@@ -170,22 +170,29 @@ async function loadData() {
 
 
 function parseGedcom(gedcom) {
+    console.log("Début parsing GEDCOM");
     const lines = gedcom.split('\n');
-    const root = { name: '', children: [] };
-    let currentPerson = null;
-    let currentLevel = 0;
+    const individuals = {};
+    const families = {};
+    let currentId = null;
 
+    // Première passe : collecter individus
     lines.forEach(line => {
         const [level, tag, ...rest] = line.trim().split(' ');
         if (level === '0' && tag.startsWith('@I')) {
-            currentPerson = { name: '', children: [] };
-        } else if (tag === 'NAME' && currentPerson) {
-            currentPerson.name = rest.join(' ').replace(/\//g, '');
-            root.children.push(currentPerson);
+            currentId = tag;
+            individuals[currentId] = { name: '', children: [] };
+        } else if (tag === 'NAME' && currentId) {
+            individuals[currentId].name = rest.join(' ').replace(/\//g, '');
         }
     });
 
-    return root;
+    console.log("Individus trouvés:", Object.keys(individuals).length);
+    
+    // Retourner le premier individu comme racine
+    const firstPerson = Object.values(individuals)[0];
+    console.log("Premier individu:", firstPerson);
+    return firstPerson;
 }
 
 function displayTree(data) {
