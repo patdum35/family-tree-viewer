@@ -4,7 +4,7 @@ let g = svg.append("g");
 
 async function loadData() {
     const password = document.getElementById('password').value;
-    if (password !== 'motdepasse') {  // À changer
+    if (password !== 'dumenil') {  // À changer
         alert('Mot de passe incorrect');
         return;
     }
