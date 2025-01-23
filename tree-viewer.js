@@ -2,26 +2,53 @@ let zoom = d3.zoom().scaleExtent([0.1, 3]);
 let svg = d3.select("#tree-svg");
 let g = svg.append("g");
 
+// async function loadData() {
+//     const password = document.getElementById('password').value;
+//     if (password !== 'dumenil') {  // À changer
+//         alert('Mot de passe incorrect');
+//         return;
+//     }
+
+//     try {
+//         const response = await fetch('arbre.zip');
+//         const blob = await response.blob();
+//         const zip = await JSZip.loadAsync(blob);
+//         const gedcom = await zip.file('arbre.ged').async('text');
+        
+//         document.getElementById('password-form').style.display = 'none';
+//         document.getElementById('tree-container').style.display = 'block';
+        
+//         displayTree(parseGedcom(gedcom));
+//     } catch (error) {
+//         console.error('Erreur:', error);
+//         alert('Erreur de chargement des données');
+//     }
+// }
+
+
+// Dans tree-viewer.js, modifiez loadData() :
 async function loadData() {
     const password = document.getElementById('password').value;
-    if (password !== 'dumenil') {  // À changer
-        alert('Mot de passe incorrect');
-        return;
-    }
-
+    
     try {
-        const response = await fetch('arbre.zip');
-        const blob = await response.blob();
-        const zip = await JSZip.loadAsync(blob);
-        const gedcom = await zip.file('arbre.ged').async('text');
+        const response = await fetch('arbre.ged');
+        const encryptedData = await response.arrayBuffer();
         
+        const wordArray = CryptoJS.lib.WordArray.create(encryptedData);
+        const decrypted = CryptoJS.AES.decrypt(wordArray, password);
+        const gedcom = decrypted.toString(CryptoJS.enc.Utf8);
+        
+        if (!gedcom) {
+            throw new Error('Décryptage échoué');
+        }
+
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
         
         displayTree(parseGedcom(gedcom));
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur de chargement des données');
+        alert('Mot de passe incorrect ou erreur de chargement');
     }
 }
 
