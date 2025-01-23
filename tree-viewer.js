@@ -170,8 +170,22 @@ async function loadData() {
 
 
 function parseGedcom(gedcom) {
-    // Code de parsing similaire à notre script Python
-    // Retourne une structure de données pour D3
+    const lines = gedcom.split('\n');
+    const root = { name: '', children: [] };
+    let currentPerson = null;
+    let currentLevel = 0;
+
+    lines.forEach(line => {
+        const [level, tag, ...rest] = line.trim().split(' ');
+        if (level === '0' && tag.startsWith('@I')) {
+            currentPerson = { name: '', children: [] };
+        } else if (tag === 'NAME' && currentPerson) {
+            currentPerson.name = rest.join(' ').replace(/\//g, '');
+            root.children.push(currentPerson);
+        }
+    });
+
+    return root;
 }
 
 function displayTree(data) {
