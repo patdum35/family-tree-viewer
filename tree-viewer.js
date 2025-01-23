@@ -31,7 +31,8 @@ async function loadData() {
     const password = document.getElementById('password').value;
     
     try {
-        const response = await fetch('arbre.ged');
+        // const response = await fetch('arbre.ged');
+        const response = await fetch('arbre.enc');  // au lieu de arbre.ged
         const encryptedData = await response.arrayBuffer();
         
         const wordArray = CryptoJS.lib.WordArray.create(encryptedData);
