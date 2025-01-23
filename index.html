@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Visualiseur d'Arbre Généalogique</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="password-form">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="loadData()">Voir l'arbre</button>
+    </div>
+    <div id="tree-container" style="display:none">
+        <div class="controls">
+            <button onclick="zoomIn()">Zoom +</button>
+            <button onclick="zoomOut()">Zoom -</button>
+        </div>
+        <svg id="tree-svg"></svg>
+    </div>
+    <script src="tree-viewer.js"></script>
+</body>
+</html>
