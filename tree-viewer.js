@@ -169,42 +169,117 @@ async function loadData() {
 }
 
 
-function parseGedcom(gedcom) {
-    console.log("Début parsing GEDCOM");
-    const lines = gedcom.split('\n');
-    const individuals = {};
-    const families = {};
-    let currentId = null;
+// function parseGedcom(gedcom) {
+//     console.log("Début parsing GEDCOM");
+//     const lines = gedcom.split('\n');
+//     const individuals = {};
+//     const families = {};
+//     let currentId = null;
 
-    // Première passe : collecter individus
+//     // Première passe : collecter individus
+//     lines.forEach(line => {
+//         const [level, tag, ...rest] = line.trim().split(' ');
+//         if (level === '0' && tag.startsWith('@I')) {
+//             currentId = tag;
+//             individuals[currentId] = { name: '', children: [] };
+//         } else if (tag === 'NAME' && currentId) {
+//             individuals[currentId].name = rest.join(' ').replace(/\//g, '');
+//         }
+//     });
+
+//     console.log("Individus trouvés:", Object.keys(individuals).length);
+    
+//     // Retourner le premier individu comme racine
+//     const firstPerson = Object.values(individuals)[0];
+//     console.log("Premier individu:", firstPerson);
+//     return firstPerson;
+// }
+
+// function displayTree(data) {
+//     const width = window.innerWidth;
+//     const height = window.innerHeight;
+    
+//     const tree = d3.tree().size([height - 100, width - 200]);
+//     const root = d3.hierarchy(data);
+    
+//     const treeData = tree(root);
+    
+//     // Dessiner les liens
+//     g.selectAll('.link')
+//         .data(treeData.links())
+//         .enter()
+//         .append('path')
+//         .attr('class', 'link')
+//         .attr('d', d3.linkHorizontal()
+//             .x(d => d.y)
+//             .y(d => d.x));
+    
+//     // Dessiner les nœuds
+//     const node = g.selectAll('.node')
+//         .data(treeData.descendants())
+//         .enter()
+//         .append('g')
+//         .attr('class', 'node')
+//         .attr('transform', d => `translate(${d.y},${d.x})`);
+    
+//     node.append('circle')
+//         .attr('r', 10);
+    
+//     node.append('text')
+//         .attr('dy', '.35em')
+//         .attr('x', d => d.children ? -13 : 13)
+//         .style('text-anchor', d => d.children ? 'end' : 'start')
+//         .text(d => d.data.name);
+        
+//     svg.call(zoom.on('zoom', event => {
+//         g.attr('transform', event.transform);
+//     }));
+// }
+
+
+
+// tree-viewer.js
+function parseGedcom(gedcom) {
+    console.log("Parsing GEDCOM");
+    // Créer structure pour D3.js
+    const root = {
+        name: "Famille",
+        children: []
+    };
+
+    const lines = gedcom.split('\n');
+    let currentPerson = null;
+
     lines.forEach(line => {
-        const [level, tag, ...rest] = line.trim().split(' ');
-        if (level === '0' && tag.startsWith('@I')) {
-            currentId = tag;
-            individuals[currentId] = { name: '', children: [] };
-        } else if (tag === 'NAME' && currentId) {
-            individuals[currentId].name = rest.join(' ').replace(/\//g, '');
+        const parts = line.trim().split(' ');
+        if (parts[0] === '0' && parts[1].startsWith('@I')) {
+            currentPerson = { name: '', children: [] };
+            root.children.push(currentPerson);
+        } else if (parts[1] === 'NAME' && currentPerson) {
+            currentPerson.name = parts.slice(2).join(' ').replace(/\//g, '');
         }
     });
 
-    console.log("Individus trouvés:", Object.keys(individuals).length);
-    
-    // Retourner le premier individu comme racine
-    const firstPerson = Object.values(individuals)[0];
-    console.log("Premier individu:", firstPerson);
-    return firstPerson;
+    console.log("Structure:", root);
+    return root;
 }
 
 function displayTree(data) {
+    console.log("Affichage arbre", data);
     const width = window.innerWidth;
     const height = window.innerHeight;
     
     const tree = d3.tree().size([height - 100, width - 200]);
     const root = d3.hierarchy(data);
-    
     const treeData = tree(root);
     
-    // Dessiner les liens
+    const svg = d3.select("#tree-svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const g = svg.append("g")
+        .attr("transform", "translate(50,50)");
+
     g.selectAll('.link')
         .data(treeData.links())
         .enter()
@@ -213,28 +288,24 @@ function displayTree(data) {
         .attr('d', d3.linkHorizontal()
             .x(d => d.y)
             .y(d => d.x));
-    
-    // Dessiner les nœuds
-    const node = g.selectAll('.node')
+
+    const nodes = g.selectAll('.node')
         .data(treeData.descendants())
         .enter()
         .append('g')
         .attr('class', 'node')
         .attr('transform', d => `translate(${d.y},${d.x})`);
-    
-    node.append('circle')
-        .attr('r', 10);
-    
-    node.append('text')
+
+    nodes.append('circle')
+        .attr('r', 5);
+
+    nodes.append('text')
         .attr('dy', '.35em')
-        .attr('x', d => d.children ? -13 : 13)
+        .attr('x', d => d.children ? -10 : 10)
         .style('text-anchor', d => d.children ? 'end' : 'start')
         .text(d => d.data.name);
-        
-    svg.call(zoom.on('zoom', event => {
-        g.attr('transform', event.transform);
-    }));
 }
+
 
 function zoomIn() {
     svg.transition().call(zoom.scaleBy, 1.2);
