@@ -33,6 +33,8 @@ async function loadData() {
     try {
         // const response = await fetch('arbre.ged');
         const response = await fetch('arbre.enc');  // au lieu de arbre.ged
+        const text = await response.text();
+        console.log("Contenu reçu:", text.substring(0, 100));        
         const encryptedData = await response.arrayBuffer();
         
         const wordArray = CryptoJS.lib.WordArray.create(encryptedData);
