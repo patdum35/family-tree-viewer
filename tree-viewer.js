@@ -53,6 +53,47 @@ let g = svg.append("g");
 // }
 
 
+async function decrypt(encryptedData, key) {
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    const keyBuffer = new Uint8Array(key);
+    
+    try {
+        const data = base64ToArrayBuffer(encryptedData);
+        const cryptoKey = await window.crypto.subtle.importKey(
+            "raw",
+            keyBuffer,
+            "AES-CBC",
+            false,
+            ["decrypt"]
+        );
+        
+        const decrypted = await window.crypto.subtle.decrypt(
+            {
+                name: "AES-CBC",
+                iv: data.slice(0, 16)
+            },
+            cryptoKey,
+            data.slice(16)
+        );
+        
+        return decoder.decode(decrypted);
+    } catch (error) {
+        throw new Error('Décryptage échoué');
+    }
+}
+
+function base64ToArrayBuffer(base64) {
+    const binary_string = window.atob(base64);
+    const bytes = new Uint8Array(binary_string.length);
+    for (let i = 0; i < binary_string.length; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes;
+}
+
+
+
 async function loadData() {
     const password = document.getElementById('password').value;
     try {
