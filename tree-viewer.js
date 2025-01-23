@@ -26,29 +26,74 @@ let g = svg.append("g");
 // }
 
 
-// Dans tree-viewer.js, modifiez loadData() :
+// // Dans tree-viewer.js, modifiez loadData() :
+// async function loadData() {
+//     const password = document.getElementById('password').value;
+    
+//     try {
+//         console.log("Chargement du fichier");
+//         const response = await fetch('arbre.enc');
+//         const encryptedText = await response.text();
+//         console.log("Contenu reçu:", encryptedText.substring(0, 100));
+
+//         const wordArray = CryptoJS.enc.Base64.parse(encryptedText);
+//         console.log("WordArray créé");
+
+//         const decrypted = CryptoJS.AES.decrypt(wordArray, password);
+//         console.log("Décryptage effectué");
+
+//         document.getElementById('password-form').style.display = 'none';
+//         document.getElementById('tree-container').style.display = 'block';
+        
+//         displayTree(parseGedcom(gedcom));
+//     } catch (error) {
+//         console.error('Erreur:', error);
+//         alert('Mot de passe incorrect ou erreur de chargement');
+//     }
+// }
+
+
 async function loadData() {
     const password = document.getElementById('password').value;
-    
     try {
         console.log("Chargement du fichier");
         const response = await fetch('arbre.enc');
-        const encryptedText = await response.text();
-        console.log("Contenu reçu:", encryptedText.substring(0, 100));
+        const encryptedData = await response.text();
+        console.log("Données reçues:", encryptedData.substring(0, 50));
 
-        const wordArray = CryptoJS.enc.Base64.parse(encryptedText);
-        console.log("WordArray créé");
+        // Dérivation de la clé
+        const salt = 'salt_';
+        const iterations = 100000;
+        const keyMaterial = await window.crypto.subtle.importKey(
+            "raw",
+            new TextEncoder().encode(password),
+            { name: "PBKDF2" },
+            false,
+            ["deriveBits"]
+        );
+        
+        const key = await window.crypto.subtle.deriveBits(
+            {
+                name: "PBKDF2",
+                salt: new TextEncoder().encode(salt),
+                iterations: iterations,
+                hash: "SHA-256",
+            },
+            keyMaterial,
+            256
+        );
 
-        const decrypted = CryptoJS.AES.decrypt(wordArray, password);
-        console.log("Décryptage effectué");
+        // Décryptage
+        const decrypted = await decrypt(encryptedData, key);
+        console.log("Décrypté:", decrypted.substring(0, 50));
 
+        displayTree(parseGedcom(decrypted));
+        
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
-        
-        displayTree(parseGedcom(gedcom));
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Mot de passe incorrect ou erreur de chargement');
+        alert('Erreur de décryptage');
     }
 }
 
