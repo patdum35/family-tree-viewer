@@ -31,19 +31,16 @@ async function loadData() {
     const password = document.getElementById('password').value;
     
     try {
-        // const response = await fetch('arbre.ged');
-        const response = await fetch('arbre.enc');  // au lieu de arbre.ged
-        const text = await response.text();
-        console.log("Contenu reçu:", text.substring(0, 100));        
-        const encryptedData = await response.arrayBuffer();
-        
-        const wordArray = CryptoJS.lib.WordArray.create(encryptedData);
+        console.log("Chargement du fichier");
+        const response = await fetch('arbre.enc');
+        const encryptedText = await response.text();
+        console.log("Contenu reçu:", encryptedText.substring(0, 100));
+
+        const wordArray = CryptoJS.enc.Base64.parse(encryptedText);
+        console.log("WordArray créé");
+
         const decrypted = CryptoJS.AES.decrypt(wordArray, password);
-        const gedcom = decrypted.toString(CryptoJS.enc.Utf8);
-        
-        if (!gedcom) {
-            throw new Error('Décryptage échoué');
-        }
+        console.log("Décryptage effectué");
 
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
