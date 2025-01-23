@@ -140,31 +140,108 @@ function base64ToArrayBuffer(base64) {
 
 
 
+// async function loadData() {
+//     const password = document.getElementById('password').value;
+//     try {
+//         console.log("Chargement du fichier");
+//         const response = await fetch('arbre.enc');
+//         const encryptedData = await response.text();
+//         console.log("Données reçues");
+
+//         // Décode base64
+//         const decoded = atob(encryptedData);
+//         // XOR avec mot de passe
+//         const key = password.repeat(decoded.length);
+//         let decrypted = '';
+//         for(let i = 0; i < decoded.length; i++) {
+//             decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i));
+//         }
+
+//         console.log("Décrypté:", decrypted.substring(0, 50));
+//         displayTree(parseGedcom(decrypted));
+        
+//         document.getElementById('password-form').style.display = 'none';
+//         document.getElementById('tree-container').style.display = 'block';
+//     } catch (error) {
+//         console.error('Erreur:', error);
+//         alert('Erreur de décryptage');
+//     }
+// }
+
+
+// async function loadData() {
+//     const password = document.getElementById('password').value;
+//     try {
+//         console.log("Chargement du fichier");
+//         const response = await fetch('arbre.enc');
+//         const encryptedData = await response.text();
+//         console.log("Données reçues");
+ 
+//         // Décode base64
+//         const decoded = atob(encryptedData);
+//         // XOR avec mot de passe
+//         const key = password.repeat(decoded.length);
+        
+//         // Décompression après XOR
+//         const compressed = new Uint8Array(decoded.length);
+//         for(let i = 0; i < decoded.length; i++) {
+//             compressed[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+//         }
+    
+//         const decrypted = pako.inflate(compressed, {to: 'string'});
+//         console.log("Décrypté:", decrypted.substring(0, 50));
+        
+//         displayTree(parseGedcom(decrypted));
+        
+//         document.getElementById('password-form').style.display = 'none';
+//         document.getElementById('tree-container').style.display = 'block';
+//     } catch (error) {
+//         console.error('Erreur:', error);
+//         alert('Erreur de décryptage');
+//     }
+//  }
+
+
+
 async function loadData() {
     const password = document.getElementById('password').value;
     try {
-        console.log("Chargement du fichier");
         const response = await fetch('arbre.enc');
         const encryptedData = await response.text();
-        console.log("Données reçues");
-
-        // Décode base64
-        const decoded = atob(encryptedData);
-        // XOR avec mot de passe
-        const key = password.repeat(decoded.length);
-        let decrypted = '';
-        for(let i = 0; i < decoded.length; i++) {
-            decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i));
-        }
-
-        console.log("Décrypté:", decrypted.substring(0, 50));
-        displayTree(parseGedcom(decrypted));
         
+        // Déchiffrement
+        const decoded = atob(encryptedData);
+        const key = password.repeat(decoded.length);
+        const decrypted = new Uint8Array(decoded.length);
+        for(let i = 0; i < decoded.length; i++) {
+            decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+        }
+        
+        // Vérification du hash (8 premiers octets)
+        const expectedHash = decrypted.slice(0, 8);
+        const content = decrypted.slice(8);
+        
+        // Calcul du hash du mot de passe
+        const encoder = new TextEncoder();
+        const passwordData = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
+        const actualHash = new Uint8Array(hashBuffer).slice(0, 8);
+        
+        // Vérification du mot de passe
+        if (!actualHash.every((val, i) => val === expectedHash[i])) {
+            throw new Error('Mot de passe incorrect');
+        }
+        
+        // Décompression
+        const decompressed = pako.inflate(content, {to: 'string'});
+        console.log("Décrypté:", decompressed.substring(0, 50));
+        
+        displayTree(parseGedcom(decompressed));
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur de décryptage');
+        alert(error.message);
     }
 }
 
