@@ -94,40 +94,70 @@ function base64ToArrayBuffer(base64) {
 
 
 
+// async function loadData() {
+//     const password = document.getElementById('password').value;
+//     try {
+//         console.log("Chargement du fichier");
+//         const response = await fetch('arbre.enc');
+//         const encryptedData = await response.text();
+//         console.log("Données reçues:", encryptedData.substring(0, 50));
+
+//         // Dérivation de la clé
+//         const salt = 'salt_';
+//         const iterations = 100000;
+//         const keyMaterial = await window.crypto.subtle.importKey(
+//             "raw",
+//             new TextEncoder().encode(password),
+//             { name: "PBKDF2" },
+//             false,
+//             ["deriveBits"]
+//         );
+        
+//         const key = await window.crypto.subtle.deriveBits(
+//             {
+//                 name: "PBKDF2",
+//                 salt: new TextEncoder().encode(salt),
+//                 iterations: iterations,
+//                 hash: "SHA-256",
+//             },
+//             keyMaterial,
+//             256
+//         );
+
+//         // Décryptage
+//         const decrypted = await decrypt(encryptedData, key);
+//         console.log("Décrypté:", decrypted.substring(0, 50));
+
+//         displayTree(parseGedcom(decrypted));
+        
+//         document.getElementById('password-form').style.display = 'none';
+//         document.getElementById('tree-container').style.display = 'block';
+//     } catch (error) {
+//         console.error('Erreur:', error);
+//         alert('Erreur de décryptage');
+//     }
+// }
+
+
+
 async function loadData() {
     const password = document.getElementById('password').value;
     try {
         console.log("Chargement du fichier");
         const response = await fetch('arbre.enc');
         const encryptedData = await response.text();
-        console.log("Données reçues:", encryptedData.substring(0, 50));
+        console.log("Données reçues");
 
-        // Dérivation de la clé
-        const salt = 'salt_';
-        const iterations = 100000;
-        const keyMaterial = await window.crypto.subtle.importKey(
-            "raw",
-            new TextEncoder().encode(password),
-            { name: "PBKDF2" },
-            false,
-            ["deriveBits"]
-        );
-        
-        const key = await window.crypto.subtle.deriveBits(
-            {
-                name: "PBKDF2",
-                salt: new TextEncoder().encode(salt),
-                iterations: iterations,
-                hash: "SHA-256",
-            },
-            keyMaterial,
-            256
-        );
+        // Décode base64
+        const decoded = atob(encryptedData);
+        // XOR avec mot de passe
+        const key = password.repeat(decoded.length);
+        let decrypted = '';
+        for(let i = 0; i < decoded.length; i++) {
+            decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i));
+        }
 
-        // Décryptage
-        const decrypted = await decrypt(encryptedData, key);
         console.log("Décrypté:", decrypted.substring(0, 50));
-
         displayTree(parseGedcom(decrypted));
         
         document.getElementById('password-form').style.display = 'none';
@@ -137,6 +167,7 @@ async function loadData() {
         alert('Erreur de décryptage');
     }
 }
+
 
 function parseGedcom(gedcom) {
     // Code de parsing similaire à notre script Python
