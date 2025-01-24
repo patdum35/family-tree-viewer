@@ -21,10 +21,10 @@ class GenealogyViewer:
         self.app.layout = html.Div([
             html.Div([
                 dcc.Input(id='password-input', type='password', placeholder='Mot de passe', value=''),
-                html.Button('Voir arbre', id='submit-button', n_clicks=0),
+                html.Button('Voir Mon arbre', id='submit-button', n_clicks=0),
                 html.Div([
-                    html.Button('Zoom +', id='zoom-in'),
-                    html.Button('Zoom -', id='zoom-out'),
+                    html.Button('ZoomZ +', id='zoom-in'),
+                    html.Button('ZoomZ -', id='zoom-out'),
                     dcc.Input(id='search', placeholder='Rechercher...')
                 ], id='controls')
             ]),
