@@ -21,6 +21,29 @@
 #         github_token: ${{ secrets.GITHUB_TOKEN }}
 #         publish_dir: ./build
 
+# name: Deploy to GitHub Pages
+# on:
+#   push:
+#     branches: [ main ]
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Setup Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: '3.x'
+#     - name: Install dependencies
+#       run: pip install -r requirements.txt
+#     - name: Build
+#       run: python build_static.py
+#     - name: Deploy
+#       uses: peaceiris/actions-gh-pages@v3
+#       with:
+#         github_token: ${{ secrets.GITHUB_TOKEN }}
+#         publish_dir: ./build
+
 name: Deploy to GitHub Pages
 on:
   push:
@@ -43,3 +66,4 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build
+        force_orphan: true  # Cette ligne force un nouveau déploiement
