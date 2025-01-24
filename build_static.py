@@ -92,7 +92,6 @@ def build_static():
         <script src="https://unpkg.com/dash-html-components@2.0.0/dash_html_components/bundle.js"></script>
         <script src="https://unpkg.com/dash-core-components@2.0.0/dash_core_components/bundle.js"></script>
         <script src="https://unpkg.com/dash-cytoscape@0.3.0/dash_cytoscape/bundle.js"></script>
-        <link rel="stylesheet" href="https://codepen.io/chriddyp/pen/bWLwgP.css">
     </head>
     <body>
         {str(app.app.layout)}
@@ -107,3 +106,6 @@ def build_static():
 
 if __name__ == '__main__':
     build_static()
+
+
+
