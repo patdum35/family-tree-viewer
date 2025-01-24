@@ -88,9 +88,11 @@ def build_static():
     <head>
         <meta charset="UTF-8">
         <title>Arbre Généalogique</title>
-        <script src="https://unpkg.com/dash-html-components/dash_html_components/bundle.js"></script>
-        <script src="https://unpkg.com/dash-core-components/dash_core_components/bundle.js"></script>
-        <script src="https://unpkg.com/dash-cytoscape/dash_cytoscape/bundle.js"></script>
+        <script src="https://unpkg.com/dash@2.13.0/dash.min.js"></script>
+        <script src="https://unpkg.com/dash-html-components@2.0.0/dash_html_components/bundle.js"></script>
+        <script src="https://unpkg.com/dash-core-components@2.0.0/dash_core_components/bundle.js"></script>
+        <script src="https://unpkg.com/dash-cytoscape@0.3.0/dash_cytoscape/bundle.js"></script>
+        <link rel="stylesheet" href="https://codepen.io/chriddyp/pen/bWLwgP.css">
     </head>
     <body>
         {str(app.app.layout)}
