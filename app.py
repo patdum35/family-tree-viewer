@@ -2,7 +2,6 @@ import dash
 from dash import html, dcc, Input, Output, State
 import dash_cytoscape as cyto
 from dash import Dash
-from dash_tools import generate_html
 from pathlib import Path
 import base64
 import zlib
@@ -155,24 +154,6 @@ class GenealogyViewer:
         self.app.run_server(debug=True)
 
 
-    def build_static(self):
-        if not os.path.exists('build'):
-            os.makedirs('build')
-            
-        # Copier arbre.enc
-        import shutil
-        shutil.copy2('arbre.enc', 'build/arbre.enc')
-        
-        # Générer index.html
-        html_content = generate_html(
-            self.app,
-            title="Arbre Généalogique",
-            filename="build/index.html"
-        )
-
-
-
 if __name__ == '__main__':
     app = GenealogyViewer()
-    # app.run()
-    app.build_static()
+    app.run()
