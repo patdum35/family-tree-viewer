@@ -595,6 +595,9 @@ function extractAndLinkUrls(text) {
 // }
 
 function displayPersonDetails(personId) {
+    console.log("DEBUG: displayPersonDetails appelée avec l'ID :", personId);
+    console.log("DEBUG: globalGedcomData :", globalGedcomData);
+    
     const person = globalGedcomData.individuals[personId];
     if (!person) return;
 
