@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="UTF-8">
+   <title>Arbre Généalogique</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <link rel="stylesheet" href="styles.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+</head>
+<body>
+   <div id="password-form">
+       <input type="password" id="password" placeholder="Mot de passe">
+       <button onclick="loadData()">Voir l'arbre</button>
+   </div>
+
+   <!-- Person Details in Modal window-->
+   <div id="person-details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-person-name">Détails de la personne</h2>
+                <span class="modal-close" onclick="closePersonDetails()">&times;</span>
+            </div>
+            <div id="person-details-content" class="person-details">
+                <!-- Details will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+
+   <div id="tree-container" style="display:none">
+        <div class="controls">
+            <button onclick="zoomIn()">Zoom +</button>
+            <button onclick="zoomOut()">Zoom -</button>
+            <button onclick="resetZoom()">Reset</button>
+            <input type="text" id="search" placeholder="Rechercher..." oninput="searchTree(this.value)">
+            <label for="prenoms">   nbre<br>prénoms</label>
+            <select id="prenoms" onchange="updatePrenoms(this.value)">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <label for="generations">générations</label>
+            <select id="generations" onchange="updateGenerations(this.value)">
+            </select>
+        </div>
+        <div class="tooltip"></div>
+        <svg id="tree-svg"></svg>
+   </div>
+
+   <script src="main.js"></script>
+   <script src="gedcomParser.js"></script>
+   <script src="displayTree.js"></script>
+   <script src="buildTree.js"></script>
+   <script src="modalWindow.js"></script>
+</body>
+</html>
