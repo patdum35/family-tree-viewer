@@ -13,6 +13,7 @@ let nombre_prenoms = 2;
 let nombre_generation = 6;
 let zoom;  // Déclarer zoom comme variable globale
 let globalGedcomData = null; // Global variable to store GEDCOM data
+let globalRootPersonId = null; // Variable globale pour stocker l'ID de la personne racine
 
 // Générer les options de génération dynamiquement
 const select = document.getElementById('generations');
@@ -96,6 +97,8 @@ document.addEventListener('blur', function(e) {
         document.body.classList.remove('fixfixed');
     }
 }, true);
+
+
 
 
 function showTooltip(event, d) {

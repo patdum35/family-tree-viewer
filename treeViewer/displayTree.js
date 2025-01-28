@@ -2,14 +2,16 @@ function displayPedigree(gedcomData, rootPersonId = null) {
 
     globalGedcomData = gedcomData;// Store the global GEDCOM data for later use
 
+    // Utiliser l'ID racine global si aucun ID n'est passé
+    const personId = rootPersonId || globalRootPersonId;
     // Si rootPersonId est fourni, l'utiliser
-    const person = rootPersonId 
-        ? gedcomData.individuals[rootPersonId] 
+    const person = personId 
+        ? gedcomData.individuals[personId] 
         : Object.values(gedcomData.individuals)
             .filter(p => p.birthDate && p.id)
             .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
 
-
+    console.log("Personne utilisée pour l'arbre :", person);
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -25,10 +27,7 @@ function displayPedigree(gedcomData, rootPersonId = null) {
         boxWidth = 120;
     }
 
-    console.log("largeur case:", boxWidth);
-    console.log("nombre_prenoms:", nombre_prenoms);
-        
-    const boxHeight = 40;
+    const boxHeight = 50;
 
     // const youngest = Object.values(gedcomData.individuals)
     //     .filter(person => person.birthDate)
@@ -118,6 +117,81 @@ function displayPedigree(gedcomData, rootPersonId = null) {
         .attr("height", boxHeight)
         .attr("rx", 5);
 
+    // node.append("text")
+    // .attr("dy", "0.35em")
+    // .attr("text-anchor", "middle")
+    // .each(function(d) {
+    //     const text = d3.select(this);
+        
+    //     const match = d.data.name.match(/(.*?)\/(.*?)\//);
+    //     if (match) {
+    //         const firstNames = match[1].trim();
+    //         const lastName = match[2].trim().toUpperCase();
+            
+    //         // Traiter les prénoms avec tirets et limiter à 3
+    //         const prenomWords = firstNames.split(' ')
+    //             .reduce((acc, word) => {
+    //                 // Si le mot contient un tiret
+    //                 if (word.includes('-')) {
+    //                     // Séparer sur le tiret et formater chaque partie
+    //                     const parts = word.split('-')
+    //                         .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+    //                     acc.push(...parts);
+    //                 } else {
+    //                     // Mot normal
+    //                     acc.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    //                 }
+    //                 return acc;
+    //             }, [])
+    //             .slice(0, nombre_prenoms);  // Limiter à 3 prénoms après avoir séparé les prénoms composés
+            
+    //         const formattedFirstNames = prenomWords.join(' ');
+    //         const maxWidth = boxWidth - 10;
+
+    //         text.text(null);
+            
+    //         // Première ligne : tenter de mettre tous les prénoms
+    //         const firstLine = text.append("tspan")
+    //             .attr("x", 0)
+    //             .attr("dy", "-0.2em");
+            
+    //         const prenomWidth = formattedFirstNames.length * 6;
+    //         if (prenomWidth <= maxWidth) {
+    //             // Les prénoms tiennent sur la première ligne
+    //             firstLine.text(formattedFirstNames);
+    //             // Deuxième ligne : seulement le nom
+    //             text.append("tspan")
+    //                 .attr("x", 0)
+    //                 .attr("dy", "1.2em")
+    //                 .attr("fill", "#0000CD")
+    //                 .text(lastName);
+    //         } else {
+    //             // Les prénoms ne tiennent pas, on les coupe
+    //             const midPoint = Math.floor(prenomWords.length / 2);
+    //             const firstPart = prenomWords.slice(0, midPoint).join(' ');
+    //             const secondPart = prenomWords.slice(midPoint).join(' ');
+                
+    //             firstLine.text(firstPart);
+                
+    //             // Deuxième ligne : reste des prénoms + nom
+    //             const secondLine = text.append("tspan")
+    //                 .attr("x", 0)
+    //                 .attr("dy", "1.2em");
+                
+    //             if (secondPart) {
+    //                 secondLine.text(secondPart + ' ');
+    //             }
+                
+    //             text.append("tspan")
+    //                 .attr("fill", "#0000CD")
+    //                 .text(lastName);
+    //         }
+    //     } else {
+    //         text.text(d.data.name);
+    //     }
+    // });
+    
+
     node.append("text")
     .attr("dy", "0.35em")
     .attr("text-anchor", "middle")
@@ -132,67 +206,67 @@ function displayPedigree(gedcomData, rootPersonId = null) {
             // Traiter les prénoms avec tirets et limiter à 3
             const prenomWords = firstNames.split(' ')
                 .reduce((acc, word) => {
-                    // Si le mot contient un tiret
                     if (word.includes('-')) {
-                        // Séparer sur le tiret et formater chaque partie
                         const parts = word.split('-')
                             .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
                         acc.push(...parts);
                     } else {
-                        // Mot normal
                         acc.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
                     }
                     return acc;
                 }, [])
-                .slice(0, nombre_prenoms);  // Limiter à 3 prénoms après avoir séparé les prénoms composés
+                .slice(0, nombre_prenoms);
             
             const formattedFirstNames = prenomWords.join(' ');
             const maxWidth = boxWidth - 10;
-
+    
             text.text(null);
             
-            // Première ligne : tenter de mettre tous les prénoms
+            // Première ligne : prénoms
             const firstLine = text.append("tspan")
                 .attr("x", 0)
-                .attr("dy", "-0.2em");
+                .attr("dy", "-0.7em")
+                .text(formattedFirstNames);
             
-            const prenomWidth = formattedFirstNames.length * 6;
-            if (prenomWidth <= maxWidth) {
-                // Les prénoms tiennent sur la première ligne
-                firstLine.text(formattedFirstNames);
-                // Deuxième ligne : seulement le nom
-                text.append("tspan")
-                    .attr("x", 0)
-                    .attr("dy", "1.2em")
-                    .attr("fill", "#0000CD")
-                    .text(lastName);
-            } else {
-                // Les prénoms ne tiennent pas, on les coupe
-                const midPoint = Math.floor(prenomWords.length / 2);
-                const firstPart = prenomWords.slice(0, midPoint).join(' ');
-                const secondPart = prenomWords.slice(midPoint).join(' ');
+            // Deuxième ligne : nom
+            text.append("tspan")
+                .attr("x", 0)
+                .attr("dy", "1.2em")
+                .attr("fill", "#0000CD")
+                .text(lastName);
+            
+            // Troisième ligne : dates
+            if (d.data.birthDate || d.data.deathDate) {
+                const birthParts = d.data.birthDate ? d.data.birthDate.split(' ') : [];
+                const deathParts = d.data.deathDate ? d.data.deathDate.split(' ') : [];
                 
-                firstLine.text(firstPart);
+                const birthYear = birthParts.length > 0 ? birthParts[birthParts.length - 1] : '?';
+                const deathYear = deathParts.length > 0 ? deathParts[deathParts.length - 1] : '?';
                 
-                // Deuxième ligne : reste des prénoms + nom
-                const secondLine = text.append("tspan")
-                    .attr("x", 0)
-                    .attr("dy", "1.2em");
+                // Nouvelle logique pour les personnes nées après 1930
+                let dateText = birthYear; // Toujours afficher l'année de naissance
                 
-                if (secondPart) {
-                    secondLine.text(secondPart + ' ');
+                if (parseInt(birthYear) > 1930) {
+                    // Si pas de date de décès, ne rien ajouter
+                    if (deathYear !== '?') {
+                        dateText += ` - ${deathYear}`;
+                    }
+                } else {
+                    // Logique originale pour les personnes nées avant 1930
+                    dateText = `${birthYear} - ${deathYear}`;
                 }
                 
                 text.append("tspan")
-                    .attr("fill", "#0000CD")
-                    .text(lastName);
+                    .attr("x", 0)
+                    .attr("dy", "1.2em")
+                    .attr("fill", "#006400")  // Vert foncé
+                    .text(dateText);
             }
-        } else {
-            text.text(d.data.name);
         }
     });
-    
 
+
+    
     zoom = d3.zoom()
         .scaleExtent([0.1, 3])
         .on("zoom", ({transform}) => {
@@ -210,13 +284,15 @@ function displayPedigree(gedcomData, rootPersonId = null) {
 // Fonction pour mettre à jour le nombre de prénoms affichés
 function updatePrenoms(value) {
     nombre_prenoms = value;
-    loadData();
+    // loadData();
+    displayPedigree(globalGedcomData, globalRootPersonId);
 }
 
 // Fonction pour mettre à jour le nombre de générations affichées
 function updateGenerations(value) {
     nombre_generation = value;
-    loadData();
+    // loadData();
+    displayPedigree(globalGedcomData, globalRootPersonId);
 }
 
 function zoomIn() {
@@ -244,7 +320,10 @@ function zoomOut() {
 }
 
 function resetZoom() {
-    // Revenir à l'affichage du plus jeune
+
+    // Revenir au plus jeune, en réinitialisant globalRootPersonId
+    globalRootPersonId = null;
+
     const youngest = Object.values(globalGedcomData.individuals)
         .filter(person => person.birthDate && person.id)
         .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];

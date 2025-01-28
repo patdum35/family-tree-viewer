@@ -119,3 +119,73 @@ function parseGEDCOM(gedcomText) {
         sources 
     };
 }
+
+function searchRootPerson(event) {
+    // Vérifier si la touche pressée est Entrée
+    if (event.key !== 'Enter') return;
+
+    const searchInput = document.getElementById('root-person-search');
+    const resultsSelect = document.getElementById('root-person-results');
+    const searchStr = searchInput.value.toLowerCase();
+
+    // Réinitialiser les résultats
+    resultsSelect.innerHTML = '<option value="">Select</option>';
+    resultsSelect.style.display = 'none';
+
+    if (!searchStr) return;
+
+    // Rechercher dans les individus
+    const matchedPersons = Object.values(globalGedcomData.individuals)
+        .filter(person => {
+            const fullName = person.name.toLowerCase().replace(/\//g, '');
+            return fullName.includes(searchStr);
+        });
+
+    // Afficher les résultats
+    if (matchedPersons.length > 0) {
+        matchedPersons.forEach(person => {
+            const option = document.createElement('option');
+            option.value = person.id;
+            option.textContent = person.name.replace(/\//g, '').trim();
+            resultsSelect.appendChild(option);
+        });
+        resultsSelect.style.display = 'block';
+    } else {
+        alert('Aucune personne trouvée');
+    }
+}
+
+
+
+function selectRootPerson() {
+    const resultsSelect = document.getElementById('root-person-results');
+    const selectedPersonId = resultsSelect.value;
+
+    console.log("Personne sélectionnée - ID :", selectedPersonId);
+    console.log("Données globales :", globalGedcomData);
+
+    if (selectedPersonId) {
+        try {
+            // Vérifier que la personne existe
+            const selectedPerson = globalGedcomData.individuals[selectedPersonId];
+            console.log("Personne sélectionnée :", selectedPerson);
+
+            // Sauvegarder globalement
+            globalRootPersonId = selectedPersonId;
+
+            // Redessiner l'arbre avec la personne sélectionnée
+            displayPedigree(globalGedcomData, selectedPersonId);
+            
+            // Masquer la liste déroulante
+            resultsSelect.style.display = 'none';
+        } catch (error) {
+            console.error("Erreur lors de la sélection de la personne :", error);
+            alert("Erreur lors de la sélection de la personne");
+        }
+    }
+}
+
+// Ajouter des écouteurs d'événements
+document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+document.getElementById('root-person-results').addEventListener('change', selectRootPerson);

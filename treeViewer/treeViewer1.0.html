@@ -29,18 +29,23 @@
 
    <div id="tree-container" style="display:none">
         <div class="controls">
-            <button onclick="zoomIn()">Zoom +</button>
-            <button onclick="zoomOut()">Zoom -</button>
-            <button onclick="resetZoom()">Reset</button>
-            <input type="text" id="search" placeholder="Rechercher..." oninput="searchTree(this.value)">
-            <label for="prenoms">   nbre<br>prénoms</label>
+            <button onclick="zoomIn()">➕</button>
+            <button onclick="zoomOut()">➖</button>
+            <button onclick="resetZoom()">↩️</button>
+            <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
+            <input type="text" id="root-person-search" placeholder="🔍racine">
+            <select id="root-person-results" style="display:none;">
+                <option value="">Select</option>
+            </select>
+
+            <label for="prenoms">nb<br>prénom</label>
             <select id="prenoms" onchange="updatePrenoms(this.value)">
                 <option value="1">1</option>
                 <option value="2" selected>2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
             </select>
-            <label for="generations">générations</label>
+            <label for="generations">nb<br>gen</label>
             <select id="generations" onchange="updateGenerations(this.value)">
             </select>
         </div>

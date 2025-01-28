@@ -39,7 +39,9 @@ function buildAncestorTree(personId, gedcomData, processed = new Set(), generati
         id: personId,
         name: person.name,
         generation: generation,
-        children: []
+        children: [],
+        birthDate: person.birthDate,
+        deathDate: person.deathDate
     };
 
     // Trouver tous les frères et sœurs avant de marquer comme traité
