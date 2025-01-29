@@ -14,6 +14,7 @@ let nombre_generation = 6;
 let zoom;  // Déclarer zoom comme variable globale
 let globalGedcomData = null; // Global variable to store GEDCOM data
 let globalRootPersonId = null; // Variable globale pour stocker l'ID de la personne racine
+let lastTransform = null; // Variable globale pour stocker la dernière transformation
 
 // Générer les options de génération dynamiquement
 const select = document.getElementById('generations');
@@ -74,6 +75,31 @@ async function loadData() {
         console.log("Exemple d'individu :", 
             Object.values(gedcomData.individuals)[0]
         );
+
+
+        const youngest = Object.values(gedcomData.individuals)
+        .filter(person => person.birthDate && person.id)
+        .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
+
+        // Initialiser la liste déroulante
+        const rootPersonResults = document.getElementById('root-person-results');
+        rootPersonResults.innerHTML = ''; // Effacer les options existantes
+
+        // Ajouter l'option pour la personne la plus jeune
+        const option = document.createElement('option');
+        option.value = youngest.id;
+        option.textContent = youngest.name.replace(/\//g, '').trim();
+        rootPersonResults.appendChild(option);
+
+        // Rendre la liste visible
+        rootPersonResults.style.display = 'block';
+
+        // Ajouter un événement de changement
+        rootPersonResults.addEventListener('change', function() {
+            const selectedPersonId = this.value;
+            displayPedigree(gedcomData, selectedPersonId);
+        });
+
 
         displayPedigree(gedcomData);
         

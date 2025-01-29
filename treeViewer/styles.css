@@ -17,8 +17,8 @@ body {
 }
 .controls {
     position: fixed;
-    top: 10px;
-    left: 10px;
+    top: 0px;
+    left: 0px;
     z-index: 100;
     background: rgba(255,255,255,0.9);
     padding: 10px;
@@ -29,6 +29,10 @@ body {
 }
 .controls button {
     background-color: transparent;
+    font-size: 12px; /* Taille de police plus grande */
+    padding: 0px; /* Padding plus important */
+    width: 100%; /* Largeur complète */
+    max-width: 20px;        
 }
 .controls label {
     background-color: transparent;
@@ -39,8 +43,14 @@ body {
     border-radius: 3px;
     border: 1px solid #ccc;
 }
+.controls select {
+    font-size: 12px;
+    padding: 0px 0px 0px 0px; /* Augmenter le padding à droite */
+    height: 22px
+}
+
 .controls label {
-    font-size: 16px;
+    font-size: 12px;
     text-align: center; /* Centrer le texte */ 
 }
 .node {
@@ -191,16 +201,42 @@ select {
 #search {
     width: 100%; /* Réduire la largeur */
     max-width: 50px; /* Limiter la largeur maximale */
+    min-width: 50px; /* Limiter la largeur minimale */    
 }
 #root-person-search {
     width: 100%; 
     max-width: 60px;
+    min-width: 60px; /* Limiter la largeur minimale */        
 }
 #root-person-results {
-    margin-top: 5px;
+    margin-top: 0px;
     width: 100%;
     max-width: 60px;
+    min-width: 60px;
+    height: 23px;
+    padding: 0px 0px 0px 0px;
 }
+.toggle-text {
+    cursor: pointer;
+}
+.toggle-text:hover {
+    opacity: 0.7;
+}
+/* .toggle-btn {
+    fill: #f0f0f0;
+    stroke: steelblue;
+    cursor: pointer;
+}
+.toggle-btn:hover {
+    fill: #e0e0e0;
+}
+.toggle-text {
+    pointer-events: none;  
+}
+/* .toggle-text:hover {
+    fill: #333;
+    cursor: pointer;
+} */ 
 
 /* Styles responsive pour le formulaire de mot de passe */
 @media screen and (max-width: 768px) {
@@ -225,15 +261,19 @@ select {
         flex-direction: column; 
         gap: 10px; 
     } */
-    .controls button, 
     .controls input[type="text"],
     .controls input[type="number"] {
         font-size: 12px; /* Taille de police plus grande */
-        padding: 2px; /* Padding plus important */
+        padding: 0px; /* Padding plus important */
         width: 100%; /* Largeur complète */
         max-width: 50px;
     }
-    
+    .controls button {
+        font-size: 12px; /* Taille de police plus grande */
+        padding: 0px; /* Padding plus important */
+        width: 100%; /* Largeur complète */
+        max-width: 20px;        
+    }  
 
 
     
