@@ -237,28 +237,58 @@ function selectRootPerson() {
 
 
 
+// function setupRootPersonSearch() {
+//     const searchInput = document.getElementById('root-person-search');
+    
+//     // Vérifier si c'est un appareil mobile
+//     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+//     if (isMobile) {
+//         // Pour les appareils mobiles, utiliser l'événement 'search'
+//         searchInput.addEventListener('search', function(event) {
+//             event.preventDefault();
+//             searchRootPerson(event);
+//         });
+//     } else {
+//         // Pour les ordinateurs, conserver le comportement existant
+//         searchInput.addEventListener('keydown', function(event) {
+//             if (event.key === 'Enter' || event.keyCode === 13) {
+//                 event.preventDefault();
+//                 searchRootPerson(event);
+//             }
+//         });
+//     }
+// }
+
+// // Charger la configuration au démarrage
+// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
+
+
+
 function setupRootPersonSearch() {
     const searchInput = document.getElementById('root-person-search');
     
-    // Vérifier si c'est un appareil mobile
+    // Détecter les appareils mobiles
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {
-        // Pour les appareils mobiles, utiliser l'événement 'search'
-        searchInput.addEventListener('search', function(event) {
-            event.preventDefault();
-            searchRootPerson(event);
-        });
-    } else {
-        // Pour les ordinateurs, conserver le comportement existant
-        searchInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' || event.keyCode === 13) {
-                event.preventDefault();
-                searchRootPerson(event);
-            }
-        });
+        // Ajouter un bouton de recherche pour les appareils mobiles
+        const searchButton = document.createElement('button');
+        searchButton.textContent = '🔍';
+        searchButton.addEventListener('click', searchRootPerson);
+        searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+
+        // CSS pour le bouton
+        searchButton.style.marginLeft = '5px';
+        searchButton.style.padding = '8px';
+        searchButton.style.backgroundColor = 'transparent';
+        searchButton.style.border = '1px solid #ccc';
+        searchButton.style.borderRadius = '4px';
+        searchButton.style.cursor = 'pointer';
     }
 }
 
-// Charger la configuration au démarrage
+// Écouteurs d'événements
+document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
 document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
