@@ -292,3 +292,21 @@ function setupRootPersonSearch() {
 document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
 document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
 document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
+
+
+
+document.getElementById("textInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") { // Détection de la touche Enter sur PC
+        event.preventDefault();  // Empêcher le saut de ligne
+        validerTexte();
+    }
+});
+
+function validerTexte() {
+    let texte = document.getElementById("textInput").value;
+    if (texte.trim() !== "") {
+        document.getElementById("resultat").textContent = "Texte validé : " + texte;
+    } else {
+        alert("Veuillez entrer du texte !");
+    }
+}
