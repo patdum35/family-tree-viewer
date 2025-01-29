@@ -203,11 +203,22 @@ select {
     max-width: 50px; /* Limiter la largeur maximale */
     min-width: 50px; /* Limiter la largeur minimale */    
 }
-#root-person-search {
+/* #root-person-search {
     width: 100%; 
     max-width: 60px;
-    min-width: 60px; /* Limiter la largeur minimale */        
+    min-width: 60px;       
+} */
+
+
+#root-person-search {
+    padding: 0px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 60px; /* Largeur standard */
+    font-size: 14px; /* Taille de police pour éviter le zoom automatique sur mobile */
 }
+
+
 #root-person-results {
     margin-top: 0px;
     width: 100%;
