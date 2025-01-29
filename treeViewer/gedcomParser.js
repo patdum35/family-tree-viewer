@@ -237,22 +237,28 @@ function selectRootPerson() {
 
 
 
-
 function setupRootPersonSearch() {
     const searchInput = document.getElementById('root-person-search');
     
-    // Écouteur pour la touche "suivant" sur mobile
-    searchInput.addEventListener('keydown', function(event) {
-        // Vérifier si c'est l'action "suivant" sur mobile
-        if (event.key === 'Enter' || event.keyCode === 13) {
+    // Vérifier si c'est un appareil mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // Pour les appareils mobiles, utiliser l'événement 'search'
+        searchInput.addEventListener('search', function(event) {
             event.preventDefault();
             searchRootPerson(event);
-        }
-    });
+        });
+    } else {
+        // Pour les ordinateurs, conserver le comportement existant
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                event.preventDefault();
+                searchRootPerson(event);
+            }
+        });
+    }
 }
-
-// Conserver l'écouteur pour la sélection de la personne
-document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
 
 // Charger la configuration au démarrage
 document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
