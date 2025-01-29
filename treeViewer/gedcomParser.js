@@ -203,36 +203,57 @@ function selectRootPerson() {
 }
 
 
+// function setupRootPersonSearch() {
+//     const searchInput = document.getElementById('root-person-search');
+    
+//     // Ajouter des écouteurs pour différents types d'événements
+//     searchInput.addEventListener('keydown', function(event) {
+//         // Vérifier si la touche Entrée est pressée (code 13)
+//         if (event.keyCode === 13 || event.key === 'Enter') {
+//             event.preventDefault(); // Empêcher le comportement par défaut
+//             searchRootPerson(event);
+//         }
+//     });
+
+//     // Ajouter un écouteur pour les appareils mobiles
+//     searchInput.addEventListener('keypress', function(event) {
+//         if (event.keyCode === 13 || event.key === 'Enter') {
+//             event.preventDefault();
+//             searchRootPerson(event);
+//         }
+//     });
+
+//     // // Ajouter un bouton de recherche pour les appareils mobiles
+//     // const searchButton = document.createElement('button');
+//     // searchButton.textContent = '🔍';
+//     // searchButton.addEventListener('click', searchRootPerson);
+//     // searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+// }
+
+
+
 function setupRootPersonSearch() {
     const searchInput = document.getElementById('root-person-search');
     
-    // Ajouter des écouteurs pour différents types d'événements
+    // Écouteurs pour différents types d'événements
     searchInput.addEventListener('keydown', function(event) {
-        // Vérifier si la touche Entrée est pressée (code 13)
-        if (event.keyCode === 13 || event.key === 'Enter') {
-            event.preventDefault(); // Empêcher le comportement par défaut
-            searchRootPerson(event);
-        }
-    });
-
-    // Ajouter un écouteur pour les appareils mobiles
-    searchInput.addEventListener('keypress', function(event) {
-        if (event.keyCode === 13 || event.key === 'Enter') {
+        if (event.key === 'Enter' || event.keyCode === 13) {
             event.preventDefault();
             searchRootPerson(event);
         }
     });
 
-    // // Ajouter un bouton de recherche pour les appareils mobiles
-    // const searchButton = document.createElement('button');
-    // searchButton.textContent = '🔍';
-    // searchButton.addEventListener('click', searchRootPerson);
-    // searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+    searchInput.addEventListener('search', function(event) {
+        event.preventDefault();
+        searchRootPerson(event);
+    });
 }
 
 
+
+
 // Ajouter des écouteurs d'événements
-document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
 document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
 document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
