@@ -157,35 +157,82 @@ function searchRootPerson(event) {
 
 
 
+// function selectRootPerson() {
+//     const resultsSelect = document.getElementById('root-person-results');
+//     const selectedPersonId = resultsSelect.value;
+
+//     console.log("Personne sélectionnée - ID :", selectedPersonId);
+//     console.log("Données globales :", globalGedcomData);
+
+//     if (selectedPersonId) {
+//         try {
+//             // Vérifier que la personne existe
+//             const selectedPerson = globalGedcomData.individuals[selectedPersonId];
+//             console.log("Personne sélectionnée :", selectedPerson);
+
+//             // Sauvegarder globalement
+//             globalRootPersonId = selectedPersonId;
+
+//             // Redessiner l'arbre avec la personne sélectionnée
+//             displayPedigree(globalGedcomData, selectedPersonId);
+            
+//             // Masquer la liste déroulante
+//             resultsSelect.style.display = 'none';
+//         } catch (error) {
+//             console.error("Erreur lors de la sélection de la personne :", error);
+//             alert("Erreur lors de la sélection de la personne");
+//         }
+//     }
+// }
+
+
 function selectRootPerson() {
     const resultsSelect = document.getElementById('root-person-results');
     const selectedPersonId = resultsSelect.value;
 
-    console.log("Personne sélectionnée - ID :", selectedPersonId);
-    console.log("Données globales :", globalGedcomData);
-
     if (selectedPersonId) {
-        try {
-            // Vérifier que la personne existe
-            const selectedPerson = globalGedcomData.individuals[selectedPersonId];
-            console.log("Personne sélectionnée :", selectedPerson);
+        // Sauvegarder globalement
+        globalRootPersonId = selectedPersonId;
 
-            // Sauvegarder globalement
-            globalRootPersonId = selectedPersonId;
-
-            // Redessiner l'arbre avec la personne sélectionnée
-            displayPedigree(globalGedcomData, selectedPersonId);
-            
-            // Masquer la liste déroulante
-            resultsSelect.style.display = 'none';
-        } catch (error) {
-            console.error("Erreur lors de la sélection de la personne :", error);
-            alert("Erreur lors de la sélection de la personne");
-        }
+        // Redessiner l'arbre avec la personne sélectionnée
+        displayPedigree(globalGedcomData, selectedPersonId);
+        
+        // Ne pas masquer la liste, mais garder l'option sélectionnée visible
+        resultsSelect.style.display = 'block';
     }
 }
+
+
+function setupRootPersonSearch() {
+    const searchInput = document.getElementById('root-person-search');
+    
+    // Ajouter des écouteurs pour différents types d'événements
+    searchInput.addEventListener('keydown', function(event) {
+        // Vérifier si la touche Entrée est pressée (code 13)
+        if (event.keyCode === 13 || event.key === 'Enter') {
+            event.preventDefault(); // Empêcher le comportement par défaut
+            searchRootPerson(event);
+        }
+    });
+
+    // Ajouter un écouteur pour les appareils mobiles
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.keyCode === 13 || event.key === 'Enter') {
+            event.preventDefault();
+            searchRootPerson(event);
+        }
+    });
+
+    // Ajouter un bouton de recherche pour les appareils mobiles
+    const searchButton = document.createElement('button');
+    searchButton.textContent = '🔍';
+    searchButton.addEventListener('click', searchRootPerson);
+    searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+}
+
 
 // Ajouter des écouteurs d'événements
 document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
 document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
 document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
+document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
