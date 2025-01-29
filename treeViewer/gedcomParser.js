@@ -265,48 +265,67 @@ function selectRootPerson() {
 
 
 
-function setupRootPersonSearch() {
-    const searchInput = document.getElementById('root-person-search');
+// function setupRootPersonSearch() {
+//     const searchInput = document.getElementById('root-person-search');
     
-    // Détecter les appareils mobiles
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+//     // Détecter les appareils mobiles
+//     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    if (isMobile) {
-        // Ajouter un bouton de recherche pour les appareils mobiles
-        const searchButton = document.createElement('button');
-        searchButton.textContent = '🔍';
-        searchButton.addEventListener('click', searchRootPerson);
-        searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+//     if (isMobile) {
+//         // Ajouter un bouton de recherche pour les appareils mobiles
+//         const searchButton = document.createElement('button');
+//         searchButton.textContent = '🔍';
+//         searchButton.addEventListener('click', searchRootPerson);
+//         searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
 
-        // CSS pour le bouton
-        searchButton.style.marginLeft = '5px';
-        searchButton.style.padding = '8px';
-        searchButton.style.backgroundColor = 'transparent';
-        searchButton.style.border = '1px solid #ccc';
-        searchButton.style.borderRadius = '4px';
-        searchButton.style.cursor = 'pointer';
-    }
-}
+//         // CSS pour le bouton
+//         searchButton.style.marginLeft = '5px';
+//         searchButton.style.padding = '8px';
+//         searchButton.style.backgroundColor = 'transparent';
+//         searchButton.style.border = '1px solid #ccc';
+//         searchButton.style.borderRadius = '4px';
+//         searchButton.style.cursor = 'pointer';
+//     }
+// }
 
-// Écouteurs d'événements
-document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
-document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
+// // Écouteurs d'événements
+// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
+// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
 
 
 
-document.getElementById("textInput").addEventListener("keydown", function(event) {
+document.getElementById("root-person-search").addEventListener("keydown", function(event) {
     if (event.key === "Enter") { // Détection de la touche Enter sur PC
         event.preventDefault();  // Empêcher le saut de ligne
-        validerTexte();
+        searchRootPerson(event);
     }
 });
 
-function validerTexte() {
-    let texte = document.getElementById("textInput").value;
-    if (texte.trim() !== "") {
-        document.getElementById("resultat").textContent = "Texte validé : " + texte;
-    } else {
-        alert("Veuillez entrer du texte !");
-    }
-}
+// function validerTexte() {
+//     let texte = document.getElementById("textInput").value;
+//     if (texte.trim() !== "") {
+//         document.getElementById("resultat").textContent = "Texte validé : " + texte;
+//     } else {
+//         alert("Veuillez entrer du texte !");
+//     }
+// }
+
+
+
+
+// document.getElementById("textInput").addEventListener("keydown", function(event) {
+//     if (event.key === "Enter") { // Détection de la touche Enter sur PC
+//         event.preventDefault();  // Empêcher le saut de ligne
+//         validerTexte();
+//     }
+// });
+
+// function validerTexte() {
+//     let texte = document.getElementById("textInput").value;
+//     if (texte.trim() !== "") {
+//         document.getElementById("resultat").textContent = "Texte validé : " + texte;
+//     } else {
+//         alert("Veuillez entrer du texte !");
+//     }
+// }
