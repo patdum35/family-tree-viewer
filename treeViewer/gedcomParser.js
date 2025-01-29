@@ -223,11 +223,11 @@ function setupRootPersonSearch() {
         }
     });
 
-    // Ajouter un bouton de recherche pour les appareils mobiles
-    const searchButton = document.createElement('button');
-    searchButton.textContent = '🔍';
-    searchButton.addEventListener('click', searchRootPerson);
-    searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+    // // Ajouter un bouton de recherche pour les appareils mobiles
+    // const searchButton = document.createElement('button');
+    // searchButton.textContent = '🔍';
+    // searchButton.addEventListener('click', searchRootPerson);
+    // searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
 }
 
 
