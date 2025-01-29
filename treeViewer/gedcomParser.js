@@ -202,7 +202,7 @@ function selectRootPerson() {
     }
 }
 
-
+// SOLUTION MARCHE SUR téléphone
 // function setupRootPersonSearch() {
 //     const searchInput = document.getElementById('root-person-search');
     
@@ -223,37 +223,36 @@ function selectRootPerson() {
 //         }
 //     });
 
-//     // // Ajouter un bouton de recherche pour les appareils mobiles
-//     // const searchButton = document.createElement('button');
-//     // searchButton.textContent = '🔍';
-//     // searchButton.addEventListener('click', searchRootPerson);
-//     // searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
+//     // Ajouter un bouton de recherche pour les appareils mobiles
+//     const searchButton = document.createElement('button');
+//     searchButton.textContent = '🔍';
+//     searchButton.addEventListener('click', searchRootPerson);
+//     searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
 // }
+// Ajouter des écouteurs d'événements
+// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
+// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
+
 
 
 
 function setupRootPersonSearch() {
     const searchInput = document.getElementById('root-person-search');
     
-    // Écouteurs pour différents types d'événements
+    // Écouteur pour la touche "suivant" sur mobile
     searchInput.addEventListener('keydown', function(event) {
+        // Vérifier si c'est l'action "suivant" sur mobile
         if (event.key === 'Enter' || event.keyCode === 13) {
             event.preventDefault();
             searchRootPerson(event);
         }
     });
-
-    searchInput.addEventListener('search', function(event) {
-        event.preventDefault();
-        searchRootPerson(event);
-    });
 }
 
-
-
-
-// Ajouter des écouteurs d'événements
-// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
+// Conserver l'écouteur pour la sélection de la personne
 document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
+
+// Charger la configuration au démarrage
 document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
