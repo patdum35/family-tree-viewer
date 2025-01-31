@@ -15,6 +15,8 @@ let zoom;  // Déclarer zoom comme variable globale
 let globalGedcomData = null; // Global variable to store GEDCOM data
 let globalRootPersonId = null; // Variable globale pour stocker l'ID de la personne racine
 let lastTransform = null; // Variable globale pour stocker la dernière transformation
+let boxWidth = 150;
+
 
 // Générer les options de génération dynamiquement
 const select = document.getElementById('generations');
@@ -41,77 +43,84 @@ window.addEventListener('click', function(event) {
     }
 });
 
+
+// chargement du fichier gedcom
 async function loadData() {
-    const password = document.getElementById('password').value;
+    const fileInput = document.getElementById('gedFile');
+    const passwordInput = document.getElementById('password');
+    
     try {
-        const response = await fetch('arbre.enc');
-        const encryptedData = await response.text();
+        let gedcomContent;
+        const file = fileInput.files[0];
         
-        const decoded = atob(encryptedData);
-        const key = password.repeat(decoded.length);
-        const decrypted = new Uint8Array(decoded.length);
-        for(let i = 0; i < decoded.length; i++) {
-            decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+        if ((!passwordInput.value)&&(!file)) {
+            alert('Veuillez sélectionner un fichier');
+            return;
+        }
+
+        const fileReader = new FileReader();
+        if ((!passwordInput.value)&&(file)) {
+
+            // Lecture du fichier
+            fileReader.readAsText(file);
+            
+            await new Promise((resolve, reject) => {
+                fileReader.onload = resolve;
+                fileReader.onerror = reject;
+            });
+
+        }
+
+        // Vérifier si c'est un fichier crypté ou non
+        if ((passwordInput.value)&&(!file)) {
+            // Fichier crypté et compressé
+            // const encryptedData = fileReader.result;
+            const response = await fetch('arbre.enc');
+            const encryptedData = await response.text();
+
+            const decoded = atob(encryptedData);
+            const key = passwordInput.value.repeat(decoded.length);
+            const decrypted = new Uint8Array(decoded.length);
+            
+            for(let i = 0; i < decoded.length; i++) {
+                decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+            }
+            
+            const expectedHash = decrypted.slice(0, 8);
+            const content = decrypted.slice(8);
+            
+            const encoder = new TextEncoder();
+            const passwordData = encoder.encode(passwordInput.value);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
+            const actualHash = new Uint8Array(hashBuffer).slice(0, 8);
+            
+            if (!actualHash.every((val, i) => val === expectedHash[i])) {
+                throw new Error('Mot de passe incorrect');
+            }
+            
+            gedcomContent = pako.inflate(content, {to: 'string'});
+        } else {
+            // Fichier non crypté
+            gedcomContent = fileReader.result;
         }
         
-        const expectedHash = decrypted.slice(0, 8);
-        const content = decrypted.slice(8);
-        
-        const encoder = new TextEncoder();
-        const passwordData = encoder.encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
-        const actualHash = new Uint8Array(hashBuffer).slice(0, 8);
-        
-        if (!actualHash.every((val, i) => val === expectedHash[i])) {
-            throw new Error('Mot de passe incorrect');
-        }
-        
-        const gedcomContent = pako.inflate(content, {to: 'string'});
         const gedcomData = parseGEDCOM(gedcomContent);
         
-        console.log("Données GEDCOM reçues dans loadData :");
-        console.log("Nombre d'individus :", Object.keys(gedcomData.individuals).length);
-        console.log("Nombre de familles :", Object.keys(gedcomData.families).length);
-        console.log("Exemple d'individu :", 
-            Object.values(gedcomData.individuals)[0]
-        );
-
-
-        const youngest = Object.values(gedcomData.individuals)
-        .filter(person => person.birthDate && person.id)
-        .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
-
-        // Initialiser la liste déroulante
-        const rootPersonResults = document.getElementById('root-person-results');
-        rootPersonResults.innerHTML = ''; // Effacer les options existantes
-
-        // Ajouter l'option pour la personne la plus jeune
-        const option = document.createElement('option');
-        option.value = youngest.id;
-        option.textContent = youngest.name.replace(/\//g, '').trim();
-        rootPersonResults.appendChild(option);
-
-        // Rendre la liste visible
-        rootPersonResults.style.display = 'block';
-
-        // Ajouter un événement de changement
-        rootPersonResults.addEventListener('change', function() {
-            const selectedPersonId = this.value;
-            displayPedigree(gedcomData, selectedPersonId);
-        });
-
+        // Stocker globalement
+        window.globalGedcomData = gedcomData;
+        
+        console.log("DEBUG: Données GEDCOM parsées", gedcomData);
 
         displayPedigree(gedcomData);
         
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error('Erreur complète:', error);
         alert(error.message);
     }
 }
 
-// Désactiver le zoom sur les inputs et select sur iOS
 document.addEventListener('focus', function(e) {
     if (/input|select|textarea/i.test(e.target.tagName)) {
         document.body.classList.add('fixfixed');
@@ -123,8 +132,6 @@ document.addEventListener('blur', function(e) {
         document.body.classList.remove('fixfixed');
     }
 }, true);
-
-
 
 
 function showTooltip(event, d) {

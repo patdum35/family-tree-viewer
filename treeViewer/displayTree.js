@@ -1,3 +1,65 @@
+function findYoungestPerson(gedcomData) {
+    // console.log("Recherche de la personne la plus jeune");
+    
+    // Filtrer les personnes avec une date de naissance valide
+    const personsWithBirthDate = Object.values(gedcomData.individuals)
+        .filter(person => {
+            if (!person.birthDate) {
+                // console.log(`Personne sans date de naissance : ${person.name}`);
+                return false;
+            }
+            
+            // Parse la date et vérifie sa validité
+            try {
+                const birthYear = extractYear(person.birthDate);
+                const birthYearNum = parseInt(birthYear);
+                
+                // Filtrer les dates non numériques ou trop anciennes
+                if (isNaN(birthYearNum) || birthYearNum < 0 || birthYearNum > new Date().getFullYear()) {
+                    // console.log(`Date de naissance invalide pour ${person.name}: ${person.birthDate}`);
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                // console.log(`Erreur de parsing pour ${person.name}: ${error}`);
+                return false;
+            }
+        });
+
+    // Trier par année de naissance la plus récente
+    const youngest = personsWithBirthDate.sort((a, b) => {
+        const yearA = parseInt(extractYear(a.birthDate));
+        const yearB = parseInt(extractYear(b.birthDate));
+        
+        // console.log(`Comparaison : ${a.name} (${yearA}) vs ${b.name} (${yearB})`);
+        
+        return yearB - yearA;
+    })[0];
+
+    if (!youngest) {
+        console.error("Aucune personne valide trouvée");
+        // Retourner la première personne si aucune date valide
+        return Object.values(gedcomData.individuals)[0];
+    }
+
+    console.log(`Personne la plus jeune trouvée : ${youngest.name}, né(e) en ${extractYear(youngest.birthDate)}`);
+    return youngest;
+}
+
+// Fonction utilitaire pour extraire l'année
+function extractYear(dateString) {
+    if (!dateString) return '0';
+    
+    // Séparer et prendre le dernier élément (année)
+    const parts = dateString.split(' ');
+    const year = parts[parts.length - 1];
+    
+    // Vérifier si c'est un nombre valide
+    return parseInt(year) || '0';
+}
+
+
 function displayPedigree(gedcomData, rootPersonId = null) {
 
     globalGedcomData = gedcomData;// Store the global GEDCOM data for later use
@@ -5,17 +67,16 @@ function displayPedigree(gedcomData, rootPersonId = null) {
     // Utiliser l'ID racine global si aucun ID n'est passé
     const personId = rootPersonId || globalRootPersonId;
     // Si rootPersonId est fourni, l'utiliser
+
     const person = personId 
         ? gedcomData.individuals[personId] 
-        : Object.values(gedcomData.individuals)
-            .filter(p => p.birthDate && p.id)
-            .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
+        : findYoungestPerson(gedcomData);
 
     console.log("Personne utilisée pour l'arbre :", person);
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    var boxWidth = 150;
+
     if (typeof nombre_prenoms === 'string') {
         nombre_prenoms = parseInt(nombre_prenoms, 10);
     }
@@ -34,24 +95,11 @@ function displayPedigree(gedcomData, rootPersonId = null) {
 
     drawTree();
 
-
-
-    // // Nouvelle fonction pour dessiner l'arbre sans le reconstruire
+    // Nouvelle fonction pour dessiner l'arbre sans le reconstruire
         function drawTree() {
+
             const root = d3.hierarchy(currentTree);
             
-            // // Le reste du code de displayPedigree à partir de la création de l'arbre d3
-            // const tree = d3.tree()
-            //     .nodeSize([boxHeight * 1.8, boxWidth * 1.3])
-            //     .separation(/* votre code de séparation */);
-
-            // const svg = d3.select("#tree-svg")
-            //     .attr("width", width)
-            //     .attr("height", height);
-
-            // svg.selectAll("*").remove();
-            // const root = d3.hierarchy(treeData);
-
             const tree = d3.tree()
                 .nodeSize([boxHeight * 1.8, boxWidth * 1.3])
                 .separation((a, b) => {
@@ -83,14 +131,9 @@ function displayPedigree(gedcomData, rootPersonId = null) {
             // Ajuster la position verticale d'Emma
             const parents = root.children?.filter(n => !n.data.isSibling);
             if (parents && parents.length === 2) {
-                // console.log("Position avant ajustement:", root.x);
-                // console.log("Position parent 1:", parents[0].x);
-                // console.log("Position parent 2:", parents[1].x);
-                
                 // Calculer le centre entre les deux parents
                 const centerY = (parents[0].x + parents[1].x) / 2;
                 
-                // console.log("Nouvelle position calculée:", centerY);
                 // Ajuster la position d'Emma
                 root.x = centerY;
             }
@@ -213,10 +256,6 @@ function displayPedigree(gedcomData, rootPersonId = null) {
 
 
             node.append("text")
-                // .filter(d => {
-                //     // Montrer "-" seulement si la personne a des ascendants visibles
-                //     return d.data.children && d.data.children.length;
-                // })
                 .filter(d => {
                     // Une case doit avoir un symbole si :
                     // 1. Elle a des ascendants visibles actuellement (->"-")
@@ -281,22 +320,6 @@ function displayPedigree(gedcomData, rootPersonId = null) {
                                 const family = gedcomData.families[famId];
                                 if (family) {
                                     d.data.children = [];
-                                    // if (family.husband) {
-                                    //     d.data.children.push({
-                                    //         id: family.husband,
-                                    //         name: gedcomData.individuals[family.husband].name,
-                                    //         generation: d.data.generation + 1,
-                                    //         children: []
-                                    //     });
-                                    // }
-                                    // if (family.wife) {
-                                    //     d.data.children.push({
-                                    //         id: family.wife,
-                                    //         name: gedcomData.individuals[family.wife].name,
-                                    //         generation: d.data.generation + 1,
-                                    //         children: []
-                                    //     });
-                                    // }
 
                                     if (family.husband) {
                                         // Vérifier si le père a des parents
@@ -339,6 +362,99 @@ function displayPedigree(gedcomData, rootPersonId = null) {
                     // Redessiner l'arbre
                     drawTree();
                 });
+
+
+                // Dans drawTree, après l'affichage du symbole droite pour les ascendants
+                // Symboles pour les descendants (à gauche)
+                node.append("text")
+                    .filter(d => {
+                        // Ne pas mettre de symbole sur la personne la plus jeune
+                        if (d.depth === 0) return false;
+                        
+                        const person = gedcomData.individuals[d.data.id];
+                        // Vérifier si la personne a des descendants
+                        return person.spouseFamilies && person.spouseFamilies.some(famId => {
+                            const family = gedcomData.families[famId];
+                            return family && family.children && family.children.length > 0;
+                        });
+                    })
+                    .attr("class", "toggle-text-left")
+                    .attr("x", -boxWidth/2 - 9)
+                    .attr("y", -boxHeight/2 + 15)
+                    .attr("text-anchor", "middle")
+                    .style("cursor", "pointer")
+                    .style("font-size", "20px")
+                    .style("fill", "#6495ED")
+                    .text(d => d.data._hiddenDescendants ? "+" : "-")
+
+
+                    .on("click", function(event, d) {
+                        event.stopPropagation();
+                        console.log("Click sur descendant pour:", d.data.name);
+                        
+                        if (!d.data._hiddenDescendants) {
+                            // Si pas de descendants cachés -> on vient de cliquer sur le "-"
+                            console.log("Cacher les descendants de:", d.data.name);
+                            
+                            function hideDescendants(treeData) {
+                                if (treeData.id === d.data.id) {
+                                    console.log("Trouvé le nœud, sauvegarde des descendants:", treeData.name);
+                                    treeData._hiddenDescendants = treeData.children || [];
+                                    treeData.children = [];
+                                    return true;
+                                }
+                                if (treeData.children) {
+                                    for (let child of treeData.children) {
+                                        if (hideDescendants(child)) return true;
+                                    }
+                                }
+                                return false;
+                            }
+                            
+                            // Modifier l'arbre actuel
+                            hideDescendants(currentTree);
+                            
+                        } else {
+                            // Si descendants cachés -> on vient de cliquer sur le "+"
+                            console.log("Montrer les descendants de:", d.data.name);
+                            
+                            function showDescendants(treeData) {
+                                if (treeData.id === d.data.id) {
+                                    console.log("Trouvé le nœud pour restauration:", treeData.name);
+                                    // Si on a des descendants cachés, les restaurer
+                                    if (treeData._hiddenDescendants) {
+                                        treeData.children = treeData._hiddenDescendants;
+                                        treeData._hiddenDescendants = null;
+                                    } else {
+                                        // Sinon, construire de nouveaux descendants
+                                        const descendants = buildDescendantTree(treeData.id, gedcomData, new Set(), treeData.generation);
+                                        if (descendants) {
+                                            treeData.children = descendants.children || [];
+                                        }
+                                    }
+                                    return true;
+                                }
+                                if (treeData.children) {
+                                    for (let child of treeData.children) {
+                                        if (showDescendants(child)) return true;
+                                    }
+                                }
+                                return false;
+                            }
+                            
+                            // Modifier l'arbre actuel
+                            showDescendants(currentTree);
+                        }
+                        
+                        // Redessiner l'arbre
+                        drawTree();
+                    });
+
+
+
+
+
+
 
 
 
@@ -568,10 +684,33 @@ function resetZoom() {
     // Revenir au plus jeune, en réinitialisant globalRootPersonId
     globalRootPersonId = null;
 
-    const youngest = Object.values(globalGedcomData.individuals)
-        .filter(person => person.birthDate && person.id)
-        .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
+    // const youngest = Object.values(globalGedcomData.individuals)
+    //     .filter(person => person.birthDate && person.id)
+    //     .sort((a, b) => new Date(b.birthDate) - new Date(a.birthDate))[0];
 
+    const youngest = findYoungestPerson(globalGedcomData);
+
+
+    // Initialiser la liste déroulante
+    const rootPersonResults = document.getElementById('root-person-results');
+    rootPersonResults.innerHTML = ''; // Effacer les options existantes
+
+    // Ajouter l'option pour la personne la plus jeune
+    const option = document.createElement('option');
+    option.value = youngest.id;
+    option.textContent = youngest.name.replace(/\//g, '').trim();
+    rootPersonResults.appendChild(option);
+
+    // Rendre la liste visible
+    rootPersonResults.style.display = 'block';
+
+    // Ajouter un événement de changement
+    rootPersonResults.addEventListener('change', function() {
+        const selectedPersonId = this.value;
+        displayPedigree(gedcomData, selectedPersonId);
+    });
+
+        
     // Redessiner l'arbre avec le plus jeune comme point de départ
     displayPedigree(globalGedcomData);
 
@@ -581,7 +720,7 @@ function resetZoom() {
     const height = window.innerHeight;
     svg.transition()
         .duration(750)
-        .call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(1));
+        .call(zoom.transform, d3.zoomIdentity.translate(boxWidth, height / 2).scale(0.8));
 }
 
 function wrapText(text, width) {

@@ -59,6 +59,12 @@ function parseGEDCOM(gedcomText) {
                 currentEntity.children.push(data);
             } else if (tag === "FAMC" || tag === "FAMS") {
                 currentEntity.families.push(data);
+                if (tag === "FAMS") {
+                    if (!currentEntity.spouseFamilies) {
+                        currentEntity.spouseFamilies = [];
+                    }
+                    currentEntity.spouseFamilies.push(data);
+                }
             } else if (tag === "MARR") {
                 currentEntity._expectingMarriageDate = true;
             } else if (tag === "NOTE") {
@@ -149,48 +155,33 @@ function searchRootPerson(event) {
             option.textContent = person.name.replace(/\//g, '').trim();
             resultsSelect.appendChild(option);
         });
+        // Animation pour indiquer des résultats trouvés
         resultsSelect.style.display = 'block';
+        resultsSelect.style.animation = 'findResults 1s infinite';
+        resultsSelect.style.backgroundColor = 'yellow'; 
     } else {
         alert('Aucune personne trouvée');
     }
 }
 
 
-
-// function selectRootPerson() {
-//     const resultsSelect = document.getElementById('root-person-results');
-//     const selectedPersonId = resultsSelect.value;
-
-//     console.log("Personne sélectionnée - ID :", selectedPersonId);
-//     console.log("Données globales :", globalGedcomData);
-
-//     if (selectedPersonId) {
-//         try {
-//             // Vérifier que la personne existe
-//             const selectedPerson = globalGedcomData.individuals[selectedPersonId];
-//             console.log("Personne sélectionnée :", selectedPerson);
-
-//             // Sauvegarder globalement
-//             globalRootPersonId = selectedPersonId;
-
-//             // Redessiner l'arbre avec la personne sélectionnée
-//             displayPedigree(globalGedcomData, selectedPersonId);
-            
-//             // Masquer la liste déroulante
-//             resultsSelect.style.display = 'none';
-//         } catch (error) {
-//             console.error("Erreur lors de la sélection de la personne :", error);
-//             alert("Erreur lors de la sélection de la personne");
-//         }
-//     }
-// }
-
-
 function selectRootPerson() {
+    console.log('selectRootPerson function called');
+    
     const resultsSelect = document.getElementById('root-person-results');
     const selectedPersonId = resultsSelect.value;
 
+    console.log('Selected Person ID:', selectedPersonId);
+
     if (selectedPersonId) {
+        console.log('Inside if block');
+
+        // Forcer la suppression de l'animation et le changement de couleur
+        resultsSelect.style.animation = 'none';
+        resultsSelect.style.backgroundColor = 'orange';
+
+        console.log('Styles applied:', resultsSelect.style.animation, resultsSelect.style.backgroundColor);
+
         // Sauvegarder globalement
         globalRootPersonId = selectedPersonId;
 
@@ -202,98 +193,6 @@ function selectRootPerson() {
     }
 }
 
-// SOLUTION MARCHE SUR téléphone
-// function setupRootPersonSearch() {
-//     const searchInput = document.getElementById('root-person-search');
-    
-//     // Ajouter des écouteurs pour différents types d'événements
-//     searchInput.addEventListener('keydown', function(event) {
-//         // Vérifier si la touche Entrée est pressée (code 13)
-//         if (event.keyCode === 13 || event.key === 'Enter') {
-//             event.preventDefault(); // Empêcher le comportement par défaut
-//             searchRootPerson(event);
-//         }
-//     });
-
-//     // Ajouter un écouteur pour les appareils mobiles
-//     searchInput.addEventListener('keypress', function(event) {
-//         if (event.keyCode === 13 || event.key === 'Enter') {
-//             event.preventDefault();
-//             searchRootPerson(event);
-//         }
-//     });
-
-//     // Ajouter un bouton de recherche pour les appareils mobiles
-//     const searchButton = document.createElement('button');
-//     searchButton.textContent = '🔍';
-//     searchButton.addEventListener('click', searchRootPerson);
-//     searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
-// }
-// Ajouter des écouteurs d'événements
-// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-// document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
-// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
-
-
-
-// function setupRootPersonSearch() {
-//     const searchInput = document.getElementById('root-person-search');
-    
-//     // Vérifier si c'est un appareil mobile
-//     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-//     if (isMobile) {
-//         // Pour les appareils mobiles, utiliser l'événement 'search'
-//         searchInput.addEventListener('search', function(event) {
-//             event.preventDefault();
-//             searchRootPerson(event);
-//         });
-//     } else {
-//         // Pour les ordinateurs, conserver le comportement existant
-//         searchInput.addEventListener('keydown', function(event) {
-//             if (event.key === 'Enter' || event.keyCode === 13) {
-//                 event.preventDefault();
-//                 searchRootPerson(event);
-//             }
-//         });
-//     }
-// }
-
-// // Charger la configuration au démarrage
-// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
-
-
-
-// function setupRootPersonSearch() {
-//     const searchInput = document.getElementById('root-person-search');
-    
-//     // Détecter les appareils mobiles
-//     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-//     if (isMobile) {
-//         // Ajouter un bouton de recherche pour les appareils mobiles
-//         const searchButton = document.createElement('button');
-//         searchButton.textContent = '🔍';
-//         searchButton.addEventListener('click', searchRootPerson);
-//         searchInput.parentNode.insertBefore(searchButton, searchInput.nextSibling);
-
-//         // CSS pour le bouton
-//         searchButton.style.marginLeft = '5px';
-//         searchButton.style.padding = '8px';
-//         searchButton.style.backgroundColor = 'transparent';
-//         searchButton.style.border = '1px solid #ccc';
-//         searchButton.style.borderRadius = '4px';
-//         searchButton.style.cursor = 'pointer';
-//     }
-// }
-
-// // Écouteurs d'événements
-// document.getElementById('root-person-search').addEventListener('keyup', searchRootPerson);
-// document.getElementById('root-person-results').addEventListener('change', selectRootPerson);
-// document.addEventListener('DOMContentLoaded', setupRootPersonSearch);
-
-
 
 document.getElementById("root-person-search").addEventListener("keydown", function(event) {
     if (event.key === "Enter") { // Détection de la touche Enter sur PC
@@ -302,30 +201,4 @@ document.getElementById("root-person-search").addEventListener("keydown", functi
     }
 });
 
-// function validerTexte() {
-//     let texte = document.getElementById("textInput").value;
-//     if (texte.trim() !== "") {
-//         document.getElementById("resultat").textContent = "Texte validé : " + texte;
-//     } else {
-//         alert("Veuillez entrer du texte !");
-//     }
-// }
-
-
-
-
-// document.getElementById("textInput").addEventListener("keydown", function(event) {
-//     if (event.key === "Enter") { // Détection de la touche Enter sur PC
-//         event.preventDefault();  // Empêcher le saut de ligne
-//         validerTexte();
-//     }
-// });
-
-// function validerTexte() {
-//     let texte = document.getElementById("textInput").value;
-//     if (texte.trim() !== "") {
-//         document.getElementById("resultat").textContent = "Texte validé : " + texte;
-//     } else {
-//         alert("Veuillez entrer du texte !");
-//     }
-// }
+document.getElementById('root-person-results').addEventListener('change', selectRootPerson);

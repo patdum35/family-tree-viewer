@@ -9,16 +9,26 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 </head>
 <body>
-   <div id="password-form">
-       <input type="password" id="password" placeholder="Mot de passe">
-       <button onclick="loadData()">Voir l'arbre</button>
 
-       <!-- <input type="text" id="textInput" placeholder="Tapez ici..." 
-       inputmode="text" enterkeyhint="next">
+    <div id="password-form">
+        
+        <div class="form-container">
+            <div class="password-row">
+                <input type="password" id="password" placeholder="Mot de passe (pour fichier crypté)">
+            </div>
+            <div class="or-row">
+                <span>ou</span>
+            </div>
 
-       <p id="resultat"></p> -->
-
+            <div class="file-row">
+                <input type="file" id="gedFile">
+            </div>
+            <div class="submit-row">
+                <button onclick="loadData()">Voir l'arbre</button>
+            </div>
+        </div>
     </div>
+
 
    <!-- Person Details in Modal window-->
    <div id="person-details-modal">
@@ -35,29 +45,30 @@
 
    <div id="tree-container" style="display:none">
         <div class="controls">
-            <!-- <div class="controls-row"> -->
+            <div class="controls-row-1">
                 <button onclick="zoomIn()">➕</button>
                 <button onclick="zoomOut()">➖</button>
-                <button onclick="resetZoom()">↩️</button>
-                <label for="prenoms">nb<br>prénom</label>
+                <button onclick="resetZoom()">🏠</button>
+                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
+                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
+                <select id="root-person-results" style="display:none;">
+                    <option value="">Select</option>
+                </select>
+            </div>
+            <div class="controls-row-2">
+                <label for="prenoms">nbre<br>prénom</label>
                 <select id="prenoms" onchange="updatePrenoms(this.value)">
                     <option value="1">1</option>
                     <option value="2" selected>2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
                 </select>
-                <label for="generations">nb<br>gen</label>
+                <label for="generations">nbre<br>géné</label>
                 <select id="generations" onchange="updateGenerations(this.value)">
                 </select>
-            <!-- </div> -->
-            <!-- <div class="controls-row"></div> -->
-                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
-                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
-                <select id="root-person-results" style="display:none;">
-                    <option value="">Select</option>
-                </select>
-            <!-- </div> -->
+            </div>
         </div>
+
         <div class="tooltip"></div>
         <svg id="tree-svg"></svg>
    </div>

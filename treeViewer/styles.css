@@ -4,7 +4,7 @@ body {
     font-family: Arial;
     overflow: hidden;
 }
-#password-form {
+/* #password-form {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -14,8 +14,82 @@ body {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
     z-index: 1000;
+} */
+
+#password-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
-.controls {
+
+.form-container {
+    border: 1px solid #ccc;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.password-row, .or-row, .file-row, .submit-row {
+    margin-bottom: 20px;
+}
+
+.password-row input, .file-row button, .submit-row button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.or-row {
+    color: #666;
+    font-style: italic;
+}
+
+#gedfile {
+    display: none;
+}
+
+
+.file-row span {
+    color: #666;
+}
+
+
+.file-row {
+    display: flex;
+    align-items: center;
+}
+
+.file-row button {
+    margin-right: 10px;
+}
+
+#file-name {
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* .controls {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -26,16 +100,40 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-}
+} */
+
+
+
+.controls {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alignement à gauche */
+ }
+ 
+ .controls-row-1, .controls-row-2  {
+    display: flex;
+    justify-content: flex-start; /* Justification à gauche */
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding-left: 10px; /* Léger padding */
+ }
+ 
+ .controls-row-1 {
+    margin-bottom: 10px; /* Espace entre les deux rangées */
+ }
+
+
+
+
 .controls button {
     background-color: transparent;
     font-size: 12px; /* Taille de police plus grande */
     padding: 0px; /* Padding plus important */
     width: 100%; /* Largeur complète */
     max-width: 20px;        
-}
-.controls label {
-    background-color: transparent;
 }
 .controls select, 
 .controls input[type="number"] {
@@ -52,6 +150,9 @@ body {
 .controls label {
     font-size: 12px;
     text-align: center; /* Centrer le texte */ 
+    background-color: transparent;
+    line-height: 0.9;
+    padding: opx
 }
 .node {
     cursor: pointer;
@@ -203,12 +304,6 @@ select {
     max-width: 50px; /* Limiter la largeur maximale */
     min-width: 50px; /* Limiter la largeur minimale */    
 }
-/* #root-person-search {
-    width: 100%; 
-    max-width: 60px;
-    min-width: 60px;       
-} */
-
 
 #root-person-search {
     padding: 0px;
@@ -233,21 +328,13 @@ select {
 .toggle-text:hover {
     opacity: 0.7;
 }
-/* .toggle-btn {
-    fill: #f0f0f0;
-    stroke: steelblue;
-    cursor: pointer;
+
+@keyframes findResults {
+    0% { background-color: yellow; }
+    50% { background-color: lightyellow; }
+    100% { background-color: yellow; }
 }
-.toggle-btn:hover {
-    fill: #e0e0e0;
-}
-.toggle-text {
-    pointer-events: none;  
-}
-/* .toggle-text:hover {
-    fill: #333;
-    cursor: pointer;
-} */ 
+
 
 /* Styles responsive pour le formulaire de mot de passe */
 @media screen and (max-width: 768px) {
@@ -266,12 +353,6 @@ select {
         width: 100%; /* Largeur complète */
     }
     /* Boutons de contrôle */
-    /* Empiler verticalement */
-    /* Espace entre les éléments */
-    /* .controls {
-        flex-direction: column; 
-        gap: 10px; 
-    } */
     .controls input[type="text"],
     .controls input[type="number"] {
         font-size: 12px; /* Taille de police plus grande */
