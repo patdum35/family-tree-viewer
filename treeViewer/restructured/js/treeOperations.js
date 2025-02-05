@@ -1,0 +1,291 @@
+// ====================================
+// Opérations sur l'arbre
+// ====================================
+import { state } from './main.js';
+
+/**
+ * Trouve tous les descendants d'une personne
+ * @param {string} personId - ID de la personne
+ * @param {Set} processed - Ensemble des IDs traités
+ * @param {number} depth - Profondeur actuelle
+ * @returns {Array} - Liste des descendants
+ */
+export function findDescendants(personId, processed = new Set(), depth = 0) {
+    if (processed.has(personId)) return [];
+    processed.add(personId);
+    
+    const person = state.gedcomData.individuals[personId];
+    const descendants = [];
+
+    if (person.spouseFamilies) {
+        person.spouseFamilies.forEach(famId => {
+            const family = state.gedcomData.families[famId];
+            if (family && family.children) {
+                family.children.forEach(childId => {
+                    if (!processed.has(childId)) {
+                        processChild(childId, depth, descendants, processed);
+                    }
+                });
+            }
+        });
+    }
+    
+    return descendants;
+}
+
+/**
+ * Traite un enfant et ses descendants
+ * @private
+ */
+function processChild(childId, depth, descendants, processed) {
+    const child = state.gedcomData.individuals[childId];
+    descendants.push({
+        id: childId,
+        name: child.name,
+        depth: depth + 1,
+        type: 'child'
+    });
+    
+    if (child.spouseFamilies) {
+        child.spouseFamilies.forEach(childFamId => {
+            const childFamily = state.gedcomData.families[childFamId];
+            if (childFamily) {
+                const spouseId = childFamily.husband === childId ? childFamily.wife : childFamily.husband;
+                if (spouseId && !processed.has(spouseId)) {
+                    const spouse = state.gedcomData.individuals[spouseId];
+                    descendants.push({
+                        id: spouseId,
+                        name: spouse.name,
+                        depth: depth + 1,
+                        type: 'spouse'
+                    });
+                }
+            }
+        });
+    }
+
+    const childDescendants = findDescendants(childId, processed, depth + 1);
+    descendants.push(...childDescendants);
+}
+
+/**
+ * Recherche des frères et sœurs
+ * @param {string} personId - ID de la personne
+ * @param {Set} processed - Ensemble des IDs traités
+ * @returns {Array} - Liste des frères et sœurs
+ */
+export function findSiblings(personId, processed) {
+    const siblings = [];
+    const person = state.gedcomData.individuals[personId];
+    
+    person.families.forEach(famId => {
+        const family = state.gedcomData.families[famId];
+        if (family && family.children && family.children.includes(personId)) {
+            family.children
+                .filter(id => id !== personId && !processed.has(id))
+                .forEach(siblingId => {
+                    siblings.push(siblingId);
+                });
+        }
+    });
+    
+    return siblings;
+}
+
+/**
+ * Construit l'arbre des ancêtres
+ * @param {string} personId - ID de la personne racine
+ * @param {Set} processed - Ensemble des IDs traités
+ * @param {number} generation - Génération actuelle
+ * @param {Object} parentNode - Nœud parent
+ * @param {number} maxGeneration - Nombre maximum de générations
+ * @returns {Object} - L'arbre des ancêtres
+ */
+export function buildAncestorTree(personId, processed = new Set(), generation = 0, parentNode = null) {
+    if (processed.has(personId) || generation >= state.nombre_generation) {
+        return null;
+    }
+    
+    const person = state.gedcomData.individuals[personId];
+    const node = createBaseNode(person, personId, generation);
+    
+    const siblings = findSiblings(personId, processed);
+    processed.add(personId);
+    
+    processGenerationLevel(node, siblings, person, processed, generation, parentNode);
+    processFamiliesAsChild(node, person, processed, generation);
+    
+    return node;
+}
+
+
+
+/**
+ * Construit l'arbre des descendants
+ * @param {string} personId - ID de la personne
+ * @param {Set} processed - Ensemble des IDs traités
+ * @param {number} generation - Génération actuelle
+ * @returns {Object} - L'arbre des descendants
+ */
+export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
+    if (processed.has(personId)) return null;
+    processed.add(personId);
+    
+    const person = state.gedcomData.individuals[personId];
+    const node = {
+        id: personId,
+        name: person.name,
+        generation: generation,
+        birthDate: person.birthDate,
+        deathDate: person.deathDate,
+        children: []
+    };
+
+    // Rechercher les familles où la personne est un conjoint
+    if (person.spouseFamilies) {
+        person.spouseFamilies.forEach(famId => {
+            const family = state.gedcomData.families[famId];
+            if (family && family.children) {
+                family.children.forEach(childId => {
+                    if (!processed.has(childId)) {
+                        const childNode = buildDescendantTree(childId, processed, generation + 1);
+                        if (childNode) {
+                            node.children.push(childNode);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    return node;
+}
+
+
+
+
+/**
+ * Crée le nœud de base pour une personne
+ * @private
+ */
+function createBaseNode(person, personId, generation) {
+    return {
+        id: personId,
+        name: person.name,
+        generation: generation,
+        children: [],
+        siblings: [],
+        birthDate: person.birthDate,
+        deathDate: person.deathDate,
+        collapsed: false,
+        _originalChildren: []
+    };
+}
+
+/**
+ * Traite le niveau de génération pour les siblings
+ * @private
+ */
+function processGenerationLevel(node, siblings, person, processed, generation, parentNode) {
+    const familiesWithChildren = person.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children;
+    });
+
+    if (generation === 0) {
+        processSiblingsAtRoot(node, siblings, familiesWithChildren);
+    } else if (parentNode) {
+        processSiblingsAtNonRoot(siblings, familiesWithChildren, parentNode, generation);
+    }
+}
+
+/**
+ * Traite les siblings au niveau racine
+ * @private
+ */
+function processSiblingsAtRoot(node, siblings, familiesWithChildren) {
+    node.siblings = siblings.map(siblingId => {
+        const siblingPerson = state.gedcomData.individuals[siblingId];
+        const genealogicalParentId = findGenealogicalParent(siblingId, familiesWithChildren);
+        
+        return {
+            id: siblingId,
+            name: siblingPerson.name,
+            generation: 0,
+            isSibling: true,
+            children: [],
+            birthDate: siblingPerson.birthDate,
+            deathDate: siblingPerson.deathDate,
+            genealogicalParentId: genealogicalParentId
+        };
+    });
+}
+
+/**
+ * Trouve le parent généalogique
+ * @private
+ */
+function findGenealogicalParent(siblingId, familiesWithChildren) {
+    return familiesWithChildren.reduce((foundParent, famId) => {
+        const family = state.gedcomData.families[famId];
+        if (family.children.includes(siblingId)) {
+            return family.husband || family.wife;
+        }
+        return foundParent;
+    }, null);
+}
+
+/**
+ * Traite les siblings aux niveaux non-racine
+ * @private
+ */
+function processSiblingsAtNonRoot(siblings, familiesWithChildren, parentNode, generation) {
+    siblings.forEach(siblingId => {
+        const siblingPerson = state.gedcomData.individuals[siblingId];
+        const genealogicalParentId = findGenealogicalParent(siblingId, familiesWithChildren);
+        
+        parentNode.children.push({
+            id: siblingId,
+            name: siblingPerson.name,
+            generation: generation,
+            isSibling: true,
+            children: [],
+            birthDate: siblingPerson.birthDate,
+            deathDate: siblingPerson.deathDate,
+            genealogicalParentId: genealogicalParentId
+        });
+    });
+}
+
+/**
+ * Traite les familles où la personne est un enfant
+ * @private
+ */
+function processFamiliesAsChild(node, person, processed, generation) {
+    const familiesAsChild = person.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children && family.children.includes(person.id);
+    });
+
+    familiesAsChild.forEach(famId => {
+        const family = state.gedcomData.families[famId];
+        if (family) {
+            processParents(family, node, processed, generation);
+        }
+    });
+}
+
+/**
+ * Traite les parents d'une personne
+ * @private
+ */
+function processParents(family, node, processed, generation) {
+    if (family.husband && !processed.has(family.husband)) {
+        const father = buildAncestorTree(family.husband, processed, generation + 1, node);
+        if (father) node.children.push(father);
+    }
+    if (family.wife && !processed.has(family.wife)) {
+        const mother = buildAncestorTree(family.wife, processed, generation + 1, node);
+        if (mother) node.children.push(mother);
+    }
+}
