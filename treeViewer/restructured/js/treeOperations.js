@@ -74,7 +74,7 @@ function processChild(childId, depth, descendants, processed) {
  * @param {Set} processed - Ensemble des IDs traités
  * @returns {Array} - Liste des frères et sœurs
  */
-export function findSiblings(personId, processed) {
+export function findSiblings(personId, processed = new Set()) {
     const siblings = [];
     const person = state.gedcomData.individuals[personId];
     
@@ -91,6 +91,8 @@ export function findSiblings(personId, processed) {
     
     return siblings;
 }
+
+
 
 /**
  * Construit l'arbre des ancêtres
@@ -109,10 +111,10 @@ export function buildAncestorTree(personId, processed = new Set(), generation = 
     const person = state.gedcomData.individuals[personId];
     const node = createBaseNode(person, personId, generation);
     
-    const siblings = findSiblings(personId, processed);
+    const siblings = findSiblings(personId, processed, new Set());
     processed.add(personId);
     
-    processGenerationLevel(node, siblings, person, processed, generation, parentNode);
+    processSiblingsGenerationLevel(node, siblings, personId, person, processed, generation, parentNode);
     processFamiliesAsChild(node, person, processed, generation);
     
     return node;
@@ -169,6 +171,11 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
  * @private
  */
 function createBaseNode(person, personId, generation) {
+    const familiesWithChildren = person.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children;
+    });
+    const genealogicalParentId = findGenealogicalParent(personId, familiesWithChildren);
     return {
         id: personId,
         name: person.name,
@@ -178,7 +185,8 @@ function createBaseNode(person, personId, generation) {
         birthDate: person.birthDate,
         deathDate: person.deathDate,
         collapsed: false,
-        _originalChildren: []
+        _originalChildren: [],
+        genealogicalParentId: genealogicalParentId
     };
 }
 
@@ -186,16 +194,16 @@ function createBaseNode(person, personId, generation) {
  * Traite le niveau de génération pour les siblings
  * @private
  */
-function processGenerationLevel(node, siblings, person, processed, generation, parentNode) {
+function processSiblingsGenerationLevel(node, siblings, personId, person, processed, generation, parentNode) {
     const familiesWithChildren = person.families.filter(famId => {
         const family = state.gedcomData.families[famId];
         return family && family.children;
     });
 
     if (generation === 0) {
-        processSiblingsAtRoot(node, siblings, familiesWithChildren);
+        processSiblingsAtRoot(node, personId, siblings, familiesWithChildren);
     } else if (parentNode) {
-        processSiblingsAtNonRoot(siblings, familiesWithChildren, parentNode, generation);
+        processSiblingsAtNonRoot(siblings, personId, familiesWithChildren, parentNode, generation);
     }
 }
 
@@ -203,7 +211,7 @@ function processGenerationLevel(node, siblings, person, processed, generation, p
  * Traite les siblings au niveau racine
  * @private
  */
-function processSiblingsAtRoot(node, siblings, familiesWithChildren) {
+function processSiblingsAtRoot(node, personId, siblings, familiesWithChildren) {
     node.siblings = siblings.map(siblingId => {
         const siblingPerson = state.gedcomData.individuals[siblingId];
         const genealogicalParentId = findGenealogicalParent(siblingId, familiesWithChildren);
@@ -216,7 +224,10 @@ function processSiblingsAtRoot(node, siblings, familiesWithChildren) {
             children: [],
             birthDate: siblingPerson.birthDate,
             deathDate: siblingPerson.deathDate,
-            genealogicalParentId: genealogicalParentId
+            collapsed: false,
+            _originalChildren: [],
+            genealogicalParentId: genealogicalParentId,
+            siblingReferenceId: personId
         };
     });
 }
@@ -225,7 +236,7 @@ function processSiblingsAtRoot(node, siblings, familiesWithChildren) {
  * Trouve le parent généalogique
  * @private
  */
-function findGenealogicalParent(siblingId, familiesWithChildren) {
+export function findGenealogicalParent(siblingId, familiesWithChildren) {
     return familiesWithChildren.reduce((foundParent, famId) => {
         const family = state.gedcomData.families[famId];
         if (family.children.includes(siblingId)) {
@@ -239,11 +250,13 @@ function findGenealogicalParent(siblingId, familiesWithChildren) {
  * Traite les siblings aux niveaux non-racine
  * @private
  */
-function processSiblingsAtNonRoot(siblings, familiesWithChildren, parentNode, generation) {
+function processSiblingsAtNonRoot(siblings, personId, familiesWithChildren, parentNode, generation) {
     siblings.forEach(siblingId => {
         const siblingPerson = state.gedcomData.individuals[siblingId];
         const genealogicalParentId = findGenealogicalParent(siblingId, familiesWithChildren);
-        
+
+        // console.log("debug findGenealogicalParent processSiblingsAtNonRoot :", siblingId, siblingPerson, familiesWithChildren, personId, parentNode, generation, genealogicalParentId);
+
         parentNode.children.push({
             id: siblingId,
             name: siblingPerson.name,
@@ -252,7 +265,10 @@ function processSiblingsAtNonRoot(siblings, familiesWithChildren, parentNode, ge
             children: [],
             birthDate: siblingPerson.birthDate,
             deathDate: siblingPerson.deathDate,
-            genealogicalParentId: genealogicalParentId
+            collapsed: false,
+            _originalChildren: [],
+            genealogicalParentId: genealogicalParentId,
+            siblingReferenceId: personId
         });
     });
 }
@@ -279,7 +295,7 @@ function processFamiliesAsChild(node, person, processed, generation) {
  * Traite les parents d'une personne
  * @private
  */
-function processParents(family, node, processed, generation) {
+export function processParents(family, node, processed, generation) {
     if (family.husband && !processed.has(family.husband)) {
         const father = buildAncestorTree(family.husband, processed, generation + 1, node);
         if (father) node.children.push(father);

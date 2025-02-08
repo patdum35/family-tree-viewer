@@ -12,11 +12,62 @@ import { addRootChangeButton, addDescendantsControls, addAncestorsControls } fro
  * @param {Object} root - La racine de l'arbre
  * @param {Object} treeLayout - La mise en page de l'arbre
  */
-export function drawNodes(group, root, treeLayout) {
-    const nodes = treeLayout(root);
+// export function drawNodes(group, root, treeLayout) {
+//     const nodes = treeLayout(root);
+
+//     const nodeGroups = group.selectAll(".node")
+//         .data(root.descendants())
+//         .join("g")
+//         .filter(d => !d.data._isDescendantNode)
+//         .attr("class", "node")
+//         .attr("transform", d => `translate(${d.y},${d.x})`)
+//         .on("click", function(event, d) {
+//             // Ajout de l'appel à displayPersonDetails lors du clic
+//             event.stopPropagation();
+//             displayPersonDetails(d.data.id);
+//         });
+
+//     drawNodeBoxes(nodeGroups);
+//     drawNodeContent(nodeGroups);
+//     addControlButtons(nodeGroups);
+
+//     // Ajout des nœuds spouses pour la racine
+//     if (root.data && root.data.spouses && root.data.spouses.length > 0) {
+//         const spouseNodes = group.selectAll(".node.spouse")
+//             .data(root.data.spouses.map(spouse => {
+//                 return {
+//                     data: { ...spouse, isSpouse: true },
+//                     depth: 0
+//                 };
+//             }))
+//             .join("g")
+//             .attr("class", "node spouse")
+//             .attr("transform", (d, i) => {
+//                 const initialSpacing = state.boxHeight * 1.2;
+//                 const spacing = state.boxHeight * 1.2;
+//                 return `translate(${root.y},${root.x + initialSpacing + spacing * i})`;
+//             })
+//             .on("click", function(event, d) {
+//                 // Ajout de l'appel à displayPersonDetails lors du clic
+//                 event.stopPropagation();
+//                 displayPersonDetails(d.data.id);
+//             });
+
+            
+//         // Même traitement pour les spouses
+//         drawNodeBoxes(spouseNodes);
+//         drawNodeContent(spouseNodes);
+//         addControlButtons(spouseNodes);
+//     }
+
+
+// }
+
+export function drawNodes(group, layout) {
+    // const nodes = treeLayout(root);
 
     const nodeGroups = group.selectAll(".node")
-        .data(root.descendants())
+        .data(layout.descendants())
         .join("g")
         .filter(d => !d.data._isDescendantNode)
         .attr("class", "node")
@@ -32,9 +83,9 @@ export function drawNodes(group, root, treeLayout) {
     addControlButtons(nodeGroups);
 
     // Ajout des nœuds spouses pour la racine
-    if (root.data && root.data.spouses && root.data.spouses.length > 0) {
+    if (layout.data && layout.data.spouses && layout.data.spouses.length > 0) {
         const spouseNodes = group.selectAll(".node.spouse")
-            .data(root.data.spouses.map(spouse => {
+            .data(layout.data.spouses.map(spouse => {
                 return {
                     data: { ...spouse, isSpouse: true },
                     depth: 0
@@ -45,7 +96,7 @@ export function drawNodes(group, root, treeLayout) {
             .attr("transform", (d, i) => {
                 const initialSpacing = state.boxHeight * 1.2;
                 const spacing = state.boxHeight * 1.2;
-                return `translate(${root.y},${root.x + initialSpacing + spacing * i})`;
+                return `translate(${layout.y},${layout.x + initialSpacing + spacing * i})`;
             })
             .on("click", function(event, d) {
                 // Ajout de l'appel à displayPersonDetails lors du clic

@@ -12,6 +12,33 @@ let lastTransform = null;
 /**
  * Initialise et dessine l'arbre
  */
+// export function drawTree() {
+//     if (!state.currentTree) return;
+
+//     const rootHierarchy = d3.hierarchy(state.currentTree);
+//     processSiblings(rootHierarchy);
+//     processSpouses(rootHierarchy);
+
+//     const svg = setupSVG();
+//     const treeLayout = createTreeLayout();
+//     const mainGroup = createMainGroup(svg);
+    
+//     // 1. Première passe : calcul et dessin normal
+//     treeLayout(rootHierarchy);
+//     drawLinks(mainGroup, rootHierarchy, treeLayout);
+//     drawSiblingLinks(mainGroup, rootHierarchy);
+//     drawNodes(mainGroup, rootHierarchy, treeLayout);
+
+//     // 2. Seconde passe : ajustement de la position verticale des siblings niveau 0
+//     adjustLevel0SiblingsPosition(mainGroup);
+//     // adjustRootSpousesPosition(mainGroup);
+
+//     // 3. Troisième passe : dessin des liens pour les siblings niveau 0
+//     drawLevel0SiblingLinks(mainGroup, rootHierarchy);
+
+//     setupZoom(svg, mainGroup);
+// }
+
 export function drawTree() {
     if (!state.currentTree) return;
 
@@ -20,26 +47,117 @@ export function drawTree() {
     processSpouses(rootHierarchy);
 
     const svg = setupSVG();
-    const treeLayout = createTreeLayout();
     const mainGroup = createMainGroup(svg);
+    const treeLayout = createTreeLayout();
     
-    // 1. Première passe : calcul et dessin normal
-    treeLayout(rootHierarchy);
-    drawLinks(mainGroup, rootHierarchy, treeLayout);
-    drawSiblingLinks(mainGroup, rootHierarchy);
-    drawNodes(mainGroup, rootHierarchy, treeLayout);
+    // Appliquer le layout une seule fois
+    const layoutResult = treeLayout(rootHierarchy);
 
-    // 2. Seconde passe : ajustement de la position verticale des siblings niveau 0
+    // Grouper les nœuds par niveau
+    const nodesByLevel = {};
+    layoutResult.descendants().forEach(node => {
+        nodesByLevel[node.depth] = nodesByLevel[node.depth] || [];
+        nodesByLevel[node.depth].push(node);
+    });
+
+    
+    
+    // // Centrer chaque niveau
+    // Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
+    //     if (depth > 0) { // Ne pas modifier la racine
+    //         const avgX = d3.mean(levelNodes, n => n.x);
+    //         levelNodes.forEach(node => {
+    //             // Réduire l'écart avec la moyenne du niveau
+    //             // let deviation = node.x - avgX;
+
+    //             let deviation = node.x;
+    //             console.log("depth=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
+    //             let offset = 0;
+
+
+
+    //             // node.x = avgX + (deviation * 0.9) ; // Ajustez le facteur 0.5 pour plus/moins de centrage
+
+    //             // if (depth == 3) {
+    //             //     node.x  = node.x - 200;
+    //             //     console.log("DEPTH******=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
+    //             // }
+    //             // if (depth == 4) {
+    //             //     node.x  = node.x - 400;
+    //             //     console.log("DEPTH******=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
+    //             // }
+
+    //         });
+    //     }
+    // });
+
+
+
+    // Structure pour mémoriser les infos par niveau
+    const levelMetrics = {};
+
+    // Première passe : collecte des métriques
+    Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
+        if (depth > 0) {
+            const positions = levelNodes.map(node => node.x);
+            levelMetrics[depth] = {
+                count: levelNodes.length,
+                minPos: Math.min(...positions),
+                maxPos: Math.max(...positions),
+                avgPos: d3.mean(positions)
+            };
+
+            levelNodes.forEach(node => {
+                // Garder les positions originales pour la deuxième passe
+                node.originalX = node.x;
+            });
+        }
+    });
+
+
+    // Afficher les métriques dans la console
+    // console.log("Métriques par niveau :");
+    // Object.entries(levelMetrics).forEach(([depth, metrics]) => {
+    //     console.log(`Niveau ${depth}:`, {
+    //         "Nombre de nœuds": metrics.count,
+    //         "Position min": metrics.minPos.toFixed(2),
+    //         "Position max": metrics.maxPos.toFixed(2),
+    //         "Position moyenne": metrics.avgPos.toFixed(2),
+    //         "Hauteur totale": (metrics.maxPos - metrics.minPos).toFixed(2)
+    //     });
+    // });
+
+
+    // Deuxième passe : ajustement des positions
+    Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
+        if (depth > 0) {
+            const metrics = levelMetrics[depth];
+            let offset = 0;
+            // if (metrics.minPos > 0) { offset = - metrics.minPos -state.boxHeight }
+            // offset = -(metrics.maxPos - metrics.minPos)/2- metrics.minPos; // -state.boxHeight 
+            // levelNodes.forEach(node => {
+            //     // TODO: Utiliser metrics pour ajuster node.x
+            //     // Pour l'instant, on garde le même comportement
+            //     // const deviation = node.originalX - metrics.avgPos;
+            //     // node.x = metrics.avgPos + (deviation * 0.5);
+
+            //     node.x = node.x + offset
+
+            // });
+        }
+    });
+
+
+
+    // Utiliser layoutResult pour tous les dessins
+    drawLinks(mainGroup, layoutResult);
+    drawSiblingLinks(mainGroup, layoutResult);
+    drawNodes(mainGroup, layoutResult);
     adjustLevel0SiblingsPosition(mainGroup);
-    // adjustRootSpousesPosition(mainGroup);
-
-    // 3. Troisième passe : dessin des liens pour les siblings niveau 0
-    drawLevel0SiblingLinks(mainGroup, rootHierarchy);
+    drawLevel0SiblingLinks(mainGroup, layoutResult);
 
     setupZoom(svg, mainGroup);
 }
-
-
 /**
  * Ajuste la position des siblings de niveau 0 pour les rapprocher de la racine
  * @private
@@ -66,7 +184,7 @@ function adjustLevel0SiblingsPosition(mainGroup) {
     }    
 
     const rootY = parseFloat(match[2]);
-    console.log("Position Y racine:", rootY);
+    // console.log("Position Y racine:", rootY);
 
     // Collecter tous les siblings niveau 0
     const level0Siblings = [];
@@ -164,7 +282,7 @@ function adjustLevel0SiblingsPosition(mainGroup) {
         
 //         // Boutons statiques pour descendants/ascendants
 //         if (shouldShowDescendantsButton(spouseData)) {
-//             addStaticDescendantsButton(spouseGroup);
+//             addSiblingDescendantsButton(spouseGroup);
 //         }
 //         if (shouldShowAncestorsButton(spouseData)) {
 //             addStaticAncestorsButton(spouseGroup);
@@ -227,7 +345,6 @@ function drawLevel0SiblingLinks(mainGroup, rootHierarchy) {
 }
 
 
-
 /**
  * Configure le SVG initial
  * @private
@@ -277,11 +394,23 @@ function createMainGroup(svg) {
  * Dessine les liens entre les nœuds
  * @private
  */
-function drawLinks(group, root, treeLayout) {
-    const nodes = treeLayout(root);
+// function drawLinks(group, root, treeLayout) {
+//     const nodes = treeLayout(root);
     
+//     group.selectAll(".link")
+//         .data(root.links())
+//         .join("path")
+//         .attr("class", d => {
+//             if (!d.source?.data || !d.target?.data) return "link hidden";
+//             if (d.source.data._isDescendantLink) return "link hidden";
+//             if (d.target.data.isSibling) return "link hidden";
+//             return "link";
+//         })
+//         .attr("d", createLinkPath);
+// }
+function drawLinks(group, layout) {
     group.selectAll(".link")
-        .data(root.links())
+        .data(layout.links())
         .join("path")
         .attr("class", d => {
             if (!d.source?.data || !d.target?.data) return "link hidden";

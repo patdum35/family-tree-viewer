@@ -189,12 +189,6 @@ function updateBoxWidth() {
 
 // Export des variables et fonctions nécessaires
 export {
-    // globalGedcomData,
-    // globalRootPersonId,
-    // currentTree,
-    // nombre_prenoms,
-    // nombre_generation,
-    // boxWidth,
     displayPersonDetails,
     closePersonDetails,
     setAsRootPerson,

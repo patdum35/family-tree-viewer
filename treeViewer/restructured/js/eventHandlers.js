@@ -124,6 +124,21 @@ export function updatePrenoms(value) {
 export function updateGenerations(value) {
     state.nombre_generation = value;
     displayGenealogicTree();
+    // Recentrer l'arbre
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+    
+    if (zoom) {
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, 
+                d3.zoomIdentity
+                    .translate(state.boxWidth, height / 2)
+                    .scale(0.8)
+            );
+    }
+
 }
 
 /**

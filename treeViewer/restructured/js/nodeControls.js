@@ -1,9 +1,9 @@
 // ====================================
 // Contrôles et interactions
 // ====================================
-import { findDescendants } from './treeOperations.js';
+import { findDescendants, findSiblings, findGenealogicalParent, processParents } from './treeOperations.js';
 import { extractYear } from './utils.js';
-import { drawTree, getZoom } from './treeRenderer.js';
+import { drawTree, getZoom, getLastTransform  } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
 
 /**
@@ -47,8 +47,6 @@ export function handleRootChange(event, d) {
             );
     }
 }
-
-
 
 /**
  * Gère les descendants des nœuds non-racine
@@ -95,22 +93,18 @@ function handleNonRootDescendants(d) {
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
 export function addDescendantsControls(nodeGroups) {
-    // Bouton statique pour les siblings
-    addStaticDescendantsButton(nodeGroups);
+    // Bouton pour les siblings
+    addSiblingDescendantsButton(nodeGroups);
     
     // Bouton interactif pour les autres nœuds
     addInteractiveDescendantsButton(nodeGroups);
 }
 
 /**
-* Ajoute un bouton "+" statique vert à gauche des siblings ayant des descendants.
-* Ce bouton est purement indicatif et n'a pas d'action associée.
-* À ne pas confondre avec addInteractiveDescendantsButton qui gère les boutons interactifs
-* pour les nœuds standards.
- * 
+* Ajoute un bouton "+"  vert à gauche des siblings ayant des descendants.
  * @private
  */
-function addStaticDescendantsButton(nodeGroups) {
+function addSiblingDescendantsButton(nodeGroups) {
     nodeGroups.append("text")
         .filter(d => {
             if (!d.data.isSibling) return false;
@@ -127,10 +121,10 @@ function addStaticDescendantsButton(nodeGroups) {
         .style("font-size", "20px")
         .style("fill", "#4CAF50")
         .text("+")
-        .on("click", event => event.stopPropagation());
+        // .on("click", event => event.stopPropagation());
+        // .on("click", handleRootChange);
+        .on("click", handleDescendantsClick);
 }
-
-
 
 /**
  * Ajoute un bouton interactif pour les descendants des autres nœuds
@@ -157,7 +151,6 @@ function addInteractiveDescendantsButton(nodeGroups) {
         .on("click", handleDescendantsClick);
 }
 
-
 /**
  * Obtient le texte du bouton des descendants
  * @private
@@ -182,7 +175,7 @@ function getDescendantsButtonText(d) {
 function handleDescendantsClick(event, d) {
     event.stopPropagation();
     
-    if (d.depth === 0) {
+    if ((d.depth === 0) || (d.data.isSibling)){
         handleRootDescendants(d);
     } else {
         handleNonRootDescendants(d);
@@ -193,32 +186,132 @@ function handleDescendantsClick(event, d) {
  * Gère les descendants de la racine
  * @private
  */
-function handleRootDescendants(d) {
-    const descendants = findDescendants(d.data.id);
+function handleRootDescendants(d) {     
+    const descendants = findDescendants(d.data.id);     
     const closestDescendant = findClosestDescendant(descendants, d.data.id);
     
     if (closestDescendant) {
-        updateRootToClosestDescendant(closestDescendant);
-    }
+        // S'assurer que nombre_generation est un nombre
+        if (typeof state.nombre_generation === 'string') {
+            state.nombre_generation = parseInt(state.nombre_generation, 10);
+        }
+        
+        // Incrémenter avec vérification
+        const newGenerations = Math.min(state.nombre_generation + 1, 101); // Maximum de 101
+        
+
+        state.nombre_generation = newGenerations;
+
+        // Mettre à jour le sélecteur avec vérifications
+        const generationsSelect = document.getElementById('generations');
+        if (generationsSelect) {
+            // Vérifier que la valeur existe dans le sélecteur
+            const optionExists = Array.from(generationsSelect.options)
+                .some(option => parseInt(option.value) === newGenerations);
+            
+            if (optionExists) {
+                generationsSelect.value = newGenerations.toString();
+            }
+        }
+
+        updateRootToClosestDescendant(closestDescendant);     
+
+        // Recentrer l'arbre comme à l'initialisation
+        const svg = d3.select("#tree-svg");
+        const height = window.innerHeight;
+        const zoom = getZoom();
+        
+        if (zoom) {
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, 
+                    d3.zoomIdentity
+                        .translate(state.boxWidth, height / 2)
+                        .scale(0.8)
+                );
+        }
+
+
+    } 
 }
 
 /**
- * Trouve le descendant le plus proche
+ * Trouve le descendant le plus proche, avec le même nom, ou le nom de l'épou(x)(se) , ou le plus agé
  * @private
  */
 function findClosestDescendant(descendants, parentId) {
-    return descendants
-        .filter(desc => {
-            const person = state.gedcomData.individuals[desc.id];
-            return person.birthDate;
-        })
-        .sort((a, b) => {
-            const yearA = parseInt(extractYear(state.gedcomData.individuals[a.id].birthDate));
-            const yearB = parseInt(extractYear(state.gedcomData.individuals[b.id].birthDate));
-            const parentYear = parseInt(extractYear(state.gedcomData.individuals[parentId].birthDate));
-            return Math.abs(yearA - parentYear) - Math.abs(yearB - parentYear);
-        })[0];
+    if (!descendants || !parentId || descendants.length === 0) {
+        return null;
+    }
+
+    const parentPerson = state.gedcomData.individuals[parentId];
+    if (!parentPerson) {
+        return null;
+    }
+
+    // Obtenir le nom de famille de la personne A
+    const parentNameMatch = parentPerson.name ? parentPerson.name.match(/\/(.+?)\//) : null;
+    const parentFamilyName = parentNameMatch ? parentNameMatch[1].trim().toUpperCase() : '';
+
+    // Obtenir le nom de famille du conjoint B
+    let spouseFamilyName = '';
+    if (parentPerson.spouseFamilies) {
+        for (const famId of parentPerson.spouseFamilies) {
+            const family = state.gedcomData.families[famId];
+            if (family) {
+                const spouseId = family.husband === parentId ? family.wife : family.husband;
+                if (spouseId) {
+                    const spouse = state.gedcomData.individuals[spouseId];
+                    if (spouse && spouse.name) {
+                        const spouseNameMatch = spouse.name.match(/\/(.+?)\//);
+                        if (spouseNameMatch) {
+                            spouseFamilyName = spouseNameMatch[1].trim().toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Filtrer les descendants ayant l'un des deux noms de famille
+    const validDescendants = descendants.filter(desc => {
+        const person = state.gedcomData.individuals[desc.id];
+        if (!person || !person.name) {
+            return false;
+        }
+
+        const descNameMatch = person.name.match(/\/(.+?)\//);
+        const descFamilyName = descNameMatch ? descNameMatch[1].trim().toUpperCase() : '';
+
+        const isValidName = descFamilyName === parentFamilyName || 
+                           descFamilyName === spouseFamilyName;
+
+        return isValidName && person.birthDate;
+    });
+
+    // Parmi les descendants valides, prendre le plus âgé
+    if (validDescendants.length === 0) {
+        const fallbackPerson = descendants[0];
+        return fallbackPerson;
+    }
+
+    const result = validDescendants.sort((a, b) => {
+        const yearA = safeParseYear(state.gedcomData.individuals[a.id].birthDate) || 9999;
+        const yearB = safeParseYear(state.gedcomData.individuals[b.id].birthDate) || 9999;
+        return yearA - yearB;  // Tri croissant par année de naissance
+    })[0];
+
+    return result;
 }
+
+function safeParseYear(dateStr) {
+    if (!dateStr) return null;
+    const year = parseInt(extractYear(dateStr));
+    return isNaN(year) ? null : year;
+}
+
+
 
 /**
  * Met à jour la racine avec le descendant le plus proche
@@ -244,7 +337,10 @@ function updateRootToClosestDescendant(descendant) {
  */
 export function addAncestorsControls(nodeGroups) {
     nodeGroups.append("text")
-        .filter(shouldShowAncestorsButton)
+        .filter(function(d) {
+            d.ShowAncestorsButton = shouldShowAncestorsButton(d);
+            return d.ShowAncestorsButton;
+        })
         .attr("class", "toggle-text")
         .attr("x", state.boxWidth/2 + 9)
         .attr("y", -state.boxHeight/2 + 15)
@@ -252,72 +348,322 @@ export function addAncestorsControls(nodeGroups) {
         .style("cursor", "pointer")
         .style("font-size", "20px")
         .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
-        .text(d => d.data.children?.length ? "-" : "+")
+        .text(function(d) {
+            // if (d.depth < 3 )
+            // {
+            //         console.log(" DEBUG addAncestorsControls:", d.data.id, d.data.name, d.data.genealogicalParentId, "depth:", d.depth, ", hasRealParents=", d.ShowAncestorsButton, "hasVisibleParent=", hasVisibleGenealogicalParents(d)); 
+            // };
+            return d.ShowAncestorsButton && hasVisibleGenealogicalParents(d) ? "-" : "+" 
+        } )
         .on("click", handleAncestorsClick);
 }
+
 
 /**
  * Vérifie si le bouton des ancêtres doit être affiché
  * @private
  */
 function shouldShowAncestorsButton(d) {
-    if (d.data.children?.length) return true;
-    if (d.depth === (state.nombre_generation-1) || d.data.hasParents) {
-        const person = state.gedcomData.individuals[d.data.id];
-        return person.families.some(famId => {
-            const family = state.gedcomData.families[famId];
-            return family && (family.husband || family.wife);
-        });
+
+    // Pour tous les niveaux, vérifier la présence réelle de parents
+    // le bouton "+/-" doit être affiché si le noeud à des parents généalogiques  (génération suivante) présents dans le gedcom
+    const person = state.gedcomData.individuals[d.data.id];
+    const hasRealParents = person.families.some(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children && family.children.includes(person.id) &&
+               (family.husband || family.wife);
+    });
+    return (hasRealParents);
+}
+
+
+/**
+ * Vérifie si le noeud à des parents généalogiques (génération suivante) affichés dans l'arbre d3
+ * @private
+ */
+function hasVisibleGenealogicalParents(d) {
+    const person = state.gedcomData.individuals[d.data.id];
+    // Récupérer l'arbre hiérarchique complet
+    const rootHierarchy = d3.hierarchy(state.currentTree);
+
+    // Trouver les parents généalogiques dans la génération suivante
+    const hasVisibleParent = rootHierarchy.descendants().some(node => 
+        node.depth === d.depth + 1 &&  // Génération suivante
+        node.data.id === d.data.genealogicalParentId //&&  // Correspond au parent généalogique
+    );
+    return (hasVisibleParent);
+}
+
+
+/**
+ * Met à jour le compteur de générations et incrémente sa valeur
+ * Limite le nombre maximum de générations à 101
+ */
+function updateGenerationCount() {
+    if (typeof state.nombre_generation === 'string') {
+        state.nombre_generation = parseInt(state.nombre_generation, 10);
     }
-    return d.data._hiddenChildren?.length;
+    const newGenerations = Math.min(state.nombre_generation + 1, 101);
+    state.nombre_generation = newGenerations;
+
+    updateGenerationSelector(newGenerations);
 }
 
 /**
- * Gère le clic sur le bouton des ancêtres
- * @private
+ * Met à jour le sélecteur de générations dans l'interface
+ * @param {number} value - Nouvelle valeur pour le nombre de générations
+ */
+function updateGenerationSelector(value) {
+    const generationsSelect = document.getElementById('generations');
+    if (generationsSelect) {
+        const optionExists = Array.from(generationsSelect.options)
+            .some(option => parseInt(option.value) === value);
+        if (optionExists) {
+            generationsSelect.value = value.toString();
+        }
+    }
+}
+
+/**
+ * Gère le décalage horizontal de l'arbre si les nœuds sont trop proches du bord droit
+ * Applique une transition animée si nécessaire
+ */
+function handleTreeShift() {
+    const svg = d3.select("#tree-svg");
+    const lastTransform = getLastTransform() || d3.zoomIdentity;
+    const zoom = getZoom();
+    const screenWidth = window.innerWidth;
+    
+    // Trouver les nœuds du niveau le plus profond
+    const nodes = d3.selectAll(".node").nodes();
+    const rightmostNode = nodes.reduce((rightmost, node) => {
+        const rect = node.getBoundingClientRect();
+        if (!rightmost || rect.right > rightmost.right) {
+            return rect;
+        }
+        return rightmost;
+    }, null);
+
+    if (rightmostNode) {
+        const margin = 100;
+        console.log("Position droite:", rightmostNode.right, "Écran:", screenWidth - margin);
+
+        if (rightmostNode.right > (screenWidth - margin)) {
+            const shiftAmount = state.boxWidth * 1.3;
+            
+            if (zoom) {
+                svg.transition()
+                    .duration(750)
+                    .call(zoom.transform, 
+                        lastTransform.translate(-shiftAmount, 0)
+                    );
+            }
+        }
+    }
+}
+
+/**
+ * Gère l'ajout ou la suppression des ancêtres pour un nœud sibling
+ * @param {Array} siblingsReference - Référence au nœud sibling
+ * @returns {boolean} - Indique si de nouveaux ancêtres ont été ajoutés
+ */
+function handleSiblingAncestors(siblingsReference) {
+    let newAncestorsAdded = false;
+
+    if (siblingsReference[0].children?.length) {
+        siblingsReference[0]._hiddenChildren = siblingsReference[0].children;
+        siblingsReference[0].children = [];
+    } else {
+        if (siblingsReference[0]._hiddenChildren) {
+            restoreHiddenChildren(siblingsReference[0]);
+            newAncestorsAdded = true;
+        } else {
+            buildNewAncestors(siblingsReference[0]);
+            updateGenerationCount();
+            newAncestorsAdded = true;
+        }
+    }
+
+    return newAncestorsAdded;
+}
+
+/**
+ * Gère l'ajout ou la suppression des ancêtres pour un nœud normal
+ * @param {Object} node - Le nœud à traiter
+ * @returns {boolean} - Indique si de nouveaux ancêtres ont été ajoutés
+ */
+function handleNormalAncestors(node) {
+    let newAncestorsAdded = false;
+
+    if (node.children?.length) {
+        node._hiddenChildren = node.children;
+        node.children = [];
+    } else {
+        if (node._hiddenChildren) {
+            restoreHiddenChildren(node);
+            newAncestorsAdded = true;
+        } else {
+            buildNewAncestors(node);
+            updateGenerationCount();
+            newAncestorsAdded = true;
+        }
+    }
+
+    return newAncestorsAdded;
+}
+
+/**
+ * Fonction principale de gestion du clic sur le bouton des ancêtres
+ * Gère l'ajout/suppression des ancêtres et le décalage de l'arbre si nécessaire
+ * @param {Event} event - L'événement de clic
+ * @param {Object} d - Les données du nœud cliqué
  */
 function handleAncestorsClick(event, d) {
     event.stopPropagation();
-    
-    if (d.data.children?.length) {
-        d.data._hiddenChildren = d.data.children;
-        d.data.children = [];
+    let newAncestorsAdded = false;
+
+    if (d.data.isSibling) {
+        const siblingsReference = d.parent.data.children.filter(child => 
+            child.id == d.data.siblingReferenceId && child !== d.data
+        );
+        newAncestorsAdded = handleSiblingAncestors(siblingsReference);
     } else {
-        if (d.data._hiddenChildren) {
-            restoreHiddenChildren(d);
-        } else {
-            buildNewAncestors(d);
-        }
+        newAncestorsAdded = handleNormalAncestors(d.data);
     }
-    
+
     drawTree();
+
+    if (newAncestorsAdded) {
+        handleTreeShift();
+    }
 }
+
+
 
 /**
  * Restaure les enfants cachés
  * @private
  */
-function restoreHiddenChildren(d) {
-    d.data.children = d.data._hiddenChildren;
-    d.data._hiddenChildren = null;
+function restoreHiddenChildren(ddata) {
+    ddata.children = ddata._hiddenChildren;
+    ddata._hiddenChildren = null;
 }
 
 /**
  * Construit de nouveaux ancêtres
  * @private
  */
-function buildNewAncestors(d) {
-    const person = state.gedcomData.individuals[d.data.id];
+function buildNewAncestors(ddata) {
+    const person = state.gedcomData.individuals[ddata.id];
+    ddata.children = [];
+   
+
+    // console.log("debug buildNewAncestors for this node :",ddata.id,ddata.name);
+
     person.families.some(famId => {
         const family = state.gedcomData.families[famId];
         if (family) {
-            d.data.children = [];
-            addParentToChildren(family.husband, 'father', d);
-            addParentToChildren(family.wife, 'mother', d);
+            // Ajouter les parents directement
+            if (family.husband) {
+                const father = state.gedcomData.individuals[family.husband];
+                const familiesWithChildren = state.gedcomData.individuals[family.husband].families.filter(famId => {
+                    const family = state.gedcomData.families[famId];
+                    return family && family.children;
+                });
+                const genealogicalParentId = findGenealogicalParent(family.husband, familiesWithChildren);
+                const fatherSiblings = findSiblings(family.husband);
+                // console.log("debug buildNewAncestors fatherSiblings for this node :", family.husband,father.id, father.name, genealogicalParentId).
+                addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParentId);
+                addOtherSpouses(family.husband, family.wife, ddata);
+                ddata.children.push({
+                    id: family.husband,
+                    name: father.name,
+                    generation: ddata.generation + 1,
+                    children: [],
+                    birthDate: father.birthDate,
+                    deathDate: father.deathDate,
+                    hasParents: true,
+                    genealogicalParentId: genealogicalParentId
+                });
+
+
+            }
+
+            if (family.wife) {
+                const mother = state.gedcomData.individuals[family.wife];
+                const familiesWithChildren = state.gedcomData.individuals[family.wife].families.filter(famId => {
+                    const family = state.gedcomData.families[famId];
+                    return family && family.children;
+                });
+                const genealogicalParentId = findGenealogicalParent(family.wife, familiesWithChildren);
+                const motherSiblings = findSiblings(family.wife);
+                // console.log("debug buildNewAncestors motherSiblings for this node :", family.wife, motherSiblings);
+                addSiblingsToNode(motherSiblings, ddata, family.wife, genealogicalParentId);
+                addOtherSpouses(family.wife, family.husband, ddata);
+                ddata.children.push({
+                    id: family.wife,
+                    name: mother.name,
+                    generation: ddata.generation + 1,
+                    children: [],
+                    birthDate: mother.birthDate,
+                    deathDate: mother.deathDate,
+                    hasParents: true,
+                    genealogicalParentId: genealogicalParentId
+                });
+
+
+            }
             return true;
         }
         return false;
     });
+}
+
+
+// Fonction utilitaire pour ajouter les siblings à un nœud
+function addSiblingsToNode(siblings, node, parentId, genealogicalParentId) {
+
+
+    // console.log("debug addSiblingsToNode for a sibling node =",node.id,node.name, ", genealogicalParentId=", genealogicalParentId, state.gedcomData.individuals[genealogicalParentId],  ", parentId =", parentId, state.gedcomData.individuals[parentId].name);
+
+
+    siblings.forEach(siblingId => {
+        const sibling = state.gedcomData.individuals[siblingId];
+        node.children.push({
+            id: siblingId,
+            name: sibling.name,
+            generation: node.generation + 1,
+            isSibling: true,
+            children: [],
+            birthDate: sibling.birthDate,
+            deathDate: sibling.deathDate,
+            genealogicalParentId: genealogicalParentId,
+            siblingReferenceId: parentId
+        });
+    });
+}
+
+// Fonction utilitaire pour ajouter les autres conjoints
+function addOtherSpouses(personId, excludeSpouseId, node) {
+    const person = state.gedcomData.individuals[personId];
+    if (person.spouseFamilies) {
+        person.spouseFamilies.forEach(spouseFamId => {
+            const spouseFamily = state.gedcomData.families[spouseFamId];
+            const spouseId = spouseFamily.husband === personId ? spouseFamily.wife : spouseFamily.husband;
+            if (spouseId && spouseId !== excludeSpouseId) {
+                const spouse = state.gedcomData.individuals[spouseId];
+                node.children.push({
+                    id: spouseId,
+                    name: spouse.name,
+                    generation: node.generation + 1,
+                    isSpouse: true,
+                    children: [],
+                    birthDate: spouse.birthDate,
+                    deathDate: spouse.deathDate
+                });
+            }
+        });
+    }
 }
 
 /**
