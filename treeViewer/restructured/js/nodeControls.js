@@ -29,7 +29,18 @@ export function addRootChangeButton(nodeGroups) {
  */
 export function handleRootChange(event, d) {
     if (!event || !d) return;
+
     
+    // Mettre à jour le sélecteur root-person-results
+    const rootPersonResults = document.getElementById('root-person-results');
+    if (rootPersonResults) {
+        rootPersonResults.innerHTML = '';
+        const option = document.createElement('option');
+        option.value = d.data.id;
+        option.textContent = d.data.name.replace(/\//g, '').trim();
+        rootPersonResults.appendChild(option);
+    }
+
     event.stopPropagation();
     displayGenealogicTree(d.data.id); 
 
@@ -38,14 +49,18 @@ export function handleRootChange(event, d) {
     const zoom = getZoom();
     
     if (zoom) {
+        let transform = d3.zoomIdentity;
+        if (state.treeMode === 'descendants') {
+            transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
+        } else {
+            transform = transform.translate(state.boxWidth, height / 2);
+        }
+        transform = transform.scale(0.8);
+
         svg.transition()
             .duration(750)
-            .call(zoom.transform, 
-                d3.zoomIdentity
-                    .translate(state.boxWidth, height / 2)
-                    .scale(0.8)
-            );
-    }
+            .call(zoom.transform, transform);
+    }    
 }
 
 /**
@@ -446,7 +461,7 @@ function handleTreeShift() {
 
     if (rightmostNode) {
         const margin = 100;
-        console.log("Position droite:", rightmostNode.right, "Écran:", screenWidth - margin);
+        // console.log("Position droite:", rightmostNode.right, "Écran:", screenWidth - margin);
 
         if (rightmostNode.right > (screenWidth - margin)) {
             const shiftAmount = state.boxWidth * 1.3;

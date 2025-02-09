@@ -2,10 +2,9 @@
 // Configuration et initialisation
 // ====================================
 import { parseGEDCOM } from './gedcomParser.js';
-import { initializeEventHandlers } from './eventHandlers.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson } from './utils.js';
-import { buildAncestorTree } from './treeOperations.js';
+import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -13,15 +12,12 @@ import {
     closeModal
 } from './modalWindow.js';
 import {
-    handleWindowResize,
-    handleModalClick,
-    handleSearchKeydown,
-    searchRootPerson,
-    selectRootPerson,
+    initializeEventHandlers,
     updatePrenoms,
     updateGenerations,
     zoomIn,
     zoomOut,
+    resetView,
     resetZoom,
     searchTree
 } from './eventHandlers.js';
@@ -33,7 +29,8 @@ export const state = {
     nombre_prenoms: 2,
     nombre_generation: 6,
     boxWidth: 150,
-    boxHeight: 50
+    boxHeight: 50,
+    treeMode: 'ancestors' // ou 'descendants'
 };
 /**
  * Initialise l'application
@@ -150,10 +147,17 @@ async function loadFileContent(file) {
  * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
  */
 export function displayGenealogicTree(rootPersonId = null, isInit = false) {
-    state.rootPersonId = rootPersonId || state.rootPersonId;
-    const person = state.rootPersonId 
-        ? state.gedcomData.individuals[state.rootPersonId] 
-        : findYoungestPerson();
+
+    // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
+    const person = rootPersonId 
+        ? state.gedcomData.individuals[rootPersonId]
+        : state.rootPersonId 
+            ? state.gedcomData.individuals[state.rootPersonId]
+            : findYoungestPerson();
+
+    // Important : toujours sauvegarder l'ID de la personne courante
+    state.rootPersonId = rootPersonId || person.id;
+
 
     // Si c'est l'initialisation, configurer le sélecteur de personne racine
     if (isInit) {
@@ -172,9 +176,18 @@ export function displayGenealogicTree(rootPersonId = null, isInit = false) {
 
     updateBoxWidth();
     
-    state.currentTree = buildAncestorTree(person.id);
+    // Construire l'arbre selon le mode
+    state.currentTree = state.treeMode === 'descendants' 
+        ? buildDescendantTree(person.id)
+        : buildAncestorTree(person.id);
+
+
     drawTree();
+
+    resetView();    
+
 }
+
 
 /**
  * Met à jour la largeur des boîtes en fonction du nombre de prénoms
@@ -186,6 +199,18 @@ function updateBoxWidth() {
     }
     state.boxWidth = state.nombre_prenoms === 1 ? 90 : 120;
 }
+
+
+/**
+ * Met à jour le mode d'affichage de l'arbre (ascendants/descendants)
+ * et redessine l'arbre avec le nouveau mode
+ * @param {string} mode - Le mode d'affichage ('ancestors' ou 'descendants')
+ */
+export function updateTreeMode(mode) {
+    state.treeMode = mode;
+    displayGenealogicTree(null, false);
+}
+
 
 // Export des variables et fonctions nécessaires
 export {

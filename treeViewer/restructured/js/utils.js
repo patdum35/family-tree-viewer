@@ -65,6 +65,22 @@ export function findYoungestPerson() {
     return youngest;
 }
 
+
+// /**
+//  * Vérifie si une personne a des descendants
+//  * @param {string} personId - ID de la personne à vérifier
+//  * @returns {boolean} - true si la personne a des descendants
+//  */
+// export function hasDescendants(personId) {
+//     const person = state.gedcomData.individuals[personId];
+//     if (!person || !person.spouseFamilies) return false;
+
+//     return person.spouseFamilies.some(famId => {
+//         const family = state.gedcomData.families[famId];
+//         return family && family.children && family.children.length > 0;
+//     });
+// }
+
 /**
  * Formate du texte pour l'affichage
  * @param {string} text - Le texte à formater

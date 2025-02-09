@@ -1,10 +1,8 @@
 // ====================================
 // Gestionnaires d'événements
 // ====================================
-import { drawTree } from './treeRenderer.js';
 import { getZoom } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
-import { findYoungestPerson } from './utils.js';
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -114,93 +112,86 @@ export function selectRootPerson() {
  * Gère les mises à jour du nombre de prénoms
  */
 export function updatePrenoms(value) {
-    state.nombre_prenoms = value;
-    displayGenealogicTree();
+    state.nombre_prenoms = parseInt(value);
+    displayGenealogicTree(null, false);
 }
 
 /**
  * Gère les mises à jour du nombre de générations
  */
 export function updateGenerations(value) {
-    state.nombre_generation = value;
-    displayGenealogicTree();
-    // Recentrer l'arbre
-    const svg = d3.select("#tree-svg");
-    const height = window.innerHeight;
-    const zoom = getZoom();
-    
-    if (zoom) {
-        svg.transition()
-            .duration(750)
-            .call(zoom.transform, 
-                d3.zoomIdentity
-                    .translate(state.boxWidth, height / 2)
-                    .scale(0.8)
-            );
-    }
-
+    state.nombre_generation = parseInt(value);
+    displayGenealogicTree(null, false);
 }
+
 
 /**
  * Gère le zoom avant
  */
 export function zoomIn() {
     const svg = d3.select("#tree-svg");
-    const currentTransform = d3.zoomTransform(svg.node());
-    svg.transition()
-        .duration(750)
-        .call(getZoom().transform, 
-            d3.zoomIdentity
-                .translate(currentTransform.x, currentTransform.y)
-                .scale(currentTransform.k * 1.2)
-        );
+    const zoom = getZoom();
+    if (zoom) {
+        svg.transition()
+            .duration(750)
+            .call(zoom.scaleBy, 1.2);
+    }
 }
+
 
 /**
  * Gère le zoom arrière
  */
 export function zoomOut() {
     const svg = d3.select("#tree-svg");
-    const currentTransform = d3.zoomTransform(svg.node());
-    svg.transition()
-        .duration(750)
-        .call(getZoom().transform, 
-            d3.zoomIdentity
-                .translate(currentTransform.x, currentTransform.y)
-                .scale(currentTransform.k / 1.2)
-        );
+    const zoom = getZoom();
+    if (zoom) {
+        svg.transition()
+            .duration(750)
+            .call(zoom.scaleBy, 0.8);
+    }
+}
+
+
+/**
+ * Réinitialise la vue de l'arbre à sa position par défaut selon le mode
+ * En mode ascendant : arbre aligné à gauche
+ * En mode descendant : arbre aligné à droite
+ * @export
+ */
+export function resetView() {
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+    
+    if (zoom) {
+        let transform = d3.zoomIdentity;
+        if (state.treeMode === 'descendants') {
+            // Pour les descendants, commencer du côté droit
+            transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
+        } else {
+            // Pour les ascendants, commencer du côté gauche
+            transform = transform.translate(state.boxWidth, height / 2);
+        }
+        transform = transform.scale(0.8);
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform);
+    }
 }
 
 /**
- * Réinitialise le zoom et retourne à la personne la plus jeune
+ * Réinitialise le niveau de zoom et la position de l'arbre
+ * à leurs valeurs par défaut selon le mode d'affichage
+ * Utilise une transition animée pour un retour fluide à la vue initiale
+ * @export
  */
 export function resetZoom() {
-    state.rootPersonId = null;
-    const youngest = findYoungestPerson();
-    
-    const rootPersonResults = document.getElementById('root-person-results');
-    rootPersonResults.innerHTML = '';
-
-    const option = document.createElement('option');
-    option.value = youngest.id;
-    option.textContent = youngest.name.replace(/\//g, '').trim();
-    rootPersonResults.appendChild(option);
-
-    rootPersonResults.style.display = 'block';
-    rootPersonResults.addEventListener('change', function() {
-        const selectedPersonId = this.value;
-        displayGenealogicTree(selectedPersonId);
-    });
-        
-    displayGenealogicTree();
-
-    const svg = d3.select("#tree-svg");
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    svg.transition()
-        .duration(750)
-        .call(getZoom().transform, d3.zoomIdentity.translate(state.boxWidth, height / 2).scale(0.8));
+    resetView();
 }
+
+
 
 /**
  * Recherche dans l'arbre

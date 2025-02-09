@@ -2,7 +2,6 @@
 // Rendu de l'arbre
 // ====================================
 import { isNodeHidden } from './utils.js';
-import { drawNodeContent } from './nodeRenderer.js';
 import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
 
@@ -12,33 +11,6 @@ let lastTransform = null;
 /**
  * Initialise et dessine l'arbre
  */
-// export function drawTree() {
-//     if (!state.currentTree) return;
-
-//     const rootHierarchy = d3.hierarchy(state.currentTree);
-//     processSiblings(rootHierarchy);
-//     processSpouses(rootHierarchy);
-
-//     const svg = setupSVG();
-//     const treeLayout = createTreeLayout();
-//     const mainGroup = createMainGroup(svg);
-    
-//     // 1. Première passe : calcul et dessin normal
-//     treeLayout(rootHierarchy);
-//     drawLinks(mainGroup, rootHierarchy, treeLayout);
-//     drawSiblingLinks(mainGroup, rootHierarchy);
-//     drawNodes(mainGroup, rootHierarchy, treeLayout);
-
-//     // 2. Seconde passe : ajustement de la position verticale des siblings niveau 0
-//     adjustLevel0SiblingsPosition(mainGroup);
-//     // adjustRootSpousesPosition(mainGroup);
-
-//     // 3. Troisième passe : dessin des liens pour les siblings niveau 0
-//     drawLevel0SiblingLinks(mainGroup, rootHierarchy);
-
-//     setupZoom(svg, mainGroup);
-// }
-
 export function drawTree() {
     if (!state.currentTree) return;
 
@@ -59,38 +31,6 @@ export function drawTree() {
         nodesByLevel[node.depth] = nodesByLevel[node.depth] || [];
         nodesByLevel[node.depth].push(node);
     });
-
-    
-    
-    // // Centrer chaque niveau
-    // Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
-    //     if (depth > 0) { // Ne pas modifier la racine
-    //         const avgX = d3.mean(levelNodes, n => n.x);
-    //         levelNodes.forEach(node => {
-    //             // Réduire l'écart avec la moyenne du niveau
-    //             // let deviation = node.x - avgX;
-
-    //             let deviation = node.x;
-    //             console.log("depth=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
-    //             let offset = 0;
-
-
-
-    //             // node.x = avgX + (deviation * 0.9) ; // Ajustez le facteur 0.5 pour plus/moins de centrage
-
-    //             // if (depth == 3) {
-    //             //     node.x  = node.x - 200;
-    //             //     console.log("DEPTH******=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
-    //             // }
-    //             // if (depth == 4) {
-    //             //     node.x  = node.x - 400;
-    //             //     console.log("DEPTH******=", depth, " levelNodes=", levelNodes, " deviation=", deviation, "node.x=", node.x );
-    //             // }
-
-    //         });
-    //     }
-    // });
-
 
 
     // Structure pour mémoriser les infos par niveau
@@ -115,19 +55,6 @@ export function drawTree() {
     });
 
 
-    // Afficher les métriques dans la console
-    // console.log("Métriques par niveau :");
-    // Object.entries(levelMetrics).forEach(([depth, metrics]) => {
-    //     console.log(`Niveau ${depth}:`, {
-    //         "Nombre de nœuds": metrics.count,
-    //         "Position min": metrics.minPos.toFixed(2),
-    //         "Position max": metrics.maxPos.toFixed(2),
-    //         "Position moyenne": metrics.avgPos.toFixed(2),
-    //         "Hauteur totale": (metrics.maxPos - metrics.minPos).toFixed(2)
-    //     });
-    // });
-
-
     // Deuxième passe : ajustement des positions
     Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
         if (depth > 0) {
@@ -149,15 +76,23 @@ export function drawTree() {
 
 
 
-    // Utiliser layoutResult pour tous les dessins
+    // Dessiner les liens selon le mode
     drawLinks(mainGroup, layoutResult);
-    drawSiblingLinks(mainGroup, layoutResult);
+    if (state.treeMode === 'descendants') {
+        drawSpouseLinks(mainGroup, layoutResult);
+    } else {
+        drawSiblingLinks(mainGroup, layoutResult);
+        drawLevel0SiblingLinks(mainGroup, layoutResult);
+    }
+
     drawNodes(mainGroup, layoutResult);
-    adjustLevel0SiblingsPosition(mainGroup);
-    drawLevel0SiblingLinks(mainGroup, layoutResult);
+    if (state.treeMode !== 'descendants') {
+        adjustLevel0SiblingsPosition(mainGroup);
+    }
 
     setupZoom(svg, mainGroup);
 }
+
 /**
  * Ajuste la position des siblings de niveau 0 pour les rapprocher de la racine
  * @private
@@ -230,71 +165,6 @@ function adjustLevel0SiblingsPosition(mainGroup) {
 
 
 
-
-// /**
-//  * Ajuste la position des Spouse de niveau 0 pour les rapprocher de la racine
-//  * @private
-//  */
-// function adjustRootSpousesPosition(mainGroup) {
-//     // Trouver la position y de la racine
-//     const rootNode = mainGroup.select(".node").filter(d => d.depth === 0 && !d.data.isSibling);
-//     if (!rootNode.node()) return;
-
-//     const rootTransform = rootNode.attr("transform");
-//     const match = rootTransform.match(/translate\((.*?),(.*?)\)/);
-//     if (!match) return;
-
-//     const rootX = parseFloat(match[1]);
-//     const rootY = parseFloat(match[2]);
-
-//     // Répartir les conjoints sous la racine
-//     const spacing = state.boxHeight * 0.65;
-//     const initialSpacing = state.boxHeight * 1.2;
-
-
-//     rootNode.datum().spouses?.forEach((spouse, index) => {
-//         // Créer le nœud pour le conjoint
-//         const spouseGroup = mainGroup.append("g")
-//             .attr("class", "node spouse")
-//             .attr("transform", `translate(${rootX},${rootY + initialSpacing + spacing * index})`);
-
-//         // Préparer les données comme pour un nœud normal
-//         const spouseData = {
-//             data: spouse,
-//             depth: 0
-//         };
-//         spouseGroup.datum(spouseData);
-
-//             // Rectangle rouge pour le conjoint
-//         spouseGroup.append("rect")
-//             .attr("class", "person-box spouse")
-//             .attr("x", -state.boxWidth/2)
-//             .attr("y", -state.boxHeight/2)
-//             .attr("width", state.boxWidth)
-//             .attr("height", state.boxHeight)
-//             .attr("rx", 5)
-//             .style("fill", "white")
-
-//         drawNodeContent(spouseGroup, spouse);
-
-//         // Réutiliser les fonctions de nodeControls
-//         addRootChangeButton(spouseGroup);
-        
-//         // Boutons statiques pour descendants/ascendants
-//         if (shouldShowDescendantsButton(spouseData)) {
-//             addSiblingDescendantsButton(spouseGroup);
-//         }
-//         if (shouldShowAncestorsButton(spouseData)) {
-//             addStaticAncestorsButton(spouseGroup);
-//         }
-
-//         // Click handler pour détails
-//         spouseGroup.on("click", () => displayPersonDetails(spouse.id));
-
-
-//     });
-// }
-
 /**
  * Dessine les liens en pointillé vert pour les siblings de niveau 0
  * @private
@@ -365,11 +235,32 @@ function setupSVG() {
  * Crée la mise en page de l'arbre
  * @private
  */
+
 function createTreeLayout() {
-    return d3.tree()
-        .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.3])
-        .separation((a, b) => {
-            if (a.data.isSibling || b.data.isSibling) return 0.65;
+    const layout = d3.tree()
+        .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.3]);
+
+    // Inverser la direction pour le mode descendants
+    if (state.treeMode === 'descendants') {
+        layout.nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.3]);
+    }
+
+    layout.separation((a, b) => {
+        if (state.treeMode === 'descendants') {
+            // Pour les couples entrelacés (personne + spouse)
+            if (a.data.isSpouse || b.data.isSpouse) {
+                return 0.8;  // Espacement réduit entre une personne et son spouse
+            }
+            // Entre différentes familles
+            if (a.parent === b.parent) {
+                return 0.8;  // Espacement entre frères/soeurs
+            }
+            return 1.0;  // Espacement entre branches différentes
+        } else {
+            // Mode ascendant : garder la logique existante
+            if (a.data.isSibling || b.data.isSibling) {
+                return 0.65;
+            }
             if (a.depth === (state.nombre_generation-1) && b.depth === (state.nombre_generation-1) && a.parent !== b.parent) {
                 return 0.7;
             }
@@ -378,8 +269,12 @@ function createTreeLayout() {
                 return scale * (a.depth === b.depth ? 1.1 : 1.5);
             }
             return 1;
-        });
+        }
+    });
+
+    return layout;
 }
+
 
 /**
  * Crée le groupe principal pour le contenu
@@ -394,20 +289,6 @@ function createMainGroup(svg) {
  * Dessine les liens entre les nœuds
  * @private
  */
-// function drawLinks(group, root, treeLayout) {
-//     const nodes = treeLayout(root);
-    
-//     group.selectAll(".link")
-//         .data(root.links())
-//         .join("path")
-//         .attr("class", d => {
-//             if (!d.source?.data || !d.target?.data) return "link hidden";
-//             if (d.source.data._isDescendantLink) return "link hidden";
-//             if (d.target.data.isSibling) return "link hidden";
-//             return "link";
-//         })
-//         .attr("d", createLinkPath);
-// }
 function drawLinks(group, layout) {
     group.selectAll(".link")
         .data(layout.links())
@@ -415,11 +296,71 @@ function drawLinks(group, layout) {
         .attr("class", d => {
             if (!d.source?.data || !d.target?.data) return "link hidden";
             if (d.source.data._isDescendantLink) return "link hidden";
+            if (state.treeMode === 'descendants' && d.target.data.isSpouse) return "link hidden";
             if (d.target.data.isSibling) return "link hidden";
             return "link";
         })
         .attr("d", createLinkPath);
 }
+
+/**
+ * Dessine les liens entre les spouses et leurs enfants en mode descendants
+ * @param {Object} group - Le groupe SVG
+ * @param {Object} layout - Le layout de l'arbre
+ */
+function drawSpouseLinks(group, layout) {
+    if (state.treeMode !== 'descendants') return;
+
+    // Collecter tous les liens spouse-enfants
+    const spouseLinks = [];
+    layout.descendants().forEach(node => {
+        if (node.data.isSpouse) {
+            const spouseId = node.data.id;
+            const parent = node.parent;
+            
+            if (parent && parent.children) {
+                const spouseIndex = parent.children.indexOf(node);
+                if (spouseIndex > 0) {
+                    const partner = parent.children[spouseIndex - 1];
+                    
+                    // Trouver la famille commune
+                    const familyId = state.gedcomData.individuals[spouseId].spouseFamilies.find(famId => {
+                        const fam = state.gedcomData.families[famId];
+                        return fam.husband === spouseId ? 
+                               fam.wife === partner.data.id : 
+                               fam.husband === partner.data.id;
+                    });
+
+                    if (familyId) {
+                        const family = state.gedcomData.families[familyId];
+                        if (family && family.children) {
+                            // Trouver les nœuds enfants
+                            const childNodes = layout.descendants().filter(n => 
+                                family.children.includes(n.data.id) && !n.data.isSpouse
+                            );
+                            
+                            // Créer les liens
+                            childNodes.forEach(child => {
+                                spouseLinks.push({
+                                    source: node,
+                                    target: child
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Dessiner les liens
+    group.selectAll(".spouse-child-link")
+        .data(spouseLinks)
+        .join("path")
+        .attr("class", "link spouse-link")
+        .attr("d", createLinkPath);
+}
+
 
 /**
  * Crée le chemin pour un lien
