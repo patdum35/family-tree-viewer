@@ -59,6 +59,10 @@
                 <label for="generations">nbre<br>géné</label>
                 <select id="generations" onchange="updateGenerations(this.value)">
                 </select>
+                <select id="treeMode" onchange="updateTreeMode(this.value)">
+                    <option value="ancestors" selected>Ascendants</option>
+                    <option value="descendants">Descendants</option>
+                </select>`
             </div>
         </div>
 
@@ -88,7 +92,8 @@
             searchTree,
             displayPersonDetails,
             closePersonDetails,
-            setAsRootPerson 
+            setAsRootPerson,
+            updateTreeMode 
         } from './js/main.js';
 
         // Rendre les fonctions disponibles globalement
@@ -102,7 +107,7 @@
         window.displayPersonDetails = displayPersonDetails;
         window.closePersonDetails = closePersonDetails;
         window.setAsRootPerson = setAsRootPerson; 
-
+        window.updateTreeMode = updateTreeMode; 
         // Ajouter les écouteurs d'événements une fois que tout est chargé
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loadDataButton').addEventListener('click', loadData);
