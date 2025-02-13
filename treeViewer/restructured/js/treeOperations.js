@@ -409,4 +409,3 @@ export function processParents(family, node, processed, generation) {
         if (mother) node.children.push(mother);
     }
 }
-

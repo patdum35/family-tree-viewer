@@ -5,7 +5,7 @@ import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, extractYear } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { startAncestorAnimation } from './treeAnimation.js';
+import { startAncestorAnimation, stopAnimation } from './treeAnimation.js';
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -32,7 +32,11 @@ export const state = {
     boxWidth: 150,
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
-    treeModeReal: 'ancestors' // ou 'descendants' ou 'both'
+    treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
+    lastHorizontalPosition: 0,
+    lastVerticalPosition: 0,
+    isSpeechEnabled: true,
+    isAnimationPaused: false
 };
 
 // window.startAnimation = startAncestorAnimation;
@@ -42,6 +46,41 @@ export const state = {
 //         console.error('Erreur dans l\'animation des ancêtres :', error);
 //     });
 // };
+
+
+
+// Fonction pour basculer le son
+export function toggleSpeech() {
+    const speechToggleBtn = document.getElementById('speechToggleBtn');
+    
+    // Basculer l'état du son
+    state.isSpeechEnabled = !state.isSpeechEnabled;
+    
+    // Mettre à jour le bouton
+    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔇' : '🔊';
+}
+
+
+export function toggleAnimationPause() {
+    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    
+    // Basculer l'état de pause
+    state.isAnimationPaused = !state.isAnimationPaused;
+    
+    // Mettre à jour le bouton
+    animationPauseBtn.querySelector('span').textContent = state.isAnimationPaused ? '▶️' : '⏸️';
+    
+    // Si nécessaire, ajouter une logique pour mettre en pause/reprendre l'animation
+    if (state.isAnimationPaused) {
+        // Logique pour mettre en pause l'animation
+        stopAnimation();
+    } else {
+        // Logique pour reprendre l'animation
+        startAncestorAnimation();
+    }
+}
+
+
 
 function initialize() {
     initializeGenerationSelect();

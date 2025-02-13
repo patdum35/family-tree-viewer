@@ -49,7 +49,10 @@ export function parseGEDCOM(gedcomText) {
                     id, 
                     name: "", 
                     birthDate: "", 
+                    birthPlace: "",
                     deathDate: "",
+                    deathPlace: "",
+                    marriagePlace: "",
                     occupation: "",
                     families: [],
                     notes: [],
@@ -75,8 +78,12 @@ export function parseGEDCOM(gedcomText) {
                 currentEntity.name = data;
             } else if (tag === "BIRT") {
                 currentEntity._expectingBirthDate = true;
+                currentEntity._expectingBirthPlace = true;
             } else if (tag === "DEAT") {
                 currentEntity._expectingDeathDate = true;
+                currentEntity._expectingDeathPlace = true;
+            } else if (tag === "MARR") {
+                currentEntity._expectingMarriagePlace = true;
             } else if (tag === "OCCU") {
                 currentEntity.occupation = data;
             } else if (tag === "HUSB" && currentEntity.husband !== undefined) {
@@ -105,6 +112,18 @@ export function parseGEDCOM(gedcomText) {
                 currentEntity.sources.push(sourceId);
             }
         } else if (currentEntity && level === "2") {
+            if (tag === "PLAC") {
+                if (currentEntity._expectingBirthPlace) {
+                    currentEntity.birthPlace = data;
+                    delete currentEntity._expectingBirthPlace;
+                } else if (currentEntity._expectingDeathPlace) {
+                    currentEntity.deathPlace = data;
+                    delete currentEntity._expectingDeathPlace;
+                } else if (currentEntity._expectingMarriagePlace) {
+                    currentEntity.marriagePlace = data;
+                    delete currentEntity._expectingMarriagePlace;
+                }
+            }
             if (tag === "DATE") {
                 if (currentEntity._expectingBirthDate) {
                     currentEntity.birthDate = data;
