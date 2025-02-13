@@ -62,7 +62,8 @@
                 <select id="treeMode" onchange="updateTreeMode(this.value)">
                     <option value="ancestors" selected>Ascendants</option>
                     <option value="descendants">Descendants</option>
-                </select>`
+                    <option value="both">Ascend.+Descend.</option>
+                </select>
             </div>
         </div>
 
@@ -93,7 +94,8 @@
             displayPersonDetails,
             closePersonDetails,
             setAsRootPerson,
-            updateTreeMode 
+            updateTreeMode,
+            handleRootPersonChange   
         } from './js/main.js';
 
         // Rendre les fonctions disponibles globalement
@@ -108,9 +110,12 @@
         window.closePersonDetails = closePersonDetails;
         window.setAsRootPerson = setAsRootPerson; 
         window.updateTreeMode = updateTreeMode; 
+        window.handleRootPersonChange = handleRootPersonChange;
         // Ajouter les écouteurs d'événements une fois que tout est chargé
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loadDataButton').addEventListener('click', loadData);
+            document.getElementById('root-person-results')
+                .addEventListener('change', handleRootPersonChange);
         });
 
     </script>
