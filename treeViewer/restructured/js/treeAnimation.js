@@ -293,7 +293,7 @@ function speakPersonName(personName) {
         
         // Configuration pour une lecture plus rapide
         utterance.lang = 'fr-FR';
-        utterance.rate = 1.3; // Légèrement accéléré
+        utterance.rate = 1.6; // Légèrement accéléré
         utterance.pitch = 1;
 
         // Trouver une voix française
