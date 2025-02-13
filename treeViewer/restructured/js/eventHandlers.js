@@ -3,6 +3,8 @@
 // ====================================
 import { getZoom } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
+import { stopAnimation } from './treeAnimation.js';
+
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -102,7 +104,7 @@ export function selectRootPerson() {
         resultsSelect.style.backgroundColor = 'orange';
 
         state.rootPersonId = selectedPersonId;
-        displayGenealogicTree(selectedPersonId);
+        displayGenealogicTree(selectedPersonId, true);
         
         resultsSelect.style.display = 'block';
     }
@@ -113,7 +115,7 @@ export function selectRootPerson() {
  */
 export function updatePrenoms(value) {
     state.nombre_prenoms = parseInt(value);
-    displayGenealogicTree(null, false);
+    displayGenealogicTree(null, false, false);
 }
 
 /**
@@ -121,8 +123,15 @@ export function updatePrenoms(value) {
  */
 export function updateGenerations(value) {
     state.nombre_generation = parseInt(value);
-    displayGenealogicTree(null, false);
+    displayGenealogicTree(null, true, false);
 }
+
+// export function updateGenerations(value) {
+//     if (value === state.nombre_generation) return; // Éviter le redessinage si même valeur
+//     state.nombre_generation = parseInt(value);
+//     displayGenealogicTree(null, false);
+// }
+
 
 
 /**
@@ -188,9 +197,9 @@ export function resetView() {
  * @export
  */
 export function resetZoom() {
+    stopAnimation();
     resetView();
 }
-
 
 
 /**

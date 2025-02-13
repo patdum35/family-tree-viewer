@@ -4,6 +4,7 @@
 import { isNodeHidden } from './utils.js';
 import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
+import { resetView } from './eventHandlers.js';
 
 let zoom;
 let lastTransform = null;
@@ -11,10 +12,20 @@ let lastTransform = null;
 /**
  * Initialise et dessine l'arbre
  */
-export function drawTree() {
+export function drawTree( isZoomRefresh = false ) {
     if (!state.currentTree) return;
 
-    const rootHierarchy = d3.hierarchy(state.currentTree);
+    
+     // Mode both : on crée deux arbres distincts
+     if (state.treeModeReal  === 'both') {
+        drawBothModeTree(isZoomRefresh);
+        return;
+    }
+
+    // Logique existante pour les modes descendants et ascendants
+    const rootHierarchy = d3.hierarchy(state.currentTree, node => node.children);   
+    
+ 
     processSiblings(rootHierarchy);
     processSpouses(rootHierarchy);
 
@@ -75,23 +86,188 @@ export function drawTree() {
     });
 
 
+    drawNodes(mainGroup, layoutResult, isZoomRefresh);
+
+
 
     // Dessiner les liens selon le mode
     drawLinks(mainGroup, layoutResult);
-    if (state.treeMode === 'descendants') {
+ 
+ 
+    if (state.treeModeReal  !== 'descendants') {
+        adjustLevel0SiblingsPosition(mainGroup);
+    }
+ 
+    if (state.treeModeReal  === 'descendants') {
         drawSpouseLinks(mainGroup, layoutResult);
     } else {
         drawSiblingLinks(mainGroup, layoutResult);
         drawLevel0SiblingLinks(mainGroup, layoutResult);
     }
 
-    drawNodes(mainGroup, layoutResult);
-    if (state.treeMode !== 'descendants') {
-        adjustLevel0SiblingsPosition(mainGroup);
-    }
+
+
 
     setupZoom(svg, mainGroup);
 }
+
+
+function drawBothModeTree(isZoomRefresh = false) {
+    const rootPerson = state.currentTree;
+    const descendants = rootPerson.descendants || [];
+    const ancestors = rootPerson.ancestors || [];
+
+    const svg = setupSVG();
+    
+    // Création et application du layout pour l'arbre descendant
+    const descendantsHierarchy = d3.hierarchy({
+        id: rootPerson.id,
+        name: rootPerson.name,
+        children: descendants
+    });
+    
+    
+    
+
+    const descendantsTreeLayout = d3.tree()
+        .nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.4])
+        .separation((a, b) => {
+            if (a.data.isSpouse || b.data.isSpouse) {
+                return 0.8;
+            }
+            if (a.parent === b.parent) {
+                return 0.8;
+            }
+            return 1.0;
+        });
+
+
+    const descendantsResult = descendantsTreeLayout(descendantsHierarchy);
+    
+    // Trouver la position la plus à droite de l'arbre descendant
+    const rightmostDescendantX = d3.max(descendantsResult.descendants(), d => d.y);
+    
+    // Créer le groupe principal en tenant compte de cette position
+    const mainGroup = svg.append("g")
+        .attr("transform", `translate(${-rightmostDescendantX + state.boxWidth * 2}, ${window.innerHeight/2})`);
+
+
+    // Création et application du layout pour l'arbre ascendant
+    const ancestorsHierarchy = d3.hierarchy({
+        id: rootPerson.id,
+        name: rootPerson.name,
+        children: ancestors
+    });
+    const ancestorsTreeLayout = d3.tree()
+        .nodeSize([state.boxHeight * 1.4, state.boxWidth * 1.3])
+        .separation((a, b) => {
+            if (a.data.isSibling || b.data.isSibling) {
+                return 0.8;
+            }
+            if (a.depth === (state.nombre_generation-1) && b.depth === (state.nombre_generation-1) && a.parent !== b.parent) {
+                return 0.8;
+            }
+            if (a.parent === b.parent) {
+                const scale = Math.max(0.5, (state.nombre_generation - a.depth) / state.nombre_generation);
+                return scale * (a.depth === b.depth ? 1.7 : 1.5);  // le 1ier chiffre permet de régler l'espacement entre les noeud
+            }
+            return 1;
+        });
+
+
+
+    // Positionner l'arbre ascendant juste après l'arbre descendant
+    const ancestorsResult = ancestorsTreeLayout(ancestorsHierarchy);
+    // Appliquer un offset négatif aux positions y de l'arbre ascendant
+    ancestorsResult.descendants().forEach(node => {
+        node.y -= state.boxWidth * 3.1; // Ajuster la valeur 2.8 selon le rapprochement souhaité
+    });
+
+    // Fonction personnalisée de création de liens
+    function createCustomLinkPath(d) {
+        return `M${d.source.y},${d.source.x}
+                H${(d.source.y + d.target.y)/2}
+                V${d.target.x}
+                H${d.target.y}`;
+    }
+
+    // Groupe pour les descendants
+    const descendantsGroup = mainGroup.append("g")
+        .attr("transform", "translate(-150, 0)");
+
+    // Dessiner les liens des descendants
+    descendantsGroup.selectAll(".link")
+        .data(descendantsResult.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", createCustomLinkPath);
+
+    // Dessiner les descendants
+    const descendantsLayoutData = {
+        descendants: () => descendantsResult.descendants().filter(d => d.depth > 0),
+        data: {
+            ...rootPerson,
+            spouses: [] // Supprimer les spouses
+        },
+        x: 0,
+        y: -150
+    };
+
+    // Dessiner les descendants
+    drawNodes(descendantsGroup, descendantsLayoutData);
+
+    // Groupe pour les ancêtres
+    const ancestorsGroup = mainGroup.append("g")
+        .attr("transform", "translate(150, 0)");
+
+    // Dessiner les liens des ancêtres
+    ancestorsGroup.selectAll(".link")
+        .data(ancestorsResult.links()) // Filtrer le niveau 0
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", createCustomLinkPath);
+
+    // Préparer les données de layout pour les ancêtres
+    const ancestorsLayoutData = {
+        descendants: () => ancestorsResult.descendants().filter(d => d.depth > 0),
+        data: {
+            ...rootPerson,
+            spouses: [] // Supprimer les spouses
+        },
+        x: 0,
+        y: 150
+    };
+
+    // Dessiner les ancêtres
+    drawNodes(ancestorsGroup, ancestorsLayoutData);
+
+    // Configuration du zoom
+    setupZoom(svg, mainGroup);
+    const zoom = getZoom();
+
+    if (isZoomRefresh) {
+        const leftmostPositionX = d3.min(descendantsResult.descendants(), d => d.y);
+        resetZoomBoth(mainGroup, svg, -leftmostPositionX + 150, window.innerHeight/2 );
+    }
+
+}
+
+/**
+ * Réinitialise le niveau de zoom et la position de l'arbre
+ * à leurs valeurs par défaut selon le mode d'affichage
+ * Utilise une transition animée pour un retour fluide à la vue initiale
+ * @export
+ */
+export function resetZoomBoth(mainGroup,svg, x, y) {
+    setupZoom(svg, mainGroup);
+    const zoom = getZoom();
+    const newTransform = d3.zoomIdentity.translate(x, y).scale(0.8);
+
+    svg.transition()
+        .duration(750)
+        .call(zoom.transform, newTransform);
+}
+
 
 /**
  * Ajuste la position des siblings de niveau 0 pour les rapprocher de la racine
@@ -170,49 +346,42 @@ function adjustLevel0SiblingsPosition(mainGroup) {
  * @private
  */
 function drawLevel0SiblingLinks(mainGroup, rootHierarchy) {
-    mainGroup.selectAll(".node")
-        .filter(d => d.depth === 0 && d.data.isSibling)
+    
+    const nodes = mainGroup.selectAll(".node");
+    nodes.filter(d => d.depth === 0 && d.data.isSibling)
         .each(function(d) {
             const siblingNode = d3.select(this);
             const genealogicalParentId = d.data.genealogicalParentId;
             
-            // Ajoutons des logs pour vérifier
-            // console.log("Recherche du père:", genealogicalParentId);
-            
-            // Modifié ici : utiliser datum() pour accéder aux données du nœud
             const fatherNode = mainGroup.selectAll(".node")
                 .filter(function(n) {
-                    // console.log("Nœud vérifié:", n.data.id);
                     return n.data.id === genealogicalParentId;
                 });
-
-            if (!fatherNode.node()) {
-                // console.log(`Parent ${genealogicalParentId} non trouvé pour le sibling ${d.data.name}`);
-                return;
-            }
-
+ 
+            if (!fatherNode.node()) { return; }
+ 
             // Récupérer les positions
             const siblingTransform = siblingNode.attr("transform");
             const fatherTransform = fatherNode.attr("transform");
             const siblingMatch = siblingTransform.match(/translate\((.*?),(.*?)\)/);
             const fatherMatch = fatherTransform.match(/translate\((.*?),(.*?)\)/);
             
-            if (!siblingMatch || !fatherMatch) return;
-
+            if (!siblingMatch || !fatherMatch) { return;}
+ 
             const siblingX = parseFloat(siblingMatch[1]);
             const siblingY = parseFloat(siblingMatch[2]);
             const fatherX = parseFloat(fatherMatch[1]);
             const fatherY = parseFloat(fatherMatch[2]);
-
+ 
             mainGroup.append("path")
                 .attr("class", "link sibling-link")
                 .attr("d", `M${siblingX  + (state.boxWidth/2)},${siblingY}
-                            H${(siblingX   + fatherX)/2}
-                            V${fatherY}
-                            H${fatherX -state.boxWidth/2}`);
-
+                           H${(siblingX   + fatherX)/2}
+                           V${fatherY}
+                           H${fatherX  - state.boxWidth/2}`);
+                           
         });
-}
+ }
 
 
 /**
@@ -237,16 +406,35 @@ function setupSVG() {
  */
 
 function createTreeLayout() {
-    const layout = d3.tree()
-        .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.3]);
+    let layout = d3.tree()
+        .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.4]);
 
     // Inverser la direction pour le mode descendants
-    if (state.treeMode === 'descendants') {
-        layout.nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.3]);
+    if (state.treeModeReal  === 'descendants') {
+        layout.nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.4]);
     }
 
     layout.separation((a, b) => {
-        if (state.treeMode === 'descendants') {
+        if (state.treeModeReal  === 'both') {
+        // Pour le mode both, on va gérer les descendants différemment
+        layout = d3.tree()
+            .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.4])
+            .separation((a, b) => {
+                // Si l'un est un descendant et l'autre non
+                const aIsDescendant = a.data.isDescendant;
+                const bIsDescendant = b.data.isDescendant;
+                
+                if (aIsDescendant !== bIsDescendant) {
+                    return 3; // Grand espacement entre ascendants et descendants
+                }
+                
+                // Si les deux sont du même côté, espacement normal
+                return 1;
+            });
+
+        }
+
+        if (state.treeModeReal  === 'descendants') {
             // Pour les couples entrelacés (personne + spouse)
             if (a.data.isSpouse || b.data.isSpouse) {
                 return 0.8;  // Espacement réduit entre une personne et son spouse
@@ -276,6 +464,7 @@ function createTreeLayout() {
 }
 
 
+
 /**
  * Crée le groupe principal pour le contenu
  * @private
@@ -296,7 +485,7 @@ function drawLinks(group, layout) {
         .attr("class", d => {
             if (!d.source?.data || !d.target?.data) return "link hidden";
             if (d.source.data._isDescendantLink) return "link hidden";
-            if (state.treeMode === 'descendants' && d.target.data.isSpouse) return "link hidden";
+            if (state.treeModeReal  === 'descendants' && d.target.data.isSpouse) return "link hidden";
             if (d.target.data.isSibling) return "link hidden";
             return "link";
         })
@@ -309,7 +498,7 @@ function drawLinks(group, layout) {
  * @param {Object} layout - Le layout de l'arbre
  */
 function drawSpouseLinks(group, layout) {
-    if (state.treeMode !== 'descendants') return;
+    if (state.treeModeReal  !== 'descendants') return;
 
     // Collecter tous les liens spouse-enfants
     const spouseLinks = [];
@@ -371,12 +560,38 @@ function createLinkPath(d) {
     if (d.source.data._isDescendantLink) return "";
     if (d.target.data.isSibling && d.source.data.generation < d.target.data.generation) return "";
 
-    return `M${d.source.y},${d.source.x}
-            H${(d.source.y + d.target.y)/2}
-            V${d.target.x}
-            H${d.target.y}`;
+    if (state.treeModeReal  === 'descendants')
+    {
+        return `M${d.source.y - (state.boxWidth/2)},${d.source.x}
+                H${(d.source.y + d.target.y)/2}
+                V${d.target.x}
+                H${d.target.y + (state.boxWidth/2)}`;
+    } else {
+        return `M${d.source.y + (state.boxWidth/2)},${d.source.x}
+                H${(d.source.y + d.target.y)/2}
+                V${d.target.x}
+                H${d.target.y - (state.boxWidth/2)}`;
+
+    }
+
 }
 
+
+
+/**
+ * Crée le chemin pour un lien
+ * @private
+ */
+function createSiblingLinkPath(d) {
+    if (!d.source?.data || !d.target?.data) return "";
+    if (d.source.data._isDescendantLink) return "";
+    if (d.target.data.isSibling && d.source.data.generation < d.target.data.generation) return "";
+
+    return `M${d.source.y - (state.boxWidth/2)},${d.source.x}
+            H${(d.source.y + d.target.y)/2}
+            V${d.target.x}
+            H${d.target.y + state.boxWidth/2}`;
+}
 
 
 /**
@@ -455,7 +670,7 @@ function drawSiblingLinks(group, root) {
             if (d.source.data._isDescendantNode || d.target.data._isDescendantNode) return "";
             if (isNodeHidden(d.source) || isNodeHidden(d.target)) return "";
             
-            return createLinkPath(d);
+            return createSiblingLinkPath(d);
         });
 }
 

@@ -163,5 +163,5 @@ export function setAsRootPerson(personId) {
     document.getElementById('person-details-modal').style.display = 'none';
     
     // Redessiner l'arbre avec cette personne comme point de départ
-    displayGenealogicTree(personId);
+    displayGenealogicTree(personId, true);
 }

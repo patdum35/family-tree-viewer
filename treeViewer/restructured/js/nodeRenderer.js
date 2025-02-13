@@ -18,7 +18,9 @@ export function drawNodes(group, layout) {
     const nodeGroups = group.selectAll(".node")
         .data(layout.descendants())
         .join("g")
-        .filter(d => !d.data._isDescendantNode)
+        // .filter(d => !d.data._isDescendantNode)
+        .filter(d => !d.data._isDescendantNode && !d.data.isDescendantContainer) // Ajout du filtre
+
         .attr("class", "node")
         .attr("transform", d => `translate(${d.y},${d.x})`)
         .on("click", function(event, d) {
@@ -63,11 +65,42 @@ export function drawNodes(group, layout) {
 
 }
 
+
+
+
+
+/**
+ * Dessine le nœud racine et ses spouses au centre
+ * @private
+ */
+export function drawRootNode(mainGroup, rootData) {
+    // Dessiner le nœud racine
+    const rootGroup = mainGroup.append("g")
+        .attr("class", "node")
+        .attr("transform", "translate(0,0)");
+
+    drawNodeBoxes(rootGroup.data([{data: rootData}]));
+    drawNodeContent(rootGroup.data([{data: rootData}]));
+
+    // Dessiner les spouses
+    if (rootData.spouses && rootData.spouses.length > 0) {
+        const spouseNodes = mainGroup.selectAll(".node.spouse.root-spouse")
+            .data(rootData.spouses)
+            .join("g")
+            .attr("class", "node spouse root-spouse")
+            .attr("transform", (d, i) => 
+                `translate(0,${(i + 1) * state.boxHeight * 1.2})`);
+
+        drawNodeBoxes(spouseNodes.data(rootData.spouses.map(d => ({data: d}))));
+        drawNodeContent(spouseNodes.data(rootData.spouses.map(d => ({data: d}))));
+    }
+}
+
 /**
  * Dessine les rectangles des nœuds
  * @private
  */
-function drawNodeBoxes(nodeGroups) {
+export function drawNodeBoxes(nodeGroups) {
     nodeGroups.append("rect")
         .attr("class", d => {
             if (!d.data) return "person-box";
@@ -86,20 +119,36 @@ function drawNodeBoxes(nodeGroups) {
  * Dessine le contenu des nœuds (nom, dates)
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
+// export function drawNodeContent(nodeGroups) {
+//     nodeGroups.append("text")
+//         .attr("dy", "0.35em")
+//         .attr("text-anchor", "middle")
+//         .each(function(d) {
+//             const text = d3.select(this);
+//             const match = d.data.name.match(/(.*?)\/(.*?)\//);
+            
+//             if (match) {
+//                 drawPersonDetails(text, match, d.data, state.boxWidth);
+//             }
+//         });
+// }
+
 export function drawNodeContent(nodeGroups) {
     nodeGroups.append("text")
         .attr("dy", "0.35em")
         .attr("text-anchor", "middle")
         .each(function(d) {
+            // Skip le nœud container des descendants
+            if (d.data.isDescendantContainer) return;
+
             const text = d3.select(this);
-            const match = d.data.name.match(/(.*?)\/(.*?)\//);
+            const match = d.data.name?.match(/(.*?)\/(.*?)\//);
             
             if (match) {
                 drawPersonDetails(text, match, d.data, state.boxWidth);
             }
         });
 }
-
 /**
  * Dessine les détails d'une personne
  * @private
