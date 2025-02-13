@@ -212,55 +212,92 @@ export function stopAnimation() {
 //         console.log('La synthèse vocale n\'est pas supportée');
 //     }
 // }
-function speakPersonName(personName) {
-    // Vérification des capacités de synthèse vocale
-    if (!('speechSynthesis' in window)) {
-        console.error('La synthèse vocale n\'est pas supportée dans ce navigateur');
-        return;
-    }
+// function speakPersonName(personName) {
+//     // Vérification des capacités de synthèse vocale
+//     if (!('speechSynthesis' in window)) {
+//         console.error('La synthèse vocale n\'est pas supportée dans ce navigateur');
+//         return;
+//     }
 
-    // Debug : vérifier les voix disponibles
-    const voices = window.speechSynthesis.getVoices();
-    console.log('Voix disponibles :', voices);
+//     // Debug : vérifier les voix disponibles
+//     const voices = window.speechSynthesis.getVoices();
+//     console.log('Voix disponibles :', voices);
 
-    // Sélectionner une voix française
-    const frenchVoice = voices.find(voice => 
-        voice.lang.startsWith('fr-') || 
-        voice.name.toLowerCase().includes('french')
-    );
+//     // Sélectionner une voix française
+//     const frenchVoice = voices.find(voice => 
+//         voice.lang.startsWith('fr-') || 
+//         voice.name.toLowerCase().includes('french')
+//     );
 
-    // Créer l'utterance
-    const utterance = new SpeechSynthesisUtterance(personName);
+//     // Créer l'utterance
+//     const utterance = new SpeechSynthesisUtterance(personName);
     
-    // Configuration de l'utterance
-    utterance.lang = 'fr-FR';
-    utterance.rate = 0.8;
-    utterance.pitch = 1;
+//     // Configuration de l'utterance
+//     utterance.lang = 'fr-FR';
+//     utterance.rate = 0.8;
+//     utterance.pitch = 1;
 
-    // Utiliser une voix française si disponible
-    if (frenchVoice) {
-        utterance.voice = frenchVoice;
-    }
+//     // Utiliser une voix française si disponible
+//     if (frenchVoice) {
+//         utterance.voice = frenchVoice;
+//     }
 
-    // Ajout d'écouteurs d'événements pour le débogage
-    utterance.onstart = () => {
-        console.log('Début de la lecture vocale');
-    };
+//     // Ajout d'écouteurs d'événements pour le débogage
+//     utterance.onstart = () => {
+//         console.log('Début de la lecture vocale');
+//     };
 
-    utterance.onend = () => {
-        console.log('Fin de la lecture vocale');
-    };
+//     utterance.onend = () => {
+//         console.log('Fin de la lecture vocale');
+//     };
 
-    utterance.onerror = (event) => {
-        console.error('Erreur de synthèse vocale:', event);
-    };
+//     utterance.onerror = (event) => {
+//         console.error('Erreur de synthèse vocale:', event);
+//     };
 
-    // Tenter de parler
-    try {
+//     // Tenter de parler
+//     try {
+//         window.speechSynthesis.speak(utterance);
+//     } catch (error) {
+//         console.error('Erreur lors de l\'appel à speechSynthesis.speak():', error);
+//     }
+// }
+
+
+function speakPersonName(personName) {
+    return new Promise((resolve, reject) => {
+        if (!('speechSynthesis' in window)) {
+            console.error('La synthèse vocale n\'est pas supportée');
+            resolve(); // Résoudre pour ne pas bloquer l'animation
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(personName);
+        
+        // Configuration pour une lecture plus rapide
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1.3; // Légèrement accéléré
+        utterance.pitch = 1;
+
+        // Trouver une voix française
+        const voices = window.speechSynthesis.getVoices();
+        const frenchVoice = voices.find(voice => 
+            voice.lang.startsWith('fr-') || 
+            voice.name.toLowerCase().includes('french')
+        );
+
+        if (frenchVoice) {
+            utterance.voice = frenchVoice;
+        }
+
+        utterance.onend = () => resolve();
+        utterance.onerror = (error) => {
+            console.error('Erreur de synthèse vocale:', error);
+            resolve(); // Résoudre quand même pour ne pas bloquer
+        };
+
         window.speechSynthesis.speak(utterance);
-    } catch (error) {
-        console.error('Erreur lors de l\'appel à speechSynthesis.speak():', error);
-    }
+    });
 }
 
 
