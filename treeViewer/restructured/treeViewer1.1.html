@@ -97,6 +97,9 @@
             updateTreeMode,
             handleRootPersonChange   
         } from './js/main.js';
+        import { 
+            startAncestorAnimation 
+        } from './js/treeAnimation.js';
 
         // Rendre les fonctions disponibles globalement
         window.loadData = loadData;
@@ -111,6 +114,10 @@
         window.setAsRootPerson = setAsRootPerson; 
         window.updateTreeMode = updateTreeMode; 
         window.handleRootPersonChange = handleRootPersonChange;
+        window.startAnimation = () => {
+            startAncestorAnimation().catch(console.error);
+        };
+
         // Ajouter les écouteurs d'événements une fois que tout est chargé
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loadDataButton').addEventListener('click', loadData);
