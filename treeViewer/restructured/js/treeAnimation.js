@@ -141,59 +141,6 @@ function findNodeInTree(nodeId) {
 
 let animationTimeouts = [];
 
-// export function startAncestorAnimation() {
-//     // Nettoyer les timeouts existants
-//     animationTimeouts.forEach(timeout => clearTimeout(timeout));
-//     animationTimeouts = [];
-
-//     const path = findAncestorPath(state.rootPersonId, TARGET_ANCESTOR_ID);
-//     console.log("Chemin vers l'ancêtre:", path);
-    
-//     let lastNode = null;
-    
-
-//     path.forEach((nodeId, index) => {
-
-//         const timeout = setTimeout(() => {
-//             console.log("Animation étape:", nodeId);
-//             const node = findNodeInTree(nodeId);
-//             if (node) {
-//                 console.log("Nœud trouvé:", node);
-//                 // Simuler le clic avec construction de l'arbre
-//                 if (!node.data.children || node.data.children.length === 0) {
-//                     const event = new Event('click');
-//                     handleAncestorsClick(event, node);
-//                     drawTree();  // Forcer le redessinage
-//                 }
-                
-//                 const zoom = getZoom();
-//                 if (zoom) {
-//                     const svg = d3.select("#tree-svg");
-//                     const lastTransform = getLastTransform() || d3.zoomIdentity;
-//                     // Ne décaler que si le nœud est trop proche du bord droit
-//                     if (node.y > window.innerWidth - 200) {  // marge de 200px
-//                         svg.transition()
-//                             .duration(750)
-//                             .call(zoom.transform, 
-//                                 lastTransform.translate(-state.boxWidth * 1.3 -12, 0)
-//                             );
-//                     }
-//                 }
-
-//                 lastNode = node;
-//             }
-//         }, index * 1500);
-//         animationTimeouts.push(timeout);
-//     });
-// }
-
-// export function stopAnimation() {
-//     animationTimeouts.forEach(timeout => clearTimeout(timeout));
-//     animationTimeouts = [];
-// }
-
-
-
 
 export function stopAnimation() {
     // Arrêter la synthèse vocale
@@ -211,118 +158,8 @@ export function stopAnimation() {
     animationTimeouts = [];
 }
 
-// Dans treeAnimation.js, ajoutez cette fonction
-// function speakPersonName(personName) {
-//     // Vérifier si la synthèse vocale est disponible
-//     if ('speechSynthesis' in window) {
-//         // Créer un nouvel objet SpeechSynthesisUtterance
-//         const utterance = new SpeechSynthesisUtterance(personName);
-        
-//         // Configurer des paramètres optionnels
-//         utterance.lang = 'fr-FR'; // Langue française
-//         utterance.rate = 0.8; // Vitesse de lecture (0.1 à 10)
-//         utterance.pitch = 1; // Tonalité (0 à 2)
-        
-//         // Lire le texte
-//         window.speechSynthesis.speak(utterance);
-//     } else {
-//         console.log('La synthèse vocale n\'est pas supportée');
-//     }
-// }
-// function speakPersonName(personName) {
-//     // Vérification des capacités de synthèse vocale
-//     if (!('speechSynthesis' in window)) {
-//         console.error('La synthèse vocale n\'est pas supportée dans ce navigateur');
-//         return;
-//     }
 
-//     // Debug : vérifier les voix disponibles
-//     const voices = window.speechSynthesis.getVoices();
-//     console.log('Voix disponibles :', voices);
-
-//     // Sélectionner une voix française
-//     const frenchVoice = voices.find(voice => 
-//         voice.lang.startsWith('fr-') || 
-//         voice.name.toLowerCase().includes('french')
-//     );
-
-//     // Créer l'utterance
-//     const utterance = new SpeechSynthesisUtterance(personName);
-    
-//     // Configuration de l'utterance
-//     utterance.lang = 'fr-FR';
-//     utterance.rate = 0.8;
-//     utterance.pitch = 1;
-
-//     // Utiliser une voix française si disponible
-//     if (frenchVoice) {
-//         utterance.voice = frenchVoice;
-//     }
-
-//     // Ajout d'écouteurs d'événements pour le débogage
-//     utterance.onstart = () => {
-//         console.log('Début de la lecture vocale');
-//     };
-
-//     utterance.onend = () => {
-//         console.log('Fin de la lecture vocale');
-//     };
-
-//     utterance.onerror = (event) => {
-//         console.error('Erreur de synthèse vocale:', event);
-//     };
-
-//     // Tenter de parler
-//     try {
-//         window.speechSynthesis.speak(utterance);
-//     } catch (error) {
-//         console.error('Erreur lors de l\'appel à speechSynthesis.speak():', error);
-//     }
-// }
-
-
-// function speakPersonName(personName) {
-//     return new Promise((resolve, reject) => {
-//         if (!('speechSynthesis' in window)) {
-//             console.error('La synthèse vocale n\'est pas supportée');
-//             resolve(); // Résoudre pour ne pas bloquer l'animation
-//             return;
-//         }
-
-//         const utterance = new SpeechSynthesisUtterance(personName);
-        
-//         // Configuration pour une lecture plus rapide
-//         utterance.lang = 'fr-FR';
-//         utterance.rate = 1.5; // Légèrement accéléré
-//         utterance.pitch = 1;
-
-//         // Trouver une voix française
-//         const voices = window.speechSynthesis.getVoices();
-//         const frenchVoice = voices.find(voice => 
-//             voice.lang.startsWith('fr-') || 
-//             voice.name.toLowerCase().includes('french')
-//         );
-
-//         if (frenchVoice) {
-//             utterance.voice = frenchVoice;
-//         }
-
-//         utterance.onend = () => resolve();
-//         utterance.onerror = (error) => {
-//             // Vérifier spécifiquement si l'erreur est une interruption
-//             if (error.error === 'interrupted') {
-//                 resolve(); // Résoudre silencieusement
-//             } else {
-//                 console.error('Erreur de synthèse vocale:', error);
-//                 resolve(); // Toujours résoudre pour ne pas bloquer l'animation
-//             }
-//         };
-
-//         window.speechSynthesis.speak(utterance);
-//     });
-// }
-
-let optimalSpeechRate = 1.2;
+let optimalSpeechRate = 0.9;
 
 function simplifyName(fullName) {
     // Séparer le nom entre les barres obliques
@@ -367,9 +204,8 @@ function speakPersonName(personName) {
                     const duration = Date.now() - startTime;
                     
                     // Log du temps de lecture
-                    console.log(`Nom original: ${personName}`);
-                    console.log(`Nom simplifié: ${simplifiedName}`);
-                    console.log(`Vitesse: ${rate}, Durée: ${duration}ms`);
+                    // console.log(`Nom original: ${personName}`);
+                    console.log(`Nom simplifié: ${simplifiedName} , Vitesse: ${rate}, Durée: ${duration}ms`);
 
                     innerResolve({ 
                         rate: rate, 
@@ -406,10 +242,10 @@ function speakPersonName(personName) {
             // Ajuster la vitesse globale avec une approche plus symétrique
             if (result.duration > targetDuration + 200) {
                 // Si trop lent, augmenter progressivement
-                optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, 3);
+                optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
             } else if (result.duration < targetDuration - 200) {
                 // Si trop rapide, diminuer progressivement
-                optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, 1.2);
+                optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
             }
 
             resolve();
@@ -420,73 +256,34 @@ function speakPersonName(personName) {
     });
 }
 
-// export async function startAncestorAnimation() {
-
-
-//     // Nettoyer les timeouts existants
-//     animationTimeouts.forEach(timeout => clearTimeout(timeout));
-//     animationTimeouts = [];
-
-//     const path = findAncestorPath(state.rootPersonId, TARGET_ANCESTOR_ID);
-//     console.log("Chemin vers l'ancêtre:", path);
-    
-//     let lastNode = null;
-
-//     path.forEach((nodeId, index) => {
-//         const timeout = setTimeout(() => {
-//             console.log("Animation étape:", nodeId);
-//             const node = findNodeInTree(nodeId);
-//             if (node) {
-//                 console.log("Nœud trouvé:", node);
-                
-//                 // Ajouter l'appel à la synthèse vocale
-//                 const personName = node.data.name.replace(/\//g, '').trim();
-
-
-//                 // speakPersonName(personName);
-//                 // Lancer simultanément la voix et l'animation
-//                 const voicePromise = speakPersonName(personName);
-
-//                 // Simuler le clic avec construction de l'arbre
-//                 if (!node.data.children || node.data.children.length === 0) {
-//                     const event = new Event('click');
-//                     handleAncestorsClick(event, node);
-//                     drawTree();  // Forcer le redessinage
-//                 }
-                
-//                 const zoom = getZoom();
-//                 if (zoom) {
-//                     const svg = d3.select("#tree-svg");
-//                     const lastTransform = getLastTransform() || d3.zoomIdentity;
-//                     // Ne décaler que si le nœud est trop proche du bord droit
-//                     if (node.y > window.innerWidth - 200) {  // marge de 200px
-//                         svg.transition()
-//                             .duration(750)
-//                             .call(zoom.transform, 
-//                                 lastTransform.translate(-state.boxWidth * 1.3 -12, 0)
-//                             );
-//                     }
-//                 }
-
-//                 // // Attendre un court instant entre chaque nœud
-//                 // await new Promise(resolve => setTimeout(resolve, 1000));
-                
-//                 // // S'assurer que la voix a fini
-//                 // await voicePromise;
-
-
-//                 lastNode = node;
-//             }
-//         }, index * 1500);
-//         animationTimeouts.push(timeout);
-//     });
-// }
-
-
 let animationController = null;
 
-export function startAncestorAnimation() {
 
+function getNodeScreenPosition(node) {
+    // Récupérer tous les nœuds actuellement dans l'arbre
+    const allNodes = d3.selectAll(".node").nodes();
+    
+    // Trouver le nœud le plus à droite
+    const rightmostNodePosition = allNodes.reduce((max, nodeEl) => {
+        const transform = nodeEl.getAttribute('transform');
+        const match = transform.match(/translate\((.*?),(.*?)\)/);
+        if (match) {
+            const x = parseFloat(match[1]);
+            return Math.max(max, x);
+        }
+        return max;
+    }, 0);
+
+    console.log('Position du nœud le plus à droite:', rightmostNodePosition);
+    console.log('Largeur de l\'écran:', window.innerWidth);
+
+    return {
+        x: rightmostNodePosition,
+        y: node.x  // Conserver la position verticale originale
+    };
+}
+
+export function startAncestorAnimation() {
     // Créer un contrôleur pour pouvoir annuler l'animation
     animationController = {
         isCancelled: false,
@@ -494,7 +291,6 @@ export function startAncestorAnimation() {
             this.isCancelled = true;
         }
     };
-
     return new Promise(async (resolve, reject) => {
         try {
             // Nettoyer les timeouts existants
@@ -515,14 +311,7 @@ export function startAncestorAnimation() {
 
                 const node = findNodeInTree(nodeId);
                 if (node) {
-                    console.log("Nœud trouvé:", nodeId);
-                    
-                    // Préparer la lecture vocale
-
-                    // const fullPersonName = node.data.name.replace(/\//g, '').trim();
-                    // const personName = fullPersonName; 
-                    console.log("DEBUGGGGGGG : ", node.data.name)
-                    
+                    // console.log("Nœud trouvé:", nodeId);
                     
                     // Lancer simultanément la voix et l'animation
                     await speakPersonName(node.data.name);
@@ -535,19 +324,132 @@ export function startAncestorAnimation() {
                     }
 
 
+                    // const zoom = getZoom();
+                    // if (zoom) {
+                    //     const svg = d3.select("#tree-svg");
+                    //     const lastTransform = getLastTransform() || d3.zoomIdentity;
+                    //     // Ne décaler que si le nœud est trop proche du bord droit
+                    //     if (node.y > window.innerWidth - 200) {  // marge de 200px
+                    //         svg.transition()
+                    //             .duration(750)
+                    //             .call(zoom.transform, 
+                    //                 lastTransform.translate(-state.boxWidth * 1.3 -12, 0)
+                    //             );
+                    //     }
+                    // }
+
+                    // Dans startAncestorAnimation()
+                    // const zoom = getZoom();
+                    // if (zoom) {
+                    //     const svg = d3.select("#tree-svg");
+                    //     const lastTransform = getLastTransform() || d3.zoomIdentity;
+                        
+                    //     // Calculer la position du nœud
+                    //     const nodeScreenPosition = getNodeScreenPosition(node);
+                        
+                    //     console.log('Détails de position du nœud:', {
+                    //         nodeY: node.y,
+                    //         windowWidth: window.innerWidth,
+                    //         screenX: nodeScreenPosition.x,
+                    //         screenY: nodeScreenPosition.y,
+                    //         nodeWidth: state.boxWidth,
+                    //         translateAmount: -state.boxWidth * 1.3 - 12
+                    //     });
+
+                    //     // Ajuster le décalage en fonction de la largeur d'écran
+                    //     const screenMargin = window.innerWidth < 600 ? 100 : 200;
+                    //     const horizontalShift = -state.boxWidth * 2; // Augmenter le décalage
+                    //     const verticalShift = window.innerHeight / 2 - nodeScreenPosition.y;
+
+                    //     if (nodeScreenPosition.x > window.innerWidth - screenMargin) {
+                    //         svg.transition()
+                    //             .duration(750)
+                    //             .call(zoom.transform, 
+                    //                 lastTransform
+                    //                     .translate(horizontalShift, verticalShift)
+                    //             );
+                    //     }
+                    // }
+
+
+
+                    // const zoom = getZoom();
+                    // if (zoom) {
+                    //     const svg = d3.select("#tree-svg");
+                    //     const lastTransform = getLastTransform() || d3.zoomIdentity;
+                        
+                    //     // Calculer la position du nœud
+                    //     const nodeScreenPosition = getNodeScreenPosition(node);
+                        
+                    //     console.log('Détails de position du nœud:', {
+                    //         nodeY: node.y,
+                    //         windowWidth: window.innerWidth,
+                    //         rightmostX: nodeScreenPosition.x,
+                    //         nodeWidth: state.boxWidth
+                    //     });
+                    
+                    //     // Ajuster le décalage en fonction de la largeur d'écran
+                    //     const screenMargin = window.innerWidth < 600 ? 100 : 200;
+                        
+                    //     // Calculer un décalage dynamique basé sur la position actuelle
+                    //     const horizontalShift = Math.max(
+                    //         window.innerWidth - nodeScreenPosition.x - state.boxWidth, 
+                    //         window.innerWidth / 2
+                    //     );
+                        
+                    //     const verticalShift = window.innerHeight / 2 - nodeScreenPosition.y;
+                    
+                    //     if (nodeScreenPosition.x > window.innerWidth - screenMargin) {
+                    //         svg.transition()
+                    //             .duration(750)
+                    //             .call(zoom.transform, 
+                    //                 lastTransform
+                    //                     .translate(-horizontalShift, verticalShift)
+                    //             );
+                    //     }
+                    // }
+
                     const zoom = getZoom();
                     if (zoom) {
                         const svg = d3.select("#tree-svg");
                         const lastTransform = getLastTransform() || d3.zoomIdentity;
-                        // Ne décaler que si le nœud est trop proche du bord droit
-                        if (node.y > window.innerWidth - 200) {  // marge de 200px
+                        
+                        // Calculer la position du nœud
+                        const nodeScreenPosition = getNodeScreenPosition(node);
+
+                        // Calculer un décalage fixe et significatif
+                        const horizontalShift = Math.min(
+                            window.innerWidth / 2,  // Décalage vers la gauche
+                            state.boxWidth * 1.5 - 12      // Ou 3 fois la largeur d'une boîte
+                        );
+                        
+                        const verticalShift = window.innerHeight / 2 - nodeScreenPosition.y;
+
+                        // Toujours décaler si le nœud est proche du bord droit
+                        if (node.y > window.innerWidth - 200) {
                             svg.transition()
                                 .duration(750)
                                 .call(zoom.transform, 
-                                    lastTransform.translate(-state.boxWidth * 1.3 -12, 0)
+                                    lastTransform.translate(-horizontalShift, verticalShift)
                                 );
                         }
                     }
+
+
+
+
+                    // Fonction utilitaire pour obtenir la position à l'écran d'un nœud
+                    function getNodeScreenPosition(node) {
+                        const svg = d3.select("#tree-svg");
+                        const svgRect = svg.node().getBoundingClientRect();
+                        const transform = getLastTransform() || d3.zoomIdentity;
+
+                        // Calculer la position transformée
+                        const x = transform.x + node.y * transform.k;
+                        const y = transform.y + node.x * transform.k;
+
+                        return { x, y };
+}
 
 
                     // Attendre un court instant entre chaque nœud
