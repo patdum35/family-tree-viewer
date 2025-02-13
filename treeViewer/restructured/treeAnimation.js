@@ -281,47 +281,144 @@ export function stopAnimation() {
 // }
 
 
+// function speakPersonName(personName) {
+//     return new Promise((resolve, reject) => {
+//         if (!('speechSynthesis' in window)) {
+//             console.error('La synthèse vocale n\'est pas supportée');
+//             resolve(); // Résoudre pour ne pas bloquer l'animation
+//             return;
+//         }
+
+//         const utterance = new SpeechSynthesisUtterance(personName);
+        
+//         // Configuration pour une lecture plus rapide
+//         utterance.lang = 'fr-FR';
+//         utterance.rate = 1.5; // Légèrement accéléré
+//         utterance.pitch = 1;
+
+//         // Trouver une voix française
+//         const voices = window.speechSynthesis.getVoices();
+//         const frenchVoice = voices.find(voice => 
+//             voice.lang.startsWith('fr-') || 
+//             voice.name.toLowerCase().includes('french')
+//         );
+
+//         if (frenchVoice) {
+//             utterance.voice = frenchVoice;
+//         }
+
+//         utterance.onend = () => resolve();
+//         utterance.onerror = (error) => {
+//             // Vérifier spécifiquement si l'erreur est une interruption
+//             if (error.error === 'interrupted') {
+//                 resolve(); // Résoudre silencieusement
+//             } else {
+//                 console.error('Erreur de synthèse vocale:', error);
+//                 resolve(); // Toujours résoudre pour ne pas bloquer l'animation
+//             }
+//         };
+
+//         window.speechSynthesis.speak(utterance);
+//     });
+// }
+
+let optimalSpeechRate = 0.9;
+
+function simplifyName(fullName) {
+    // Séparer le nom entre les barres obliques
+    const nameParts = fullName.split('/');
+    
+    // Traiter les prénoms
+    const firstNames = nameParts[0].trim().split(' ');
+    const firstFirstName = firstNames[0]; // Garder uniquement le premier prénom
+    
+    // Traiter le nom de famille
+    const lastName = nameParts[1] ? nameParts[1].trim().toUpperCase() : '';
+    
+    // Combiner le premier prénom et le nom de famille
+    return `${firstFirstName} ${lastName}`.trim();
+}
+
+
 function speakPersonName(personName) {
     return new Promise((resolve, reject) => {
         if (!('speechSynthesis' in window)) {
-            console.error('La synthèse vocale n\'est pas supportée');
-            resolve(); // Résoudre pour ne pas bloquer l'animation
+            resolve();
             return;
         }
 
-        const utterance = new SpeechSynthesisUtterance(personName);
-        
-        // Configuration pour une lecture plus rapide
-        utterance.lang = 'fr-FR';
-        utterance.rate = 2.0; // Légèrement accéléré
-        utterance.pitch = 1;
+        // Paramètres initiaux
+        const targetDuration = 1500; // 1 seconde pour lire le nom
+        const maxRate = 5; // Vitesse maximale
+        const minRate = 1.0; // Vitesse minimale
 
-        // Trouver une voix française
-        const voices = window.speechSynthesis.getVoices();
-        const frenchVoice = voices.find(voice => 
-            voice.lang.startsWith('fr-') || 
-            voice.name.toLowerCase().includes('french')
-        );
+        // Simplifier le nom avant lecture
+        const simplifiedName = simplifyName(personName);
 
-        if (frenchVoice) {
-            utterance.voice = frenchVoice;
+        function measureSpeechDuration(rate) {
+            return new Promise((innerResolve) => {
+                const utterance = new SpeechSynthesisUtterance(simplifiedName);
+                utterance.rate = rate;
+                utterance.lang = 'fr-FR';
+
+                const startTime = Date.now();
+
+                utterance.onend = () => {
+                    const duration = Date.now() - startTime;
+                    
+                    // Log du temps de lecture
+                    console.log(`Nom original: ${personName}`);
+                    console.log(`Nom simplifié: ${simplifiedName}`);
+                    console.log(`Vitesse: ${rate}, Durée: ${duration}ms`);
+
+                    innerResolve({ 
+                        rate: rate, 
+                        duration: duration 
+                    });
+                };
+
+                utterance.onerror = () => {
+                    innerResolve({ 
+                        rate: rate, 
+                        duration: Infinity 
+                    });
+                };
+
+                // Sélectionner une voix française si possible
+                const voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => 
+                    voice.lang.startsWith('fr-') || 
+                    voice.name.toLowerCase().includes('french')
+                );
+
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            });
         }
 
-        utterance.onend = () => resolve();
-        utterance.onerror = (error) => {
-            // Vérifier spécifiquement si l'erreur est une interruption
-            if (error.error === 'interrupted') {
-                resolve(); // Résoudre silencieusement
-            } else {
-                console.error('Erreur de synthèse vocale:', error);
-                resolve(); // Toujours résoudre pour ne pas bloquer l'animation
-            }
-        };
+        // Lecture avec la vitesse mémorisée ou par défaut
+        async function adaptiveSpeech() {
+            const result = await measureSpeechDuration(optimalSpeechRate);
 
-        window.speechSynthesis.speak(utterance);
+            // Ajuster la vitesse globale avec une approche plus symétrique
+            if (result.duration > targetDuration + 200) {
+                // Si trop lent, augmenter progressivement
+                optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
+            } else if (result.duration < targetDuration - 200) {
+                // Si trop rapide, diminuer progressivement
+                optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
+            }
+
+            resolve();
+        }
+
+        // Lancer la lecture adaptative
+        adaptiveSpeech();
     });
 }
-
 
 // export async function startAncestorAnimation() {
 
@@ -421,10 +518,14 @@ export function startAncestorAnimation() {
                     console.log("Nœud trouvé:", nodeId);
                     
                     // Préparer la lecture vocale
-                    const personName = node.data.name.replace(/\//g, '').trim();
+
+                    // const fullPersonName = node.data.name.replace(/\//g, '').trim();
+                    // const personName = fullPersonName; 
+                    console.log("DEBUGGGGGGG : ", node.data.name)
+                    
                     
                     // Lancer simultanément la voix et l'animation
-                    await speakPersonName(personName);
+                    await speakPersonName(node.data.name);
                     
                     // Actions sur le nœud
                     if (!node.data.children || node.data.children.length === 0) {
@@ -433,16 +534,6 @@ export function startAncestorAnimation() {
                         drawTree();
                     }
 
-                    // Gérer le zoom/déplacement
-                    // const zoom = getZoom();
-                    // const svg = d3.select("#tree-svg");
-                    // if (zoom) {
-                    //     svg.transition()
-                    //         .duration(750)
-                    //         .call(zoom.transform, 
-                    //             getLastTransform().translate(-state.boxWidth * 1.3 -12, 0)
-                    //         );
-                    // }
 
                     const zoom = getZoom();
                     if (zoom) {
