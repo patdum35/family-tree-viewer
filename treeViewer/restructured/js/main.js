@@ -35,7 +35,13 @@ export const state = {
     treeModeReal: 'ancestors' // ou 'descendants' ou 'both'
 };
 
-window.startAnimation = startAncestorAnimation;
+// window.startAnimation = startAncestorAnimation;
+
+// window.startAnimation = () => {
+//     startAncestorAnimation().catch(error => {
+//         console.error('Erreur dans l\'animation des ancêtres :', error);
+//     });
+// };
 
 function initialize() {
     initializeGenerationSelect();
