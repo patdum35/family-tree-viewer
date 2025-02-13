@@ -259,31 +259,56 @@ function speakPersonName(personName) {
 let animationController = null;
 
 
-function getNodeScreenPosition(node) {
-    // Récupérer tous les nœuds actuellement dans l'arbre
-    const allNodes = d3.selectAll(".node").nodes();
+// function getNodeScreenPosition(node) {
+//     // Récupérer tous les nœuds actuellement dans l'arbre
+//     const allNodes = d3.selectAll(".node").nodes();
     
-    // Trouver le nœud le plus à droite
-    const rightmostNodePosition = allNodes.reduce((max, nodeEl) => {
-        const transform = nodeEl.getAttribute('transform');
-        const match = transform.match(/translate\((.*?),(.*?)\)/);
-        if (match) {
-            const x = parseFloat(match[1]);
-            return Math.max(max, x);
-        }
-        return max;
-    }, 0);
+//     // Trouver le nœud le plus à droite
+//     const rightmostNodePosition = allNodes.reduce((max, nodeEl) => {
+//         const transform = nodeEl.getAttribute('transform');
+//         const match = transform.match(/translate\((.*?),(.*?)\)/);
+//         if (match) {
+//             const x = parseFloat(match[1]);
+//             return Math.max(max, x);
+//         }
+//         return max;
+//     }, 0);
 
-    console.log('Position du nœud le plus à droite:', rightmostNodePosition);
-    console.log('Largeur de l\'écran:', window.innerWidth);
+//     console.log('Position du nœud le plus à droite:', rightmostNodePosition, " node.x=", node.x, " node.y=", node.y, 'Largeur de l\'écran:', window.innerWidth);
 
-    return {
-        x: rightmostNodePosition,
-        y: node.x  // Conserver la position verticale originale
-    };
+//     return {
+//         x: rightmostNodePosition,
+//         y: node.x  // Conserver la position verticale originale
+//     };
+// }
+
+
+//  Fonction utilitaire pour obtenir la position à l'écran d'un nœud
+function getNodeScreenPosition(node) {
+    const svg = d3.select("#tree-svg");
+    const svgRect = svg.node().getBoundingClientRect();
+    const transform = getLastTransform() || d3.zoomIdentity;
+
+    // Calculer la position transformée
+    const x = transform.x + node.y * transform.k;
+    const y = transform.y + node.x * transform.k;
+
+    // console.log("Last transform: transform.X =", transform.x , " transform.Y =", transform.y , " transform.k=", transform.k, "lastX=",state.lastHorizontalPosition, "lastY=",state.lastVerticalPosition);
+
+    // console.log("Position du nœud le plus à droite: node.X=", node.y, " node.Y=", node.x, " X=", x, " Y=", y,'Largeur de l\'écran:', window.innerWidth, 'hauteur de l\'écran:', window.innerHeight);
+    console.log("-------------Position plus à droite: node.X=", node.y, " node.Y=", node.x, " transX=", x, " transY=", y, "transform.X =", transform.x , "transform.Y =", transform.y , " transform.k=", transform.k, "lastX=",state.lastHorizontalPosition, "lastY=",state.lastVerticalPosition);
+
+
+    return { x, y };
 }
 
 export function startAncestorAnimation() {
+    state.lastHorizontalPosition = 0;
+    state.lastVerticalPosition = 0;
+    let firstTimeShift = true;
+    let offsetX = 0;
+    let offsetY = 0;    
+    
     // Créer un contrôleur pour pouvoir annuler l'animation
     animationController = {
         isCancelled: false,
@@ -418,38 +443,76 @@ export function startAncestorAnimation() {
                         const nodeScreenPosition = getNodeScreenPosition(node);
 
                         // Calculer un décalage fixe et significatif
-                        const horizontalShift = Math.min(
-                            window.innerWidth / 2,  // Décalage vers la gauche
-                            state.boxWidth * 1.5 - 12      // Ou 3 fois la largeur d'une boîte
-                        );
                         
-                        const verticalShift = window.innerHeight / 2 - nodeScreenPosition.y;
+                        // const horizontalShift = (nodeScreenPosition.x - window.innerHeight)
+                        // const horizontalShift = Math.min(
+                        //     window.innerWidth / 2,  // Décalage vers la gauche
+                        //     state.boxWidth * 1.5 - 12      // Ou 3 fois la largeur d'une boîte
+                        // );
+
+
+                        // let horizontalShift;
+
+                        // const horizontalShift = (window.innerWidth / 2 - nodeScreenPosition.x) - state.boxWidth;
+
+
+                        // const verticalShift = window.innerHeight / 2 - nodeScreenPosition.y;
+                        // const verticalShift = 0;
 
                         // Toujours décaler si le nœud est proche du bord droit
-                        if (node.y > window.innerWidth - 200) {
+                        // if (nodeScreenPosition.y > window.innerWidth - 200) {
+                        
+
+                        
+                        
+                        // if((node.y > window.innerWidth - 250) || (node.x > window.innerHeight - 250)) {
+                        if(((node.y > window.innerWidth - 300) || (node.x > window.innerHeight - 300)) && ( ((node.y - state.lastHorizontalPosition) > (state.boxWidth*0.2) ) || ((node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) )) ) {
+                            // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
+                        // if (( (node.y - state.lastHorizontalPosition) > (state.boxWidth*1) ) || ((node.x -state.lastVerticalPosition)  > (state.boxHeight*1)))   {
+                            console.log("***before******* firstTimeShift", firstTimeShift, "deltaX=", node.y - state.lastHorizontalPosition, "deltaY=", node.x - state.lastVerticalPosition, "state.lastHorizontalPosition=",state.lastHorizontalPosition, "state.lastVerticalPosition=",state.lastVerticalPosition)
+
+
+                            if (firstTimeShift) {
+                                // offsetX = window.innerWidth - (node.y - state.lastHorizontalPosition)
+                                // offsetY = window.innerHeight - (node.x - state.lastVerticalPosition)
+                                offsetX = (node.y - state.lastHorizontalPosition)
+                                offsetY = (node.x - state.lastVerticalPosition)
+
+                            }
+                            
+                            firstTimeShift = false;
+                            
+                            const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
+                            const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
+
                             svg.transition()
                                 .duration(750)
                                 .call(zoom.transform, 
-                                    lastTransform.translate(-horizontalShift, verticalShift)
+                                    lastTransform.translate(-horizontalShift, -verticalShift)
+                                    // lastTransform.translate(-horizontalShift, 0)
                                 );
+
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+
+                            console.log("****after****** offsetX=", offsetX, "deltaX=", node.y - state.lastHorizontalPosition, "deltaY=", node.x - state.lastVerticalPosition,"hShift=", -horizontalShift, "vShift=", verticalShift, "innerWidth=", window.innerWidth, "innerHeight=",  window.innerHeight, "state.lastHorizontalPosition=",state.lastHorizontalPosition, "state.lastVerticalPosition=",state.lastVerticalPosition)
                         }
                     }
 
 
+                        // //                     // Fonction utilitaire pour obtenir la position à l'écran d'un nœud
+                        // function getNodeScreenPosition(node) {
+                        //     const svg = d3.select("#tree-svg");
+                        //     const svgRect = svg.node().getBoundingClientRect();
+                        //     const transform = getLastTransform() || d3.zoomIdentity;
 
+                        //     // Calculer la position transformée
+                        //     const x = transform.x + node.y * transform.k;
+                        //     const y = transform.y + node.x * transform.k;
 
-                    // Fonction utilitaire pour obtenir la position à l'écran d'un nœud
-                    function getNodeScreenPosition(node) {
-                        const svg = d3.select("#tree-svg");
-                        const svgRect = svg.node().getBoundingClientRect();
-                        const transform = getLastTransform() || d3.zoomIdentity;
+                        //     return { x, y };
+                        // }
 
-                        // Calculer la position transformée
-                        const x = transform.x + node.y * transform.k;
-                        const y = transform.y + node.x * transform.k;
-
-                        return { x, y };
-}
 
 
                     // Attendre un court instant entre chaque nœud
