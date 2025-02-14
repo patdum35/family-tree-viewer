@@ -329,7 +329,7 @@ export function findContextualHistoricalFigures(personId) {
     return context;
 }
 
-async function geocodeLocation(location) {
+export async function geocodeLocation(location) {
     try {
         // Utiliser l'API de Nominatim (OpenStreetMap)
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);

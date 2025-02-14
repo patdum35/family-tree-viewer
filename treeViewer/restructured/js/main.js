@@ -2,10 +2,10 @@
 // Configuration et initialisation
 // ====================================
 import { parseGEDCOM } from './gedcomParser.js';
-import { initializeEventHandlers } from './eventHandlers.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson } from './utils.js';
-import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
+import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
+import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -13,10 +13,12 @@ import {
     closeModal
 } from './modalWindow.js';
 import {
+    initializeEventHandlers,
     updatePrenoms,
     updateGenerations,
     zoomIn,
     zoomOut,
+    resetView,
     resetZoom,
     searchTree
 } from './eventHandlers.js';
@@ -29,11 +31,29 @@ export const state = {
     nombre_generation: 6,
     boxWidth: 150,
     boxHeight: 50,
-    treeMode: 'ancestors' // ou 'descendants'
+    treeMode: 'ancestors', // ou 'descendants' ou 'both'
+    treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
+    lastHorizontalPosition: 0,
+    lastVerticalPosition: 0,
+    isSpeechEnabled: true,
+    isAnimationPaused: false
 };
-/**
- * Initialise l'application
- */
+
+window.toggleAnimationPause = toggleAnimationPause;
+
+
+// Fonction pour basculer le son
+export function toggleSpeech() {
+    const speechToggleBtn = document.getElementById('speechToggleBtn');
+    
+    // Basculer l'état du son
+    state.isSpeechEnabled = !state.isSpeechEnabled;
+    
+    // Mettre à jour le bouton
+    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔇' : '🔊';
+}
+
+
 function initialize() {
     initializeGenerationSelect();
     initializeEventHandlers();
@@ -66,8 +86,12 @@ export async function loadData() {
         
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
-        
-        displayGenealogicTree(null, true);  // Appel avec isInit = true
+
+        // Dispatch un événement personnalisé
+        const event = new Event('gedcomLoaded');
+        document.dispatchEvent(event);
+
+        displayGenealogicTree(null, true, true);  // Appel avec isInit = true
     } catch (error) {
         console.error('Erreur complète:', error);
         alert(error.message);
@@ -141,57 +165,166 @@ async function loadFileContent(file) {
 }
 
 /**
+ * Ajoute une personne à l'historique des racines et met à jour le sélecteur
+ * @param {Object} person - La personne à ajouter
+ */
+function addToRootHistory(person) {
+    const rootPersonResults = document.getElementById('root-person-results');
+    
+    // Récupérer l'historique des racines depuis le localStorage
+    let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+    
+    // Vérifier si cette personne est déjà dans l'historique
+    const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
+    
+    // Si la personne n'est pas dans l'historique, l'ajouter
+    if (existingIndex === -1) {
+        rootHistory.push({
+            id: person.id,
+            name: person.name.replace(/\//g, '').trim()
+        });
+        
+        // Sauvegarder l'historique mis à jour
+        localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
+    }
+
+    // Réinitialiser le sélecteur
+    rootPersonResults.innerHTML = '';
+    
+    // Remplir le sélecteur avec l'historique
+    rootHistory.forEach(entry => {
+        const option = document.createElement('option');
+        option.value = entry.id;
+        option.textContent = entry.name;
+        rootPersonResults.appendChild(option);
+    });
+
+    // Ajouter l'option "clear history"
+    const clearOption = document.createElement('option');
+    clearOption.value = 'clear-history';
+    clearOption.textContent = '--- Clear History ---';
+    rootPersonResults.appendChild(clearOption);
+
+
+    // Ajouter l'option "demo1"
+    const demoOption = document.createElement('option');
+    demoOption.value = 'demo1';
+    demoOption.textContent = '--- Demo1 ---';
+    rootPersonResults.appendChild(demoOption);
+
+
+    // Sélectionner la personne courante
+    rootPersonResults.value = person.id;
+}
+
+
+/**
+ * Gère le changement de sélection dans le sélecteur de personnes racines
+ * @param {Event} event - L'événement de changement
+ */
+export function handleRootPersonChange(event) {
+    const selectedValue = event.target.value;
+    
+    if (selectedValue === 'clear-history') {
+        // Vider l'historique
+        localStorage.removeItem('rootPersonHistory');
+        
+        // Garder uniquement la racine actuelle dans l'historique
+        const currentPerson = state.gedcomData.individuals[state.rootPersonId];
+        let newHistory = [{
+            id: currentPerson.id,
+            name: currentPerson.name.replace(/\//g, '').trim()
+        }];
+        
+        // Sauvegarder le nouvel historique
+        localStorage.setItem('rootPersonHistory', JSON.stringify(newHistory));
+        
+        // Mettre à jour le sélecteur avec seulement la racine actuelle
+        addToRootHistory(currentPerson);
+        
+        return;
+    }
+
+    if (selectedValue === 'demo1') {
+        // Réinitialiser l'état de l'animation avant de démarrer
+        resetAnimationState();
+        
+        // Forcer 2 générations
+        state.nombre_generation = 2;
+        document.getElementById('generations').value = '2';
+        
+        // Mettre à jour l'état de pause
+        const animationPauseBtn = document.getElementById('animationPauseBtn');
+        animationPauseBtn.querySelector('span').textContent = '⏸️';
+        
+        // Redessiner l'arbre d'abord
+        displayGenealogicTree(null, true, false);
+        
+        // Démarrer l'animation après un court délai
+        setTimeout(() => {
+            startAncestorAnimation();
+        }, 500);
+        
+        event.target.value = state.rootPersonId;
+        return;
+    }
+
+
+}
+
+/**
  * Affiche l'arbre généalogique
  * @param {string} rootPersonId - ID optionnel de la personne racine
  * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
  */
-export function displayGenealogicTree(rootPersonId = null, isInit = false) {
-    state.rootPersonId = rootPersonId || state.rootPersonId;
-    const person = state.rootPersonId 
-        ? state.gedcomData.individuals[state.rootPersonId] 
-        : findYoungestPerson();
+export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false) {
 
-    // Si c'est l'initialisation, configurer le sélecteur de personne racine
+    // Réinitialiser l'état de l'animation avant de changer l'arbre
+    resetAnimationState();
+
+    // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
+    const person = rootPersonId 
+        ? state.gedcomData.individuals[rootPersonId]
+        : state.rootPersonId 
+            ? state.gedcomData.individuals[state.rootPersonId]
+            : findYoungestPerson();
+
+    // Important : toujours sauvegarder l'ID de la personne courante
+    state.rootPersonId = rootPersonId || person.id;
+
+    // Si c'est l'initialisation, configurer le sélecteur avec la première racine
     if (isInit) {
         const rootPersonResults = document.getElementById('root-person-results');
         rootPersonResults.innerHTML = '';
-        
-        const option = document.createElement('option');
-        option.value = person.id;
-        option.textContent = person.name.replace(/\//g, '').trim();
-        rootPersonResults.appendChild(option);
-        
+        addToRootHistory(person);
         rootPersonResults.style.display = 'block';
         rootPersonResults.style.backgroundColor = 'orange';
+    } else {
+        // Sinon, ajouter la nouvelle racine à l'historique
+        addToRootHistory(person);
     }
 
 
     updateBoxWidth();
     
-    state.currentTree = buildAncestorTree(person.id);
-    drawTree();
+    // Construire l'arbre selon le mode
+    state.treeModeReal = state.treeMode;
+    state.currentTree = state.treeMode === 'descendants' 
+        ? buildDescendantTree(person.id)
+        : state.treeMode === 'ancestors'
+        ? buildAncestorTree(person.id)
+        : buildCombinedTree(person.id); // Pour le mode 'both'
+
+
+
+    drawTree(isZoomRefresh);
+
+    // Ne pas faire resetView() en mode both
+    if (state.treeModeReal !== 'both') {
+        resetView();    
+    }
+
 }
-
-
-
-
-/**
- * Met à jour le mode d'affichage de l'arbre
- * @param {string} mode - 'ancestors' ou 'descendants'
- */
-export function updateTreeMode(mode) {
-    state.treeMode = mode;
-
-    // Reconstruire l'arbre avec le mode approprié
-    state.currentTree = mode === 'ancestors' 
-        ? buildAncestorTree(state.rootPersonId)
-        : buildDescendantTree(state.rootPersonId);
-
-    // Redessiner l'arbre
-    drawTree();
-}
-
-
 
 /**
  * Met à jour la largeur des boîtes en fonction du nombre de prénoms
@@ -202,6 +335,18 @@ function updateBoxWidth() {
         state.nombre_prenoms = parseInt(state.nombre_prenoms, 10);
     }
     state.boxWidth = state.nombre_prenoms === 1 ? 90 : 120;
+}
+
+/**
+ * Met à jour le mode d'affichage de l'arbre (ascendants/descendants)
+ * et redessine l'arbre avec le nouveau mode
+ * @param {string} mode - Le mode d'affichage ('ancestors' ou 'descendants')
+ */
+export function updateTreeMode(mode) {
+    // Réinitialiser l'état de l'animation avant de changer le mode
+    resetAnimationState();
+    state.treeMode = mode;
+    displayGenealogicTree(null, true, false);
 }
 
 // Export des variables et fonctions nécessaires

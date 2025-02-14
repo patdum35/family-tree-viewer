@@ -5,6 +5,7 @@ import { state  } from './main.js';
 import { handleAncestorsClick } from './nodeControls.js';
 import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
 import { buildDescendantTree } from './treeOperations.js';
+import { geocodeLocation } from './modalWindow.js';
 
 // ID en dur pour test
 const TARGET_ANCESTOR_ID = "@I1336@"
@@ -13,6 +14,63 @@ const TARGET_ANCESTOR_ID = "@I1336@"
 // "@I5@" ; OK
 // "@I1328@"; Bad // À remplacer par l'ID réel de l'ancêtre cible
  
+
+
+let animationTimeouts = [];
+let optimalSpeechRate = 0.9;
+let animationMap = null;
+let animationMarker = null;
+
+function initAnimationMap() {
+    // Initialiser la carte
+    const mapContainer = document.getElementById('animation-map');
+    if (!mapContainer) return null;
+
+    animationMap = L.map('animation-map', {
+        center: [46.2276, 2.2137], // Centre de la France
+        zoom: 5,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    // Ajouter la couche de tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(animationMap);
+
+    return animationMap;
+}
+
+function updateMapLocation(location) {
+    if (!animationMap) {
+        animationMap = initAnimationMap();
+    }
+
+    // Géocoder la localisation
+    geocodeLocation(location).then(coords => {
+        if (coords) {
+            // Supprimer le marqueur précédent s'il existe
+            if (animationMarker) {
+                animationMap.removeLayer(animationMarker);
+            }
+
+            // Créer un nouveau marqueur avec une animation
+            animationMarker = L.marker([coords.lat, coords.lon], {
+                icon: L.icon({
+                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(animationMap);
+
+            // Animation de zoom et de centrage
+            animationMap.flyTo([coords.lat, coords.lon], 8, {
+                animate: true,
+                duration: 1.5 // Durée de l'animation en secondes
+            });
+        }
+    });
+}
+
+
 /**
  * Trouve le chemin entre une personne et son ancêtre
  * @private
@@ -76,29 +134,6 @@ function findNodeInTree(nodeId) {
  * Lance l'animation d'expansion vers l'ancêtre
  * @export
  */
-
-let animationTimeouts = [];
-
-
-export function stopAnimation() {
-    // Arrêter la synthèse vocale
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-    }
-
-    // Annuler l'animation
-    if (animationController) {
-        animationController.cancel();
-    }
-
-    // Réinitialiser les timeouts
-    animationTimeouts.forEach(timeout => clearTimeout(timeout));
-    animationTimeouts = [];
-}
-
-
-let optimalSpeechRate = 0.9;
-
 function simplifyName(fullName) {
     // Séparer le nom entre les barres obliques
     const nameParts = fullName.split('/');
@@ -199,28 +234,15 @@ function speakPersonName(personName) {
 
 let animationController = null;
 
-
-
-//  Fonction utilitaire pour obtenir la position à l'écran d'un nœud
-function getNodeScreenPosition(node) {
-    const svg = d3.select("#tree-svg");
-    const svgRect = svg.node().getBoundingClientRect();
-    const transform = getLastTransform() || d3.zoomIdentity;
-
-    // Calculer la position transformée
-    const x = transform.x + node.y * transform.k;
-    const y = transform.y + node.x * transform.k;
-
-    // console.log("-------------Position plus à droite: node.X=", node.y, " node.Y=", node.x, " transX=", x, " transY=", y, "transform.X =", transform.x , "transform.Y =", transform.y , " transform.k=", transform.k, "lastX=",state.lastHorizontalPosition, "lastY=",state.lastVerticalPosition);
-    return { x, y };
-}
-
+let animationState = {
+    path: [],          // Le chemin complet de l'animation
+    currentIndex: 0,   // L'index du nœud actuel
+    isPaused: false
+};
 
 export function startAncestorAnimation() {
 
-
-    if (state.isAnimationPaused) return;
-
+    // if (state.isAnimationPaused) return;
 
     state.lastHorizontalPosition = 0;
     state.lastVerticalPosition = 0;
@@ -235,26 +257,65 @@ export function startAncestorAnimation() {
             this.isCancelled = true;
         }
     };
+
+    // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
+    if (animationState.path.length === 0) {
+        animationState.path = findAncestorPath(state.rootPersonId, TARGET_ANCESTOR_ID);
+        animationState.currentIndex = 0;
+        animationState.isPaused = false;
+    }
+
+    // Initialiser la carte au début de l'animation
+    initAnimationMap();
+
+
     return new Promise(async (resolve, reject) => {
         try {
             // Nettoyer les timeouts existants
             animationTimeouts.forEach(timeout => clearTimeout(timeout));
             animationTimeouts = [];
 
-            const path = findAncestorPath(state.rootPersonId, TARGET_ANCESTOR_ID);
+            // const path = findAncestorPath(state.rootPersonId, TARGET_ANCESTOR_ID);
             // console.log("Chemin vers l'ancêtre:", path);
             
             // for (const nodeId of path) {
-            for (const [index, nodeId] of path.entries()) {
+            // for (const [index, nodeId] of path.entries()) {
 
-                // Vérifier si l'animation a été annulée
-                if (animationController.isCancelled) {
-                    // console.log('Animation annulée');
+            //     // Vérifier si l'animation a été annulée
+            //     if (animationController.isCancelled) {
+            //         // console.log('Animation annulée');
+            //         break;
+            //     }
+
+            // Reprendre à partir de l'index actuel
+            for (let i = animationState.currentIndex; i < animationState.path.length; i++) {
+                // Vérifier si l'animation a été annulée ou mise en pause
+                if (animationController.isCancelled || animationState.isPaused) {
+                    animationState.currentIndex = i;
                     break;
                 }
 
+                const nodeId = animationState.path[i];
                 const node = findNodeInTree(nodeId);
+
                 if (node) {
+
+
+                    // Chercher un lieu à afficher
+                    const person = state.gedcomData.individuals[node.data.id];
+                    const locationToDisplay = person.birthPlace || 
+                        (person.spouseFamilies && 
+                         person.spouseFamilies.length > 0 && 
+                         state.gedcomData.families[person.spouseFamilies[0]].marriagePlace) || 
+                        person.deathPlace;
+
+                    // Mettre à jour la carte si un lieu est trouvé
+                    if (locationToDisplay) {
+                        updateMapLocation(locationToDisplay);
+                    }
+
+
+
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
                     const voicePromise = state.isSpeechEnabled 
                         ? speakPersonName(node.data.name)
@@ -297,6 +358,11 @@ export function startAncestorAnimation() {
                     }
                 } 
             }
+            // Réinitialiser l'état si l'animation est terminée
+            if (animationState.currentIndex >= animationState.path.length) {
+                animationState.path = [];
+                animationState.currentIndex = 0;
+            }
             
             resolve(); // Résoudre la promesse une fois terminé
         } catch (error) {
@@ -304,4 +370,68 @@ export function startAncestorAnimation() {
             reject(error); // Rejeter en cas d'erreur
         }
     });
+}
+
+export function toggleAnimationPause() {
+    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    
+    // Basculer l'état de pause
+    animationState.isPaused = !animationState.isPaused;
+    
+    // Mettre à jour le bouton
+    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
+    
+    if (animationState.isPaused) {
+        // Mettre en pause
+        stopAnimation();
+    } else {
+        // Reprendre l'animation
+        startAncestorAnimation();
+    }
+}
+
+export function stopAnimation() {
+    // Arrêter la synthèse vocale
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+
+    // Annuler l'animation
+    if (animationController) {
+        animationController.cancel();
+    }
+
+    // Réinitialiser les timeouts
+    animationTimeouts.forEach(timeout => clearTimeout(timeout));
+    animationTimeouts = [];
+
+
+    // Supprimer le marqueur et réinitialiser la carte
+    if (animationMarker) {
+        animationMap.removeLayer(animationMarker);
+        animationMarker = null;
+    }
+    if (animationMap) {
+        animationMap.remove();
+        animationMap = null;
+    }
+
+
+
+}
+
+export function resetAnimationState() {
+    animationState = {
+        path: [],
+        currentIndex: 0,
+        isPaused: false
+    };
+
+    // Réinitialiser le contrôleur d'animation
+    if (animationController) {
+        animationController.isCancelled = true;
+    }
+
+    // Arrêter toute animation en cours
+    stopAnimation();
 }

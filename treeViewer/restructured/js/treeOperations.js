@@ -2,7 +2,7 @@
 // Opérations sur l'arbre
 // ====================================
 import { state } from './main.js';
-
+import { findClosestDescendant  } from './nodeControls.js';
 /**
  * Trouve tous les descendants d'une personne
  * @param {string} personId - ID de la personne
@@ -122,327 +122,13 @@ export function buildAncestorTree(personId, processed = new Set(), generation = 
 
 
 
-
 /**
  * Construit l'arbre des descendants
- * @param {string} personId - ID de la personne racine
+ * @param {string} personId - ID de la personne
  * @param {Set} processed - Ensemble des IDs traités
  * @param {number} generation - Génération actuelle
  * @returns {Object} - L'arbre des descendants
  */
-// export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
-//     if (processed.has(personId) || generation >= state.nombre_generation) {
-//         return null;
-//     }
-
-//     const person = state.gedcomData.individuals[personId];
-//     const node = {
-//         id: personId,
-//         name: person.name,
-//         generation: generation,
-//         children: [],
-//         birthDate: person.birthDate,
-//         deathDate: person.deathDate
-//     };
-
-//     processed.add(personId);
-
-//     // Traiter tous les mariages de la personne
-//     if (person.spouseFamilies) {
-//         person.spouseFamilies.forEach(famId => {
-//             const family = state.gedcomData.families[famId];
-//             if (family && family.children) {
-//                 // Ajouter le conjoint comme information
-//                 const spouseId = family.husband === personId ? family.wife : family.husband;
-//                 if (spouseId) {
-//                     const spouse = state.gedcomData.individuals[spouseId];
-//                     if (!node.spouses) node.spouses = [];
-//                     node.spouses.push({
-//                         id: spouseId,
-//                         name: spouse.name,
-//                         birthDate: spouse.birthDate,
-//                         deathDate: spouse.deathDate
-//                     });
-//                 }
-
-//                 // Traiter les enfants
-//                 family.children.forEach(childId => {
-//                     if (!processed.has(childId)) {
-//                         const childNode = buildDescendantTree(childId, processed, generation + 1);
-//                         if (childNode) {
-//                             node.children.push(childNode);
-//                         }
-//                     }
-//                 });
-//             }
-//         });
-//     }
-
-//     return node;
-// }
-
-
-/**
- * Construit l'arbre des descendants
- * @param {string} personId - ID de la personne racine
- * @param {Set} processed - Ensemble des IDs traités
- * @param {number} generation - Génération actuelle
- * @returns {Object} - L'arbre des descendants
- */
-// export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
-//     // Vérifications initiales
-//     if (!personId || !state.gedcomData || !state.gedcomData.individuals) {
-//         console.log("Données manquantes:", { personId, gedcomData: !!state.gedcomData });
-//         return null;
-//     }
-
-//     if (processed.has(personId) || generation >= state.nombre_generation) {
-//         return null;
-//     }
-
-//     const person = state.gedcomData.individuals[personId];
-//     if (!person) {
-//         console.log("Personne non trouvée:", personId);
-//         return null;
-//     }
-
-//     console.log("Construction arbre pour:", { 
-//         id: personId, 
-//         nom: person.name, 
-//         generation: generation 
-//     });
-
-//     const node = {
-//         id: personId,
-//         name: person.name,
-//         generation: generation,
-//         children: [],
-//         birthDate: person.birthDate,
-//         deathDate: person.deathDate
-//     };
-
-//     processed.add(personId);
-
-//     // Traiter tous les mariages de la personne
-//     if (person.spouseFamilies) {
-//         person.spouseFamilies.forEach(famId => {
-//             const family = state.gedcomData.families[famId];
-//             if (family && family.children) {
-//                 // Ajouter le conjoint comme information
-//                 const spouseId = family.husband === personId ? family.wife : family.husband;
-//                 if (spouseId) {
-//                     const spouse = state.gedcomData.individuals[spouseId];
-//                     if (spouse) {
-//                         if (!node.spouses) node.spouses = [];
-//                         node.spouses.push({
-//                             id: spouseId,
-//                             name: spouse.name,
-//                             birthDate: spouse.birthDate,
-//                             deathDate: spouse.deathDate
-//                         });
-//                     }
-//                 }
-
-//                 // Traiter les enfants
-//                 family.children.forEach(childId => {
-//                     if (!processed.has(childId)) {
-//                         const childNode = buildDescendantTree(childId, processed, generation + 1);
-//                         if (childNode) {
-//                             node.children.push(childNode);
-//                         }
-//                     }
-//                 });
-//             }
-//         });
-//     }
-
-//     return node;
-// }
-
-/**
- * Construit l'arbre des descendants
- * @param {string} personId - ID de la personne racine
- * @param {Set} processed - Ensemble des IDs traités
- * @param {number} generation - Génération actuelle
- * @returns {Object} - L'arbre des descendants
- */
-// export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
-//     if (processed.has(personId) || generation >= state.nombre_generation) {
-//         return null;
-//     }
-
-//     const person = state.gedcomData.individuals[personId];
-//     const node = {
-//         id: personId,
-//         name: person.name,
-//         generation: generation,
-//         children: [],
-//         birthDate: person.birthDate,
-//         deathDate: person.deathDate
-//     };
-
-//     processed.add(personId);
-
-//     // Si la personne a des conjoints, on les ajoute comme des siblings spéciaux
-//     if (person.spouseFamilies) {
-//         node.siblings = [];
-//         person.spouseFamilies.forEach(famId => {
-//             const family = state.gedcomData.families[famId];
-//             if (family) {
-//                 const spouseId = family.husband === personId ? family.wife : family.husband;
-//                 if (spouseId && !processed.has(spouseId)) {
-//                     const spouse = state.gedcomData.individuals[spouseId];
-//                     if (spouse) {
-//                         node.siblings.push({
-//                             id: spouseId,
-//                             name: spouse.name,
-//                             generation: generation,
-//                             isSpouse: true,  // Flag spécial pour les spouses
-//                             children: [],
-//                             birthDate: spouse.birthDate,
-//                             deathDate: spouse.deathDate,
-//                             siblingReferenceId: personId  // Référence vers le conjoint
-//                         });
-//                     }
-//                 }
-//             }
-
-//             // Traiter les enfants de cette famille
-//             if (family && family.children) {
-//                 family.children.forEach(childId => {
-//                     if (!processed.has(childId)) {
-//                         const childNode = buildDescendantTree(childId, processed, generation + 1);
-//                         if (childNode) {
-//                             node.children.push(childNode);
-//                         }
-//                     }
-//                 });
-//             }
-//         });
-//     }
-
-//     return node;
-// }
-
-/**
- * Construit l'arbre des descendants
- * @param {string} personId - ID de la personne racine
- * @param {Set} processed - Ensemble des IDs traités
- * @param {number} generation - Génération actuelle
- * @returns {Object} - L'arbre des descendants
- */
-// export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
-//     if (processed.has(personId) || generation >= state.nombre_generation) {
-//         return null;
-//     }
-
-//     const person = state.gedcomData.individuals[personId];
-//     const node = {
-//         id: personId,
-//         name: person.name,
-//         generation: generation,
-//         children: [],
-//         birthDate: person.birthDate,
-//         deathDate: person.deathDate
-//     };
-
-//     processed.add(personId);
-
-
-
-//     // Traiter d'abord la spouse de la racine
-//     if (generation === 0 && person.spouseFamilies) {
-//         const rootSpouses = [];
-//         person.spouseFamilies.forEach(famId => {
-//             const family = state.gedcomData.families[famId];
-//             if (family) {
-//                 const spouseId = family.husband === personId ? family.wife : family.husband;
-//                 if (spouseId && !processed.has(spouseId)) {
-//                     const spouse = state.gedcomData.individuals[spouseId];
-//                     if (spouse) {
-//                         processed.add(spouseId);
-//                         rootSpouses.push({
-//                             id: spouseId,
-//                             name: spouse.name,
-//                             generation: generation,
-//                             isSpouse: true,
-//                             spouseOf: personId,
-//                             children: [],
-//                             birthDate: spouse.birthDate,
-//                             deathDate: spouse.deathDate
-//                         });
-//                     }
-//                 }
-//             }
-//         });
-//         // Ajouter les spouses de la racine en premier
-//         node.children.push(...rootSpouses);
-//     }
-
-//     // Collecter les enfants et leurs spouses
-//     if (person.spouseFamilies) {
-//         const childrenWithSpouses = [];
-
-//         person.spouseFamilies.forEach(famId => {
-//             const family = state.gedcomData.families[famId];
-//             if (family) {
-//                 // Traiter les enfants de cette famille
-//                 if (family.children) {
-//                     family.children.forEach(childId => {
-//                         if (!processed.has(childId)) {
-//                             const childNode = buildDescendantTree(childId, processed, generation + 1);
-//                             if (childNode) {
-//                                 // Chercher le spouse de cet enfant
-//                                 let spouseNode = null;
-//                                 const childPerson = state.gedcomData.individuals[childId];
-//                                 if (childPerson.spouseFamilies) {
-//                                     const spouseFam = state.gedcomData.families[childPerson.spouseFamilies[0]];
-//                                     if (spouseFam) {
-//                                         const spouseId = spouseFam.husband === childId ? spouseFam.wife : spouseFam.husband;
-//                                         if (spouseId && !processed.has(spouseId)) {
-//                                             const spouse = state.gedcomData.individuals[spouseId];
-//                                             if (spouse) {
-//                                                 processed.add(spouseId);
-//                                                 spouseNode = {
-//                                                     id: spouseId,
-//                                                     name: spouse.name,
-//                                                     generation: generation + 1,
-//                                                     isSpouse: true,
-//                                                     spouseOf: childId,
-//                                                     children: [],
-//                                                     birthDate: spouse.birthDate,
-//                                                     deathDate: spouse.deathDate
-//                                                 };
-//                                             }
-//                                         }
-//                                     }
-//                                 }
-                                
-//                                 // Ajouter l'enfant et son spouse comme une paire
-//                                 childrenWithSpouses.push({
-//                                     child: childNode,
-//                                     spouse: spouseNode
-//                                 });
-//                             }
-//                         }
-//                     });
-//                 }
-//             }
-//         });
-
-//         // Maintenant, entrelacer les enfants et leurs spouses
-//         childrenWithSpouses.forEach(pair => {
-//             node.children.push(pair.child);
-//             if (pair.spouse) {
-//                 node.children.push(pair.spouse);
-//             }
-//         });
-//     }
-
-//     return node;
-// }
-
-
 export function buildDescendantTree(personId, processed = new Set(), generation = 0) {
     if (processed.has(personId) || generation >= state.nombre_generation) {
         return null;
@@ -454,31 +140,23 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
         name: person.name,
         generation: generation,
         children: [],
-        siblings: [],  // Pour stocker les spouses de la racine
         birthDate: person.birthDate,
         deathDate: person.deathDate
     };
 
-    processed.add(personId);
-
-    // Traiter la spouse de la racine comme un sibling spécial
+    // Traiter la spouse de la racine comme dans le mode ascendant
     if (generation === 0 && person.spouseFamilies) {
+        node.spouses = [];
         person.spouseFamilies.forEach(famId => {
             const family = state.gedcomData.families[famId];
             if (family) {
                 const spouseId = family.husband === personId ? family.wife : family.husband;
-                if (spouseId && !processed.has(spouseId)) {
+                if (spouseId) {
                     const spouse = state.gedcomData.individuals[spouseId];
                     if (spouse) {
-                        processed.add(spouseId);
-                        node.siblings.push({
+                        node.spouses.push({
                             id: spouseId,
                             name: spouse.name,
-                            generation: generation,
-                            isSpouse: true,
-                            spouseOf: personId,
-                            siblingReferenceId: personId,
-                            children: [],
                             birthDate: spouse.birthDate,
                             deathDate: spouse.deathDate
                         });
@@ -487,6 +165,8 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
             }
         });
     }
+
+    processed.add(personId);
 
     // Collecter les enfants et leurs spouses
     if (person.spouseFamilies) {
@@ -524,12 +204,7 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
                                     }
                                 }
                             }
-                            
-                            // Ajouter l'enfant et son spouse comme une paire
-                            childrenWithSpouses.push({
-                                child: childNode,
-                                spouse: spouseNode
-                            });
+                            childrenWithSpouses.push({child: childNode, spouse: spouseNode});
                         }
                     }
                 });
@@ -547,6 +222,52 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
 
     return node;
 }
+
+
+
+
+export function buildCombinedTree(personId) {
+    // Find closest descendant first
+    const descendants = findDescendants(personId);
+    const closestDescendant = findClosestDescendant(descendants, personId);
+    const targetId = closestDescendant ? closestDescendant.id : personId;
+
+
+    // Si pas de descendant proche, retourner un arbre d'ascendants
+    if (!closestDescendant) {
+        state.treeModeReal = 'ancestors';
+        return buildAncestorTree(personId, new Set(), 0);
+    }
+
+    state.treeModeReal = 'both';
+    // Build both trees
+    const descendantsTree = buildDescendantTree(personId, new Set(), 0);
+    const ancestorsTree = buildAncestorTree(targetId, new Set(), 0);
+    
+    const rootPerson = state.gedcomData.individuals[personId];
+    
+    return {
+        id: personId,
+        name: rootPerson.name,
+        birthDate: rootPerson.birthDate,
+        deathDate: rootPerson.deathDate,
+        descendants: descendantsTree ? descendantsTree.children : [],
+        ancestors: ancestorsTree ? ancestorsTree.children : [],
+        spouses: rootPerson.spouseFamilies ? 
+            rootPerson.spouseFamilies.map(famId => {
+                const family = state.gedcomData.families[famId];
+                const spouseId = family.husband === personId ? family.wife : family.husband;
+                const spouse = state.gedcomData.individuals[spouseId];
+                return {
+                    id: spouseId,
+                    name: spouse.name,
+                    birthDate: spouse.birthDate,
+                    deathDate: spouse.deathDate
+                };
+            }) : []
+    };
+}
+
 
 
 /**
