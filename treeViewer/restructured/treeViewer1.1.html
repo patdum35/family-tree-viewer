@@ -7,13 +7,11 @@
     
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="css/styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-        
+    
     <!-- Bibliothèques externes -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
     <!-- Formulaire de mot de passe -->
@@ -41,11 +39,9 @@
     <div id="tree-container" style="display: none;">
         <div class="controls">
             <div class="controls-row-1">
-                <button onclick="zoomIn()"><span>➕</span></button>
-                <button onclick="zoomOut()"><span>➖</span></button>
-                <button onclick="resetZoom()"><span>🏠</span></button>
-                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button"><span class="wide-span">🔇</span></button>
-                <button onclick="toggleAnimationPause()" id="animationPauseBtn"><span>⏸️</span></button>
+                <button onclick="zoomIn()">➕</button>
+                <button onclick="zoomOut()">➖</button>
+                <button onclick="resetZoom()">🏠</button>
                 <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
                 <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
                 <select id="root-person-results" style="display:block;">
@@ -66,8 +62,7 @@
                 <select id="treeMode" onchange="updateTreeMode(this.value)">
                     <option value="ancestors" selected>Ascendants</option>
                     <option value="descendants">Descendants</option>
-                    <option value="both">Ascend.+Descend.</option>
-                </select>
+                </select>`
             </div>
         </div>
 
@@ -93,19 +88,13 @@
             updateGenerations, 
             zoomIn, 
             zoomOut, 
-            resetZoom,
-            toggleSpeech,
-            toggleAnimationPause, 
+            resetZoom, 
             searchTree,
             displayPersonDetails,
             closePersonDetails,
             setAsRootPerson,
-            updateTreeMode,
-            handleRootPersonChange   
+            updateTreeMode 
         } from './js/main.js';
-        import { 
-            startAncestorAnimation 
-        } from './js/treeAnimation.js';
 
         // Rendre les fonctions disponibles globalement
         window.loadData = loadData;
@@ -114,23 +103,14 @@
         window.zoomIn = zoomIn;
         window.zoomOut = zoomOut;
         window.resetZoom = resetZoom;
-        window.toggleSpeech = toggleSpeech;
-        window.toggleAnimationPause = toggleAnimationPause;
         window.searchTree = searchTree;
         window.displayPersonDetails = displayPersonDetails;
         window.closePersonDetails = closePersonDetails;
         window.setAsRootPerson = setAsRootPerson; 
         window.updateTreeMode = updateTreeMode; 
-        window.handleRootPersonChange = handleRootPersonChange;
-        window.startAnimation = () => {
-            startAncestorAnimation().catch(console.error);
-        };
-
         // Ajouter les écouteurs d'événements une fois que tout est chargé
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loadDataButton').addEventListener('click', loadData);
-            document.getElementById('root-person-results')
-                .addEventListener('change', handleRootPersonChange);
         });
 
     </script>
