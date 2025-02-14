@@ -65,7 +65,9 @@ body {
 
 
 .controls {
-    position: relative;
+    /* position: relative; */
+    position: fixed; 
+    z-index: 1000;  /* Pour être au-dessus de l'arbre */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -73,6 +75,7 @@ body {
  }
  
  .controls-row-1, .controls-row-2  {
+    background-color: rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: flex-start; /* Justification à gauche */
     align-items: center;
@@ -86,6 +89,72 @@ body {
  }
 
 
+
+
+
+
+
+
+
+.controls-row-1 button {
+    min-width: 28px;  /* Force une largeur minimale */
+    height: 30px;
+    display: inline-flex;  /* Changement de flex */
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.controls-row-1 button:hover {
+    background-color: rgba(0,0,0,0.1);  /* Léger effet de survol */
+}
+
+.controls-row-1 button:focus {
+    outline: none;  /* Supprime le contour de focus */
+}
+
+
+
+.controls-row-1 button span {
+    font-size: 26px;  /*2rem;  Taille explicite pour le span
+    /* font-size: 2rem; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Bouton spécial plus grand */
+.controls-row-1 button.large-button {
+    min-width: 35px;  /* Largeur plus grande */
+    height: 30px;      /* Hauteur plus grande */
+    font-size: 30px;  /* Police légèrement plus grande */
+}
+
+.controls-row-1 button span.wide-span {
+    font-size: 32px; 
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.controls-row-1 button:hover { 
+    background-color: #e0e0e0;  /* Couleur de survol légèrement différente */
+}
+
+/* Pour s'assurer que le texte et les contrôles restent bien visibles */
+.controls select, 
+.controls input[type="number"],
+.controls input[type="text"],
+.controls button,
+.controls label {
+    background-color: rgba(255, 255, 255, 0.9);
+}
 
 
 .controls button {
@@ -125,10 +194,16 @@ body {
 .node text {
     font: 12px sans-serif;
 }
+
+
 #tree-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100vh;
 }
+
 .tooltip {
     position: absolute;
     background: white;
