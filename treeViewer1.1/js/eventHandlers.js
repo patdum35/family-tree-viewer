@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom } from './treeRenderer.js';
-import { state, displayGenealogicTree } from './main.js';
+import { state, displayGenealogicTree, hideMap } from './main.js';
 import { stopAnimation } from './treeAnimation.js';
 
 
@@ -218,6 +218,7 @@ export function resetView() {
 export function resetZoom() {
     stopAnimation();
     resetView();
+    hideMap();
 }
 
 

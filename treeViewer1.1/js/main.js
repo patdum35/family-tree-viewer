@@ -250,7 +250,6 @@ function addToRootHistory(person) {
 
 
 
-
     // Sélectionner la personne courante
     rootPersonResults.value = person.id;
 }
