@@ -37,7 +37,8 @@ export const state = {
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
-    isAnimationPaused: false
+    isAnimationPaused: false,
+    targetAncestorId: "@I741@"
 };
 
 export { geocodeLocation, validateLocations };
@@ -103,6 +104,9 @@ export async function loadData() {
         // Dispatch un événement personnalisé
         const event = new Event('gedcomLoaded');
         document.dispatchEvent(event);
+
+
+        hideMap();
 
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
     } catch (error) {
@@ -219,11 +223,32 @@ function addToRootHistory(person) {
     rootPersonResults.appendChild(clearOption);
 
 
+
     // Ajouter l'option "demo1"
     const demoOption = document.createElement('option');
     demoOption.value = 'demo1';
     demoOption.textContent = '--- Demo1 ---';
     rootPersonResults.appendChild(demoOption);
+    
+    // Ajouter l'option "demo2"
+    const demoOption2 = document.createElement('option');
+    demoOption2.value = 'demo2';
+    demoOption2.textContent = '--- Demo2 ---';
+    rootPersonResults.appendChild(demoOption2);
+
+    // Ajouter l'option "heatMap1"
+    const heatMapOption = document.createElement('option');
+    heatMapOption.value = 'heatMap1';
+    heatMapOption.textContent = '--- heatMap1 ---';
+    rootPersonResults.appendChild(heatMapOption);
+    
+    // Ajouter l'option "demo2"
+    const heatMapOption2 = document.createElement('option');
+    heatMapOption2.value = 'heatMap2';
+    heatMapOption2.textContent = '--- heatMap2 ---';
+    rootPersonResults.appendChild(heatMapOption2);
+
+
 
 
     // Sélectionner la personne courante
@@ -258,7 +283,13 @@ export function handleRootPersonChange(event) {
         return;
     }
 
-    if (selectedValue === 'demo1') {
+    if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
+        
+        if (selectedValue === 'demo1'){ state.targetAncestorId = "@I741@" }
+        else {  state.targetAncestorId = "@I1327@"}
+        
+        showMap();
+
         // Réinitialiser l'état de l'animation avant de démarrer
         resetAnimationState();
         
@@ -396,9 +427,17 @@ export function saveTargetAncestorId() {
     }
 }
 
+// Fonction pour masquer la map
+export function hideMap() {
+    const mapContainer = document.getElementById('animation-map-container');
+    mapContainer.style.display = 'none';
+}
 
-
-
+// Fonction pour afficher la map
+function showMap() {
+    const mapContainer = document.getElementById('animation-map-container');
+    mapContainer.style.display = 'block';
+}
 
 
 // Export des variables et fonctions nécessaires

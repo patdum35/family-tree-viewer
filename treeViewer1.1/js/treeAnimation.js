@@ -22,14 +22,14 @@ let animationTimeouts = [];
 let optimalSpeechRate = 0.9;
 let animationMap = null;
 let animationMarker = null;
-let targetAncestorId = "@I741@"; // Valeur par défaut
+// let targetAncestorId = "@I741@"; // Valeur par défaut
 
 export function setTargetAncestorId(newId) {
-    targetAncestorId = newId;
+    state.targetAncestorId = newId;
 }
 
 export function getTargetAncestorId() {
-    return targetAncestorId;
+    return state.targetAncestorId;
 }
 
 function initAnimationMap() {
@@ -416,6 +416,8 @@ export function startAncestorAnimation() {
 
     // if (state.isAnimationPaused) return;
 
+    resetMap();
+
     state.lastHorizontalPosition = 0;
     state.lastVerticalPosition = 0;
     let firstTimeShift = true;
@@ -432,7 +434,7 @@ export function startAncestorAnimation() {
 
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
-        animationState.path = findAncestorPath(state.rootPersonId, targetAncestorId);
+        animationState.path = findAncestorPath(state.rootPersonId, state.targetAncestorId);
         animationState.currentIndex = 0;
         animationState.isPaused = false;
     }
@@ -586,6 +588,10 @@ export function toggleAnimationPause() {
         stopAnimation();
     } else {
         // Reprendre l'animation
+
+        // Supprimer le marqueur et réinitialiser la carte
+        // resetMap();
+
         startAncestorAnimation();
     }
 }
@@ -606,6 +612,19 @@ export function stopAnimation() {
     animationTimeouts = [];
 
 
+    // // Supprimer le marqueur et réinitialiser la carte
+    // if (animationMarker) {
+    //     animationMap.removeLayer(animationMarker);
+    //     animationMarker = null;
+    // }
+    // if (animationMap) {
+    //     animationMap.remove();
+    //     animationMap = null;
+    // }
+
+}
+
+export function resetMap() {
     // Supprimer le marqueur et réinitialiser la carte
     if (animationMarker) {
         animationMap.removeLayer(animationMarker);
@@ -615,9 +634,6 @@ export function stopAnimation() {
         animationMap.remove();
         animationMap = null;
     }
-
-
-
 }
 
 export function resetAnimationState() {
