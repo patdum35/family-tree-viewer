@@ -129,6 +129,7 @@ function initializeGenerationSelect() {
 export async function loadData() {
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
+    toggleFullScreen();
     
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
