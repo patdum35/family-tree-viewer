@@ -1,1 +1,286 @@
+<!DOCTYPE html>
+<html>
+<!-- <head> -->
+    <!-- <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbre généalogique</title> -->
+    
+    <!-- CSS -->
+    <!-- <link rel="stylesheet" type="text/css" href="css/styles.css"> -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" /> -->
+        
+    <!-- Bibliothèques externes -->
+    <!-- <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script> -->
+<!-- </head> -->
 
+
+
+<head>
+    <!-- Méta tags pour le mode plein écran mobile -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Arbre généalogique</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />    
+
+    <!-- Bibliothèques externes -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+    // Ajouter un script pour masquer la barre du navigateur sur mobile
+    window.addEventListener('load', function() {
+        // Pour iOS
+        if (window.navigator.standalone === false) {
+            window.scrollTo(0, 1);
+        }
+        
+        // Pour Android et autres
+        if ('standalone' in window.navigator) {
+            document.documentElement.requestFullscreen();
+        }
+    });
+    </script>
+</head>
+
+
+
+
+
+
+
+<body>
+    <!-- Formulaire de mot de passe -->
+    <div id="password-form">
+        <div class="form-container">
+            <div class="password-row">
+                <input type="password" id="password" placeholder="Mot de passe (pour fichier crypté)">
+            </div>
+            <div class="or-row">
+                <div>ou</div>
+            </div>
+            <div class="file-row">
+                <input type="file" id="gedFile" accept=".ged">
+            </div>
+            <div style="margin-top: -15px; margin-bottom: 20px; ">
+                <label style="text-align: left; display: block; margin-left:15px">GEDCOM<br></label>
+            </div>
+            <div class="submit-row">
+                <button id="loadDataButton">Afficher l'arbre</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteneur de l'arbre -->
+    <div id="tree-container" style="display: none;">
+        <div class="controls">
+            <div class="controls-row-1">
+                <button onclick="zoomIn()"><span>➕</span></button>
+                <button onclick="zoomOut()"><span>➖</span></button>
+                <button onclick="resetZoom()"><span>🏠</span></button>
+                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button"><span class="wide-span">🔇</span></button>
+                <button onclick="toggleAnimationPause()" id="animationPauseBtn"><span>⏸️</span></button>
+                <button onclick="openSettingsModal()" id="settingsBtn"><span>⚙️</span></button>
+                <button onclick="toggleFullScreen()" class="large-button"><span>⛶</span></button>
+                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
+                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
+                <select id="root-person-results" style="display:block;">
+                    <option value="">Select</option>
+                </select>
+            </div>
+            <div class="controls-row-2">
+                <!-- <button onclick="toggleFullScreen()" class="large-button"><span class="wide-span">⛶</span></button> -->
+                <label for="prenoms">nbre<br>prénom</label>
+                <select id="prenoms" onchange="updatePrenoms(this.value)">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <label for="generations">nbre<br>géné</label>
+                <select id="generations" onchange="updateGenerations(this.value)">
+                </select>
+                <select id="treeMode" onchange="updateTreeMode(this.value)">
+                    <option value="ancestors" selected>Ascendants</option>
+                    <option value="descendants">Descendants</option>
+                    <option value="both">Ascend.+Descend.</option>
+                </select>
+            </div>                       
+        </div>
+
+        <svg id="tree-svg"></svg>
+        <div id="animation-map-container" style="position: fixed; bottom: 20px; left: 20px; width: 300px; height: 200px; z-index: 1000; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div id="animation-map" style="width: 100%; height: 100%; border-radius: 10px;"></div>
+        </div>
+ 
+    </div>
+
+
+
+    <!-- Fenêtre modale pour les détails -->
+    <div id="person-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-person-name"></h2>
+                <span class="modal-close" onclick="closePersonDetails()">&times;</span>
+            </div>
+            <div id="person-details-content"></div>
+        </div>
+    </div>
+
+
+    <div id="settings-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Paramètres</h2>
+                <span class="modal-close" onclick="closeSettingsModal()">&times;</span>
+            </div>
+            <div id="settings-content">
+                <div class="settings-section">
+                    <h3>Animation des Ancêtres</h3>
+                    <label for="targetAncestorId">ID de l'Ancêtre Cible :</label>
+                    <input 
+                        type="text" 
+                        id="targetAncestorId" 
+                        value="@I741@" 
+                        placeholder="Entrez l'ID de l'ancêtre"
+                    >
+                    <button onclick="saveTargetAncestorId()">Enregistrer</button>
+                </div>
+                
+                <!-- Nouveau bloc pour la validation des lieux -->
+                <div class="settings-section">
+                    <h3>Validation des Lieux</h3>
+                    <button onclick="validateLocations()">Scanner les Lieux</button>
+                    <select id="unlocatableLocations" size="10" style="width: 100%; margin-top: 10px;">
+                        <option>Résultats apparaîtront ici</option>
+                    </select>
+                </div>
+                <div class="settings-section">
+                    <h3>Heatmaps</h3>
+                    <div>
+                        <label for="heatmapMaxPersons">Nombre max. de personnes :</label>
+                        <input 
+                            type="number" 
+                            id="heatmapMaxPersons" 
+                            value="10" 
+                            min="1"
+                            max="10000"
+                            style="width: 80px;"
+                        >
+                    </div>
+                    <button onclick="createAncestorsHeatMap({type: 'all'})">Heatmap Complète</button>
+                    <button onclick="createAncestorsHeatMap({type: 'ancestors'})">Heatmap Ascendants</button>
+                    <button onclick="createAncestorsHeatMap({type: 'descendants'})">Heatmap Descendants</button>
+                </div>
+
+                <!-- Section pour le géocodage -->
+                <div class="settings-section">
+                    <h3>Géocodage Local</h3>
+                    <div style="margin-bottom: 10px;">
+                        <label for="maxLocations">Nombre max. de lieux à traiter :</label>
+                        <input 
+                            type="number" 
+                            id="maxLocations" 
+                            value="10" 
+                            min="1"
+                            style="width: 80px;"
+                        >
+                        <span style="font-size: 0.8em; color: #666;">(0 = tous)</span>
+                    </div>
+                    <button onclick="generateGeocodeFile()">Générer fichier geolocalisation.json</button>
+                    <div id="geocoding-progress" style="margin-top: 10px; display: none;">
+                        <div id="geocoding-status"></div>
+                        <progress id="geocoding-bar" value="0" max="100" style="width: 100%;"></progress>
+                    </div>
+                    <select id="geocoding-results" size="10" style="width: 100%; margin-top: 10px; display: none;">
+                        <option>Résultats apparaîtront ici</option>
+                    </select>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Scripts -->
+    <script type="module">
+        import { 
+            loadData, 
+            updatePrenoms, 
+            updateGenerations, 
+            zoomIn, 
+            zoomOut, 
+            resetZoom,
+            toggleSpeech,
+            searchTree,
+            displayPersonDetails,
+            closePersonDetails,
+            setAsRootPerson,
+            updateTreeMode,
+            handleRootPersonChange,
+            openSettingsModal,
+            closeSettingsModal,
+            saveTargetAncestorId,
+            toggleFullScreen
+        } from './js/main.js';
+        import { 
+            startAncestorAnimation 
+        } from './js/treeAnimation.js';
+        import { 
+            validateLocations,
+            createAncestorsHeatMap 
+        } from './js/geoLocalisation.js';
+        import {
+            initBackgroundContainer
+        } from './js/backgroundManager.js';
+
+        // Rendre les fonctions disponibles globalement
+        window.loadData = loadData;
+        window.updatePrenoms = updatePrenoms;
+        window.updateGenerations = updateGenerations;
+        window.zoomIn = zoomIn;
+        window.zoomOut = zoomOut;
+        window.resetZoom = resetZoom;
+        window.toggleSpeech = toggleSpeech;
+        window.toggleAnimationPause = toggleAnimationPause;
+        window.searchTree = searchTree;
+        window.displayPersonDetails = displayPersonDetails;
+        window.closePersonDetails = closePersonDetails;
+        window.setAsRootPerson = setAsRootPerson; 
+        window.updateTreeMode = updateTreeMode; 
+        window.handleRootPersonChange = handleRootPersonChange;
+        window.openSettingsModal = openSettingsModal;
+        window.closeSettingsModal = closeSettingsModal;
+        window.saveTargetAncestorId = saveTargetAncestorId;
+        window.validateLocations = validateLocations;
+        window.createAncestorsHeatMap = createAncestorsHeatMap;
+        window.initBackgroundContainer = initBackgroundContainer;
+        window.toggleFullScreen = toggleFullScreen;
+        window.startAnimation = () => {
+            startAncestorAnimation().catch(console.error);
+        };
+
+        // Ajouter les écouteurs d'événements une fois que tout est chargé
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loadDataButton').addEventListener('click', loadData);
+            document.getElementById('root-person-results')
+                .addEventListener('change', handleRootPersonChange);
+        });
+
+    </script>
+</body>
+</html>
