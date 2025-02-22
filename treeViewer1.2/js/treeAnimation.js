@@ -372,7 +372,10 @@ export function startAncestorAnimation() {
                     const locations = [
                         { type: 'Naissance', place: person.birthPlace },
                         { type: 'Mariage', place: null },
-                        { type: 'Décès', place: person.deathPlace }
+                        { type: 'Décès', place: person.deathPlace },
+                        { type: 'Résidence1', place: person.residPlace1 },
+                        { type: 'Résidence2', place: person.residPlace2 },
+                        { type: 'Résidence3', place: person.residPlace3 }
                     ];
 
                     // Rechercher le lieu de mariage
@@ -388,7 +391,10 @@ export function startAncestorAnimation() {
                     const locationSymbols = {
                         'Naissance': '🌳', //'👶'
                         'Mariage': '❤️', //<span style="color: #FF0000;">🔗</span>', //.'💍'
-                        'Décès': '✝️' //'✟' //'✟', 
+                        'Décès': '✝️', //'✟' //'✟', 
+                        'Résidence1': '🏠',
+                        'Résidence2': '🏠',
+                        'Résidence3': '🏠'
                     };
 
                     // Mettre à jour la carte

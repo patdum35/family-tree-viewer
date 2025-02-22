@@ -45,7 +45,6 @@ export const state = {
 export { geocodeLocation, validateLocations };
 
 window.toggleAnimationPause = toggleAnimationPause;
-// window.createAncestorsHeatMap = createAncestorsHeatMap;
 
 // ajoutez des options pour différents types de heatmap
 export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
@@ -68,8 +67,6 @@ export function toggleSpeech() {
     speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔇' : '🔊';
 }
 
-
-
 export function toggleFullScreen() {
     if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {
@@ -88,26 +85,10 @@ export function toggleFullScreen() {
     }
 }
 
-
 function initialize() {
     initializeGenerationSelect();
     initializeEventHandlers();
 }
-
-// function initialize() {
-//     initializeGenerationSelect();
-//     initializeEventHandlers();
-
-//     // Ajoutez ce code pour le plein écran
-//     if (document.documentElement.requestFullscreen) {
-//         document.documentElement.requestFullscreen().catch(err => {
-//             console.log(`Erreur lors du passage en plein écran : ${err.message}`);
-//         });
-//     }
-// }
-
-// window.addEventListener('load', initialize);
-
 
 /**
  * Initialise le sélecteur de générations
@@ -135,6 +116,19 @@ export async function loadData() {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
         state.gedcomData = parseGEDCOM(gedcomContent);
         
+
+        // // Nettoyer tous les conteneurs de fond d'écran existants
+        // const loginBackground = document.querySelector('.login-background');
+        // if (loginBackground) {
+        //     loginBackground.remove();
+        // }
+        // const existingBackgroundContainer = document.querySelector('.background-container');
+        // if (existingBackgroundContainer) {
+        //     existingBackgroundContainer.remove();
+        // }
+
+
+
         document.getElementById('password-form').style.display = 'none';
         document.getElementById('tree-container').style.display = 'block';
 
@@ -299,7 +293,6 @@ function addToRootHistory(person) {
     rootPersonResults.value = person.id;
 }
 
-
 /**
  * Gère le changement de sélection dans le sélecteur de personnes racines
  * @param {Event} event - L'événement de changement
@@ -348,6 +341,19 @@ export function handleRootPersonChange(event) {
         // Redessiner l'arbre d'abord
         displayGenealogicTree(null, true, false);
         
+
+
+        // Nettoyer tous les conteneurs de fond d'écran existants
+        const loginBackground = document.querySelector('.login-background');
+        if (loginBackground) {
+            loginBackground.remove();
+        }
+        const existingBackgroundContainer = document.querySelector('.background-container');
+        if (existingBackgroundContainer) {
+            existingBackgroundContainer.remove();
+        }
+
+
         // Démarrer l'animation après un court délai
         setTimeout(() => {
             startAncestorAnimation();
@@ -437,7 +443,6 @@ export function updateTreeMode(mode) {
     displayGenealogicTree(null, true, false);
 }
 
-
 // Fonctions de gestion de la modal de paramètres
 export function openSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
@@ -482,7 +487,6 @@ export function showMap() {
     const mapContainer = document.getElementById('animation-map-container');
     mapContainer.style.display = 'block';
 }
-
 
 // Export des variables et fonctions nécessaires
 export {

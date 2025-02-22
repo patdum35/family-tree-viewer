@@ -33,6 +33,25 @@ export function extractYear(dateString) {
     return parseInt(year) || '0';
 }
 
+
+// export function extractYear(dateString) {
+//     if (!dateString) return '0';
+//     const parts = dateString.split(' ');
+    
+//     // Chercher un nombre à 4 chiffres, sans restriction
+//     const yearMatch = dateString.match(/\b(\d{4})\b/);
+    
+//     if (yearMatch) {
+//         const year = parseInt(yearMatch[1]);
+//         return year;
+//     }
+    
+//     // Fallback sur la méthode originale si pas de match
+//     const year = parts[parts.length - 1];
+//     return parseInt(year) || '0';
+// }
+
+
 /**
  * Trouve la personne la plus jeune dans les données GEDCOM
  * @returns {Object} - La personne la plus jeune

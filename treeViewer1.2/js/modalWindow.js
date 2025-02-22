@@ -58,6 +58,16 @@ export function displayPersonDetails(personId) {
         </div>
     `;
 
+    // Add profession only if it exists
+    if (person.occupation) {
+        detailsHTML += `
+            <div class="details-section">
+                <h3>Profession</h3>
+                <p>${person.occupation}</p>
+            </div>
+        `;
+    }
+
     // Add birth details only if they exist
     if (person.birthDate || person.birthPlace) {
         detailsHTML += `
@@ -80,15 +90,52 @@ export function displayPersonDetails(personId) {
         `;
     }
 
-    // Add profession only if it exists
-    if (person.occupation) {
+
+    if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+        const marriageFamily = state.gedcomData.families[person.spouseFamilies[0]];
+        if (marriageFamily && (marriageFamily.marriageDate || marriageFamily.marriagePlace)) {
+            detailsHTML += `
+                <div class="details-section">
+                    <h3>Mariage</h3>
+                    ${marriageFamily.marriageDate ? `<p><strong>Date :</strong> ${marriageFamily.marriageDate}</p>` : ''}
+                    ${marriageFamily.marriagePlace ? `<p><strong>Lieu :</strong> ${marriageFamily.marriagePlace}</p>` : ''}
+                </div>
+            `;
+        }
+    }
+
+
+    // Add residence  details only if they exist
+    if (person.residDate1 || person.residPlace1) {
         detailsHTML += `
             <div class="details-section">
-                <h3>Profession</h3>
-                <p>${person.occupation}</p>
+                <h3>Résidence</h3>
+                ${person.residDate1 ? `<p><strong>Date :</strong> ${person.residDate1}</p>` : ''}
+                ${person.residPlace1 ? `<p><strong>Lieu :</strong> ${person.residPlace1}</p>` : ''}
             </div>
         `;
     }
+    // Add residence  details only if they exist
+    if (person.residDate2 || person.residPlace2) {
+        detailsHTML += `
+            <div class="details-section">
+                <h3>Résidence</h3>
+                ${person.residDate2 ? `<p><strong>Date :</strong> ${person.residDate2}</p>` : ''}
+                ${person.residPlace2 ? `<p><strong>Lieu :</strong> ${person.residPlace2}</p>` : ''}
+            </div>
+        `;
+    }
+    // Add residence  details only if they exist
+    if (person.residDate3 || person.residPlace3) {
+        detailsHTML += `
+            <div class="details-section">
+                <h3>Résidence</h3>
+                ${person.residDate3 ? `<p><strong>Date :</strong> ${person.residDate3}</p>` : ''}
+                ${person.residPlace3 ? `<p><strong>Lieu :</strong> ${person.residPlace3}</p>` : ''}
+            </div>
+        `;
+    }
+
 
     // Add notes if available and text is not empty
     if (person.notes && person.notes.length > 0) {
@@ -315,26 +362,6 @@ export function findContextualHistoricalFigures(personId) {
     return context;
 }
 
-// export async function geocodeLocation(location) {
-//     try {
-//         // Utiliser l'API de Nominatim (OpenStreetMap)
-//         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
-//         const data = await response.json();
-        
-//         if (data && data.length > 0) {
-//             // Retourner les coordonnées du premier résultat
-//             return {
-//                 lat: parseFloat(data[0].lat),
-//                 lon: parseFloat(data[0].lon)
-//             };
-//         }
-//         return null;
-//     } catch (error) {
-//         console.error('Erreur de géocodage:', error);
-//         return null;
-//     }
-// }
-
 function displayLocationPoints(personId) {
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
@@ -342,15 +369,21 @@ function displayLocationPoints(personId) {
     // Collecter les lieux
     const locations = [
         { type: 'Naissance', place: person.birthPlace },
-        { type: 'Mariage', place: null },
-        { type: 'Décès', place: person.deathPlace }
+        { type: 'Décès', place: person.deathPlace },
+        { type: 'Résidence1', place: person.residPlace1 },
+        { type: 'Résidence2', place: person.residPlace2 },
+        { type: 'Résidence3', place: person.residPlace3 }
     ];
 
-    // Rechercher le lieu de mariage
+
+    // Ajouter le lieu de mariage depuis la famille
     if (person.spouseFamilies && person.spouseFamilies.length > 0) {
         const marriageFamily = state.gedcomData.families[person.spouseFamilies[0]];
-        locations[1].place = marriageFamily ? marriageFamily.marriagePlace : null;
+        if (marriageFamily && marriageFamily.marriagePlace) {
+            locations.splice(1, 0, { type: 'Mariage', place: marriageFamily.marriagePlace });
+        }
     }
+
 
     // Filtrer les lieux non-nuls
     const validLocations = locations.filter(loc => loc.place);
@@ -383,7 +416,10 @@ function createMultiLocationMap(locations) {
     const locationSymbols = {
         'Naissance': '🌳', //'👶'
         'Mariage': '❤️', //<span style="color: #FF0000;">🔗</span>', //.'💍'
-        'Décès': '✝️' //'✟' //'✟', 
+        'Décès': '✝️', //'✟' //'✟', 
+        'Résidence1': '🏠',
+        'Résidence2': '🏠',
+        'Résidence3': '🏠'
     };
 
     // Stocker les coordonnées pour ajuster la vue

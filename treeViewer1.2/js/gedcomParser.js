@@ -36,6 +36,7 @@ export function parseGEDCOM(gedcomText) {
     let currentEntity = null;
     let currentNoteCounter = 1;
     let currentSourceCounter = 1;
+    let residenceCounter = 0;
 
     for (const line of lines) {
         const match = line.match(/^\s*(\d+)\s+(@\w+@)?\s*(\w+)?\s*(.*)?$/);
@@ -52,13 +53,20 @@ export function parseGEDCOM(gedcomText) {
                     birthPlace: "",
                     deathDate: "",
                     deathPlace: "",
-                    marriagePlace: "",
+                    // marriagePlace: "",
+                    residDate1: "",
+                    residPlace1: "",
+                    residDate2: "",
+                    residPlace2: "",
+                    residDate3: "",
+                    residPlace3: "",
                     occupation: "",
                     families: [],
                     notes: [],
                     sources: []
                 };
                 currentEntity = individuals[id];
+                residenceCounter = 0;
             } else if (tag === "FAM") {
                 families[id] = { 
                     id, 
@@ -66,6 +74,7 @@ export function parseGEDCOM(gedcomText) {
                     wife: null, 
                     children: [],
                     marriageDate: "",
+                    marriagePlace: "",
                     notes: [],
                     sources: []
                 };
@@ -82,7 +91,11 @@ export function parseGEDCOM(gedcomText) {
             } else if (tag === "DEAT") {
                 currentEntity._expectingDeathDate = true;
                 currentEntity._expectingDeathPlace = true;
+                
+                currentEntity._expectingBirthDate = false;
+                currentEntity._expectingBirthPlace = false;
             } else if (tag === "MARR") {
+                currentEntity._expectingMarriageDate = true;
                 currentEntity._expectingMarriagePlace = true;
             } else if (tag === "OCCU") {
                 currentEntity.occupation = data;
@@ -100,8 +113,8 @@ export function parseGEDCOM(gedcomText) {
                     }
                     currentEntity.spouseFamilies.push(data);
                 }
-            } else if (tag === "MARR") {
-                currentEntity._expectingMarriageDate = true;
+            // } else if (tag === "MARR") {
+            //     currentEntity._expectingMarriageDate = true;
             } else if (tag === "NOTE") {
                 const noteId = `NOTE_${currentNoteCounter++}`;
                 notes[noteId] = { text: data.trim() };
@@ -110,7 +123,42 @@ export function parseGEDCOM(gedcomText) {
                 const sourceId = `SOURCE_${currentSourceCounter++}`;
                 sources[sourceId] = { text: data.trim() };
                 currentEntity.sources.push(sourceId);
+            } else if (tag === "RESI") {
+                residenceCounter++;
+                if (residenceCounter === 1) {
+                    currentEntity._expectingResidDate1 = true;
+                    currentEntity._expectingResidPlace1 = true;
+
+                    currentEntity._expectingBirthDate = false;
+                    currentEntity._expectingBirthPlace = false;
+                    currentEntity._expectingDeathDate = false;
+                    currentEntity._expectingDeathPlace = false;
+                } else if (residenceCounter === 2) {
+                    currentEntity._expectingResidDate2 = true;
+                    currentEntity._expectingResidPlace2 = true;
+
+                    currentEntity._expectingBirthDate = false;
+                    currentEntity._expectingBirthPlace = false;
+                    currentEntity._expectingDeathDate = false;
+                    currentEntity._expectingDeathPlace = false;
+                    currentEntity._expectingResidDate1 = false;
+                    currentEntity._expectingResidPlace1 = false;
+                } else if (residenceCounter === 3) {
+                    currentEntity._expectingResidDate3 = true;
+                    currentEntity._expectingResidPlace3 = true;
+
+                    currentEntity._expectingBirthDate = false;
+                    currentEntity._expectingBirthPlace = false;
+                    currentEntity._expectingDeathDate = false;
+                    currentEntity._expectingDeathPlace = false;
+                    currentEntity._expectingResidDate1 = false;
+                    currentEntity._expectingResidPlace1 = false;
+                    currentEntity._expectingResidDate2 = false;
+                    currentEntity._expectingResidPlace2 = false;
+                }
             }
+
+
         } else if (currentEntity && level === "2") {
             if (tag === "PLAC") {
                 if (currentEntity._expectingBirthPlace) {
@@ -121,10 +169,19 @@ export function parseGEDCOM(gedcomText) {
                     delete currentEntity._expectingDeathPlace;
                 } else if (currentEntity._expectingMarriagePlace) {
                     currentEntity.marriagePlace = data;
+                    // console.log('in parseGedcom marriagePlace= ',data);
                     delete currentEntity._expectingMarriagePlace;
-                }
-            }
-            if (tag === "DATE") {
+                } else if (currentEntity._expectingResidPlace1) {
+                    currentEntity.residPlace1 = data;
+                    delete currentEntity._expectingResidPlace1;
+                } else if (currentEntity._expectingResidPlace2) {
+                    currentEntity.residPlace2 = data;
+                    delete currentEntity._expectingResidPlace2;
+                } else if (currentEntity._expectingResidPlace3) {
+                    currentEntity.residPlace3 = data;
+                    delete currentEntity._expectingResidPlace3;
+                }   
+            } else if (tag === "DATE") {
                 if (currentEntity._expectingBirthDate) {
                     currentEntity.birthDate = data;
                     delete currentEntity._expectingBirthDate;
@@ -133,7 +190,17 @@ export function parseGEDCOM(gedcomText) {
                     delete currentEntity._expectingDeathDate;
                 } else if (currentEntity._expectingMarriageDate) {
                     currentEntity.marriageDate = data;
+                    // console.log('in parseGedcom marriageDate= ',data);
                     delete currentEntity._expectingMarriageDate;
+                } else if (currentEntity._expectingResidDate1) {
+                    currentEntity.residDate1 = data;
+                    delete currentEntity._expectingResidDate1;
+                } else if (currentEntity._expectingResidDate2) {
+                    currentEntity.residDate2 = data;
+                    delete currentEntity._expectingResidDate2;
+                } else if (currentEntity._expectingResidDate3) {    
+                    currentEntity.residDate3 = data;
+                    delete currentEntity._expectingResidDate3;
                 }
             } else if (tag === "NOTE") {
                 const noteId = `NOTE_${currentNoteCounter++}`;
