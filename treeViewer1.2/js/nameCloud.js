@@ -442,48 +442,430 @@ function showPersonsList(name, people, config) {
 
 
 
-const NameCloud = ({ nameData , config }) => {
+// const NameCloud = ({ nameData , config }) => {
+//     React.useEffect(() => {
+//         if (!nameData || nameData.length === 0) return;
+
+//         d3.select('#name-cloud-svg').selectAll('*').remove();
+
+//         const width = 800;
+//         const height = 600;
+
+//         const svg = d3.select('#name-cloud-svg')
+//             .attr('width', width)
+//             .attr('height', height);
+
+//         // Fond
+//         svg.append('rect')
+//             .attr('width', width)
+//             .attr('height', height)
+//             .attr('fill', '#f7fafc');
+
+//         // Échelle pour la taille des polices
+//         const fontScale = d3.scaleLog()
+//             .domain([1, d3.max(nameData, d => d.size)])
+//             .range([10, 45])
+//             .clamp(true);
+
+//         // Palette de couleurs vives
+//         const colorPalette = [
+//             '#1E88E5', // bleu vif
+//             '#E53935', // rouge vif
+//             '#43A047', // vert vif
+//             '#FB8C00', // orange vif
+//             '#8E24AA', // violet vif
+//             '#00ACC1', // cyan vif
+//             '#FFB300', // jaune vif
+//             '#3949AB', // indigo vif
+//             '#00897B', // turquoise vif
+//             '#7CB342'  // vert lime vif
+//         ];
+
+//         const color = d3.scaleOrdinal(colorPalette);
+
+//         const layout = d3.layout.cloud()
+//             .size([width - 20, height - 20])
+//             .words(nameData.map(d => ({
+//                 text: d.text,
+//                 size: fontScale(d.size),
+//                 originalSize: d.size
+//             })))
+//             .padding(1)
+//             .rotate(0)
+//             .fontSize(d => d.size)
+//             .spiral('rectangular')
+//             .random(() => 0.5)
+//             .canvas(function() {
+//                 const canvas = document.createElement('canvas');
+//                 canvas.setAttribute('willReadFrequently', 'true');
+//                 return canvas;
+//             })
+//             .on('end', words => {
+//                 draw(words);
+//             });
+
+
+//         function draw(words) {
+//             const background = svg.append('g');
+//             const textGroup = svg.append('g')
+//                 .attr('transform', `translate(${width/2},${height/2})`);
+        
+//             background.append('rect')
+//                 .attr('width', width)
+//                 .attr('height', height)
+//                 .attr('fill', '#f7fafc');
+        
+//             // Ne pas trier les mots - garder l'ordre optimal calculé par le layout cloud
+//             const texts = textGroup.selectAll('text')
+//                 .data(words)
+//                 .join('text')
+//                 .attr('class', 'name-text')
+//                 .style('font-size', d => `${d.size}px`)
+//                 .style('font-family', 'Arial')
+//                 .style('font-weight', 'bold')
+//                 .style('fill', (d, i) => color(i % colorPalette.length))
+//                 .attr('transform', d => `translate(${d.x},${d.y})`)
+//                 .attr('text-anchor', 'middle')
+//                 .attr('dominant-baseline', 'middle')
+//                 .style('cursor', 'pointer')
+//                 .style('pointer-events', 'none') // Important: désactiver les événements sur le texte
+//                 .text(d => d.text);
+
+                
+
+//             // D'abord définir la fonction de calcul des dimensions
+//             const getClickDimensions = (d) => {
+//                 const clickWidth = d.size > 30 ? d.width/4 : d.width/2;
+//                 const clickHeight = d.size > 30 ? d.height/8 : (d.size > 15 ? d.height/4: d.height/2);
+//                 return {
+//                     width: clickWidth,
+//                     height: clickHeight,
+//                 };
+//             };
+
+//             // Créer une zone de clic invisible plus grande pour chaque mot
+//             const clickAreas = textGroup.selectAll('rect.click-area')
+//                 .data(words)
+//                 .join('rect')
+//                 .attr('class', 'click-area')
+//                 .attr('x', d => d.x - getClickDimensions(d).width/2)
+//                 .attr('y', d => d.y - getClickDimensions(d).height/2)
+//                 .attr('width', d => getClickDimensions(d).width)
+//                 .attr('height', d => getClickDimensions(d).height)
+//                 .style('cursor', 'pointer');
+                
+
+//             const textProperties = new Map();
+//             texts.each(function(d) {
+//                 textProperties.set(d.text, {
+//                     fill: color(words.indexOf(d) % colorPalette.length),
+//                     size: d.size
+//                 });
+//             });
+        
+//             let activeTemp = null;
+
+            
+//             function handleClick(d) {
+//                 if (!state.gedcomData) return;
+                
+//                 const people = Object.values(state.gedcomData.individuals)
+//                     .filter(p => {
+//                         // Vérifier si la personne correspond au nom
+//                         const firstName = p.name.split('/')[0].trim();
+                
+//                         // Pour les prénoms, utiliser une correspondance de mot exact
+//                         const nameMatches = config.type === 'prenoms' 
+//                         ? firstName.split(' ').some(name => 
+//                             name.toLowerCase() === d.text.toLowerCase() || 
+//                             name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
+//                         )
+//                         // Pour les noms de famille uniquement, faire la comparaison insensible à la casse
+//                         : (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
+
+
+//                         return nameMatches &&(hasDateInRange(p, config))
+//                     })
+//                     .map(p => ({
+//                         name: p.name.replace(/\//g, ''),
+//                         id: p.id
+//                     }));
+                
+//                 showPersonsList(d.text, people, config);
+//             }
+
+
+//             function createTempText(originalElement, d, props) {
+//                 if (activeTemp) {
+//                     activeTemp.remove();
+//                     d3.selectAll('.name-text').style('opacity', 1);
+//                 }
+        
+//                 d3.select(originalElement).style('opacity', 0);
+                
+//                 const tempGroup = svg.append('g')
+//                     .attr('transform', `translate(${width/2},${height/2})`);
+                    
+//                 const tempText = tempGroup.append('text')
+//                     .attr('class', 'temp-text')
+//                     .style('font-size', `${props.size * 1.2}px`)
+//                     .style('font-family', 'Arial')
+//                     .style('font-weight', 'bold')
+//                     .style('fill', '#e53e3e')
+//                     .attr('transform', d3.select(originalElement).attr('transform'))
+//                     .attr('text-anchor', 'middle')
+//                     .attr('dominant-baseline', 'middle')
+//                     .style('cursor', 'pointer')
+//                     .text(d.text);
+        
+//                 tempText
+//                     .on('click', () => handleClick(d))
+//                     .on('mouseout', () => {
+//                         tempGroup.remove();
+//                         d3.select(originalElement).style('opacity', 1);
+//                         activeTemp = null;
+//                     });
+        
+//                 activeTemp = tempGroup;
+//                 return tempGroup;
+//             }
+        
+//             // Gérer les événements sur les zones de clic
+//             clickAreas
+//                 .on('mouseover', function(event, d) {
+//                     const props = textProperties.get(d.text);
+//                     if (!props) return;
+//                     const correspondingText = texts.filter(function(t) { 
+//                         return t.text === d.text; 
+//                     }).node();
+//                     createTempText(correspondingText, d, props);
+//                 })
+//                 .on('click', function(event, d) {
+//                     handleClick(d);
+//                 });
+        
+//             texts.append('title')
+//                 .text(d => `${d.text}: ${d.originalSize} occurrences`);
+//         }
+
+
+
+
+
+
+
+//         function draw(words) {
+//             const background = svg.append('g');
+//             const textGroup = svg.append('g')
+//                 .attr('transform', `translate(${width/2},${height/2})`);
+        
+//             background.append('rect')
+//                 .attr('width', width)
+//                 .attr('height', height)
+//                 .attr('fill', '#f7fafc');
+        
+//             // Trier les mots par taille (les plus grands en premier)
+//             const sortedWords = words.sort((a, b) => b.size - a.size);
+            
+//             const texts = textGroup.selectAll('text')
+//                 .data(sortedWords)
+//                 .join('text')
+//                 .attr('class', 'name-text')
+//                 .style('font-size', d => `${d.size}px`)
+//                 .style('font-family', 'Arial')
+//                 .style('font-weight', 'bold')
+//                 .style('fill', (d, i) => color(i % colorPalette.length))
+//                 .attr('transform', d => `translate(${d.x},${d.y})`)
+//                 .attr('text-anchor', 'middle')
+//                 .attr('dominant-baseline', 'middle')
+//                 .style('cursor', 'pointer')
+//                 .text(d => d.text);
+        
+//             // D'abord définir la fonction de calcul des dimensions
+//             const getClickDimensions = (d) => {
+//                 const clickWidth = d.size > 30 ? d.width/4 : d.width/2;
+//                 const clickHeight = d.size > 30 ? d.height/8 : (d.size > 15 ? d.height/4: d.height/2);
+//                 return {
+//                     width: clickWidth,
+//                     height: clickHeight,
+//                 };
+//             };            
+        
+//             // Ajouter des zones de clic transparentes
+//             const clickAreas = textGroup.selectAll('rect.click-area')
+//                 .data(sortedWords)
+//                 .join('rect')
+//                 .attr('class', 'click-area')
+//                 .attr('x', d => d.x - getClickDimensions(d).width/2)
+//                 .attr('y', d => d.y - getClickDimensions(d).height/2)
+//                 .attr('width', d => getClickDimensions(d).width)
+//                 .attr('height', d => getClickDimensions(d).height)
+
+
+
+//                 .style('fill', 'transparent')
+//                 .style('cursor', 'pointer');
+        
+//             const textProperties = new Map();
+//             texts.each(function(d) {
+//                 textProperties.set(d.text, {
+//                     fill: color(words.indexOf(d) % colorPalette.length),
+//                     size: d.size
+//                 });
+//             });
+        
+//             let activeTemp = null;
+        
+//             function handleClick(d) {
+//                 if (!state.gedcomData) return;
+                
+//                 const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+
+//                 const people = Object.values(state.gedcomData.individuals)
+//                     .filter(p => {
+//                         const firstName = p.name.split('/')[0].trim();
+                
+//                         const nameMatches = config.type === 'prenoms' 
+//                             ? firstName.split(' ').some(name => 
+//                                 name.toLowerCase() === d.text.toLowerCase() || 
+//                                 name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
+//                             )
+//                             : (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
+        
+//                         // Si mode descendants, s'assurer que la personne est dans l'arbre des descendants
+//                         const isInDescendantTree = config.scope !== 'descendants' || 
+//                             persons.some(descendant => descendant.id === p.id);
+
+//                         return nameMatches && isInDescendantTree && hasDateInRange(p, config);
+
+//                     })
+//                     .map(p => ({
+//                         name: p.name.replace(/\//g, ''),
+//                         id: p.id
+//                     }));
+                
+//                 showPersonsList(d.text, people, config);
+//             }
+        
+//             function createTempText(originalElement, d, props) {
+//                 if (activeTemp) {
+//                     activeTemp.remove();
+//                     d3.selectAll('.name-text').style('opacity', 1);
+//                 }
+        
+//                 d3.select(originalElement).style('opacity', 0);
+                
+//                 const tempGroup = svg.append('g')
+//                     .attr('transform', `translate(${width/2},${height/2})`);
+                    
+//                 const tempText = tempGroup.append('text')
+//                     .attr('class', 'temp-text')
+//                     .style('font-size', `${props.size * 1.2}px`)
+//                     .style('font-family', 'Arial')
+//                     .style('font-weight', 'bold')
+//                     .style('fill', '#e53e3e')
+//                     .attr('transform', d3.select(originalElement).attr('transform'))
+//                     .attr('text-anchor', 'middle')
+//                     .attr('dominant-baseline', 'middle')
+//                     .style('cursor', 'pointer')
+//                     .text(d.text);
+        
+//                 tempText
+//                     .on('click', () => handleClick(d))
+//                     .on('mouseout', () => {
+//                         tempGroup.remove();
+//                         d3.select(originalElement).style('opacity', 1);
+//                         activeTemp = null;
+//                     });
+        
+//                 activeTemp = tempGroup;
+//                 return tempGroup;
+//             }
+        
+//             // Gérer les événements sur les zones de clic
+//             clickAreas
+//                 .on('mouseover', function(event, d) {
+//                     const props = textProperties.get(d.text);
+//                     if (!props) return;
+//                     const correspondingText = texts.filter(function(t) { 
+//                         return t.text === d.text; 
+//                     }).node();
+//                     createTempText(correspondingText, d, props);
+//                 })
+//                 .on('click', function(event, d) {
+//                     handleClick(d);
+//                 });
+        
+//             texts.append('title')
+//                 .text(d => `${d.text}: ${d.originalSize} occurrences`);
+//         }
+
+
+
+//         layout.start();
+
+//     }, [nameData]);
+
+//     return React.createElement('div', { className: 'bg-white p-4 rounded-lg shadow-lg' },
+//         React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
+//             config.type === 'prenoms' 
+//                 ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
+//                 : `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
+//         ),
+//         React.createElement('div', { className: 'relative w-full h-96' },
+//             React.createElement('svg', {
+//                 id: 'name-cloud-svg',
+//                 className: 'w-full h-full',
+//                 style: { backgroundColor: '#f7fafc' }
+//             })
+//         )
+//     );
+// };
+
+
+
+
+
+const NameCloud = ({ nameData, config }) => {
     React.useEffect(() => {
         if (!nameData || nameData.length === 0) return;
 
         d3.select('#name-cloud-svg').selectAll('*').remove();
 
-        const width = 800;
-        const height = 600;
+        const width = window.innerWidth * 0.9; // Largeur responsive
+        const height = window.innerHeight * 0.8; // Hauteur responsive
 
         const svg = d3.select('#name-cloud-svg')
             .attr('width', width)
             .attr('height', height);
 
-            // Configurer le zoom avec support tactile
+        // Créer un groupe de contenu qui sera zoomable
+        const contentGroup = svg.append('g');
+
+        // Configuration du zoom
         const zoom = d3.zoom()
             .scaleExtent([0.5, 5]) // Limiter le zoom entre 0.5x et 5x
             .on('zoom', (event) => {
-                textGroup.attr('transform', event.transform);
+                contentGroup.attr('transform', event.transform);
             });
 
-        // Ajouter l'événement de zoom au SVG
+        // Ajouter le zoom au SVG avec support complet (souris, tactile)
         svg.call(zoom)
-           // Activer le zoom tactile
-           .call(d3.zoom()
-               .touchable(true) // Support tactile
-               .on('zoom', (event) => {
-                   textGroup.attr('transform', event.transform);
-               })
-           );
+           .on('wheel', (event) => event.preventDefault(), { passive: false })
+           .on('touchstart', (event) => event.preventDefault(), { passive: false })
+           .on('touchmove', (event) => event.preventDefault(), { passive: false });
 
-        // Fond
+        // Fond cliquable et zoomable
         svg.append('rect')
             .attr('width', width)
             .attr('height', height)
             .attr('fill', '#f7fafc')
-            .attr('pointer-events', 'all'); // Permettre les interactions sur le fond
+            .attr('pointer-events', 'all')
+            .lower(); // Mettre le rectangle au fond
 
-        // Échelle pour la taille des polices
-        const fontScale = d3.scaleLog()
-            .domain([1, d3.max(nameData, d => d.size)])
-            .range([10, 45])
-            .clamp(true);
+        // Groupe pour le contenu du nuage de mots
+        const textGroup = contentGroup.append('g')
+            .attr('transform', `translate(${width/2},${height/2})`);
 
         // Palette de couleurs vives
         const colorPalette = [
@@ -505,7 +887,10 @@ const NameCloud = ({ nameData , config }) => {
             .size([width - 20, height - 20])
             .words(nameData.map(d => ({
                 text: d.text,
-                size: fontScale(d.size),
+                size: d3.scaleLog()
+                    .domain([1, d3.max(nameData, d => d.size)])
+                    .range([10, 45])
+                    .clamp(true)(d.size),
                 originalSize: d.size
             })))
             .padding(1)
@@ -522,156 +907,7 @@ const NameCloud = ({ nameData , config }) => {
                 draw(words);
             });
 
-
-        function draw(words) {
-            const background = svg.append('g');
-            const textGroup = svg.append('g')
-                .attr('transform', `translate(${width/2},${height/2})`);
-        
-            background.append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .attr('fill', '#f7fafc');
-        
-            // Ne pas trier les mots - garder l'ordre optimal calculé par le layout cloud
-            const texts = textGroup.selectAll('text')
-                .data(words)
-                .join('text')
-                .attr('class', 'name-text')
-                .style('font-size', d => `${d.size}px`)
-                .style('font-family', 'Arial')
-                .style('font-weight', 'bold')
-                .style('fill', (d, i) => color(i % colorPalette.length))
-                .attr('transform', d => `translate(${d.x},${d.y})`)
-                .attr('text-anchor', 'middle')
-                .attr('dominant-baseline', 'middle')
-                .style('cursor', 'pointer')
-                .style('pointer-events', 'none') // Important: désactiver les événements sur le texte
-                .text(d => d.text);
-
-                
-
-            // D'abord définir la fonction de calcul des dimensions
-            const getClickDimensions = (d) => {
-                const clickWidth = d.size > 30 ? d.width/4 : d.width/2;
-                const clickHeight = d.size > 30 ? d.height/8 : (d.size > 15 ? d.height/4: d.height/2);
-                return {
-                    width: clickWidth,
-                    height: clickHeight,
-                };
-            };
-
-            // Créer une zone de clic invisible plus grande pour chaque mot
-            const clickAreas = textGroup.selectAll('rect.click-area')
-                .data(words)
-                .join('rect')
-                .attr('class', 'click-area')
-                .attr('x', d => d.x - getClickDimensions(d).width/2)
-                .attr('y', d => d.y - getClickDimensions(d).height/2)
-                .attr('width', d => getClickDimensions(d).width)
-                .attr('height', d => getClickDimensions(d).height)
-                .style('cursor', 'pointer');
-                
-
-            const textProperties = new Map();
-            texts.each(function(d) {
-                textProperties.set(d.text, {
-                    fill: color(words.indexOf(d) % colorPalette.length),
-                    size: d.size
-                });
-            });
-        
-            let activeTemp = null;
-
-            
-            function handleClick(d) {
-                if (!state.gedcomData) return;
-                
-                const people = Object.values(state.gedcomData.individuals)
-                    .filter(p => {
-                        // Vérifier si la personne correspond au nom
-                        const firstName = p.name.split('/')[0].trim();
-                
-                        // Pour les prénoms, utiliser une correspondance de mot exact
-                        const nameMatches = config.type === 'prenoms' 
-                        ? firstName.split(' ').some(name => 
-                            name.toLowerCase() === d.text.toLowerCase() || 
-                            name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
-                        )
-                        // Pour les noms de famille uniquement, faire la comparaison insensible à la casse
-                        : (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
-
-
-                        return nameMatches &&(hasDateInRange(p, config))
-                    })
-                    .map(p => ({
-                        name: p.name.replace(/\//g, ''),
-                        id: p.id
-                    }));
-                
-                showPersonsList(d.text, people, config);
-            }
-
-
-            function createTempText(originalElement, d, props) {
-                if (activeTemp) {
-                    activeTemp.remove();
-                    d3.selectAll('.name-text').style('opacity', 1);
-                }
-        
-                d3.select(originalElement).style('opacity', 0);
-                
-                const tempGroup = svg.append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-                    
-                const tempText = tempGroup.append('text')
-                    .attr('class', 'temp-text')
-                    .style('font-size', `${props.size * 1.2}px`)
-                    .style('font-family', 'Arial')
-                    .style('font-weight', 'bold')
-                    .style('fill', '#e53e3e')
-                    .attr('transform', d3.select(originalElement).attr('transform'))
-                    .attr('text-anchor', 'middle')
-                    .attr('dominant-baseline', 'middle')
-                    .style('cursor', 'pointer')
-                    .text(d.text);
-        
-                tempText
-                    .on('click', () => handleClick(d))
-                    .on('mouseout', () => {
-                        tempGroup.remove();
-                        d3.select(originalElement).style('opacity', 1);
-                        activeTemp = null;
-                    });
-        
-                activeTemp = tempGroup;
-                return tempGroup;
-            }
-        
-            // Gérer les événements sur les zones de clic
-            clickAreas
-                .on('mouseover', function(event, d) {
-                    const props = textProperties.get(d.text);
-                    if (!props) return;
-                    const correspondingText = texts.filter(function(t) { 
-                        return t.text === d.text; 
-                    }).node();
-                    createTempText(correspondingText, d, props);
-                })
-                .on('click', function(event, d) {
-                    handleClick(d);
-                });
-        
-            texts.append('title')
-                .text(d => `${d.text}: ${d.originalSize} occurrences`);
-        }
-
-
-
-
-
-
-
+        // Le reste de votre code de dessin reste identique
         function draw(words) {
             const background = svg.append('g');
             const textGroup = svg.append('g')
@@ -818,12 +1054,11 @@ const NameCloud = ({ nameData , config }) => {
                 .text(d => `${d.text}: ${d.originalSize} occurrences`);
         }
 
-
-
         layout.start();
 
     }, [nameData]);
 
+    // Reste du composant inchangé
     return React.createElement('div', { className: 'bg-white p-4 rounded-lg shadow-lg' },
         React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
             config.type === 'prenoms' 
@@ -839,6 +1074,13 @@ const NameCloud = ({ nameData , config }) => {
         )
     );
 };
+
+
+
+
+
+
+
 
 export default NameCloud;
 
