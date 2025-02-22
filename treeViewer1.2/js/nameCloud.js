@@ -455,11 +455,29 @@ const NameCloud = ({ nameData , config }) => {
             .attr('width', width)
             .attr('height', height);
 
+            // Configurer le zoom avec support tactile
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 5]) // Limiter le zoom entre 0.5x et 5x
+            .on('zoom', (event) => {
+                textGroup.attr('transform', event.transform);
+            });
+
+        // Ajouter l'événement de zoom au SVG
+        svg.call(zoom)
+           // Activer le zoom tactile
+           .call(d3.zoom()
+               .touchable(true) // Support tactile
+               .on('zoom', (event) => {
+                   textGroup.attr('transform', event.transform);
+               })
+           );
+
         // Fond
         svg.append('rect')
             .attr('width', width)
             .attr('height', height)
-            .attr('fill', '#f7fafc');
+            .attr('fill', '#f7fafc')
+            .attr('pointer-events', 'all'); // Permettre les interactions sur le fond
 
         // Échelle pour la taille des polices
         const fontScale = d3.scaleLog()
