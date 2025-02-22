@@ -1,28 +1,12 @@
 <!DOCTYPE html>
 <html>
-<!-- <head> -->
-    <!-- <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbre généalogique</title> -->
-    
-    <!-- CSS -->
-    <!-- <link rel="stylesheet" type="text/css" href="css/styles.css"> -->
-    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" /> -->
-        
-    <!-- Bibliothèques externes -->
-    <!-- <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script> -->
-<!-- </head> -->
-
 
 
 <head>
     <!-- Méta tags pour le mode plein écran mobile -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <!-- <meta charset="UTF-8"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Arbre généalogique</title>
@@ -37,20 +21,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-    <!-- <script>
-    // Ajouter un script pour masquer la barre du navigateur sur mobile
-    window.addEventListener('load', function() {
-        // Pour iOS
-        if (window.navigator.standalone === false) {
-            window.scrollTo(0, 1);
-        }
-        
-        // Pour Android et autres
-        if ('standalone' in window.navigator) {
-            document.documentElement.requestFullscreen();
-        }
-    });
-    </script> -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    
 </head>
 
 
@@ -60,6 +34,10 @@
 
 
 <body>
+    <div class="login-background">
+        <img src="background_images/contemporain.jpg" class="login-background-image" alt="Fond d'écran">
+    </div>
+
     <!-- Formulaire de mot de passe -->
     <div id="password-form">
         <div class="form-container">
@@ -97,6 +75,19 @@
                 <select id="root-person-results" style="display:block;">
                     <option value="">Select</option>
                 </select>
+                <!-- <button onclick="showNameCloud()" class="large-button"> <span class="wide-span">👥</span></button> -->
+                <!-- <button onclick="showNameConfigModal()" class="large-button"> <span class="wide-span">👥</span></button> -->
+                <button onclick="processNamesCloudWithDate({
+                    type: 'prenoms', 
+                    startDate: 1500, 
+                    endDate: new Date().getFullYear(),
+                    scope: 'all'
+                })" class="large-button"> 
+                    <span class="wide-span">👥</span>
+                </button>
+                
+
+
             </div>
             <div class="controls-row-2">
                 <!-- <button onclick="toggleFullScreen()" class="large-button"><span class="wide-span">⛶</span></button> -->
@@ -218,6 +209,10 @@
 
     <!-- Scripts -->
     <script type="module">
+
+        import { processNamesCloudWithDate  } from './js/nameCloud.js';
+        window.processNamesCloudWithDate  = processNamesCloudWithDate ;
+
         import { 
             loadData, 
             updatePrenoms, 
@@ -282,5 +277,29 @@
         });
 
     </script>
+
+
+
+    <script>
+        // Fonction pour masquer le fond d'écran de connexion
+        function hideLoginBackground() {
+            const loginBackground = document.querySelector('.login-background');
+            if (loginBackground) {
+                // loginBackground.style.display = 'none';
+                loginBackground.remove(); // Au lieu de juste le masquer, on le supprime du DOM
+            }
+        }
+
+        // Modifier la fonction loadData existante
+        const originalLoadData = window.loadData;
+        window.loadData = async function() {
+            await originalLoadData();
+            hideLoginBackground();
+        };
+    </script>
+
+
+
+
 </body>
 </html>
