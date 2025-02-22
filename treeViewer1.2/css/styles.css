@@ -17,21 +17,67 @@ body {
 
 
 
-/* html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+
+
+/* Style pour le fond d'écran de la page de connexion */
+.login-background {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: -1;
+    pointer-events: none;
 }
 
-#tree-svg {
+.login-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 100vh;
-} */
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+    /* Réduire la luminosité et légèrement le contraste */
+    filter: brightness(0.7) contrast(0.9); 
+    transition: opacity 2s ease-in-out;
+}
 
-
+/* Modification du style existant du formulaire pour mieux s'intégrer */
 #password-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+.form-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Style responsive pour le fond d'écran de connexion */
+@media screen and (max-width: 768px) {
+    .form-container {
+        width: 90%;
+        margin: 20px;
+        padding: 20px;
+    }
+}
+
+
+
+
+
+
+/* #password-form {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -45,7 +91,12 @@ body {
     width: 400px;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+} */
+
+
+
+
+
 
 .password-row, .or-row, .file-row, .submit-row {
     margin-bottom: 20px;
@@ -101,7 +152,8 @@ body {
  }
  
  .controls-row-1, .controls-row-2  {
-    background-color: rgba(255, 255, 255, 0.1);
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    background-color: transparent;
     display: flex;
     justify-content: flex-start; /* Justification à gauche */
     align-items: center;
@@ -208,12 +260,14 @@ body {
 
 
 .controls button {
-    background-color: transparent;
+    /* background-color: transparent; */
+    background-color: rgba(255, 255, 255, 0.5);
     font-size: 12px; /* Taille de police plus grande */
     padding: 0px; /* Padding plus important */
     width: 100%; /* Largeur complète */
     max-width: 20px;        
 }
+
 .controls select, 
 .controls input[type="number"] {
     padding: 5px;
