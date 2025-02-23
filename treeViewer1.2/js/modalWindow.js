@@ -25,6 +25,10 @@ import { geocodeLocation } from './geoLocalisation.js';
 * - Utilise un style moderne avec des sections distinctes et colorées
 */
 export function displayPersonDetails(personId) {
+    
+    
+    console.log("Affichage des détails de la personne :", personId);
+    
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
 

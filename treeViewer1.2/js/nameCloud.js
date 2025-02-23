@@ -1,6 +1,7 @@
 // Ajout dans la section des imports
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
-import { state } from './main.js';
+import { state, displayPersonDetails } from './main.js';
+import { startAncestorAnimation } from './treeAnimation.js';
 
 
 // Structure des stats
@@ -12,9 +13,9 @@ const stats = {
         marriage: 0,
         people: new Set() // Pour compter les personnes uniques avec dates directes
     },
-    ancestorDates: [], // {id, name, depth, type, year}
-    descendantDates: [], // {id, name, depth, type, year}
-    noDates: [], // {id, name}
+    ancestorDates: [],
+    descendantDates: [],
+    noDates: [],
     inPeriod: 0,
     uniqueNames: 0
 };
@@ -333,8 +334,19 @@ function showPersonsList(name, people, config) {
     // Titre
     const title = document.createElement('h2');
     title.textContent = config.type === 'prenoms' ? 
-        `Liste des personnes avec le prénom "${name}" (${people.length} occurrences)` :
-        `Liste des personnes avec le nom "${name}" (${people.length} occurrences)`;
+        `Liste des personnes avec le prénom "${name}" (${people.length} personnes)` :
+        config.type === 'noms' ?
+            `Liste des personnes avec le nom "${name}" (${people.length} personnes)` :
+            config.type === 'professions' ? 
+                `Liste des personnes avec la profession "${name}" (${people.length} personnes)` :
+                config.type === 'duree_vie' ? 
+                    `Liste des personnes ayant vécu ${name} ans (${people.length} personnes)` :
+                    config.type === 'age_procreation' ?
+                    `Liste des personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
+                        config.type === 'lieux' ?
+                        `Liste des personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
+                        'Liste des personnes';
+
     title.style.marginBottom = '10px';
     title.style.borderBottom = '1px solid #eee';
     title.style.paddingBottom = '5px';
@@ -342,6 +354,7 @@ function showPersonsList(name, people, config) {
 
     // Bouton de fermeture
     const closeBtn = document.createElement('button');
+    closeBtn.id = 'person-list-close-button';  // Ajout d'un ID unique
     closeBtn.innerHTML = '×';
     closeBtn.style.position = 'absolute';
     closeBtn.style.right = '10px';
@@ -350,13 +363,11 @@ function showPersonsList(name, people, config) {
     closeBtn.style.background = 'none';
     closeBtn.style.fontSize = '20px';
     closeBtn.style.cursor = 'pointer';
-    // closeBtn.onclick = () => document.body.removeChild(modal);
     closeBtn.onclick = () => {
         if (modal.parentNode) {
             modal.parentNode.removeChild(modal);
         }
     };
-
 
     // Liste des personnes
     const list = document.createElement('div');
@@ -372,19 +383,18 @@ function showPersonsList(name, people, config) {
 
         if (individual) {
             if (individual.birthDate) {
-                date = `Naissance: ${individual.birthDate}`;  // Raccourci pour Naissance
+                date = `Naissance: ${individual.birthDate}`;
                 sortDate = extractYear(individual.birthDate) || 0;
             } else if (individual.deathDate) {
-                date = `Décès: ${individual.deathDate}`;  // Raccourci pour Décès
+                date = `Décès: ${individual.deathDate}`;
                 sortDate = extractYear(individual.deathDate) || 0;
             } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
-                // Chercher une date de mariage dans les familles où la personne est époux/épouse
                 for (const famId of individual.spouseFamilies) {
                     const family = state.gedcomData.families[famId];
                     if (family && family.marriageDate) {
                         date = `Mariage: ${family.marriageDate}`;
                         sortDate = extractYear(family.marriageDate) || 0;
-                        break; // On prend le premier mariage trouvé
+                        break;
                     }
                 }
             }
@@ -392,19 +402,22 @@ function showPersonsList(name, people, config) {
 
         return {
             name: person.name,
+            id: person.id,  // Assurez-vous d'inclure l'ID ici
             date: date,
             sortDate: sortDate
         };
-    }).sort((a, b) => a.sortDate - b.sortDate);
+    }).sort((a, b) => b.sortDate - a.sortDate);
+
 
     peopleWithDates.forEach((person, index) => {
         const personDiv = document.createElement('div');
-        personDiv.style.padding = '3px 5px';  // Padding réduit
+        personDiv.style.padding = '3px 5px';
         personDiv.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : 'white';
         personDiv.style.display = 'flex';
         personDiv.style.justifyContent = 'space-between';
         personDiv.style.alignItems = 'center';
-        personDiv.style.lineHeight = '1.2';  // Hauteur de ligne réduite
+        personDiv.style.lineHeight = '1.2';
+        personDiv.style.cursor = 'pointer';
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = person.name;
@@ -413,12 +426,22 @@ function showPersonsList(name, people, config) {
         const dateSpan = document.createElement('span');
         dateSpan.textContent = person.date;
         dateSpan.style.color = '#666';
-        dateSpan.style.whiteSpace = 'nowrap';  // Éviter le retour à la ligne des dates
+        dateSpan.style.whiteSpace = 'nowrap';
 
         personDiv.appendChild(nameSpan);
         personDiv.appendChild(dateSpan);
+
+        personDiv.addEventListener('click', (event) => {
+            console.log('Clicked on person:', person.name, person.id); // Log pour vérifier le clic et l'ID
+
+            event.stopPropagation();
+            showPersonActions(person, event);
+        });
+
         list.appendChild(personDiv);
     });
+
+
 
     content.appendChild(closeBtn);
     content.appendChild(title);
@@ -441,233 +464,126 @@ function showPersonsList(name, people, config) {
 }
 
 
+function showPersonActions(person, event) {
+    console.log('Showing actions for:', person.name, person.id); // Log pour vérifier l'appel de la fonction
 
-// const NameCloud = ({ nameData , config }) => {
-//     React.useEffect(() => {
-//         if (!nameData || nameData.length === 0) return;
+    // Supprimer tout menu contextuel existant
+    const existingMenu = document.getElementById('person-actions-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
 
-//         d3.select('#name-cloud-svg').selectAll('*').remove();
+    const actionsMenu = document.createElement('div');
+    actionsMenu.id = 'person-actions-menu';
+    actionsMenu.style.position = 'fixed'; // Changé de 'absolute' à 'fixed'
+    actionsMenu.style.left = `${event.clientX}px`;
+    actionsMenu.style.top = `${event.clientY}px`;
+    actionsMenu.style.backgroundColor = 'white';
+    actionsMenu.style.border = '1px solid #ccc';
+    actionsMenu.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    actionsMenu.style.zIndex = '10000'; // Augmenté pour s'assurer qu'il est au-dessus des autres éléments
 
-//         const width = 800;
-//         const height = 600;
+    const actions = [
+        { text: "Voir dans l'arbre", action: () => showInTree(person.id) },
+        { text: "Voir la fiche", action: () => showPersonDetails(person.id) },
+        { text: "Animation", action: () => startAnimation(person.id) }
+    ];
 
-//         const svg = d3.select('#name-cloud-svg')
-//             .attr('width', width)
-//             .attr('height', height);
+    actions.forEach(action => {
+        const actionButton = document.createElement('button');
+        actionButton.textContent = action.text;
+        actionButton.style.display = 'block';
+        actionButton.style.width = '100%';
+        actionButton.style.padding = '5px 10px';
+        actionButton.style.border = 'none';
+        actionButton.style.backgroundColor = 'transparent';
+        actionButton.style.textAlign = 'left';
+        actionButton.style.cursor = 'pointer';
 
-//         // Fond
-//         svg.append('rect')
-//             .attr('width', width)
-//             .attr('height', height)
-//             .attr('fill', '#f7fafc');
+        actionButton.addEventListener('mouseenter', () => {
+            actionButton.style.backgroundColor = '#f0f0f0';
+        });
 
-//         // Échelle pour la taille des polices
-//         const fontScale = d3.scaleLog()
-//             .domain([1, d3.max(nameData, d => d.size)])
-//             .range([10, 45])
-//             .clamp(true);
+        actionButton.addEventListener('mouseleave', () => {
+            actionButton.style.backgroundColor = 'transparent';
+        });
 
-//         // Palette de couleurs vives
-//         const colorPalette = [
-//             '#1E88E5', // bleu vif
-//             '#E53935', // rouge vif
-//             '#43A047', // vert vif
-//             '#FB8C00', // orange vif
-//             '#8E24AA', // violet vif
-//             '#00ACC1', // cyan vif
-//             '#FFB300', // jaune vif
-//             '#3949AB', // indigo vif
-//             '#00897B', // turquoise vif
-//             '#7CB342'  // vert lime vif
-//         ];
 
-//         const color = d3.scaleOrdinal(colorPalette);
-
-//         const layout = d3.layout.cloud()
-//             .size([width - 20, height - 20])
-//             .words(nameData.map(d => ({
-//                 text: d.text,
-//                 size: fontScale(d.size),
-//                 originalSize: d.size
-//             })))
-//             .padding(1)
-//             .rotate(0)
-//             .fontSize(d => d.size)
-//             .spiral('rectangular')
-//             .random(() => 0.5)
-//             .canvas(function() {
-//                 const canvas = document.createElement('canvas');
-//                 canvas.setAttribute('willReadFrequently', 'true');
-//                 return canvas;
-//             })
-//             .on('end', words => {
-//                 draw(words);
-//             });
-
-//         function draw(words) {
-//             const background = svg.append('g');
-//             const textGroup = svg.append('g')
-//                 .attr('transform', `translate(${width/2},${height/2})`);
-        
-//             background.append('rect')
-//                 .attr('width', width)
-//                 .attr('height', height)
-//                 .attr('fill', '#f7fafc');
-        
-//             // Trier les mots par taille (les plus grands en premier)
-//             const sortedWords = words.sort((a, b) => b.size - a.size);
+        actionButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             
-//             const texts = textGroup.selectAll('text')
-//                 .data(sortedWords)
-//                 .join('text')
-//                 .attr('class', 'name-text')
-//                 .style('font-size', d => `${d.size}px`)
-//                 .style('font-family', 'Arial')
-//                 .style('font-weight', 'bold')
-//                 .style('fill', (d, i) => color(i % colorPalette.length))
-//                 .attr('transform', d => `translate(${d.x},${d.y})`)
-//                 .attr('text-anchor', 'middle')
-//                 .attr('dominant-baseline', 'middle')
-//                 .style('cursor', 'pointer')
-//                 .text(d => d.text);
-        
-//             // D'abord définir la fonction de calcul des dimensions
-//             const getClickDimensions = (d) => {
-//                 const clickWidth = d.size > 30 ? d.width/4 : d.width/2;
-//                 const clickHeight = d.size > 30 ? d.height/8 : (d.size > 15 ? d.height/4: d.height/2);
-//                 return {
-//                     width: clickWidth,
-//                     height: clickHeight,
-//                 };
-//             };            
-        
-//             // Ajouter des zones de clic transparentes
-//             const clickAreas = textGroup.selectAll('rect.click-area')
-//                 .data(sortedWords)
-//                 .join('rect')
-//                 .attr('class', 'click-area')
-//                 .attr('x', d => d.x - getClickDimensions(d).width/2)
-//                 .attr('y', d => d.y - getClickDimensions(d).height/2)
-//                 .attr('width', d => getClickDimensions(d).width)
-//                 .attr('height', d => getClickDimensions(d).height)
-//                 .style('fill', 'transparent')
-//                 .style('cursor', 'pointer');
-        
-//             const textProperties = new Map();
-//             texts.each(function(d) {
-//                 textProperties.set(d.text, {
-//                     fill: color(words.indexOf(d) % colorPalette.length),
-//                     size: d.size
-//                 });
-//             });
-        
-//             let activeTemp = null;
-        
-//             function handleClick(d) {
-//                 if (!state.gedcomData) return;
-                
-//                 const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+            // Fermer le menu contextuel
+            actionsMenu.remove();
 
-//                 const people = Object.values(state.gedcomData.individuals)
-//                     .filter(p => {
-//                         const firstName = p.name.split('/')[0].trim();
-                
-//                         const nameMatches = config.type === 'prenoms' 
-//                             ? firstName.split(' ').some(name => 
-//                                 name.toLowerCase() === d.text.toLowerCase() || 
-//                                 name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
-//                             )
-//                             : (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
-        
-//                         // Si mode descendants, s'assurer que la personne est dans l'arbre des descendants
-//                         const isInDescendantTree = config.scope !== 'descendants' || 
-//                             persons.some(descendant => descendant.id === p.id);
+            // Simuler un clic sur le bouton de fermeture de la modale de liste
+            const closeButton = document.getElementById('person-list-close-button');
+            if (closeButton) {
+                closeButton.click();
+            } else {
+                console.log("Bouton de fermeture de la liste non trouvé");
+            }
 
-//                         return nameMatches && isInDescendantTree && hasDateInRange(p, config);
-
-//                     })
-//                     .map(p => ({
-//                         name: p.name.replace(/\//g, ''),
-//                         id: p.id
-//                     }));
-                
-//                 showPersonsList(d.text, people, config);
-//             }
-        
-//             function createTempText(originalElement, d, props) {
-//                 if (activeTemp) {
-//                     activeTemp.remove();
-//                     d3.selectAll('.name-text').style('opacity', 1);
-//                 }
-        
-//                 d3.select(originalElement).style('opacity', 0);
-                
-//                 const tempGroup = svg.append('g')
-//                     .attr('transform', `translate(${width/2},${height/2})`);
-                    
-//                 const tempText = tempGroup.append('text')
-//                     .attr('class', 'temp-text')
-//                     .style('font-size', `${props.size * 1.2}px`)
-//                     .style('font-family', 'Arial')
-//                     .style('font-weight', 'bold')
-//                     .style('fill', '#e53e3e')
-//                     .attr('transform', d3.select(originalElement).attr('transform'))
-//                     .attr('text-anchor', 'middle')
-//                     .attr('dominant-baseline', 'middle')
-//                     .style('cursor', 'pointer')
-//                     .text(d.text);
-        
-//                 tempText
-//                     .on('click', () => handleClick(d))
-//                     .on('mouseout', () => {
-//                         tempGroup.remove();
-//                         d3.select(originalElement).style('opacity', 1);
-//                         activeTemp = null;
-//                     });
-        
-//                 activeTemp = tempGroup;
-//                 return tempGroup;
-//             }
-        
-//             // Gérer les événements sur les zones de clic
-//             clickAreas
-//                 .on('mouseover', function(event, d) {
-//                     const props = textProperties.get(d.text);
-//                     if (!props) return;
-//                     const correspondingText = texts.filter(function(t) { 
-//                         return t.text === d.text; 
-//                     }).node();
-//                     createTempText(correspondingText, d, props);
-//                 })
-//                 .on('click', function(event, d) {
-//                     handleClick(d);
-//                 });
-        
-//             texts.append('title')
-//                 .text(d => `${d.text}: ${d.originalSize} occurrences`);
-//         }
+            // Exécuter l'action après un court délai
+            setTimeout(() => {
+                action.action();
+            }, 100);
+        });
 
 
+        actionsMenu.appendChild(actionButton);
+    });
 
-//         layout.start();
+    document.body.appendChild(actionsMenu);
 
-//     }, [nameData]);
+    // Fermer le menu si on clique ailleurs
+    document.addEventListener('click', function closeMenu(e) {
+        const menu = document.getElementById('person-actions-menu');
+        if (menu && !menu.contains(e.target)) {
+            if (menu.parentNode) {
+                menu.parentNode.removeChild(menu);
+            }
+            document.removeEventListener('click', closeMenu);
+        }
+    });
+}
 
-//     return React.createElement('div', { className: 'bg-white p-4 rounded-lg shadow-lg' },
-//         React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
-//             config.type === 'prenoms' 
-//                 ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
-//                 : `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
-//         ),
-//         React.createElement('div', { className: 'relative w-full h-96' },
-//             React.createElement('svg', {
-//                 id: 'name-cloud-svg',
-//                 className: 'w-full h-full',
-//                 style: { backgroundColor: '#f7fafc' }
-//             })
-//         )
-//     );
-// };
+
+function showInTree(personId) {
+    // Appeler la fonction pour afficher l'arbre en mode ascendant avec cette personne comme racine
+    state.rootPersonId = personId;
+    state.treeMode = 'ancestors';
+    console.log('Showing in tree:', personId); // Log pour vérifier l'appel de la fonction
+    drawTree();
+}
+
+function showPersonDetails(personId) {
+    // Appeler la fonction pour afficher la fenêtre modale des détails
+    console.log('Showing details for:', personId); // Log pour vérifier l'appel de la fonction
+
+
+    displayPersonDetails(personId);
+
+    const modal = document.querySelector('.modal-container');
+    if (modal) {
+        modal.remove();
+    }
+
+}
+
+function startAnimation(personId) {
+    // Appeler la fonction pour lancer l'animation avec cette personne comme racine
+    state.rootPersonId = personId;
+    console.log('Starting animation with:', personId); // Log pour vérifier l'appel de la fonction
+    startAncestorAnimation();
+    // Fermez la fenêtre modale si elle est encore ouverte
+    const modal = document.querySelector('.modal-container');
+    if (modal) {
+        modal.remove();
+    }
+
+}
+
+
 
 const createColorPalette = () => [
     '#1E88E5', // bleu vif
@@ -689,140 +605,21 @@ const createFontScale = (nameData) => {
         .clamp(true);
 };
 
-// const setupZoom = (svg, textGroup) => {
-//     const zoom = d3.zoom()
-//         .scaleExtent([0.5, 5])
-//         .on('zoom', (event) => {
-//             // Vérifier que textGroup existe avant de le transformer
-//             if (textGroup && textGroup.current) {
-//                 textGroup.current.attr('transform', event.transform);
-//             }
-//         });
-
-//     svg.call(zoom)
-//        .on('wheel', (event) => event.preventDefault(), { passive: false })
-//        .on('touchstart', (event) => {
-//            if (event.touches.length > 1) {
-//                event.preventDefault();
-//            }
-//        }, { passive: false })
-//        .on('touchmove', (event) => {
-//            if (event.touches.length > 1) {
-//                event.preventDefault();
-//            }
-//        }, { passive: false });
-
-//     return zoom;
-// };
-
-// const NameCloud = ({ nameData, config }) => {
-//     const textGroupRef = React.useRef(null);
-
-//     React.useEffect(() => {
-//         if (!nameData || nameData.length === 0) return;
-
-//         d3.select('#name-cloud-svg').selectAll('*').remove();
-
-//         const width = 800;
-//         const height = 600;
-
-//         const svg = d3.select('#name-cloud-svg')
-//             .attr('width', width)
-//             .attr('height', height);
-
-//         // Rectangle de fond transparent
-//         svg.append('rect')
-//             .attr('width', width)
-//             .attr('height', height)
-//             .attr('fill', 'transparent')
-//             .style('touch-action', 'pan-x pan-y pinch-zoom')
-//             .lower();
-
-//         const textGroup = svg.append('g')
-//             .attr('transform', `translate(${width/2},${height/2})`);
-        
-//         // Stocker la référence pour le zoom
-//         textGroupRef.current = textGroup;
-
-//         // Configurer le zoom
-//         setupZoom(svg, textGroupRef);
-
-//         const fontScale = createFontScale(nameData);
-//         const colorPalette = createColorPalette();
-//         const color = d3.scaleOrdinal(colorPalette);
-
-//         const layout = d3.layout.cloud()
-//             .size([width - 20, height - 20])
-//             .words(nameData.map(d => ({
-//                 text: d.text,
-//                 size: fontScale(d.size),
-//                 originalSize: d.size
-//             })))
-//             .padding(1)
-//             .rotate(0)
-//             .fontSize(d => d.size)
-//             .spiral('rectangular')
-//             .random(() => 0.5)
-//             .canvas(function() {
-//                 const canvas = document.createElement('canvas');
-//                 canvas.setAttribute('willReadFrequently', 'true');
-//                 return canvas;
-//             })
-//             .on('end', words => {
-//                 drawNameCloud(svg, textGroup, words, color, config);
-//             });
-
-//         layout.start();
-
-//     }, [nameData]);
-
-//     return React.createElement('div', { 
-//         className: 'bg-white p-4 rounded-lg shadow-lg',
-//         style: { 
-//             touchAction: 'pan-x pan-y pinch-zoom',
-//             userSelect: 'none'
-//         }
-//     },
-//         React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
-//             config.type === 'prenoms' 
-//                 ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
-//                 : `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
-//         ),
-//         React.createElement('div', { 
-//             className: 'relative w-full h-96',
-//             style: { 
-//                 touchAction: 'pan-x pan-y pinch-zoom',
-//                 userSelect: 'none'
-//             }
-//         },
-//             React.createElement('svg', {
-//                 id: 'name-cloud-svg',
-//                 className: 'w-full h-full',
-//                 style: { 
-//                     backgroundColor: '#f7fafc',
-//                     touchAction: 'pan-x pan-y pinch-zoom',
-//                     userSelect: 'none'
-//                 }
-//             })
-//         )
-//     );
-// };
-
-
 
 const setupZoom = (svg, width, height) => {
     const textGroup = svg.append('g')
-        .attr('transform', `translate(${width/2},${height/2})`);
+        .attr('transform', `translate(${width / 2},${height / 2})`);
 
     const zoom = d3.zoom()
         .scaleExtent([0.5, 5])
+        .translateExtent([[-width, -height], [2 * width, 2 * height]]) // Permet de se déplacer au-delà des limites initiales
         .on('zoom', (event) => {
-            // Utiliser directement textGroup sans référence externe
             textGroup.attr('transform', event.transform);
         });
 
     return { zoom, textGroup };
 };
+
 
 const NameCloud = ({ nameData, config }) => {
     React.useEffect(() => {
@@ -898,11 +695,21 @@ const NameCloud = ({ nameData, config }) => {
             userSelect: 'none'
         }
     },
-        React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
-            config.type === 'prenoms' 
-                ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
-                : `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
-        ),
+    React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
+        config.type === 'prenoms' 
+            ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
+            : config.type === 'noms'
+                ? `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
+                : config.type === 'professions'
+                    ? `Nuage des Professions entre ${config.startDate} et ${config.endDate}`
+                    : config.type === 'duree_vie'
+                        ? `Nuage des Durées de vie entre ${config.startDate} et ${config.endDate}`
+                        : config.type === 'age_procreation'
+                            ? `Nuage des Âges de procréation entre ${config.startDate} et ${config.endDate}`
+                            : `Nuage des Lieux entre ${config.startDate} et ${config.endDate}`                            
+
+
+    ),
         React.createElement('div', { 
             className: 'relative w-full h-96',
             style: { 
@@ -923,12 +730,7 @@ const NameCloud = ({ nameData, config }) => {
     );
 };
 
-
-
-
-
-
-
+export default NameCloud;
 
 
 function drawNameCloud(svg, textGroup, words, color, config) {
@@ -981,48 +783,154 @@ function drawNameCloud(svg, textGroup, words, color, config) {
 
     let activeTemp = null;
 
+
     function handleClick(d) {
         if (!state.gedcomData) return;
         
         const persons = getPersonsFromTree(config.scope, config.rootPersonId);
-
+    
         const people = Object.values(state.gedcomData.individuals)
             .filter(p => {
-                const firstName = p.name.split('/')[0].trim();
-        
-                const nameMatches = config.type === 'prenoms' 
-                    ? firstName.split(' ').some(name => 
+                let matches = false;
+                
+                if (config.type === 'prenoms') {
+                    const firstName = p.name.split('/')[0].trim();
+                    matches = firstName.split(' ').some(name => 
                         name.toLowerCase() === d.text.toLowerCase() || 
                         name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
-                    )
-                    : (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
+                    );
+                } else if (config.type === 'noms') {
+                    matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
+                } else if (config.type === 'professions') {
+                    const cleanedProfessions = cleanProfession(p.occupation);
+                    matches = cleanedProfessions.includes(d.text.toLowerCase());
+                } else if (config.type === 'age_procreation') {
+                    if (p.birthDate) {
+                        const parentBirthYear = extractYear(p.birthDate);
+                        
+                        // Pour chaque mariage
+                        if (p.spouseFamilies) {
+                            p.spouseFamilies.forEach(familyId => {
+                                const family = state.gedcomData.families[familyId];
+                                if (family && family.children) {
+                                    family.children.forEach(childId => {
+                                        const child = state.gedcomData.individuals[childId];
+                                        if (child && child.birthDate) {
+                                            const childBirthYear = extractYear(child.birthDate);
+                                            if (childBirthYear > parentBirthYear) {
+                                                const ageAtChildBirth = childBirthYear - parentBirthYear;
+                                                if (ageAtChildBirth.toString() === d.text) {
+                                                    matches = true;
+                                                    p.date = `Parent né(e) en ${p.birthDate}, enfant: ${child.name.replace(/\//g, '')} né(e) en ${child.birthDate}`;
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                } else if (config.type === 'duree_vie') {
+                    // Calcul de la durée de vie
+                    if (p.birthDate && p.deathDate) {
+                        const birthYear = extractYear(p.birthDate);
+                        const deathYear = extractYear(p.deathDate);
+                        
+                        // Vérifier que la personne a vécu pendant la période sélectionnée
+                        const startYear = Math.min(config.startDate, config.endDate);
+                        const endYear = Math.max(config.startDate, config.endDate);
+                        
+                        if (birthYear <= endYear && deathYear >= startYear) {
+                            const age = deathYear - birthYear;
+                            matches = age.toString() === d.text;
+                        }
+                    }
+                } else if (config.type === 'lieux') {
+                    const personLocations = [
+                        p.birthPlace, 
+                        p.deathPlace, 
+                        p.marriagePlace, 
+                        p.residPlace1, 
+                        p.residPlace2, 
+                        p.residPlace3
+                    ];
+                    
+                    matches = personLocations.some(location => {
+                        const cleanedLocation = cleanLocation(location);
+                        return cleanedLocation === d.text;
+                    });
+                }   
 
-                // Si mode descendants, s'assurer que la personne est dans l'arbre des descendants
-                const isInDescendantTree = config.scope !== 'descendants' || 
-                    persons.some(descendant => descendant.id === p.id);
+                // Vérifier si la personne est dans l'arbre approprié selon le scope
+                const isInTree = 
+                    config.scope === 'all' || 
+                    (config.scope === 'descendants' && persons.some(descendant => descendant.id === p.id)) ||
+                    (config.scope === 'ancestors' && persons.some(ancestor => ancestor.id === p.id));
 
-                return nameMatches && isInDescendantTree && hasDateInRange(p, config);
+                return matches && isInTree && hasDateInRange(p, config);
+
+
+
             })
             .map(p => ({
                 name: p.name.replace(/\//g, ''),
-                id: p.id
+                id: p.id,
+                occupation: p.occupation || 'Non spécifiée' // Utiliser 'Non spécifiée' si l'occupation n'est pas définie
             }));
         
         showPersonsList(d.text, people, config);
     }
 
-    function createTempText(originalElement, d, props) {
-        if (activeTemp) {
-            activeTemp.remove();
-            d3.selectAll('.name-text').style('opacity', 1);
-        }
 
+function createTempText(originalElement, d, props) {
+    // Détecter si on est en mode zoomé
+    const currentTransform = d3.zoomTransform(svg.node());
+    const isZoomed = currentTransform.k !== 1;
+
+    if (activeTemp) {
+        activeTemp.remove();
+        d3.selectAll('.name-text').style('opacity', 1);
+    }
+
+    let tempGroup, tempText;
+
+    if (isZoomed) {
+        // Récupérer les coordonnées de l'élément original
+        const originalTransform = d3.select(originalElement).attr('transform');
+        const coords = originalTransform.match(/translate\(([^,]+),([^)]+)\)/);
+
+        if (!coords) return null;
+
+        const x = parseFloat(coords[1]);
+        const y = parseFloat(coords[2]);
+
+        const transformedX = currentTransform.x + x * currentTransform.k;
+        const transformedY = currentTransform.y + y * currentTransform.k;
+
+        tempGroup = svg.append('g')
+            .attr('transform', `translate(${transformedX}, ${transformedY}) scale(${currentTransform.k})`);
+
+        tempText = tempGroup.append('text')
+            .attr('class', 'temp-text')
+            .style('font-size', `${props.size * 1.2}px`)
+            .style('font-family', 'Arial')
+            .style('font-weight', 'bold')
+            .style('fill', '#e53e3e')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .style('cursor', 'pointer')
+            .text(d.text);
+
+        d3.select(originalElement)
+            .style('font-size', `${props.size * 1.2}px`)
+            .style('fill', '#e53e3e');
+    } else {
         d3.select(originalElement).style('opacity', 0);
-        
-        const tempGroup = svg.append('g')
-            .attr('transform', `translate(${svg.attr('width')/2},${svg.attr('height')/2})`);
-            
-        const tempText = tempGroup.append('text')
+
+        tempGroup = svg.append('g')
+            .attr('transform', `translate(${svg.attr('width') / 2},${svg.attr('height') / 2})`);
+
+        tempText = tempGroup.append('text')
             .attr('class', 'temp-text')
             .style('font-size', `${props.size * 1.2}px`)
             .style('font-family', 'Arial')
@@ -1033,40 +941,45 @@ function drawNameCloud(svg, textGroup, words, color, config) {
             .attr('dominant-baseline', 'middle')
             .style('cursor', 'pointer')
             .text(d.text);
-
-        tempText
-            .on('click', () => handleClick(d))
-            .on('mouseout', () => {
-                tempGroup.remove();
-                d3.select(originalElement).style('opacity', 1);
-                activeTemp = null;
-            });
-
-        activeTemp = tempGroup;
-        return tempGroup;
     }
 
-    // Gérer les événements sur les zones de clic
-    clickAreas
-        .on('mouseover', function(event, d) {
-            const props = textProperties.get(d.text);
-            if (!props) return;
-            const correspondingText = texts.filter(function(t) { 
-                return t.text === d.text; 
-            }).node();
-            createTempText(correspondingText, d, props);
-        })
-        .on('click', function(event, d) {
-            handleClick(d);
+    tempText
+        .on('click', () => handleClick(d))
+        .on('mouseout', () => {
+            tempGroup.remove();
+            d3.select(originalElement).style('opacity', 1);
+            if (isZoomed) {
+                d3.select(originalElement)
+                    .style('font-size', `${props.size}px`)
+                    .style('fill', props.fill);
+            }
+            activeTemp = null;
         });
 
+    activeTemp = tempGroup;
+    return tempGroup;
+}
+
+clickAreas
+    .on('mouseover', function(event, d) {
+        const props = textProperties.get(d.text);
+        if (!props) return;
+        const correspondingText = texts.filter(function(t) { 
+            return t.text === d.text; 
+        }).node();
+        createTempText(correspondingText, d, props);
+    })
+    .on('click', function(event, d) {
+        handleClick(d);
+    });
+
+
+
+
+    
     texts.append('title')
         .text(d => `${d.text}: ${d.originalSize} occurrences`);
 }
-
-
-
-export default NameCloud;
 
 
 function extractYear(dateString) {
@@ -1199,6 +1112,65 @@ function isValidFamilyName(name) {
            /[a-zA-Z]/.test(name);
 }
 
+function cleanProfession(profession) {
+    if (!profession) return [];
+    
+    // Diviser la chaîne par les virgules et nettoyer chaque partie
+    const professions = profession.split(',')
+        // .map(p => p.trim().toLowerCase().replace(/[^a-zà-ÿ\s-]/gi, '').replace(/\s+/g, ' '))
+        .map(p => p.trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' '))
+        .filter(p => p.length > 0); // Filtrer les chaînes vides
+    
+    // Retourner jusqu'à trois professions uniques
+    return [...new Set(professions)].slice(0, 10);
+}
+
+
+
+
+
+// Liste des lieux à exclure
+const excludedLocations = new Set([
+    '?', 
+    'inconnu', 
+    'unknown', 
+    'nc', 
+    'n.c', 
+    'non communiqué', 
+    'non spécifié',
+    'non renseigné'
+]);
+// fonction de nettoyage des lieux
+function cleanLocation(location) {
+    if (!location) return '';
+    
+    // Convertir en minuscules et supprimer les espaces supplémentaires
+    location = location.toLowerCase().trim();
+    
+    // Supprimer les guillemets
+    location = location.replace(/"/g, '');
+
+    // Vérifier si le lieu est dans la liste d'exclusion
+    if (excludedLocations.has(location)) return '';
+    
+    // Supprimer les parenthèses et les chiffres
+    location = location.replace(/\(.*?\)/g, '').replace(/\d+/g, '');
+    
+    // Prendre la partie avant la virgule
+    location = location.split(',')[0];
+    
+    // Diviser en mots et garder les 3 premiers
+    const words = location.trim().split(/\s+/)
+        .slice(0, 4)
+        .filter(word => !excludedLocations.has(word));
+    
+    // Capitaliser le premier mot
+    if (words.length > 0) {
+        words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+    }
+    
+    return words.join(' ').trim();
+}
 
 
 // Fonction pour capitaliser un prénom
@@ -1285,8 +1257,207 @@ function getPersonsFromTree(mode, rootPersonId = null) {
 }
 
 
+function createDateInput(label, defaultValue, width = '50px') {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+    
+    const labelElement = document.createElement('div');
+    labelElement.innerHTML = label;
+    labelElement.style.fontSize = '12px';
+    labelElement.style.marginBottom = '3px';
 
-function showNameCloud(nameData, config) {  
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.style.width = width;
+    input.style.padding = '3px';
+    input.value = defaultValue;
+    input.step = '100'; // Définit l'incrément à 100
+
+    // Gérer l'incrément/décrément manuel
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const currentValue = parseInt(input.value) || 0;
+            const newValue = e.key === 'ArrowUp' ? currentValue + 100 : currentValue - 100;
+            input.value = newValue;
+        }
+    });
+
+    container.appendChild(labelElement);
+    container.appendChild(input);
+
+    return { container, input };
+}
+
+
+function createRootPersonSelect() {
+    const rootPersonSelect = document.createElement('select');
+    rootPersonSelect.style.padding = '5px';
+    rootPersonSelect.style.width = '100%';
+    rootPersonSelect.style.display = 'none';
+
+    const rootPersons = Object.values(state.gedcomData.individuals);
+    rootPersons.sort((a, b) => a.name.localeCompare(b.name));
+    rootPersons.forEach(person => {
+        const option = document.createElement('option');
+        option.value = person.id;
+        option.textContent = person.name.replace(/\//g, '').trim();
+        rootPersonSelect.appendChild(option);
+    });
+
+    // Initialiser avec la personne racine actuelle si elle existe
+    if (state.rootPersonId) {
+        rootPersonSelect.value = state.rootPersonId;
+    }
+
+    return rootPersonSelect;
+}
+
+function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
+    const container = document.createElement('div');
+    container.style.display = 'none'; // Caché par défaut
+    container.style.position = 'relative';
+    container.style.marginLeft = '10px';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'flex-start';
+
+    const label = document.createElement('label');
+    label.textContent = 'Personne racine';
+    label.style.fontSize = '12px';
+    label.style.marginBottom = '3px';
+
+    const searchWrapper = document.createElement('div');
+    searchWrapper.style.display = 'flex';
+    searchWrapper.style.gap = '5px';
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Rechercher racine';
+    searchInput.style.padding = '3px';
+    searchInput.style.width = '120px';
+
+    const searchButton = document.createElement('button');
+    searchButton.textContent = '🔍';
+    searchButton.style.padding = '3px 5px';
+
+    const resultsSelect = document.createElement('select');
+    resultsSelect.style.display = 'none';
+    resultsSelect.style.position = 'absolute';
+    resultsSelect.style.top = '100%';
+    resultsSelect.style.left = '0';
+    resultsSelect.style.width = '100%';
+    resultsSelect.style.zIndex = '1000';
+
+    searchWrapper.appendChild(searchInput);
+    searchWrapper.appendChild(searchButton);
+
+    container.appendChild(label);
+    container.appendChild(searchWrapper);
+    container.appendChild(resultsSelect);
+    container.appendChild(rootPersonSelect);
+
+    function normalizeString(str) {
+        return str.toLowerCase()
+            .replace(/[éèêë]/g, 'e')
+            .replace(/[àâä]/g, 'a')
+            .replace(/[îï]/g, 'i')
+            .replace(/[ôö]/g, 'o')
+            .replace(/[ûüù]/g, 'u')
+            .replace(/ç/g, 'c');
+    }
+    
+    function searchRootPerson() {
+        const searchStr = normalizeString(searchInput.value);
+        resultsSelect.innerHTML = '<option value="">Sélectionner</option>';
+        resultsSelect.style.display = 'none';
+    
+        if (!searchStr) return;
+    
+        const matchedPersons = Object.values(state.gedcomData.individuals)
+            .filter(person => {
+                const fullName = normalizeString(person.name.replace(/\//g, ''));
+                return fullName.includes(searchStr);
+            });
+
+        if (matchedPersons.length > 0) {
+            matchedPersons.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.id;
+                option.textContent = person.name.replace(/\//g, '').trim();
+                resultsSelect.appendChild(option);
+            });
+            
+            resultsSelect.style.display = 'block';
+            resultsSelect.style.animation = 'findResults 1s infinite';
+            resultsSelect.style.backgroundColor = 'yellow';
+        } else {
+            alert('Aucune personne trouvée');
+        }
+    }
+
+    searchButton.addEventListener('click', searchRootPerson);
+    searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchRootPerson();
+        }
+    });
+
+    resultsSelect.addEventListener('change', () => {
+        const selectedPersonId = resultsSelect.value;
+        if (selectedPersonId) {
+            resultsSelect.style.animation = 'none';
+            resultsSelect.style.backgroundColor = 'orange';
+            rootPersonSelect.value = selectedPersonId;
+            generateNameCloud();
+        }
+    });
+
+    searchWrapper.appendChild(searchInput);
+    searchWrapper.appendChild(searchButton);
+
+    container.appendChild(label);
+    container.appendChild(searchWrapper);
+    container.appendChild(resultsSelect);
+    container.appendChild(rootPersonSelect);
+
+    return { container, rootPersonSelect };
+}
+
+function createTypeSelect(config) {
+    const typeSelect = document.createElement('select');
+    typeSelect.style.padding = '5px';
+    typeSelect.style.minWidth = '100px';
+    typeSelect.innerHTML = `
+        <option value="prenoms">Prénoms</option>
+        <option value="noms">Noms de famille</option>
+        <option value="professions">Professions</option>
+        <option value="duree_vie">Durée de vie</option>
+        <option value="age_procreation">Age de procréation</option>
+        <option value="lieux">Lieux</option>                    
+    `;
+    typeSelect.value = config.type;
+    return typeSelect;
+}
+
+function createScopeSelect(config) {
+    const scopeSelect = document.createElement('select');
+    scopeSelect.style.padding = '5px';
+    scopeSelect.style.minWidth = '100px';
+    scopeSelect.innerHTML = `
+        <option value="all">Fichier entier</option>
+        <option value="ancestors">Ascendance</option>
+        <option value="descendants">Descendance</option>
+    `;
+    scopeSelect.value = config.scope || 'all';
+    return scopeSelect;
+}
+
+
+function createModalContainer() {
     const modal = document.createElement('div');
     modal.className = 'modal-container';
     modal.style.position = 'fixed';
@@ -1300,6 +1471,10 @@ function showNameCloud(nameData, config) {
     modal.style.alignItems = 'center';
     modal.style.zIndex = '1000';
 
+    return modal;
+}
+
+function createMainContainer() {
     const container = document.createElement('div');
     container.style.width = '90%';
     container.style.height = '90%';
@@ -1310,117 +1485,10 @@ function showNameCloud(nameData, config) {
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
 
-    // Conteneur pour les options
-    const optionsContainer = document.createElement('div');
-    optionsContainer.style.display = 'flex';
-    optionsContainer.style.marginBottom = '15px';
-    optionsContainer.style.alignItems = 'center';
-    optionsContainer.style.gap = '10px';
+    return container;
+}
 
-    // Type d'affichage (prénoms/noms)
-    const typeSelect = document.createElement('select');
-    typeSelect.style.padding = '5px';
-    typeSelect.innerHTML = `
-        <option value="prenoms">Prénoms</option>
-        <option value="noms">Noms de famille</option>
-    `;
-    typeSelect.value = config.type;
-
-    // Sélection de la portée
-    const scopeSelect = document.createElement('select');
-    scopeSelect.style.padding = '5px';
-    scopeSelect.innerHTML = `
-        <option value="all">Fichier entier</option>
-        <option value="ancestors">Ascendance</option>
-        <option value="descendants">Descendance</option>
-    `;
-    scopeSelect.value = config.scope || 'all';
-
-    // Sélecteur de personne racine
-    const rootPersonSelect = document.createElement('select');
-    rootPersonSelect.style.padding = '5px';
-    rootPersonSelect.style.width = '100%';
-    rootPersonSelect.style.display = 'none'; // Cacher initialement
-
-    // Remplir le sélecteur des personnes racines
-    const rootPersons = Object.values(state.gedcomData.individuals);
-    rootPersons.sort((a, b) => a.name.localeCompare(b.name));
-    rootPersons.forEach(person => {
-        const option = document.createElement('option');
-        option.value = person.id;
-        option.textContent = person.name.replace(/\//g, '').trim();
-        rootPersonSelect.appendChild(option);
-    });
-
-    // Conteneur pour la recherche de personne racine
-    const rootPersonSearchContainer = document.createElement('div');
-    rootPersonSearchContainer.style.display = 'flex';
-    rootPersonSearchContainer.style.alignItems = 'center';
-    rootPersonSearchContainer.style.gap = '5px';
-
-    const rootPersonSearchInput = document.createElement('input');
-    rootPersonSearchInput.type = 'text';
-    rootPersonSearchInput.placeholder = 'Rechercher une personne racine';
-    rootPersonSearchInput.style.padding = '5px';
-    rootPersonSearchInput.style.flexGrow = '1';
-
-    const rootPersonSearchButton = document.createElement('button');
-    rootPersonSearchButton.textContent = '🔍';
-    rootPersonSearchButton.style.padding = '5px 10px';
-
-    const rootPersonResultsSelect = document.createElement('select');
-    rootPersonResultsSelect.style.display = 'none';
-    rootPersonResultsSelect.style.width = '100%';
-    rootPersonResultsSelect.style.marginTop = '5px';
-
-    // Dates
-    const startDateContainer = document.createElement('div');
-    startDateContainer.style.display = 'flex';
-    startDateContainer.style.alignItems = 'center';
-    startDateContainer.style.gap = '5px';
-    
-    const startDateLabel = document.createElement('div');
-    startDateLabel.innerHTML = 'année<br>début';
-    startDateLabel.style.marginRight = '5px';
-    startDateLabel.style.fontSize = '12px';
-    startDateLabel.style.lineHeight = '1.1';
-    startDateLabel.style.textAlign = 'center';
-
-    const startDateInput = document.createElement('input');
-    startDateInput.type = 'number';
-    startDateInput.style.width = '100px';
-    startDateInput.style.padding = '5px';
-    startDateInput.value = config.startDate;
-
-    const endDateContainer = document.createElement('div');
-    endDateContainer.style.display = 'flex';
-    endDateContainer.style.alignItems = 'center';
-    endDateContainer.style.gap = '5px';
-    
-    const endDateLabel = document.createElement('div');
-    endDateLabel.innerHTML = 'année<br>fin';
-    endDateLabel.style.marginRight = '5px';
-    endDateLabel.style.fontSize = '12px';
-    endDateLabel.style.lineHeight = '1.1';
-    endDateLabel.style.textAlign = 'center';
-
-    const endDateInput = document.createElement('input');
-    endDateInput.type = 'number';
-    endDateInput.style.width = '100px';
-    endDateInput.style.padding = '5px';
-    endDateInput.value = config.endDate;
-
-    // Bouton Afficher
-    const showButton = document.createElement('button');
-    showButton.textContent = 'Afficher';
-    showButton.style.padding = '5px 10px';
-    showButton.style.backgroundColor = '#4CAF50';
-    showButton.style.color = 'white';
-    showButton.style.border = 'none';
-    showButton.style.borderRadius = '4px';
-    showButton.style.marginLeft = '10px';
-
-    // Bouton Fermer
+function createCloseButton() {
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.style.position = 'absolute';
@@ -1431,131 +1499,29 @@ function showNameCloud(nameData, config) {
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
 
-    // Conteneur pour le nuage de noms
+    return closeButton;
+}
+
+function createOptionsContainer() {
+    const optionsContainer = document.createElement('div');
+    optionsContainer.style.display = 'flex';
+    optionsContainer.style.marginBottom = '15px';
+    optionsContainer.style.alignItems = 'center';
+    optionsContainer.style.gap = '10px';
+
+    return optionsContainer;
+}
+
+
+function createNameCloudContainer() {
     const nameCloudContainer = document.createElement('div');
     nameCloudContainer.style.flexGrow = '1';
     nameCloudContainer.style.overflow = 'auto';
 
-    // Fonction de recherche de personne racine
-    function searchRootPerson() {
-        const searchStr = rootPersonSearchInput.value.toLowerCase();
-        rootPersonResultsSelect.innerHTML = '<option value="">Sélectionner</option>';
-        rootPersonResultsSelect.style.display = 'none';
+    return nameCloudContainer;
+}
 
-        if (!searchStr) return;
-
-        const matchedPersons = Object.values(state.gedcomData.individuals)
-            .filter(person => {
-                const fullName = person.name.toLowerCase().replace(/\//g, '');
-                return fullName.includes(searchStr);
-            });
-
-        if (matchedPersons.length > 0) {
-            matchedPersons.forEach(person => {
-                const option = document.createElement('option');
-                option.value = person.id;
-                option.textContent = person.name.replace(/\//g, '').trim();
-                rootPersonResultsSelect.appendChild(option);
-            });
-            
-            rootPersonResultsSelect.style.display = 'block';
-            rootPersonResultsSelect.style.animation = 'findResults 1s infinite';
-            rootPersonResultsSelect.style.backgroundColor = 'yellow';
-        } else {
-            alert('Aucune personne trouvée');
-        }
-    }
-
-    // Événement de recherche
-    rootPersonSearchButton.addEventListener('click', searchRootPerson);
-    rootPersonSearchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            searchRootPerson();
-        }
-    });
-
-    // Événement de sélection
-    rootPersonResultsSelect.addEventListener('change', () => {
-        const selectedPersonId = rootPersonResultsSelect.value;
-        if (selectedPersonId) {
-            rootPersonResultsSelect.style.animation = 'none';
-            rootPersonResultsSelect.style.backgroundColor = 'orange';
-            rootPersonSelect.value = selectedPersonId;
-        }
-    });
-
-    // Conteneur pour la sélection de la personne racine
-    const rootPersonContainer = document.createElement('div');
-    rootPersonContainer.style.display = 'flex';
-    rootPersonContainer.style.flexDirection = 'column';
-
-    const rootPersonLabel = document.createElement('label');
-    rootPersonLabel.textContent = 'Personne racine :';
-
-    const rootPersonSearchWrapper = document.createElement('div');
-    rootPersonSearchWrapper.style.display = 'flex';
-    rootPersonSearchWrapper.style.gap = '5px';
-    rootPersonSearchWrapper.appendChild(rootPersonSearchInput);
-    rootPersonSearchWrapper.appendChild(rootPersonSearchButton);
-
-    rootPersonContainer.appendChild(rootPersonLabel);
-    rootPersonContainer.appendChild(rootPersonSearchWrapper);
-    rootPersonContainer.appendChild(rootPersonResultsSelect);
-    rootPersonContainer.appendChild(rootPersonSelect);
-
-    // Gestion de la visibilité de la sélection de personne racine
-    function updateRootPersonVisibility() {
-        const isRootPersonNeeded = ['ancestors', 'descendants'].includes(scopeSelect.value);
-        rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
-        rootPersonSelect.style.display = isRootPersonNeeded ? 'block' : 'none';
-    }
-    scopeSelect.addEventListener('change', updateRootPersonVisibility);
-    updateRootPersonVisibility();
-
-    // Assembler les conteneurs de dates
-    startDateContainer.appendChild(startDateLabel);
-    startDateContainer.appendChild(startDateInput);
-    endDateContainer.appendChild(endDateLabel);
-    endDateContainer.appendChild(endDateInput);
-
-    // Ajouter les éléments à optionsContainer
-    optionsContainer.appendChild(typeSelect);
-    optionsContainer.appendChild(scopeSelect);
-    optionsContainer.appendChild(rootPersonContainer);
-    optionsContainer.appendChild(startDateContainer);
-    optionsContainer.appendChild(endDateContainer);
-    optionsContainer.appendChild(showButton);
-
-    // Ajouter les éléments au container principal
-    container.appendChild(closeButton);
-    container.appendChild(optionsContainer);
-    container.appendChild(nameCloudContainer);
-    modal.appendChild(container);
-    document.body.appendChild(modal);
-
-    // Fonction pour générer le nuage de noms
-    function generateNameCloud() {
-        const newConfig = {
-            type: typeSelect.value,
-            startDate: parseInt(startDateInput.value),
-            endDate: parseInt(endDateInput.value),
-            scope: scopeSelect.value,
-            rootPersonId: scopeSelect.value !== 'all' ? rootPersonSelect.value : null
-        };
-
-        // Effacer le contenu précédent
-        nameCloudContainer.innerHTML = '';
-
-        // Générer les données du nuage de noms
-        processNamesCloudWithDate(newConfig, nameCloudContainer);
-    }
-
-    // Événements
-    typeSelect.addEventListener('change', generateNameCloud);
-    scopeSelect.addEventListener('change', generateNameCloud);
-    showButton.addEventListener('click', generateNameCloud);
-
+function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
     closeButton.addEventListener('click', () => {
         document.body.removeChild(modal);
@@ -1569,14 +1535,112 @@ function showNameCloud(nameData, config) {
         }
     };
     document.addEventListener('keydown', handleEscape);
-
-    // Générer le nuage de noms initial
-    generateNameCloud();
 }
 
 
+function showNameCloud(nameData, config) {
+    // Créer les éléments principaux
+    const modal = createModalContainer();
+    const container = createMainContainer();
+    const closeButton = createCloseButton();
+    const optionsContainer = createOptionsContainer();
+    const nameCloudContainer = createNameCloudContainer();
 
-// Fonction principale de traitement
+    // Créer les éléments de configuration
+    const typeSelect = createTypeSelect(config);
+    const scopeSelect = createScopeSelect(config);
+    const rootPersonSelect = createRootPersonSelect();
+
+    const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate, '45px');
+    const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate, '45px');
+
+    const showButton = document.createElement('button');
+    showButton.textContent = 'Afficher';
+    showButton.style.padding = '5px 10px';
+    showButton.style.backgroundColor = '#4CAF50';
+    showButton.style.color = 'white';
+    showButton.style.border = 'none';
+    showButton.style.borderRadius = '4px';
+
+    // Conteneur pour la personne racine avec recherche
+    const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
+        createRootPersonSearchContainer(rootPersonSelect, generateNameCloud);
+
+    // Gestion de la visibilité de la sélection de personne racine
+    function updateRootPersonVisibility() {
+        const isRootPersonNeeded = ['ancestors', 'descendants'].includes(scopeSelect.value);
+        rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
+    }
+    scopeSelect.addEventListener('change', updateRootPersonVisibility);
+    updateRootPersonVisibility();
+
+    // Création du layout
+    const leftContainer = document.createElement('div');
+    leftContainer.style.display = 'flex';
+    leftContainer.style.gap = '10px';
+    leftContainer.appendChild(typeSelect);
+    leftContainer.appendChild(scopeSelect);
+
+    const dateContainer = document.createElement('div');
+    dateContainer.style.display = 'flex';
+    dateContainer.style.gap = '10px';
+    dateContainer.appendChild(startDateContainer);
+    dateContainer.appendChild(endDateContainer);
+
+    optionsContainer.style.display = 'flex';
+    optionsContainer.style.justifyContent = 'space-between';
+    optionsContainer.style.alignItems = 'flex-end';
+    optionsContainer.style.width = '100%';
+
+    const mainOptionsContainer = document.createElement('div');
+    mainOptionsContainer.style.display = 'flex';
+    mainOptionsContainer.style.gap = '10px';
+    mainOptionsContainer.style.alignItems = 'flex-end';
+
+    mainOptionsContainer.appendChild(leftContainer);
+    mainOptionsContainer.appendChild(dateContainer);
+    mainOptionsContainer.appendChild(showButton);
+
+    optionsContainer.appendChild(mainOptionsContainer);
+    optionsContainer.appendChild(rootPersonContainer);
+
+    // Assemblage final
+    container.appendChild(closeButton);
+    container.appendChild(optionsContainer);
+    container.appendChild(nameCloudContainer);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    // Fonction pour générer le nuage de noms
+    function generateNameCloud() {
+        const newConfig = {
+            type: typeSelect.value,
+            startDate: parseInt(startDateInput.value),
+            endDate: parseInt(endDateInput.value),
+            scope: scopeSelect.value,
+            rootPersonId: scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+        };
+
+        // Effacer le contenu précédent
+        nameCloudContainer.innerHTML = '';
+
+        // Générer les données du nuage de noms
+        processNamesCloudWithDate(newConfig, nameCloudContainer);
+    }
+
+    // Configuration des événements
+    setupModalEvents(modal, closeButton, generateNameCloud);
+    typeSelect.addEventListener('change', generateNameCloud);
+    scopeSelect.addEventListener('change', generateNameCloud);
+    showButton.addEventListener('click', generateNameCloud);
+
+    // Générer le nuage de noms initial
+    generateNameCloud();
+
+    return modal;
+}
+
+
 function processNamesCloudWithDate(config, containerElement = null) {
     resetStats();
     const nameFrequency = {};
@@ -1606,7 +1670,7 @@ function processNamesCloudWithDate(config, containerElement = null) {
                     }
                 });
             }
-        } else {
+        } else if (config.type === 'noms') {
             const familyName = person.name.split('/')[1];
 
             if (familyName && hasDate) {
@@ -1617,6 +1681,103 @@ function processNamesCloudWithDate(config, containerElement = null) {
                     nameFrequency[formattedName] = (nameFrequency[formattedName] || 0) + 1;
                 }
             }
+        } else if (config.type === 'professions') {
+            if (person.occupation && hasDate) {
+                stats.inPeriod++;
+                const cleanedProfessions = cleanProfession(person.occupation);
+                // if (cleanedProfessions) {
+                //     nameFrequency[cleanedProfessions] = (nameFrequency[cleanedProfessions] || 0) + 1;
+                // }
+
+                cleanedProfessions.forEach(prof => {
+                    if (prof) {
+                        nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                    }
+                });
+
+            }
+        } else if (config.type === 'duree_vie') {
+            if (person.birthDate && person.deathDate) {
+                const birthYear = extractYear(person.birthDate);
+                const deathYear = extractYear(person.deathDate);
+                
+                // Vérifier que la personne a vécu pendant la période sélectionnée
+                const startYear = Math.min(config.startDate, config.endDate);
+                const endYear = Math.max(config.startDate, config.endDate);
+                
+                // La personne doit avoir été vivante pendant la période
+                // (née avant la fin de la période ET morte après le début de la période)
+                // if (birthYear <= endYear && deathYear >= startYear) {
+                if (birthYear <= endYear && birthYear >= startYear) {
+                    const age = deathYear - birthYear;
+                    if (age >= 0 && age <= 150) {
+                        stats.inPeriod++;
+                        const ageStr = age.toString();
+                        nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
+                    }
+                }
+            }
+        } else if (config.type === 'age_procreation') {
+            if (person.birthDate) {
+                const parentBirthYear = extractYear(person.birthDate);
+                
+                // Pour chaque mariage
+                if (person.spouseFamilies) {
+                    person.spouseFamilies.forEach(familyId => {
+                        const family = state.gedcomData.families[familyId];
+                        if (family && family.children) {
+                            // Pour chaque enfant
+                            family.children.forEach(childId => {
+                                const child = state.gedcomData.individuals[childId];
+                                if (child && child.birthDate) {
+                                    const childBirthYear = extractYear(child.birthDate);
+                                    
+                                    // Vérifier que la personne a vécu pendant la période sélectionnée
+                                    const startYear = Math.min(config.startDate, config.endDate);
+                                    const endYear = Math.max(config.startDate, config.endDate);
+
+                                    // if (childBirthYear > parentBirthYear) {
+                                    if ((childBirthYear > parentBirthYear) && (parentBirthYear <= endYear) && (parentBirthYear >= startYear)) {
+                                        const ageAtChildBirth = childBirthYear - parentBirthYear;
+                                        // Filtre des âges raisonnables (12-70 ans)
+                                        if (ageAtChildBirth >= 5 && ageAtChildBirth <= 100) {
+                                            stats.inPeriod++;
+                                            const ageStr = ageAtChildBirth.toString();
+                                            nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        } else if (config.type === 'lieux') {
+            const allLocations = [];
+            
+            // Collecter tous les lieux possibles
+            if (hasDate) {
+                const potentialLocations = [
+                    person.birthPlace, 
+                    person.deathPlace, 
+                    person.marriagePlace, 
+                    person.residPlace1, 
+                    person.residPlace2, 
+                    person.residPlace3
+                ];
+                
+                potentialLocations.forEach(location => {
+                    const cleanedLocation = cleanLocation(location);
+                    if (cleanedLocation) {
+                        allLocations.push(cleanedLocation);
+                    }
+                });
+            }
+            
+            // Compter les occurrences de lieux
+            allLocations.forEach(location => {
+                nameFrequency[location] = (nameFrequency[location] || 0) + 1;
+            });
         }
     });
 
