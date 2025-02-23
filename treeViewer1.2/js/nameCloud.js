@@ -695,7 +695,11 @@ const NameCloud = ({ nameData, config }) => {
             userSelect: 'none'
         }
     },
-    React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 
+    React.createElement('h2', { className: 'text-xl font-bold mb-4', 
+        style: { 
+            marginBottom: '0px'  // Ajouter cette ligne pour réduire l'espace
+        }
+    }, 
         config.type === 'prenoms' 
             ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
             : config.type === 'noms'
@@ -711,7 +715,7 @@ const NameCloud = ({ nameData, config }) => {
 
     ),
         React.createElement('div', { 
-            className: 'relative w-full h-96',
+            className: 'relative w-full ',
             style: { 
                 touchAction: 'pan-x pan-y pinch-zoom',
                 userSelect: 'none'
@@ -1257,7 +1261,7 @@ function getPersonsFromTree(mode, rootPersonId = null) {
 }
 
 
-function createDateInput(label, defaultValue, width = '50px') {
+function createDateInput(label, defaultValue, width = '40px') {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
@@ -1271,7 +1275,7 @@ function createDateInput(label, defaultValue, width = '50px') {
     const input = document.createElement('input');
     input.type = 'number';
     input.style.width = width;
-    input.style.padding = '3px';
+    input.style.padding = '0px';
     input.value = defaultValue;
     input.step = '100'; // Définit l'incrément à 100
 
@@ -1508,6 +1512,8 @@ function createOptionsContainer() {
     optionsContainer.style.marginBottom = '15px';
     optionsContainer.style.alignItems = 'center';
     optionsContainer.style.gap = '10px';
+    optionsContainer.style.marginTop = '-20px'; // Valeur négative pour remonter
+    optionsContainer.style.marginBottom = '-10px'; // Réduire l'espace en-dessous
 
     return optionsContainer;
 }
@@ -1555,12 +1561,12 @@ function showNameCloud(nameData, config) {
     const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate, '45px');
 
     const showButton = document.createElement('button');
-    showButton.textContent = 'Afficher';
-    showButton.style.padding = '5px 10px';
+    showButton.textContent = 'OK';
+    showButton.style.padding = '1px 1px';
     showButton.style.backgroundColor = '#4CAF50';
     showButton.style.color = 'white';
     showButton.style.border = 'none';
-    showButton.style.borderRadius = '4px';
+    showButton.style.borderRadius = '2px';
 
     // Conteneur pour la personne racine avec recherche
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
