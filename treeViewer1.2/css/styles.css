@@ -568,7 +568,7 @@ select {
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: inner-spin-button !important;
-    width: 30px;  /* Essayons 10px */
+    width: 35px;  /* Essayons 10px */
     height: 100%; /* Garder la hauteur complète */
     margin: 0;    /* Suppression des marges par défaut */
     padding: 0;   /* Suppression du padding */
