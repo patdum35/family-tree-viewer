@@ -1276,6 +1276,7 @@ function createDateInput(label, defaultValue, width = '40px') {
     input.type = 'number';
     input.style.width = width;
     input.style.padding = '0px';
+    input.style.height = '21px'; // Ajouter une hauteur fixe
     input.value = defaultValue;
     input.step = '100'; // Définit l'incrément à 100
 
@@ -1323,8 +1324,11 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     const container = document.createElement('div');
     container.style.display = 'none'; // Caché par défaut
     container.style.position = 'relative';
-    container.style.marginLeft = '10px';
+    container.style.marginLeft = '-10px';
     container.style.display = 'flex';
+    container.style.width = 'auto'; // Ajuster la largeur automatiquement
+    container.style.alignSelf = 'flex-start'; // Aligner à gauche
+    container.style.zIndex = '10'; // S'assurer qu'il ne recouvre pas le bouton de fermeture
     container.style.flexDirection = 'column';
     container.style.alignItems = 'flex-start';
 
@@ -1554,7 +1558,12 @@ function showNameCloud(nameData, config) {
 
     // Créer les éléments de configuration
     const typeSelect = createTypeSelect(config);
+    typeSelect.style.padding = '1px 3px';
+    typeSelect.style.verticalAlign = 'top';
+    typeSelect.style.marginLeft = '-15px';
+
     const scopeSelect = createScopeSelect(config);
+    scopeSelect.style.marginLeft = '-5px';    
     const rootPersonSelect = createRootPersonSelect();
 
     const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate, '45px');
@@ -1567,15 +1576,19 @@ function showNameCloud(nameData, config) {
     showButton.style.color = 'white';
     showButton.style.border = 'none';
     showButton.style.borderRadius = '2px';
+    showButton.style.marginLeft = '-6px'; 
 
     // Conteneur pour la personne racine avec recherche
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
         createRootPersonSearchContainer(rootPersonSelect, generateNameCloud);
+    
+    rootPersonContainer.style.marginLeft = '2px'; // Ajoutez cette ligne
 
     // Gestion de la visibilité de la sélection de personne racine
     function updateRootPersonVisibility() {
         const isRootPersonNeeded = ['ancestors', 'descendants'].includes(scopeSelect.value);
         rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
+
     }
     scopeSelect.addEventListener('change', updateRootPersonVisibility);
     updateRootPersonVisibility();
@@ -1607,8 +1620,28 @@ function showNameCloud(nameData, config) {
     mainOptionsContainer.appendChild(dateContainer);
     mainOptionsContainer.appendChild(showButton);
 
-    optionsContainer.appendChild(mainOptionsContainer);
-    optionsContainer.appendChild(rootPersonContainer);
+    // optionsContainer.appendChild(mainOptionsContainer);
+    // optionsContainer.appendChild(rootPersonContainer);
+
+    // Création du conteneur flexible
+    const bottomContainer = document.createElement('div');
+    bottomContainer.style.display = 'flex';
+    bottomContainer.style.justifyContent = 'flex-start'; // Aligner à gauche
+    bottomContainer.style.alignItems = 'center';
+    bottomContainer.style.width = '100%';
+    bottomContainer.style.gap = '10px'; // Espace entre les éléments
+    // bottomContainer.style.marginLeft = '15px'; 
+    // bottomContainer.style.paddingLeft = '15px';
+
+    // Ajouter les conteneurs au nouveau conteneur flexible
+    bottomContainer.appendChild(mainOptionsContainer);
+    bottomContainer.appendChild(rootPersonContainer);
+
+    // Ajouter le conteneur flexible à la section des options
+    optionsContainer.appendChild(bottomContainer);
+
+
+
 
     // Assemblage final
     container.appendChild(closeButton);
