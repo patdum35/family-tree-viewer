@@ -1430,13 +1430,13 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
 function createTypeSelect(config) {
     const typeSelect = document.createElement('select');
     typeSelect.style.padding = '5px';
-    typeSelect.style.minWidth = '100px';
+    typeSelect.style.minWidth = '20px';
     typeSelect.innerHTML = `
-        <option value="prenoms">Prénoms</option>
-        <option value="noms">Noms de famille</option>
-        <option value="professions">Professions</option>
-        <option value="duree_vie">Durée de vie</option>
-        <option value="age_procreation">Age de procréation</option>
+        <option value="prenoms">Prénom</option>
+        <option value="noms">Nom</option>
+        <option value="professions">Métier</option>
+        <option value="duree_vie">Vie</option>
+        <option value="age_procreation">Procréat</option>
         <option value="lieux">Lieux</option>                    
     `;
     typeSelect.value = config.type;
@@ -1445,12 +1445,12 @@ function createTypeSelect(config) {
 
 function createScopeSelect(config) {
     const scopeSelect = document.createElement('select');
-    scopeSelect.style.padding = '5px';
-    scopeSelect.style.minWidth = '100px';
+    scopeSelect.style.padding = '1px';
+    scopeSelect.style.minWidth = '20px';
     scopeSelect.innerHTML = `
-        <option value="all">Fichier entier</option>
-        <option value="ancestors">Ascendance</option>
-        <option value="descendants">Descendance</option>
+        <option value="all">Tout</option>
+        <option value="ancestors">Ascend</option>
+        <option value="descendants">Descend</option>
     `;
     scopeSelect.value = config.scope || 'all';
     return scopeSelect;
