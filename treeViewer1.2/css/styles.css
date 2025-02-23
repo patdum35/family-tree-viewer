@@ -20,7 +20,7 @@ body {
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: inner-spin-button !important;
-    width: 25px;
+    width: 15px;
     position: absolute;
     top: 0;
     right: 0;
