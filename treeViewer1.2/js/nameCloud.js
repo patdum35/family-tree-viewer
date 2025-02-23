@@ -681,6 +681,35 @@ const NameCloud = ({ nameData, config }) => {
                 return canvas;
             })
             .on('end', words => {
+                // Calculer la boîte englobante de tous les mots
+                const bbox = words.reduce((acc, word) => {
+                    if (!acc) return { 
+                        minX: word.x - word.width/2, 
+                        maxX: word.x + word.width/2, 
+                        minY: word.y - word.height/2, 
+                        maxY: word.y + word.height/2 
+                    };
+                    
+                    return {
+                        minX: Math.min(acc.minX, word.x - word.width/2),
+                        maxX: Math.max(acc.maxX, word.x + word.width/2),
+                        minY: Math.min(acc.minY, word.y - word.height/2),
+                        maxY: Math.max(acc.maxY, word.y + word.height/2)
+                    };
+                }, null);
+
+                if (bbox) {
+                    const bboxWidth = bbox.maxX - bbox.minX;
+                    const bboxHeight = bbox.maxY - bbox.minY;
+                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+
+                    // Ajuster la transformation du groupe de texte pour centrer
+                    textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+                }
+
+
+
                 drawNameCloud(svg, textGroup, words, color, config);
             });
 
@@ -1261,7 +1290,7 @@ function getPersonsFromTree(mode, rootPersonId = null) {
 }
 
 
-function createDateInput(label, defaultValue, width = '40px') {
+function createDateInput(label, defaultValue, width = '55px') {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
@@ -1274,9 +1303,9 @@ function createDateInput(label, defaultValue, width = '40px') {
 
     const input = document.createElement('input');
     input.type = 'number';
-    input.style.width = width;
+    input.style.width = '55px'; //width;
     input.style.padding = '0px';
-    input.style.height = '21px'; // Ajouter une hauteur fixe
+    input.style.height = '23px'; // Ajouter une hauteur fixe
     input.value = defaultValue;
     input.step = '100'; // Définit l'incrément à 100
 
