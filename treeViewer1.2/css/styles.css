@@ -16,48 +16,7 @@ body {
 /*z-index: 2;   Au-dessus du fond mais en-dessous des contrôles */
 
 
-/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
-/* input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: inner-spin-button !important;
-    width: 15px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-} */
 
-/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: inner-spin-button !important;
-    width: 12px;  /* Essayons 10px */
-    height: 100%; /* Garder la hauteur complète */
-    margin: 0;    /* Suppression des marges par défaut */
-    padding: 0;   /* Suppression du padding */
-    position: absolute;
-    top: 0;
-    right: 0;
-    /* transform: scale(0.6);   */
-    /* opacity: 0.5;   */
-    /* cursor: pointer;      */
-}
-/*transform: scale(0.6);  /* Réduire la taille des flèches */
-/*opacity: 0.5;   /*Rend les flèches légèrement transparentes */
-/*cursor: pointer;   /*Change le curseur au survol */    
-
-
-
-
-/* Pour Firefox */
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-input[type=number]:hover,
-input[type=number]:focus {
-    -moz-appearance: number-input;
-}
 
 
 /* Style pour le fond d'écran de la page de connexion */
@@ -596,6 +555,86 @@ select {
 .toggle-text:hover {
     opacity: 0.7;
 }
+
+
+
+
+
+/* styles pour l'affichage Cloud map */
+
+
+
+/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    width: 12px;  /* Essayons 10px */
+    height: 100%; /* Garder la hauteur complète */
+    margin: 0;    /* Suppression des marges par défaut */
+    padding: 0;   /* Suppression du padding */
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+/* Pour l'input lui-même */
+input[type=number] {
+    /* padding-left: -10px;
+    margin-left: -7px;  */
+    padding-left: -5px;
+    margin-left: -7px; 
+
+    padding-right: 0px; /* Laisser de la place pour les flèches */
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+
+/* Pour Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+
+/* Réduire la taille de police du titre */
+.modal-container h2 {
+    font-size: 16px;  /* Taille de police plus petite */
+    margin: 10px 0;    /* Réduire les marges */
+}
+
+/* Réduire l'espace entre les éléments de configuration */
+.modal-container .options-container {
+    margin-bottom: 10px;  /* Réduire l'espace en-dessous */
+    display: flex;
+    align-items: center;
+    gap: 5px;  /* Espace minimal entre les éléments */
+}
+
+
+/* Réduire la taille des sélecteurs et boutons */
+.modal-container select,
+.modal-container button {
+    padding: 3px 5px;  /* Padding plus petit */
+    font-size: 15px;   /* Police plus petite */
+    height: 25px;      /* Hauteur fixe et réduite */
+}
+
+/* Réduire la hauteur du conteneur principal */
+.modal-container > div:first-child {
+    padding: 10px;  /* Padding réduit */
+}
+
+/* Augmenter l'espace pour le nuage de mots */
+.modal-container > div:last-child {
+    flex-grow: 1;
+    /* overflow: auto; */
+    height: calc(100% - 100px);  /* Ajuster selon vos besoins */
+    
+}
+
+
+
+
 
 @keyframes findResults {
     0% { background-color: yellow; }
