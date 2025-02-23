@@ -606,20 +606,189 @@ const createFontScale = (nameData) => {
 };
 
 
+// const setupZoom = (svg, width, height) => {
+//     const textGroup = svg.append('g')
+//         .attr('transform', `translate(${width / 2},${height / 2})`);
+
+//     const zoom = d3.zoom()
+//         .scaleExtent([0.5, 5])
+//         .translateExtent([[-width, -height], [2 * width, 2 * height]]) // Permet de se déplacer au-delà des limites initiales
+//         .on('zoom', (event) => {
+//             textGroup.attr('transform', event.transform);
+//         });
+
+//     return { zoom, textGroup };
+// };
+
+
+// const NameCloud = ({ nameData, config }) => {
+//     React.useEffect(() => {
+//         if (!nameData || nameData.length === 0) return;
+
+//         d3.select('#name-cloud-svg').selectAll('*').remove();
+
+//         const width = 800;
+//         const height = 600;
+
+//         const svg = d3.select('#name-cloud-svg')
+//             .attr('width', width)
+//             .attr('height', height);
+
+//         // Rectangle de fond transparent
+//         svg.append('rect')
+//             .attr('width', width)
+//             .attr('height', height)
+//             .attr('fill', 'transparent')
+//             .style('touch-action', 'pan-x pan-y pinch-zoom')
+//             .lower();
+
+//         // Configurer le zoom et créer le textGroup
+//         const { zoom, textGroup } = setupZoom(svg, width, height);
+
+//         // Activer les événements de zoom
+//         svg.call(zoom)
+//            .on('wheel', (event) => event.preventDefault(), { passive: false })
+//            .on('touchstart', (event) => {
+//                if (event.touches.length > 1) {
+//                    event.preventDefault();
+//                }
+//            }, { passive: false })
+//            .on('touchmove', (event) => {
+//                if (event.touches.length > 1) {
+//                    event.preventDefault();
+//                }
+//            }, { passive: false });
+
+//         const fontScale = createFontScale(nameData);
+//         const colorPalette = createColorPalette();
+//         const color = d3.scaleOrdinal(colorPalette);
+
+//         const layout = d3.layout.cloud()
+//             .size([width - 20, height - 20])
+//             .words(nameData.map(d => ({
+//                 text: d.text,
+//                 size: fontScale(d.size),
+//                 originalSize: d.size
+//             })))
+//             .padding(1)
+//             .rotate(0)
+//             .fontSize(d => d.size)
+//             .spiral('rectangular')
+//             .random(() => 0.5)
+//             .canvas(function() {
+//                 const canvas = document.createElement('canvas');
+//                 canvas.setAttribute('willReadFrequently', 'true');
+//                 return canvas;
+//             })
+//             .on('end', words => {
+//                 // Calculer la boîte englobante de tous les mots
+//                 const bbox = words.reduce((acc, word) => {
+//                     if (!acc) return { 
+//                         minX: word.x - word.width/2, 
+//                         maxX: word.x + word.width/2, 
+//                         minY: word.y - word.height/2, 
+//                         maxY: word.y + word.height/2 
+//                     };
+                    
+//                     return {
+//                         minX: Math.min(acc.minX, word.x - word.width/2),
+//                         maxX: Math.max(acc.maxX, word.x + word.width/2),
+//                         minY: Math.min(acc.minY, word.y - word.height/2),
+//                         maxY: Math.max(acc.maxY, word.y + word.height/2)
+//                     };
+//                 }, null);
+
+//                 if (bbox) {
+//                     const bboxWidth = bbox.maxX - bbox.minX;
+//                     const bboxHeight = bbox.maxY - bbox.minY;
+//                     const centerX = width / 2 - (bbox.minX + bboxWidth/2);
+//                     const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+
+//                     // Ajuster la transformation du groupe de texte pour centrer
+//                     textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+//                 }
+
+
+
+//                 drawNameCloud(svg, textGroup, words, color, config);
+//             });
+
+//         layout.start();
+
+//     }, [nameData]);
+
+//     return React.createElement('div', { 
+//         className: 'bg-white p-4 rounded-lg shadow-lg',
+//         style: { 
+//             touchAction: 'pan-x pan-y pinch-zoom',
+//             userSelect: 'none'
+//         }
+//     },
+//     React.createElement('h2', { className: 'text-xl font-bold mb-4', 
+//         style: { 
+//             marginBottom: '0px'  // Ajouter cette ligne pour réduire l'espace
+//         }
+//     }, 
+//         config.type === 'prenoms' 
+//             ? `Prénoms entre ${config.startDate} et ${config.endDate}`
+//             : config.type === 'noms'
+//                 ? `Noms de famille entre ${config.startDate} et ${config.endDate}`
+//                 : config.type === 'professions'
+//                     ? `Professions entre ${config.startDate} et ${config.endDate}`
+//                     : config.type === 'duree_vie'
+//                         ? `Durées de vie entre ${config.startDate} et ${config.endDate}`
+//                         : config.type === 'age_procreation'
+//                             ? `Âges de procréation entre ${config.startDate} et ${config.endDate}`
+//                             : `Lieux entre ${config.startDate} et ${config.endDate}`                            
+
+
+//     ),
+//         React.createElement('div', { 
+//             className: 'relative w-full ',
+//             style: { 
+//                 touchAction: 'pan-x pan-y pinch-zoom',
+//                 userSelect: 'none'
+//             }
+//         },
+//             React.createElement('svg', {
+//                 id: 'name-cloud-svg',
+//                 className: 'w-full h-full',
+//                 style: { 
+//                     backgroundColor: '#f7fafc',
+//                     touchAction: 'pan-x pan-y pinch-zoom',
+//                     userSelect: 'none'
+//                 }
+//             })
+//         )
+//     );
+// };
+
+// export default NameCloud;
+
+
+
+
+
+
+
+
+
 const setupZoom = (svg, width, height) => {
-    const textGroup = svg.append('g')
-        .attr('transform', `translate(${width / 2},${height / 2})`);
+    const container = svg.append('g')
+        .attr('class', 'container');
+
+    const textGroup = container.append('g')
+        .attr('class', 'text-group');
 
     const zoom = d3.zoom()
         .scaleExtent([0.5, 5])
-        .translateExtent([[-width, -height], [2 * width, 2 * height]]) // Permet de se déplacer au-delà des limites initiales
+        .translateExtent([[-width, -height], [2 * width, 2 * height]])
         .on('zoom', (event) => {
-            textGroup.attr('transform', event.transform);
+            container.attr('transform', event.transform);
         });
 
-    return { zoom, textGroup };
+    return { zoom, textGroup, container };
 };
-
 
 const NameCloud = ({ nameData, config }) => {
     React.useEffect(() => {
@@ -627,14 +796,13 @@ const NameCloud = ({ nameData, config }) => {
 
         d3.select('#name-cloud-svg').selectAll('*').remove();
 
-        const width = 800;
-        const height = 600;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
         const svg = d3.select('#name-cloud-svg')
             .attr('width', width)
             .attr('height', height);
 
-        // Rectangle de fond transparent
         svg.append('rect')
             .attr('width', width)
             .attr('height', height)
@@ -642,10 +810,8 @@ const NameCloud = ({ nameData, config }) => {
             .style('touch-action', 'pan-x pan-y pinch-zoom')
             .lower();
 
-        // Configurer le zoom et créer le textGroup
-        const { zoom, textGroup } = setupZoom(svg, width, height);
+        const { zoom, textGroup, container } = setupZoom(svg, width, height);
 
-        // Activer les événements de zoom
         svg.call(zoom)
            .on('wheel', (event) => event.preventDefault(), { passive: false })
            .on('touchstart', (event) => {
@@ -681,36 +847,17 @@ const NameCloud = ({ nameData, config }) => {
                 return canvas;
             })
             .on('end', words => {
-                // Calculer la boîte englobante de tous les mots
-                const bbox = words.reduce((acc, word) => {
-                    if (!acc) return { 
-                        minX: word.x - word.width/2, 
-                        maxX: word.x + word.width/2, 
-                        minY: word.y - word.height/2, 
-                        maxY: word.y + word.height/2 
-                    };
-                    
-                    return {
-                        minX: Math.min(acc.minX, word.x - word.width/2),
-                        maxX: Math.max(acc.maxX, word.x + word.width/2),
-                        minY: Math.min(acc.minY, word.y - word.height/2),
-                        maxY: Math.max(acc.maxY, word.y + word.height/2)
-                    };
-                }, null);
-
-                if (bbox) {
-                    const bboxWidth = bbox.maxX - bbox.minX;
-                    const bboxHeight = bbox.maxY - bbox.minY;
-                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
-
-                    // Ajuster la transformation du groupe de texte pour centrer
-                    textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
-                }
-
-
-
                 drawNameCloud(svg, textGroup, words, color, config);
+
+                // Calculer la boîte englobante de tous les mots
+                const bbox = textGroup.node().getBBox();
+                const bboxWidth = bbox.width;
+                const bboxHeight = bbox.height;
+                const centerX = (width - bboxWidth) / 2 - bbox.x;
+                const centerY = (height - bboxHeight) / 2 - bbox.y;
+
+                // Appliquer la transformation initiale pour centrer le contenu
+                container.attr('transform', `translate(${centerX}, ${centerY})`);
             });
 
         layout.start();
@@ -726,25 +873,23 @@ const NameCloud = ({ nameData, config }) => {
     },
     React.createElement('h2', { className: 'text-xl font-bold mb-4', 
         style: { 
-            marginBottom: '0px'  // Ajouter cette ligne pour réduire l'espace
+            marginBottom: '0px'
         }
     }, 
         config.type === 'prenoms' 
-            ? `Nuage des Prénoms entre ${config.startDate} et ${config.endDate}`
+            ? `Prénoms entre ${config.startDate} et ${config.endDate}`
             : config.type === 'noms'
-                ? `Nuage des Noms de famille entre ${config.startDate} et ${config.endDate}`
+                ? `Noms de famille entre ${config.startDate} et ${config.endDate}`
                 : config.type === 'professions'
-                    ? `Nuage des Professions entre ${config.startDate} et ${config.endDate}`
+                    ? `Professions entre ${config.startDate} et ${config.endDate}`
                     : config.type === 'duree_vie'
-                        ? `Nuage des Durées de vie entre ${config.startDate} et ${config.endDate}`
+                        ? `Durées de vie entre ${config.startDate} et ${config.endDate}`
                         : config.type === 'age_procreation'
-                            ? `Nuage des Âges de procréation entre ${config.startDate} et ${config.endDate}`
-                            : `Nuage des Lieux entre ${config.startDate} et ${config.endDate}`                            
-
-
+                            ? `Âges de procréation entre ${config.startDate} et ${config.endDate}`
+                            : `Lieux entre ${config.startDate} et ${config.endDate}`
     ),
         React.createElement('div', { 
-            className: 'relative w-full ',
+            className: 'relative w-full h-96',
             style: { 
                 touchAction: 'pan-x pan-y pinch-zoom',
                 userSelect: 'none'
@@ -764,6 +909,15 @@ const NameCloud = ({ nameData, config }) => {
 };
 
 export default NameCloud;
+
+
+
+
+
+
+
+
+
 
 
 function drawNameCloud(svg, textGroup, words, color, config) {
