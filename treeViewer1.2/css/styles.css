@@ -20,11 +20,12 @@ body {
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: inner-spin-button !important;
-    width: 15px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
+    width: 10px;  /* Essayons 10px */
+    margin: 0;    /* Suppression des marges par défaut */
+    padding: 0;   /* Suppression du padding */
+    transform: scale(0.6);  /* Réduire la taille des flèches */
+    opacity: 0.5;  /* Rend les flèches légèrement transparentes */
+    cursor: pointer;  /* Change le curseur au survol */    
 }
 
 /* Pour Firefox */
