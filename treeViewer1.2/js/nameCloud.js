@@ -1303,9 +1303,9 @@ function createDateInput(label, defaultValue, width = '55px') {
 
     const input = document.createElement('input');
     input.type = 'number';
-    input.style.width = '55px'; //width;
+    input.style.width = '57px'; //width;
     input.style.padding = '0px';
-    input.style.height = '23px'; // Ajouter une hauteur fixe
+    input.style.height = '25px'; // Ajouter une hauteur fixe
     input.value = defaultValue;
     input.step = '100'; // Définit l'incrément à 100
 
@@ -1611,7 +1611,8 @@ function showNameCloud(nameData, config) {
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
         createRootPersonSearchContainer(rootPersonSelect, generateNameCloud);
     
-    rootPersonContainer.style.marginLeft = '2px'; // Ajoutez cette ligne
+    rootPersonContainer.style.marginLeft = '-7px'; // Ajoutez cette ligne
+    rootPersonContainer.style.marginTop = '3px'; // Ajoutez cette ligne
 
     // Gestion de la visibilité de la sélection de personne racine
     function updateRootPersonVisibility() {
