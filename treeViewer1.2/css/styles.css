@@ -16,7 +16,26 @@ body {
 /*z-index: 2;   Au-dessus du fond mais en-dessous des contrôles */
 
 
+/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    width: 25px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+}
 
+/* Pour Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+input[type=number]:hover,
+input[type=number]:focus {
+    -moz-appearance: number-input;
+}
 
 
 /* Style pour le fond d'écran de la page de connexion */
