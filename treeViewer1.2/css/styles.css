@@ -17,16 +17,37 @@ body {
 
 
 /* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
+/* input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    width: 15px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+} */
+
+/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: inner-spin-button !important;
-    width: 10px;  /* Essayons 10px */
+    width: 12px;  /* Essayons 10px */
+    height: 100%; /* Garder la hauteur complète */
     margin: 0;    /* Suppression des marges par défaut */
     padding: 0;   /* Suppression du padding */
-    transform: scale(0.6);  /* Réduire la taille des flèches */
-    opacity: 0.5;  /* Rend les flèches légèrement transparentes */
-    cursor: pointer;  /* Change le curseur au survol */    
+    position: absolute;
+    top: 0;
+    right: 0;
+    /* transform: scale(0.6);   */
+    /* opacity: 0.5;   */
+    /* cursor: pointer;      */
 }
+/*transform: scale(0.6);  /* Réduire la taille des flèches */
+/*opacity: 0.5;   /*Rend les flèches légèrement transparentes */
+/*cursor: pointer;   /*Change le curseur au survol */    
+
+
+
 
 /* Pour Firefox */
 input[type=number] {
