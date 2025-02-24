@@ -38,45 +38,65 @@
         <img src="background_images/contemporain.jpg" class="login-background-image" alt="Fond d'écran">
     </div>
 
-    <!-- Formulaire de mot de passe -->
-    <div id="password-form">
-        <div class="form-container">
-            <div class="password-row">
-                <input type="password" id="password" placeholder="Mot de passe (pour fichier crypté)">
+
+    <!-- Bouton pour ouvrir la modal de chargement de fichier -->
+    <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()">⚙️</button>
+
+    <!-- Nouvelle modal simple pour le chargement de fichier -->
+    <!-- <div id="gedcom-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Charger un fichier GEDCOM</h2>
+                <span class="modal-close" onclick="closeGedcomModal()">&times;</span>
             </div>
-            <div class="or-row">
-                <div>ou</div>
-            </div>
-            <div class="file-row">
+            <div class="settings-section">
                 <input type="file" id="gedFile" accept=".ged">
+                <button onclick="loadData(); closeGedcomModal()">Afficher l'arbre</button>
             </div>
-            <div style="margin-top: -15px; margin-bottom: 20px; ">
-                <label style="text-align: left; display: block; margin-left:15px">GEDCOM<br></label>
+        </div>
+    </div> -->
+    <!-- Nouvelle modal simple pour le chargement de fichier -->
+    <div id="gedcom-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; width: 300px; max-width: 90%; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; margin: 15% auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 18px; color: #333;">Charger un fichier GEDCOM</h2>
+                <span onclick="closeGedcomModal()" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
             </div>
-            <div class="submit-row">
-                <button id="loadDataButton">Afficher l'arbre</button>
+            <div style="padding: 10px 0;">
+                <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;">
+                <button onclick="loadData(); closeGedcomModal()" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Afficher l'arbre</button>
             </div>
         </div>
     </div>
+
+    <!-- Formulaire de mot de passe -->
+
+
+    <div id="password-form" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; box-sizing: border-box;">
+            <div class="password-row">
+                <input type="password" id="password" placeholder="Mot de passe" style="width: 100%; max-width: 240px; box-sizing: border-box;" autocomplete="new-password">
+            </div>
+            <div class="submit-row">
+                <button id="loadDataButton" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">Visualiser l'arbre</button>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Conteneur de l'arbre -->
     <div id="tree-container" style="display: none;">
         <div class="controls">
             <div class="controls-row-1">
-                <button onclick="zoomIn()"><span>➕</span></button>
+                <!-- <button onclick="zoomIn()"><span>➕</span></button> -->
+                <button onclick="zoomIn()" class="zoom-button"><span>➕</span></button>
                 <button onclick="zoomOut()"><span>➖</span></button>
                 <button onclick="resetZoom()"><span>🏠</span></button>
                 <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button"><span class="wide-span">🔇</span></button>
                 <button onclick="toggleAnimationPause()" id="animationPauseBtn"><span>⏸️</span></button>
                 <button onclick="openSettingsModal()" id="settingsBtn"><span>⚙️</span></button>
                 <button onclick="toggleFullScreen()" class="large-button"><span>⛶</span></button>
-                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">
-                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
-                <select id="root-person-results" style="display:block;">
-                    <option value="">Select</option>
-                </select>
-                <!-- <button onclick="showNameCloud()" class="large-button"> <span class="wide-span">👥</span></button> -->
-                <!-- <button onclick="showNameConfigModal()" class="large-button"> <span class="wide-span">👥</span></button> -->
                 <button onclick="processNamesCloudWithDate({
                     type: 'prenoms', 
                     startDate: 1500, 
@@ -84,20 +104,22 @@
                     scope: 'all'
                 })" class="large-button"> 
                     <span class="wide-span">👥</span>
-                </button>
-                
-
+                </button>          
+                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
+                <select id="root-person-results" style="display:block;">
+                    <option value="">Select</option>
+                </select>
 
             </div>
             <div class="controls-row-2">
                 <!-- <button onclick="toggleFullScreen()" class="large-button"><span class="wide-span">⛶</span></button> -->
-                <label for="prenoms">nbre<br>prénom</label>
+                <!-- <label for="prenoms">nbre<br>prénom</label>
                 <select id="prenoms" onchange="updatePrenoms(this.value)">
                     <option value="1">1</option>
                     <option value="2" selected>2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
-                </select>
+                </select> -->
                 <label for="generations">nbre<br>géné</label>
                 <select id="generations" onchange="updateGenerations(this.value)">
                 </select>
@@ -106,6 +128,7 @@
                     <option value="descendants">Descendants</option>
                     <option value="both">Ascend.+Descend.</option>
                 </select>
+                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">     
             </div>                       
         </div>
 
@@ -149,6 +172,33 @@
                     <button onclick="saveTargetAncestorId()">Enregistrer</button>
                 </div>
                 
+                <!-- Nouveau bloc pour le module "prenoms" -->
+                <div class="settings-section">
+                    <h3>Nombre de Prénoms</h3>
+                    <label for="prenoms">nbre<br>prénom</label>
+                    <select id="prenoms" onchange="updatePrenoms(this.value)">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <!-- Nouveau bloc pour le module "noms" -->
+                <!-- <div class="settings-section">
+                    <h3>Nombre de lettres dans les Noms</h3>
+                    <label for="mots">nbre<br>prénom</label>
+                    <select id="mots" onchange="updateLettersInNames(this.value)">
+                        <option value="8">8</option>
+                        <option value="12">12</option>
+                        <option value="16" selected>16</option>
+                        <option value="20">20</option>
+                        <option value="24">24</option>
+                        <option value="28">28</option>
+                    </select>
+                </div> -->
+
+
                 <!-- Nouveau bloc pour la validation des lieux -->
                 <div class="settings-section">
                     <h3>Validation des Lieux</h3>
@@ -156,23 +206,6 @@
                     <select id="unlocatableLocations" size="10" style="width: 100%; margin-top: 10px;">
                         <option>Résultats apparaîtront ici</option>
                     </select>
-                </div>
-                <div class="settings-section">
-                    <h3>Heatmaps</h3>
-                    <div>
-                        <label for="heatmapMaxPersons">Nombre max. de personnes :</label>
-                        <input 
-                            type="number" 
-                            id="heatmapMaxPersons" 
-                            value="10" 
-                            min="1"
-                            max="10000"
-                            style="width: 80px;"
-                        >
-                    </div>
-                    <button onclick="createAncestorsHeatMap({type: 'all'})">Heatmap Complète</button>
-                    <button onclick="createAncestorsHeatMap({type: 'ancestors'})">Heatmap Ascendants</button>
-                    <button onclick="createAncestorsHeatMap({type: 'descendants'})">Heatmap Descendants</button>
                 </div>
 
                 <!-- Section pour le géocodage -->
@@ -200,6 +233,27 @@
                 </div>
 
 
+                <div class="settings-section">
+                    <h3>Heatmaps</h3>
+                    <div>
+                        <label for="heatmapMaxPersons">Nombre max. de personnes :</label>
+                        <input 
+                            type="number" 
+                            id="heatmapMaxPersons" 
+                            value="10" 
+                            min="1"
+                            max="10000"
+                            style="width: 80px;"
+                        >
+                    </div>
+                    <button onclick="createAncestorsHeatMap({type: 'all'})">Heatmap Complète</button>
+                    <button onclick="createAncestorsHeatMap({type: 'ancestors'})">Heatmap Ascendants</button>
+                    <button onclick="createAncestorsHeatMap({type: 'descendants'})">Heatmap Descendants</button>
+                </div>
+
+
+
+
 
             </div>
         </div>
@@ -214,8 +268,11 @@
         window.processNamesCloudWithDate  = processNamesCloudWithDate ;
 
         import { 
+            openGedcomModal,
+            closeGedcomModal,
             loadData, 
             updatePrenoms, 
+            updateLettersInNames, 
             updateGenerations, 
             zoomIn, 
             zoomOut, 
@@ -244,8 +301,11 @@
         } from './js/backgroundManager.js';
 
         // Rendre les fonctions disponibles globalement
+        window.openGedcomModal = openGedcomModal;
+        window.closeGedcomModal = closeGedcomModal;
         window.loadData = loadData;
         window.updatePrenoms = updatePrenoms;
+        window.updateLettersInNames = updateLettersInNames;
         window.updateGenerations = updateGenerations;
         window.zoomIn = zoomIn;
         window.zoomOut = zoomOut;

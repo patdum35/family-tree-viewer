@@ -3550,5 +3550,569 @@
   "Saint Quentin (Aisne) ": {
     "lat": 49.8465253,
     "lon": 3.2876843
+  },
+  "Bretteville-du-Grand-Caux, 76110, Seine Maritime": {
+    "lat": 49.6629465,
+    "lon": 0.3922726
+  },
+  "Annouville-Vilmesnil, 76110, Seine Maritime": {
+    "lat": 49.6777571,
+    "lon": 0.4326426
+  },
+  "Goderville, 76110, Seine Maritime": {
+    "lat": 49.6456303,
+    "lon": 0.3661017
+  },
+  "Beuzeville la Guérard": {
+    "lat": 49.7122785,
+    "lon": 0.6166861
+  },
+  "Bennetot": {
+    "lat": 49.6720105,
+    "lon": 0.5523447
+  },
+  "Fécamp (Saint Benoist)": {
+    "lat": 49.7558443,
+    "lon": 0.39059717646226233
+  },
+  "Saint-Germain-de-la-Mer - Matignon, Côtes-d'Armor, France": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "La Boitardais 22130 Bourseul": {
+    "lat": 48.503142,
+    "lon": -2.246309
+  },
+  "Languenan, 22105, Côtes d'Armor, Bretagne": {
+    "lat": 48.510953,
+    "lon": -2.127031
+  },
+  "Matignon, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.5968982,
+    "lon": -2.2922438
+  },
+  "Saint Cast": {
+    "lat": 49.4694729,
+    "lon": -2.5953147776547203
+  },
+  "Bourseul 22130 côtes d'Armor Bretagne France": {
+    "lat": 48.487358,
+    "lon": -2.258746
+  },
+  "Plancoët 22130 Côtes d' Armor Bretagne France": {
+    "lat": 48.5225082,
+    "lon": -2.2345898
+  },
+  "Pleurtuit, 35730, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.5815,
+    "lon": -2.05912
+  },
+  "Fougères, 35300, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.3503362,
+    "lon": -1.1958526
+  },
+  "La Trinité-Porhoët, 56710, Morbihan, Bretagne, FRANCE": {
+    "lat": 48.0980252,
+    "lon": -2.5477426
+  },
+  "Le Mans, 72181, Sarthe, Pays de la Loire, France": {
+    "lat": 48.0073849,
+    "lon": 0.1967849
+  },
+  "Champtocé-sur-Loire, 49068, Maine-et-Loire, Pays de la Loire, France": {
+    "lat": 47.4115866,
+    "lon": -0.8649391
+  },
+  "Dijon, 21231, Côte-d'Or, Bourgogne, France": {
+    "lat": 47.3215806,
+    "lon": 5.0414701
+  },
+  "Poitiers, 86194, Vienne, Poitou-Charentes, France": {
+    "lat": 46.5802596,
+    "lon": 0.340196
+  },
+  "Bourges, 18033, Cher, Centre-Val de Loire, France": {
+    "lat": 47.0811658,
+    "lon": 2.399125
+  },
+  "Le Mans, 72, Sarthe, Pays de la Loire, France": {
+    "lat": 47.955698,
+    "lon": 0.1712127
+  },
+  "Aachen Nordrhein-Westfalen Germany": {
+    "lat": 50.776351,
+    "lon": 6.083862
+  },
+  "Beaucorps, Pléboulle (22)": {
+    "lat": 48.5957408,
+    "lon": -2.3289102
+  },
+  "Chemazé, 53066, Mayenne, Pays de la Loire, France": {
+    "lat": 47.7853491,
+    "lon": -0.7756615
+  },
+  "Plévenon - Côtes-d Armor": {
+    "lat": 48.6548909,
+    "lon": -2.3315588
+  },
+  "plevenon": {
+    "lat": 48.6548909,
+    "lon": -2.3315588
+  },
+  "Saint Cast 22380 Côtes d' Armor Bretagne France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Créhen, 22049, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.546319,
+    "lon": -2.213879
+  },
+  "Coëtlogon (22)": {
+    "lat": 48.12966985,
+    "lon": -2.5361080747099845
+  },
+  "Gévezé, 35850, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.2204891,
+    "lon": -1.7896366
+  },
+  "Romillé, 35850, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.2153539,
+    "lon": -1.89245
+  },
+  "Langan, 35144, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.245019,
+    "lon": -1.853596
+  },
+  "Côtes-d'Armor, Bretagne": {
+    "lat": 48.461487700000006,
+    "lon": -2.751432791068642
+  },
+  "Côtes d’Armor, Bretagne, France": {
+    "lat": 48.461487700000006,
+    "lon": -2.751432791068642
+  },
+  "Saint-Hélen, 22100, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.472065,
+    "lon": -1.958615
+  },
+  "angleterre": {
+    "lat": 52.5310214,
+    "lon": -1.2649062
+  },
+  "Coëtquen, Saint-Hélen, 22": {
+    "lat": 48.4725476,
+    "lon": -1.9379651
+  },
+  "Commercy,55029,Meuse": {
+    "lat": 48.763203,
+    "lon": 5.5914753
+  },
+  "Saint Quentin (Aisne)": {
+    "lat": 49.8465253,
+    "lon": 3.2876843
+  },
+  "Dinan, 22050, Côtes d'Armor, Bretagne": {
+    "lat": 48.4539775,
+    "lon": -2.047687
+  },
+  "Lamballe, 22093, Côtes d'Armor, Bretagne": {
+    "lat": 48.46244615,
+    "lon": -2.516502292079859
+  },
+  "Dinan Côtes d'Armor, Bretagne, France": {
+    "lat": 48.4539775,
+    "lon": -2.047687
+  },
+  "Thouars, 79329, Deux Sèvres, Poitou-Charentes": {
+    "lat": 46.9790193,
+    "lon": -0.2153741
+  },
+  "Saint-Pol-sur-Mer, Saint-Pol-sur-Mer, 59540, Nord, Nord-Pas-de-Calais, France": {
+    "lat": 51.0284507,
+    "lon": 2.3519062
+  },
+  "Montivilliers, 76447, Seine-Maritime, Normandie, France": {
+    "lat": 49.5456435,
+    "lon": 0.192418
+  },
+  "Romillé, 35, bretagne, france": {
+    "lat": 48.2153539,
+    "lon": -1.89245
+  },
+  "Bideford, Devon, Royaume-Uni": {
+    "lat": 51.0181448,
+    "lon": -4.2064223
+  },
+  "La Baillie, Saint-Cast-le-Guildo, 22282, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.6279708,
+    "lon": -2.2824685
+  },
+  "Tourville-les-Ifs, 76": {
+    "lat": 49.713794,
+    "lon": 0.3997245
+  },
+  "Notre-Dame-du-Guildo, 22380, Cotes d'Armor, FRANCE": {
+    "lat": 48.5792308,
+    "lon": -2.2202534
+  },
+  "Saint-Cast (22)": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Potan, 22550, Côtes d'Armor, FRANCE": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "St-Germain-de-la-Mer, 22550, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Saint-Potan (22)": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Notre-Dame-du-Guildo (22)": {
+    "lat": 48.5792308,
+    "lon": -2.2202534
+  },
+  "St-Germain-de-la-Mer, 22, Bretagne": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "St-Germain-de-la-Mer, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Breteil, \" le Magois \" (35)": {
+    "lat": 48.1300487,
+    "lon": -1.9269126
+  },
+  "Talensac, \" Les Bouchers \" (35)": {
+    "lat": 48.0796201,
+    "lon": -1.8957532
+  },
+  "Saint-Romain-de-Colbosc, (76) Seine-Maritime, Normandie, France": {
+    "lat": 49.5313601,
+    "lon": 0.3579164
+  },
+  "Angerville-la-Martel,76": {
+    "lat": 49.7614028,
+    "lon": 0.5013556
+  },
+  "Ste-Helene-de-Bondeville": {
+    "lat": 49.7723027,
+    "lon": 0.4410246
+  },
+  "Ste-Helene-de-Bondeville, 76587, Seine-Maritime, Normandie, France": {
+    "lat": 49.7751006,
+    "lon": 0.458877
+  },
+  "Angerville-la-Martel, 76013, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.7614028,
+    "lon": 0.5013556
+  },
+  "St-Germain-de-la-Mer, Côtes-d'Armor, 22, FR": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "St-Germain-de-la-Mer, Cotes-d'Armor, 22, FR": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "St-Germain-de-la-Mer, Côtes-d'Armor, France": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Nagel-Séez-Mesnil, 27190, Eure, Normandie, FRANCE": {
+    "lat": 48.92298,
+    "lon": 0.93509
+  },
+  "La Baillie, Saint-Cast Le Guildo, 22, Bretagne": {
+    "lat": 48.6279708,
+    "lon": -2.2824685
+  },
+  "Saint-Pierre-en-Port, Normandie, France": {
+    "lat": 49.8069179,
+    "lon": 0.4946787
+  },
+  "Saint-Potan, 22550, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Cast": {
+    "lat": 49.4694729,
+    "lon": -2.5953147776547203
+  },
+  "St-Germain-de-la-Mer (22143), Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "St-Germain-de-la-Mer, Côtes d'Armor, 22": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "St-Germain-de-la-Mer, 22, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Saint-Pol-de-Léon": {
+    "lat": 48.6849601,
+    "lon": -3.9868641
+  },
+  "Cornouaille, Finistère, Bretagne, France": {
+    "lat": 47.9713877,
+    "lon": -4.17040990631579
+  },
+  "Saint-Cast, 22, France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Cast 22 France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "St-Germain-de-la-Mer, 22550, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Saint-Cast, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Cast, Bretagne, France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Cast, 22, Franc": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Potan, 22323, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan 22": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan 22, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan 22 Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan, 22550, Côtes-D'Armor, Bretagne, FRANCE": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan, Côtes-d’Armor, 22": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan, 22323, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Pleurtuit, 35 Ille et Vilaine, Bretagne, France": {
+    "lat": 48.5815,
+    "lon": -2.05912
+  },
+  "Aachen Nordrhein-Westfalen, Germany": {
+    "lat": 50.776351,
+    "lon": 6.083862
+  },
+  "Plévenon, Côtes-d Armor": {
+    "lat": 48.6548909,
+    "lon": -2.3315588
+  },
+  "Saint-Potan, Côtes-D'armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan ( 22 )": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Cast ( 22 )": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "St-Germain-de-la-Mer, 22, Côtes-d'Armor, Bretagne, Fr": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Saint-Cast Le Guildo, 22, Bretagne": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Cast Le Guildo (22)": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint-Cast 22380 Côtes d' Armor Bretagne France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "St-Germain-de-la-Mer 22": {
+    "lat": 48.6182513,
+    "lon": -2.302739
+  },
+  "Saint-Potan, 22550, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Potan,  Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Piémont, ITALIE": {
+    "lat": 45.060735,
+    "lon": 7.923549
+  },
+  "Monaco,  Monaco": {
+    "lat": 43.7323492,
+    "lon": 7.4276832
+  },
+  "Constantine,  Algérie": {
+    "lat": 36.3641642,
+    "lon": 6.6084281
+  },
+  "Ibagué, Tolima, Colombie": {
+    "lat": 4.4386033,
+    "lon": -75.2108857
+  },
+  "San Paolo, Brésil": {
+    "lat": -23.5506507,
+    "lon": -46.6333824
+  },
+  "Auxerre": {
+    "lat": 47.7961287,
+    "lon": 3.570579
+  },
+  "Charlesbourg": {
+    "lat": 46.89564985,
+    "lon": -71.2908285897658
+  },
+  "Saint-Pierre-de-la-Rivière-du-Sud": {
+    "lat": 46.9138596,
+    "lon": -70.6254264
+  },
+  "Breteil, \" Gautrel \" (35)": {
+    "lat": 48.1457582,
+    "lon": -1.9001485
+  },
+  "Breteil, \" la Haute Herdrouais \" (35)": {
+    "lat": 48.1494411,
+    "lon": -1.9037306
+  },
+  "Breteil, \" la Herdrouais \" (35)": {
+    "lat": 48.1465448,
+    "lon": -1.9084908
+  },
+  "Talensac, \" le Châtellier \" (35)": {
+    "lat": 48.111917,
+    "lon": -1.9228385
+  },
+  "Breteil, \" la Riolais\" (35)": {
+    "lat": 48.1550818,
+    "lon": -1.8964726
+  },
+  "Breteil, \" le Plessis-Cohan \" (35)": {
+    "lat": 48.1230433,
+    "lon": -1.9221663
+  },
+  "Breteil, \" Digran \" (35)": {
+    "lat": 48.1405713,
+    "lon": -1.8972095
+  },
+  "Breteil, \" la Bergerais \" (35)": {
+    "lat": 48.13204,
+    "lon": -1.9138914
+  },
+  "Breteil, \" le Léez \" (35)": {
+    "lat": 48.14059,
+    "lon": -1.9166947
+  },
+  "Talensac, \" Le Chatellier \" (35)": {
+    "lat": 48.111917,
+    "lon": -1.9228385
+  },
+  "Breteil, \" Les Vilbertes \" (35)": {
+    "lat": 48.14308704020159,
+    "lon": -1.9016107724702906
+  },
+  "Breteil, \" Les Vilbertes \", 35": {
+    "lat": 48.14308704020159,
+    "lon": -1.9016107724702906
+  },
+  "Romillé, \" la Lande de Chauverais \" (35)": {
+    "lat": 48.21995315,
+    "lon": -1.8852998445232827
+  },
+  "Monterfil, \" Painvoisin \" (35)": {
+    "lat": 48.0537805,
+    "lon": -1.9674111
+  },
+  "Mordelles, \" Cramoux \" (35)": {
+    "lat": 48.0539972,
+    "lon": -1.8184423
+  },
+  "Mordelles, \" Gagne pain \" (35)": {
+    "lat": 48.0720556,
+    "lon": -1.818031
+  },
+  "Bréal-Sous-Montfort, \" la Costardais \" (35)": {
+    "lat": 48.0436017,
+    "lon": -1.8616386
+  },
+  "le Rheu, \" la Barberais \" (35)": {
+    "lat": 48.1001559,
+    "lon": -1.7829386
+  },
+  "Mordelles, \" Gagne Pain \" (35)": {
+    "lat": 48.0720556,
+    "lon": -1.818031
+  },
+  "Pacé, \" la Grande Touche \" (35)": {
+    "lat": 48.1441764,
+    "lon": -1.7957332
+  },
+  "Gévezé, \" Coudray \" (35)": {
+    "lat": 48.18858486132359,
+    "lon": -1.796880563208792
+  },
+  "Gévezé, \" le Coudray \" (35)": {
+    "lat": 48.18858486132359,
+    "lon": -1.796880563208792
+  },
+  "Gévezé, \" La Bisolais \" (35)": {
+    "lat": 48.2018542,
+    "lon": -1.7829409
+  },
+  "Gévezé, \" la Rosaie \" (35)": {
+    "lat": 48.1717682,
+    "lon": -1.8174085
+  },
+  "Bréal-Sous-Montfort, \" la Rue du Pas \" (35)": {
+    "lat": 48.0608844,
+    "lon": -1.8277065
+  },
+  "Bréal-Sous-Montfort, \" la Grannelais \" (35)": {
+    "lat": 48.062281,
+    "lon": -1.8694148
+  },
+  "Mordelles, \" la Bellais \" (35)": {
+    "lat": 48.0839505,
+    "lon": -1.8332594
+  },
+  "Dinan, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.4539775,
+    "lon": -2.047687
+  },
+  "Le Havre": {
+    "lat": 49.4938975,
+    "lon": 0.1079732
   }
 }
