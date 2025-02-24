@@ -17,6 +17,7 @@ import {
 import {
     initializeEventHandlers,
     updatePrenoms,
+    updateLettersInNames,
     updateGenerations,
     zoomIn,
     zoomOut,
@@ -30,6 +31,8 @@ export const state = {
     rootPersonId: null,
     currentTree: null,
     nombre_prenoms: 2,
+    nombre_lettersInPrenoms: 20,
+    nombre_lettersInNames: 15,
     nombre_generation: 6,
     boxWidth: 150,
     boxHeight: 50,
@@ -45,6 +48,17 @@ export const state = {
 export { geocodeLocation, validateLocations };
 
 window.toggleAnimationPause = toggleAnimationPause;
+
+
+function openGedcomModal() {
+    document.getElementById('gedcom-modal').style.display = 'block';
+}
+
+function closeGedcomModal() {
+    document.getElementById('gedcom-modal').style.display = 'none';
+}
+
+
 
 // ajoutez des options pour différents types de heatmap
 export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
@@ -88,6 +102,20 @@ export function toggleFullScreen() {
 function initialize() {
     initializeGenerationSelect();
     initializeEventHandlers();
+
+    // Ajouter l'événement pour soumettre le formulaire avec Enter
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+            passwordInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    loadData();
+                }
+            });
+        }
+    });
+
 }
 
 /**
@@ -130,6 +158,13 @@ export async function loadData() {
 
 
         document.getElementById('password-form').style.display = 'none';
+
+        // Cacher le bouton paramètres de la page d'accueil
+        const settingsButton = document.getElementById('load-gedcom-button');
+        if (settingsButton) {
+            settingsButton.style.display = 'none';
+        }
+
         document.getElementById('tree-container').style.display = 'block';
 
         // Initialiser le conteneur de fond d'écran
@@ -428,7 +463,32 @@ function updateBoxWidth() {
     if (typeof state.nombre_prenoms === 'string') {
         state.nombre_prenoms = parseInt(state.nombre_prenoms, 10);
     }
-    state.boxWidth = state.nombre_prenoms === 1 ? 90 : 120;
+    if (typeof state.nombre_lettersInNames === 'string') {
+        state.nombre_lettersInNames = parseInt(state.nombre_lettersInNames, 10);
+    }
+    // state.boxWidth = state.nombre_prenoms === 1 ? 90 : state.nombre_prenoms === 2 ? 120 : state.nombre_prenoms === 3 ? 150 : 180;
+
+    if (state.nombre_prenoms === 1) {
+        state.boxWidth = 90;
+        state.nombre_lettersInNames = 11;
+        state.nombre_lettersInPrenoms = 13;
+    }
+    else if (state.nombre_prenoms === 2) {
+        state.boxWidth = 120;
+        state.nombre_lettersInNames = 15;
+        state.nombre_lettersInPrenoms = 18;
+    }
+    else if (state.nombre_prenoms === 3) {
+        state.boxWidth = 150;
+        state.nombre_lettersInNames = 19;
+        state.nombre_lettersInPrenoms = 23;
+    }
+    else if (state.nombre_prenoms === 4) {
+        state.boxWidth = 180;
+        state.nombre_lettersInNames = 24;
+        state.nombre_lettersInPrenoms = 30;
+    }
+    // state.boxWidth = state.nombre_lettersInNames < 11 ? 90 : state.nombre_lettersInNames <= 15 ? 120 : state.nombre_lettersInNames <= 19 ? 140 : state.nombre_lettersInNames <= 13 ? 160 : 180;
 }
 
 /**
@@ -451,6 +511,11 @@ export function openSettingsModal() {
     // Charger la valeur actuelle
     const currentTargetId = localStorage.getItem('targetAncestorId') || '@I741@';
     document.getElementById('targetAncestorId').value = currentTargetId;
+
+
+
+
+
 }
 
 export function closeSettingsModal() {
@@ -490,11 +555,14 @@ export function showMap() {
 
 // Export des variables et fonctions nécessaires
 export {
+    openGedcomModal,
+    closeGedcomModal,
     displayPersonDetails,
     closePersonDetails,
     setAsRootPerson,
     closeModal,
     updatePrenoms,
+    updateLettersInNames,
     updateGenerations,
     zoomIn,
     zoomOut,

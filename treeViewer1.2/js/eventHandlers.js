@@ -138,6 +138,15 @@ export function updatePrenoms(value) {
 }
 
 /**
+ * Gère les mises à jour du nombre de mots dans les noms
+ */
+export function updateLettersInNames(value) {
+    state.nombre_lettersInNames = parseInt(value)-1;
+    displayGenealogicTree(null, false, false);
+}
+
+
+/**
  * Gère les mises à jour du nombre de générations
  */
 export function updateGenerations(value) {

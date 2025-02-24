@@ -171,6 +171,7 @@ export function drawNodeContent(nodeGroups) {
 function drawPersonDetails(text, match, data) {
     const [_, firstNames, lastName] = match;
     const formattedFirstNames = formatFirstNames(firstNames);
+    const formattedLastNames = formatlastNames(lastName);
     
     // Prénom(s)
     text.append("tspan")
@@ -183,8 +184,9 @@ function drawPersonDetails(text, match, data) {
         .attr("x", 0)
         .attr("dy", "1.2em")
         .attr("fill", "#0000CD")
-        .text(lastName.trim().toUpperCase());
-    
+        // .text(lastName.trim().toUpperCase());
+        .text(formattedLastNames.trim().toUpperCase());
+
     // Dates
     drawDates(text, data);
 }
@@ -207,7 +209,26 @@ function formatFirstNames(firstNames) {
             return acc;
         }, [])
         .slice(0, state.nombre_prenoms)
-        .join(' ');
+        .join(' ')
+        .slice(0, state.nombre_lettersInPrenoms); // Garder seulement le nombre de lettres spécifié
+}
+
+
+/**
+ * Formate les noms
+ * @private
+ */
+function formatlastNames(lastNames) {
+    return lastNames.trim()
+        .split('(')[0] // Séparer par le caractère '(' et prendre la première partie
+        .replace(')', '') // Enlever le caractère ')' s'il existe
+        .split(',')[0] // Séparer par la virgule et prendre la première partie
+        .split(' ') // Séparer par les espaces
+        // .slice(0, state.nombre_lettersInNames) // Garder seulement le nombre de mots spécifié
+        .join(' ') // Rejoindre les mots avec des espaces
+        .slice(0, state.nombre_lettersInNames); // Garder seulement le nombre de lettres spécifié
+
+        
 }
 
 /**

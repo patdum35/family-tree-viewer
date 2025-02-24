@@ -180,7 +180,22 @@ function drawBothModeTree(isZoomRefresh = false) {
     const ancestorsResult = ancestorsTreeLayout(ancestorsHierarchy);
     // Appliquer un offset négatif aux positions y de l'arbre ascendant
     ancestorsResult.descendants().forEach(node => {
-        node.y -= state.boxWidth * 3.1; // Ajuster la valeur 2.8 selon le rapprochement souhaité
+        if (state.nombre_prenoms === 1)
+        {
+            node.y -= 120*2.8 // Ajuster la valeur 2.8 selon le rapprochement souhaité
+        }        
+        else if (state.nombre_prenoms === 2)
+        {
+            node.y -= 120*3.1
+        }
+        else if (state.nombre_prenoms === 3)
+        {
+            node.y -= 120*3.3
+        }
+        else
+        {
+            node.y -= 120*3.4
+        }
     });
 
     // Fonction personnalisée de création de liens
