@@ -697,6 +697,10 @@ input[type=number] {
 
 
 
+
+
+
+
 /* Base styles for control buttons */
 .controls-row-1 button {
     min-width: 28px;
@@ -738,7 +742,7 @@ input[type=number] {
     }
 
     .controls-row-1 {
-        gap: 2px; /* Réduire l'espace entre les boutons */
+        gap: 3px; /* Réduire l'espace entre les boutons */
     }
 
     .controls-row-1 button span {
@@ -755,7 +759,7 @@ input[type=number] {
     }
 
     .controls-row-1 {
-        gap: 1px; /* Espace minimal entre les boutons */
+        gap: 2px; /* Espace minimal entre les boutons */
     }
 
 
