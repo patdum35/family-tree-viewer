@@ -805,5 +805,16 @@ input[type=number] {
 }
 
 
+.mobile-tooltip {
+    position: fixed;
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    z-index: 2000;
+    pointer-events: none;
+    white-space: nowrap;
+}
 
 
