@@ -4,6 +4,15 @@ import { state, displayPersonDetails } from './main.js';
 import { startAncestorAnimation } from './treeAnimation.js';
 
 
+
+// let SVG_width = 800;
+// let SVG_height = 600;
+
+
+let SVG_width = 1200;
+let SVG_height = 800;
+
+
 // Structure des stats
 const stats = {
     totalPersons: 0,
@@ -35,8 +44,6 @@ function resetStats() {
     stats.inPeriod = 0;
     stats.uniqueNames = 0;
 }
-
-
 
 function findDateForPerson(personId) {
     const person = state.gedcomData.individuals[personId];
@@ -225,8 +232,6 @@ function findDateForPerson(personId) {
     return null;
 }
 
-
-
 // Fonction pour afficher les statistiques
 // Fonction d'affichage des stats modifiée pour plus de clarté
 function displayDateStats() {
@@ -304,8 +309,6 @@ function displayDateStats() {
 
     console.log('\n========================================');
 }
-
-
 
 
 function showPersonsList(name, people, config) {
@@ -463,7 +466,6 @@ function showPersonsList(name, people, config) {
 
 }
 
-
 function showPersonActions(person, event) {
     console.log('Showing actions for:', person.name, person.id); // Log pour vérifier l'appel de la fonction
 
@@ -547,7 +549,6 @@ function showPersonActions(person, event) {
     });
 }
 
-
 function showInTree(personId) {
     // Appeler la fonction pour afficher l'arbre en mode ascendant avec cette personne comme racine
     state.rootPersonId = personId;
@@ -583,8 +584,6 @@ function startAnimation(personId) {
 
 }
 
-
-
 const createColorPalette = () => [
     '#1E88E5', // bleu vif
     '#E53935', // rouge vif
@@ -606,19 +605,66 @@ const createFontScale = (nameData) => {
 };
 
 
+// Variable globale pour les offsets
+let horizontalOffset = 0;
+let verticalOffset = 0;
+
+let containerHorizontalOffset = 0;
+let containerVerticalOffset = 0;
+
+
 const setupZoom = (svg, width, height) => {
+    // Dimensions de l'écran
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    
+    // Dimensions de la map (SVG)
+    const mapW = width;
+    const mapH = height;
+    
+    // Calcul des offsets
+    horizontalOffset = screenW < mapW ? -(mapW - screenW)/2 : 0;
+    verticalOffset = screenH < mapH ? -(mapH - screenH)/2 : 0;
+
+    containerHorizontalOffset = screenW > mapW ? -(mapW - screenW)/2 : 0;
+    containerVerticalOffset = screenH > mapH ? -(mapH - screenH)/2 : 0;
+
+    console.log("DEBUG screen size =", screenW, 'x', screenH, ", map size = ", mapW, "x", mapH, " offsets =", containerHorizontalOffset, containerVerticalOffset, horizontalOffset, verticalOffset);
+
     const textGroup = svg.append('g')
-        .attr('transform', `translate(${width / 2},${height / 2})`);
+        .attr('transform', `translate(${width / 2 + horizontalOffset},${height / 2 + verticalOffset})`);
 
     const zoom = d3.zoom()
         .scaleExtent([0.5, 5])
-        .translateExtent([[-width, -height], [2 * width, 2 * height]]) // Permet de se déplacer au-delà des limites initiales
+        .translateExtent([[-width, -height], [2 * width, 2 * height]])
         .on('zoom', (event) => {
             textGroup.attr('transform', event.transform);
         });
 
+    // Initialiser la transformation de zoom pour éviter le déplacement brusque
+    const initialTransform = d3.zoomIdentity
+        .translate(width / 2 + horizontalOffset, height / 2 + verticalOffset)
+        .scale(1);
+    
+    svg.call(zoom.transform, initialTransform);
+
+    // Appliquer le zoom et ajouter les événements
+    svg.call(zoom)
+       .on('wheel', (event) => event.preventDefault(), { passive: false })
+       .on('touchstart', (event) => {
+           if (event.touches.length > 1) {
+               event.preventDefault();
+           }
+       }, { passive: false })
+       .on('touchmove', (event) => {
+           if (event.touches.length > 1) {
+               event.preventDefault();
+           }
+       }, { passive: false });
+
     return { zoom, textGroup };
 };
+
 
 
 const NameCloud = ({ nameData, config }) => {
@@ -627,8 +673,8 @@ const NameCloud = ({ nameData, config }) => {
 
         d3.select('#name-cloud-svg').selectAll('*').remove();
 
-        const width = 800;
-        const height = 600;
+        const width = SVG_width;
+        const height = SVG_height;
 
         const svg = d3.select('#name-cloud-svg')
             .attr('width', width)
@@ -701,8 +747,10 @@ const NameCloud = ({ nameData, config }) => {
                 if (bbox) {
                     const bboxWidth = bbox.maxX - bbox.minX;
                     const bboxHeight = bbox.maxY - bbox.minY;
-                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+                    // const centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                    // const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+                    const centerX = width / 2 - (bbox.minX + bboxWidth/2) + horizontalOffset;
+                    const centerY = height / 2 - (bbox.minY + bboxHeight/2) + verticalOffset;
 
                     // Ajuster la transformation du groupe de texte pour centrer
                     textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
@@ -724,25 +772,6 @@ const NameCloud = ({ nameData, config }) => {
             userSelect: 'none'
         }
     },
-    React.createElement('h2', { className: 'text-xl font-bold mb-4', 
-        style: { 
-            marginBottom: '0px'  // Ajouter cette ligne pour réduire l'espace
-        }
-    }, 
-        config.type === 'prenoms' 
-            ? `Prénoms entre ${config.startDate} et ${config.endDate}`
-            : config.type === 'noms'
-                ? `Noms de famille entre ${config.startDate} et ${config.endDate}`
-                : config.type === 'professions'
-                    ? `Professions entre ${config.startDate} et ${config.endDate}`
-                    : config.type === 'duree_vie'
-                        ? `Durées de vie entre ${config.startDate} et ${config.endDate}`
-                        : config.type === 'age_procreation'
-                            ? `Âges de procréation entre ${config.startDate} et ${config.endDate}`
-                            : `Lieux entre ${config.startDate} et ${config.endDate}`                            
-
-
-    ),
         React.createElement('div', { 
             className: 'relative w-full ',
             style: { 
@@ -759,165 +788,12 @@ const NameCloud = ({ nameData, config }) => {
                     userSelect: 'none'
                 }
             })
+
         )
     );
 };
 
 export default NameCloud;
-
-
-
-
-
-
-
-
-
-// const setupZoom = (svg, width, height) => {
-//     const container = svg.append('g')
-//         .attr('class', 'container');
-
-//     const textGroup = container.append('g')
-//         .attr('class', 'text-group');
-
-//     const zoom = d3.zoom()
-//         .scaleExtent([0.5, 5])
-//         .translateExtent([[-width, -height], [2 * width, 2 * height]])
-//         .on('zoom', (event) => {
-//             container.attr('transform', event.transform);
-//         });
-
-//     return { zoom, textGroup, container };
-// };
-
-// const NameCloud = ({ nameData, config }) => {
-//     React.useEffect(() => {
-//         if (!nameData || nameData.length === 0) return;
-
-//         d3.select('#name-cloud-svg').selectAll('*').remove();
-
-//         const width = window.innerWidth;
-//         const height = window.innerHeight;
-
-//         const svg = d3.select('#name-cloud-svg')
-//             .attr('width', width)
-//             .attr('height', height);
-
-//         svg.append('rect')
-//             .attr('width', width)
-//             .attr('height', height)
-//             .attr('fill', 'transparent')
-//             .style('touch-action', 'pan-x pan-y pinch-zoom')
-//             .lower();
-
-//         const { zoom, textGroup, container } = setupZoom(svg, width, height);
-
-//         svg.call(zoom)
-//            .on('wheel', (event) => event.preventDefault(), { passive: false })
-//            .on('touchstart', (event) => {
-//                if (event.touches.length > 1) {
-//                    event.preventDefault();
-//                }
-//            }, { passive: false })
-//            .on('touchmove', (event) => {
-//                if (event.touches.length > 1) {
-//                    event.preventDefault();
-//                }
-//            }, { passive: false });
-
-//         const fontScale = createFontScale(nameData);
-//         const colorPalette = createColorPalette();
-//         const color = d3.scaleOrdinal(colorPalette);
-
-//         const layout = d3.layout.cloud()
-//             .size([width - 20, height - 20])
-//             .words(nameData.map(d => ({
-//                 text: d.text,
-//                 size: fontScale(d.size),
-//                 originalSize: d.size
-//             })))
-//             .padding(1)
-//             .rotate(0)
-//             .fontSize(d => d.size)
-//             .spiral('rectangular')
-//             .random(() => 0.5)
-//             .canvas(function() {
-//                 const canvas = document.createElement('canvas');
-//                 canvas.setAttribute('willReadFrequently', 'true');
-//                 return canvas;
-//             })
-//             .on('end', words => {
-//                 drawNameCloud(svg, textGroup, words, color, config);
-
-//                 // Calculer la boîte englobante de tous les mots
-//                 const bbox = textGroup.node().getBBox();
-//                 const bboxWidth = bbox.width;
-//                 const bboxHeight = bbox.height;
-//                 const centerX = (width - bboxWidth) / 2 - bbox.x;
-//                 const centerY = (height - bboxHeight) / 2 - bbox.y;
-
-//                 // Appliquer la transformation initiale pour centrer le contenu
-//                 container.attr('transform', `translate(${centerX}, ${centerY})`);
-//             });
-
-//         layout.start();
-
-//     }, [nameData]);
-
-//     return React.createElement('div', { 
-//         className: 'bg-white p-4 rounded-lg shadow-lg',
-//         style: { 
-//             touchAction: 'pan-x pan-y pinch-zoom',
-//             userSelect: 'none'
-//         }
-//     },
-//     React.createElement('h2', { className: 'text-xl font-bold mb-4', 
-//         style: { 
-//             marginBottom: '0px'
-//         }
-//     }, 
-//         config.type === 'prenoms' 
-//             ? `Prénoms entre ${config.startDate} et ${config.endDate}`
-//             : config.type === 'noms'
-//                 ? `Noms de famille entre ${config.startDate} et ${config.endDate}`
-//                 : config.type === 'professions'
-//                     ? `Professions entre ${config.startDate} et ${config.endDate}`
-//                     : config.type === 'duree_vie'
-//                         ? `Durées de vie entre ${config.startDate} et ${config.endDate}`
-//                         : config.type === 'age_procreation'
-//                             ? `Âges de procréation entre ${config.startDate} et ${config.endDate}`
-//                             : `Lieux entre ${config.startDate} et ${config.endDate}`
-//     ),
-//         React.createElement('div', { 
-//             className: 'relative w-full h-96',
-//             style: { 
-//                 touchAction: 'pan-x pan-y pinch-zoom',
-//                 userSelect: 'none'
-//             }
-//         },
-//             React.createElement('svg', {
-//                 id: 'name-cloud-svg',
-//                 className: 'w-full h-full',
-//                 style: { 
-//                     backgroundColor: '#f7fafc',
-//                     touchAction: 'pan-x pan-y pinch-zoom',
-//                     userSelect: 'none'
-//                 }
-//             })
-//         )
-//     );
-// };
-
-// export default NameCloud;
-
-
-
-
-
-
-
-
-
 
 
 function drawNameCloud(svg, textGroup, words, color, config) {
@@ -1091,6 +967,7 @@ function createTempText(originalElement, d, props) {
         const x = parseFloat(coords[1]);
         const y = parseFloat(coords[2]);
 
+        // Utiliser les coordonnées transformées par le zoom
         const transformedX = currentTransform.x + x * currentTransform.k;
         const transformedY = currentTransform.y + y * currentTransform.k;
 
@@ -1112,22 +989,49 @@ function createTempText(originalElement, d, props) {
             .style('font-size', `${props.size * 1.2}px`)
             .style('fill', '#e53e3e');
     } else {
+        // Mode non-zoomé
         d3.select(originalElement).style('opacity', 0);
 
-        tempGroup = svg.append('g')
-            .attr('transform', `translate(${svg.attr('width') / 2},${svg.attr('height') / 2})`);
-
-        tempText = tempGroup.append('text')
-            .attr('class', 'temp-text')
-            .style('font-size', `${props.size * 1.2}px`)
-            .style('font-family', 'Arial')
-            .style('font-weight', 'bold')
-            .style('fill', '#e53e3e')
-            .attr('transform', d3.select(originalElement).attr('transform'))
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .style('cursor', 'pointer')
-            .text(d.text);
+        // Récupérer les coordonnées exactes du mot original
+        const originalTransform = d3.select(originalElement).attr('transform');
+        const coords = originalTransform.match(/translate\(([^,]+),([^)]+)\)/);
+        
+        if (coords) {
+            // Si on peut extraire les coordonnées, les utiliser directement
+            const x = parseFloat(coords[1]);
+            const y = parseFloat(coords[2]);
+            
+            tempGroup = svg.append('g')
+                .attr('transform', `translate(${svg.attr('width') / 2 + horizontalOffset}, ${svg.attr('height') / 2 + verticalOffset})`);
+                
+            tempText = tempGroup.append('text')
+                .attr('class', 'temp-text')
+                .style('font-size', `${props.size * 1.2}px`)
+                .style('font-family', 'Arial')
+                .style('font-weight', 'bold')
+                .style('fill', '#e53e3e')
+                .attr('transform', `translate(${x}, ${y})`) // Utiliser les coordonnées exactes
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .style('cursor', 'pointer')
+                .text(d.text);
+        } else {
+            // Fallback: utiliser la transformation originale
+            tempGroup = svg.append('g')
+                .attr('transform', `translate(${svg.attr('width') / 2 + horizontalOffset}, ${svg.attr('height') / 2 + verticalOffset})`);
+                
+            tempText = tempGroup.append('text')
+                .attr('class', 'temp-text')
+                .style('font-size', `${props.size * 1.2}px`)
+                .style('font-family', 'Arial')
+                .style('font-weight', 'bold')
+                .style('fill', '#e53e3e')
+                .attr('transform', originalTransform)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .style('cursor', 'pointer')
+                .text(d.text);
+        }
     }
 
     tempText
@@ -1146,6 +1050,10 @@ function createTempText(originalElement, d, props) {
     activeTemp = tempGroup;
     return tempGroup;
 }
+
+
+
+
 
 clickAreas
     .on('mouseover', function(event, d) {
@@ -1261,7 +1169,6 @@ const excludedSurNames = new Set([
     'i', 'Ii', 'iII', 'Ier', '1er', '1ère'
 ]);
 
-
 // Fonction de nettoyage d'un prénom
 function cleanSurName(name) {
     // Supprimer les caractères spéciaux et nettoyer les espaces
@@ -1285,8 +1192,6 @@ function isValidSurName(name) {
             !/^\d+$/.test(name) &&
             /[a-zA-Z]/.test(name);
 }
-
-
 
 // Liste des mots à exclure pour les noms de famille
 const excludedFamilyNames = new Set([
@@ -1322,10 +1227,6 @@ function cleanProfession(profession) {
     // Retourner jusqu'à trois professions uniques
     return [...new Set(professions)].slice(0, 10);
 }
-
-
-
-
 
 // Liste des lieux à exclure
 const excludedLocations = new Set([
@@ -1370,7 +1271,6 @@ function cleanLocation(location) {
     return words.join(' ').trim();
 }
 
-
 // Fonction pour capitaliser un prénom
 function capitalizeName(name) {
     return name
@@ -1378,7 +1278,6 @@ function capitalizeName(name) {
         .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
         .join('-');
 }
-
 
 function formatFamilyName(familyName) {
     // Vérifier si le nom est vide ou non défini
@@ -1398,7 +1297,6 @@ function formatFamilyName(familyName) {
     // Rejoindre les mots
     return words.join(' ');
 }
-
 
 function getPersonsFromTree(mode, rootPersonId = null) {
     // Sauvegarder la valeur initiale des générations
@@ -1454,7 +1352,6 @@ function getPersonsFromTree(mode, rootPersonId = null) {
     }
 }
 
-
 function createDateInput(label, defaultValue, width = '55px') {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -1489,7 +1386,6 @@ function createDateInput(label, defaultValue, width = '55px') {
 
     return { container, input };
 }
-
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -1658,7 +1554,6 @@ function createScopeSelect(config) {
     return scopeSelect;
 }
 
-
 function createModalContainer() {
     const modal = document.createElement('div');
     modal.className = 'modal-container';
@@ -1672,21 +1567,25 @@ function createModalContainer() {
     modal.style.justifyContent = 'center';
     modal.style.alignItems = 'center';
     modal.style.zIndex = '1000';
+    modal.style.padding = '0'; // Ajouter cette ligne
+    modal.style.margin = '0';  // Ajouter cette ligne
+    modal.style.overflow = 'hidden'; // Ajouter cette ligne
 
     return modal;
 }
 
 function createMainContainer() {
     const container = document.createElement('div');
-    container.style.width = '90%';
-    container.style.height = '90%';
-    container.style.backgroundColor = 'white';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
     container.style.borderRadius = '10px';
-    container.style.padding = '20px';
+    container.style.padding = '0'; // Réduire à 0 pour maximiser l'espace
     container.style.position = 'relative';
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
-
+    container.style.overflow = 'hidden';
+    
     return container;
 }
 
@@ -1696,31 +1595,55 @@ function createCloseButton() {
     closeButton.style.position = 'absolute';
     closeButton.style.top = '10px';
     closeButton.style.right = '10px';
-    closeButton.style.background = 'none';
-    closeButton.style.border = 'none';
+    closeButton.style.background = 'rgba(255, 255, 255, 0.7)'; // Fond semi-transparent
+    closeButton.style.border = '1px solid #ccc';
+    closeButton.style.borderRadius = '50%'; // Forme ronde
+    closeButton.style.width = '30px';
+    closeButton.style.height = '30px';
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
-
+    closeButton.style.display = 'flex';
+    closeButton.style.justifyContent = 'center';
+    closeButton.style.alignItems = 'center';
+    closeButton.style.zIndex = '1001'; // Valeur plus élevée que celle du conteneur des options
+    closeButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)'; // Ombre légère pour mieux ressortir
+    
     return closeButton;
 }
-
-function createOptionsContainer() {
-    const optionsContainer = document.createElement('div');
-    optionsContainer.style.display = 'flex';
-    optionsContainer.style.marginBottom = '15px';
-    optionsContainer.style.alignItems = 'center';
-    optionsContainer.style.gap = '10px';
-    optionsContainer.style.marginTop = '-20px'; // Valeur négative pour remonter
-    optionsContainer.style.marginBottom = '-10px'; // Réduire l'espace en-dessous
-
-    return optionsContainer;
-}
-
 
 function createNameCloudContainer() {
     const nameCloudContainer = document.createElement('div');
     nameCloudContainer.style.flexGrow = '1';
-    nameCloudContainer.style.overflow = 'auto';
+    nameCloudContainer.style.overflow = 'hidden';
+    nameCloudContainer.style.margin = '0';
+    nameCloudContainer.style.padding = '0';
+    nameCloudContainer.style.position = 'relative'; // Pour qu'il puisse contenir des éléments positionnés
+    nameCloudContainer.style.marginTop = '-20px';
+
+
+
+    // Dimensions de l'écran
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    
+    // Dimensions de la map (SVG)
+    const mapW = SVG_width;
+    const mapH = SVG_height;
+        
+    // Calcul des offsets
+    horizontalOffset = screenW < mapW ? -(mapW - screenW)/2 : 0;
+    verticalOffset = screenH < mapH ? -(mapH - screenH)/2 : 0;
+   
+    containerHorizontalOffset = screenW > mapW ? -(mapW - screenW)/2 : 0;
+    containerVerticalOffset = screenH > mapH ? -(mapH - screenH)/2 : 0;
+    
+    horizontalOffset = screenW < mapW ? -(mapW - screenW)/2 : 0;
+    console.log( " DEBUG screen size =", screenW, 'x', screenH, ", map size = ", mapW, "x" , mapH, " offsets =", containerHorizontalOffset, containerVerticalOffset, horizontalOffset, verticalOffset  )
+
+
+    nameCloudContainer.style.marginLeft = containerHorizontalOffset + 'px';
+    nameCloudContainer.style.marginTop = containerVerticalOffset + 'px';
+    console.log("DEBUG offset = ", containerHorizontalOffset, nameCloudContainer.style.marginLeft)    
 
     return nameCloudContainer;
 }
@@ -1741,20 +1664,31 @@ function setupModalEvents(modal, closeButton, generateNameCloud) {
     document.addEventListener('keydown', handleEscape);
 }
 
-
 function showNameCloud(nameData, config) {
     // Créer les éléments principaux
     const modal = createModalContainer();
     const container = createMainContainer();
     const closeButton = createCloseButton();
-    const optionsContainer = createOptionsContainer();
     const nameCloudContainer = createNameCloudContainer();
+    
+    // Créer le conteneur des options
+    const optionsContainer = document.createElement('div');
+    optionsContainer.style.display = 'flex';
+    optionsContainer.style.flexDirection = 'column';
+    optionsContainer.style.alignItems = 'center';
+    optionsContainer.style.padding = '5px';
+    optionsContainer.style.backgroundColor = 'transparent';
+    optionsContainer.style.position = 'absolute';
+    optionsContainer.style.top = '0';
+    optionsContainer.style.left = '0';
+    optionsContainer.style.right = '0';
+    optionsContainer.style.zIndex = '10';
 
     // Créer les éléments de configuration
     const typeSelect = createTypeSelect(config);
     typeSelect.style.padding = '1px 3px';
     typeSelect.style.verticalAlign = 'top';
-    typeSelect.style.marginLeft = '-15px';
+    typeSelect.style.marginLeft = '0px';
 
     const scopeSelect = createScopeSelect(config);
     scopeSelect.style.marginLeft = '-5px';    
@@ -1770,25 +1704,24 @@ function showNameCloud(nameData, config) {
     showButton.style.color = 'white';
     showButton.style.border = 'none';
     showButton.style.borderRadius = '2px';
-    showButton.style.marginLeft = '-6px'; 
+    showButton.style.marginLeft = '-6px';
 
     // Conteneur pour la personne racine avec recherche
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
         createRootPersonSearchContainer(rootPersonSelect, generateNameCloud);
     
-    rootPersonContainer.style.marginLeft = '-7px'; // Ajoutez cette ligne
-    rootPersonContainer.style.marginTop = '3px'; // Ajoutez cette ligne
+    rootPersonContainer.style.marginLeft = '-7px';
+    rootPersonContainer.style.marginTop = '3px';
 
     // Gestion de la visibilité de la sélection de personne racine
     function updateRootPersonVisibility() {
         const isRootPersonNeeded = ['ancestors', 'descendants'].includes(scopeSelect.value);
         rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
-
     }
     scopeSelect.addEventListener('change', updateRootPersonVisibility);
     updateRootPersonVisibility();
 
-    // Création du layout
+    // Création du layout pour les boutons
     const leftContainer = document.createElement('div');
     leftContainer.style.display = 'flex';
     leftContainer.style.gap = '10px';
@@ -1801,11 +1734,6 @@ function showNameCloud(nameData, config) {
     dateContainer.appendChild(startDateContainer);
     dateContainer.appendChild(endDateContainer);
 
-    optionsContainer.style.display = 'flex';
-    optionsContainer.style.justifyContent = 'space-between';
-    optionsContainer.style.alignItems = 'flex-end';
-    optionsContainer.style.width = '100%';
-
     const mainOptionsContainer = document.createElement('div');
     mainOptionsContainer.style.display = 'flex';
     mainOptionsContainer.style.gap = '10px';
@@ -1815,36 +1743,65 @@ function showNameCloud(nameData, config) {
     mainOptionsContainer.appendChild(dateContainer);
     mainOptionsContainer.appendChild(showButton);
 
-    // optionsContainer.appendChild(mainOptionsContainer);
-    // optionsContainer.appendChild(rootPersonContainer);
-
-    // Création du conteneur flexible
+    // Création du conteneur pour les boutons du bas
     const bottomContainer = document.createElement('div');
     bottomContainer.style.display = 'flex';
-    bottomContainer.style.justifyContent = 'flex-start'; // Aligner à gauche
+    bottomContainer.style.justifyContent = 'space-between';
     bottomContainer.style.alignItems = 'center';
     bottomContainer.style.width = '100%';
-    bottomContainer.style.gap = '10px'; // Espace entre les éléments
-    // bottomContainer.style.marginLeft = '15px'; 
-    // bottomContainer.style.paddingLeft = '15px';
+    bottomContainer.style.gap = '10px';
 
-    // Ajouter les conteneurs au nouveau conteneur flexible
+    // Ajouter les boutons au conteneur du bas
     bottomContainer.appendChild(mainOptionsContainer);
     bottomContainer.appendChild(rootPersonContainer);
 
-    // Ajouter le conteneur flexible à la section des options
+    // Créer le titre
+    const titleElement = document.createElement('div');
+    titleElement.style.fontSize = '22px';
+    titleElement.style.fontWeight = 'bold';
+    titleElement.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
+    titleElement.style.padding = '2px 10px';
+    titleElement.style.borderRadius = '4px';
+    titleElement.style.marginTop = '5px';
+    titleElement.style.textAlign = 'center';
+    titleElement.style.position = 'relative'; // Position relative
+    // Ajouter une ombre légère pour améliorer la lisibilité
+    titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    // titleElement.style.left = horizontalOffset + 'px'; // Utiliser le même offset que la carte
+
+    // Définir le texte du titre
+    updateTitleText(titleElement, config);
+
+    // Ajouter les éléments au conteneur des options
     optionsContainer.appendChild(bottomContainer);
-
-
-
+    optionsContainer.appendChild(titleElement);
 
     // Assemblage final
     container.appendChild(closeButton);
-    container.appendChild(optionsContainer);
     container.appendChild(nameCloudContainer);
+    container.appendChild(optionsContainer);
     modal.appendChild(container);
     document.body.appendChild(modal);
 
+    // Fonction pour mettre à jour le texte du titre
+    function updateTitleText(element, cfg) {
+        let titleText = '';
+        if (cfg.type === 'prenoms') {
+            titleText = `Prénoms entre ${cfg.startDate} et ${cfg.endDate}`;
+        } else if (cfg.type === 'noms') {
+            titleText = `Noms de famille entre ${cfg.startDate} et ${cfg.endDate}`;
+        } else if (cfg.type === 'professions') {
+            titleText = `Professions entre ${cfg.startDate} et ${cfg.endDate}`;
+        } else if (cfg.type === 'duree_vie') {
+            titleText = `Durées de vie entre ${cfg.startDate} et ${cfg.endDate}`;
+        } else if (cfg.type === 'age_procreation') {
+            titleText = `Âges de procréation entre ${cfg.startDate} et ${cfg.endDate}`;
+        } else {
+            titleText = `Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
+        }
+        element.textContent = titleText;
+    }
+    
     // Fonction pour générer le nuage de noms
     function generateNameCloud() {
         const newConfig = {
@@ -1854,6 +1811,9 @@ function showNameCloud(nameData, config) {
             scope: scopeSelect.value,
             rootPersonId: scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
         };
+
+        // Mettre à jour le titre
+        updateTitleText(titleElement, newConfig);
 
         // Effacer le contenu précédent
         nameCloudContainer.innerHTML = '';
@@ -1874,10 +1834,16 @@ function showNameCloud(nameData, config) {
     return modal;
 }
 
-
 function processNamesCloudWithDate(config, containerElement = null) {
     resetStats();
     const nameFrequency = {};
+
+    // Dimensions de l'écran
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
+    if (screenW >= 800) SVG_width = 800; else SVG_height = 600;
+
     
     // Récupérer les personnes selon le mode choisi
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
@@ -2036,7 +2002,6 @@ function processNamesCloudWithDate(config, containerElement = null) {
         showNameCloud(nameData, config);
     }
 }
-
 
 // Exports
 export { processNamesCloudWithDate };

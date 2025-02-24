@@ -568,96 +568,101 @@ export function showMap() {
 }
 
 
-// // Gestion des tooltips pour mobile et desktop
-// document.addEventListener('DOMContentLoaded', function() {
-//     // Créer un élément pour afficher le tooltip
-//     const tooltipElement = document.createElement('div');
-//     tooltipElement.className = 'mobile-tooltip';
-//     tooltipElement.style.display = 'none';
-//     document.body.appendChild(tooltipElement);
-    
-//     // Fonction pour tous les éléments avec data-tooltip
-//     document.querySelectorAll('[data-tooltip]').forEach(element => {
-//         // Pour les appareils tactiles
-//         element.addEventListener('touchstart', function(e) {
-//             const tooltip = this.getAttribute('data-tooltip');
-//             if (tooltip) {
-//                 tooltipElement.textContent = tooltip;
-//                 tooltipElement.style.display = 'block';
-                
-//                 // Positionner le tooltip près de l'élément
-//                 const rect = this.getBoundingClientRect();
-//                 tooltipElement.style.top = (rect.top - 40) + 'px';
-//                 tooltipElement.style.left = (rect.left + rect.width/2 - tooltipElement.offsetWidth/2) + 'px';
-                
-//                 // Masquer après un délai
-//                 setTimeout(() => {
-//                     tooltipElement.style.display = 'none';
-//                 }, 1500);
-//             }
-//         });
-        
-//         // Pour les ordinateurs (conserver le comportement hover)
-//         element.setAttribute('title', element.getAttribute('data-tooltip'));
-//     });
-// });
-
-
 // Fonction pour afficher un message toast temporaire
-function showToast(message, duration = 1000) {
+function showToast(message, duration = 2500) {
     const toast = document.getElementById('mobile-toast');
     if (toast) {
-      toast.textContent = message;
-      toast.style.display = 'block';
-      
-      // Masquer après le délai spécifié
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, duration);
+        toast.textContent = message;
+        toast.style.display = 'block';
+
+        // Masquer après le délai spécifié
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, duration);
     }
-  }
-  
+}
+
+
+
+// Objet pour stocker les compteurs d'actions
+const actionCounters = {};
+const max_count = 3;
+
 
 // Ajouter les messages toast aux boutons et sélecteurs
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.controls-row-1 button, .controls-row-2 button, select, .controls-row-1 input, .controls-row-2 input').forEach(element => {
-      element.addEventListener('change', function() {
-        const message = this.getAttribute('data-action');
-        if (message) {
-          showToast(message);
-        }
-      });
-      
-      // Pour les sélecteurs, utiliser l'événement change
-      if (element.tagName === 'SELECT') {
         element.addEventListener('change', function() {
-          const selectedOption = this.options[this.selectedIndex];
-          const message = selectedOption.getAttribute('data-action') || this.getAttribute('data-action');
-          if (message) {
-            showToast(message);
-          }
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
         });
-      }
-      
-      // Pour les champs de saisie, utiliser l'événement input
-      if (element.tagName === 'INPUT') {
-        element.addEventListener('input', function() {
-          const message = this.getAttribute('data-action');
-          if (message) {
-            showToast(message);
-          }
-        });
-      }
-      
-      // Garder le clic pour tous
-      element.addEventListener('click', function() {
-        const message = this.getAttribute('data-action');
-        if (message) {
-          showToast(message);
+
+        // Pour les sélecteurs, utiliser l'événement change
+        if (element.tagName === 'SELECT') {
+            element.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const message = selectedOption.getAttribute('data-action') || this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+            });
         }
-      });
+
+        // Pour les champs de saisie, utiliser l'événement input
+        if (element.tagName === 'INPUT') {
+            element.addEventListener('input', function() {
+                const message = this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+            });
+        }
+
+        // Garder le clic pour tous
+        element.addEventListener('click', function() {
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
+        });
     });
-  });
+});
+
+
+
+
+
+
 
 // Export des variables et fonctions nécessaires
 export {
