@@ -198,23 +198,12 @@ body {
 
 
 
-.controls-row-1 button {
-    min-width: 28px;  /* Force une largeur minimale */
-    height: 30px;
-    display: inline-flex;  /* Changement de flex */
-    justify-content: center;
-    align-items: center;
-    border: none;
-    background-color: transparent;
-    outline: none;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-}
 
-.controls-row-1 button:hover {
-    background-color: rgba(0,0,0,0.1);  /* Léger effet de survol */
-}
+
+
+
+
+
 
 .controls-row-1 button:focus {
     outline: none;  /* Supprime le contour de focus */
@@ -222,32 +211,8 @@ body {
 
 
 
-.controls-row-1 button span {
-    font-size: 26px;  /*2rem;  Taille explicite pour le span
-    /* font-size: 2rem; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Bouton spécial plus grand */
-.controls-row-1 button.large-button {
-    min-width: 35px;  /* Largeur plus grande */
-    height: 30px;      /* Hauteur plus grande */
-    font-size: 30px;  /* Police légèrement plus grande */
-}
-
-.controls-row-1 button span.wide-span {
-    font-size: 32px; 
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-}
 
 
-.controls-row-1 button:hover { 
-    background-color: #e0e0e0;  /* Couleur de survol légèrement différente */
-}
 
 /* Pour s'assurer que le texte et les contrôles restent bien visibles */
 .controls select, 
@@ -644,6 +609,28 @@ input[type=number] {
 }
 
 
+
+
+
+/* Styles par défaut pour les boutons */
+.control-button {
+    font-size: 16px;
+    padding: 10px;
+    margin: 5px;
+}
+
+/* Media query pour les petits écrans */
+@media screen and (max-width: 768px) {
+    .control-button {
+        font-size: 8px; /* Réduire la taille de la police */
+        padding: 0px; /* Réduire le padding */
+        margin: 0px; /* Réduire la marge */
+    }
+}
+
+
+
+
 /* Styles responsive pour le formulaire de mot de passe */
 @media screen and (max-width: 768px) {
     #password-form {
@@ -706,3 +693,113 @@ input[type=number] {
         max-width: 60px;
     }        
 }
+
+
+
+
+/* Base styles for control buttons */
+.controls-row-1 button {
+    min-width: 28px;
+    height: 30px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
+    cursor: pointer;
+    border-radius: 0px;
+    transition: background-color 0.2s;
+    padding: 0;
+    margin: 3px; /* Espacement normal entre les boutons */
+}
+
+.controls-row-1 button:hover {
+    background-color: rgba(255, 255, 255, 0.85); /* Fond un peu plus opaque au survol */
+}
+
+.controls-row-1 button span {
+    font-size: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Specific styles for zoom button */
+.zoom-button {
+    margin: 2px;
+}
+
+/* Media query for small screens */
+@media screen and (max-width: 768px) {
+    .controls-row-1 button {
+        min-width: 20px;
+        height: 22px;
+        margin: 1px;
+    }
+
+    .controls-row-1 {
+        gap: 2px; /* Réduire l'espace entre les boutons */
+    }
+
+    .controls-row-1 button span {
+        font-size: 18px;
+    }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 480px) {
+    .controls-row-1 button {
+        min-width: 18px;
+        height: 20px;
+        margin: 0px; /* Espacement minimal sur très petit écran */
+    }
+
+    .controls-row-1 {
+        gap: 1px; /* Espace minimal entre les boutons */
+    }
+
+
+    .controls-row-1 button span {
+        font-size: 16px;
+    }
+}
+
+
+
+/* Styles for larger buttons */
+.controls-row-1 button.large-button {
+    min-width: 35px;
+    height: 30px;
+}
+
+.controls-row-1 button span.wide-span {
+    font-size: 32px;
+}
+
+/* Media query for small screens */
+@media screen and (max-width: 768px) {
+    .controls-row-1 button.large-button {
+        min-width: 24px;
+        height: 22px;
+    }
+
+    .controls-row-1 button span.wide-span {
+        font-size: 20px;
+    }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 480px) {
+    .controls-row-1 button.large-button {
+        min-width: 22px;
+        height: 20px;
+    }
+
+    .controls-row-1 button span.wide-span {
+        font-size: 18px;
+    }
+}
+
+
+
+
