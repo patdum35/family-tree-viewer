@@ -613,6 +613,440 @@ let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
 
 
+
+
+// Appeler cette fonction pour configurer l'écouteur d'événements
+// Fonction pour gérer à la fois les changements d'orientation et les redimensionnements
+
+//GOOD Lais lent
+// function setupResizeListeners() {
+//     // Variable pour limiter la fréquence des événements (debouncing)
+//     let resizeTimer;
+    
+//     // Gérer l'événement de changement d'orientation spécifique aux mobiles
+//     window.addEventListener('orientationchange', function() {
+//         clearTimeout(resizeTimer);
+//         resizeTimer = setTimeout(handleResize, 300);
+//     });
+    
+//     // Gérer également le redimensionnement général de la fenêtre (couvre desktop et certains mobiles)
+//     window.addEventListener('resize', function() {
+//         clearTimeout(resizeTimer);
+//         resizeTimer = setTimeout(handleResize, 300);
+//     });
+    
+//     function handleResize() {
+//         // Recalculer les dimensions de l'écran
+//         const screenW = window.innerWidth;
+//         const screenH = window.innerHeight;
+        
+//         console.log("Window resized - New dimensions:", screenW, "x", screenH);
+        
+//         // Mettre à jour les dimensions SVG en fonction de la taille d'écran
+//         if (screenW >= 1200) {
+//             SVG_width = 1200;
+//         } else if (screenW >= 800) {
+//             SVG_width = 800;
+//         } else {
+//             SVG_width = screenW * 0.95; // 95% de la largeur d'écran pour les petits écrans
+//         }
+        
+//         if (screenH >= 800) {
+//             SVG_height = 800;
+//         } else if (screenH >= 600) {
+//             SVG_height = 600;
+//         } else {
+//             SVG_height = screenH * 0.85; // 85% de la hauteur d'écran pour les petits écrans
+//         }
+        
+//         // Recalculer les offsets
+//         horizontalOffset = screenW < SVG_width ? -(SVG_width - screenW)/2 : 0;
+//         verticalOffset = screenH < SVG_height ? -(SVG_height - screenH)/2 : 0;
+//         containerHorizontalOffset = screenW > SVG_width ? (screenW - SVG_width)/2 : 0;
+//         containerVerticalOffset = screenH > SVG_height ? (screenH - SVG_height)/2 : 0;
+        
+//         // Trouver la modal du nuage de noms si elle existe
+//         const modalContainer = document.querySelector('.modal-container');
+//         if (modalContainer) {
+//             // Tenter de récupérer la configuration actuelle
+//             const typeSelect = document.querySelector('select[id$="type-select"]');
+//             const startDateInput = document.querySelector('input[type="number"][id$="start-date"]');
+//             const endDateInput = document.querySelector('input[type="number"][id$="end-date"]');
+//             const scopeSelect = document.querySelector('select[id$="scope-select"]');
+            
+//             const currentConfig = {
+//                 type: typeSelect ? typeSelect.value : 'prenoms',
+//                 startDate: startDateInput ? parseInt(startDateInput.value) : 1500,
+//                 endDate: endDateInput ? parseInt(endDateInput.value) : new Date().getFullYear(),
+//                 scope: scopeSelect ? scopeSelect.value : 'all',
+//                 rootPersonId: null // On pourrait essayer de récupérer ça aussi si nécessaire
+//             };
+            
+//             // Supprimer la modal actuelle
+//             document.body.removeChild(modalContainer);
+            
+//             // Recréer le nuage de noms avec les dimensions mises à jour
+//             processNamesCloudWithDate(currentConfig);
+//         }
+//     }
+// }
+// GOOD
+
+
+// function setupResizeListeners() {
+//     let resizeTimer;
+    
+//     // Combiner les événements orientationchange et resize
+//     ['orientationchange', 'resize'].forEach(event => {
+//         window.addEventListener(event, function() {
+//             clearTimeout(resizeTimer);
+//             resizeTimer = setTimeout(handleResize, 300);
+//         });
+//     });
+    
+//     function handleResize() {
+//         // Recalculer les dimensions de l'écran
+//         const screenW = window.innerWidth;
+//         const screenH = window.innerHeight;
+        
+//         console.log("Screen dimensions changed:", screenW, "x", screenH);
+        
+//         // Trouver l'élément SVG du nuage
+//         const svgElement = document.getElementById('name-cloud-svg');
+//         if (!svgElement) return;
+        
+//         // Récupérer les dimensions actuelles de la carte
+//         const currentWidth = parseInt(svgElement.getAttribute('width'));
+//         const currentHeight = parseInt(svgElement.getAttribute('height'));
+        
+//         // Recalculer les offsets
+//         horizontalOffset = screenW < currentWidth ? -(currentWidth - screenW)/2 : 0;
+//         verticalOffset = screenH < currentHeight ? -(currentHeight - screenH)/2 : 0;
+//         containerHorizontalOffset = screenW > currentWidth ? (screenW - currentWidth)/2 : 0;
+//         containerVerticalOffset = screenH > currentHeight ? (screenH - currentHeight)/2 : 0;
+        
+//         // 1. Ajuster le conteneur de la carte
+//         const nameCloudContainer = svgElement.parentElement;
+//         if (nameCloudContainer) {
+//             nameCloudContainer.style.marginLeft = containerHorizontalOffset + 'px';
+//             nameCloudContainer.style.marginTop = containerVerticalOffset + 'px';
+//         }
+        
+//         // 2. Ajuster le groupe principal de la carte
+//         const mainGroup = svgElement.querySelector('g.container') || svgElement.querySelector('g');
+//         if (mainGroup) {
+//             // Extraire la transformation actuelle
+//             const currentTransform = mainGroup.getAttribute('transform');
+//             const match = currentTransform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+            
+//             if (match) {
+//                 // Préserver le zoom actuel mais ajuster la position
+//                 const tx = parseFloat(match[1]);
+//                 const ty = parseFloat(match[2]);
+                
+//                 // Calculer la nouvelle position en tenant compte des offsets
+//                 const newTx = (currentWidth / 2 + horizontalOffset);
+//                 const newTy = (currentHeight / 2 + verticalOffset);
+                
+//                 mainGroup.setAttribute('transform', `translate(${newTx}, ${newTy})`);
+//             }
+//         }
+        
+//         // 3. Ajuster le titre si nécessaire
+//         const titleElement = document.querySelector('.modal-container .title-element');
+//         if (titleElement) {
+//             titleElement.style.position = 'relative';
+//             titleElement.style.left = horizontalOffset + 'px';
+//         }
+        
+//         // 4. Mettre à jour les dimensions de l'écran et les offsets dans les variables globales
+//         // pour les futures interactions
+//         console.log("New offsets:", horizontalOffset, verticalOffset, containerHorizontalOffset, containerVerticalOffset);
+//     }
+// }
+
+
+//  RAPIDE mais mauvais offset ??
+// function setupResizeListeners() {
+//     let resizeTimer;
+    
+//     // Combiner les événements orientationchange et resize
+//     ['orientationchange', 'resize'].forEach(event => {
+//         window.addEventListener(event, function() {
+//             clearTimeout(resizeTimer);
+//             resizeTimer = setTimeout(handleResize, 300);
+//         });
+//     });
+    
+//     function handleResize() {
+//         // Recalculer les dimensions de l'écran
+//         const screenW = window.innerWidth;
+//         const screenH = window.innerHeight;
+        
+//         console.log("Screen dimensions changed:", screenW, "x", screenH);
+        
+//         // Trouver l'élément SVG du nuage
+//         const svgElement = document.getElementById('name-cloud-svg');
+//         if (!svgElement) return;
+        
+//         // Récupérer les dimensions actuelles du SVG
+//         const currentWidth = parseInt(svgElement.getAttribute('width'));
+//         const currentHeight = parseInt(svgElement.getAttribute('height'));
+        
+//         // Calculer les nouvelles dimensions du SVG
+//         let newWidth, newHeight;
+        
+//         if (screenW >= 1200) {
+//             newWidth = 1200;
+//         } else if (screenW >= 800) {
+//             newWidth = 800;
+//         } else {
+//             newWidth = screenW * 0.95;
+//         }
+        
+//         if (screenH >= 800) {
+//             newHeight = 800;
+//         } else if (screenH >= 600) {
+//             newHeight = 600;
+//         } else {
+//             newHeight = screenH * 0.85;
+//         }
+        
+//         // Mettre à jour les variables globales
+//         SVG_width = newWidth;
+//         SVG_height = newHeight;
+        
+//         // Recalculer les offsets
+//         horizontalOffset = screenW < newWidth ? -(newWidth - screenW)/2 : 0;
+//         verticalOffset = screenH < newHeight ? -(newHeight - screenH)/2 : 0;
+//         containerHorizontalOffset = screenW > newWidth ? (screenW - newWidth)/2 : 0;
+//         containerVerticalOffset = screenH > newHeight ? (screenH - newHeight)/2 : 0;
+        
+//         // 1. Redimensionner le SVG
+//         svgElement.setAttribute('width', newWidth);
+//         svgElement.setAttribute('height', newHeight);
+        
+//         // Trouver le rectangle de fond et le redimensionner
+//         const backgroundRect = svgElement.querySelector('rect');
+//         if (backgroundRect) {
+//             backgroundRect.setAttribute('width', newWidth);
+//             backgroundRect.setAttribute('height', newHeight);
+//         }
+        
+//         // 2. Ajuster le conteneur de la carte
+//         const nameCloudContainer = svgElement.parentElement;
+//         if (nameCloudContainer) {
+//             nameCloudContainer.style.marginLeft = containerHorizontalOffset + 'px';
+//             nameCloudContainer.style.marginTop = containerVerticalOffset + 'px';
+//         }
+        
+//         // 3. Ajuster le groupe principal de la carte
+//         const mainGroup = svgElement.querySelector('.name-cloud-container');
+//         if (mainGroup) {
+//             // Calculer le facteur d'échelle pour préserver le rapport d'aspect
+//             const scaleX = newWidth / currentWidth;
+//             const scaleY = newHeight / currentHeight;
+//             const scale = Math.min(scaleX, scaleY);
+            
+//             // Calculer la nouvelle position centrale
+//             const newCenterX = newWidth / 2 + horizontalOffset;
+//             const newCenterY = newHeight / 2 + verticalOffset;
+            
+//             // Appliquer la transformation avec le nouveau centre et l'échelle
+//             mainGroup.setAttribute('transform', `translate(${newCenterX}, ${newCenterY}) scale(${scale})`);
+//         }
+        
+//         // 4. Ajuster le titre si nécessaire
+//         const titleElement = document.querySelector('.modal-container .title-element');
+//         if (titleElement) {
+//             titleElement.style.position = 'relative';
+//             titleElement.style.left = horizontalOffset + 'px';
+//         }
+        
+//         console.log("Resized SVG to:", newWidth, "x", newHeight);
+//         console.log("New offsets:", horizontalOffset, verticalOffset, containerHorizontalOffset, containerVerticalOffset);
+//     }
+// }
+
+
+function setupResizeListeners() {
+    let resizeTimer;
+    
+    // Combiner les événements orientationchange et resize
+    ['orientationchange', 'resize'].forEach(event => {
+        window.addEventListener(event, function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(handleResize, 300);
+        });
+    });
+    
+    function handleResize() {
+        // Recalculer les dimensions de l'écran
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+        
+        console.log("Screen dimensions changed:", screenW, "x", screenH);
+        
+        // Trouver l'élément SVG du nuage
+        const svgElement = document.getElementById('name-cloud-svg');
+        if (!svgElement) return;
+        
+        // Récupérer les dimensions actuelles du SVG
+        const currentWidth = parseInt(svgElement.getAttribute('width'));
+        const currentHeight = parseInt(svgElement.getAttribute('height'));
+        
+        // Calculer les nouvelles dimensions du SVG
+        let newWidth, newHeight;
+        
+        if (screenW >= 1200) {
+            newWidth = 1200;
+        } else if (screenW >= 800) {
+            newWidth = 800;
+        } else {
+            newWidth = screenW * 0.95;
+        }
+        
+        if (screenH >= 800) {
+            newHeight = 800;
+        } else if (screenH >= 600) {
+            newHeight = 600;
+        } else {
+            newHeight = screenH * 0.85;
+        }
+        
+        // Mettre à jour les variables globales
+        SVG_width = newWidth;
+        SVG_height = newHeight;
+        
+        // LOGIQUE D'OFFSET CORRIGÉE
+        // Calcul des offsets pour centrage du SVG
+        if (screenW < newWidth) {
+            // L'écran est plus petit que le SVG en largeur
+            horizontalOffset = -(newWidth - screenW)/2;
+            containerHorizontalOffset = 0;
+        } else {
+            // L'écran est plus grand que le SVG en largeur
+            horizontalOffset = 0;
+            containerHorizontalOffset = (screenW - newWidth)/2;
+        }
+        
+        if (screenH < newHeight) {
+            // L'écran est plus petit que le SVG en hauteur
+            verticalOffset = -(newHeight - screenH)/2;
+            containerVerticalOffset = 0;
+        } else {
+            // L'écran est plus grand que le SVG en hauteur
+            verticalOffset = 0;
+            containerVerticalOffset = (screenH - newHeight)/2;
+        }
+        
+        console.log("DEBUG - New offsets:", 
+                   "horizontalOffset:", horizontalOffset, 
+                   "verticalOffset:", verticalOffset, 
+                   "containerHorizontalOffset:", containerHorizontalOffset, 
+                   "containerVerticalOffset:", containerVerticalOffset);
+
+        containerVerticalOffset = 0;
+        
+        // 1. Redimensionner le SVG
+        svgElement.setAttribute('width', newWidth);
+        svgElement.setAttribute('height', newHeight);
+        
+        // Trouver le rectangle de fond et le redimensionner
+        const backgroundRect = svgElement.querySelector('rect');
+        if (backgroundRect) {
+            backgroundRect.setAttribute('width', newWidth);
+            backgroundRect.setAttribute('height', newHeight);
+        }
+        
+        // 2. Ajuster le conteneur de la carte avec les nouveaux offsets
+        const nameCloudContainer = svgElement.closest('.relative') || svgElement.parentElement;
+        if (nameCloudContainer) {
+            nameCloudContainer.style.marginLeft = containerHorizontalOffset + 'px';
+            nameCloudContainer.style.marginTop = containerVerticalOffset + 'px';
+        }
+        
+        // 3. Ajuster le groupe principal de la carte
+        const mainGroup = svgElement.querySelector('.name-cloud-container');
+        if (mainGroup) {
+            // Calculer la nouvelle position centrale
+            const newCenterX = newWidth / 2 + horizontalOffset;
+            const newCenterY = newHeight / 2 + verticalOffset;
+            
+            // Appliquer la transformation (sans mise à l'échelle pour conserver les proportions)
+            mainGroup.setAttribute('transform', `translate(${newCenterX}, ${newCenterY})`);
+        }
+        
+        // 4. Ajuster le titre si nécessaire
+        const titleElement = document.querySelector('.modal-container .title-element') || 
+                            document.querySelector('.modal-container div[style*="font-size: 22px"]');
+        if (titleElement) {
+            // Centrer le titre horizontalement par rapport au SVG
+            titleElement.style.position = 'relative';
+            titleElement.style.left = horizontalOffset + 'px';
+            titleElement.style.width = 'auto';
+            titleElement.style.textAlign = 'center';
+        }
+        
+        console.log("Resized SVG to:", newWidth, "x", newHeight);
+    }
+}
+
+
+// const setupZoom = (svg, width, height) => {
+//     // Dimensions de l'écran
+//     const screenW = window.innerWidth;
+//     const screenH = window.innerHeight;
+    
+//     // Dimensions de la map (SVG)
+//     const mapW = width;
+//     const mapH = height;
+    
+//     // Calcul des offsets
+//     horizontalOffset = screenW < mapW ? -(mapW - screenW)/2 : 0;
+//     verticalOffset = screenH < mapH ? -(mapH - screenH)/2 : 0;
+
+//     containerHorizontalOffset = screenW > mapW ? -(mapW - screenW)/2 : 0;
+//     containerVerticalOffset = screenH > mapH ? -(mapH - screenH)/2 : 0;
+
+//     console.log("DEBUG screen size =", screenW, 'x', screenH, ", map size = ", mapW, "x", mapH, " offsets =", containerHorizontalOffset, containerVerticalOffset, horizontalOffset, verticalOffset);
+
+//     const textGroup = svg.append('g')
+//         .attr('transform', `translate(${width / 2 + horizontalOffset},${height / 2 + verticalOffset})`);
+
+//     const zoom = d3.zoom()
+//         .scaleExtent([0.5, 5])
+//         .translateExtent([[-width, -height], [2 * width, 2 * height]])
+//         .on('zoom', (event) => {
+//             textGroup.attr('transform', event.transform);
+//         });
+
+//     // Initialiser la transformation de zoom pour éviter le déplacement brusque
+//     const initialTransform = d3.zoomIdentity
+//         .translate(width / 2 + horizontalOffset, height / 2 + verticalOffset)
+//         .scale(1);
+    
+//     svg.call(zoom.transform, initialTransform);
+
+//     // Appliquer le zoom et ajouter les événements
+//     svg.call(zoom)
+//        .on('wheel', (event) => event.preventDefault(), { passive: false })
+//        .on('touchstart', (event) => {
+//            if (event.touches.length > 1) {
+//                event.preventDefault();
+//            }
+//        }, { passive: false })
+//        .on('touchmove', (event) => {
+//            if (event.touches.length > 1) {
+//                event.preventDefault();
+//            }
+//        }, { passive: false });
+
+//     return { zoom, textGroup };
+// };
+
+
+
 const setupZoom = (svg, width, height) => {
     // Dimensions de l'écran
     const screenW = window.innerWidth;
@@ -625,29 +1059,30 @@ const setupZoom = (svg, width, height) => {
     // Calcul des offsets
     horizontalOffset = screenW < mapW ? -(mapW - screenW)/2 : 0;
     verticalOffset = screenH < mapH ? -(mapH - screenH)/2 : 0;
-
-    containerHorizontalOffset = screenW > mapW ? -(mapW - screenW)/2 : 0;
-    containerVerticalOffset = screenH > mapH ? -(mapH - screenH)/2 : 0;
-
+    
+    containerHorizontalOffset = screenW > mapW ? (screenW - mapW)/2 : 0;
+    containerVerticalOffset = screenH > mapH ? (screenH - mapH)/2 : 0;
+    
     console.log("DEBUG screen size =", screenW, 'x', screenH, ", map size = ", mapW, "x", mapH, " offsets =", containerHorizontalOffset, containerVerticalOffset, horizontalOffset, verticalOffset);
-
+    
     const textGroup = svg.append('g')
+        .attr('class', 'name-cloud-container') // Ajouter une classe pour faciliter la sélection
         .attr('transform', `translate(${width / 2 + horizontalOffset},${height / 2 + verticalOffset})`);
-
+    
     const zoom = d3.zoom()
         .scaleExtent([0.5, 5])
         .translateExtent([[-width, -height], [2 * width, 2 * height]])
         .on('zoom', (event) => {
             textGroup.attr('transform', event.transform);
         });
-
+    
     // Initialiser la transformation de zoom pour éviter le déplacement brusque
     const initialTransform = d3.zoomIdentity
         .translate(width / 2 + horizontalOffset, height / 2 + verticalOffset)
         .scale(1);
     
     svg.call(zoom.transform, initialTransform);
-
+    
     // Appliquer le zoom et ajouter les événements
     svg.call(zoom)
        .on('wheel', (event) => event.preventDefault(), { passive: false })
@@ -661,7 +1096,7 @@ const setupZoom = (svg, width, height) => {
                event.preventDefault();
            }
        }, { passive: false });
-
+    
     return { zoom, textGroup };
 };
 
@@ -1831,6 +2266,11 @@ function showNameCloud(nameData, config) {
     // Générer le nuage de noms initial
     generateNameCloud();
 
+
+    // Configurer les écouteurs d'événements pour les changements de taille d'écran
+    setupResizeListeners();
+
+
     return modal;
 }
 
@@ -1842,7 +2282,7 @@ function processNamesCloudWithDate(config, containerElement = null) {
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
     if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
-    if (screenW >= 800) SVG_width = 800; else SVG_height = 600;
+    if (screenH >= 800) SVG_height = 800; else SVG_height = 600;
 
     
     // Récupérer les personnes selon le mode choisi
