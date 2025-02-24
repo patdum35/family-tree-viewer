@@ -729,9 +729,9 @@ input[type=number] {
 }
 
 /* Specific styles for zoom button */
-.zoom-button {
+/* .zoom-button {
     margin: 2px;
-}
+} */
 
 /* Media query for small screens */
 @media screen and (max-width: 768px) {
