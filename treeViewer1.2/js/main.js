@@ -567,6 +567,42 @@ export function showMap() {
     mapContainer.style.display = 'block';
 }
 
+
+// Gestion des tooltips pour mobile et desktop
+document.addEventListener('DOMContentLoaded', function() {
+    // Créer un élément pour afficher le tooltip
+    const tooltipElement = document.createElement('div');
+    tooltipElement.className = 'mobile-tooltip';
+    tooltipElement.style.display = 'none';
+    document.body.appendChild(tooltipElement);
+    
+    // Fonction pour tous les éléments avec data-tooltip
+    document.querySelectorAll('[data-tooltip]').forEach(element => {
+        // Pour les appareils tactiles
+        element.addEventListener('touchstart', function(e) {
+            const tooltip = this.getAttribute('data-tooltip');
+            if (tooltip) {
+                tooltipElement.textContent = tooltip;
+                tooltipElement.style.display = 'block';
+                
+                // Positionner le tooltip près de l'élément
+                const rect = this.getBoundingClientRect();
+                tooltipElement.style.top = (rect.top - 40) + 'px';
+                tooltipElement.style.left = (rect.left + rect.width/2 - tooltipElement.offsetWidth/2) + 'px';
+                
+                // Masquer après un délai
+                setTimeout(() => {
+                    tooltipElement.style.display = 'none';
+                }, 1500);
+            }
+        });
+        
+        // Pour les ordinateurs (conserver le comportement hover)
+        element.setAttribute('title', element.getAttribute('data-tooltip'));
+    });
+});
+
+
 // Export des variables et fonctions nécessaires
 export {
     openGedcomModal,
