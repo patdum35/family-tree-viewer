@@ -30,9 +30,6 @@
 
 
 
-
-
-
 <body>
     <div class="login-background">
         <img src="background_images/contemporain.jpg" class="login-background-image" alt="Fond d'écran">
@@ -42,20 +39,7 @@
     <!-- Bouton pour ouvrir la modal de chargement de fichier -->
     <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()">⚙️</button>
 
-    <!-- Nouvelle modal simple pour le chargement de fichier -->
-    <!-- <div id="gedcom-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Charger un fichier GEDCOM</h2>
-                <span class="modal-close" onclick="closeGedcomModal()">&times;</span>
-            </div>
-            <div class="settings-section">
-                <input type="file" id="gedFile" accept=".ged">
-                <button onclick="loadData(); closeGedcomModal()">Afficher l'arbre</button>
-            </div>
-        </div>
-    </div> -->
-    <!-- Nouvelle modal simple pour le chargement de fichier -->
+    <!-- modal simple pour le chargement de fichier -->
     <div id="gedcom-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
         <div style="background-color: white; width: 300px; max-width: 90%; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; margin: 15% auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -70,8 +54,6 @@
     </div>
 
     <!-- Formulaire de mot de passe -->
-
-
     <div id="password-form" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
         <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; box-sizing: border-box;">
             <div class="password-row">
@@ -170,21 +152,6 @@
                         <option value="4">4</option>
                     </select>
                 </div>
-
-                <!-- Nouveau bloc pour le module "noms" -->
-                <!-- <div class="settings-section">
-                    <h3>Nombre de lettres dans les Noms</h3>
-                    <label for="mots">nbre<br>prénom</label>
-                    <select id="mots" onchange="updateLettersInNames(this.value)">
-                        <option value="8">8</option>
-                        <option value="12">12</option>
-                        <option value="16" selected>16</option>
-                        <option value="20">20</option>
-                        <option value="24">24</option>
-                        <option value="28">28</option>
-                    </select>
-                </div> -->
-
 
                 <!-- Nouveau bloc pour la validation des lieux -->
                 <div class="settings-section">
@@ -378,9 +345,8 @@
         };
     </script>
 
-<!-- fenêtre toast pour fair eun tooltip -->
-<div id="mobile-toast" style="position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
-
+<!-- fenêtre toast pour faire un tooltip -->
+<div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
 
 </body>
 </html>
