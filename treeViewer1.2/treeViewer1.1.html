@@ -90,28 +90,24 @@
         <div class="controls">
             <div class="controls-row-1">
                 <!-- <button onclick="zoomIn()"><span>➕</span></button> -->
-                <button onclick="zoomIn()" class="zoom-button"><span>➕</span></button>
-                <button onclick="zoomOut()"><span>➖</span></button>
-                <button onclick="resetZoom()"><span>🏠</span></button>
-                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button"><span class="wide-span">🔇</span></button>
-                <button onclick="toggleAnimationPause()" id="animationPauseBtn"><span>⏸️</span></button>
-                <button onclick="openSettingsModal()" id="settingsBtn"><span>⚙️</span></button>
-                <button onclick="toggleFullScreen()" class="large-button"><span>⛶</span></button>
-                <button onclick="processNamesCloudWithDate({
-                    type: 'prenoms', 
-                    startDate: 1500, 
-                    endDate: new Date().getFullYear(),
-                    scope: 'all'
-                })" class="large-button"> 
+                <button onclick="zoomIn()" class="zoom-button" title="Zoom avant"><span>➕</span></button>
+                <button onclick="zoomOut()" title="Zoom arrière"><span>➖</span></button>
+                <button onclick="resetZoom()" title="reset affichage"><span>🏠</span></button>
+                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" title="eteindre/allumer le son"><span class="wide-span">🔇</span></button>
+                <button onclick="toggleAnimationPause()" id="animationPauseBtn" title="pause/Play de l'animation"><span>⏸️</span></button>
+                <button onclick="openSettingsModal()" id="settingsBtn" title="paramètres"><span>⚙️</span></button>
+                <button onclick="toggleFullScreen()" class="large-button" title="désactive/active plein écran"><span>⛶</span></button>
+                <button onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  title="visualisation en nuage"> 
                     <span class="wide-span">👥</span>
                 </button>          
-                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next">
-                <select id="root-person-results" style="display:block;">
+                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" title="entrer le nom ou les premières lettres pour rechercher une personne racine et valider">
+                <select id="root-person-results" style="display:block;" title="selectionner la personne racine">
                     <option value="">Select</option>
                 </select>
 
             </div>
-            <div class="controls-row-2">
+            <!-- <div class="controls-row-2"> -->
+            <div class="controls-row-2" style="margin-top: -10px; gap: 5px;">                
                 <!-- <button onclick="toggleFullScreen()" class="large-button"><span class="wide-span">⛶</span></button> -->
                 <!-- <label for="prenoms">nbre<br>prénom</label>
                 <select id="prenoms" onchange="updatePrenoms(this.value)">
@@ -121,14 +117,17 @@
                     <option value="4">4</option>
                 </select> -->
                 <label for="generations">nbre<br>géné</label>
-                <select id="generations" onchange="updateGenerations(this.value)">
+                <select id="generations" onchange="updateGenerations(this.value)" title="entrer le nombre maximum de génération à visualiser">
                 </select>
-                <select id="treeMode" onchange="updateTreeMode(this.value)">
-                    <option value="ancestors" selected>Ascendants</option>
-                    <option value="descendants">Descendants</option>
-                    <option value="both">Ascend.+Descend.</option>
+                <!-- <select id="treeMode" onchange="updateTreeMode(this.value)"> -->
+                    <select id="treeMode" onchange="updateTreeMode(this.value)" title="choisir le mode ancêtre, descendant ou les 2" style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
+                        <option value="ancestors" title="Affiche tous les ancêtres de la personne sélectionnée" selected>Asc.</option>
+                        <option value="descendants" title="Affiche tous les descendants de la personne sélectionnée">Desc.</option>
+                        <option value="both" title="Affiche à la fois les ancêtres et les descendants de la personne sélectionnée">A+D</option>
+                    </select>
+
                 </select>
-                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)">     
+                <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)" title="recherche d'un personne dans la page courante">     
             </div>                       
         </div>
 
