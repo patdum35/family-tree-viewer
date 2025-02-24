@@ -501,6 +501,20 @@ export function updateTreeMode(mode) {
     resetAnimationState();
     state.treeMode = mode;
     displayGenealogicTree(null, true, false);
+
+    // pour mettre à jour la description
+    const description = document.getElementById('treeModeDescription');
+    if (description) {
+        if (mode === 'ancestors') {
+            description.textContent = 'Ascendants';
+        } else if (mode === 'descendants') {
+            description.textContent = 'Descendants';
+        } else {
+            description.textContent = 'Ascendants + Descendants';
+        }
+    }
+
+
 }
 
 // Fonctions de gestion de la modal de paramètres
