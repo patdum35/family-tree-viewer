@@ -7,6 +7,15 @@ import { startAncestorAnimation } from './treeAnimation.js';
 let SVG_width = 1920; //1200;
 let SVG_height = 1080; //800;
 let nameCloudContainer;
+// Ajouter un timer pour limiter la fréquence des relayouts
+let resizeTimer;
+let lastResizeTime = 0;
+const RESIZE_COOLDOWN = 500; // Temps minimal entre deux relayouts en ms
+
+
+// Variable globale pour stocker les données actuelles du nuage
+let currentNameData = null;
+let currentConfig = null;
 
 // Structure des stats
 const stats = {
@@ -600,27 +609,6 @@ const createColorPalette = () => [
 // };
 
 
-// const createFontScale = (nameData) => {
-//     // Facteur basé sur le nombre de mots
-//     const wordCount = nameData.length;
-//     const wordFactor = wordCount < 20 ? 1.8 : 
-//                        wordCount < 50 ? 1.4 : 1;
-    
-//     // Facteur basé sur la taille du SVG
-//     const sizeFactor = Math.min(SVG_width / 800, SVG_height / 600);
-    
-//     // Combiner les facteurs
-//     const adjustedMaxSize = 45 * wordFactor * Math.max(1, sizeFactor);
-    
-//     // Obtenir la valeur max ou utiliser 1 si tableau vide
-//     const maxValue = d3.max(nameData, d => d.size) || 1;
-    
-//     return d3.scaleLog()
-//         .domain([1, maxValue])
-//         .range([10, adjustedMaxSize])
-//         .clamp(true);
-// };
-
 
 const createFontScale = (nameData) => {
     // Obtenir les statistiques des données
@@ -688,22 +676,310 @@ function setupResizeListeners() {
         });
     });
     
-    function handleResize() {
+    // function handleResize() {
         
-        // 1. Trouver les éléments SVG et la modal existants
+    //     // 1. Trouver les éléments SVG et la modal existants
+    //     const svgElement = document.getElementById('name-cloud-svg');
+    //     const modalContainer = document.querySelector('.modal-container');
+        
+    //     if (!svgElement || !modalContainer) return;
+        
+    //     // const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
+    //     // console.log(message);
+    //     // showToast(message, 10000)
+
+    //     centerCloudNameContainer();
+    //     console.log("Fast resize completed - Only CloudNameContainer is moved");
+    // }
+
+
+    function handleResize() {
         const svgElement = document.getElementById('name-cloud-svg');
         const modalContainer = document.querySelector('.modal-container');
         
         if (!svgElement || !modalContainer) return;
         
-        // const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
-        // console.log(message);
-        // showToast(message, 10000)
+        // Obtenir les dimensions actuelles du SVG
+        const oldWidth = SVG_width;
+        const oldHeight = SVG_height;
+        
+        // Calculer les nouvelles dimensions
+        const newScreenW = window.innerWidth;
+        const newScreenH = window.innerHeight;
+        
+        // Déterminer les nouvelles dimensions du SVG (code existant)
+        // if (newScreenW >= 1900) SVG_width = 1920; 
+        // else if (newScreenW >= 1200) SVG_width = 1200; 
+        // else SVG_width = 800;
+        
+        // if (newScreenH >= 1000) SVG_height = 1080; 
+        // else if (newScreenH >= 800) SVG_height = 800;  
+        // else SVG_height = 600;
+        
+        SVG_width = newScreenW;
+        SVG_height = newScreenH;
 
-        centerCloudNameContainer();
-        console.log("Fast resize completed - Only CloudNameContainer is moved");
+        // for mobile phone
+        if (((newScreenW >= 700) || (newScreenH >= 700)) && ((newScreenW < 700) || (newScreenH < 700))   ) 
+            { SVG_width = newScreenW + 150; SVG_height = newScreenH + 150; }
+
+        
+        // Si les dimensions ont réellement changé et que nous avons des données
+        if ((oldWidth !== SVG_width || oldHeight !== SVG_height) && currentNameData && currentConfig) {
+            console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
+            
+            // Nettoyer le SVG existant
+            d3.select('#name-cloud-svg').selectAll('*').remove();
+            
+            // Recréer le SVG avec les nouvelles dimensions
+            const svg = d3.select('#name-cloud-svg')
+                .attr('width', SVG_width)
+                .attr('height', SVG_height);
+                
+            // Rectangle de fond
+            svg.append('rect')
+                .attr('width', SVG_width)
+                .attr('height', SVG_height)
+                .attr('fill', 'transparent')
+                .style('touch-action', 'pan-x pan-y pinch-zoom')
+                .lower();
+                
+            // Configurer le zoom et créer le nouveau textGroup
+            const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
+            
+            // Recalculer les échelles pour les nouvelles dimensions
+            const fontScale = createFontScale(currentNameData);
+            const colorPalette = createColorPalette();
+            const color = d3.scaleOrdinal(colorPalette);
+            
+            // Relancer uniquement le layout pour repositionner les mots
+            const layout = d3.layout.cloud()
+                .size([SVG_width - 20, SVG_height - 20])
+                .words(currentNameData.map(d => ({
+                    text: d.text,
+                    size: fontScale(d.size),
+                    originalSize: d.size
+                })))
+                .padding(1)
+                .rotate(0)
+                .fontSize(d => d.size)
+                .spiral('rectangular')
+                .random(() => 0.5)
+                .canvas(function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.setAttribute('willReadFrequently', 'true');
+                    return canvas;
+                })
+                .on('end', words => {
+                    // Redessiner le nuage avec les mots repositionnés
+                    drawNameCloud(svg, textGroup, words, color, currentConfig);
+                });
+                
+            layout.start();
+            
+            // Ajuster les offsets pour le centrage
+            centerCloudNameContainer();
+            
+            const message = `Redimensionnement: ${oldWidth}x${oldHeight} -> ${SVG_width}x${SVG_height}`;
+            console.log(message);
+            showToast(message, 3000);
+        } else {
+            // Simple repositionnement si pas de changement significatif
+            centerCloudNameContainer();
+            console.log("Repositionnement uniquement - pas de relayout");
+        }
     }
+
+   
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function setupResizeListeners() {
+//     ['orientationchange', 'resize'].forEach(event => {
+//         window.addEventListener(event, function() {
+//             clearTimeout(resizeTimer);
+            
+//             // Immédiatement repositionner le conteneur pour une réponse instantanée
+//             centerCloudNameContainer();
+            
+//             // Utiliser un throttling pour le relayout complet
+//             const now = Date.now();
+//             const timeSinceLastResize = now - lastResizeTime;
+            
+//             if (timeSinceLastResize > RESIZE_COOLDOWN) {
+//                 // Si suffisamment de temps s'est écoulé, faire un relayout immédiat
+//                 handleCompleteResize();
+//                 lastResizeTime = now;
+//             } else {
+//                 // Sinon, programmer un relayout différé
+//                 resizeTimer = setTimeout(handleCompleteResize, 300);
+//             }
+//         });
+//     });
+// }
+
+// // Fonction pour un simple repositionnement (ultra rapide)
+// function handleQuickResize() {
+//     const svgElement = document.getElementById('name-cloud-svg');
+//     if (!svgElement) return;
+    
+//     // Mettre à jour les offsets de centrage
+//     centerCloudNameContainer();
+    
+//     // Adapter les dimensions du SVG
+//     const newScreenW = window.innerWidth;
+//     const newScreenH = window.innerHeight;
+    
+//     // Déterminer les nouvelles dimensions du SVG
+//     let newWidth = SVG_width;
+//     let newHeight = SVG_height;
+    
+//     // Logique pour déterminer les dimensions
+//     newWidth = newScreenW;
+//     newHeight = newScreenH;
+
+//     // for mobile phone
+//     if (((newScreenW >= 700) || (newScreenH >= 700)) && ((newScreenW < 700) || (newScreenH < 700))   ) 
+//         { newWidth = newScreenW + 150; newHeight = newScreenH + 150; }
+    
+//     // Mettre à jour les dimensions du SVG sans relayout
+//     svgElement.setAttribute('width', newWidth);
+//     svgElement.setAttribute('height', newHeight);
+    
+//     // Mettre à jour les variables globales pour cohérence
+//     SVG_width = newWidth;
+//     SVG_height = newHeight;
+    
+//     console.log("Ajustement rapide - dimensions SVG:", SVG_width, "x", SVG_height);
+// }
+
+// // Fonction pour un relayout complet (plus lent mais meilleur résultat)
+// function handleCompleteResize() {
+//     const svgElement = document.getElementById('name-cloud-svg');
+//     const modalContainer = document.querySelector('.modal-container');
+    
+//     if (!svgElement || !modalContainer || !currentNameData || !currentConfig) {
+//         handleQuickResize();
+//         return;
+//     }
+    
+//     // Obtenir les dimensions actuelles et les nouvelles
+//     const oldWidth = SVG_width;
+//     const oldHeight = SVG_height;
+    
+//     // Appeler handleQuickResize pour mettre à jour les dimensions
+//     handleQuickResize();
+    
+//     // Si le changement d'orientation est significatif (détection d'orientation)
+//     const orientationChanged = 
+//         (oldWidth > oldHeight && SVG_width < SVG_height) || 
+//         (oldWidth < oldHeight && SVG_width > SVG_height);
+    
+//     // Optimisation: ne relancer le layout que si nécessaire
+//     const dimensionChangeRatio = Math.abs(
+//         (SVG_width * SVG_height) / (oldWidth * oldHeight) - 1
+//     );
+    
+//     if (orientationChanged || dimensionChangeRatio > 0.2) { // 20% de changement
+//         console.log("Changement important - relayout complet");
+        
+//         // Optimisation: réduire le nombre de mots pour les dispositifs mobiles
+//         let optimizedNameData = currentNameData;
+//         const isMobile = Math.min(window.innerWidth, window.innerHeight) < 700;
+        
+//         if (isMobile && currentNameData.length > 50) {
+//             // Sur mobile, limiter le nombre de mots pour accélérer le rendu
+//             optimizedNameData = currentNameData.slice(0, 50);
+//             console.log("Mode mobile: nombre de mots limité à 50");
+//         }
+        
+//         // Nettoyer et recréer le SVG
+//         d3.select('#name-cloud-svg').selectAll('*').remove();
+        
+//         const svg = d3.select('#name-cloud-svg')
+//             .attr('width', SVG_width)
+//             .attr('height', SVG_height);
+            
+//         svg.append('rect')
+//             .attr('width', SVG_width)
+//             .attr('height', SVG_height)
+//             .attr('fill', 'transparent')
+//             .style('touch-action', 'pan-x pan-y pinch-zoom')
+//             .lower();
+            
+//         const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
+        
+//         // Recalculer les échelles pour les nouvelles dimensions
+//         const fontScale = createFontScale(optimizedNameData);
+//         const colorPalette = createColorPalette();
+//         const color = d3.scaleOrdinal(colorPalette);
+        
+//         // Optimisation: utiliser une spirale plus simple sur mobile
+//         const spiralType = isMobile ? 'archimedean' : 'rectangular';
+        
+//         // Afficher un message "Chargement..." pendant le recalcul (optionnel)
+//         showToast("Recalcul en cours...", 1000);
+        
+//         // Utiliser un timeout pour permettre au navigateur de respirer
+//         setTimeout(() => {
+//             const layout = d3.layout.cloud()
+//                 .size([SVG_width - 20, SVG_height - 20])
+//                 .words(optimizedNameData.map(d => ({
+//                     text: d.text,
+//                     size: fontScale(d.size),
+//                     originalSize: d.size
+//                 })))
+//                 .padding(isMobile ? 0.5 : 1) // Réduire le padding sur mobile
+//                 .rotate(0)
+//                 .fontSize(d => d.size)
+//                 .spiral(spiralType)
+//                 .random(() => 0.5)
+//                 .canvas(function() {
+//                     const canvas = document.createElement('canvas');
+//                     canvas.setAttribute('willReadFrequently', 'true');
+//                     return canvas;
+//                 })
+//                 .on('end', words => {
+//                     drawNameCloud(svg, textGroup, words, color, currentConfig);
+//                     centerCloudNameContainer();
+//                     showToast("Redimensionnement terminé", 500);
+//                 });
+                
+//             layout.start();
+//         }, 50); // Petit délai pour permettre au toast de s'afficher
+//     } else {
+//         console.log("Changement mineur - ajustement sans relayout");
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const setupZoom = (svg, width, height) => {
     // Dimensions de l'écran
@@ -1920,11 +2196,17 @@ function processNamesCloudWithDate(config, containerElement = null) {
     // Dimensions de l'écran
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
-    if (screenW >= 1900) SVG_width = 1920; else if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
-    if (screenH >= 1000) SVG_height = 1080; else if (screenH >= 800) SVG_width = 1200;  else SVG_height = 600;
+    // if (screenW >= 1900) SVG_width = 1920; else if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
+    // if (screenH >= 1000) SVG_height = 1080; else if (screenH >= 800) SVG_width = 1200;  else SVG_height = 600;
+    
+    SVG_width = window.innerWidth;
+    SVG_height = window.innerHeight;
+
+
 
     // for mobile phone
-    if (((screenW >= 720) || (screenH >= 720)) && ((screenW < 720) || (screenH < 720))   ) { SVG_width = 900; SVG_height = 900; }
+    if (((screenW >= 700) || (screenH >= 700)) && ((screenW < 700) || (screenH < 700))   ) 
+        { SVG_width = screenW + 150; SVG_height = screenH + 150; }
 
 
     const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
@@ -2087,25 +2369,13 @@ function processNamesCloudWithDate(config, containerElement = null) {
         root.render(React.createElement(NameCloud, { nameData: nameData, config: config }));
     } else {
         showNameCloud(nameData, config);
-
-        let  rectInit = nameCloudContainer.getBoundingClientRect();
-
-        console.log(" \n A L'init  **********************");
-
-        console.log("nameCloudContainer :", Math.round(rectInit.left), Math.round(rectInit.top), Math.round(rectInit.top), Math.round(rectInit.bottom));
-        rectInit = modal.getBoundingClientRect();
-        console.log("modal              :", Math.round(rectInit.left), Math.round(rectInit.top), Math.round(rectInit.top), Math.round(rectInit.bottom));
-        rectInit = optionsContainer.getBoundingClientRect();
-        console.log("optionsContainer   :", Math.round(rectInit.left), Math.round(rectInit.top), Math.round(rectInit.top), Math.round(rectInit.bottom));
-        rectInit = container.getBoundingClientRect();
-        console.log("Container          :", Math.round(rectInit.left), Math.round(rectInit.top), Math.round(rectInit.top), Math.round(rectInit.bottom));
-        rectInit = closeButton.getBoundingClientRect();
-        console.log("closeButton        :", Math.round(rectInit.left), Math.round(rectInit.top), Math.round(rectInit.top), Math.round(rectInit.bottom));
-
-
     }
 
     centerCloudNameContainer();
+
+    currentNameData = nameData; // Sauvegarder les données du nuage
+    // Conserver les données pour réutilisation
+    currentConfig = { ...config };
 
     
 }
