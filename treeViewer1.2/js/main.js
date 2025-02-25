@@ -569,7 +569,7 @@ export function showMap() {
 
 
 // Fonction pour afficher un message toast temporaire
-function showToast(message, duration = 2500) {
+export function showToast(message, duration = 2500) {
     const toast = document.getElementById('mobile-toast');
     if (toast) {
         toast.textContent = message;
