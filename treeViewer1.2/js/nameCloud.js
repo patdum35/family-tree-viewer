@@ -1926,6 +1926,11 @@ function processNamesCloudWithDate(config, containerElement = null) {
     // for mobile phone
     if (((screenW >= 720) || (screenH >= 720)) && ((screenW < 720) || (screenH < 720))   ) { SVG_width = 900; SVG_height = 900; }
 
+
+    const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
+    console.log(message);
+    showToast(message, 3000)
+
     
     // Récupérer les personnes selon le mode choisi
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
