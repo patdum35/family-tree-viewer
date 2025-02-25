@@ -4,8 +4,8 @@ import { state, displayPersonDetails, showToast } from './main.js';
 import { startAncestorAnimation } from './treeAnimation.js';
 
 
-let SVG_width = 1200;
-let SVG_height = 800;
+let SVG_width = 1920; //1200;
+let SVG_height = 1080; //800;
 let nameCloudContainer;
 
 // Structure des stats
@@ -592,11 +592,80 @@ const createColorPalette = () => [
     '#7CB342'  // vert lime vif
 ];
 
+// const createFontScale = (nameData) => {
+//     return d3.scaleLog()
+//         .domain([1, d3.max(nameData, d => d.size)])
+//         .range([10, 45])
+//         .clamp(true);
+// };
+
+
+// const createFontScale = (nameData) => {
+//     // Facteur basé sur le nombre de mots
+//     const wordCount = nameData.length;
+//     const wordFactor = wordCount < 20 ? 1.8 : 
+//                        wordCount < 50 ? 1.4 : 1;
+    
+//     // Facteur basé sur la taille du SVG
+//     const sizeFactor = Math.min(SVG_width / 800, SVG_height / 600);
+    
+//     // Combiner les facteurs
+//     const adjustedMaxSize = 45 * wordFactor * Math.max(1, sizeFactor);
+    
+//     // Obtenir la valeur max ou utiliser 1 si tableau vide
+//     const maxValue = d3.max(nameData, d => d.size) || 1;
+    
+//     return d3.scaleLog()
+//         .domain([1, maxValue])
+//         .range([10, adjustedMaxSize])
+//         .clamp(true);
+// };
+
+
 const createFontScale = (nameData) => {
-    return d3.scaleLog()
-        .domain([1, d3.max(nameData, d => d.size)])
-        .range([10, 45])
-        .clamp(true);
+    // Obtenir les statistiques des données
+    const wordCount = nameData.length;
+    const maxCount = d3.max(nameData, d => d.size) || 1;
+    const minCount = d3.min(nameData, d => d.size) || 1;
+    
+    // Déterminer le type d'échelle à utiliser en fonction de la distribution
+    let scale;
+    let mobile = false;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobile = true;
+    
+    // Si toutes les valeurs sont identiques ou presque, utiliser une échelle linéaire
+    if (maxCount <= 2 || maxCount - minCount <= 2) {
+        // Pour les collections avec peu de variation, définir des tailles plus uniformes
+        // const minFontSize = wordCount < 20 ? 22 : 14;
+        // const maxFontSize = wordCount < 20 ? 38 : 30;
+
+        const minFontSize = ((wordCount < 20) && !mobile) ? 62 : wordCount < 60 ? 20 : 14;
+        const maxFontSize = ((wordCount < 20) && !mobile) ? 88 :  wordCount < 60 ? 48 : 30;
+        
+
+        scale = d3.scaleLinear()
+            .domain([minCount, maxCount])
+            .range([minFontSize, maxFontSize]);
+
+        console.log("debug font linear ", minFontSize, maxFontSize, scale, scale.clamp(true))
+    } else {
+        // Pour les collections avec plus de variation, ajuster l'échelle logarithmique
+        const sizeFactor = Math.min(SVG_width / 800, SVG_height / 600);
+        const minFontSize = Math.max(16, 10 * sizeFactor); // Augmenter la taille minimale
+        const maxFontSize = Math.min(70, 45 * sizeFactor * (wordCount < 20 ? 1.5 : 1));
+        
+        scale = d3.scalePow()
+            .exponent(0.5) // Utiliser une échelle de puissance avec exposant 0.5 (racine carrée)
+            .domain([minCount, maxCount])
+            .range([minFontSize, maxFontSize]);
+
+        
+        console.log("debug font log ", minFontSize, maxFontSize, scale, scale.clamp(true))
+    }
+    
+
+
+    return scale.clamp(true);
 };
 
 
@@ -627,9 +696,9 @@ function setupResizeListeners() {
         
         if (!svgElement || !modalContainer) return;
         
-        const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
-        console.log(message);
-        showToast(message, 10000)
+        // const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
+        // console.log(message);
+        // showToast(message, 10000)
 
         centerCloudNameContainer();
         console.log("Fast resize completed - Only CloudNameContainer is moved");
@@ -1851,8 +1920,11 @@ function processNamesCloudWithDate(config, containerElement = null) {
     // Dimensions de l'écran
     const screenW = window.innerWidth;
     const screenH = window.innerHeight;
-    if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
-    if (screenH >= 800) SVG_height = 800; else SVG_height = 600;
+    if (screenW >= 1900) SVG_width = 1920; else if (screenW >= 1200) SVG_width = 1200; else SVG_width = 800;
+    if (screenH >= 1000) SVG_height = 1080; else if (screenH >= 800) SVG_width = 1200;  else SVG_height = 600;
+
+    // for mobile phone
+    if (((screenW >= 720) || (screenH >= 720)) && ((screenW < 720) || (screenH < 720))   ) { SVG_width = 900; SVG_height = 900; }
 
     
     // Récupérer les personnes selon le mode choisi
