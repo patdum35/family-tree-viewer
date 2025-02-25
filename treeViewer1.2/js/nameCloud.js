@@ -644,9 +644,15 @@ const createFontScale = (nameData) => {
         //     .domain([minCount, maxCount])
         //     .range([minFontSize, maxFontSize]);
        
-        scale = d3.scaleLog()
-            .domain([1, d3.max(nameData, d => d.size)])
-            .range([10, 45])
+        if (!mobile) {
+            scale = d3.scaleLog()
+                .domain([1, d3.max(nameData, d => d.size)])
+                .range([10, 45])
+        } else {
+            scale = d3.scaleLog()
+                .domain([1, d3.max(nameData, d => d.size)])
+                .range([5, 22])
+        }
 
         
         // console.log("debug font log ", minFontSize, maxFontSize, scale, scale.clamp(true))
@@ -806,7 +812,7 @@ function setupResizeListeners() {
     ['orientationchange', 'resize'].forEach(event => {
         window.addEventListener(event, function() {
             // Immédiatement repositionner le conteneur pour une réponse instantanée
-            centerCloudNameContainer();
+            // centerCloudNameContainer();
             handleCompleteResize();
         });
     });
@@ -850,9 +856,9 @@ function handleCompleteResize() {
 
 
 
-    console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
+    // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
     // Afficher un message "Chargement..." pendant le recalcul (optionnel)
-    showToast("Recalcul en cours...", 1000);
+    // showToast("Recalcul en cours...", 1000);
     
 
     // Nettoyer le SVG existant
@@ -908,8 +914,8 @@ function handleCompleteResize() {
     centerCloudNameContainer();
     
     const message = `Redimensionnement: ${oldWidth}x${oldHeight} -> ${SVG_width}x${SVG_height}`;
-    console.log(message);
-    showToast(message, 3000);
+    // console.log(message);
+    // showToast(message, 3000);
 
 }
 
