@@ -697,6 +697,10 @@ input[type=number] {
 
 
 
+
+
+
+
 /* Base styles for control buttons */
 .controls-row-1 button {
     min-width: 28px;
@@ -725,9 +729,9 @@ input[type=number] {
 }
 
 /* Specific styles for zoom button */
-.zoom-button {
+/* .zoom-button {
     margin: 2px;
-}
+} */
 
 /* Media query for small screens */
 @media screen and (max-width: 768px) {
@@ -738,7 +742,7 @@ input[type=number] {
     }
 
     .controls-row-1 {
-        gap: 2px; /* Réduire l'espace entre les boutons */
+        gap: 3px; /* Réduire l'espace entre les boutons */
     }
 
     .controls-row-1 button span {
@@ -755,7 +759,7 @@ input[type=number] {
     }
 
     .controls-row-1 {
-        gap: 1px; /* Espace minimal entre les boutons */
+        gap: 2px; /* Espace minimal entre les boutons */
     }
 
 
@@ -801,5 +805,16 @@ input[type=number] {
 }
 
 
+.mobile-tooltip {
+    position: fixed;
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    z-index: 2000;
+    pointer-events: none;
+    white-space: nowrap;
+}
 
 
