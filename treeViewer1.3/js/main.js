@@ -139,6 +139,10 @@ export async function loadData() {
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
     toggleFullScreen();
+
+    // for mobile phone
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) state.mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) state.mobilePhone = 2;    
     
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
@@ -501,6 +505,20 @@ export function updateTreeMode(mode) {
     resetAnimationState();
     state.treeMode = mode;
     displayGenealogicTree(null, true, false);
+
+    // pour mettre à jour la description
+    const description = document.getElementById('treeModeDescription');
+    if (description) {
+        if (mode === 'ancestors') {
+            description.textContent = 'Ascendants';
+        } else if (mode === 'descendants') {
+            description.textContent = 'Descendants';
+        } else {
+            description.textContent = 'Ascendants + Descendants';
+        }
+    }
+
+
 }
 
 // Fonctions de gestion de la modal de paramètres
@@ -552,6 +570,103 @@ export function showMap() {
     const mapContainer = document.getElementById('animation-map-container');
     mapContainer.style.display = 'block';
 }
+
+
+// Fonction pour afficher un message toast temporaire
+export function showToast(message, duration = 2500) {
+    const toast = document.getElementById('mobile-toast');
+    if (toast) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+
+        // Masquer après le délai spécifié
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, duration);
+    }
+}
+
+
+
+// Objet pour stocker les compteurs d'actions
+const actionCounters = {};
+const max_count = 3;
+
+
+// Ajouter les messages toast aux boutons et sélecteurs
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.controls-row-1 button, .controls-row-2 button, select, .controls-row-1 input, .controls-row-2 input').forEach(element => {
+        element.addEventListener('change', function() {
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
+        });
+
+        // Pour les sélecteurs, utiliser l'événement change
+        if (element.tagName === 'SELECT') {
+            element.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const message = selectedOption.getAttribute('data-action') || this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+            });
+        }
+
+        // Pour les champs de saisie, utiliser l'événement input
+        if (element.tagName === 'INPUT') {
+            element.addEventListener('input', function() {
+                const message = this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+            });
+        }
+
+        // Garder le clic pour tous
+        element.addEventListener('click', function() {
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
+        });
+    });
+});
+
+
+
+
+
+
 
 // Export des variables et fonctions nécessaires
 export {
