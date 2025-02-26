@@ -671,7 +671,6 @@ const createFontScale = (nameData) => {
 
 
 // Variable globale pour les offsets
-
 let horizontalOffset = 0;
 let verticalOffset = 0;
 
@@ -680,149 +679,7 @@ let containerVerticalOffset = 0;
 
 
 
-// function setupResizeListeners() {
-//     let resizeTimer;
-    
-//     ['orientationchange', 'resize'].forEach(event => {
-//         window.addEventListener(event, function() {
-//             clearTimeout(resizeTimer);
-//             resizeTimer = setTimeout(handleResize, 300);
-//         });
-//     });
-    
-//     // function handleResize() {
-        
-//     //     // 1. Trouver les éléments SVG et la modal existants
-//     //     const svgElement = document.getElementById('name-cloud-svg');
-//     //     const modalContainer = document.querySelector('.modal-container');
-        
-//     //     if (!svgElement || !modalContainer) return;
-        
-//     //     // const message = "screen = " + window.innerWidth + " x "  + window.innerHeight +", map= " + SVG_width + " x " + SVG_height;
-//     //     // console.log(message);
-//     //     // showToast(message, 10000)
 
-//     //     centerCloudNameContainer();
-//     //     console.log("Fast resize completed - Only CloudNameContainer is moved");
-//     // }
-
-
-//     function handleResize() {
-//         const svgElement = document.getElementById('name-cloud-svg');
-//         const modalContainer = document.querySelector('.modal-container');
-        
-//         if (!svgElement || !modalContainer) return;
-        
-//         // Obtenir les dimensions actuelles du SVG
-//         const oldWidth = SVG_width;
-//         const oldHeight = SVG_height;
-        
-//         // Calculer les nouvelles dimensions
-//         const newScreenW = window.innerWidth;
-//         const newScreenH = window.innerHeight;
-        
-//         SVG_width = newScreenW;
-//         SVG_height = newScreenH;
-
-//         // for mobile phone
-//         if (((newScreenW >= 700) || (newScreenH >= 700)) && ((newScreenW < 700) || (newScreenH < 700))   ) 
-//             { SVG_width = newScreenW + 50; SVG_height = newScreenH + 50; }
-
-        
-//         // Si les dimensions ont réellement changé et que nous avons des données
-//         if ((oldWidth !== SVG_width || oldHeight !== SVG_height) && currentNameData && currentConfig) {
-//             console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
-            
-//             // Nettoyer le SVG existant
-//             d3.select('#name-cloud-svg').selectAll('*').remove();
-            
-//             // Recréer le SVG avec les nouvelles dimensions
-//             const svg = d3.select('#name-cloud-svg')
-//                 .attr('width', SVG_width)
-//                 .attr('height', SVG_height);
-                
-//             // Rectangle de fond
-//             svg.append('rect')
-//                 .attr('width', SVG_width)
-//                 .attr('height', SVG_height)
-//                 .attr('fill', 'transparent')
-//                 .style('touch-action', 'pan-x pan-y pinch-zoom')
-//                 .lower();
-                
-//             // Configurer le zoom et créer le nouveau textGroup
-//             const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
-            
-//             // Recalculer les échelles pour les nouvelles dimensions
-//             const fontScale = createFontScale(currentNameData);
-//             const colorPalette = createColorPalette();
-//             const color = d3.scaleOrdinal(colorPalette);
-            
-//             // Relancer uniquement le layout pour repositionner les mots
-//             const layout = d3.layout.cloud()
-//                 .size([SVG_width - 20, SVG_height - 20])
-//                 .words(currentNameData.map(d => ({
-//                     text: d.text,
-//                     size: fontScale(d.size),
-//                     originalSize: d.size
-//                 })))
-//                 .padding(1)
-//                 .rotate(0)
-//                 .fontSize(d => d.size)
-//                 .spiral('rectangular')
-//                 .random(() => 0.5)
-//                 .canvas(function() {
-//                     const canvas = document.createElement('canvas');
-//                     canvas.setAttribute('willReadFrequently', 'true');
-//                     return canvas;
-//                 })
-//                 .on('end', words => {
-//                     // Redessiner le nuage avec les mots repositionnés
-//                     drawNameCloud(svg, textGroup, words, color, currentConfig);
-//                 });
-                
-//             layout.start();
-            
-//             // Ajuster les offsets pour le centrage
-//             centerCloudNameContainer();
-            
-//             const message = `Redimensionnement: ${oldWidth}x${oldHeight} -> ${SVG_width}x${SVG_height}`;
-//             console.log(message);
-//             showToast(message, 3000);
-//         } else {
-//             // Simple repositionnement si pas de changement significatif
-//             centerCloudNameContainer();
-//             console.log("Repositionnement uniquement - pas de relayout");
-//         }
-
-
-
-
-
-
-//     }
-
-   
-
-
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Variables pour gérer le redimensionnement
 let resizeTimer;
 let isResizing = false;
 
@@ -859,19 +716,6 @@ function setupResizeListeners() {
 function handleQuickResize() {
     const svgElement = document.getElementById('name-cloud-svg');
     if (!svgElement) return;
-    
-    // // Mettre à jour la variable mobilePhone
-    // mobilePhone = false;
-    // if (Math.min(window.innerWidth, window.innerHeight) < 400) mobilePhone = 1;
-    // else if (Math.min(window.innerWidth, window.innerHeight) < 600) mobilePhone = 2;
-    
-    // // Adapter les dimensions du SVG sans relayout
-    // svgElement.setAttribute('width', window.innerWidth + (mobilePhone ? 50 : 0));
-    // svgElement.setAttribute('height', window.innerHeight + (mobilePhone ? 50 : 0));
-    
-    // // Mettre à jour les variables globales
-    // SVG_width = parseInt(svgElement.getAttribute('width'));
-    // SVG_height = parseInt(svgElement.getAttribute('height'));
     
     // Centrer le conteneur
     centerCloudNameContainer();
@@ -923,12 +767,6 @@ function handleCompleteResize() {
     SVG_width = newWidth;
     SVG_height = newHeight;
 
-
-
-    // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
-    // Afficher un message "Chargement..." pendant le recalcul (optionnel)
-    // showToast("Recalcul en cours...", 1000);
-    
 
     // Nettoyer le SVG existant
     d3.select('#name-cloud-svg').selectAll('*').remove();
@@ -986,10 +824,6 @@ function handleCompleteResize() {
         // Mettre à jour le titre avec les statistiques
         updateTitleText(titleElement, currentConfig);
     }
-    
-    const message = `Redimensionnement: ${oldWidth}x${oldHeight} -> ${SVG_width}x${SVG_height}`;
-    // console.log(message);
-    // showToast(message, 3000);
 
 }
 
@@ -1879,19 +1713,68 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
             .replace(/ç/g, 'c');
     }
     
+
     function searchRootPerson() {
         const searchStr = normalizeString(searchInput.value);
-        resultsSelect.innerHTML = '<option value="">Sélectionner</option>';
+        
+        // Réinitialiser le sélecteur
+        resultsSelect.innerHTML = '<option value="">Select</option>';
         resultsSelect.style.display = 'none';
+        
+        // Appliquer un style plus moderne au sélecteur
+        resultsSelect.style.textAlign = 'left';
+        resultsSelect.style.backgroundColor = '#4361ee'; // Bleu vif
+        resultsSelect.style.color = 'white';
+        resultsSelect.style.border = '1px solid #3f51b5';
+        resultsSelect.style.borderRadius = '4px';
+        resultsSelect.style.appearance = 'none'; // Supprime la flèche native
+        resultsSelect.style.padding = '5px';
+        resultsSelect.style.paddingLeft = '15px'; // Espace pour la flèche à gauche
+        resultsSelect.style.cursor = 'pointer';
+        resultsSelect.style.fontSize = '14px';
+        resultsSelect.style.fontWeight = 'bold';
+        resultsSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+        
+        // // Ajouter la flèche blanche à gauche
+        // resultsSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'6\' height=\'6\' fill=\'white\'><polygon points=\'0,3 6,0 6,6\'/></svg>")';
+        // resultsSelect.style.backgroundRepeat = 'no-repeat';
+        // resultsSelect.style.backgroundPosition = 'left 5px center';
+
+        // Ajouter la flèche blanche en haut à droite
+        resultsSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
+        resultsSelect.style.backgroundRepeat = 'no-repeat';
+        resultsSelect.style.backgroundPosition = 'top 0px left 5px'; // Positionner en haut à droite
+        resultsSelect.style.paddingLeft = '0px'; // Espace pour la flèche
+
+
+
+
+
+
+        // Style pour les options
+        const selectId = `results-select-${Date.now()}`;
+        resultsSelect.id = selectId;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            #${selectId} option {
+                text-align: left;
+                padding-left: 10px;
+                background-color: #38b000; /* Vert pour les options */
+                color: white;
+            }
+        `;
+        document.head.appendChild(style);
     
         if (!searchStr) return;
     
+        // Reste du code de recherche...
         const matchedPersons = Object.values(state.gedcomData.individuals)
             .filter(person => {
                 const fullName = normalizeString(person.name.replace(/\//g, ''));
                 return fullName.includes(searchStr);
             });
-
+    
         if (matchedPersons.length > 0) {
             matchedPersons.forEach(person => {
                 const option = document.createElement('option');
@@ -1901,12 +1784,48 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
             });
             
             resultsSelect.style.display = 'block';
-            resultsSelect.style.animation = 'findResults 1s infinite';
-            resultsSelect.style.backgroundColor = 'yellow';
+            
+            // Changer la couleur de base en orange vif
+            resultsSelect.style.backgroundColor = '#FF6D00'; // Orange pétant
+            resultsSelect.style.border = '1px solid #E65100'; // Orange foncé pour la bordure
+            
+            // Ajouter l'animation clignotante avec un contraste plus fort
+            const animationId = `blink-animation-${Date.now()}`;
+            const animationStyle = document.createElement('style');
+            animationStyle.textContent = `
+                @keyframes ${animationId} {
+                    0% { background-color: #FF6D00; } /* Orange vif */
+                    50% { background-color: #FFAB40; } /* Orange clair */
+                    100% { background-color: #FF6D00; } /* Orange vif */
+                }
+                
+                #${selectId}.blinking {
+                    animation: ${animationId} 0.7s infinite;
+                }
+            `;
+            document.head.appendChild(animationStyle);
+            
+            // Appliquer la classe d'animation
+            resultsSelect.classList.add('blinking');
+            
+            // Conserver les événements de survol
+            resultsSelect.addEventListener('mouseover', () => {
+                resultsSelect.classList.remove('blinking');
+                resultsSelect.style.backgroundColor = '#E65100'; // Orange foncé au survol
+            });
+            
+            resultsSelect.addEventListener('mouseout', () => {
+                resultsSelect.style.backgroundColor = '#FF6D00'; // Retour à l'orange vif
+                resultsSelect.classList.add('blinking');
+            });
         } else {
             alert('Aucune personne trouvée');
         }
+
     }
+
+
+
 
     searchButton.addEventListener('click', searchRootPerson);
     searchInput.addEventListener('keydown', (event) => {
@@ -1938,9 +1857,28 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
 }
 
 function createTypeSelect(config) {
+    // Créer le sélecteur
     const typeSelect = document.createElement('select');
-    typeSelect.style.padding = '5px';
-    typeSelect.style.minWidth = '20px';
+    typeSelect.style.padding = '0px';
+    typeSelect.style.minWidth = '10px';
+    typeSelect.style.backgroundColor = '#4361ee';
+    typeSelect.style.color = 'white';
+    typeSelect.style.border = '1px solid #3f51b5';
+    typeSelect.style.borderRadius = '3px';
+    typeSelect.style.appearance = 'none'; // Supprime la flèche native
+    typeSelect.style.cursor = 'pointer';
+    typeSelect.style.fontSize = '14px';
+    typeSelect.style.fontWeight = 'bold';
+    typeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+    
+    // Ajouter la flèche blanche en haut à droite
+    typeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
+
+    typeSelect.style.backgroundRepeat = 'no-repeat';
+    typeSelect.style.backgroundPosition = 'top 0px right -13px'; // Positionner en haut à droite
+    typeSelect.style.paddingRight = '0px'; // Espace pour la flèche
+    
+    // Options du sélecteur
     typeSelect.innerHTML = `
         <option value="prenoms">Prénom</option>
         <option value="noms">Nom</option>
@@ -1950,21 +1888,83 @@ function createTypeSelect(config) {
         <option value="lieux">Lieux</option>                    
     `;
     typeSelect.value = config.type;
+    
+    // Événements de survol
+    typeSelect.addEventListener('mouseover', () => {
+        typeSelect.style.backgroundColor = '#3a56e8';
+    });
+    typeSelect.addEventListener('mouseout', () => {
+        typeSelect.style.backgroundColor = '#4361ee';
+    });
+    
+    // Style pour les options
+    const style = document.createElement('style');
+    style.textContent = `
+        #type-select-${Date.now()} option {
+            background-color: #38b000;
+            color: white;
+        }
+    `;
+    document.head.appendChild(style);
+    typeSelect.id = `type-select-${Date.now()}`;
+    
     return typeSelect;
 }
 
+
+
+
 function createScopeSelect(config) {
     const scopeSelect = document.createElement('select');
-    scopeSelect.style.padding = '1px';
-    scopeSelect.style.minWidth = '20px';
+    scopeSelect.style.padding = '0px';
+    scopeSelect.style.minWidth = '10px';
+    scopeSelect.style.backgroundColor = '#38b000'; // Vert
+    scopeSelect.style.color = 'white';
+    scopeSelect.style.border = '1px solid #2d8600';
+    scopeSelect.style.borderRadius = '3px';
+    scopeSelect.style.appearance = 'none'; // Supprime la flèche native
+    scopeSelect.style.cursor = 'pointer';
+    scopeSelect.style.fontSize = '14px';
+    scopeSelect.style.fontWeight = 'bold';
+    scopeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+    
+    // Ajouter la flèche blanche en haut à droite
+    scopeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
+    scopeSelect.style.backgroundRepeat = 'no-repeat';
+    scopeSelect.style.backgroundPosition = 'top 0px right -13px'; // Positionner en haut à droite
+    scopeSelect.style.paddingRight = '0px'; // Espace pour la flèche
+
+
+
+
     scopeSelect.innerHTML = `
         <option value="all">Tout</option>
         <option value="ancestors">Ascend</option>
         <option value="descendants">Descend</option>
     `;
     scopeSelect.value = config.scope || 'all';
+    
+    // Événements de survol
+    scopeSelect.addEventListener('mouseover', () => {
+        scopeSelect.style.backgroundColor = '#2e9800'; // Version légèrement plus foncée au survol
+    });
+    scopeSelect.addEventListener('mouseout', () => {
+        scopeSelect.style.backgroundColor = '#38b000'; // Retour à la couleur normale
+    });
+    
     return scopeSelect;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 function createModalContainer() {
     const modal = document.createElement('div');
@@ -2001,12 +2001,13 @@ function createMainContainer() {
     return container;
 }
 
+
 function createCloseButton() {
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
+    closeButton.style.top = '1px';  // Modifié de 10px à 5px pour le déplacer vers le haut
+    closeButton.style.right = '1px'; // Modifié de 10px à 5px pour le déplacer vers la droite
     closeButton.style.background = 'rgba(255, 255, 255, 0.7)'; // Fond semi-transparent
     closeButton.style.border = '1px solid #ccc';
     closeButton.style.borderRadius = '50%'; // Forme ronde
@@ -2022,6 +2023,8 @@ function createCloseButton() {
     
     return closeButton;
 }
+
+
 
 function createNameCloudContainer() {
     const nameCloudContainer = document.createElement('div');
@@ -2127,14 +2130,29 @@ function showNameCloud(nameData, config) {
     const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate, '45px');
     const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate, '45px');
 
+
     const showButton = document.createElement('button');
-    showButton.textContent = 'OK';
-    showButton.style.padding = '1px 1px';
-    showButton.style.backgroundColor = '#4CAF50';
+    showButton.innerHTML = '✓'; // Coche pour indiquer "valider"
+    showButton.style.padding = '0';
+    showButton.style.backgroundColor = '#4CAF50'; // Vert
     showButton.style.color = 'white';
     showButton.style.border = 'none';
-    showButton.style.borderRadius = '2px';
-    showButton.style.marginLeft = '-6px';
+    showButton.style.borderRadius = '50%'; // Forme ronde
+    showButton.style.width = '23px';
+    showButton.style.height = '23px';
+    showButton.style.position = 'relative';
+    showButton.style.marginLeft = '-8px';
+    // showButton.style.marginTop = '-13px';
+    showButton.style.transform = 'translateY(-4px)';
+    showButton.style.fontSize = '16px';
+    showButton.style.cursor = 'pointer';
+    showButton.style.display = 'flex';
+    showButton.style.justifyContent = 'center';
+    showButton.style.alignItems = 'center';
+    showButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    showButton.title = 'Valider'; // Infobulle qui apparaît au survol
+
+
 
     // Conteneur pour la personne racine avec recherche
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
