@@ -7,8 +7,10 @@ import { startAncestorAnimation } from './treeAnimation.js';
 let SVG_width = 1920; //1200;
 let SVG_height = 1080; //800;
 let nameCloudContainer;
+let titleElement;
 let totalWords;
 let placedWords;
+let mobilePhone;
 
 // Variable globale pour stocker les données actuelles du nuage
 let currentNameData = null;
@@ -615,17 +617,16 @@ const createFontScale = (nameData) => {
     
     // Déterminer le type d'échelle à utiliser en fonction de la distribution
     let scale;
-    let mobile = false;
-    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobile = true;
     
     // Si toutes les valeurs sont identiques ou presque, utiliser une échelle linéaire
-    if (maxCount <= 2 || maxCount - minCount <= 2) {
+    // if (maxCount <= 2 || maxCount - minCount <= 2) {
+    if(wordCount < 70) {
         // Pour les collections avec peu de variation, définir des tailles plus uniformes
         // const minFontSize = wordCount < 20 ? 22 : 14;
         // const maxFontSize = wordCount < 20 ? 38 : 30;
 
-        const minFontSize = ((wordCount < 20) && !mobile) ? 62 : wordCount < 60 ? 20 : 14;
-        const maxFontSize = ((wordCount < 20) && !mobile) ? 88 :  wordCount < 60 ? 48 : 30;
+        const minFontSize = ((wordCount < 20) && !mobilePhone) ? 62 : wordCount < 60 ? 20 : 14;
+        const maxFontSize = ((wordCount < 20) && !mobilePhone) ? 88 :  wordCount < 60 ? 48 : 30;
         
 
         scale = d3.scaleLinear()
@@ -644,7 +645,7 @@ const createFontScale = (nameData) => {
         //     .domain([minCount, maxCount])
         //     .range([minFontSize, maxFontSize]);
        
-        if (!mobile) {
+        if (!mobilePhone) {
             scale = d3.scaleLog()
                 .domain([1, d3.max(nameData, d => d.size)])
                 .range([10, 45])
@@ -833,85 +834,94 @@ function handleCompleteResize() {
     const oldWidth = SVG_width;
     const oldHeight = SVG_height;
     
-    // Adapter les dimensions du SVG
-    const newScreenW = window.innerWidth;
-    const newScreenH = window.innerHeight;
+//     // Adapter les dimensions du SVG
+//     const newScreenW = window.innerWidth;
+//     const newScreenH = window.innerHeight;
 
-    // Déterminer les nouvelles dimensions du SVG
-    let newWidth = SVG_width;
-    let newHeight = SVG_height;
+//     // Déterminer les nouvelles dimensions du SVG
+//     let newWidth = SVG_width;
+//     let newHeight = SVG_height;
     
-    // Logique pour déterminer les dimensions
-    newWidth = newScreenW;
-    newHeight = newScreenH;
+//     // Logique pour déterminer les dimensions
+//     newWidth = newScreenW;
+//     newHeight = newScreenH;
 
-    // for mobile phone
-    if (((newScreenW >= 700) || (newScreenH >= 700)) && ((newScreenW < 700) || (newScreenH < 700))   ) 
-        { newWidth = newScreenW + 50; newHeight = newScreenH + 50; }
+//     // for mobile phone
+//     mobilePhone = false;
+//     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobilePhone = 1;
+//     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) mobilePhone = 2;
 
-
-   // Mettre à jour les variables globales pour cohérence
-    SVG_width = newWidth;
-    SVG_height = newHeight;
-
+//     if (mobilePhone)
+//         { newWidth = newScreenW + 50; newHeight = newScreenH + 50; }
 
 
-    // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
-    // Afficher un message "Chargement..." pendant le recalcul (optionnel)
-    // showToast("Recalcul en cours...", 1000);
+//    // Mettre à jour les variables globales pour cohérence
+//     SVG_width = newWidth;
+//     SVG_height = newHeight;
+
+
+
+//     // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
+//     // Afficher un message "Chargement..." pendant le recalcul (optionnel)
+//     // showToast("Recalcul en cours...", 1000);
     
 
-    // Nettoyer le SVG existant
-    d3.select('#name-cloud-svg').selectAll('*').remove();
+//     // Nettoyer le SVG existant
+//     d3.select('#name-cloud-svg').selectAll('*').remove();
     
-    // Recréer le SVG avec les nouvelles dimensions
-    const svg = d3.select('#name-cloud-svg')
-        .attr('width', SVG_width)
-        .attr('height', SVG_height);
+//     // Recréer le SVG avec les nouvelles dimensions
+//     const svg = d3.select('#name-cloud-svg')
+//         .attr('width', SVG_width)
+//         .attr('height', SVG_height);
         
-    // Rectangle de fond
-    svg.append('rect')
-        .attr('width', SVG_width)
-        .attr('height', SVG_height)
-        .attr('fill', 'transparent')
-        .style('touch-action', 'pan-x pan-y pinch-zoom')
-        .lower();
+//     // Rectangle de fond
+//     svg.append('rect')
+//         .attr('width', SVG_width)
+//         .attr('height', SVG_height)
+//         .attr('fill', 'transparent')
+//         .style('touch-action', 'pan-x pan-y pinch-zoom')
+//         .lower();
         
-    // Configurer le zoom et créer le nouveau textGroup
-    const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
+//     // Configurer le zoom et créer le nouveau textGroup
+//     const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
     
-    // Recalculer les échelles pour les nouvelles dimensions
-    const fontScale = createFontScale(currentNameData);
-    const colorPalette = createColorPalette();
-    const color = d3.scaleOrdinal(colorPalette);
+//     // Recalculer les échelles pour les nouvelles dimensions
+//     const fontScale = createFontScale(currentNameData);
+//     const colorPalette = createColorPalette();
+//     const color = d3.scaleOrdinal(colorPalette);
     
-    // Relancer uniquement le layout pour repositionner les mots
-    const layout = d3.layout.cloud()
-        .size([SVG_width - 20, SVG_height - 20])
-        .words(currentNameData.map(d => ({
-            text: d.text,
-            size: fontScale(d.size),
-            originalSize: d.size
-        })))
-        .padding(1)
-        .rotate(0)
-        .fontSize(d => d.size)
-        .spiral('rectangular')
-        .random(() => 0.5)
-        .canvas(function() {
-            const canvas = document.createElement('canvas');
-            canvas.setAttribute('willReadFrequently', 'true');
-            return canvas;
-        })
-        .on('end', words => {
-            // Redessiner le nuage avec les mots repositionnés
-            drawNameCloud(svg, textGroup, words, color, currentConfig);
-        });
+//     // Relancer uniquement le layout pour repositionner les mots
+//     const layout = d3.layout.cloud()
+//         .size([SVG_width - 20, SVG_height - 20])
+//         .words(currentNameData.map(d => ({
+//             text: d.text,
+//             size: fontScale(d.size),
+//             originalSize: d.size
+//         })))
+//         // .padding(1)
+//         .padding(mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
+//         .rotate(0)
+//         .fontSize(d => d.size)
+//         .spiral('rectangular')
+//         .random(() => 0.5)
+//         .canvas(function() {
+//             const canvas = document.createElement('canvas');
+//             canvas.setAttribute('willReadFrequently', 'true');
+//             return canvas;
+//         })
+//         .on('end', words => {
+//             // Redessiner le nuage avec les mots repositionnés
+//             drawNameCloud(svg, textGroup, words, color, currentConfig);
+//         });
         
-    layout.start();
+//     layout.start();
     
     // Ajuster les offsets pour le centrage
     centerCloudNameContainer();
+    if (titleElement) {
+        // Mettre à jour le titre avec les statistiques
+        updateTitleText(titleElement, currentConfig);
+    }
     
     const message = `Redimensionnement: ${oldWidth}x${oldHeight} -> ${SVG_width}x${SVG_height}`;
     // console.log(message);
@@ -1019,7 +1029,8 @@ const NameCloud = ({ nameData, config }) => {
                 size: fontScale(d.size),
                 originalSize: d.size
             })))
-            .padding(1)
+            // .padding(1)
+            .padding(mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
             .rotate(0)
             .fontSize(d => d.size)
             .spiral('rectangular')
@@ -1965,25 +1976,38 @@ function setupModalEvents(modal, closeButton, generateNameCloud) {
 function updateTitleText(element, cfg) {
     let titleText = '';
     if (cfg.type === 'prenoms') {
-        titleText = `${totalWords} Prénoms entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${totalWords} Prénoms`;
     } else if (cfg.type === 'noms') {
-        titleText = `${totalWords} Noms de famille entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${totalWords} Noms`;
     } else if (cfg.type === 'professions') {
-        titleText = `${totalWords} Professions entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${totalWords} Métiers`;
     } else if (cfg.type === 'duree_vie') {
-        titleText = `${totalWords} Durées de vie entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${totalWords} Durées de vie `;
     } else if (cfg.type === 'age_procreation') {
-        titleText = `${totalWords} Âges de procréation entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${totalWords} Ages de procréation`;
     } else {
         titleText = `${totalWords} Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
     }
-    // if (placedWords < totalWords) titleText = titleText + " (" + placedWords+ " mots placés)"
+    
+    if (!mobilePhone || window.innerWidth > 600) 
+        titleText = titleText + ` entre ${cfg.startDate} et ${cfg.endDate}`;
+    else
+        // titleText = titleText + ` <span style="font-size: 0.8em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;
+        titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;
+
+
     if (placedWords < totalWords) {
-        titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${placedWords} mots placés)</span>`;
-        element.innerHTML = titleText; // Utiliser innerHTML au lieu de textContent
-    } else {
-        element.textContent = titleText;
-    }
+        if (!mobilePhone || window.innerWidth > 600)
+            titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${placedWords} mots placés)</span>`;
+        else
+            titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${placedWords} mots placés)</span>`;
+        // element.innerHTML = titleText; // Utiliser innerHTML au lieu de textContent
+    } 
+    // else {
+    //     element.textContent = titleText;
+    // }
+
+    element.innerHTML = titleText;
 
     // element.textContent = titleText;
 }
@@ -2083,7 +2107,7 @@ function showNameCloud(nameData, config) {
     bottomContainer.appendChild(rootPersonContainer);
 
     // Créer le titre
-    const titleElement = document.createElement('div');
+    titleElement = document.createElement('div');
     titleElement.style.fontSize = '22px';
     titleElement.style.fontWeight = 'bold';
     titleElement.id = 'name-cloud-title';
@@ -2178,9 +2202,13 @@ function processNamesCloudWithDate(config, containerElement = null) {
     SVG_height = window.innerHeight;
 
 
+    mobilePhone = false;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) mobilePhone = 2;
 
     // for mobile phone
-    if (((screenW >= 700) || (screenH >= 700)) && ((screenW < 700) || (screenH < 700))   ) 
+    // if (((screenW >= 700) || (screenH >= 700)) && ((screenW < 700) || (screenH < 700))   )
+    if (mobilePhone) 
         { SVG_width = screenW + 50; SVG_height = screenH + 50; }
 
 
