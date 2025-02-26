@@ -809,16 +809,80 @@ let containerVerticalOffset = 0;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Variables pour gérer le redimensionnement
+let resizeTimer;
+let isResizing = false;
+
 function setupResizeListeners() {
     ['orientationchange', 'resize'].forEach(event => {
         window.addEventListener(event, function() {
-            // Immédiatement repositionner le conteneur pour une réponse instantanée
-            // centerCloudNameContainer();
-            handleCompleteResize();
+            // Annuler tout timer précédent
+            clearTimeout(resizeTimer);
+            
+            // Première étape: centrage rapide immédiat (sans écran noir)
+            handleQuickResize();
+            
+            // Montrer un indicateur de chargement si ce n'est pas déjà fait
+            if (!isResizing) {
+                isResizing = true;
+                if (typeof showToast === 'function') {
+                    showToast("Optimisation en cours...", 2000);
+                }
+            }
+            
+            // Deuxième étape: planifier le redimensionnement complet après un court délai
+            resizeTimer = setTimeout(() => {
+                // Utiliser requestAnimationFrame pour s'assurer que le navigateur est prêt
+                requestAnimationFrame(() => {
+                    handleCompleteResize();
+                    isResizing = false;
+                });
+            }, 300); // Délai avant le redimensionnement complet
         });
     });
 }
 
+// Fonction pour un simple repositionnement (ultra rapide)
+function handleQuickResize() {
+    const svgElement = document.getElementById('name-cloud-svg');
+    if (!svgElement) return;
+    
+    // // Mettre à jour la variable mobilePhone
+    // mobilePhone = false;
+    // if (Math.min(window.innerWidth, window.innerHeight) < 400) mobilePhone = 1;
+    // else if (Math.min(window.innerWidth, window.innerHeight) < 600) mobilePhone = 2;
+    
+    // // Adapter les dimensions du SVG sans relayout
+    // svgElement.setAttribute('width', window.innerWidth + (mobilePhone ? 50 : 0));
+    // svgElement.setAttribute('height', window.innerHeight + (mobilePhone ? 50 : 0));
+    
+    // // Mettre à jour les variables globales
+    // SVG_width = parseInt(svgElement.getAttribute('width'));
+    // SVG_height = parseInt(svgElement.getAttribute('height'));
+    
+    // Centrer le conteneur
+    centerCloudNameContainer();
+    
+    // Mettre à jour le titre si disponible
+    if (titleElement) {
+        updateTitleText(titleElement, currentConfig);
+    }
+    
+    console.log("Ajustement rapide effectué");
+}
 
 // Fonction pour un relayout complet (plus lent mais meilleur résultat)
 function handleCompleteResize() {
@@ -834,87 +898,87 @@ function handleCompleteResize() {
     const oldWidth = SVG_width;
     const oldHeight = SVG_height;
     
-//     // Adapter les dimensions du SVG
-//     const newScreenW = window.innerWidth;
-//     const newScreenH = window.innerHeight;
+    // Adapter les dimensions du SVG
+    const newScreenW = window.innerWidth;
+    const newScreenH = window.innerHeight;
 
-//     // Déterminer les nouvelles dimensions du SVG
-//     let newWidth = SVG_width;
-//     let newHeight = SVG_height;
+    // Déterminer les nouvelles dimensions du SVG
+    let newWidth = SVG_width;
+    let newHeight = SVG_height;
     
-//     // Logique pour déterminer les dimensions
-//     newWidth = newScreenW;
-//     newHeight = newScreenH;
+    // Logique pour déterminer les dimensions
+    newWidth = newScreenW;
+    newHeight = newScreenH;
 
-//     // for mobile phone
-//     mobilePhone = false;
-//     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobilePhone = 1;
-//     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) mobilePhone = 2;
+    // for mobile phone
+    mobilePhone = false;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) mobilePhone = 2;
 
-//     if (mobilePhone)
-//         { newWidth = newScreenW + 50; newHeight = newScreenH + 50; }
-
-
-//    // Mettre à jour les variables globales pour cohérence
-//     SVG_width = newWidth;
-//     SVG_height = newHeight;
+    if (mobilePhone)
+        { newWidth = newScreenW + 50; newHeight = newScreenH + 50; }
 
 
+   // Mettre à jour les variables globales pour cohérence
+    SVG_width = newWidth;
+    SVG_height = newHeight;
 
-//     // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
-//     // Afficher un message "Chargement..." pendant le recalcul (optionnel)
-//     // showToast("Recalcul en cours...", 1000);
+
+
+    // console.log("Redimensionnement du SVG avec relayout:", oldWidth, "x", oldHeight, "->", SVG_width, "x", SVG_height);
+    // Afficher un message "Chargement..." pendant le recalcul (optionnel)
+    // showToast("Recalcul en cours...", 1000);
     
 
-//     // Nettoyer le SVG existant
-//     d3.select('#name-cloud-svg').selectAll('*').remove();
+    // Nettoyer le SVG existant
+    d3.select('#name-cloud-svg').selectAll('*').remove();
     
-//     // Recréer le SVG avec les nouvelles dimensions
-//     const svg = d3.select('#name-cloud-svg')
-//         .attr('width', SVG_width)
-//         .attr('height', SVG_height);
+    // Recréer le SVG avec les nouvelles dimensions
+    const svg = d3.select('#name-cloud-svg')
+        .attr('width', SVG_width)
+        .attr('height', SVG_height);
         
-//     // Rectangle de fond
-//     svg.append('rect')
-//         .attr('width', SVG_width)
-//         .attr('height', SVG_height)
-//         .attr('fill', 'transparent')
-//         .style('touch-action', 'pan-x pan-y pinch-zoom')
-//         .lower();
+    // Rectangle de fond
+    svg.append('rect')
+        .attr('width', SVG_width)
+        .attr('height', SVG_height)
+        .attr('fill', 'transparent')
+        .style('touch-action', 'pan-x pan-y pinch-zoom')
+        .lower();
         
-//     // Configurer le zoom et créer le nouveau textGroup
-//     const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
+    // Configurer le zoom et créer le nouveau textGroup
+    const { zoom, textGroup } = setupZoom(svg, SVG_width, SVG_height);
     
-//     // Recalculer les échelles pour les nouvelles dimensions
-//     const fontScale = createFontScale(currentNameData);
-//     const colorPalette = createColorPalette();
-//     const color = d3.scaleOrdinal(colorPalette);
+    // Recalculer les échelles pour les nouvelles dimensions
+    const fontScale = createFontScale(currentNameData);
+    const colorPalette = createColorPalette();
+    const color = d3.scaleOrdinal(colorPalette);
     
-//     // Relancer uniquement le layout pour repositionner les mots
-//     const layout = d3.layout.cloud()
-//         .size([SVG_width - 20, SVG_height - 20])
-//         .words(currentNameData.map(d => ({
-//             text: d.text,
-//             size: fontScale(d.size),
-//             originalSize: d.size
-//         })))
-//         // .padding(1)
-//         .padding(mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
-//         .rotate(0)
-//         .fontSize(d => d.size)
-//         .spiral('rectangular')
-//         .random(() => 0.5)
-//         .canvas(function() {
-//             const canvas = document.createElement('canvas');
-//             canvas.setAttribute('willReadFrequently', 'true');
-//             return canvas;
-//         })
-//         .on('end', words => {
-//             // Redessiner le nuage avec les mots repositionnés
-//             drawNameCloud(svg, textGroup, words, color, currentConfig);
-//         });
+    // Relancer uniquement le layout pour repositionner les mots
+    const layout = d3.layout.cloud()
+        .size([SVG_width - 20, SVG_height - 20])
+        .words(currentNameData.map(d => ({
+            text: d.text,
+            size: fontScale(d.size),
+            originalSize: d.size
+        })))
+        // .padding(1)
+        .padding(mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
+        .rotate(0)
+        .fontSize(d => d.size)
+        .spiral('rectangular')
+        .random(() => 0.5)
+        .canvas(function() {
+            const canvas = document.createElement('canvas');
+            canvas.setAttribute('willReadFrequently', 'true');
+            return canvas;
+        })
+        .on('end', words => {
+            // Redessiner le nuage avec les mots repositionnés
+            drawNameCloud(svg, textGroup, words, color, currentConfig);
+        });
         
-//     layout.start();
+    layout.start();
     
     // Ajuster les offsets pour le centrage
     centerCloudNameContainer();
@@ -928,6 +992,21 @@ function handleCompleteResize() {
     // showToast(message, 3000);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
