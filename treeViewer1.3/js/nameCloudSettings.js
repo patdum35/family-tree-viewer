@@ -1,10 +1,6 @@
 import { nameCloudState } from './nameCloud.js';
 
 
-
-
-
-
 // Fonction pour créer un sélecteur de forme personnalisé
 function createShapeSelect(selectedShape = 'rectangle') {
     // Définir les options et les valeurs correspondantes
@@ -236,20 +232,6 @@ function createShapeSelect(selectedShape = 'rectangle') {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // 3. Créer la modale de paramètres
 export function createSettingsModal(onSave) {
     // Conteneur principal de la modale
@@ -270,8 +252,8 @@ export function createSettingsModal(onSave) {
     const content = document.createElement('div');
     content.style.backgroundColor = 'transparent';
     content.style.borderRadius = '8px';
-    content.style.padding = '20px';
-    content.style.width = '240px'; // Encore plus compact
+    content.style.padding = '15px'; // Réduit de 20px à 15px
+    content.style.width = '240px'; 
     content.style.maxWidth = '90%';
     content.style.maxHeight = '90vh';
     content.style.overflow = 'auto';
@@ -281,14 +263,15 @@ export function createSettingsModal(onSave) {
     const titleContainer = document.createElement('div');
     titleContainer.style.backgroundColor = '#4361ee';
     titleContainer.style.borderRadius = '8px 8px 0 0';
-    titleContainer.style.padding = '10px';
-    titleContainer.style.marginBottom = '15px';
+    titleContainer.style.padding = '8px'; // Réduit de 10px à 8px
+    titleContainer.style.marginBottom = '10px'; // Réduit de 15px à 10px
     
     const title = document.createElement('h3');
     title.textContent = 'Paramètres du nuage';
     title.style.margin = '0';
     title.style.color = 'white';
     title.style.textAlign = 'center';
+    title.style.fontSize = '16px'; // Ajout pour réduire la taille de la police
     
     titleContainer.appendChild(title);
     
@@ -296,16 +279,16 @@ export function createSettingsModal(onSave) {
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
+    closeButton.style.top = '5px'; // Réduit de 10px à 5px
+    closeButton.style.right = '5px'; // Réduit de 10px à 5px
     closeButton.style.background = 'white';
     closeButton.style.borderRadius = '50%';
     closeButton.style.border = 'none';
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
     closeButton.style.color = '#666';
-    closeButton.style.width = '30px';
-    closeButton.style.height = '30px';
+    closeButton.style.width = '25px'; // Réduit de 30px à 25px
+    closeButton.style.height = '25px'; // Réduit de 30px à 25px
     closeButton.style.display = 'flex';
     closeButton.style.alignItems = 'center';
     closeButton.style.justifyContent = 'center';
@@ -319,7 +302,7 @@ export function createSettingsModal(onSave) {
     const paramContainer = document.createElement('div');
     paramContainer.style.display = 'flex';
     paramContainer.style.flexDirection = 'column';
-    paramContainer.style.gap = '10px';
+    paramContainer.style.gap = '4px'; // Encore réduit de 6px à 4px
     
     // Fonction pour appliquer les changements immédiatement
     const applyChanges = () => {
@@ -353,72 +336,20 @@ export function createSettingsModal(onSave) {
         }
     };
 
-
-
     // 1. Forme du nuage
     const shapeContainer = createFormGroup('Forme\ndu nuage', '#8e44ad'); // Couleur violette
-    // const shapeSelect = document.createElement('select');
-    // shapeSelect.style.padding = '2px';
-    // shapeSelect.style.borderRadius = '4px';
-    // shapeSelect.style.border = '1px solid #ddd';
-    // shapeSelect.style.width = '128px';
-    // shapeSelect.style.backgroundColor = '#4CAF50'; // Vert
-    // shapeSelect.style.color = 'white';
-    // shapeSelect.style.fontWeight = 'bold';
     
-    // const shapes = [
-    //     { value: 'rectangle', label: 'Rectangle' },
-    //     { value: 'ellipse', label: 'Ellipse' },
-    //     { value: 'coeur', label: 'Coeur' },
-    //     { value: 'etoile', label: 'Étoile' },
-    //     { value: 'arabesque', label: 'Arabesque' },
-    //     { value: 'A', label: 'A' },
-    //     { value: 'M', label: 'M' },
-    //     { value: 'puzzle', label: 'Nuzzle' },
-    //     { value: 'nuage', label: 'Nuage' },
-    //     { value: 'arbre', label: 'Arbre' },
-    //     { value: 'carte', label: 'Carte' },
-    //     { value: 'ampoule', label: 'Ampoule' },
-    //     { value: 'cerveau', label: 'Cerveau' },
-    //     { value: 'maison', label: 'Maison' },
-    //     { value: 'ballon', label: 'Ballon' }
-    // ];
-    
-    // shapes.forEach(shape => {
-    //     const option = document.createElement('option');
-    //     option.value = shape.value;
-    //     option.textContent = shape.label;
-    //     shapeSelect.appendChild(option);
-    // });
-    
-    // shapeSelect.value = nameCloudState.cloudShape || 'rectangle';
-    // shapeSelect.addEventListener('change', applyChanges);
-    // shapeContainer.appendChild(shapeSelect);
-    
-
     const shapeSelect = createShapeSelect(nameCloudState.cloudShape || 'rectangle');
     shapeSelect.addEventListener('change', applyChanges);
     shapeContainer.appendChild(shapeSelect);
     
-
-
-
-
-
-
-
-
-
-
-
-
     // 2. Taille de police minimum
-    const minFontContainer = createFormGroup('Taille\nminimum',  '#f39c12'); // Orange              //'#e74c3c'); // Rouge
+    const minFontContainer = createFormGroup('Taille\nminimum',  '#f39c12'); // Orange
     const minFontInput = createNumberInput(nameCloudState.minFontSize, applyChanges);
     minFontContainer.appendChild(minFontInput);
     
     // 3. Taille de police maximum
-    const maxFontContainer = createFormGroup('Taille\nmaximum', '#8e44ad'); // Couleur violette               //'#2980b9'); // Bleu foncé
+    const maxFontContainer = createFormGroup('Taille\nmaximum', '#8e44ad'); // Couleur violette
     const maxFontInput = createNumberInput(nameCloudState.maxFontSize, applyChanges);
     maxFontContainer.appendChild(maxFontInput);
     
@@ -428,13 +359,18 @@ export function createSettingsModal(onSave) {
     paddingContainer.appendChild(paddingInput);
     
     // 5. Police de caractères
-    const fontContainer = createFormGroup('Police', '#8e44ad'); // Couleur violette   ///'#27ae60'); // Vert foncé
+    const fontContainer = createFormGroup('Police', '#8e44ad'); // Couleur violette
+    const fontLabel = fontContainer.querySelector('.form-group-label');
+    fontLabel.style.padding = '1px 6px';
+    fontLabel.style.lineHeight = '2'; 
+ 
     const fontSelect = document.createElement('select');
     fontSelect.style.padding = '2px';
     fontSelect.style.borderRadius = '4px';
     fontSelect.style.border = '1px solid #ddd';
-    fontSelect.style.width = '128px';
+    fontSelect.style.width = '126px';
     fontSelect.style.backgroundColor = 'white';
+    fontSelect.style.height = '22px'; // Ajout pour réduire la hauteur
     
     const fonts = [
         'Arial', 'Verdana', 'Georgia', 'Times New Roman', 
@@ -455,24 +391,31 @@ export function createSettingsModal(onSave) {
     fontContainer.appendChild(fontSelect);
     
     // 6. Options (cases à cocher)
-    const optionsContainer = createFormGroup('Options', '#f39c12'); // Orange              //'#9b59b6'); // Violet
+    const optionsContainer = createFormGroup('Options', '#f39c12'); // Orange
+    const optionsLabel = optionsContainer.querySelector('.form-group-label');
+    optionsLabel.style.padding = '1px 6px';
+    optionsLabel.style.lineHeight = '2'; 
+    optionsLabel.style.marginTop = '-35px'; 
+
     
     // Container pour les cases à cocher
     const checkboxesContainer = document.createElement('div');
     checkboxesContainer.style.display = 'flex';
     checkboxesContainer.style.flexDirection = 'column';
-    checkboxesContainer.style.gap = '5px';
+    checkboxesContainer.style.gap = '1px'; // Encore réduit de 2px à 1px
     checkboxesContainer.style.backgroundColor = 'white';
-    checkboxesContainer.style.padding = '6px';
+    checkboxesContainer.style.padding = '3px'; // Encore réduit de 4px à 3px
     checkboxesContainer.style.borderRadius = '4px';
-    checkboxesContainer.style.width = '115px';
+    checkboxesContainer.style.width = '120px';
     
     // Case à cocher "Contour de la forme"
     const isShapeBorderLabel = document.createElement('label');
     isShapeBorderLabel.style.display = 'flex';
     isShapeBorderLabel.style.alignItems = 'center';
-    isShapeBorderLabel.style.gap = '8px';
+    isShapeBorderLabel.style.gap = '5px'; // Réduit de 8px à 5px
     isShapeBorderLabel.style.cursor = 'pointer';
+    isShapeBorderLabel.style.fontSize = '12px'; // Ajout pour réduire la taille du texte
+    isShapeBorderLabel.style.height = '18px'; // Ajout pour réduire la hauteur
     
     const isShapeBorderCheckbox = document.createElement('input');
     isShapeBorderCheckbox.type = 'checkbox';
@@ -486,8 +429,10 @@ export function createSettingsModal(onSave) {
     const isThreeZonesLabel = document.createElement('label');
     isThreeZonesLabel.style.display = 'flex';
     isThreeZonesLabel.style.alignItems = 'center';
-    isThreeZonesLabel.style.gap = '8px';
+    isThreeZonesLabel.style.gap = '5px'; // Réduit de 8px à 5px
     isThreeZonesLabel.style.cursor = 'pointer';
+    isThreeZonesLabel.style.fontSize = '12px'; // Ajout pour réduire la taille du texte
+    isThreeZonesLabel.style.height = '18px'; // Ajout pour réduire la hauteur
     
     const isThreeZonesCheckbox = document.createElement('input');
     isThreeZonesCheckbox.type = 'checkbox';
@@ -496,18 +441,15 @@ export function createSettingsModal(onSave) {
     
     isThreeZonesLabel.appendChild(isThreeZonesCheckbox);
     isThreeZonesLabel.appendChild(document.createTextNode('3 zones'));
-    
-
-
-
-
 
     // Case à cocher "Rotation des mots"
     const wordRotationLabel = document.createElement('label');
     wordRotationLabel.style.display = 'flex';
     wordRotationLabel.style.alignItems = 'center';
-    wordRotationLabel.style.gap = '8px';
+    wordRotationLabel.style.gap = '5px'; // Réduit de 8px à 5px
     wordRotationLabel.style.cursor = 'pointer';
+    wordRotationLabel.style.fontSize = '12px'; // Ajout pour réduire la taille du texte
+    wordRotationLabel.style.height = '18px'; // Ajout pour réduire la hauteur
 
     const wordRotationCheckbox = document.createElement('input');
     wordRotationCheckbox.type = 'checkbox';
@@ -521,8 +463,10 @@ export function createSettingsModal(onSave) {
     const movingRotationLabel = document.createElement('label');
     movingRotationLabel.style.display = 'flex';
     movingRotationLabel.style.alignItems = 'center';
-    movingRotationLabel.style.gap = '8px';
+    movingRotationLabel.style.gap = '5px'; // Réduit de 8px à 5px
     movingRotationLabel.style.cursor = 'pointer';
+    movingRotationLabel.style.fontSize = '12px'; // Ajout pour réduire la taille du texte
+    movingRotationLabel.style.height = '18px'; // Ajout pour réduire la hauteur
 
     const movingRotationCheckbox = document.createElement('input');
     movingRotationCheckbox.type = 'checkbox';
@@ -542,15 +486,18 @@ export function createSettingsModal(onSave) {
     // Bouton pour appliquer les paramètres
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Appliquer';
-    saveButton.style.padding = '10px 15px';
+    saveButton.style.padding = '5px 10px';
     saveButton.style.backgroundColor = '#4CAF50';
     saveButton.style.color = 'white';
     saveButton.style.fontWeight = 'bold';
     saveButton.style.border = 'none';
     saveButton.style.borderRadius = '4px';
     saveButton.style.cursor = 'pointer';
-    saveButton.style.width = '100%';
-    saveButton.style.marginTop = '15px';
+    saveButton.style.width = '90px';
+    saveButton.style.fontSize = '12px';
+    saveButton.style.position = 'absolute';
+    saveButton.style.bottom = '52px';
+    saveButton.style.left = '15px'; // Positionné à gauche
     
     saveButton.addEventListener('click', () => {
         applyChanges();
@@ -565,6 +512,9 @@ export function createSettingsModal(onSave) {
     paramContainer.appendChild(paddingContainer);
     paramContainer.appendChild(fontContainer);
     paramContainer.appendChild(optionsContainer);
+    
+    // Ajouter un peu de marge en bas pour laisser de la place au bouton
+    paramContainer.style.marginBottom = '35px';
     
     // Assemblage de la modale
     content.appendChild(closeButton);
@@ -582,20 +532,21 @@ function createFormGroup(label, color) {
     group.style.display = 'flex';
     group.style.alignItems = 'center';
     group.style.justifyContent = 'space-between';
-    group.style.gap = '10px';
-    group.style.marginBottom = '5px';
+    group.style.gap = '6px'; // Encore réduit de 8px à 6px
+    group.style.marginBottom = '2px'; // Encore réduit de 3px à 2px
     
     const labelElement = document.createElement('div');
+    labelElement.classList.add('form-group-label'); // Ajoute une classe
     labelElement.innerHTML = label.replace('\n', '<br>');
     labelElement.style.fontWeight = 'bold';
-    labelElement.style.fontSize = '12px';
+    labelElement.style.fontSize = '11px';
     labelElement.style.color = 'white';
     labelElement.style.backgroundColor = color || '#8e44ad';
-    labelElement.style.padding = '5px 8px';
+    labelElement.style.padding = '2px 6px'; // Réduit le padding vertical de 4px à 2px
     labelElement.style.borderRadius = '4px';
     labelElement.style.width = '80px';
     labelElement.style.textAlign = 'center';
-    labelElement.style.lineHeight = '1.2';
+    labelElement.style.lineHeight = '1';  // Réduit de 1.1 à 1
     
     group.appendChild(labelElement);
     return group;
@@ -606,24 +557,24 @@ function createNumberInput(defaultValue, onChange) {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.alignItems = 'center';
-    container.style.gap = '5px';
+    container.style.gap = '4px'; // Réduit de 5px à 4px
     container.style.backgroundColor = 'white';
-    container.style.padding = '4px';
+    container.style.padding = '3px'; // Réduit de 4px à 3px
     container.style.borderRadius = '4px';
     container.style.width = '120px';
     
     // Bouton - (en bleu)
     const minusButton = document.createElement('button');
     minusButton.textContent = '-';
-    minusButton.style.width = '22px';
-    minusButton.style.height = '22px';
+    minusButton.style.width = '20px'; // Réduit de 22px à 20px
+    minusButton.style.height = '20px'; // Réduit de 22px à 20px
     minusButton.style.backgroundColor = '#4361ee'; // Bleu
     minusButton.style.color = 'white';
     minusButton.style.border = 'none';
     minusButton.style.borderRadius = '50%';
     minusButton.style.fontSize = '14px';
     minusButton.style.lineHeight = '1';
-    minusButton.style.paddingBottom = '2px'; // Ajustement pour centrer le signe -
+    minusButton.style.paddingBottom = '2px';
     minusButton.style.display = 'flex';
     minusButton.style.justifyContent = 'center';
     minusButton.style.alignItems = 'center';
@@ -633,19 +584,20 @@ function createNumberInput(defaultValue, onChange) {
     const input = document.createElement('input');
     input.type = 'number';
     input.value = defaultValue;
-    input.style.padding = '4px';
+    input.style.padding = '3px'; // Réduit de 4px à 3px
     input.style.borderRadius = '4px';
     input.style.border = '1px solid #ddd';
-    input.style.width = '50px'; // Encore plus réduit
+    input.style.width = '50px';
+    input.style.height = '16px'; // Ajout pour réduire la hauteur
     input.style.textAlign = 'center';
-    input.style.fontSize = '12px';
-    input.style.marginLeft = '6px'; // Décalage vers la droite
+    input.style.fontSize = '11px'; // Réduit de 12px à 11px
+    input.style.marginLeft = '6px';
     
     // Bouton +
     const plusButton = document.createElement('button');
     plusButton.textContent = '+';
-    plusButton.style.width = '22px';
-    plusButton.style.height = '22px';
+    plusButton.style.width = '20px'; // Réduit de 22px à 20px
+    plusButton.style.height = '20px'; // Réduit de 22px à 20px
     plusButton.style.backgroundColor = '#4CAF50';
     plusButton.style.color = 'white';
     plusButton.style.border = 'none';
@@ -684,6 +636,3 @@ function createNumberInput(defaultValue, onChange) {
     
     return container;
 }
-
-
-

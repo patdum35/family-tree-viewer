@@ -68,7 +68,7 @@ export class HistoricDatePicker {
         modalContent.style.width = '70%';
         modalContent.style.maxWidth = '220px';
         modalContent.style.textAlign = 'center';
-        modalContent.style.maxHeight = '70vh';
+        modalContent.style.maxHeight = '100vh';
         modalContent.style.overflowY = 'auto';
         modalContent.style.overflowX = 'hidden'; // Masquer l'ascenseur horizontal
         modalContent.style.boxSizing = 'border-box';
@@ -77,7 +77,7 @@ export class HistoricDatePicker {
         const modalHeader = document.createElement('div');
         modalHeader.style.backgroundColor = 'rgba(63, 81, 181, 0.8)'; // Bleu semi-transparent
         modalHeader.style.color = 'white';
-        modalHeader.style.padding = '8px';
+        modalHeader.style.padding = '8px 8px'
         modalHeader.style.margin = '-12px -12px 12px -12px';
         modalHeader.style.borderRadius = '8px 8px 0 0';
         modalHeader.style.display = 'flex';
@@ -116,8 +116,8 @@ export class HistoricDatePicker {
         const modalFooter = document.createElement('div');
         modalFooter.style.display = 'flex';
         modalFooter.style.justifyContent = 'space-between';
-        modalFooter.style.marginTop = '10px';
-        modalFooter.style.paddingTop = '10px';
+        modalFooter.style.marginTop = '6px';
+        modalFooter.style.paddingTop = '6px';
         modalFooter.style.borderTop = '1px solid rgba(224, 224, 224, 0.5)'; // Bordure semi-transparente
         
         const cancelButton = document.createElement('button');
@@ -221,6 +221,27 @@ export class HistoricDatePicker {
         const modal = document.getElementById(this.modalId);
         modal.style.display = 'flex';
         
+
+    
+        // Vérifier la hauteur de l'écran
+        if (window.innerHeight < 500) {
+            // Si la hauteur est inférieure à 500px, positionner la modale en haut
+            modal.style.alignItems = 'flex-start';
+            modal.style.paddingTop = '10px'; // Ajouter un petit espace en haut
+
+            // Optimisation supplémentaire pour les petits écrans
+            const modalContent = modal.querySelector('div'); // Premier div enfant (le contenu)
+            if (modalContent) {
+                modalContent.style.padding = '8px'; // Réduire davantage le padding sur petit écran
+            }
+
+        } else {
+            // Sinon, conserver le centrage vertical
+            modal.style.alignItems = 'center';
+            modal.style.paddingTop = '0';
+        }
+
+
         // Afficher la vue des siècles par défaut
         this.showCenturyView();
     }
@@ -257,7 +278,7 @@ export class HistoricDatePicker {
         gridContainer.style.display = 'grid';
         gridContainer.style.gridTemplateColumns = 'repeat(5, 1fr)';
         gridContainer.style.gap = '4px'; //'4px';
-        gridContainer.style.marginBottom = '8px';
+        gridContainer.style.marginBottom = '4px';
         gridContainer.style.width = '100%'; // S'assurer que la grille prend 100% de la largeur
         gridContainer.style.boxSizing = 'border-box'; // Inclure padding et bordure dans la largeur
         gridContainer.style.overflowX = 'hidden'; // Masquer tout débordement horizontal
@@ -282,7 +303,7 @@ export class HistoricDatePicker {
 
             gridItem.style.maxWidth = '35px'; // Limite la taille maximum
             gridItem.style.margin = '0 auto'; // Centre les ronds horizontalement
-            gridItem.style.padding = '1'; // Supprime tout padding
+            gridItem.style.padding = '0'; // Supprime tout padding
 
             
             // Style pour les siècles
