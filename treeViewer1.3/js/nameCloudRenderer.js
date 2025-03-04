@@ -1,19 +1,12 @@
-// import * as d3 from 'd3';
-// import 'd3-cloud';
-import { state, showToast, displayPersonDetails } from './main.js';
-import { startAncestorAnimation } from './treeAnimation.js';
+import { state, showToast} from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
 import { hasDateInRange, extractYear,  cleanProfession, cleanLocation,  } from './nameCloudUtils.js';
 import { showPersonsList } from './nameCloudInteractions.js'
 import { updateTitleText } from './nameCloudUI.js'
+import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js'
 
-
-
-let horizontalOffset = 0;
-let verticalOffset = 0;
 let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
-
 
 function setupZoom(svg, width, height) {
     const textGroup = svg.append('g')
@@ -57,11 +50,6 @@ function setupZoom(svg, width, height) {
     
     return { zoom, textGroup };
 }
-
-
-
-
-
 
 let resizeTimer;
 let isResizing = false;
@@ -118,129 +106,101 @@ function handleCompleteResize() {
     const modalContainer = document.querySelector('.modal-container');
     
     if (!svgElement || !modalContainer || !nameCloudState.currentNameData || !nameCloudState.currentConfig) {
-        // handleQuickResize();
         return;
     }
-    
-    // Obtenir les dimensions actuelles et les nouvelles
-    const oldWidth = nameCloudState.SVG_width;
-    const oldHeight = nameCloudState.SVG_height;
     
     // Adapter les dimensions du SVG
     const newScreenW = window.innerWidth;
     const newScreenH = window.innerHeight;
 
     // Déterminer les nouvelles dimensions du SVG
-    let newWidth = nameCloudState.SVG_width;
-    let newHeight = nameCloudState.SVG_height;
-    
-    // Logique pour déterminer les dimensions
-    newWidth = newScreenW;
-    newHeight = newScreenH;
+    let newWidth = newScreenW;
+    let newHeight = newScreenH;
 
-    // for mobile phone
+    // Mettre à jour la détection de mobile
     nameCloudState.mobilePhone = false;
-    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
-    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400) nameCloudState.mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600) nameCloudState.mobilePhone = 2;
 
-    if (nameCloudState.mobilePhone)
-        { newWidth = newScreenW + 50; newHeight = newScreenH + 50; }
+    if (nameCloudState.mobilePhone) { 
+        newWidth = newScreenW + 50; 
+        newHeight = newScreenH + 50; 
+    }
 
-
-    // Mettre à jour les variables globales pour cohérence
+    // Mettre à jour les variables globales
     nameCloudState.SVG_width = newWidth;
     nameCloudState.SVG_height = newHeight;
 
-
-    // Nettoyer le SVG existant
-    d3.select('#name-cloud-svg').selectAll('*').remove();
+    // Initialiser le SVG et lancer le layout
+    const layout = initializeCloudAndLayout(
+        svgElement,
+        nameCloudState.currentNameData,
+        nameCloudState.currentConfig,
+        nameCloudState.SVG_width,
+        nameCloudState.SVG_height
+    );
     
-    // Recréer le SVG avec les nouvelles dimensions
-    const svg = d3.select('#name-cloud-svg')
-        .attr('width', nameCloudState.SVG_width)
-        .attr('height', nameCloudState.SVG_height);
-        
-    // Rectangle de fond
-    svg.append('rect')
-        .attr('width', nameCloudState.SVG_width)
-        .attr('height', nameCloudState.SVG_height)
-        .attr('fill', 'transparent')
-        .style('touch-action', 'pan-x pan-y pinch-zoom')
-        .lower();
-        
-    // Configurer le zoom et créer le nouveau textGroup
-    const { zoom, textGroup } = setupZoom(svg, nameCloudState.SVG_width, nameCloudState.SVG_height);
-    
-    // Recalculer les échelles pour les nouvelles dimensions
-    const fontScale = createFontScale(nameCloudState.currentNameData);
-    const colorPalette = createColorPalette();
-    const color = d3.scaleOrdinal(colorPalette);
-    
-    // Relancer uniquement le layout pour repositionner les mots
-    const layout = d3.layout.cloud()
-        .size([nameCloudState.SVG_width - 20, nameCloudState.SVG_height - 20])
-        .words(nameCloudState.currentNameData.map(d => ({
-            text: d.text,
-            size: fontScale(d.size),
-            originalSize: d.size
-        })))
-        // .padding(1)
-        .padding(nameCloudState.mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
-        .rotate(0)
-        .fontSize(d => d.size)
-        .spiral('rectangular')
-        .random(() => 0.5)
-        .canvas(function() {
-            const canvas = document.createElement('canvas');
-            canvas.setAttribute('willReadFrequently', 'true');
-            return canvas;
-        })
-        .on('end', words => {
-            // Redessiner le nuage avec les mots repositionnés
-            drawNameCloud(svg, textGroup, words, color, nameCloudState.currentConfig);
-        });
-        
     layout.start();
     
     // Ajuster les offsets pour le centrage
     centerCloudNameContainer();
-
-    // Mettre à jour le titre avec les statistiques de placement
-    const titleElement = document.getElementById('name-cloud-title');
-    if (titleElement) {
-        // Mettre à jour le titre avec les statistiques
-        updateTitleText(titleElement, nameCloudState.currentConfig);
-    }
-
 }
-
-
-
-
-
-
-
-
-
-
-
 
 function drawNameCloud(svg, textGroup, words, color, config) {
     const sortedWords = words.sort((a, b) => b.size - a.size);
     
+    // Fonction pour obtenir la rotation d'un mot
+    function getWordRotation(d) {
+        if (!nameCloudState.wordRotation) return 0;
+        
+        // Angles aléatoires entre -20 et +20 degrés
+        return Math.floor(Math.random() * 41) - 20;
+    }
+
+
+    // D'abord, créez les textes avec une rotation initiale
     const texts = textGroup.selectAll('text')
         .data(sortedWords)
         .join('text')
         .attr('class', 'name-text')
         .style('font-size', d => `${d.size}px`)
-        .style('font-family', 'Arial')
+        .style('font-family', nameCloudState.fontFamily)
         .style('font-weight', 'bold')
         .style('fill', (d, i) => color(i % color.range().length))
-        .attr('transform', d => `translate(${d.x},${d.y})`)
+        .attr('transform', d => `translate(${d.x},${d.y}) rotate(${getWordRotation(d)})`)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .style('cursor', 'pointer')
         .text(d => d.text);
+
+
+    // Si l'animation est activée, démarrer l'animation de rotation
+    if (nameCloudState.movingRotation) {
+        animateRotation(texts);
+    }
+
+    // Fonction pour animer la rotation des mots
+    function animateRotation(textElements) {
+        texts.transition()
+            .duration(2000) // Durée de l'animation en millisecondes
+            .attr('transform', d => {
+                const angle = Math.floor(Math.random() * 31) - 15; // Rotation aléatoire
+                return `translate(${d.x},${d.y}) rotate(${angle})`;
+            })
+            .on('end', function() {
+                // Animation continue (facultatif)
+                setInterval(() => {
+                    d3.select(this)
+                        .transition()
+                        .duration(2000)
+                        .attr('transform', d => {
+                            const newAngle = Math.floor(Math.random() * 31) - 15;
+                            return `translate(${d.x},${d.y}) rotate(${newAngle})`;
+                        });
+                }, 3000); // Intervalle entre les animations
+            });
+    }
+
 
     const getClickDimensions = (d) => {
         const clickWidth = d.size > 30 ? d.width/4 : d.width/2;
@@ -404,7 +364,7 @@ function drawNameCloud(svg, textGroup, words, color, config) {
             tempText = tempGroup.append('text')
                 .attr('class', 'temp-text')
                 .style('font-size', `${props.size * 1.2}px`)
-                .style('font-family', 'Arial')
+                .style('font-family', nameCloudState.fontFamily) // Utiliser la police personnalisée
                 .style('font-weight', 'bold')
                 .style('fill', '#e53e3e')
                 .attr('text-anchor', 'middle')
@@ -429,12 +389,12 @@ function drawNameCloud(svg, textGroup, words, color, config) {
                 const y = parseFloat(coords[2]);
                 
                 tempGroup = svg.append('g')
-                    .attr('transform', `translate(${svg.attr('width') / 2 + horizontalOffset}, ${svg.attr('height') / 2 + verticalOffset})`);
+                    .attr('transform', `translate(${svg.attr('width') / 2 }, ${svg.attr('height') / 2 })`);
                     
                 tempText = tempGroup.append('text')
                     .attr('class', 'temp-text')
                     .style('font-size', `${props.size * 1.2}px`)
-                    .style('font-family', 'Arial')
+                    .style('font-family', nameCloudState.fontFamily) // Utiliser la police personnalisée
                     .style('font-weight', 'bold')
                     .style('fill', '#e53e3e')
                     .attr('transform', `translate(${x}, ${y})`) // Utiliser les coordonnées exactes
@@ -445,12 +405,12 @@ function drawNameCloud(svg, textGroup, words, color, config) {
             } else {
                 // Fallback: utiliser la transformation originale
                 tempGroup = svg.append('g')
-                    .attr('transform', `translate(${svg.attr('width') / 2 + horizontalOffset}, ${svg.attr('height') / 2 + verticalOffset})`);
+                    .attr('transform', `translate(${svg.attr('width') / 2 }, ${svg.attr('height') / 2 })`);
                     
                 tempText = tempGroup.append('text')
                     .attr('class', 'temp-text')
                     .style('font-size', `${props.size * 1.2}px`)
-                    .style('font-family', 'Arial')
+                    .style('font-family', nameCloudState.fontFamily) // Utiliser la police personnalisée
                     .style('font-weight', 'bold')
                     .style('fill', '#e53e3e')
                     .attr('transform', originalTransform)
@@ -500,228 +460,22 @@ function drawNameCloud(svg, textGroup, words, color, config) {
         .text(d => `${d.text}: ${d.originalSize} occurrences`);
 }
 
-
-// export function createNameCloud(nameData, config) {
-//     // console.log("Création du nuage de mots avec données:", nameData);
-//     console.log("Nombre de mots:", nameData.length);
-
-//     if (!nameData || nameData.length === 0) {
-//         console.error("Aucune donnée pour créer le nuage de mots");
-//         return React.createElement('div', {}, "Pas de données disponibles");
-//     }
-
-//     // Utiliser requestAnimationFrame pour s'assurer que le DOM est prêt
-//     requestAnimationFrame(() => {
-//         const width = window.innerWidth;
-//         const height = window.innerHeight;
-
-//         const svg = d3.select('#name-cloud-svg')
-//             .attr('width', width)
-//             .attr('height', height);
-
-//         svg.selectAll('*').remove();
-
-//         // Rectangle de fond transparent
-//         svg.append('rect')
-//             .attr('width', width)
-//             .attr('height', height)
-//             .attr('fill', 'transparent')
-//             .style('touch-action', 'pan-x pan-y pinch-zoom')
-//             .lower();
-
-//         // MODIFICATION ICI : Appeler setupZoom
-//         const { zoom, textGroup } = setupZoom(svg, width, height);
-
-//         const fontScale = createFontScale(nameData);
-//         const colorPalette = createColorPalette();
-//         const color = d3.scaleOrdinal(colorPalette);
-
-//         const layout = d3.layout.cloud()
-//             .size([width - 20, height - 20])
-//             .words(nameData.map(d => ({
-//                 text: d.text,
-//                 size: fontScale(d.size),
-//                 originalSize: d.size
-//             })))
-//             .padding(1)
-//             .rotate(0)
-//             .fontSize(d => d.size)
-//             .spiral('rectangular')
-//             .random(() => 0.5)
-//             .on('end', words => {
-//                 // console.log("Mots générés:", words);
-//                 nameCloudState.totalWords = nameData.length;
-//                 nameCloudState.placedWords = words.length;
-//                 // MODIFICATION ICI : Appeler drawNameCloud
-//                 drawNameCloud(svg, textGroup, words, color, config);
-
-//                 // Mettre à jour le titre avec les statistiques de placement
-//                 const titleElement = document.getElementById('name-cloud-title');
-//                 if (titleElement) {
-//                     // Mettre à jour le titre avec les statistiques
-//                     updateTitleText(titleElement, config);
-//                 }
-
-
-//             });
-
-//         layout.start();
-//     });
-
-//     return React.createElement('div', { 
-//         className: 'bg-white p-4 rounded-lg shadow-lg',
-//         style: { 
-//             touchAction: 'pan-x pan-y pinch-zoom',
-//             userSelect: 'none'
-//         }
-//     },
-//         React.createElement('div', { 
-//             className: 'relative w-full ',
-//             style: { 
-//                 touchAction: 'pan-x pan-y pinch-zoom',
-//                 userSelect: 'none'
-//             }
-//         },
-//             React.createElement('svg', {
-//                 id: 'name-cloud-svg',
-//                 className: 'w-full h-full',
-//                 style: { 
-//                     backgroundColor: '#f7fafc',
-//                     touchAction: 'pan-x pan-y pinch-zoom',
-//                     userSelect: 'none'
-//                 }
-//             })
-//         )
-//     );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const NameCloud = ({ nameData, config }) => {
     React.useEffect(() => {
         if (!nameData || nameData.length === 0) return;
 
-        d3.select('#name-cloud-svg').selectAll('*').remove();
-
-        const width = nameCloudState.SVG_width;
-        const height = nameCloudState.SVG_height;
-
-        const svg = d3.select('#name-cloud-svg')
-            .attr('width', width)
-            .attr('height', height);
-
-        // Rectangle de fond transparent
-        svg.append('rect')
-            .attr('width', width)
-            .attr('height', height)
-            .attr('fill', 'transparent')
-            .style('touch-action', 'pan-x pan-y pinch-zoom')
-            .lower();
-
-        // Configurer le zoom et créer le textGroup
-        const { zoom, textGroup } = setupZoom(svg, width, height);
-
-        // Activer les événements de zoom
-        svg.call(zoom)
-           .on('wheel', (event) => event.preventDefault(), { passive: false })
-           .on('touchstart', (event) => {
-               if (event.touches.length > 1) {
-                   event.preventDefault();
-               }
-           }, { passive: false })
-           .on('touchmove', (event) => {
-               if (event.touches.length > 1) {
-                   event.preventDefault();
-               }
-           }, { passive: false });
-
-        const fontScale = createFontScale(nameData);
-        const colorPalette = createColorPalette();
-        const color = d3.scaleOrdinal(colorPalette);
-
-        const layout = d3.layout.cloud()
-            .size([width - 20, height - 20])
-            .words(nameData.map(d => ({
-                text: d.text,
-                size: fontScale(d.size),
-                originalSize: d.size
-            })))
-            // .padding(1)
-            .padding(nameCloudState.mobilePhone ? 0.5 : 1) // Réduire le padding sur mobile
-            .rotate(0)
-            .fontSize(d => d.size)
-            .spiral('rectangular')
-            .random(() => 0.5)
-            .canvas(function() {
-                const canvas = document.createElement('canvas');
-                canvas.setAttribute('willReadFrequently', 'true');
-                return canvas;
-            })
-            .on('end', words => {
-
-                nameCloudState.totalWords = nameData.length;
-                nameCloudState.placedWords = words.length;
-                const percentPlaced = Math.round((nameCloudState.placedWords / nameCloudState.totalWords) * 100);
-                
-                console.log(`Mots placés: ${nameCloudState.placedWords}/${nameCloudState.totalWords} (${percentPlaced}%)`);
-                
-
-
-                // Calculer la boîte englobante de tous les mots
-                const bbox = words.reduce((acc, word) => {
-                    if (!acc) return { 
-                        minX: word.x - word.width/2, 
-                        maxX: word.x + word.width/2, 
-                        minY: word.y - word.height/2, 
-                        maxY: word.y + word.height/2 
-                    };
-                    
-                    return {
-                        minX: Math.min(acc.minX, word.x - word.width/2),
-                        maxX: Math.max(acc.maxX, word.x + word.width/2),
-                        minY: Math.min(acc.minY, word.y - word.height/2),
-                        maxY: Math.max(acc.maxY, word.y + word.height/2)
-                    };
-                }, null);
-
-                if (bbox) {
-                    const bboxWidth = bbox.maxX - bbox.minX;
-                    const bboxHeight = bbox.maxY - bbox.minY;
-                    // const centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                    // const centerY = height / 2 - (bbox.minY + bboxHeight/2);
-                    const centerX = width / 2 - (bbox.minX + bboxWidth/2) + horizontalOffset;
-                    const centerY = height / 2 - (bbox.minY + bboxHeight/2) + verticalOffset;
-
-                    // Ajuster la transformation du groupe de texte pour centrer
-                    textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
-                }
-
-
-
-                drawNameCloud(svg, textGroup, words, color, config);
-
-                // Mettre à jour le titre avec les statistiques de placement
-                const titleElement = document.getElementById('name-cloud-title');
-                if (titleElement) {
-                    // Mettre à jour le titre avec les statistiques
-                    updateTitleText(titleElement, config);
-                }
-
-
-
-            });
-
+        const svgElement = document.getElementById('name-cloud-svg');
+        if (!svgElement) return;
+        
+        // Initialiser le SVG et lancer le layout
+        const layout = initializeCloudAndLayout(
+            svgElement,
+            nameData,
+            config,
+            nameCloudState.SVG_width,
+            nameCloudState.SVG_height
+        );
+        
         layout.start();
 
     }, [nameData]);
@@ -749,27 +503,9 @@ export const NameCloud = ({ nameData, config }) => {
                     userSelect: 'none'
                 }
             })
-
         )
     );
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 function createColorPalette() {
     return [
@@ -790,37 +526,35 @@ function createFontScale(nameData) {
     const wordCount = nameData.length;
     const maxCount = d3.max(nameData, d => d.size) || 1;
     const minCount = d3.min(nameData, d => d.size) || 1;
-    
+
+    // Récupérer explicitement les valeurs avec fallback
+    let minFontSize = nameCloudState.minFontSize || 10;
+    let maxFontSize = nameCloudState.maxFontSize || 45;
+
+
     let scale;
     
     if(wordCount < 70) {
-        const minFontSize = ((wordCount < 20) && !nameCloudState.mobilePhone) ? 62 : wordCount < 60 ? 20 : 14;
-        const maxFontSize = ((wordCount < 20) && !nameCloudState.mobilePhone) ? 88 :  wordCount < 60 ? 48 : 30;
+        minFontSize = ((wordCount < 20) && !nameCloudState.mobilePhone) ? minFontSize*6 + 2 : wordCount < 60 ? minFontSize*2 : minFontSize + 4;
+        maxFontSize = ((wordCount < 20) && !nameCloudState.mobilePhone) ? Math.max(1,maxFontSize*2 -2) :  wordCount < 60 ? maxFontSize +3 : parseInt(maxFontSize*2/3);
         
         scale = d3.scaleLinear()
             .domain([minCount, maxCount])
             .range([minFontSize, maxFontSize]);
-        // console.log("debug font log ", state.mobilePhone, wordCount, maxCount, minCount,   minFontSize, maxFontSize, scale, scale.clamp(true))
+        console.log("Font choice: mobile, linear ", nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=",minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
 
     } else {
-        if (!state.mobilePhone) {
-            scale = d3.scaleLog()
-                .domain([1, d3.max(nameData, d => d.size)])
-                .range([10, 45])
-        } else {
-            scale = d3.scaleLog()
-                .domain([1, d3.max(nameData, d => d.size)])
-                .range([5, 22])
+        if (nameCloudState.mobilePhone) {
+            minFontSize = parseInt(minFontSize/2);
+            maxFontSize = parseInt(maxFontSize/2);
         }
-
-        // console.log("debug font log ", state.mobilePhone, wordCount, maxCount, minCount, scale, scale.clamp(true))
+        scale = d3.scaleLog()
+        .domain([1, d3.max(nameData, d => d.size)])
+        .range([minFontSize, maxFontSize]);
+        console.log("Font choice: PC, log ", nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=", minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
     }
-
-
-
     return scale.clamp(true);
 }
-
 
 export function centerCloudNameContainer() {         
 
@@ -831,5 +565,131 @@ export function centerCloudNameContainer() {
         nameCloudContainer.style.marginLeft = containerHorizontalOffset + 'px';
         nameCloudContainer.style.marginTop = containerVerticalOffset + 'px';
     }
-    // console.log( "\n******* centerCloudNameContainer with offX", containerHorizontalOffset, ", offY=", containerVerticalOffset, ", center map with offX=", horizontalOffset," offY=" , verticalOffset, ", screen W=",window.innerWidth , " H=",window.innerHeight, "SVG w=", SVG_width, "h=",SVG_height)
+}
+
+// Fonction commune pour initialiser le SVG et créer le nuage de mots
+function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
+    // Nettoyer le SVG existant
+    d3.select(svgElement).selectAll('*').remove();
+    
+    // Initialiser le SVG avec les dimensions
+    const svg = d3.select(svgElement)
+        .attr('width', width)
+        .attr('height', height);
+        
+    // Rectangle de fond transparent
+    svg.append('rect')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'transparent')
+        .style('touch-action', 'pan-x pan-y pinch-zoom')
+        .lower();
+        
+    // Configurer le zoom et créer le textGroup
+    const { zoom, textGroup } = setupZoom(svg, width, height);
+
+    // Ajouter les formes concentriques si activé
+    if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+        generateConcentricShapes(textGroup, nameCloudState.cloudShape, width, height);
+    }
+
+    // Activer les événements de zoom
+    svg.call(zoom)
+       .on('wheel', (event) => event.preventDefault(), { passive: false })
+       .on('touchstart', (event) => {
+           if (event.touches.length > 1) {
+               event.preventDefault();
+           }
+       }, { passive: false })
+       .on('touchmove', (event) => {
+           if (event.touches.length > 1) {
+               event.preventDefault();
+           }
+       }, { passive: false });
+
+    // Préparer les échelles et couleurs
+    const fontScale = createFontScale(nameData);
+    const colorPalette = createColorPalette();
+    const color = d3.scaleOrdinal(colorPalette);
+    
+    // Calculer le padding approprié
+    let padding = 1;
+    if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) {
+        padding = nameCloudState.mobilePhone ? nameCloudState.padding/8 : nameCloudState.padding/4;
+    }
+
+    // Créer les données pour le layout
+    const wordData = nameData.map(d => ({
+        text: d.text,
+        size: fontScale(d.size),
+        originalSize: d.size
+    }));
+
+    // Initialiser le layout
+    const layout = d3.layout.cloud()
+        .size([width - 20, height - 20])
+        .words(wordData)
+        .padding(padding)
+        .rotate(0)
+        .fontSize(d => d.size)
+        .spiral(nameCloudState.cloudShape === 'rectangle' ? 'rectangular' : 'archimedean')
+        .random(() => 0.5)
+        .canvas(function() {
+            const canvas = document.createElement('canvas');
+            canvas.setAttribute('willReadFrequently', 'true');
+            return canvas;
+        })
+        .on('end', words => {
+            let placedWords;
+            
+            if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+                // Utiliser la disposition en forme personnalisée
+                placedWords = placeWordsInShape(words, nameCloudState.cloudShape, width*2/3, height*2/3);
+            } else {
+                // Utiliser la disposition d'origine
+                placedWords = words;
+                
+                // Calculer la boîte englobante de tous les mots pour le centrage
+                const bbox = words.reduce((acc, word) => {
+                    if (!acc) return { 
+                        minX: word.x - word.width/2, 
+                        maxX: word.x + word.width/2, 
+                        minY: word.y - word.height/2, 
+                        maxY: word.y + word.height/2 
+                    };
+                    
+                    return {
+                        minX: Math.min(acc.minX, word.x - word.width/2),
+                        maxX: Math.max(acc.maxX, word.x + word.width/2),
+                        minY: Math.min(acc.minY, word.y - word.height/2),
+                        maxY: Math.max(acc.maxY, word.y + word.height/2)
+                    };
+                }, null);
+
+                if (bbox) {
+                    const bboxWidth = bbox.maxX - bbox.minX;
+                    const bboxHeight = bbox.maxY - bbox.minY;
+                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+
+                    // Ajuster la transformation du groupe de texte pour centrer
+                    textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+                }
+            }
+
+            // Mettre à jour les statistiques
+            nameCloudState.totalWords = nameData.length;
+            nameCloudState.placedWords = placedWords.length;
+            
+            // Dessiner le nuage avec les mots positionnés
+            drawNameCloud(svg, textGroup, placedWords, color, config);
+            
+            // Mettre à jour le titre avec les statistiques
+            const titleElement = document.getElementById('name-cloud-title');
+            if (titleElement) {
+                updateTitleText(titleElement, config);
+            }
+        });
+    
+    return layout;
 }

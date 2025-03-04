@@ -1,6 +1,7 @@
-import { state, displayPersonDetails, showToast } from './main.js';
+import { state, displayPersonDetails } from './main.js';
 import { startAncestorAnimation } from './treeAnimation.js';
-import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
+import { nameCloudState } from './nameCloud.js'
+import { extractYear } from './nameCloudUtils.js';
 
 export function showPersonsList(name, people, config) {
     const modal = document.createElement('div');
@@ -27,14 +28,28 @@ export function showPersonsList(name, people, config) {
 
     // Titre
     const title = document.createElement('h2');
-    title.textContent = `Liste des personnes (${people.length} personnes)`;
+    title.textContent = config.type === 'prenoms' ? 
+        `Personnes avec le prénom "${name}" (${people.length} personnes)` :
+        config.type === 'noms' ?
+            `Personnes avec le nom "${name}" (${people.length} personnes)` :
+            config.type === 'professions' ? 
+                `Personnes avec la profession "${name}" (${people.length} personnes)` :
+                config.type === 'duree_vie' ? 
+                    `Personnes ayant vécu ${name} ans (${people.length} personnes)` :
+                    config.type === 'age_procreation' ?
+                    `Personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
+                        config.type === 'lieux' ?
+                        `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
+                        'Personnes';
+
     title.style.marginBottom = '10px';
     title.style.borderBottom = '1px solid #eee';
     title.style.paddingBottom = '5px';
-    title.style.fontSize = '16px';
+    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px'; 
 
     // Bouton de fermeture
     const closeBtn = document.createElement('button');
+    closeBtn.id = 'person-list-close-button';  // Ajout d'un ID unique
     closeBtn.innerHTML = '×';
     closeBtn.style.position = 'absolute';
     closeBtn.style.right = '10px';
@@ -52,10 +67,44 @@ export function showPersonsList(name, people, config) {
     // Liste des personnes
     const list = document.createElement('div');
     list.style.display = 'grid';
-    list.style.gap = '2px';
-    list.style.fontSize = '14px';
+    list.style.gap = '2px';  // Espacement réduit
+    list.style.fontSize = '14px';  // Taille de police réduite
 
-    people.forEach((person, index) => {
+    // Trier les personnes par date
+    const peopleWithDates = people.map(person => {
+        let date = '';
+        let sortDate = 0;
+        const individual = state.gedcomData.individuals[person.id];
+
+        if (individual) {
+            if (individual.birthDate) {
+                date = `👶🚼 ${individual.birthDate}`;
+                sortDate = extractYear(individual.birthDate) || 0;
+            } else if (individual.deathDate) {
+                date = `✝ ☦ 🏴 ⚰️ ${individual.deathDate}`;
+                sortDate = extractYear(individual.deathDate) || 0;
+            } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
+                for (const famId of individual.spouseFamilies) {
+                    const family = state.gedcomData.families[famId];
+                    if (family && family.marriageDate) {
+                        date = `🔗 💞 ⚭ 💍 ${family.marriageDate}`;
+                        sortDate = extractYear(family.marriageDate) || 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return {
+            name: person.name,
+            id: person.id,  // Assurez-vous d'inclure l'ID ici
+            date: date,
+            sortDate: sortDate
+        };
+    }).sort((a, b) => b.sortDate - a.sortDate);
+
+
+    peopleWithDates.forEach((person, index) => {
         const personDiv = document.createElement('div');
         personDiv.style.padding = '3px 5px';
         personDiv.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : 'white';
@@ -67,10 +116,23 @@ export function showPersonsList(name, people, config) {
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = person.name;
+        nameSpan.style.marginRight = '10px';
+        if (nameCloudState.mobilePhone)
+            {nameSpan.style.fontSize = '12px';} // Taille fixe en pixels
+
+        const dateSpan = document.createElement('span');
+        dateSpan.textContent = person.date;
+        dateSpan.style.color = 'darkblue';
+        dateSpan.style.whiteSpace = 'nowrap';
+        if (nameCloudState.mobilePhone)
+            {dateSpan.style.fontSize = '10px';} // Taille fixe en pixels
 
         personDiv.appendChild(nameSpan);
+        personDiv.appendChild(dateSpan);
 
         personDiv.addEventListener('click', (event) => {
+            console.log('Clicked on person:', person.name, person.id); // Log pour vérifier le clic et l'ID
+
             event.stopPropagation();
             showPersonActions(person, event);
         });
@@ -78,11 +140,14 @@ export function showPersonsList(name, people, config) {
         list.appendChild(personDiv);
     });
 
+
+
     content.appendChild(closeBtn);
     content.appendChild(title);
     content.appendChild(list);
     modal.appendChild(content);
     document.body.appendChild(modal);
+
 
     // Gestion de la touche Échap
     const handleEscape = (e) => {
@@ -94,6 +159,7 @@ export function showPersonsList(name, people, config) {
         }
     };
     document.addEventListener('keydown', handleEscape);
+
 }
 
 export function showPersonActions(person, event) {

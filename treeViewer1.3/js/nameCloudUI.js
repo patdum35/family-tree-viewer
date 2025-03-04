@@ -1,8 +1,8 @@
-import { state, displayPersonDetails, showToast } from './main.js';
+import { state } from './main.js';
 import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
-import { startAncestorAnimation } from './treeAnimation.js';
-import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
+import { createSettingsModal } from './nameCloudSettings.js';
+import { createDateInput } from './dateUI.js';
 
 
 function createModalContainer() {
@@ -74,301 +74,6 @@ function createNameCloudContainer() {
     return nameCloudContainer;
 }
 
-// function createTypeSelect(config) {
-//     const typeSelect = document.createElement('select');
-//     typeSelect.style.padding = '0px';
-//     typeSelect.style.minWidth = '10px';
-//     typeSelect.style.backgroundColor = '#4361ee';
-//     typeSelect.style.color = 'white';
-//     typeSelect.style.border = '1px solid #3f51b5';
-//     typeSelect.style.borderRadius = '3px';
-//     typeSelect.style.appearance = 'none';
-//     typeSelect.style.cursor = 'pointer';
-//     typeSelect.style.fontSize = '14px';
-//     typeSelect.style.fontWeight = 'bold';
-//     typeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-    
-//     typeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-//     typeSelect.style.backgroundRepeat = 'no-repeat';
-//     typeSelect.style.backgroundPosition = 'top 0px right -13px';
-//     typeSelect.style.paddingRight = '0px';
-    
-//     typeSelect.innerHTML = `
-//         <option value="prenoms">Prénom</option>
-//         <option value="noms">Nom</option>
-//         <option value="professions">Métier</option>
-//         <option value="duree_vie">Vie</option>
-//         <option value="age_procreation">Procréat</option>
-//         <option value="lieux">Lieux</option>                    
-//     `;
-//     typeSelect.value = config.type;
-    
-//     typeSelect.addEventListener('mouseover', () => {
-//         typeSelect.style.backgroundColor = '#3a56e8';
-//     });
-//     typeSelect.addEventListener('mouseout', () => {
-//         typeSelect.style.backgroundColor = '#4361ee';
-//     });
-
-    
-//     // Générer un ID unique pour ce sélecteur
-//     const selectId = `type-select-${Date.now()}`;
-//     typeSelect.id = selectId;
-    
-//     // Style pour les options, incluant l'état au survol
-//     const style = document.createElement('style');
-//     style.textContent = `
-//         #${selectId} option {
-//             background-color: #38b000;
-//             color: white;
-//         }
-        
-//         #${selectId} option:hover {
-//             background-color: #2e9800 !important;
-//             color: white !important;
-//         }
-        
-//         #${selectId} option:checked {
-//             background-color: #38b000;
-//             color: white;
-//         }
-//     `;
-//     document.head.appendChild(style);
-
-
-//     return typeSelect;
-// }
-
-function createScopeSelect(config) {
-    const scopeSelect = document.createElement('select');
-    scopeSelect.style.padding = '0px';
-    scopeSelect.style.minWidth = '10px';
-    scopeSelect.style.backgroundColor = '#38b000';
-    scopeSelect.style.color = 'white';
-    scopeSelect.style.border = '1px solid #2d8600';
-    scopeSelect.style.borderRadius = '3px';
-    scopeSelect.style.appearance = 'none';
-    scopeSelect.style.cursor = 'pointer';
-    scopeSelect.style.fontSize = '14px';
-    scopeSelect.style.fontWeight = 'bold';
-    scopeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-    
-    scopeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-    scopeSelect.style.backgroundRepeat = 'no-repeat';
-    scopeSelect.style.backgroundPosition = 'top 0px right -13px';
-    scopeSelect.style.paddingRight = '0px';
-
-    scopeSelect.innerHTML = `
-        <option value="all">Tout</option>
-        <option value="ancestors">Ascend</option>
-        <option value="descendants">Descend</option>
-    `;
-    scopeSelect.value = config.scope || 'all';
-    
-    scopeSelect.addEventListener('mouseover', () => {
-        scopeSelect.style.backgroundColor = '#2e9800';
-    });
-    scopeSelect.addEventListener('mouseout', () => {
-        scopeSelect.style.backgroundColor = '#38b000';
-    });
-    
-    return scopeSelect;
-}
-
-
-
-function createTypeSelect(config) {
-    // Déterminer si nous sommes sur mobile
-    // const isMobile = Math.min(window.innerWidth, window.innerHeight) < 600;
-    
-    // Si nous ne sommes pas sur mobile, utiliser la version d'origine
-    if (!nameCloudState.mobilePhone) {
-        return createStandardTypeSelect(config);
-    }
-    
-    console.log("##########  New Typeselct for MOBILE ##########")
-
-    // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Vie', 'Procréat', 'Lieux'];
-    const typeValues = ['prenoms', 'noms', 'professions', 'duree_vie', 'age_procreation', 'lieux'];
-    
-    // Trouver l'index de l'option actuellement sélectionnée
-    const currentIndex = typeValues.indexOf(config.type);
-    const currentOption = typeOptions[currentIndex >= 0 ? currentIndex : 0];
-    
-    // Couleurs pour le sélecteur personnalisé
-    const colors = {
-        main: '#4361ee',    // Bleu pour le sélecteur
-        options: '#38b000', // Vert pour les options
-        hover: '#2e9800',   // Vert légèrement plus foncé au survol
-        selected: '#266e00' // Vert encore plus foncé pour l'option sélectionnée
-    };
-    
-    // Conteneur principal
-    const selectContainer = document.createElement('div');
-    selectContainer.style.position = 'relative';
-    selectContainer.style.width = '75px';
-    selectContainer.style.height = '25px';
-    
-    // Élément qui simule le select
-    const selectDisplay = document.createElement('div');
-    selectDisplay.style.padding = '4px 6px';
-    selectDisplay.style.border = '1px solid #3f51b5';
-    selectDisplay.style.borderRadius = '3px';
-    selectDisplay.style.backgroundColor = colors.main;
-    selectDisplay.style.color = 'white';
-    selectDisplay.style.cursor = 'pointer';
-    selectDisplay.style.fontSize = '14px';
-    selectDisplay.style.fontWeight = 'bold';
-    selectDisplay.style.display = 'flex';
-    selectDisplay.style.justifyContent = 'space-between';
-    selectDisplay.style.alignItems = 'center';
-    selectDisplay.style.height = '100%';
-    selectDisplay.style.boxSizing = 'border-box';
-    selectDisplay.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-    
-    // Texte affiché
-    const displayText = document.createElement('span');
-    displayText.textContent = currentOption;
-    
-    // Icône de flèche
-    const arrow = document.createElement('span');
-    arrow.innerHTML = '▼';
-    arrow.style.fontSize = '8px';
-    arrow.style.marginLeft = '4px';
-    
-    selectDisplay.appendChild(displayText);
-    selectDisplay.appendChild(arrow);
-    
-    // Conteneur des options (initialement masqué)
-    const optionsContainer = document.createElement('div');
-    optionsContainer.style.position = 'absolute';
-    optionsContainer.style.top = '100%';
-    optionsContainer.style.left = '0';
-    optionsContainer.style.width = '100%';
-    optionsContainer.style.backgroundColor = '#fff';
-    optionsContainer.style.border = '1px solid #ccc';
-    optionsContainer.style.borderRadius = '4px';
-    optionsContainer.style.marginTop = '2px';
-    optionsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    optionsContainer.style.maxHeight = '200px';
-    optionsContainer.style.overflowY = 'auto';
-    optionsContainer.style.zIndex = '1000';
-    optionsContainer.style.display = 'none';
-    
-    // Valeur cachée simulant un vrai select
-    const hiddenSelect = document.createElement('select');
-    hiddenSelect.style.display = 'none';
-    
-    // Créer les options dans le select caché
-    typeValues.forEach((value, index) => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.text = typeOptions[index];
-        if (value === config.type) option.selected = true;
-        hiddenSelect.appendChild(option);
-    });
-    
-    // Ajouter les options visuelles
-    typeOptions.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.style.padding = '8px 10px';
-        optionElement.style.cursor = 'pointer';
-        optionElement.style.backgroundColor = colors.options;
-        optionElement.style.color = 'white';
-        optionElement.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
-        optionElement.textContent = option;
-        
-        // Effet de survol
-        optionElement.addEventListener('mouseover', () => {
-            optionElement.style.backgroundColor = colors.hover;
-        });
-        
-        optionElement.addEventListener('mouseout', () => {
-            optionElement.style.backgroundColor = option === displayText.textContent ? 
-                colors.selected : colors.options;
-        });
-        
-        // Sélection d'une option
-        optionElement.addEventListener('click', () => {
-            displayText.textContent = option;
-            hiddenSelect.value = typeValues[index];
-            optionsContainer.style.display = 'none';
-            arrow.innerHTML = '▼';
-            
-            // Mettre à jour les couleurs des options
-            Array.from(optionsContainer.children).forEach(opt => {
-                opt.style.backgroundColor = colors.options;
-            });
-            optionElement.style.backgroundColor = colors.selected;
-            
-            // Déclencher un événement de changement pour simuler un select natif
-            const event = new Event('change');
-            hiddenSelect.dispatchEvent(event);
-        });
-        
-        // Mettre en évidence l'option actuellement sélectionnée
-        if (option === currentOption) {
-            optionElement.style.backgroundColor = colors.selected;
-        }
-        
-        optionsContainer.appendChild(optionElement);
-    });
-    
-    // Toggle du dropdown
-    selectDisplay.addEventListener('click', () => {
-        const isVisible = optionsContainer.style.display === 'block';
-        optionsContainer.style.display = isVisible ? 'none' : 'block';
-        arrow.innerHTML = isVisible ? '▼' : '▲';
-    });
-    
-    // Fermer le dropdown si on clique ailleurs
-    document.addEventListener('click', (event) => {
-        if (!selectContainer.contains(event.target)) {
-            optionsContainer.style.display = 'none';
-            arrow.innerHTML = '▼';
-        }
-    });
-    
-    // Assembler le tout
-    selectContainer.appendChild(selectDisplay);
-    selectContainer.appendChild(optionsContainer);
-    selectContainer.appendChild(hiddenSelect);
-    
-    // Exposer les événements du select caché sur le conteneur
-    ['change', 'click'].forEach(eventName => {
-        hiddenSelect.addEventListener(eventName, (event) => {
-            const newEvent = new Event(eventName, { bubbles: true });
-            selectContainer.dispatchEvent(newEvent);
-        });
-    });
-    
-    // Méthodes pour simuler le comportement d'un vrai select
-    Object.defineProperty(selectContainer, 'value', {
-        get: function() {
-            return hiddenSelect.value;
-        },
-        set: function(value) {
-            hiddenSelect.value = value;
-            const index = typeValues.indexOf(value);
-            if (index >= 0) {
-                displayText.textContent = typeOptions[index];
-            }
-        }
-    });
-    
-    selectContainer.addEventListener('mouseover', () => {
-        selectDisplay.style.backgroundColor = '#3a56e8';
-    });
-    
-    selectContainer.addEventListener('mouseout', () => {
-        selectDisplay.style.backgroundColor = '#4361ee';
-    });
-    
-    return selectContainer;
-}
-
-// Fonction pour créer le select standard (non-mobile)
 function createStandardTypeSelect(config) {
     const typeSelect = document.createElement('select');
     typeSelect.style.padding = '0px';
@@ -433,10 +138,264 @@ function createStandardTypeSelect(config) {
 }
 
 
+function createTypeSelect(config) {
+    
+    // Si nous ne sommes pas sur mobile, utiliser la version d'origine
+    if (!nameCloudState.mobilePhone) {
+        return createStandardTypeSelect(config);
+    }
+    
+    // Définir les options et les valeurs correspondantes
+    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Vie', 'Procréat', 'Lieux'];
+    // Textes plus détaillés pour l'affichage dans la liste déroulante
+    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Durée de Vie', 'Ages de Procréation', 'Lieux'];
+   
+    const typeValues = ['prenoms', 'noms', 'professions', 'duree_vie', 'age_procreation', 'lieux'];
+    
+    // Trouver l'index de l'option actuellement sélectionnée
+    const currentIndex = typeValues.indexOf(config.type);
+    const currentOption = typeOptions[currentIndex >= 0 ? currentIndex : 0];
+    
+    // Couleurs pour le sélecteur personnalisé
+    const colors = {
+        main: '#4361ee',    // Bleu pour le sélecteur
+        options: '#38b000', // Vert pour les options
+        hover: '#2e9800',   // Vert légèrement plus foncé au survol
+        selected: '#1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée (highlight prononcé)
+    };
+    
+    // Conteneur principal
+    const selectContainer = document.createElement('div');
+    selectContainer.style.position = 'relative';
+    selectContainer.style.width = '60px'; // Réduit de 75px à 70px
+    selectContainer.style.height = '25px';
+    
+    // Élément qui simule le select
+    const selectDisplay = document.createElement('div');
+    selectDisplay.style.padding = '1px 1px'; // Réduit le padding latéral
+    selectDisplay.style.border = '1px solid #3f51b5';
+    selectDisplay.style.borderRadius = '3px';
+    selectDisplay.style.backgroundColor = colors.main;
+    selectDisplay.style.color = 'white';
+    selectDisplay.style.cursor = 'pointer';
+    selectDisplay.style.fontSize = '14px';
+    selectDisplay.style.fontWeight = 'bold';
+    selectDisplay.style.display = 'flex';
+    selectDisplay.style.justifyContent = 'space-between';
+    selectDisplay.style.alignItems = 'center';
+    selectDisplay.style.height = '100%';
+    selectDisplay.style.boxSizing = 'border-box';
+    selectDisplay.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+    selectDisplay.style.position = 'relative'; // Position relative pour la flèche
+    
+    // Texte affiché
+    const displayText = document.createElement('span');
+    displayText.textContent = currentOption;
+    displayText.style.width = '100%'; // Prend tout l'espace disponible
+    displayText.style.textAlign = 'left'; //'center'; // Centre le texte
+    
+    // Ajouter la flèche comme un pseudo-élément
+    const arrowStyle = document.createElement('style');
+    const selectId = `select-${Date.now()}`;
+    selectDisplay.id = selectId;
+    
+    arrowStyle.textContent = `
+        #${selectId}::after {
+            content: '';
+            position: absolute;
+            top: 0px;
+            right: 2px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid white;
+            pointer-events: none;
+        }
+    `;
+
+    document.head.appendChild(arrowStyle);
+    
+    // Ajouter le texte au display
+    selectDisplay.appendChild(displayText);
+    
+    // Conteneur des options (initialement masqué)
+    const optionsContainer = document.createElement('div');
+    optionsContainer.style.position = 'absolute';
+    optionsContainer.style.top = '100%';
+    optionsContainer.style.left = '-20px'; // Décaler vers la gauche pour élargir
+    optionsContainer.style.width = '210px'; //'160px'; // Largeur fixe plus grande
+    optionsContainer.style.backgroundColor = '#fff';
+    optionsContainer.style.border = '1px solid #ccc';
+    optionsContainer.style.borderRadius = '4px';
+    optionsContainer.style.marginTop = '2px';
+    optionsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    optionsContainer.style.maxHeight = '230px';
+    optionsContainer.style.overflowY = 'auto';
+    optionsContainer.style.zIndex = '1000';
+    optionsContainer.style.display = 'none';
+    
+    // Valeur cachée simulant un vrai select
+    const hiddenSelect = document.createElement('select');
+    hiddenSelect.style.display = 'none';
+    
+    // Créer les options dans le select caché
+    typeValues.forEach((value, index) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.text = typeOptions[index];
+        if (value === config.type) option.selected = true;
+        hiddenSelect.appendChild(option);
+    });
+    
+    // Ajouter les options visuelles
+    typeOptions.forEach((option, index) => {
+        const optionElement = document.createElement('div');
+        optionElement.style.padding = '10px 8px'; // '6px 8px'; // Réduit le padding des options
+        optionElement.style.cursor = 'pointer';
+        optionElement.style.backgroundColor = colors.options;
+        optionElement.style.color = 'white';
+        optionElement.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+        optionElement.style.fontSize = '13px'; // Réduit la taille de police
+        optionElement.style.textAlign = 'center'; // Centre le texte
+        optionElement.textContent = typeOptionsExpanded[index]; //option; // Utiliser le texte détaillé
+        
+        // Effet de survol
+        optionElement.addEventListener('mouseover', () => {
+            optionElement.style.backgroundColor = colors.hover;
+        });
+        
+        optionElement.addEventListener('mouseout', () => {
+            optionElement.style.backgroundColor = option === displayText.textContent ? 
+                colors.selected : colors.options;
+        });
+        
+        // Sélection d'une option
+        optionElement.addEventListener('click', () => {
+            // Mise en évidence immédiate et plus prononcée
+            optionElement.style.backgroundColor = '#1a4d00'; // Vert très foncé pour un highlight plus prononcé
+            optionElement.style.transition = 'background-color 0s'; // Transition immédiate
+            optionElement.style.fontWeight = 'bold'; // Texte en gras
+            
+            // Réinitialiser les autres options immédiatement
+            Array.from(optionsContainer.children).forEach(opt => {
+                if (opt !== optionElement) {
+                    opt.style.backgroundColor = colors.options;
+                    opt.style.fontWeight = 'normal';
+                }
+            });
+            
+            // Mettre à jour le texte et la valeur
+            displayText.textContent = option;
+            hiddenSelect.value = typeValues[index];
+            
+            // Ajouter un délai avant de fermer la liste
+            setTimeout(() => {
+                optionsContainer.style.display = 'none';
+                
+                // Déclencher un événement de changement pour simuler un select natif
+                const event = new Event('change');
+                hiddenSelect.dispatchEvent(event);
+            }, 150); // Délai de 150ms pour voir l'effet de sélection
+        });
+        
+        // Mettre en évidence l'option actuellement sélectionnée de manière plus prononcée
+        if (option === currentOption) {
+            optionElement.style.backgroundColor = colors.selected;
+            optionElement.style.fontWeight = 'bold';
+            optionElement.style.boxShadow = 'inset 0 0 3px rgba(0,0,0,0.3)'; // Effet d'enfoncement
+        }
+        
+        optionsContainer.appendChild(optionElement);
+    });
+    
+    // Toggle du dropdown
+    selectDisplay.addEventListener('click', () => {
+        const isVisible = optionsContainer.style.display === 'block';
+        optionsContainer.style.display = isVisible ? 'none' : 'block';
+    });
+    
+    // Fermer le dropdown si on clique ailleurs
+    document.addEventListener('click', (event) => {
+        if (!selectContainer.contains(event.target)) {
+            optionsContainer.style.display = 'none';
+        }
+    });
+    
+    // Assembler le tout
+    selectContainer.appendChild(selectDisplay);
+    selectContainer.appendChild(optionsContainer);
+    selectContainer.appendChild(hiddenSelect);
+    
+    // Exposer les événements du select caché sur le conteneur
+    ['change', 'click'].forEach(eventName => {
+        hiddenSelect.addEventListener(eventName, (event) => {
+            const newEvent = new Event(eventName, { bubbles: true });
+            selectContainer.dispatchEvent(newEvent);
+        });
+    });
+    
+    // Méthodes pour simuler le comportement d'un vrai select
+    Object.defineProperty(selectContainer, 'value', {
+        get: function() {
+            return hiddenSelect.value;
+        },
+        set: function(value) {
+            hiddenSelect.value = value;
+            const index = typeValues.indexOf(value);
+            if (index >= 0) {
+                displayText.textContent = typeOptions[index];
+            }
+        }
+    });
+    
+    selectContainer.addEventListener('mouseover', () => {
+        selectDisplay.style.backgroundColor = '#3a56e8';
+    });
+    
+    selectContainer.addEventListener('mouseout', () => {
+        selectDisplay.style.backgroundColor = '#4361ee';
+    });
+    
+    return selectContainer;
+}
 
 
+function createScopeSelect(config) {
+    const scopeSelect = document.createElement('select');
+    scopeSelect.style.padding = '0px';
+    scopeSelect.style.minWidth = '10px';
+    scopeSelect.style.backgroundColor = '#38b000';
+    scopeSelect.style.color = 'white';
+    scopeSelect.style.border = '1px solid #2d8600';
+    scopeSelect.style.borderRadius = '3px';
+    scopeSelect.style.appearance = 'none';
+    scopeSelect.style.cursor = 'pointer';
+    scopeSelect.style.fontSize = '14px';
+    scopeSelect.style.fontWeight = 'bold';
+    scopeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+    
+    scopeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
+    scopeSelect.style.backgroundRepeat = 'no-repeat';
+    scopeSelect.style.backgroundPosition = 'top 0px right -13px';
+    scopeSelect.style.paddingRight = '0px';
 
-
+    scopeSelect.innerHTML = `
+        <option value="all">Tout</option>
+        <option value="ancestors">Ascend</option>
+        <option value="descendants">Descend</option>
+    `;
+    scopeSelect.value = config.scope || 'all';
+    
+    scopeSelect.addEventListener('mouseover', () => {
+        scopeSelect.style.backgroundColor = '#2e9800';
+    });
+    scopeSelect.addEventListener('mouseout', () => {
+        scopeSelect.style.backgroundColor = '#38b000';
+    });
+    
+    return scopeSelect;
+}
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -461,37 +420,6 @@ function createRootPersonSelect() {
 }
 
 function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
-    // const container = document.createElement('div');
-    // container.style.display = 'none';
-    // container.style.position = 'relative';
-    // container.style.marginLeft = '-10px';
-    // container.style.display = 'flex';
-    // container.style.width = 'auto';
-    // container.style.alignSelf = 'flex-start';
-    // container.style.zIndex = '10';
-    // container.style.flexDirection = 'column';
-    // container.style.alignItems = 'flex-start';
-
-    // const label = document.createElement('label');
-    // label.textContent = 'Personne racine';
-    // label.style.fontSize = '12px';
-    // label.style.marginBottom = '3px';
-
-    // const searchWrapper = document.createElement('div');
-    // searchWrapper.style.display = 'flex';
-    // searchWrapper.style.gap = '5px';
-
-    // const searchInput = document.createElement('input');
-    // searchInput.type = 'text';
-    // searchInput.placeholder = 'Rechercher racine';
-    // searchInput.style.padding = '3px';
-    // searchInput.style.width = '120px';
-
-    // const searchButton = document.createElement('button');
-    // searchButton.textContent = '🔍';
-    // searchButton.style.padding = '3px 5px';
-
-
     const container = document.createElement('div');
     container.style.display = 'none'; // Caché par défaut
     container.style.position = 'relative';
@@ -627,343 +555,45 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     };
 }
 
-// function createDateInput(label, defaultValue, width = '55px') {
-//     const container = document.createElement('div');
-//     container.style.display = 'flex';
-//     container.style.flexDirection = 'column';
-//     container.style.alignItems = 'center';
+
+function createSettingsButton() {
+    const settingsButton = document.createElement('button');
+    settingsButton.innerHTML = '⚙️';
     
-//     const labelElement = document.createElement('div');
-//     labelElement.innerHTML = label;
-//     labelElement.style.fontSize = '12px';
-//     labelElement.style.marginBottom = '3px';
-
-//     const input = document.createElement('input');
-//     input.type = 'number';
-//     input.style.width = width;
-//     input.style.padding = '0px';
-//     input.style.height = '25px';
-//     input.value = defaultValue;
-//     input.step = '100';
-
-//     // Gestion de l'incrément/décrément manuel
-//     input.addEventListener('keydown', (e) => {
-//         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-//             e.preventDefault();
-//             const currentValue = parseInt(input.value) || 0;
-//             const newValue = e.key === 'ArrowUp' ? currentValue + 100 : currentValue - 100;
-//             input.value = newValue;
-//         }
-//     });
-
-//     container.appendChild(labelElement);
-//     container.appendChild(input);
-
-//     return { container, input };
-// }
-
-
-
-
-
-
-
-
-
-
-
-function createDateInput(label, defaultValue, width = '55px') {
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.alignItems = 'center';
+    // Style de base
+    settingsButton.style.backgroundColor = 'transparent';
+    settingsButton.style.border = 'none';
+    settingsButton.style.padding = '0';
+    settingsButton.style.width = '28px';
+    settingsButton.style.height = '28px';
+    settingsButton.style.fontSize = '20px';
+    settingsButton.style.cursor = 'pointer';
+    settingsButton.style.display = 'flex';
+    settingsButton.style.justifyContent = 'center';
+    settingsButton.style.alignItems = 'center';
+    settingsButton.title = 'Paramètres';
     
-    const labelElement = document.createElement('div');
-    labelElement.innerHTML = label;
-    labelElement.style.fontSize = '12px';
-    labelElement.style.marginBottom = '3px';
-
-    // Déterminer si nous sommes sur mobile
-    // const nameCloud.mobilePhone = Math.min(window.innerWidth, window.innerHeight) < 600;
-    
-    if (nameCloudState.mobilePhone) {
-        // Créer un bouton qui ouvrira un sélecteur mobile-friendly
-        const dateButton = document.createElement('button');
-        dateButton.textContent = defaultValue;
-        dateButton.style.width = '70px';
-        dateButton.style.padding = '5px';
-        dateButton.style.fontSize = '14px';
-        dateButton.style.border = '1px solid #ccc';
-        dateButton.style.borderRadius = '4px';
-        dateButton.style.backgroundColor = 'white';
-        dateButton.style.cursor = 'pointer';
-        
-        // Input caché pour stocker la valeur
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.value = defaultValue;
-        
-        // Événement pour ouvrir le sélecteur
-        dateButton.addEventListener('click', () => {
-            showYearPickerModal(hiddenInput.value, (selectedYear) => {
-                hiddenInput.value = selectedYear;
-                dateButton.textContent = selectedYear;
-                
-                // Déclencher un événement de changement
-                const event = new Event('change');
-                hiddenInput.dispatchEvent(event);
-            });
-        });
-        
-        container.appendChild(labelElement);
-        container.appendChild(dateButton);
-        container.appendChild(hiddenInput);
-        
-        return { container, input: hiddenInput };
-    } else {
-        // Version desktop - sélecteur numérique standard
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.style.width = '57px';
-        input.style.padding = '0px';
-        input.style.height = '25px';
-        input.value = defaultValue;
-        input.step = '100';
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                e.preventDefault();
-                const currentValue = parseInt(input.value) || 0;
-                const newValue = e.key === 'ArrowUp' ? currentValue + 100 : currentValue - 100;
-                input.value = newValue;
-            }
-        });
-        
-        container.appendChild(labelElement);
-        container.appendChild(input);
-        
-        return { container, input };
-    }
-}
-
-// Fonction pour afficher la modale de sélection d'année
-
-function showYearPickerModal(initialYear, onSelect) {
-    // Supprimer toute modale existante
-    const existingModal = document.getElementById('year-picker-modal');
-    if (existingModal) {
-        document.body.removeChild(existingModal);
-    }
-    
-    // Créer la modale
-    const modal = document.createElement('div');
-    modal.id = 'year-picker-modal';
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.width = '100%';
-    modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '2000';
-    
-    const content = document.createElement('div');
-    content.style.backgroundColor = 'white';
-    content.style.padding = '20px';
-    content.style.borderRadius = '10px';
-    content.style.width = '80%';
-    content.style.maxWidth = '300px';
-    content.style.textAlign = 'center';
-    content.style.maxHeight = '70vh';
-    content.style.overflowY = 'auto';
-    
-    // Titre
-    const title = document.createElement('h3');
-    title.textContent = 'Sélectionner une année';
-    title.style.marginTop = '0';
-    title.style.marginBottom = '15px';
-    
-    // Conteneur des boutons d'année
-    const yearSelector = document.createElement('div');
-    yearSelector.style.display = 'flex';
-    yearSelector.style.flexDirection = 'column';
-    yearSelector.style.maxHeight = '300px';
-    yearSelector.style.overflow = 'auto';
-    yearSelector.style.margin = '10px 0';
-    
-    // Boutons d'actions
-    const actions = document.createElement('div');
-    actions.style.display = 'flex';
-    actions.style.justifyContent = 'space-between';
-    actions.style.marginTop = '15px';
-    
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Annuler';
-    cancelButton.style.padding = '10px 20px';
-    cancelButton.style.border = '1px solid #ccc';
-    cancelButton.style.borderRadius = '5px';
-    cancelButton.style.backgroundColor = '#f0f0f0';
-    cancelButton.style.cursor = 'pointer';
-    
-    cancelButton.addEventListener('click', () => {
-        document.body.removeChild(modal);
+    // Animation subtile au survol
+    settingsButton.addEventListener('mouseover', () => {
+        settingsButton.style.animation = 'gear-spin 2s linear infinite';
     });
     
-    actions.appendChild(cancelButton);
+    settingsButton.addEventListener('mouseout', () => {
+        settingsButton.style.animation = 'none';
+    });
     
-    // Fonction pour afficher les siècles
-    function showCenturies() {
-        yearSelector.innerHTML = '';
-        
-        // Générer les boutons par siècle
-        const centuries = [1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000];
-        const currentCentury = Math.floor(initialYear / 100) * 100;
-        
-        centuries.forEach(century => {
-            const centuryButton = document.createElement('button');
-            centuryButton.textContent = `${century} - ${century + 99}`;
-            centuryButton.style.margin = '5px';
-            centuryButton.style.padding = '10px';
-            centuryButton.style.border = '1px solid #ccc';
-            centuryButton.style.borderRadius = '5px';
-            centuryButton.style.fontSize = '16px';
-            centuryButton.style.width = '100%';
-            centuryButton.style.cursor = 'pointer';
-            centuryButton.style.backgroundColor = century <= initialYear && initialYear < century + 100 ? '#e0e0e0' : 'white';
-            
-            centuryButton.addEventListener('click', () => {
-                showDecadesForCentury(century);
-            });
-            
-            yearSelector.appendChild(centuryButton);
-        });
-    }
-    
-    // Fonction pour afficher les décennies d'un siècle
-    function showDecadesForCentury(century) {
-        yearSelector.innerHTML = '';
-        
-        // Bouton de retour
-        const backButton = document.createElement('button');
-        backButton.textContent = '← Retour aux siècles';
-        backButton.style.margin = '5px';
-        backButton.style.padding = '10px';
-        backButton.style.border = '1px solid #ccc';
-        backButton.style.borderRadius = '5px';
-        backButton.style.fontSize = '16px';
-        backButton.style.width = '100%';
-        backButton.style.cursor = 'pointer';
-        backButton.style.backgroundColor = '#f8f8f8';
-        
-        backButton.addEventListener('click', () => {
-            showCenturies();
-        });
-        
-        yearSelector.appendChild(backButton);
-        
-        // Générer les décennies
-        for (let decade = century; decade < century + 100; decade += 10) {
-            const decadeButton = document.createElement('button');
-            decadeButton.textContent = `${decade} - ${decade + 9}`;
-            decadeButton.style.margin = '5px';
-            decadeButton.style.padding = '10px';
-            decadeButton.style.border = '1px solid #ccc';
-            decadeButton.style.borderRadius = '5px';
-            decadeButton.style.fontSize = '16px';
-            decadeButton.style.width = '100%';
-            decadeButton.style.cursor = 'pointer';
-            decadeButton.style.backgroundColor = decade <= initialYear && initialYear < decade + 10 ? '#e0e0e0' : 'white';
-            
-            decadeButton.addEventListener('click', () => {
-                showYearsForDecade(decade, century);
-            });
-            
-            yearSelector.appendChild(decadeButton);
+    // Ajouter l'animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes gear-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-    }
+    `;
+    document.head.appendChild(style);
     
-    // Fonction pour afficher les années d'une décennie
-    function showYearsForDecade(decade, century) {
-        yearSelector.innerHTML = '';
-        
-        // Bouton de retour
-        const backButton = document.createElement('button');
-        backButton.textContent = '← Retour aux décennies';
-        backButton.style.margin = '5px';
-        backButton.style.padding = '10px';
-        backButton.style.border = '1px solid #ccc';
-        backButton.style.borderRadius = '5px';
-        backButton.style.fontSize = '16px';
-        backButton.style.width = '100%';
-        backButton.style.cursor = 'pointer';
-        backButton.style.backgroundColor = '#f8f8f8';
-        
-        backButton.addEventListener('click', () => {
-            showDecadesForCentury(century);
-        });
-        
-        yearSelector.appendChild(backButton);
-        
-        // Générer les années
-        for (let year = decade; year < decade + 10; year++) {
-            const yearButton = document.createElement('button');
-            yearButton.textContent = year;
-            yearButton.style.margin = '5px';
-            yearButton.style.padding = '10px';
-            yearButton.style.border = '1px solid #ccc';
-            yearButton.style.borderRadius = '5px';
-            yearButton.style.fontSize = '16px';
-            yearButton.style.width = '100%';
-            yearButton.style.cursor = 'pointer';
-            yearButton.style.backgroundColor = year === parseInt(initialYear) ? '#e0e0e0' : 'white';
-            
-            yearButton.addEventListener('click', () => {
-                onSelect(year);
-                document.body.removeChild(modal);
-            });
-            
-            yearSelector.appendChild(yearButton);
-        }
-    }
-    
-    // Afficher initialement les siècles
-    content.appendChild(title);
-    content.appendChild(yearSelector);
-    content.appendChild(actions);
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-    
-    // Afficher les siècles au démarrage
-    showCenturies();
-    
-    // Ajouter un gestionnaire d'événement pour fermer la modale avec Echap
-    const handleEscapeKey = (e) => {
-        if (e.key === 'Escape') {
-            document.body.removeChild(modal);
-            document.removeEventListener('keydown', handleEscapeKey);
-        }
-    };
-    document.addEventListener('keydown', handleEscapeKey);
+    return settingsButton;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1004,7 +634,6 @@ export function updateTitleText(element, cfg) {
     if (!nameCloudState.mobilePhone || window.innerWidth > 600) 
         titleText = titleText + ` entre ${cfg.startDate} et ${cfg.endDate}`;
     else
-        // titleText = titleText + ` <span style="font-size: 0.8em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;
         titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;
 
 
@@ -1013,15 +642,10 @@ export function updateTitleText(element, cfg) {
             titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${nameCloudState.placedWords} mots placés)</span>`;
         else
             titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${nameCloudState.placedWords} mots placés)</span>`;
-        // element.innerHTML = titleText; // Utiliser innerHTML au lieu de textContent
     } 
-    // else {
-    //     element.textContent = titleText;
-    // }
 
     element.innerHTML = titleText;
 
-    // element.textContent = titleText;
 }
 
 function showNameCloud(nameData, config) {
@@ -1034,7 +658,7 @@ function showNameCloud(nameData, config) {
     optionsContainer.style.display = 'flex';
     optionsContainer.style.flexDirection = 'column';
     optionsContainer.style.alignItems = 'center';
-    optionsContainer.style.padding = '5px';
+    optionsContainer.style.padding = '2px';
     optionsContainer.style.backgroundColor = 'transparent';
     optionsContainer.style.position = 'absolute';
     optionsContainer.style.top = '0';
@@ -1047,8 +671,20 @@ function showNameCloud(nameData, config) {
     const rootPersonSelect = createRootPersonSelect();
 
     // Modification ici pour utiliser config.startDate et config.endDate
-    const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate || 1500);
-    const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear());
+    // const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate || 1500);
+    // const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear());
+
+
+    const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate || 1500, (value) => {
+        // Support de callback en option pour réagir directement aux changements
+        // sans attendre l'événement 'change'
+        console.log('Start date changed to:', value);
+    });
+    const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear(), (value) => {
+        console.log('End date changed to:', value);
+    });
+
+
 
     const showButton = document.createElement('button');
     showButton.innerHTML = '✓';
@@ -1070,10 +706,6 @@ function showNameCloud(nameData, config) {
     showButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
     showButton.title = 'Valider';
 
-    // Modification pour le conteneur de personne racine
-    // const rootPersonContainer = createRootPersonSearchContainer(rootPersonSelect, () => {
-    //     generateNameCloud();
-    // });
 
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
     createRootPersonSearchContainer(rootPersonSelect, () => {
@@ -1110,38 +742,6 @@ function showNameCloud(nameData, config) {
 
     updateTitleText(titleElement, config);
     
-    // function updateTitleText() {
-    //     const totalWords = nameData.length;
-    //     const isMobile = Math.min(window.innerWidth, window.innerHeight) < 600;
-        
-    //     let titleText = '';
-        
-    //     if (config.type === 'prenoms') {
-    //         titleText = `${totalWords} Prénoms`;
-    //     } else if (config.type === 'noms') {
-    //         titleText = `${totalWords} Noms`;
-    //     } else if (config.type === 'professions') {
-    //         titleText = `${totalWords} Métiers`;
-    //     } else if (config.type === 'duree_vie') {
-    //         titleText = `${totalWords} Durées de vie`;
-    //     } else if (config.type === 'age_procreation') {
-    //         titleText = `${totalWords} Ages de procréation`;
-    //     } else if (config.type === 'lieux') {
-    //         titleText = `${totalWords} Lieux`;
-    //     }
-        
-    //     if (!isMobile || window.innerWidth > 600) {
-    //         titleText += ` entre ${startDateInput.value} et ${endDateInput.value}`;
-    //     } else {
-    //         titleText = `<span style="font-size: 0.7em">${titleText}</span> <span style="font-size: 0.6em">entre ${startDateInput.value} et ${endDateInput.value}</span>`;
-    //     }
-        
-    //     titleElement.innerHTML = titleText;
-    // }
-
-    // // Appeler updateTitleText initialement
-    // updateTitleText();
-
     function generateNameCloud() {
         const newConfig = {
             type: typeSelect.value,
@@ -1169,12 +769,36 @@ function showNameCloud(nameData, config) {
     endDateInput.addEventListener('change', generateNameCloud);
     showButton.addEventListener('click', generateNameCloud);
 
+
+    // Ajout du bouton de paramètres
+    const settingsButton = createSettingsButton();
+    settingsButton.addEventListener('click', () => {
+        const settingsModal = createSettingsModal((settings) => {
+            // Callback lorsque les paramètres sont sauvegardés
+            generateNameCloud();
+        });
+        document.body.appendChild(settingsModal);
+    });
+
+
     // Assemblage du conteneur
     const leftContainer = document.createElement('div');
     leftContainer.style.display = 'flex';
-    leftContainer.style.gap = '10px';
+    leftContainer.style.gap = '2px';
     leftContainer.appendChild(typeSelect);
     leftContainer.appendChild(scopeSelect);
+
+
+    // Placer le bouton paramètres juste sous le typeSelect dans optionsContainer
+    // Notez que settingsButton sera positionné en tant qu'élément indépendant
+    settingsButton.style.position = 'absolute';
+    settingsButton.style.top = '-3px'; // Ajustez selon la hauteur de votre typeSelect
+    settingsButton.style.left = '16px'; // Ajustez selon le positionnement souhaité
+
+    // Ajoutez le bouton à optionsContainer
+    optionsContainer.appendChild(settingsButton);
+
+    
 
     const dateContainer = document.createElement('div');
     dateContainer.style.display = 'flex';
@@ -1191,12 +815,7 @@ function showNameCloud(nameData, config) {
     mainOptionsContainer.appendChild(dateContainer);
     mainOptionsContainer.appendChild(showButton);
 
-    // const bottomContainer = document.createElement('div');
-    // bottomContainer.style.display = 'flex';
-    // bottomContainer.style.justifyContent = 'space-between';
-    // bottomContainer.style.alignItems = 'center';
-    // bottomContainer.style.width = '100%';
-    // bottomContainer.style.gap = '10px';
+
 
     const bottomContainer = document.createElement('div');
     bottomContainer.style.display = 'flex';
@@ -1204,9 +823,6 @@ function showNameCloud(nameData, config) {
     bottomContainer.style.alignItems = 'center';
     bottomContainer.style.width = '100%';
     bottomContainer.style.gap = '10px'; 
-
-
-
 
     bottomContainer.appendChild(mainOptionsContainer);
     bottomContainer.appendChild(rootPersonContainer);
@@ -1222,30 +838,11 @@ function showNameCloud(nameData, config) {
 
 
 
-    // // Gestion du redimensionnement
-    // function handleResize() {
-    //     if (nameCloudContainer.children.length > 0) {
-    //         generateNameCloud();
-    //     }
-    // }
-
-    // window.addEventListener('resize', handleResize);
-
-    // // Événement de fermeture
-    // closeButton.addEventListener('click', () => {
-    //     // Retirer l'écouteur de redimensionnement
-    //     window.removeEventListener('resize', handleResize);
-    //     document.body.removeChild(modal);
-    // });
-
-
-
-    // // Configuration des événements
+    // Configuration des événements
     setupModalEvents(modal, closeButton, generateNameCloud);
     typeSelect.addEventListener('change', generateNameCloud);
     scopeSelect.addEventListener('change', generateNameCloud);
     showButton.addEventListener('click', generateNameCloud);
-
 
 
     // Générer initialement le nuage de mots
@@ -1267,18 +864,9 @@ function showNameCloud(nameData, config) {
 export const createNameCloudUI = {
     renderInContainer(nameData, config, containerElement) {
         if (containerElement) {
-            // Utilisez createNameCloud de nameCloudRenderer.js
-            // const NameCloudElement = createNameCloud(nameData, config);
-            
-            // // Utilisez ReactDOM pour rendre l'élément
-            // const root = ReactDOM.createRoot(containerElement);
-            // root.render(NameCloudElement);
-
+            // Utilisez ReactDOM pour rendre l'élément
             const root = ReactDOM.createRoot(containerElement);
             root.render(React.createElement(NameCloud, { nameData: nameData, config: config }));
-
-
-
         }
     },
 
@@ -1286,4 +874,3 @@ export const createNameCloudUI = {
         showNameCloud(nameData, config);
     }
 };
-

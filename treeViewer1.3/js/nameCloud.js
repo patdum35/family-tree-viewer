@@ -2,12 +2,8 @@
 import { state, showToast } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
-// import { state, displayPersonDetails, showToast } from './main.js';
-// import { startAncestorAnimation } from './treeAnimation.js';
-
 import { createNameCloudUI } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfession, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -17,8 +13,16 @@ export const nameCloudState = {
     SVG_height: 1080,
     currentConfig: null,
     currentNameData: null,
-};
-
+    minFontSize: 10,
+    maxFontSize: 45,
+    cloudShape: 'rectangle',
+    padding: 4,
+    fontFamily: 'Arial',
+    isShapeBorder: true,
+    isThreeZones: true,
+    wordRotation: false,
+    movingRotation: false
+}
 
 export function processNamesCloudWithDate(config, containerElement = null) {
     // Logique principale de traitement des données
@@ -51,7 +55,6 @@ export function processNamesCloudWithDate(config, containerElement = null) {
     nameCloudState.currentConfig = { ...config };
 
     const message = "nombre de mots  = "  + nameData.length;
-    console.log(message);
     showToast(message, 3000)
 }
 
@@ -76,7 +79,7 @@ function processPersonData(person, config, nameFrequency, stats) {
     if (config.type === 'prenoms') {
         const firstName = person.name.split('/')[0].trim();
         const firstNames = firstName
-            .split(' ')
+            .split(/[ ,]+/) // Split sur l'espace ou la virgule
             .map(name => cleanSurName(name))
             .filter(name => isValidSurName(name))
             .map(name => capitalizeName(name));
@@ -211,10 +214,7 @@ function updateStats(stats, nameFrequency) {
     stats.total = Object.values(nameFrequency).reduce((sum, count) => sum + count, 0);
 
     // Affichage des statistiques (optionnel, vous pouvez le commenter si non nécessaire)
-    console.log('\n===== STATISTIQUES GLOBALES =====');
-    console.log(`\nNombre total de personnes dans le nuage : ${stats.total}`);
-    console.log(`Nombre de noms uniques : ${stats.uniqueNames}`);
-    console.log(`Personnes dans la période : ${stats.inPeriod}`);
+    console.log(`\n personnes dans le nuage : ${stats.total}`+`, noms uniques : ${stats.uniqueNames}` + `, Personnes dans la période : ${stats.inPeriod}`);
     
     // Vous pouvez ajouter d'autres logs ou traitements si nécessaire
 }

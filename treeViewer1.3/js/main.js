@@ -8,6 +8,7 @@ import { initBackgroundContainer } from './backgroundManager.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, validateLocations, loadGeolocalisationFile } from './geoLocalisation.js';
+import { nameCloudState } from './nameCloud.js';
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -141,8 +142,9 @@ export async function loadData() {
     toggleFullScreen();
 
     // for mobile phone
-    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) state.mobilePhone = 1;
-    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) state.mobilePhone = 2;    
+    nameCloudState.mobilePhone = false;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
     
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
