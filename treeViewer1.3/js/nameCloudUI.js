@@ -951,7 +951,7 @@ export function updateTitleText(element, cfg) {
         titleText = `${nameCloudState.totalWords} Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
     }
     
-    if (!nameCloudState.mobilePhone || window.innerWidth > 600) 
+    if (!nameCloudState.mobilePhone || window.innerWidth > 800) 
         titleText = titleText + ` entre ${cfg.startDate} et ${cfg.endDate}`;
     else
         titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;

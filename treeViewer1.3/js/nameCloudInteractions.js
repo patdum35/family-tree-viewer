@@ -70,24 +70,103 @@ export function showPersonsList(name, people, config) {
     list.style.gap = '2px';  // Espacement réduit
     list.style.fontSize = '14px';  // Taille de police réduite
 
+    // // Trier les personnes par date
+    // const peopleWithDates = people.map(person => {
+    //     let date = '';
+    //     let sortDate = 0;
+    //     const individual = state.gedcomData.individuals[person.id];
+
+    //     if (individual) {
+    //         if (individual.birthDate) {
+    //             date = `👶 ${individual.birthDate}`; //🚼
+    //             sortDate = extractYear(individual.birthDate) || 0;
+    //         } else if (individual.deathDate) {
+    //             date = `✝ ${individual.deathDate}`; // ☦ 🏴 ⚰️
+    //             sortDate = extractYear(individual.deathDate) || 0;
+    //         } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
+    //             for (const famId of individual.spouseFamilies) {
+    //                 const family = state.gedcomData.families[famId];
+    //                 if (family && family.marriageDate) {
+    //                     date = `💍 ${family.marriageDate}`;  //🔗 💞 ⚭ 
+    //                     sortDate = extractYear(family.marriageDate) || 0;
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return {
+    //         name: person.name,
+    //         id: person.id,  // Assurez-vous d'inclure l'ID ici
+    //         date: date,
+    //         sortDate: sortDate
+    //     };
+    // }).sort((a, b) => b.sortDate - a.sortDate);
+
+
+    // peopleWithDates.forEach((person, index) => {
+    //     const personDiv = document.createElement('div');
+    //     personDiv.style.padding = '3px 5px';
+    //     personDiv.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : 'white';
+    //     personDiv.style.display = 'flex';
+    //     personDiv.style.justifyContent = 'space-between';
+    //     personDiv.style.alignItems = 'center';
+    //     personDiv.style.lineHeight = '1.2';
+    //     personDiv.style.cursor = 'pointer';
+
+    //     const nameSpan = document.createElement('span');
+    //     nameSpan.textContent = person.name;
+    //     nameSpan.style.marginRight = '10px';
+    //     if (nameCloudState.mobilePhone)
+    //         {nameSpan.style.fontSize = '12px';} // Taille fixe en pixels
+
+    //     const dateSpan = document.createElement('span');
+    //     dateSpan.textContent = person.date;
+    //     dateSpan.style.color = 'darkblue';
+    //     dateSpan.style.whiteSpace = 'nowrap';
+    //     if (nameCloudState.mobilePhone)
+    //         {dateSpan.style.fontSize = '10px';} // Taille fixe en pixels
+
+    //     personDiv.appendChild(nameSpan);
+    //     personDiv.appendChild(dateSpan);
+
+    //     personDiv.addEventListener('click', (event) => {
+    //         console.log('Clicked on person:', person.name, person.id); // Log pour vérifier le clic et l'ID
+
+    //         event.stopPropagation();
+    //         showPersonActions(person, event);
+    //     });
+
+    //     list.appendChild(personDiv);
+    // });
+
+
+
+
+
+
     // Trier les personnes par date
     const peopleWithDates = people.map(person => {
         let date = '';
         let sortDate = 0;
+        let symbolType = ''; // Pour stocker le type de symbole
         const individual = state.gedcomData.individuals[person.id];
 
         if (individual) {
             if (individual.birthDate) {
-                date = `👶🚼 ${individual.birthDate}`;
+                symbolType = 'birth';
+                date = `<span class="date-symbol" style="font-size: 1.5em; vertical-align: middle;">👶</span> ${individual.birthDate}`; //🚼
                 sortDate = extractYear(individual.birthDate) || 0;
             } else if (individual.deathDate) {
-                date = `✝ ☦ 🏴 ⚰️ ${individual.deathDate}`;
+                symbolType = 'death';
+                date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">✝</span> ${individual.deathDate}`; //☦🏴⚰️
                 sortDate = extractYear(individual.deathDate) || 0;
             } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
                 for (const famId of individual.spouseFamilies) {
                     const family = state.gedcomData.families[famId];
                     if (family && family.marriageDate) {
-                        date = `🔗 💞 ⚭ 💍 ${family.marriageDate}`;
+                        symbolType = 'marriage';
+                        date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">💍</span> ${family.marriageDate}`; //🔗💞⚭
                         sortDate = extractYear(family.marriageDate) || 0;
                         break;
                     }
@@ -97,8 +176,9 @@ export function showPersonsList(name, people, config) {
 
         return {
             name: person.name,
-            id: person.id,  // Assurez-vous d'inclure l'ID ici
+            id: person.id,
             date: date,
+            symbolType: symbolType,
             sortDate: sortDate
         };
     }).sort((a, b) => b.sortDate - a.sortDate);
@@ -121,7 +201,7 @@ export function showPersonsList(name, people, config) {
             {nameSpan.style.fontSize = '12px';} // Taille fixe en pixels
 
         const dateSpan = document.createElement('span');
-        dateSpan.textContent = person.date;
+        dateSpan.innerHTML = person.date; // Utiliser innerHTML pour interpréter les balises span
         dateSpan.style.color = 'darkblue';
         dateSpan.style.whiteSpace = 'nowrap';
         if (nameCloudState.mobilePhone)
@@ -131,14 +211,19 @@ export function showPersonsList(name, people, config) {
         personDiv.appendChild(dateSpan);
 
         personDiv.addEventListener('click', (event) => {
-            console.log('Clicked on person:', person.name, person.id); // Log pour vérifier le clic et l'ID
-
+            console.log('Clicked on person:', person.name, person.id);
             event.stopPropagation();
             showPersonActions(person, event);
         });
 
         list.appendChild(personDiv);
     });
+
+
+
+
+
+
 
 
 
