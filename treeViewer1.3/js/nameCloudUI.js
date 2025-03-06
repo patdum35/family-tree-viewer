@@ -3,6 +3,7 @@ import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
+import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
 
 function createModalContainer() {
@@ -137,265 +138,188 @@ function createStandardTypeSelect(config) {
     return typeSelect;
 }
 
-
 function createTypeSelect(config) {
-    
-    // Si nous ne sommes pas sur mobile, utiliser la version d'origine
-    if (!nameCloudState.mobilePhone) {
-        return createStandardTypeSelect(config);
-    }
-    
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Vie', 'Procréat', 'Lieux'];
-    // Textes plus détaillés pour l'affichage dans la liste déroulante
-    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Durée de Vie', 'Ages de Procréation', 'Lieux'];
-   
+    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Vie', 'Procréat', 'Lieux']; 
+    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Durée de Vie', 'Ages de Procréation', 'Lieux'];          
     const typeValues = ['prenoms', 'noms', 'professions', 'duree_vie', 'age_procreation', 'lieux'];
     
-    // Trouver l'index de l'option actuellement sélectionnée
-    const currentIndex = typeValues.indexOf(config.type);
-    const currentOption = typeOptions[currentIndex >= 0 ? currentIndex : 0];
+    // Créer la liste d'options
+    const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
     
     // Couleurs pour le sélecteur personnalisé
     const colors = {
-        main: '#4361ee',    // Bleu pour le sélecteur
-        options: '#38b000', // Vert pour les options
-        hover: '#2e9800',   // Vert légèrement plus foncé au survol
-        selected: '#1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée (highlight prononcé)
+        main: ' #4361ee',    // Bleu pour le sélecteur
+        options: ' #38b000', // Vert pour les options
+        hover: ' #2e9800',   // Vert légèrement plus foncé au survol
+        selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
     };
     
-    // Conteneur principal
-    const selectContainer = document.createElement('div');
-    selectContainer.style.position = 'relative';
-    selectContainer.style.width = '60px'; // Réduit de 75px à 70px
-    selectContainer.style.height = '25px';
-    
-    // Élément qui simule le select
-    const selectDisplay = document.createElement('div');
-    selectDisplay.style.padding = '1px 1px'; // Réduit le padding latéral
-    selectDisplay.style.border = '1px solid #3f51b5';
-    selectDisplay.style.borderRadius = '3px';
-    selectDisplay.style.backgroundColor = colors.main;
-    selectDisplay.style.color = 'white';
-    selectDisplay.style.cursor = 'pointer';
-    selectDisplay.style.fontSize = '14px';
-    selectDisplay.style.fontWeight = 'bold';
-    selectDisplay.style.display = 'flex';
-    selectDisplay.style.justifyContent = 'space-between';
-    selectDisplay.style.alignItems = 'center';
-    selectDisplay.style.height = '100%';
-    selectDisplay.style.boxSizing = 'border-box';
-    selectDisplay.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-    selectDisplay.style.position = 'relative'; // Position relative pour la flèche
-    
-    // Texte affiché
-    const displayText = document.createElement('span');
-    displayText.textContent = currentOption;
-    displayText.style.width = '100%'; // Prend tout l'espace disponible
-    displayText.style.textAlign = 'left'; //'center'; // Centre le texte
-    
-    // Ajouter la flèche comme un pseudo-élément
-    const arrowStyle = document.createElement('style');
-    const selectId = `select-${Date.now()}`;
-    selectDisplay.id = selectId;
-    
-    arrowStyle.textContent = `
-        #${selectId}::after {
-            content: '';
-            position: absolute;
-            top: 0px;
-            right: 2px;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 6px solid white;
-            pointer-events: none;
-        }
-    `;
+    // Utiliser le sélecteur personnalisé avec une configuration très précise
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.type,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '60px',
+            height: '25px',
+            dropdownWidth: '160px',
+            // Hauteur fixe au lieu d'une hauteur maximale
+            // Calculée en fonction du nombre d'options et de leur hauteur
+            // dropdownFixedHeight: `${(options.length) * 50}px` // 38px par option (padding 10px haut+bas + texte)
+            dropdownMaxHeight: '300px'
 
-    document.head.appendChild(arrowStyle);
-    
-    // Ajouter le texte au display
-    selectDisplay.appendChild(displayText);
-    
-    // Conteneur des options (initialement masqué)
-    const optionsContainer = document.createElement('div');
-    optionsContainer.style.position = 'absolute';
-    optionsContainer.style.top = '100%';
-    optionsContainer.style.left = '-20px'; // Décaler vers la gauche pour élargir
-    optionsContainer.style.width = '210px'; //'160px'; // Largeur fixe plus grande
-    optionsContainer.style.backgroundColor = '#fff';
-    optionsContainer.style.border = '1px solid #ccc';
-    optionsContainer.style.borderRadius = '4px';
-    optionsContainer.style.marginTop = '2px';
-    optionsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    optionsContainer.style.maxHeight = '230px';
-    optionsContainer.style.overflowY = 'auto';
-    optionsContainer.style.zIndex = '1000';
-    optionsContainer.style.display = 'none';
-    
-    // Valeur cachée simulant un vrai select
-    const hiddenSelect = document.createElement('select');
-    hiddenSelect.style.display = 'none';
-    
-    // Créer les options dans le select caché
-    typeValues.forEach((value, index) => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.text = typeOptions[index];
-        if (value === config.type) option.selected = true;
-        hiddenSelect.appendChild(option);
-    });
-    
-    // Ajouter les options visuelles
-    typeOptions.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.style.padding = '10px 8px'; // '6px 8px'; // Réduit le padding des options
-        optionElement.style.cursor = 'pointer';
-        optionElement.style.backgroundColor = colors.options;
-        optionElement.style.color = 'white';
-        optionElement.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
-        optionElement.style.fontSize = '13px'; // Réduit la taille de police
-        optionElement.style.textAlign = 'center'; // Centre le texte
-        optionElement.textContent = typeOptionsExpanded[index]; //option; // Utiliser le texte détaillé
-        
-        // Effet de survol
-        optionElement.addEventListener('mouseover', () => {
-            optionElement.style.backgroundColor = colors.hover;
-        });
-        
-        optionElement.addEventListener('mouseout', () => {
-            optionElement.style.backgroundColor = option === displayText.textContent ? 
-                colors.selected : colors.options;
-        });
-        
-        // Sélection d'une option
-        optionElement.addEventListener('click', () => {
-            // Mise en évidence immédiate et plus prononcée
-            optionElement.style.backgroundColor = '#1a4d00'; // Vert très foncé pour un highlight plus prononcé
-            optionElement.style.transition = 'background-color 0s'; // Transition immédiate
-            optionElement.style.fontWeight = 'bold'; // Texte en gras
-            
-            // Réinitialiser les autres options immédiatement
-            Array.from(optionsContainer.children).forEach(opt => {
-                if (opt !== optionElement) {
-                    opt.style.backgroundColor = colors.options;
-                    opt.style.fontWeight = 'normal';
-                }
-            });
-            
-            // Mettre à jour le texte et la valeur
-            displayText.textContent = option;
-            hiddenSelect.value = typeValues[index];
-            
-            // Ajouter un délai avant de fermer la liste
-            setTimeout(() => {
-                optionsContainer.style.display = 'none';
-                
-                // Déclencher un événement de changement pour simuler un select natif
-                const event = new Event('change');
-                hiddenSelect.dispatchEvent(event);
-            }, 150); // Délai de 150ms pour voir l'effet de sélection
-        });
-        
-        // Mettre en évidence l'option actuellement sélectionnée de manière plus prononcée
-        if (option === currentOption) {
-            optionElement.style.backgroundColor = colors.selected;
-            optionElement.style.fontWeight = 'bold';
-            optionElement.style.boxShadow = 'inset 0 0 3px rgba(0,0,0,0.3)'; // Effet d'enfoncement
-        }
-        
-        optionsContainer.appendChild(optionElement);
-    });
-    
-    // Toggle du dropdown
-    selectDisplay.addEventListener('click', () => {
-        const isVisible = optionsContainer.style.display === 'block';
-        optionsContainer.style.display = isVisible ? 'none' : 'block';
-    });
-    
-    // Fermer le dropdown si on clique ailleurs
-    document.addEventListener('click', (event) => {
-        if (!selectContainer.contains(event.target)) {
-            optionsContainer.style.display = 'none';
-        }
-    });
-    
-    // Assembler le tout
-    selectContainer.appendChild(selectDisplay);
-    selectContainer.appendChild(optionsContainer);
-    selectContainer.appendChild(hiddenSelect);
-    
-    // Exposer les événements du select caché sur le conteneur
-    ['change', 'click'].forEach(eventName => {
-        hiddenSelect.addEventListener(eventName, (event) => {
-            const newEvent = new Event(eventName, { bubbles: true });
-            selectContainer.dispatchEvent(newEvent);
-        });
-    });
-    
-    // Méthodes pour simuler le comportement d'un vrai select
-    Object.defineProperty(selectContainer, 'value', {
-        get: function() {
-            return hiddenSelect.value;
         },
-        set: function(value) {
-            hiddenSelect.value = value;
-            const index = typeValues.indexOf(value);
-            if (index >= 0) {
-                displayText.textContent = typeOptions[index];
-            }
-        }
+        
+        // Padding très réduit pour maximiser la compacité
+        padding: {
+            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
+            options: { x: 8, y: 10 }     // Padding pour les options
+        },
+        
+        // Configuration précise de la flèche comme dans l'original
+        // arrow: {
+        //     position: 'top',        // Position en haut
+        //     visible: true,
+        //     size: 6,                // Taille en pixels
+        //     offset: { x: 0, y: 0 }  // Décalage en pixels
+        // },
+        
+
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 0.5 } // Décale 5px vers la gauche et 2px vers le bas
+        },
+
+
+
+        // Personnalisation des options
+        customizeOptionElement: (optionElement, option) => {
+            // Utiliser le label étendu dans le menu déroulant
+            optionElement.textContent = option.expandedLabel;
+            
+            // Centrer le texte
+            optionElement.style.textAlign = 'center';
+            
+            // Padding spécifique
+            optionElement.style.padding = '10px 8px';
+        },
+        
+        // // Personnalisations après création
+        // onCreated: (selectContainer) => {
+        //     const selectDisplay = selectContainer.querySelector('div');
+            
+        //     // Reproduire les effets de survol de l'original
+        //     selectContainer.addEventListener('mouseover', () => {
+        //         if (selectDisplay) selectDisplay.style.backgroundColor = '#3a56e8';
+        //     });
+            
+        //     selectContainer.addEventListener('mouseout', () => {
+        //         if (selectDisplay) selectDisplay.style.backgroundColor = '#4361ee';
+        //     });
+            
+        //     // Ajuster la position de la flèche si nécessaire
+        //     const arrowElement = document.getElementById(selectDisplay.id);
+        //     if (arrowElement) {
+        //         const style = document.createElement('style');
+        //         style.textContent = `
+        //             #${selectDisplay.id}::after {
+        //                 top: 0px !important;
+        //                 right: 2px !important;
+        //             }
+        //         `;
+        //         document.head.appendChild(style);
+        //     }
+
+        //     // Supprimer l'ascenseur vertical du menu déroulant
+        //     const optionsContainer = selectContainer.querySelector('div:nth-child(2)');
+        //     if (optionsContainer) {
+        //         optionsContainer.style.overflowY = 'hidden';
+                
+        //         // Désactiver la barre de défilement complètement
+        //         const noScrollbarStyle = document.createElement('style');
+        //         const uniqueId = `dropdown-${Date.now()}`;
+        //         optionsContainer.id = uniqueId;
+                
+        //         noScrollbarStyle.textContent = `
+        //             #${uniqueId}::-webkit-scrollbar {
+        //                 display: none;
+        //             }
+        //             #${uniqueId} {
+        //                 -ms-overflow-style: none;  /* IE and Edge */
+        //                 scrollbar-width: none;     /* Firefox */
+        //             }
+        //         `;
+        //         document.head.appendChild(noScrollbarStyle);
+        //     }
+        // }
     });
-    
-    selectContainer.addEventListener('mouseover', () => {
-        selectDisplay.style.backgroundColor = '#3a56e8';
-    });
-    
-    selectContainer.addEventListener('mouseout', () => {
-        selectDisplay.style.backgroundColor = '#4361ee';
-    });
-    
-    return selectContainer;
 }
 
 
+// Remplacement de la fonction createShapeSelect
 function createScopeSelect(config) {
-    const scopeSelect = document.createElement('select');
-    scopeSelect.style.padding = '0px';
-    scopeSelect.style.minWidth = '10px';
-    scopeSelect.style.backgroundColor = '#38b000';
-    scopeSelect.style.color = 'white';
-    scopeSelect.style.border = '1px solid #2d8600';
-    scopeSelect.style.borderRadius = '3px';
-    scopeSelect.style.appearance = 'none';
-    scopeSelect.style.cursor = 'pointer';
-    scopeSelect.style.fontSize = '14px';
-    scopeSelect.style.fontWeight = 'bold';
-    scopeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+    // Définir les options et les valeurs correspondantes
+    // Définir les options et les valeurs correspondantes
+    const typeOptions = ['Tout', 'Ascend', 'Descend']; 
+    const typeOptionsExpanded = ['Tout le fichier', 'Ascendants de la racine', 'Desccendants de la racine'];       
+    const typeValues = ['all', 'ancestors', 'descendants'];
     
-    scopeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-    scopeSelect.style.backgroundRepeat = 'no-repeat';
-    scopeSelect.style.backgroundPosition = 'top 0px right -13px';
-    scopeSelect.style.paddingRight = '0px';
+    
+    // Créer la liste d'options
+    const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
+    
+    // Couleurs pour le sélecteur personnalisé
+    const colors = {
+        main: ' #4CAF50',    // Vert pour le sélecteur principal
+        options: ' #4361ee', // Bleu pour les options
+        hover: ' #2341ce', //#4CAF50',   // Vert au survol
+        selected: ' #1a237e' // Bleu foncé pour l'option sélectionnée
+    };
+    
+    // Utiliser la fonction générique
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.type,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '60px',
+            height: '25px',
+            dropdownWidth: '190px',
+        },
+        // Padding très réduit pour maximiser la compacité
+        padding: {
+            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
+            options: { x: 8, y: 10 }     // Padding pour les options
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 0.5 } // Décale 5px vers la gauche et 2px vers le bas
+        },
+        
+        // Personnalisation des options
+        customizeOptionElement: (optionElement, option) => {
+            // Utiliser le label étendu dans le menu déroulant
+            optionElement.textContent = option.expandedLabel;
+            
+            // Centrer le texte
+            optionElement.style.textAlign = 'center';
+            
+            // Padding spécifique
+            optionElement.style.padding = '10px 8px';
+        },
 
-    scopeSelect.innerHTML = `
-        <option value="all">Tout</option>
-        <option value="ancestors">Ascend</option>
-        <option value="descendants">Descend</option>
-    `;
-    scopeSelect.value = config.scope || 'all';
-    
-    scopeSelect.addEventListener('mouseover', () => {
-        scopeSelect.style.backgroundColor = '#2e9800';
+
+
+
     });
-    scopeSelect.addEventListener('mouseout', () => {
-        scopeSelect.style.backgroundColor = '#38b000';
-    });
-    
-    return scopeSelect;
 }
+
+
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -1059,6 +983,13 @@ function showNameCloud(nameData, config) {
     titleElement.style.position = 'relative';
     titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     titleElement.style.zIndex = '15'; // Z-index plus élevé pour superposer sur le sélecteur
+    // if ((window.innerWidth > 700) && (window.innerWidth < 1600)) {
+    if ((window.innerWidth > 700)) {
+            titleElement.style.marginTop = '-30px';
+            titleElement.style.marginLeft = '375px';
+            titleElement.style.textAlign = 'left';
+    }
+
 
     // Définir le texte du titre
     nameCloudState.totalWords = nameData.length;

@@ -9,19 +9,27 @@ export const nameCloudState = {
     mobilePhone: false,
     totalWords: 0,
     placedWords: 0,
+    maxCount: 5,
+    minCount: 1,
     SVG_width: 1920,
     SVG_height: 1080,
     currentConfig: null,
     currentNameData: null,
     minFontSize: 10,
     maxFontSize: 45,
+    appliedMinFontSize: 10,
+    appliedMaxFontSize: 45,
     cloudShape: 'rectangle',
     padding: 4,
+    paddingLocal: 4,
     fontFamily: 'Arial',
     isShapeBorder: true,
     isThreeZones: true,
     wordRotation: false,
-    movingRotation: false
+    wordMovement: 'none',   // Can be 'none', 'simple', 'bounce', or 'float'
+    movingRotation: false,
+    autoShapeScale: 1,
+    autoZoomScale: 1,
 }
 
 export function processNamesCloudWithDate(config, containerElement = null) {

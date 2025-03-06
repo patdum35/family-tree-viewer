@@ -1,4 +1,5 @@
 import { nameCloudState } from './nameCloud.js'
+import { computeFontScale } from './nameCloudRenderer.js'
 
 
 export function createShapePath(shape, width, height, scale = 1.0) {
@@ -79,8 +80,13 @@ let standardThreshold = 17;
 
 // ================ FORME DE CŒUR ================
 export function createHeartPath(width, height, scale) {
-    const heartWidth = width * scale * 0.92;
-    const heartHeight = height * scale * 0.92;
+    // const heartWidth = width * scale * 0.92;
+    // const heartHeight = heartWidth ; //height * scale * 0.92;
+    const heartZize = Math.min(width, height);
+    const heartWidth = heartZize * scale * 0.8;
+    const heartHeight = heartZize * scale * 0.8;
+    
+
     const centerX = 0;
     const centerY = 0;
     
@@ -114,7 +120,7 @@ export function createHeartPath(width, height, scale) {
     // if (scale === 1.0) { 
     //     globalShapeMap = createHeartShapeMatrix() 
     //     computeHeartLimits();
-    //     console.log("DEBUG scale=", scale ,", minX, maxX, minY, maxY=  ", minX, maxX, minY, maxY, 0.6 , nameCloudState.padding, Math.max(0.1, (20 - nameCloudState.padding)/10))
+    //     console.log("DEBUG scale=", scale ,", minX, maxX, minY, maxY=  ", minX, maxX, minY, maxY, 0.6 , nameCloudState.paddingLocal, Math.max(0.1, (20 - nameCloudState.paddingLocal)/10))
 
     // }
 
@@ -212,8 +218,12 @@ function computeHeartLimits()
 
 export function isPointInHeart(x, y, centerX, centerY, width, height, scaleFactor = 1.0) {
 
-    const heartWidth = width * 0.92 * scaleFactor;
-    const heartHeight = height * 0.92 * scaleFactor;
+    // const heartWidth = width * 0.92 * scaleFactor;
+    // const heartHeight = height * 0.92 * scaleFactor;
+
+    const heartZize = Math.min(width, height);
+    const heartWidth = heartZize * scaleFactor * 0.8;
+    const heartHeight = heartZize * scaleFactor * 0.8;
 
         
     // Normaliser les coordonnées du point
@@ -303,7 +313,7 @@ export function debugShapeBoundaries(textGroup, shape, width, height) {
 
 // ================ FORME DE RECTANGLE  ================
 export function createRectangleShapeMatrix() {
-    console.log(`Calcul de la shapeMap `);
+    // console.log(`Calcul de la shapeMap `);
     const matrixSize = 100;
     const shapeMap = Array.from({ length: matrixSize }, () => 
         Array(matrixSize).fill(0)
@@ -334,7 +344,7 @@ export function createStarPath(width, height, scale) {
     const midRadius = maxRadius * 0.75; // Rayon intermédiaire pour adoucir
     
     // Angle d'inclinaison (en radians)
-    const rotation = Math.PI / 75;  // Environ 18 degrés d'inclinaison
+    const rotation = Math.PI / 115;  // Environ 18 degrés d'inclinaison
     
     let pathPoints = [];
     
@@ -378,7 +388,7 @@ export function createStarPath(width, height, scale) {
 
 // Fonction pour créer la matrice de forme en étoile
 export function createStarShapeMatrix() {
-    console.log(`Calcul de la shapeMap pour l'étoile`);
+    // console.log(`Calcul de la shapeMap pour l'étoile`);
     const matrixSize = 100;
     const shapeMap = Array.from({ length: matrixSize }, () => 
         Array(matrixSize).fill(0)
@@ -622,7 +632,7 @@ export function createArabesquePath(width, height, scale) {
 
 // Fonction pour créer la matrice de forme d'arabesque
 export function createArabesqueShapeMatrix() {
-    console.log(`Calcul de la shapeMap pour l'arabesque`);
+    // console.log(`Calcul de la shapeMap pour l'arabesque`);
     const matrixSize = 100;
     const shapeMap = Array.from({ length: matrixSize }, () => 
         Array(matrixSize).fill(0)
@@ -1682,8 +1692,8 @@ export function isWordInZone(word, outerZone, innerZone, shape, centerX, centerY
     const wordDim = getWordDimensions(word);
 
     let safetyOverlap;
-    safetyOverlap = Math.max(1, 7 - nameCloudState.padding);
-    if (word.size > verylargeWordThreshold) {safetyOverlap =  Math.max(1, 5 - nameCloudState.padding);}
+    safetyOverlap = Math.max(1, 7 - nameCloudState.paddingLocal);
+    if (word.size > verylargeWordThreshold) {safetyOverlap =  Math.max(1, 5 - nameCloudState.paddingLocal);}
 
     const halfWidth = wordDim.width / safetyOverlap;   // plus le dividende est grand , plus les mots sont superposés
     const halfHeight = wordDim.height / safetyOverlap;
@@ -1729,19 +1739,19 @@ export function getWordDimensions(word) {
 export function checkCollision(word, x, y, placedWords) {
     const wordDim = getWordDimensions(word);
     let safetyMargin;
-    if (nameCloudState.padding >= 4)
+    if (nameCloudState.paddingLocal >= 4)
     { 
-        safetyMargin = word.size * Math.max(0.1, (4/nameCloudState.padding)*0.6); 
+        safetyMargin = word.size * Math.max(0.1, (4/nameCloudState.paddingLocal)*0.6); 
     }  // 0.6 //0.1; //Plus le nombre est grand et positif plus les mots sont ressérés
     else
     {
-        if (nameCloudState.padding == 3)
+        if (nameCloudState.paddingLocal == 3)
             safetyMargin = word.size * 0.7;
-        else if (nameCloudState.padding == 3)
+        else if (nameCloudState.paddingLocal == 3)
             safetyMargin = word.size * 0.8;
-        else if (nameCloudState.padding == 2)
+        else if (nameCloudState.paddingLocal == 2)
             safetyMargin = word.size * 0.9;
-        else if (nameCloudState.padding == 1)
+        else if (nameCloudState.paddingLocal == 1)
             safetyMargin = word.size * 1.0;
     }
     
@@ -1754,25 +1764,25 @@ export function checkCollision(word, x, y, placedWords) {
     if (word.size >= verylargeWordThreshold ) {
         safetyMargin = word.size * 0.1 ; // Marge très négative pour les grands mots au centre
     } else if (word.size >= largeWordThreshold ) {
-        if( nameCloudState.padding <= 2) {
+        if( nameCloudState.paddingLocal <= 2) {
             safetyMargin = word.size * 0.8 ; // Marge très négative pour les grands mots au centre
         }
     } else if (word.size >= mediumWordThreshold ) {
-        if( nameCloudState.padding <= 2) {
+        if( nameCloudState.paddingLocal <= 2) {
             safetyMargin = safetyMargin + 0.01*word.size ; // Marge très négative pour les grands mots au centre
         } else {
             safetyMargin = safetyMargin + 0.03*word.size ; // Marge très négative pour les grands mots au centre
         }
         
     } else if (word.size >= standardThreshold ) {
-        if( nameCloudState.padding <= 2) {
+        if( nameCloudState.paddingLocal <= 2) {
             safetyMargin = safetyMargin + 0.05*word.size ; // Marge très négative pour les grands mots au centre
         } else {
             safetyMargin = safetyMargin + 0.1*word.size ; // Marge très négative pour les grands mots au centre
         }
 
     } else {
-        if( nameCloudState.padding <= 2) {
+        if( nameCloudState.paddingLocal <= 2) {
             safetyMargin = safetyMargin + 0.01*word.size ; // Ou autre valeur qui fonctionnait pour vous
         } else {
             safetyMargin = safetyMargin + 0.2*word.size ; // Marge très négative pour les grands mots au centre
@@ -1798,6 +1808,40 @@ export function checkCollision(word, x, y, placedWords) {
     return false;
 }
 
+
+
+// export function computeAutoShapeScale(words, shape) {
+//     largeWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.7 + nameCloudState.minFontSize;  // 34.5
+//     mediumWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.4 + nameCloudState.minFontSize;  // 24
+//     standardThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.2 + nameCloudState.minFontSize; // 17
+//     // Trier les mots par taille décroissante
+//     words.sort((a, b) => b.size - a.size);
+//     // Séparer les mots en trois catégories
+//     const largeWords = words.filter(word => word.size >= largeWordThreshold);
+//     const mediumWords = words.filter(word => word.size < largeWordThreshold && word.size >= mediumWordThreshold);
+//     const smallWords = words.filter(word => word.size < mediumWordThreshold);
+//     const surface_estimation = largeWords.length * nameCloudState.maxFontSize + mediumWords.length * (nameCloudState.maxFontSize - nameCloudState.minFontSize)/2 + smallWords.length * nameCloudState.minFontSize; 
+//     const autoShapeScale = 1;
+//     return { autoShapeScale, surface_estimation }
+// }
+
+
+function computeWordsGroups(words, shape) {
+    largeWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.7 + nameCloudState.minFontSize;  // 34.5
+    mediumWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.4 + nameCloudState.minFontSize;  // 24
+    standardThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.2 + nameCloudState.minFontSize; // 17
+    // Trier les mots par taille décroissante
+    words.sort((a, b) => b.size - a.size);
+    // Séparer les mots en trois catégories
+    const largeWords = words.filter(word => word.size >= largeWordThreshold);
+    const mediumWords = words.filter(word => word.size < largeWordThreshold && word.size >= mediumWordThreshold);
+    const smallWords = words.filter(word => word.size < mediumWordThreshold);
+    // const surface_estimation = largeWords.length * nameCloudState.maxFontSize + mediumWords.length * (nameCloudState.maxFontSize - nameCloudState.minFontSize)/2 + smallWords.length * nameCloudState.minFontSize; 
+    // const autoShapeScale = 1;
+    return { largeWords, mediumWords, smallWords }
+}
+
+
 // Fonction principale pour placer les mots dans une forme
 export function placeWordsInShape(words, shape, width, height) {
     const placedWords = [];
@@ -1808,26 +1852,30 @@ export function placeWordsInShape(words, shape, width, height) {
     const centerY = 0;
     
     // Définir des seuils de taille pour catégoriser les mots  
-    let maxFontSize, minFontSize;
+    // let maxFontSize, minFontSize;
 
-    minFontSize = nameCloudState.minFontSize;
-     maxFontSize = nameCloudState.maxFontSize;
-    if(totalWords < 70) {
-        minFontSize = ((totalWords < 20) && !nameCloudState.mobilePhone) ? minFontSize*6 + 2 : totalWords < 60 ? minFontSize*2 : minFontSize + 4;
-        maxFontSize = ((totalWords < 20) && !nameCloudState.mobilePhone) ? Math.max(1,maxFontSize*2 -2) :  totalWords < 60 ? maxFontSize +3 : parseInt(maxFontSize*2/3);
+    // minFontSize = nameCloudState.minFontSize;
+    //  maxFontSize = nameCloudState.maxFontSize;
+    // if(totalWords < 70) {
+    //     minFontSize = ((totalWords < 20) && !nameCloudState.mobilePhone) ? minFontSize*6 + 2 : totalWords < 60 ? minFontSize*2 : minFontSize + 4;
+    //     maxFontSize = ((totalWords < 20) && !nameCloudState.mobilePhone) ? Math.max(1,maxFontSize*2 -2) :  totalWords < 60 ? maxFontSize +3 : parseInt(maxFontSize*2/3);
 
-    } else {
-        if (nameCloudState.mobilePhone) {
-            minFontSize = parseInt(minFontSize/2);
-            maxFontSize = parseInt(maxFontSize/2);
-        }
-    }
-
-    largeWordThreshold = (maxFontSize - minFontSize) * 0.7 + minFontSize;  // 34.5
-    mediumWordThreshold = (maxFontSize - minFontSize) * 0.4 + minFontSize;  // 24
-    standardThreshold = (maxFontSize - minFontSize) * 0.2 + minFontSize; // 17
+    // } else {
+    //     if (nameCloudState.mobilePhone) {
+    //         minFontSize = parseInt(minFontSize/2);
+    //         maxFontSize = parseInt(maxFontSize/2);
+    //     }
+    // }
 
 
+    // let { minFontSize, maxFontSize } = computeFontScale(words) ;
+
+
+    // largeWordThreshold = (maxFontSize - minFontSize) * 0.7 + minFontSize;  // 34.5
+    // mediumWordThreshold = (maxFontSize - minFontSize) * 0.4 + minFontSize;  // 24
+    // standardThreshold = (maxFontSize - minFontSize) * 0.2 + minFontSize; // 17
+
+    const {largeWords, mediumWords, smallWords} = computeWordsGroups(words, shape);
 
     // Trier les mots par taille décroissante
     words.sort((a, b) => b.size - a.size);
@@ -1836,9 +1884,9 @@ export function placeWordsInShape(words, shape, width, height) {
     // console.log(`in placeWordsInShape, Tentative de placement de ${words.length} mots dans la zone centrale`, "map=" , width, height , "fonts=", nameCloudState.maxFontSize, nameCloudState.minFontSize );
 
     // Séparer les mots en trois catégories
-    const largeWords = words.filter(word => word.size >= largeWordThreshold);
-    const mediumWords = words.filter(word => word.size < largeWordThreshold && word.size >= mediumWordThreshold);
-    const smallWords = words.filter(word => word.size < mediumWordThreshold);
+    // const largeWords = words.filter(word => word.size >= largeWordThreshold);
+    // const mediumWords = words.filter(word => word.size < largeWordThreshold && word.size >= mediumWordThreshold);
+    // const smallWords = words.filter(word => word.size < mediumWordThreshold);
     
  
 
@@ -1864,7 +1912,7 @@ export function placeWordsInShape(words, shape, width, height) {
 
     // 1. Placement des grands mots dans la zone centrale (50%)
     function placeWordsInCentralZone(wordsToPlace) {
-        console.log(`Tentative de placement de ${wordsToPlace.length} mots dans la zone centrale`, "map=" , width, height , "fonts=", nameCloudState.maxFontSize, nameCloudState.minFontSize );
+        // console.log(`Tentative de placement de ${wordsToPlace.length} mots dans la zone centrale`, "map=" , width, height , "fonts=", nameCloudState.maxFontSize, nameCloudState.minFontSize );
         let placed = 0;
         
         for (const word of wordsToPlace) {
@@ -1893,17 +1941,17 @@ export function placeWordsInShape(words, shape, width, height) {
                 }
                 if (wordPlaced) break;
             }
-            console.log('essai big ', word.text, " attemp=", attempt,",x=", parseInt(x),"y=" , parseInt(y), "size=" , word.size)
+            // console.log('essai big ', word.text, " attemp=", attempt,",x=", parseInt(x),"y=" , parseInt(y), "size=" , word.size)
 
         }
         
-        console.log(`${placed} mots placés dans la zone centrale`);
+        // console.log(`${placed} mots placés dans la zone centrale`);
         return placed;
     }
     
     // 2 & 3. Placement des mots moyens
     function placeMediumWords(wordsToPlace) {
-        console.log(`Tentative de placement de ${wordsToPlace.length} mots moyens`);
+        // console.log(`Tentative de placement de ${wordsToPlace.length} mots moyens`);
         let placed = 0;
         
         for (const word of wordsToPlace) {
@@ -1953,13 +2001,13 @@ export function placeWordsInShape(words, shape, width, height) {
             }
         }
 
-        console.log(`${placed} mots moyens placés`);
+        // console.log(`${placed} mots moyens placés`);
         return placed;
     }
     
     // 4, 5 & 6. Placement des petits mots
     function placeSmallWords(wordsToPlace) {
-        console.log(`Tentative de placement de ${wordsToPlace.length} petits mots`);
+        // console.log(`Tentative de placement de ${wordsToPlace.length} petits mots`);
         let placed = 0;
         
         for (const word of wordsToPlace) {
@@ -2033,7 +2081,7 @@ export function placeWordsInShape(words, shape, width, height) {
             }
         }
         
-        console.log(`${placed} petits mots placés`);
+        // console.log(`${placed} petits mots placés`);
         return placed;
     }
     
@@ -2042,7 +2090,7 @@ export function placeWordsInShape(words, shape, width, height) {
 // Calculer et stocker la shape maps si elle n'existe pas
     globalShapeMap = createShapeMatrix() 
     computeShapeLimits();
-    // console.log("DEBUG scale=", scale ,", minX, maxX, minY, maxY=  ", minX, maxX, minY, maxY, 0.6 , nameCloudState.padding, Math.max(0.1, (20 - nameCloudState.padding)/10))
+    // console.log("DEBUG scale=", scale ,", minX, maxX, minY, maxY=  ", minX, maxX, minY, maxY, 0.6 , nameCloudState.paddingLocal, Math.max(0.1, (20 - nameCloudState.paddingLocal)/10))
 
 
     placeWordsInCentralZone(largeWords);
@@ -2053,7 +2101,7 @@ export function placeWordsInShape(words, shape, width, height) {
     const remainingWords = words.filter(word => !placedWords.some(p => p.text === word.text));
     
     if (remainingWords.length > 0) {
-        console.log(`Il reste ${remainingWords.length} mots à placer`);
+        // console.log(`Il reste ${remainingWords.length} mots à placer`);
         
         for (const word of remainingWords) {
             let wordPlaced = false;
@@ -2078,7 +2126,7 @@ export function placeWordsInShape(words, shape, width, height) {
         }
     }
     
-    console.log(`Total mots placés: ${placedWords.length}/${totalWords} (${Math.round(placedWords.length/totalWords*100)}%)`);
+    // console.log(`Total mots placés: ${placedWords.length}/${totalWords} (${Math.round(placedWords.length/totalWords*100)}%)`);
     return placedWords;
 }
 
@@ -2099,25 +2147,25 @@ export function generateConcentricShapes(textGroup, shape, width, height) {
         .attr('stroke-width', 1)
         .lower();
 
-    if (nameCloudState.isThreeZones)
-    {
-        const pathString75 = createShapePath(shape, width, height, 0.75);
-        const pathString50 = createShapePath(shape, width, height, 0.5);
+    // if (nameCloudState.isThreeZones)
+    // {
+    //     const pathString75 = createShapePath(shape, width, height, 0.75);
+    //     const pathString50 = createShapePath(shape, width, height, 0.5);
             
-        textGroup.append('path')
-            .attr('class', 'shape-path-75')
-            .attr('d', pathString75)
-            .attr('stroke', 'green')
-            .attr('fill', 'none')
-            .attr('stroke-width', 1)
-            .lower();
+    //     textGroup.append('path')
+    //         .attr('class', 'shape-path-75')
+    //         .attr('d', pathString75)
+    //         .attr('stroke', 'green')
+    //         .attr('fill', 'none')
+    //         .attr('stroke-width', 1)
+    //         .lower();
             
-        textGroup.append('path')
-            .attr('class', 'shape-path-50')
-            .attr('d', pathString50)
-            .attr('stroke', 'blue')
-            .attr('fill', 'none')
-            .attr('stroke-width', 1)
-            .lower();
-    }
+    //     textGroup.append('path')
+    //         .attr('class', 'shape-path-50')
+    //         .attr('d', pathString50)
+    //         .attr('stroke', 'blue')
+    //         .attr('fill', 'none')
+    //         .attr('stroke-width', 1)
+    //         .lower();
+    // }
 }
