@@ -601,7 +601,7 @@ export function createMobileDateInput(label, defaultValue, onChange) {
     
     const dateButton = document.createElement('button');
     dateButton.textContent = defaultValue;
-    dateButton.style.width = '32px';
+    dateButton.style.width = '36px';
     dateButton.style.padding = '0px';
     dateButton.style.fontSize = '12px';
     dateButton.style.border = '1px solid #3f51b5';
@@ -689,7 +689,8 @@ export function createDesktopDateInput(label, defaultValue, onChange) {
 // Fonction principale qui choisit le sélecteur approprié selon le dispositif
 export function createDateInput(label, defaultValue, onChange) {
     // Déterminer si nous sommes sur mobile
-    if (nameCloudState.mobilePhone) {
+    if (true) {
+    // if (nameCloudState.mobilePhone) {
         return createMobileDateInput(label, defaultValue, onChange);
     } else {
         return createDesktopDateInput(label, defaultValue, onChange);

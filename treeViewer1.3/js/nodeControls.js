@@ -641,10 +641,24 @@ function updateGenerationCount() {
  */
 function updateGenerationSelector(value) {
     const generationsSelect = document.getElementById('generations');
-    if (generationsSelect) {
+    
+    if (!generationsSelect) {
+        console.warn("Sélecteur de générations non trouvé");
+        return;
+    }
+    
+    // Vérifier si c'est un sélecteur standard ou personnalisé
+    if (generationsSelect.tagName === 'SELECT') {
+        // Sélecteur standard
         const optionExists = Array.from(generationsSelect.options)
             .some(option => parseInt(option.value) === value);
+        
         if (optionExists) {
+            generationsSelect.value = value.toString();
+        }
+    } else {
+        // Sélecteur personnalisé
+        if (typeof generationsSelect.value !== 'undefined') {
             generationsSelect.value = value.toString();
         }
     }

@@ -545,8 +545,6 @@ function createColorPalette() {
     ];
 }
 
-
-
 export function computeFontScale(nameData) {
     const wordCount = nameData.length;
     nameCloudState.maxCount = d3.max(nameData, d => d.size) || 1;
@@ -616,8 +614,6 @@ function createFontScale(nameData) {
     }
     return scale.clamp(true);
 }
-
-
 
 export function centerCloudNameContainer() {         
 
@@ -820,51 +816,7 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     return layout;
 }
 
-
-
-
 // // This function handles both rotation and position animation for words
-// function animateWords(textElements) {
-//     // Define the animation properties
-//     const movementRadius = 10; // How far words can move from their original position
-//     const rotationRange = 15;  // Maximum rotation in degrees (+ or -)
-//     const animDuration = 3000; // Duration of each animation cycle in ms
-//     const pauseDuration = 500; // Pause between animations in ms
-    
-//     // Store original positions for each text element
-//     textElements.each(function(d) {
-//         d.originalX = d.x;
-//         d.originalY = d.y;
-//     });
-    
-//     // Function to generate new random positions and angles
-//     function getNewTransform(d) {
-//         // Random movement within the radius
-//         const dx = (Math.random() * 2 - 1) * movementRadius;
-//         const dy = (Math.random() * 2 - 1) * movementRadius;
-//         // Random rotation
-//         const angle = Math.floor(Math.random() * (2 * rotationRange + 1)) - rotationRange;
-        
-//         return `translate(${d.originalX + dx},${d.originalY + dy}) rotate(${angle})`;
-//     }
-    
-//     // Start the animation loop
-//     function animateLoop() {
-//         textElements
-//             .transition()
-//             .duration(animDuration)
-//             .ease(d3.easeQuadInOut) // Smoother easing function
-//             .attr('transform', d => getNewTransform(d))
-//             .transition()
-//             .duration(pauseDuration)
-//             .on('end', animateLoop); // Create an endless loop
-//     }
-    
-//     // Begin the animation
-//     animateLoop();
-// }
-
-// This is an alternative version with more pronounced movement
 function animateWordsWithBounce(textElements) {
     // Define the animation properties
     const movementRadius = 15;   // How far words can move from their original position
@@ -959,7 +911,6 @@ function animateWordsFloating(textElements) {
     // Start animation
     animate();
 }
-
 
 // Version corrigée de la fonction animateWords
 function animateWords(textElements) {

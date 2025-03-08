@@ -190,7 +190,7 @@ function createTypeSelect(config) {
         arrow: {
             position: 'top-right',
             size: 5.5,
-            offset: { x: -5, y: 0.5 } // Décale 5px vers la gauche et 2px vers le bas
+            offset: { x: -5, y: 1} // Décale 5px vers la gauche et 2px vers le bas
         },
 
 
@@ -258,15 +258,12 @@ function createTypeSelect(config) {
     });
 }
 
-
-// Remplacement de la fonction createShapeSelect
 function createScopeSelect(config) {
     // Définir les options et les valeurs correspondantes
     // Définir les options et les valeurs correspondantes
     const typeOptions = ['Tout', 'Ascend', 'Descend']; 
     const typeOptionsExpanded = ['Tout le fichier', 'Ascendants de la racine', 'Desccendants de la racine'];       
     const typeValues = ['all', 'ancestors', 'descendants'];
-    
     
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -288,7 +285,7 @@ function createScopeSelect(config) {
         dimensions: {
             width: '60px',
             height: '25px',
-            dropdownWidth: '190px',
+            dropdownWidth: '200px',
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
@@ -298,7 +295,7 @@ function createScopeSelect(config) {
         arrow: {
             position: 'top-right',
             size: 5.5,
-            offset: { x: -5, y: 0.5 } // Décale 5px vers la gauche et 2px vers le bas
+            offset: { x: -5, y: 1 } // Décale 5px vers la gauche et 2px vers le bas
         },
         
         // Personnalisation des options
@@ -313,13 +310,8 @@ function createScopeSelect(config) {
             optionElement.style.padding = '10px 8px';
         },
 
-
-
-
     });
 }
-
-
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -343,295 +335,6 @@ function createRootPersonSelect() {
 
     return rootPersonSelect;
 }
-
-// function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
-//     const container = document.createElement('div');
-//     container.style.display = 'none'; // Caché par défaut
-//     container.style.position = 'relative';
-//     container.style.marginLeft = '5px'; // Changé de -7px à 5px pour le coller à gauche du bouton OK
-//     container.style.display = 'flex';
-//     container.style.width = 'auto';
-//     container.style.alignSelf = 'flex-start';
-//     container.style.zIndex = '10';
-//     container.style.flexDirection = 'column';
-//     container.style.alignItems = 'flex-start'; // S'assure que tout est aligné à gauche
-
-//     const label = document.createElement('label');
-//     label.textContent = 'Personne racine';
-//     label.style.fontSize = '12px';
-//     label.style.marginBottom = '2px';
-//     label.style.textAlign = 'left'; // Assurez-vous que le texte est aligné à gauche
-
-//     const searchWrapper = document.createElement('div');
-//     searchWrapper.style.display = 'flex';
-//     searchWrapper.style.gap = '5px';
-//     searchWrapper.style.width = '100%'; // Assure que le wrapper prend toute la largeur disponible
-//     searchWrapper.style.height = '25px'; // Hauteur réduite
-
-//     const searchInput = document.createElement('input');
-//     searchInput.type = 'text';
-//     searchInput.placeholder = 'search racine';
-//     searchInput.style.padding = '2px 3px'; // Padding réduit
-//     searchInput.style.width = '79px';
-//     searchInput.style.height = '19px'; // Hauteur réduite
-
-
-//     const searchButton = document.createElement('button');
-//     searchButton.textContent = '🔍';
-//     searchButton.style.padding = '0px 0px'; // Padding réduit
-//     searchButton.style.height = '26px'; // Hauteur réduite
-//     searchButton.style.marginLeft = '-3px';
-
-
-//     const resultsSelect = document.createElement('select');
-//     resultsSelect.style.display = 'none';
-//     resultsSelect.style.position = 'absolute';
-//     resultsSelect.style.top = '100%';
-//     resultsSelect.style.left = '0';
-//     resultsSelect.style.width = '100%';
-//     resultsSelect.style.zIndex = '1000';
-
-//     function normalizeString(str) {
-//         return str.toLowerCase()
-//             .replace(/[éèêë]/g, 'e')
-//             .replace(/[àâä]/g, 'a')
-//             .replace(/[îï]/g, 'i')
-//             .replace(/[ôö]/g, 'o')
-//             .replace(/[ûüù]/g, 'u')
-//             .replace(/ç/g, 'c');
-//     }
-
-//     function searchRootPerson() {
-//         const searchStr = normalizeString(searchInput.value);
-        
-//         resultsSelect.innerHTML = '<option value="">Select</option>';
-//         resultsSelect.style.display = 'none';
-        
-//         resultsSelect.style.textAlign = 'left';
-//         resultsSelect.style.backgroundColor = '#4361ee';
-//         resultsSelect.style.color = 'white';
-//         resultsSelect.style.border = '1px solid #3f51b5';
-//         resultsSelect.style.borderRadius = '4px';
-//         resultsSelect.style.appearance = 'none';
-//         resultsSelect.style.cursor = 'pointer';
-//         resultsSelect.style.fontSize = '14px';
-//         resultsSelect.style.fontWeight = 'bold';
-//         resultsSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-        
-//         resultsSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-//         resultsSelect.style.backgroundRepeat = 'no-repeat';
-//         resultsSelect.style.backgroundPosition = 'top 0px left 5px';
-//         resultsSelect.style.paddingLeft = '0px';
-
-//         if (!searchStr) return;
-    
-//         const matchedPersons = Object.values(state.gedcomData.individuals)
-//             .filter(person => {
-//                 const fullName = normalizeString(person.name.replace(/\//g, ''));
-//                 return fullName.includes(searchStr);
-//             });
-    
-//         if (matchedPersons.length > 0) {
-//             matchedPersons.forEach(person => {
-//                 const option = document.createElement('option');
-//                 option.value = person.id;
-//                 option.textContent = person.name.replace(/\//g, '').trim();
-//                 resultsSelect.appendChild(option);
-//             });
-            
-//             resultsSelect.style.display = 'block';
-            
-//             resultsSelect.style.backgroundColor = '#FF6D00';
-//             resultsSelect.style.border = '1px solid #E65100';
-//         } else {
-//             alert('Aucune personne trouvée');
-//         }
-//     }
-
-//     searchButton.addEventListener('click', searchRootPerson);
-//     searchInput.addEventListener('keydown', (event) => {
-//         if (event.key === 'Enter') {
-//             event.preventDefault();
-//             searchRootPerson();
-//         }
-//     });
-
-//     resultsSelect.addEventListener('change', () => {
-//         const selectedPersonId = resultsSelect.value;
-//         if (selectedPersonId) {
-//             resultsSelect.style.animation = 'none';
-//             resultsSelect.style.backgroundColor = 'orange';
-//             rootPersonSelect.value = selectedPersonId;
-//             generateNameCloud();
-//         }
-//     });
-
-//     searchWrapper.appendChild(searchInput);
-//     searchWrapper.appendChild(searchButton);
-
-//     container.appendChild(label);
-//     container.appendChild(searchWrapper);
-//     container.appendChild(resultsSelect);
-//     container.appendChild(rootPersonSelect);
-
-//     return {
-//         container: container,
-//         rootPersonSelect: rootPersonSelect
-//     };
-// }
-
-
-// function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
-//     const container = document.createElement('div');
-//     container.style.display = 'none'; // Caché par défaut
-//     container.style.position = 'relative';
-//     container.style.marginLeft = '5px'; // Changé de -7px à 5px pour le coller à gauche du bouton OK
-//     container.style.display = 'flex';
-//     container.style.width = 'auto';
-//     container.style.alignSelf = 'flex-start';
-//     container.style.zIndex = '10';
-//     container.style.flexDirection = 'column';
-//     container.style.alignItems = 'flex-start'; // S'assure que tout est aligné à gauche
-
-//     const label = document.createElement('label');
-//     label.textContent = 'Personne racine';
-//     label.style.fontSize = '12px';
-//     label.style.marginBottom = '2px';
-//     label.style.textAlign = 'left'; // Assurez-vous que le texte est aligné à gauche
-
-//     const searchWrapper = document.createElement('div');
-//     searchWrapper.style.display = 'flex';
-//     searchWrapper.style.gap = '5px';
-//     searchWrapper.style.width = '100%'; // Assure que le wrapper prend toute la largeur disponible
-//     searchWrapper.style.height = '22px'; // Hauteur réduite
-//     // searchWrapper.style.position = 'relative'; // Ajout de position relative pour le positionnement du résultat
-
-//     const searchInput = document.createElement('input');
-//     searchInput.type = 'text';
-//     searchInput.placeholder = 'search racine';
-//     searchInput.style.padding = '2px 3px'; // Padding réduit
-//     searchInput.style.width = '79px';
-//     searchInput.style.height = '19px'; // Hauteur réduite
-
-//     const searchButton = document.createElement('button');
-//     searchButton.textContent = '🔍';
-//     searchButton.style.padding = '0px 0px'; // Padding réduit
-//     searchButton.style.height = '26px'; // Hauteur réduite
-//     searchButton.style.marginLeft = '-3px';
-
-//     const resultsSelect = document.createElement('select');
-//     resultsSelect.style.display = 'none';
-//     resultsSelect.style.position = 'absolute';
-//     resultsSelect.style.bottom = '100%'; // Changé de 'top: 100%' à 'bottom: 100%' pour afficher au-dessus
-//     resultsSelect.style.left = '0';
-//     resultsSelect.style.width = '100%';
-//     resultsSelect.style.zIndex = '1000';
-//     resultsSelect.style.height = '19px';
-//     // resultsSelect.style.marginBottom = '0px'; // Ajout d'une marge en bas pour l'espacement
-//     resultsSelect.style.marginTop = '12px'
-
-//     function normalizeString(str) {
-//         return str.toLowerCase()
-//             .replace(/[éèêë]/g, 'e')
-//             .replace(/[àâä]/g, 'a')
-//             .replace(/[îï]/g, 'i')
-//             .replace(/[ôö]/g, 'o')
-//             .replace(/[ûüù]/g, 'u')
-//             .replace(/ç/g, 'c');
-//     }
-
-//     function searchRootPerson() {
-//         const searchStr = normalizeString(searchInput.value);
-        
-//         resultsSelect.innerHTML = '<option value="">. select</option>';
-//         resultsSelect.style.display = 'none';
-        
-//         resultsSelect.style.textAlign = 'left';
-//         resultsSelect.style.backgroundColor = '#4361ee';
-//         resultsSelect.style.color = 'white';
-//         resultsSelect.style.border = '1px solid #3f51b5';
-//         resultsSelect.style.borderRadius = '4px';
-//         resultsSelect.style.appearance = 'none';
-//         resultsSelect.style.cursor = 'pointer';
-//         resultsSelect.style.fontSize = '14px';
-//         resultsSelect.style.fontWeight = 'bold';
-//         resultsSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-        
-//         resultsSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-//         resultsSelect.style.backgroundRepeat = 'no-repeat';
-//         resultsSelect.style.backgroundPosition = 'top 0px left 5px';
-//         resultsSelect.style.paddingLeft = '0px';
-
-//         if (!searchStr) return;
-    
-//         const matchedPersons = Object.values(state.gedcomData.individuals)
-//             .filter(person => {
-//                 const fullName = normalizeString(person.name.replace(/\//g, ''));
-//                 return fullName.includes(searchStr);
-//             });
-    
-//         if (matchedPersons.length > 0) {
-//             matchedPersons.forEach(person => {
-//                 const option = document.createElement('option');
-//                 option.value = person.id;
-//                 option.textContent = person.name.replace(/\//g, '').trim();
-//                 resultsSelect.appendChild(option);
-//             });
-            
-//             resultsSelect.style.display = 'block';
-            
-//             resultsSelect.style.backgroundColor = '#FF6D00';
-//             resultsSelect.style.border = '1px solid #E65100';
-            
-//             // Ajout d'une animation de clignotement pour le sélecteur orange
-//             resultsSelect.style.animation = 'blink 1s infinite';
-//             const blinkStyle = document.createElement('style');
-//             blinkStyle.textContent = `
-//                 @keyframes blink {
-//                     0% { opacity: 1; }
-//                     50% { opacity: 0.7; }
-//                     100% { opacity: 1; }
-//                 }
-//             `;
-//             document.head.appendChild(blinkStyle);
-//         } else {
-//             alert('Aucune personne trouvée');
-//         }
-//     }
-
-//     searchButton.addEventListener('click', searchRootPerson);
-//     searchInput.addEventListener('keydown', (event) => {
-//         if (event.key === 'Enter') {
-//             event.preventDefault();
-//             searchRootPerson();
-//         }
-//     });
-
-//     resultsSelect.addEventListener('change', () => {
-//         const selectedPersonId = resultsSelect.value;
-//         if (selectedPersonId) {
-//             resultsSelect.style.animation = 'none';
-//             resultsSelect.style.backgroundColor = 'orange';
-//             rootPersonSelect.value = selectedPersonId;
-//             generateNameCloud();
-//         }
-//     });
-
-//     searchWrapper.appendChild(searchInput);
-//     searchWrapper.appendChild(searchButton);
-//     searchWrapper.appendChild(resultsSelect); // Ajout du résultat dans le searchWrapper pour le positionnement
-
-//     container.appendChild(label);
-//     container.appendChild(searchWrapper);
-//     container.appendChild(rootPersonSelect);
-
-//     return {
-//         container: container,
-//         rootPersonSelect: rootPersonSelect
-//     };
-// }
-
-
 
 function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     const container = document.createElement('div');
@@ -797,9 +500,6 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     };
 }
 
-
-
-
 function createSettingsButton() {
     const settingsButton = document.createElement('button');
     settingsButton.innerHTML = '⚙️';
@@ -838,9 +538,6 @@ function createSettingsButton() {
     
     return settingsButton;
 }
-
-
-
 
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
@@ -888,6 +585,16 @@ export function updateTitleText(element, cfg) {
             titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${nameCloudState.placedWords} mots placés)</span>`;
     } 
 
+    if ((window.innerWidth > 700)) {
+        element.style.marginTop = '-30px';
+        element.style.marginLeft = '375px';
+        element.style.textAlign = 'left';
+    } else {
+        element.style.marginTop = '0px';
+        element.style.marginLeft = '0px';
+        element.style.textAlign = 'center';        
+    }
+
     element.innerHTML = titleText;
 
 }
@@ -932,7 +639,6 @@ function showNameCloud(nameData, config) {
     });
 
 
-
     const showButton = document.createElement('button');
     showButton.innerHTML = '✓';
     showButton.style.padding = '0';
@@ -943,7 +649,7 @@ function showNameCloud(nameData, config) {
     showButton.style.width = '23px';
     showButton.style.height = '23px';
     showButton.style.position = 'relative';
-    showButton.style.marginLeft = '-8px';
+    showButton.style.marginLeft = '0px';
     showButton.style.transform = 'translateY(-2px)';
     showButton.style.fontSize = '16px';
     showButton.style.cursor = 'pointer';
@@ -1059,13 +765,13 @@ function showNameCloud(nameData, config) {
 
     const dateContainer = document.createElement('div');
     dateContainer.style.display = 'flex';
-    dateContainer.style.gap = '10px';
+    dateContainer.style.gap = '3px';
     dateContainer.appendChild(startDateContainer);
     dateContainer.appendChild(endDateContainer);
 
     const mainOptionsContainer = document.createElement('div');
     mainOptionsContainer.style.display = 'flex';
-    mainOptionsContainer.style.gap = '10px';
+    mainOptionsContainer.style.gap = '3px';
     mainOptionsContainer.style.alignItems = 'flex-end';
 
     mainOptionsContainer.appendChild(leftContainer);
@@ -1131,4 +837,3 @@ export const createNameCloudUI = {
         showNameCloud(nameData, config);
     }
 };
-

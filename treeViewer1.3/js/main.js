@@ -9,6 +9,7 @@ import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './tre
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, validateLocations, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
+import { initializeCustomSelectors, replaceRootPersonSelector  } from './mainUI.js'; 
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -100,9 +101,16 @@ export function toggleFullScreen() {
     }
 }
 
-function initialize() {
+function initialize() {   
+     // Initialiser le sélecteur de générations standard d'abord
+    // (nécessaire pour sa création avant de le remplacer)
     initializeGenerationSelect();
+    
+    // Initialiser les gestionnaires d'événements
     initializeEventHandlers();
+    
+    // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
+    initializeCustomSelectors();
 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     document.addEventListener('DOMContentLoaded', function() {
@@ -136,6 +144,77 @@ function initializeGenerationSelect() {
 /**
  * Charge les données GEDCOM
  */
+// export async function loadData() {
+//     const fileInput = document.getElementById('gedFile');
+//     const passwordInput = document.getElementById('password');
+//     toggleFullScreen();
+
+//     // for mobile phone
+//     nameCloudState.mobilePhone = false;
+//     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+//     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
+    
+//     try {
+//         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
+//         state.gedcomData = parseGEDCOM(gedcomContent);
+        
+
+//         // // Nettoyer tous les conteneurs de fond d'écran existants
+//         // const loginBackground = document.querySelector('.login-background');
+//         // if (loginBackground) {
+//         //     loginBackground.remove();
+//         // }
+//         // const existingBackgroundContainer = document.querySelector('.background-container');
+//         // if (existingBackgroundContainer) {
+//         //     existingBackgroundContainer.remove();
+//         // }
+
+
+
+//         document.getElementById('password-form').style.display = 'none';
+
+//         // Cacher le bouton paramètres de la page d'accueil
+//         const settingsButton = document.getElementById('load-gedcom-button');
+//         if (settingsButton) {
+//             settingsButton.style.display = 'none';
+//         }
+
+//         document.getElementById('tree-container').style.display = 'block';
+
+//         // Initialiser le conteneur de fond d'écran
+//         initBackgroundContainer();
+
+
+//         // Chargement du fichier de géolocalisation
+//         await loadGeolocalisationFile();
+
+
+//         // Dispatch un événement personnalisé
+//         const event = new Event('gedcomLoaded');
+//         document.dispatchEvent(event);
+
+
+//         hideMap();
+
+//         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
+
+//         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
+//         setTimeout(() => {
+//             replaceRootPersonSelector();
+//         }, 500); // Petit délai pour s'assurer que tout est prêt
+
+
+        
+//     } catch (error) {
+//         console.error('Erreur complète:', error);
+//         alert(error.message);
+//     }
+// }
+
+
+/**
+ * Charge les données GEDCOM et configure l'affichage de l'arbre
+ */
 export async function loadData() {
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
@@ -150,18 +229,16 @@ export async function loadData() {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
         state.gedcomData = parseGEDCOM(gedcomContent);
         
-
-        // // Nettoyer tous les conteneurs de fond d'écran existants
-        // const loginBackground = document.querySelector('.login-background');
-        // if (loginBackground) {
-        //     loginBackground.remove();
-        // }
-        // const existingBackgroundContainer = document.querySelector('.background-container');
-        // if (existingBackgroundContainer) {
-        //     existingBackgroundContainer.remove();
-        // }
-
-
+        // IMPORTANT: Supprimer l'image de fond de la page d'accueil
+        const loginBackground = document.querySelector('.login-background');
+        if (loginBackground) {
+            loginBackground.remove(); // Supprime complètement l'élément du DOM
+        }
+        // Nettoyer aussi tout autre conteneur de fond d'écran existant
+        const existingBackgroundContainer = document.querySelector('.background-container');
+        if (existingBackgroundContainer) {
+            existingBackgroundContainer.remove();
+        }
 
         document.getElementById('password-form').style.display = 'none';
 
@@ -173,27 +250,73 @@ export async function loadData() {
 
         document.getElementById('tree-container').style.display = 'block';
 
-        // Initialiser le conteneur de fond d'écran
-        initBackgroundContainer();
-
+        // Si vous souhaitez remplacer l'image par un autre fond, vous pouvez initialiser
+        // un nouveau conteneur ici, sinon, commentez ou supprimez cette ligne
+        // initBackgroundContainer();
 
         // Chargement du fichier de géolocalisation
         await loadGeolocalisationFile();
-
 
         // Dispatch un événement personnalisé
         const event = new Event('gedcomLoaded');
         document.dispatchEvent(event);
 
-
         hideMap();
 
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
+
+        // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
+        setTimeout(() => {
+            replaceRootPersonSelector();
+        }, 500); // Petit délai pour s'assurer que tout est prêt
+        
     } catch (error) {
         console.error('Erreur complète:', error);
         alert(error.message);
     }
 }
+
+// Pour être certain que le fond est bien supprimé, on peut aussi ajouter une règle CSS
+// Vous pouvez ajouter ceci à votre fichier CSS ou l'injecter dynamiquement
+function injectCustomStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .tree-container-active .login-background,
+        .tree-container-active .background-container {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* Pour s'assurer que le fond est blanc ou transparent */
+        body.tree-view {
+            background: white !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Ajouter la classe à body quand l'arbre est affiché
+    document.addEventListener('gedcomLoaded', function() {
+        document.body.classList.add('tree-view');
+        document.getElementById('tree-container').classList.add('tree-container-active');
+    });
+}
+
+// Appelez cette fonction au chargement de la page
+window.addEventListener('load', injectCustomStyle);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Charge le contenu du fichier GEDCOM
@@ -261,12 +384,132 @@ async function loadFileContent(file) {
     });
 }
 
+// /**
+//  * Ajoute une personne à l'historique des racines et met à jour le sélecteur
+//  * @param {Object} person - La personne à ajouter
+//  */
+// function addToRootHistory(person) {
+//     // const rootPersonResults = document.getElementById('root-person-results');
+
+//     if (!person || !person.id) {
+//         console.warn("Personne invalide passée à addToRootHistory");
+//         return;
+//     }
+    
+//     const rootPersonResults = document.getElementById('root-person-results');
+//     if (!rootPersonResults) {
+//         console.warn("Élément root-person-results non trouvé");
+//         return;
+//     }
+
+
+
+    
+//     // Récupérer l'historique des racines depuis le localStorage
+//     let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+    
+//     // Vérifier si cette personne est déjà dans l'historique
+//     const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
+    
+//     // Si la personne n'est pas dans l'historique, l'ajouter
+//     if (existingIndex === -1) {
+//         rootHistory.push({
+//             id: person.id,
+//             name: person.name.replace(/\//g, '').trim()
+//         });
+        
+//         // Sauvegarder l'historique mis à jour
+//         localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
+//     }
+
+//     // Réinitialiser le sélecteur
+//     rootPersonResults.innerHTML = '';
+    
+//     // Remplir le sélecteur avec l'historique
+//     rootHistory.forEach(entry => {
+//         const option = document.createElement('option');
+//         option.value = entry.id;
+//         option.textContent = entry.name;
+//         rootPersonResults.appendChild(option);
+//     });
+
+//     // Ajouter l'option "clear history"
+//     const clearOption = document.createElement('option');
+//     clearOption.value = 'clear-history';
+//     clearOption.textContent = '--- Clear History ---';
+//     rootPersonResults.appendChild(clearOption);
+
+
+
+//     // Ajouter l'option "demo1"
+//     const demoOption = document.createElement('option');
+//     demoOption.value = 'demo1';
+//     demoOption.textContent = '--- Demo1 ---';
+//     rootPersonResults.appendChild(demoOption);
+    
+//     // Ajouter l'option "demo2"
+//     const demoOption2 = document.createElement('option');
+//     demoOption2.value = 'demo2';
+//     demoOption2.textContent = '--- Demo2 ---';
+//     rootPersonResults.appendChild(demoOption2);
+
+//     // // Ajouter l'option "heatMap1"
+//     // const heatMapOption = document.createElement('option');
+//     // heatMapOption.value = 'heatMap1';
+//     // heatMapOption.textContent = '--- heatMap1 ---';
+//     // rootPersonResults.appendChild(heatMapOption);
+    
+//     // // Ajouter l'option "demo2"
+//     // const heatMapOption2 = document.createElement('option');
+//     // heatMapOption2.value = 'heatMap2';
+//     // heatMapOption2.textContent = '--- heatMap2 ---';
+//     // rootPersonResults.appendChild(heatMapOption2);
+
+
+
+//     // Sélectionner la personne courante
+//     rootPersonResults.value = person.id;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Ajoute une personne à l'historique des racines et met à jour le sélecteur
  * @param {Object} person - La personne à ajouter
  */
 function addToRootHistory(person) {
+    // Utiliser la fonction de mise à jour du sélecteur personnalisé
+    // au lieu de manipuler directement le sélecteur standard
+    import('./mainUI.js').then(module => {
+        if (typeof module.updateRootPersonSelector === 'function') {
+            module.updateRootPersonSelector(person);
+        } else {
+            console.warn("La fonction updateRootPersonSelector n'est pas disponible");
+            // Comportement de secours en cas d'échec
+            fallbackUpdateRootPersonSelector(person);
+        }
+    }).catch(error => {
+        console.error("Erreur lors de l'import de mainUI.js:", error);
+        // Comportement de secours en cas d'échec
+        fallbackUpdateRootPersonSelector(person);
+    });
+}
+
+// Fonction de secours qui utilise le code original
+function fallbackUpdateRootPersonSelector(person) {
     const rootPersonResults = document.getElementById('root-person-results');
+    if (!rootPersonResults) return;
     
     // Récupérer l'historique des racines depuis le localStorage
     let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
@@ -302,8 +545,6 @@ function addToRootHistory(person) {
     clearOption.textContent = '--- Clear History ---';
     rootPersonResults.appendChild(clearOption);
 
-
-
     // Ajouter l'option "demo1"
     const demoOption = document.createElement('option');
     demoOption.value = 'demo1';
@@ -316,28 +557,90 @@ function addToRootHistory(person) {
     demoOption2.textContent = '--- Demo2 ---';
     rootPersonResults.appendChild(demoOption2);
 
-    // // Ajouter l'option "heatMap1"
-    // const heatMapOption = document.createElement('option');
-    // heatMapOption.value = 'heatMap1';
-    // heatMapOption.textContent = '--- heatMap1 ---';
-    // rootPersonResults.appendChild(heatMapOption);
-    
-    // // Ajouter l'option "demo2"
-    // const heatMapOption2 = document.createElement('option');
-    // heatMapOption2.value = 'heatMap2';
-    // heatMapOption2.textContent = '--- heatMap2 ---';
-    // rootPersonResults.appendChild(heatMapOption2);
-
-
-
     // Sélectionner la personne courante
     rootPersonResults.value = person.id;
 }
+
+
+
 
 /**
  * Gère le changement de sélection dans le sélecteur de personnes racines
  * @param {Event} event - L'événement de changement
  */
+// export function handleRootPersonChange(event) {
+//     const selectedValue = event.target.value;
+    
+//     if (selectedValue === 'clear-history') {
+//         // Vider l'historique
+//         localStorage.removeItem('rootPersonHistory');
+        
+//         // Garder uniquement la racine actuelle dans l'historique
+//         const currentPerson = state.gedcomData.individuals[state.rootPersonId];
+//         let newHistory = [{
+//             id: currentPerson.id,
+//             name: currentPerson.name.replace(/\//g, '').trim()
+//         }];
+        
+//         // Sauvegarder le nouvel historique
+//         localStorage.setItem('rootPersonHistory', JSON.stringify(newHistory));
+        
+//         // Mettre à jour le sélecteur avec seulement la racine actuelle
+//         addToRootHistory(currentPerson);
+        
+//         return;
+//     }
+
+//     if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
+        
+//         if (selectedValue === 'demo1'){ state.targetAncestorId = "@I736@" } //"@I6@" } //
+//         else { state.targetAncestorId = "@I1322@"}
+        
+//         showMap();
+
+//         // Réinitialiser l'état de l'animation avant de démarrer
+//         resetAnimationState();
+        
+//         // Forcer 2 générations
+//         state.nombre_generation = 2;
+//         document.getElementById('generations').value = '2';
+        
+//         // Mettre à jour l'état de pause
+//         const animationPauseBtn = document.getElementById('animationPauseBtn');
+//         animationPauseBtn.querySelector('span').textContent = '⏸️';
+        
+//         // Redessiner l'arbre d'abord
+//         displayGenealogicTree(null, true, false);
+        
+
+
+//         // Nettoyer tous les conteneurs de fond d'écran existants
+//         const loginBackground = document.querySelector('.login-background');
+//         if (loginBackground) {
+//             loginBackground.remove();
+//         }
+//         const existingBackgroundContainer = document.querySelector('.background-container');
+//         if (existingBackgroundContainer) {
+//             existingBackgroundContainer.remove();
+//         }
+
+
+//         // Démarrer l'animation après un court délai
+//         setTimeout(() => {
+//             startAncestorAnimation();
+//         }, 500);
+        
+//         // event.target.value = state.rootPersonId;
+
+//         const rootPersonResults = document.getElementById('root-person-results');
+//         if (rootPersonResults) {
+//             rootPersonResults.value = state.rootPersonId;
+//         }
+
+//         return;
+//     }
+// }
+
 export function handleRootPersonChange(event) {
     const selectedValue = event.target.value;
     
@@ -373,17 +676,22 @@ export function handleRootPersonChange(event) {
         
         // Forcer 2 générations
         state.nombre_generation = 2;
-        document.getElementById('generations').value = '2';
+        
+        // Mettre à jour le sélecteur si disponible
+        const genSelect = document.getElementById('generations');
+        if (genSelect) {
+            genSelect.value = '2';
+        }
         
         // Mettre à jour l'état de pause
         const animationPauseBtn = document.getElementById('animationPauseBtn');
-        animationPauseBtn.querySelector('span').textContent = '⏸️';
+        if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+            animationPauseBtn.querySelector('span').textContent = '⏸️';
+        }
         
         // Redessiner l'arbre d'abord
         displayGenealogicTree(null, true, false);
         
-
-
         // Nettoyer tous les conteneurs de fond d'écran existants
         const loginBackground = document.querySelector('.login-background');
         if (loginBackground) {
@@ -394,17 +702,19 @@ export function handleRootPersonChange(event) {
             existingBackgroundContainer.remove();
         }
 
-
         // Démarrer l'animation après un court délai
         setTimeout(() => {
             startAncestorAnimation();
         }, 500);
         
-        event.target.value = state.rootPersonId;
+        // Mettre à jour la valeur du sélecteur si possible
+        const customSelector = document.querySelector('[data-text-key="rootPersonResults"]');
+        if (customSelector && typeof customSelector.value !== 'undefined') {
+            customSelector.value = state.rootPersonId;
+        }
+        
         return;
     }
-
-
 }
 
 /**
@@ -666,7 +976,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
+// Exposer la fonction et le compteur globalement
+window.showToast = showToast;
+window.actionCounters = actionCounters;
+// window.displayGenealogicTree = displayGenealogicTree;
 
 
 
