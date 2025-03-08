@@ -751,22 +751,22 @@ input[type=number] {
 }
 
 /* Extra small screens */
-@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 480px) {
     .controls-row-1 button {
         min-width: 18px;
         height: 20px;
-        margin: 0px; /* Espacement minimal sur très petit écran */
+        margin: 0px; 
     }
 
     .controls-row-1 {
-        gap: 2px; /* Espace minimal entre les boutons */
+        gap: 2px; 
     }
 
 
     .controls-row-1 button span {
         font-size: 16px;
     }
-}
+} */
 
 
 
@@ -793,7 +793,7 @@ input[type=number] {
 }
 
 /* Extra small screens */
-@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 480px) {
     .controls-row-1 button.large-button {
         min-width: 22px;
         height: 20px;
@@ -802,7 +802,7 @@ input[type=number] {
     .controls-row-1 button span.wide-span {
         font-size: 18px;
     }
-}
+} */
 
 
 .mobile-tooltip {
