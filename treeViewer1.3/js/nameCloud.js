@@ -19,14 +19,14 @@ export const nameCloudState = {
     maxFontSize: 45,
     appliedMinFontSize: 10,
     appliedMaxFontSize: 45,
-    cloudShape: 'rectangle',
+    cloudShape: 'coeur',
     padding: 4,
     paddingLocal: 4,
     fontFamily: 'Arial',
-    isShapeBorder: true,
+    isShapeBorder: false,
     isThreeZones: true,
     wordRotation: false,
-    wordMovement: 'none',   // Can be 'none', 'simple', 'bounce', or 'float'
+    wordMovement: 'simple',   // Can be 'none', 'simple', 'bounce', or 'float'
     movingRotation: false,
     autoShapeScale: 1,
     autoZoomScale: 1,
