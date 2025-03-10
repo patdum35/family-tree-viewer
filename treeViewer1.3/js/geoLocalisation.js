@@ -2,6 +2,7 @@
 import { state } from './main.js';
 import { displayPersonDetails } from './modalWindow.js';
 import { buildAncestorTree, buildDescendantTree} from './treeOperations.js';
+import { nameCloudState, getPersonsFromTree, processPersonData } from './nameCloud.js';
 
 export async function validateLocations() {
     const unlocatableLocations = document.getElementById('unlocatableLocations');
@@ -410,7 +411,7 @@ async function getIndividualsToProcess(type, rootPersonId, maxPersons) {
     return individuals;
 }
 
-function createInteractiveHeatmap(locationData, heatmapName) {
+export function createInteractiveHeatmap(locationData, heatmapName) {
     // Fermer toute modale existante
     const existingModal = document.querySelector('.settings-modal');
     if (existingModal) {
@@ -518,7 +519,7 @@ function createInteractiveHeatmap(locationData, heatmapName) {
         // Événements de survol
         marker.on('mouseover', () => {
             let details = `<h3>Détails du point</h3>
-                <p><strong>Coordonnées :</strong> ${location.coords.lat.toFixed(4)}, ${location.coords.lon.toFixed(4)}</p>
+                <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
                 <p><strong>Nombre total d'occurences :</strong> ${location.count}</p>`;
 
             if (location.families && Object.keys(location.families).length > 0) {
@@ -965,21 +966,1519 @@ async function showHeatmapDialog(existingHeatmaps, type = 'all') {
 }
 
 
+// // // Variable globale pour le cache
+// // let geolocalisationCache = null;
+
+// // // Fonction pour charger le fichier au démarrage
+// // export async function loadGeolocalisationFile() {
+// //     try {
+// //         const response = await fetch('geolocalisation.json', { method: 'HEAD' });
+// //         if (response.ok) {
+// //             const dataResponse = await fetch('geolocalisation.json');
+// //             geolocalisationCache = await dataResponse.json();
+// //             console.log('Fichier de géolocalisation chargé');
+// //             return true;
+// //         }
+// //         return false;
+// //     } catch (error) {
+// //         return false;
+// //     }
+// // }
+
+// // export async function geocodeLocation(location) {
+// //     if (!location || location.trim() === '') return null;
+
+    
+// //     // console.log(" DEBUGGGGGGGGGG  : UTILSATION DU CACHE pour geolocalisation")
+// //     // Si le cache est disponible, chercher d'abord dedans
+// //     if (geolocalisationCache && geolocalisationCache[location]) {
+// //         // console.log(" UTILSATION DU CACHE pour geolocalisation")
+
+// //         return geolocalisationCache[location];
+// //     }
+
+// //     try {
+// //         await delay(Math.random() * 500);
+
+// //         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`, {
+// //             headers: {
+// //                 'User-Agent': 'GenealogyTreeApp/1.0'
+// //             }
+// //         });
+
+// //         if (!response.ok) {
+// //             console.error('Erreur de réponse:', response.status);
+// //             return null;
+// //         }
+
+// //         const data = await response.json();
+        
+// //         return data && data.length > 0 ? {
+// //             lat: parseFloat(data[0].lat),
+// //             lon: parseFloat(data[0].lon)
+// //         } : null;
+// //     } catch (error) {
+// //         console.error('Erreur de géocodage pour', location, ':', error);
+// //         return null;
+// //     }
+// // }
+
+
+// // export function generateGeocodeFile() {
+// //     generateGeocodeFileInternal();
+// // }
+
+// // // Rendre la fonction accessible globalement
+// // window.generateGeocodeFile = generateGeocodeFile;
+
+
+// // async function generateGeocodeFileInternal() {
+// //     const statusDiv = document.getElementById('geocoding-status');
+// //     const progressBar = document.getElementById('geocoding-bar');
+// //     const resultsList = document.getElementById('geocoding-results');
+// //     const maxLocations = parseInt(document.getElementById('maxLocations').value) || 0;
+    
+// //     document.getElementById('geocoding-progress').style.display = 'block';
+// //     resultsList.style.display = 'block';
+// //     resultsList.innerHTML = '';
+
+// //     // Collecter tous les lieux uniques
+// //     const locations = new Set();
+// //     for (const person of Object.values(state.gedcomData.individuals)) {
+// //         if (person.birthPlace) locations.add(person.birthPlace);
+// //         if (person.deathPlace) locations.add(person.deathPlace);
+        
+// //         if (person.spouseFamilies) {
+// //             person.spouseFamilies.forEach(famId => {
+// //                 const family = state.gedcomData.families[famId];
+// //                 if (family?.marriagePlace) locations.add(family.marriagePlace);
+// //             });
+// //         }
+// //     }
+
+// //     // Convertir en array et limiter si nécessaire
+// //     let locationsArray = Array.from(locations);
+// //     if (maxLocations > 0) {
+// //         locationsArray = locationsArray.slice(0, maxLocations);
+// //     }
+
+// //     const totalLocations = locationsArray.length;
+// //     let processed = 0;
+// //     const geolocalisationData = {};
+
+// //     // Charger les données existantes si disponibles
+// //     try {
+// //         const response = await fetch('geolocalisation.json');
+// //         if (response.ok) {
+// //             const existingData = await response.json();
+// //             Object.assign(geolocalisationData, existingData);
+// //             console.log('Données existantes chargées');
+// //         }
+// //     } catch (error) {
+// //         // Pas de fichier existant, on continue
+// //     }
+
+// //     for (const location of locationsArray) {
+// //         statusDiv.textContent = `Géocodage: ${processed + 1}/${totalLocations} - ${location}`;
+// //         progressBar.value = (processed / totalLocations) * 100;
+
+// //         try {
+// //             if (geolocalisationData[location]) {
+// //                 resultsList.innerHTML += `<option style="color: blue;">↺ ${location} (cache)</option>`;
+// //             } else {
+// //                 const coords = await geocodeLocation(location);
+// //                 if (coords) {
+// //                     geolocalisationData[location] = coords;
+// //                     resultsList.innerHTML += `<option style="color: green;">✓ ${location}</option>`;
+// //                 } else {
+// //                     resultsList.innerHTML += `<option style="color: red;">✗ ${location}</option>`;
+// //                 }
+// //             }
+// //         } catch (error) {
+// //             resultsList.innerHTML += `<option style="color: red;">✗ ${location} (${error.message})</option>`;
+// //         }
+
+// //         processed++;
+// //         if (!geolocalisationData[location]) {
+// //             await new Promise(resolve => setTimeout(resolve, 1000));
+// //         }
+// //     }
+
+// //     // Générer le fichier
+// //     const blob = new Blob([JSON.stringify(geolocalisationData, null, 2)], {type: 'application/json'});
+// //     const url = URL.createObjectURL(blob);
+    
+// //     const a = document.createElement('a');
+// //     a.href = url;
+// //     a.download = 'geolocalisation.json';
+// //     document.body.appendChild(a);
+// //     a.click();
+// //     document.body.removeChild(a);
+// //     URL.revokeObjectURL(url);
+
+// //     statusDiv.textContent = `Terminé ! ${processed} lieux traités`;
+// //     progressBar.value = 100;
+// // }
+
+
+
+
+
+
+
+
+
+// function applySmallScreenStyles(map, heatmapTitle) {
+//     const screenWidth = window.innerWidth;
+//     const isSmallScreen = screenWidth <= 410;
+    
+//     // 1. Gérer la barre de titre et son contenu
+//     const titleBar = document.querySelector('#namecloud-heatmap-wrapper > div');
+//     const mapContainer = document.getElementById('ancestors-heatmap');
+    
+//     if (titleBar && mapContainer) {
+//         if (isSmallScreen) {
+//             // Masquer la barre de titre originale
+//             titleBar.style.display = 'none';
+            
+//             // Créer un titre à l'intérieur de la carte
+//             let mapTitle = document.getElementById('heatmap-map-title');
+//             if (!mapTitle) {
+//                 mapTitle = document.createElement('div');
+//                 mapTitle.id = 'heatmap-map-title';
+//                 mapTitle.style.position = 'absolute';
+//                 mapTitle.style.top = '10px';
+//                 mapTitle.style.left = '10px';
+//                 mapTitle.style.zIndex = '1000';
+//                 mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+//                 mapTitle.style.padding = '3px 6px';
+//                 mapTitle.style.borderRadius = '4px';
+//                 mapTitle.style.fontSize = '12px';
+//                 mapTitle.style.fontWeight = 'bold';
+//                 mapTitle.style.maxWidth = '70%';
+//                 mapTitle.textContent = heatmapTitle || 'Heatmap';
+//                 mapContainer.appendChild(mapTitle);
+//             }
+            
+//             // Créer les boutons dans la carte
+//             let controlsContainer = document.getElementById('heatmap-map-controls');
+//             if (!controlsContainer) {
+//                 controlsContainer = document.createElement('div');
+//                 controlsContainer.id = 'heatmap-map-controls';
+//                 controlsContainer.style.position = 'absolute';
+//                 controlsContainer.style.top = '10px';
+//                 controlsContainer.style.right = '10px';
+//                 controlsContainer.style.zIndex = '1000';
+//                 controlsContainer.style.display = 'flex';
+//                 controlsContainer.style.gap = '5px';
+                
+//                 // Bouton refresh
+//                 const refreshBtn = document.createElement('button');
+//                 refreshBtn.innerHTML = '🔄';
+//                 refreshBtn.title = 'Rafraîchir la heatmap';
+//                 refreshBtn.style.width = '24px';
+//                 refreshBtn.style.height = '24px';
+//                 refreshBtn.style.padding = '0';
+//                 refreshBtn.style.border = '1px solid #ccc';
+//                 refreshBtn.style.borderRadius = '3px';
+//                 refreshBtn.style.backgroundColor = 'white';
+//                 refreshBtn.style.cursor = 'pointer';
+//                 refreshBtn.style.fontSize = '12px';
+//                 refreshBtn.style.display = 'flex';
+//                 refreshBtn.style.justifyContent = 'center';
+//                 refreshBtn.style.alignItems = 'center';
+                
+//                 // Bouton fermeture
+//                 const closeBtn = document.createElement('button');
+//                 closeBtn.innerHTML = '✖';
+//                 closeBtn.title = 'Fermer la heatmap';
+//                 closeBtn.style.width = '24px';
+//                 closeBtn.style.height = '24px';
+//                 closeBtn.style.padding = '0';
+//                 closeBtn.style.border = '1px solid #ccc';
+//                 closeBtn.style.borderRadius = '3px';
+//                 closeBtn.style.backgroundColor = 'white';
+//                 closeBtn.style.cursor = 'pointer';
+//                 closeBtn.style.fontSize = '12px';
+//                 closeBtn.style.display = 'flex';
+//                 closeBtn.style.justifyContent = 'center';
+//                 closeBtn.style.alignItems = 'center';
+                
+//                 // Ajouter les écouteurs d'événements
+//                 refreshBtn.addEventListener('click', () => {
+//                     if (typeof refreshHeatmap === 'function') {
+//                         refreshHeatmap();
+//                     }
+//                 });
+                
+//                 closeBtn.addEventListener('click', () => {
+//                     const wrapper = document.getElementById('namecloud-heatmap-wrapper');
+//                     if (wrapper) {
+//                         document.body.removeChild(wrapper);
+//                         // Restaurer les z-index si nécessaire
+//                         document.querySelectorAll('[data-original-z-index]').forEach(el => {
+//                             el.style.zIndex = el.dataset.originalZIndex;
+//                             delete el.dataset.originalZIndex;
+//                         });
+//                     }
+//                 });
+                
+//                 controlsContainer.appendChild(refreshBtn);
+//                 controlsContainer.appendChild(closeBtn);
+//                 mapContainer.appendChild(controlsContainer);
+//             }
+//         } else {
+//             // Rétablir l'affichage normal pour les écrans plus grands
+//             titleBar.style.display = 'flex';
+            
+//             // Supprimer les éléments spécifiques aux petits écrans s'ils existent
+//             const mapTitle = document.getElementById('heatmap-map-title');
+//             const controlsContainer = document.getElementById('heatmap-map-controls');
+            
+//             if (mapTitle) mapTitle.remove();
+//             if (controlsContainer) controlsContainer.remove();
+//         }
+//     }
+    
+//     // 2. Réduire la taille des boutons de zoom
+//     if (map) {
+//         const zoomControl = document.querySelector('.leaflet-control-zoom');
+//         if (zoomControl) {
+//             if (isSmallScreen) {
+//                 // Réduction plus importante des boutons de zoom
+//                 zoomControl.style.transform = 'scale(0.7)';
+//                 zoomControl.style.transformOrigin = 'top right';
+//                 zoomControl.style.marginTop = '40px'; // Décalage vers le bas
+//                 zoomControl.style.marginLeft = '-10px'; // Décalage vers la gauche
+
+//                 // Ajuster également les éléments internes des boutons zoom
+//                 const zoomButtons = zoomControl.querySelectorAll('a');
+//                 zoomButtons.forEach(btn => {
+//                     btn.style.width = '22px';
+//                     btn.style.height = '22px';
+//                     btn.style.lineHeight = '22px';
+//                     btn.style.fontSize = '14px';
+//                 });
+//             } else {
+//                 zoomControl.style.transform = 'none';
+//                 const zoomButtons = zoomControl.querySelectorAll('a');
+//                 zoomButtons.forEach(btn => {
+//                     btn.style.width = '';
+//                     btn.style.height = '';
+//                     btn.style.lineHeight = '';
+//                     btn.style.fontSize = '';
+//                 });
+//             }
+//         }
+
+
+
+
+
+
+
+
+
+//     }
+    
+//     // 3. Masquer l'attribution Leaflet sur petits écrans
+//     const attribution = document.querySelector('.leaflet-control-attribution');
+//     if (attribution) {
+//         attribution.style.display = isSmallScreen ? 'none' : 'block';
+//     }
+    
+//     // 4. Centrer la carte sur son centre actuel pour garder le contenu centré
+//     if (map) {
+//         const currentCenter = map.getCenter();
+//         const currentZoom = map.getZoom();
+//         map.invalidateSize();
+//         map.setView(currentCenter, currentZoom, { animate: false });
+//     }
+// }
+
+
+
+function applySmallScreenStyles(map, heatmapTitle) {
+    const screenWidth = window.innerWidth;
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    
+    // Vérifier à la fois la taille de l'écran ET la taille du conteneur
+    const isSmallScreen = screenWidth <= 410;
+    const isSmallContainer = heatmapWrapper && 
+                            (heatmapWrapper.clientWidth <= 200 || heatmapWrapper.clientHeight <= 200);
+    
+    // Appliquer le style petit écran si l'un des deux est vrai
+    const applySmallStyle = isSmallScreen || isSmallContainer;
+    
+    // 1. Gérer la barre de titre et son contenu
+    const titleBar = document.querySelector('#namecloud-heatmap-wrapper > div');
+    const mapContainer = document.getElementById('ancestors-heatmap');
+    
+    if (titleBar && mapContainer) {
+        if (applySmallStyle) {
+            // Code existant pour le style petit écran...
+            titleBar.style.display = 'none';
+            
+            // Reste du code pour créer/gérer mapTitle et controlsContainer...
+        } else {
+            // Rétablir l'affichage normal pour les écrans et conteneurs plus grands
+            titleBar.style.display = 'flex';
+            
+            // Supprimer les éléments spécifiques aux petits écrans s'ils existent
+            const mapTitle = document.getElementById('heatmap-map-title');
+            const controlsContainer = document.getElementById('heatmap-map-controls');
+            
+            if (mapTitle) mapTitle.remove();
+            if (controlsContainer) controlsContainer.remove();
+        }
+    }
+    
+    // 2. Réduire la taille des boutons de zoom et les déplacer vers le bas
+    if (map) {
+        const zoomControl = document.querySelector('.leaflet-control-zoom');
+        if (zoomControl) {
+            if (applySmallStyle) {
+                // // Réduction et repositionnement des boutons de zoom
+                zoomControl.style.transform = 'scale(0.7)';
+                zoomControl.style.transformOrigin = 'top right';
+                zoomControl.style.marginTop = '40px'; // Décalage vers le bas
+                zoomControl.style.marginLeft = '-10px'; // Décalage vers le bas 
+
+                // Ajuster également les éléments internes des boutons zoom
+                const zoomButtons = zoomControl.querySelectorAll('a');
+                zoomButtons.forEach(btn => {
+                    btn.style.width = '22px';
+                    btn.style.height = '22px';
+                    btn.style.lineHeight = '22px';
+                    btn.style.fontSize = '14px';
+                });
+                // Masquer la barre de titre originale
+                titleBar.style.display = 'none';
+                
+                // Créer ou mettre à jour le titre à l'intérieur de la carte
+                let mapTitle = document.getElementById('heatmap-map-title');
+                // Enlever "Heatmap - " du début du titre pour plus de compacité
+
+                if (!mapTitle) {
+                    // Si le titre n'existe pas, le créer
+                    mapTitle = document.createElement('div');
+                    mapTitle.id = 'heatmap-map-title';
+                    mapTitle.style.position = 'absolute';
+                    mapTitle.style.top = '10px';
+                    mapTitle.style.left = '10px';
+                    mapTitle.style.zIndex = '1000';
+                    mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    mapTitle.style.padding = '3px 6px';
+                    mapTitle.style.borderRadius = '4px';
+                    mapTitle.style.fontSize = '12px';
+                    mapTitle.style.fontWeight = 'bold';
+                    mapTitle.style.maxWidth = '70%';
+                    mapContainer.appendChild(mapTitle);
+                }
+                
+                // Toujours mettre à jour le texte du titre
+                // mapTitle.textContent = heatmapTitle || 'Heatmap';
+                mapTitle.textContent = (heatmapTitle || 'Heatmap').replace(/^Heatmap\s*-\s*/, '');
+                
+                // Créer les boutons dans la carte
+                let controlsContainer = document.getElementById('heatmap-map-controls');
+                if (!controlsContainer) {
+                    controlsContainer = document.createElement('div');
+                    controlsContainer.id = 'heatmap-map-controls';
+                    controlsContainer.style.position = 'absolute';
+                    controlsContainer.style.top = '10px';
+                    controlsContainer.style.right = '10px';
+                    controlsContainer.style.zIndex = '1000';
+                    controlsContainer.style.display = 'flex';
+                    controlsContainer.style.gap = '5px';
+                    
+                    // Bouton refresh
+                    const refreshBtn = document.createElement('button');
+                    refreshBtn.innerHTML = '🔄';
+                    refreshBtn.title = 'Rafraîchir la heatmap';
+                    refreshBtn.style.width = '24px';
+                    refreshBtn.style.height = '24px';
+                    refreshBtn.style.padding = '0';
+                    refreshBtn.style.border = '1px solid #ccc';
+                    refreshBtn.style.borderRadius = '3px';
+                    refreshBtn.style.backgroundColor = 'white';
+                    refreshBtn.style.cursor = 'pointer';
+                    refreshBtn.style.fontSize = '12px';
+                    refreshBtn.style.display = 'flex';
+                    refreshBtn.style.justifyContent = 'center';
+                    refreshBtn.style.alignItems = 'center';
+                    
+                    // Bouton fermeture
+                    const closeBtn = document.createElement('button');
+                    closeBtn.innerHTML = '✖';
+                    closeBtn.title = 'Fermer la heatmap';
+                    closeBtn.style.width = '24px';
+                    closeBtn.style.height = '24px';
+                    closeBtn.style.padding = '0';
+                    closeBtn.style.border = '1px solid #ccc';
+                    closeBtn.style.borderRadius = '3px';
+                    closeBtn.style.backgroundColor = 'white';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.style.fontSize = '12px';
+                    closeBtn.style.display = 'flex';
+                    closeBtn.style.justifyContent = 'center';
+                    closeBtn.style.alignItems = 'center';
+                    
+                    // Ajouter les écouteurs d'événements
+                    refreshBtn.addEventListener('click', () => {
+                        if (typeof refreshHeatmap === 'function') {
+                            refreshHeatmap();
+                        }
+                    });
+                    
+                    closeBtn.addEventListener('click', () => {
+                        const wrapper = document.getElementById('namecloud-heatmap-wrapper');
+                        if (wrapper) {
+                            document.body.removeChild(wrapper);
+                            // Restaurer les z-index si nécessaire
+                            document.querySelectorAll('[data-original-z-index]').forEach(el => {
+                                el.style.zIndex = el.dataset.originalZIndex;
+                                delete el.dataset.originalZIndex;
+                            });
+                        }
+                    });
+                    
+                    controlsContainer.appendChild(refreshBtn);
+                    controlsContainer.appendChild(closeBtn);
+                    mapContainer.appendChild(controlsContainer);
+                }
+
+            } else {
+                zoomControl.style.transform = 'none';
+                zoomControl.style.marginTop = '0'; // Restaurer la position par défaut
+                zoomControl.style.marginLeft = '+10px'; // Décalage vers le bas 
+                const zoomButtons = zoomControl.querySelectorAll('a');
+                zoomButtons.forEach(btn => {
+                    btn.style.width = '';
+                    btn.style.height = '';
+                    btn.style.lineHeight = '';
+                    btn.style.fontSize = '';
+                });
+            }
+        }
+    }
+    
+    // 3. Masquer l'attribution Leaflet sur petits écrans
+    const attribution = document.querySelector('.leaflet-control-attribution');
+    if (attribution) {
+        attribution.style.display = applySmallStyle ? 'none' : 'block';
+    }
+    
+    // 4. Centrer la carte sur son centre actuel pour garder le contenu centré
+    if (map) {
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        map.invalidateSize();
+        map.setView(currentCenter, currentZoom, { animate: false });
+    }
+}
+
+
+
+export function createImprovedHeatmap(locationData, heatmapTitle) {
+    // Fermer toute carte existante d'abord
+    const existingMap = document.getElementById('namecloud-heatmap-wrapper');
+    if (existingMap) {
+        document.body.removeChild(existingMap);
+    }
+
+    // Créer un conteneur principal (semi-transparent) qui ne couvre pas tout l'écran
+    const heatmapWrapper = document.createElement('div');
+
+    console.log("Création de la heatmap - État initial:", {
+        nameCloudState: nameCloudState.heatmapPosition ? { ...nameCloudState.heatmapPosition } : null
+    });
+
+
+    heatmapWrapper.id = 'namecloud-heatmap-wrapper';
+    heatmapWrapper.style.position = 'fixed';
+    heatmapWrapper.style.top = '60px'; // Remonté de 20px comme demandé
+    heatmapWrapper.style.left = '20px';
+    heatmapWrapper.style.width = 'calc(100% - 40px)';
+    heatmapWrapper.style.height = 'calc(100% - 100px)'; // Réduire la hauteur
+
+
+
+
+
+
+    // Ajoutez également un écouteur d'événement pour le redimensionnement de la fenêtre
+    window.addEventListener('resize', function() {
+        const wrapper = document.getElementById('namecloud-heatmap-wrapper');
+        if (!wrapper) return; // Ne rien faire si la heatmap n'est pas affichée
+        // Ajuster la largeur en fonction de la taille de l'écran
+        wrapper.style.width = 'calc(100% - 40px)';
+        wrapper.style.height = 'calc(100% - 100px)';
+    });
+
+
+
+    console.log("Styles de base appliqués:", {
+        top: heatmapWrapper.style.top,
+        left: heatmapWrapper.style.left,
+        width: heatmapWrapper.style.width,
+        height: heatmapWrapper.style.height
+    });
+
+
+    heatmapWrapper.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    heatmapWrapper.style.zIndex = '9000'; // Élevé mais inférieur aux contrôles (11000+)
+    heatmapWrapper.style.display = 'flex';
+    heatmapWrapper.style.flexDirection = 'column';
+    heatmapWrapper.style.borderRadius = '10px';
+    heatmapWrapper.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+    heatmapWrapper.style.overflow = 'hidden';
+    heatmapWrapper.style.resize = 'both'; // Permettre le redimensionnement
+    heatmapWrapper.style.minWidth = '100px'; //'400px';
+    heatmapWrapper.style.minHeight = '100px'; //'300px';
+
+
+
+
+
+
+
+    // // Appliquer les dimensions et positions sauvegardées
+    // if (nameCloudState.heatmapPosition) {
+    //     // Pour la position
+    //     if (nameCloudState.heatmapPosition.top !== null) {
+    //         heatmapWrapper.style.top = `${nameCloudState.heatmapPosition.top}px`;
+    //     }
+    //     if (nameCloudState.heatmapPosition.left !== null) {
+    //         heatmapWrapper.style.left = `${nameCloudState.heatmapPosition.left}px`;
+    //     }
+        
+    //     // Pour les dimensions
+    //     if (nameCloudState.heatmapPosition.width !== null) {
+    //         heatmapWrapper.style.width = `${nameCloudState.heatmapPosition.width}px`;
+    //     }
+    //     if (nameCloudState.heatmapPosition.height !== null) {
+    //         heatmapWrapper.style.height = `${nameCloudState.heatmapPosition.height}px`;
+    //     }
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Barre de titre avec poignée pour déplacer
+    const titleBar = document.createElement('div');
+    titleBar.style.padding = '8px 12px';
+    titleBar.style.backgroundColor = '#4361ee';
+    titleBar.style.color = 'white';
+    titleBar.style.fontWeight = 'bold';
+    titleBar.style.display = 'flex';
+    titleBar.style.justifyContent = 'space-between';
+    titleBar.style.alignItems = 'center';
+    titleBar.style.cursor = 'move'; // Indiquer que c'est déplaçable
+    titleBar.innerHTML = `
+        <div class="title-text">${heatmapTitle || ''}</div>
+        <div style="display: flex; gap: 10px;">
+            <button id="heatmap-refresh" title="Rafraîchir la heatmap" 
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">
+                🔄
+            </button>
+            <button id="heatmap-close" title="Fermer la heatmap" 
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">
+                ✖
+            </button>
+        </div>
+    `;
+
+    // Conteneur de carte
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'ancestors-heatmap';
+    mapContainer.style.flexGrow = '1';
+    mapContainer.style.width = '100%';
+    mapContainer.style.margin = '0';
+    mapContainer.style.padding = '0';
+    mapContainer.style.position = 'relative'; // Assure un positionnement correct
+    mapContainer.style.zIndex = '1'; // Assure que la carte est visible dans son conteneur
+
+    // Assembler les éléments
+    heatmapWrapper.appendChild(titleBar);
+    heatmapWrapper.appendChild(mapContainer);
+
+    // Ajouter au body
+    document.body.appendChild(heatmapWrapper);
+
+    // Rendre le conteneur déplaçable
+    makeElementDraggable(heatmapWrapper, titleBar);
+
+
+
+    // Fonction pour sauvegarder la position et les dimensions
+    function saveHeatmapPosition() {
+        const rect = heatmapWrapper.getBoundingClientRect();
+        if (!nameCloudState.heatmapPosition) {
+            nameCloudState.heatmapPosition = {};
+        }
+        nameCloudState.heatmapPosition.top = rect.top;
+        nameCloudState.heatmapPosition.left = rect.left;
+        nameCloudState.heatmapPosition.width = rect.width;
+        nameCloudState.heatmapPosition.height = rect.height;
+        console.log("Position heatmap sauvegardée:", { ...nameCloudState.heatmapPosition });
+    }
+
+
+
+    // Ajouter un écouteur pour sauvegarder la position après déplacement
+    heatmapWrapper.addEventListener('mouseup', () => {
+        console.log("Événement mouseup détecté sur heatmapWrapper");
+        saveHeatmapPosition();
+    });
+
+    // Ajouter un écouteur pour le redimensionnement
+    if (window.ResizeObserver) {
+        const resizeObserver = new ResizeObserver(() => {
+            console.log("Redimensionnement détecté par ResizeObserver");
+            saveHeatmapPosition();
+        });
+        
+        resizeObserver.observe(heatmapWrapper);
+        heatmapWrapper.resizeObserver = resizeObserver;
+        console.log("ResizeObserver attaché à heatmapWrapper");
+    }
+
+
+
+
+
+
+
+
+
+    // S'assurer que le conteneur du nameCloud n'interfère pas
+    const nameCloudContainer = document.getElementById('name-Cloud-Container');
+    if (nameCloudContainer) {
+        // Sauvegarder le z-index original pour le restaurer à la fermeture
+        nameCloudContainer.dataset.originalZIndex = nameCloudContainer.style.zIndex || 'auto';
+        // Temporairement réduire son z-index pour que la heatmap soit au-dessus
+        nameCloudContainer.style.zIndex = '1';
+    }
+
+    const restoreOriginalZindexes = () => {
+        document.querySelectorAll('[data-original-z-index]').forEach(el => {
+            el.style.zIndex = el.dataset.originalZIndex;
+            // Nettoyer l'attribut data pour éviter des problèmes futurs
+            delete el.dataset.originalZIndex;
+        });
+    };
+
+    // Initialiser la carte
+    setTimeout(() => {
+        try {
+            const map = L.map('ancestors-heatmap').setView([46.2276, 2.2137], 6); // Vue centrée sur la France
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Vérifier que nous avons des données valides
+            if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {
+                console.error('Données de heatmap invalides:', locationData);
+                return;
+            }
+
+            // Collecter les coordonnées valides
+            const coordinates = locationData
+                .filter(loc => loc.coords && typeof loc.coords.lat === 'number' && typeof loc.coords.lon === 'number')
+                .map(loc => [loc.coords.lat, loc.coords.lon]);
+
+            // Vérifier qu'il y a des coordonnées valides
+            if (coordinates.length === 0) {
+                console.error('Aucune coordonnée valide trouvée dans les données');
+                return;
+            }
+
+            // Créer la couche de chaleur
+            const heat = L.heatLayer(
+                coordinates.map(coords => [...coords, 1]), 
+                {
+                    radius: 25,
+                    blur: 15,
+                    maxZoom: 1,
+                }
+            ).addTo(map);
+
+            // Ajouter des marqueurs interactifs
+            locationData.forEach(location => {
+                if (!location.coords || typeof location.coords.lat !== 'number' || typeof location.coords.lon !== 'number') {
+                    return;
+                }
+
+                const marker = L.circleMarker([location.coords.lat, location.coords.lon], {
+                    radius: 5,
+                    fillColor: 'white',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                // Conteneur de détails
+                const detailsContainer = document.createElement('div');
+                detailsContainer.id = 'heatmap-details';
+                detailsContainer.style.padding = '10px';
+                detailsContainer.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                detailsContainer.style.position = 'absolute';
+                detailsContainer.style.bottom = '10px';
+                detailsContainer.style.right = '10px';
+                detailsContainer.style.zIndex = '9100'; // Z-index élevé pour être au-dessus de la carte
+                detailsContainer.style.maxWidth = '300px';
+                detailsContainer.style.maxHeight = '400px';
+                detailsContainer.style.overflowY = 'auto';
+                detailsContainer.style.borderRadius = '5px';
+                detailsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                detailsContainer.style.display = 'none';
+                heatmapWrapper.appendChild(detailsContainer);
+
+                // Variable pour suivre l'état d'ouverture
+                let isDetailsOpen = false;
+                    // Fonctions de gestion des détails
+                const showDetails = () => {
+                    // Fermer tous les autres détails ouverts
+                    document.querySelectorAll('.heatmap-details-open').forEach(el => {
+                        el.style.display = 'none';
+                        el.classList.remove('heatmap-details-open');
+                    });
+                    
+                    // Afficher et marquer ces détails comme ouverts
+                    detailsContainer.style.display = 'block';
+                    detailsContainer.classList.add('heatmap-details-open');
+                    isDetailsOpen = true;
+                    
+                    // Générer le contenu des détails
+                    let details = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0;">Détails du point</h3>
+                            <button id="close-details" style="background: none; border: none; font-size: 16px; cursor: pointer;">✖</button>
+                        </div>
+                        <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
+                        <p><strong>Nombre total d'occurrences :</strong> ${location.count}</p>
+                    `;
+
+                    if (location.families && Object.keys(location.families).length > 0) {
+                        details += `<h4>Noms de famille :</h4><ul>`;
+                        const sortedFamilies = Object.entries(location.families)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 5);
+
+                        sortedFamilies.forEach(([family, count]) => {
+                            details += `<li>${family}: ${count} occurrences</li>`;
+                        });
+                        
+                        if (Object.keys(location.families).length > 5) {
+                            details += `<li>... et ${Object.keys(location.families).length - 5} autres noms</li>`;
+                        }
+                        
+                        details += `</ul>`;
+                    }
+
+                    if (location.locations && location.locations.length > 0) {
+                        details += `<h4>Personnes :</h4>
+                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
+                            <ul style="margin: 0; padding-left: 20px;">`;
+                        
+                        location.locations.slice(0, 20).forEach(person => {
+                            details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
+                        });
+
+                        if (location.locations.length > 20) {
+                            details += `<li>... et ${location.locations.length - 20} autres personnes</li>`;
+                        }
+                        
+                        details += `</ul></div>`;
+                    }
+
+                    detailsContainer.innerHTML = details;
+                    
+                    // Ajouter un gestionnaire d'événements pour le bouton de fermeture
+                    const closeButton = detailsContainer.querySelector('#close-details');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Empêcher la propagation aux autres écouteurs
+                            detailsContainer.style.display = 'none';
+                            detailsContainer.classList.remove('heatmap-details-open');
+                            isDetailsOpen = false;
+                        });
+                    }
+                };
+
+                // Événements de survol et de clic
+                marker.on('mouseover', () => {
+                    if (!isDetailsOpen) {
+                        showDetails();
+                    }
+                });
+                // marker.on('mouseout', () => {
+                //     detailsContainer.style.display = 'none';
+                // });
+                marker.on('mouseout', (e) => {
+                    // Ne pas fermer si les détails sont fixés (après un clic)
+                    if (!isDetailsOpen) {
+                        setTimeout(() => {
+                            // Vérifier si la souris n'est pas revenue sur le conteneur de détails
+                            const x = e.originalEvent.clientX;
+                            const y = e.originalEvent.clientY;
+                            const elem = document.elementFromPoint(x, y);
+                            if (!detailsContainer.contains(elem)) {
+                                detailsContainer.style.display = 'none';
+                            }
+                        }, 100);
+                    }
+                });
+                marker.on('click', () => {
+                    // Basculer l'état d'ouverture au clic
+                    isDetailsOpen = !isDetailsOpen;
+                    
+                    if (isDetailsOpen) {
+                        showDetails();
+                    } else {
+                        detailsContainer.style.display = 'none';
+                        detailsContainer.classList.remove('heatmap-details-open');
+                    }
+                });
+            
+                // Gérer les clics sur le conteneur de détails lui-même
+                detailsContainer.addEventListener('click', (e) => {
+                    // Empêcher que les clics sur les détails ne ferment l'info-bulle
+                    e.stopPropagation();
+                });
+                
+                // Ajouter un écouteur de document pour fermer les détails quand on clique ailleurs
+                document.addEventListener('click', (e) => {
+                    if (isDetailsOpen && !detailsContainer.contains(e.target) && 
+                        e.target !== marker._path) {
+                        detailsContainer.style.display = 'none';
+                        detailsContainer.classList.remove('heatmap-details-open');
+                        isDetailsOpen = false;
+                    }
+                });
+
+
+            });
+
+            // Ajuster la vue à toutes les coordonnées valides
+            try {
+                if (coordinates.length > 0) {
+                    const bounds = L.latLngBounds(coordinates);
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, {
+                            padding: [50, 50]
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'ajustement de la vue:', error);
+            }
+
+            // Gérer les événements des boutons avec restauration des z-index
+            document.getElementById('heatmap-close').addEventListener('click', () => {
+                // Restaurer le z-index original du conteneur nameCloud
+                if (nameCloudContainer) {
+                    nameCloudContainer.style.zIndex = nameCloudContainer.dataset.originalZIndex;
+                    delete nameCloudContainer.dataset.originalZIndex;
+                }
+                
+                // Restaurer les z-index originaux de tous les éléments
+                restoreOriginalZindexes();
+                
+                // Supprimer la heatmap
+                document.body.removeChild(heatmapWrapper);
+            });
+
+
+            // map.on('load', () => {
+            //     applySmallScreenStyles(map, heatmapTitle);
+            // });
+
+            // Appliquer les styles immédiatement après l'initialisation
+            setTimeout(() => {
+                applySmallScreenStyles(map, heatmapTitle);
+                heat._reset(); 
+            }, 200);
+
+            // Ajouter un écouteur pour le redimensionnement qui réapplique les styles
+            window.addEventListener('resize', () => {
+                const map = document.querySelector('#namecloud-heatmap-wrapper')?.map;
+                const titleText = document.querySelector('.title-text')?.textContent || '';
+                if (map) {
+                    applySmallScreenStyles(map, titleText);
+                    heat._reset(); 
+                }
+            });
+
+
+
+            // Forcer un redimensionnement de la carte pour s'assurer qu'elle s'affiche correctement
+            // map.invalidateSize();
+
+            const currentCenter = map.getCenter();
+            const currentZoom = map.getZoom();
+            map.invalidateSize();
+            map.setView(currentCenter, currentZoom, { animate: false });
+            
+            // Sauvegarde de la référence pour usage ultérieur
+            heatmapWrapper.map = map;
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation de la carte:', error);
+            alert('Erreur lors de la création de la carte. Voir console pour détails.');
+        }
+    }, 100); // Petit délai pour s'assurer que le DOM est prêt
+
+    // Ajouter l'événement de rafraîchissement
+    const refreshButton = document.getElementById('heatmap-refresh');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
+            if (typeof refreshHeatmap === 'function') {
+                refreshHeatmap();
+            } else {
+                console.warn('La fonction refreshHeatmap n\'est pas définie');
+            }
+        });
+    }
+
+    // AJOUT: S'assurer que le bouton de fermeture est toujours visible
+    const closeButton = document.getElementById('heatmap-close');
+    if (closeButton) {
+        closeButton.style.position = 'sticky';
+        closeButton.style.top = '0';
+        closeButton.style.right = '0';
+        closeButton.style.zIndex = '99999';
+    }
+
+
+
+
+    // À la fin de createImprovedHeatmap, remplacez ou ajoutez ceci
+    // Observer les changements de taille du conteneur pour le redimensionnement manuel
+    if (window.ResizeObserver) {
+        // const resizeObserver = new ResizeObserver(entries => {
+        //     for (let entry of entries) {
+        //         if (entry.target.id === 'namecloud-heatmap-wrapper' && heatmapWrapper.map) {
+        //             const map = heatmapWrapper.map;
+        //             const currentCenter = map.getCenter();
+        //             const currentZoom = map.getZoom();
+                    
+        //             setTimeout(() => {
+        //                 map.invalidateSize();
+        //                 map.setView(currentCenter, currentZoom, { animate: false });
+        //             }, 10);
+        //         }
+        //     }
+        // });
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target.id === 'namecloud-heatmap-wrapper' && heatmapWrapper.map) {
+                    // Appliquer les styles en fonction de la nouvelle taille
+                    const titleText = document.querySelector('.title-text')?.textContent || 'Heatmap';
+                    applySmallScreenStyles(heatmapWrapper.map, titleText);
+                }
+            }
+        });
+        
+        // Observer le conteneur de la heatmap
+        resizeObserver.observe(heatmapWrapper);
+        
+        // Sauvegarder l'observateur pour pouvoir le déconnecter lors de la fermeture
+        heatmapWrapper.resizeObserver = resizeObserver;
+        
+        // Ajouter la déconnexion à l'événement de fermeture
+        const closeButton = document.getElementById('heatmap-close');
+        if (closeButton) {
+            const originalClickHandler = closeButton.onclick;
+            closeButton.onclick = function() {
+                if (heatmapWrapper.resizeObserver) {
+                    heatmapWrapper.resizeObserver.disconnect();
+                }
+                if (originalClickHandler) {
+                    originalClickHandler.call(this);
+                }
+            };
+        }
+    }
+
+    // // Solution alternative si ResizeObserver n'est pas supporté
+    // heatmapWrapper.addEventListener('mouseup', function() {
+    //     if (heatmapWrapper.map) {
+    //         const map = heatmapWrapper.map;
+    //         const currentCenter = map.getCenter();
+    //         const currentZoom = map.getZoom();
+            
+    //         setTimeout(() => {
+    //             map.invalidateSize();
+    //             map.setView(currentCenter, currentZoom, { animate: false });
+    //         }, 10);
+    //     }
+    // });
+
+
+
+    return heatmapWrapper;
+}
+
+
+
+
+
+// Fonction simplifiée pour le rafraîchissement de la heatmap
+export async function refreshHeatmap() {
+    console.log("Début refreshHeatmap - État actuel:", {
+        nameCloudState: nameCloudState.heatmapPosition ? { ...nameCloudState.heatmapPosition } : null
+    });
+
+
+    // Si aucune heatmap n'est affichée, ne rien faire
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    if (heatmapWrapper) {
+        const rect = heatmapWrapper.getBoundingClientRect();
+        console.log("Position heatmap avant suppression:", {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height
+        });
+    }
+    if (!heatmapWrapper) return;
+    
+    // Afficher un indicateur de chargement
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'heatmap-loading-overlay';
+    loadingOverlay.style.position = 'absolute';
+    loadingOverlay.style.top = '0';
+    loadingOverlay.style.left = '0';
+    loadingOverlay.style.width = '100%';
+    loadingOverlay.style.height = '100%';
+    loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.justifyContent = 'center';
+    loadingOverlay.style.alignItems = 'center';
+    loadingOverlay.style.zIndex = '9500';
+    loadingOverlay.innerHTML = '<div style="text-align: center;"><p>Mise à jour de la heatmap...</p><progress style="width: 200px;"></progress></div>';
+    
+    // Remplacer l'overlay existant s'il y en a un
+    const existingOverlay = document.getElementById('heatmap-loading-overlay');
+    if (existingOverlay) existingOverlay.remove();
+    
+    heatmapWrapper.appendChild(loadingOverlay);
+    
+    try {
+        // Fermer la heatmap actuelle
+        const closeButton = document.getElementById('heatmap-close');
+        if (closeButton) closeButton.click();
+        
+        // Un petit délai pour laisser la fermeture se terminer
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Simuler un clic sur le bouton de carte pour générer une nouvelle heatmap
+        // avec les filtres actuels
+        const mapButton = document.querySelector('[title="Afficher la heatmap"]');
+        if (mapButton) mapButton.click();
+        
+    } catch (error) {
+        console.error('Erreur lors du rafraîchissement de la heatmap:', error);
+        if (document.contains(loadingOverlay)) loadingOverlay.remove();
+        alert(`Erreur lors de la mise à jour de la heatmap: ${error.message}`);
+    }
+}
+
+// Fonction pour attacher les écouteurs d'événements aux contrôles pour la mise à jour automatique
+export const attachFilterListeners = () => {
+    // Fonction debounce pour éviter de réagir trop souvent
+    const debounce = (func, wait) => {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
+    
+    // Stocker les valeurs précédentes pour détecter les vrais changements
+    const previousValues = {
+        type: null,
+        scope: null,
+        startDate: null,
+        endDate: null,
+        rootPerson: null
+    };
+    
+    // Fonction pour vérifier si une valeur a réellement changé
+    const hasValueChanged = (element, key) => {
+        // Si c'est un élément select ou input standard
+        if (element.tagName === 'SELECT' || element.tagName === 'INPUT') {
+            if (previousValues[key] === null) {
+                previousValues[key] = element.value;
+                return false; // Premier chargement, pas de changement
+            }
+            
+            const hasChanged = element.value !== previousValues[key];
+            if (hasChanged) {
+                previousValues[key] = element.value;
+                // console.log(`Valeur '${key}' changée: ${previousValues[key]} -> ${element.value}`);
+            }
+            return hasChanged;
+        }
+        
+        // Pour les sélecteurs personnalisés
+        if (element.className === 'custom-select-container') {
+            const value = element.value || element.dataset?.value;
+            if (previousValues[key] === null) {
+                previousValues[key] = value;
+                return false; // Premier chargement, pas de changement
+            }
+            
+            const hasChanged = value !== previousValues[key];
+            if (hasChanged) {
+                previousValues[key] = value;
+                // console.log(`Valeur '${key}' changée: ${previousValues[key]} -> ${value}`);
+            }
+            return hasChanged;
+        }
+        
+        return false; // Par défaut, pas de changement
+    };
+    
+    // Fonction de rafraîchissement qui vérifie s'il y a eu un vrai changement
+    const smartRefresh = (element, key) => {
+        // Vérifier si la valeur a vraiment changé
+        if (hasValueChanged(element, key)) {
+            // console.log(`Rafraîchissement déclenché par changement de ${key}`);
+            if (typeof refreshHeatmap === 'function' && 
+                document.getElementById('namecloud-heatmap-wrapper')) {
+                refreshHeatmap();
+            }
+        }
+    };
+    
+    // Version debounced du rafraîchissement intelligent
+    const debouncedSmartRefresh = debounce(smartRefresh, 1000);
+    
+    // Attacher des écouteurs aux éléments de typeSelect et scopeSelect
+    const typeSelect = document.querySelector('[data-text-key="typeSelect"]');
+    const scopeSelect = document.querySelector('[data-text-key="scopeSelect"]');
+    const startDateInput = document.querySelector('[data-text-key="startDateInput"]');
+    const endDateInput = document.querySelector('[data-text-key="endDateInput"]');
+    const rootPersonSelect = document.querySelector('[data-text-key="rootPersonResults"]');
+    
+    // Pour le typeSelect
+    if (typeSelect) {
+        typeSelect.addEventListener('change', () => debouncedSmartRefresh(typeSelect, 'type'));
+    }
+    
+    // Pour le scopeSelect
+    if (scopeSelect) {
+        scopeSelect.addEventListener('change', () => debouncedSmartRefresh(scopeSelect, 'scope'));
+    }
+    
+    // Pour les dates
+    if (startDateInput) {
+        startDateInput.addEventListener('change', () => debouncedSmartRefresh(startDateInput, 'startDate'));
+    }
+    
+    if (endDateInput) {
+        endDateInput.addEventListener('change', () => debouncedSmartRefresh(endDateInput, 'endDate'));
+    }
+    
+
+    
+    // Pour le bouton OK/Valider
+    const validateButton = document.querySelector('button[title="Valider"]');
+    if (validateButton) {
+        validateButton.addEventListener('click', () => {
+            // console.log("Rafraîchissement déclenché par clic sur Valider");
+            if (typeof refreshHeatmap === 'function' && 
+                document.getElementById('namecloud-heatmap-wrapper')) {
+                refreshHeatmap();
+            }
+        });
+    }
+    
+    // console.log('Écouteurs intelligents attachés pour mettre à jour la heatmap uniquement lors des vrais changements');
+};
+
+
+
+// Fonction pour rendre un élément déplaçable
+function makeElementDraggable(element, handle) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    if (handle) {
+        // Si une poignée est fournie, le déplacement se fait via cette poignée
+        handle.onmousedown = dragMouseDown;
+    } else {
+        // Sinon, on peut déplacer l'élément directement
+        element.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Obtenir la position de la souris au démarrage
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // Appeler la fonction quand la souris bouge
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Calculer la nouvelle position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Limiter le déplacement pour ne pas sortir de la fenêtre
+        const newTop = (element.offsetTop - pos2);
+        const newLeft = (element.offsetLeft - pos1);
+        
+        // Empêcher de sortir à gauche ou en haut
+        if (newTop < 0) pos2 = element.offsetTop;
+        if (newLeft < 0) pos1 = element.offsetLeft;
+        
+        // Empêcher de sortir à droite ou en bas
+        const maxRight = window.innerWidth - element.offsetWidth;
+        const maxBottom = window.innerHeight - element.offsetHeight;
+        
+        if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+        if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+        
+        // Définir la nouvelle position de l'élément
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // Arrêter de déplacer quand on relâche la souris
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+
+
+
+
+/**
+ * Crée les données pour la heatmap en utilisant les mêmes personnes et filtres que la CloudMap
+ * 
+ * @param {Object} config - Configuration contenant type, startDate, endDate, scope, rootPersonId
+ * @returns {Promise<Array>} - Données formatées pour la heatmap
+ */
+
+
+
+export async function createDataForHeatMap(config) {
+    try {
+        
+        // Configuration pour extraire les lieux
+        const locationConfig = {
+            ...config,
+            type: 'lieux' // Forcer le type à 'lieux' pour extraire tous les lieux
+        };
+        
+        // Obtenir les personnes selon le même filtrage que la CloudMap
+
+        const persons = getPersonsFromTree(locationConfig.scope, locationConfig.rootPersonId);
+        console.log(`Nombre de personnes trouvées pour la heatmap : ${persons.length}`);
+        
+        // Collecter tous les lieux non nettoyés
+        const locationData = {};
+        const stats = { inPeriod: 0 }; // Stats minimal
+        
+        // Traiter chaque personne pour extraire ses lieux sans nettoyage
+        persons.forEach(person => {
+            processPersonData(person, locationConfig, locationData, stats, { doNotClean: true });
+        });
+        
+
+        // Créer une structure pour stocker les informations détaillées par lieu
+        const locationDetails = {};
+        
+        // Collecter les détails des lieux pour chaque personne
+        for (const person of persons) {
+            // Fonction pour ajouter les détails d'un lieu
+            const addLocationDetail = (place, type, date) => {
+                if (!place || place.trim() === '') return;
+                
+                if (!locationDetails[place]) {
+                    locationDetails[place] = {
+                        events: [],
+                        families: {}
+                    };
+                }
+                
+                // Extraire l'année si disponible
+                let year = null;
+                if (date) {
+                    const match = date.match(/\d{4}/);
+                    if (match) {
+                        year = match[0];
+                    }
+                }
+                
+                // Ajouter l'événement
+                locationDetails[place].events.push({
+                    type: type,
+                    name: person.name.replace(/\//g, '').trim(),
+                    year: year
+                });
+                
+                // Ajouter le nom de famille
+                const familyName = person.name.split('/')[1]?.trim().toUpperCase();
+                if (familyName) {
+                    locationDetails[place].families[familyName] = 
+                        (locationDetails[place].families[familyName] || 0) + 1;
+                }
+            };
+            
+            // Ajouter les détails pour chaque type de lieu
+            if (person.birthPlace) addLocationDetail(person.birthPlace, 'Naissance', person.birthDate);
+            if (person.deathPlace) addLocationDetail(person.deathPlace, 'Décès', person.deathDate);
+            if (person.residPlace1) addLocationDetail(person.residPlace1, 'Résidence', null);
+            if (person.residPlace2) addLocationDetail(person.residPlace2, 'Résidence', null);
+            if (person.residPlace3) addLocationDetail(person.residPlace3, 'Résidence', null);
+            
+            // Ajouter les mariages
+            if (person.spouseFamilies) {
+                for (const famId of person.spouseFamilies) {
+                    const family = state.gedcomData.families[famId];
+                    if (family && family.marriagePlace) {
+                        addLocationDetail(family.marriagePlace, 'Mariage', family.marriageDate);
+                    }
+                }
+            }
+        }
+
+        
+
+        // Convertir les données de lieu en format pour la heatmap
+        const heatmapData = {};
+        
+        // Géocoder chaque lieu et ajouter les détails
+        for (const [place, count] of Object.entries(locationData)) {
+            if (!place || place.trim() === '') continue;
+            
+            try {
+                const coords = await geocodeLocation(place);
+                // console.log(" DEBUG : geocodeLocation ", place, coords)
+                
+                if (coords) {
+                    const key = `${coords.lat.toFixed(2)},${coords.lon.toFixed(2)}`;
+                    
+                    if (!heatmapData[key]) {
+                        heatmapData[key] = {
+                            coords: coords,
+                            count: 0,
+                            families: {},
+                            locations: [],
+                            placeName: place
+                        };
+                    }
+                    
+                    // Ajouter le nombre d'occurrences
+                    heatmapData[key].count += count;
+                    
+                    // Ajouter les détails du lieu si disponibles
+                    if (locationDetails[place]) {
+                        // Ajouter les événements
+                        heatmapData[key].locations.push(...locationDetails[place].events);
+                        
+                        // Fusionner les compteurs de noms de famille
+                        for (const [family, famCount] of Object.entries(locationDetails[place].families)) {
+                            heatmapData[key].families[family] = 
+                                (heatmapData[key].families[family] || 0) + famCount;
+                        }
+                    } else {
+                        // Fallback si pas de détails
+                        heatmapData[key].locations.push({
+                            type: 'Lieu',
+                            name: place,
+                            count: count
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur de géocodage pour "${place}":`, error);
+            }
+        }
+        
+        // Convertir l'objet en tableau
+        const result = Object.values(heatmapData);
+        console.log(`Données de heatmap générées: ${result.length} lieux géolocalisés`);
+        
+        return result;
+    } catch (error) {
+        console.error('Erreur lors de la création des données pour la heatmap:', error);
+        throw error;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Variable globale pour le cache
 let geolocalisationCache = null;
 
 // Fonction pour charger le fichier au démarrage
 export async function loadGeolocalisationFile() {
     try {
-        const response = await fetch('geolocalisation.json', { method: 'HEAD' });
+        // Déterminer le fichier à charger selon le propriétaire de l'arbre
+        const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : 'geolocalisation.json';
+        console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
+        
+        // Vérifier d'abord si le fichier existe
+        const response = await fetch(geoFileName, { method: 'HEAD' });
+        
         if (response.ok) {
-            const dataResponse = await fetch('geolocalisation.json');
+            // Charger le contenu du fichier
+            const dataResponse = await fetch(geoFileName);
             geolocalisationCache = await dataResponse.json();
-            console.log('Fichier de géolocalisation chargé');
+            console.log(`Fichier ${geoFileName} chargé avec succès`);
             return true;
+        } else {
+            console.warn(`Le fichier ${geoFileName} n'a pas été trouvé. Statut: ${response.status}`);
+            return false;
         }
-        return false;
     } catch (error) {
+        console.error('Erreur lors du chargement du fichier de géolocalisation:', error);
         return false;
     }
 }
@@ -987,16 +2486,18 @@ export async function loadGeolocalisationFile() {
 export async function geocodeLocation(location) {
     if (!location || location.trim() === '') return null;
 
-    
-    // console.log(" DEBUGGGGGGGGGG  : UTILSATION DU CACHE pour geolocalisation")
     // Si le cache est disponible, chercher d'abord dedans
-    if (geolocalisationCache && geolocalisationCache[location]) {
-        // console.log(" UTILSATION DU CACHE pour geolocalisation")
 
+    // console.log(" DEBUG : in geocodeLocation ", location, geolocalisationCache, geolocalisationCache[location])
+
+    if (geolocalisationCache && geolocalisationCache[location]) {
         return geolocalisationCache[location];
     }
 
     try {
+
+        console.log(" DEBUG : in geocodeLocation  SEARCH ... ", location)
+
         await delay(Math.random() * 500);
 
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`, {
@@ -1022,14 +2523,13 @@ export async function geocodeLocation(location) {
     }
 }
 
-
+// Fonction modifiée pour générer le fichier de géolocalisation approprié
 export function generateGeocodeFile() {
     generateGeocodeFileInternal();
 }
 
 // Rendre la fonction accessible globalement
 window.generateGeocodeFile = generateGeocodeFile;
-
 
 async function generateGeocodeFileInternal() {
     const statusDiv = document.getElementById('geocoding-status');
@@ -1046,7 +2546,10 @@ async function generateGeocodeFileInternal() {
     for (const person of Object.values(state.gedcomData.individuals)) {
         if (person.birthPlace) locations.add(person.birthPlace);
         if (person.deathPlace) locations.add(person.deathPlace);
-        
+        if (person.residPlace1) locations.add(person.residPlace1);
+        if (person.residPlace2) locations.add(person.residPlace2);
+        if (person.residPlace3) locations.add(person.residPlace3);
+
         if (person.spouseFamilies) {
             person.spouseFamilies.forEach(famId => {
                 const family = state.gedcomData.families[famId];
@@ -1065,16 +2568,20 @@ async function generateGeocodeFileInternal() {
     let processed = 0;
     const geolocalisationData = {};
 
+    // Déterminer le nom de fichier à charger/générer
+    const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : 'geolocalisation.json';
+
     // Charger les données existantes si disponibles
     try {
-        const response = await fetch('geolocalisation.json');
+        const response = await fetch(geoFileName);
         if (response.ok) {
             const existingData = await response.json();
             Object.assign(geolocalisationData, existingData);
-            console.log('Données existantes chargées');
+            console.log(`Données existantes chargées depuis ${geoFileName}`);
         }
     } catch (error) {
         // Pas de fichier existant, on continue
+        console.log(`Aucun fichier ${geoFileName} existant, création d'un nouveau fichier`);
     }
 
     for (const location of locationsArray) {
@@ -1109,12 +2616,12 @@ async function generateGeocodeFileInternal() {
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'geolocalisation.json';
+    a.download = geoFileName;  // Utiliser le nom de fichier approprié
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    statusDiv.textContent = `Terminé ! ${processed} lieux traités`;
+    statusDiv.textContent = `Terminé ! ${processed} lieux traités et sauvegardés dans ${geoFileName}`;
     progressBar.value = 100;
 }

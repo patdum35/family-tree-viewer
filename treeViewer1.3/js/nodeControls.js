@@ -5,6 +5,7 @@ import { findDescendants, findSiblings, findGenealogicalParent, buildDescendantT
 import { extractYear } from './utils.js';
 import { drawTree, getZoom, getLastTransform  } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
+import { updateSelectorValue, selectorHasOption } from './UIutils.js';
 import { resetView } from './eventHandlers.js';
 
 /**
@@ -31,16 +32,10 @@ export function addRootChangeButton(nodeGroups) {
 export function handleRootChange(event, d) {
     if (!event || !d) return;
 
+    // Mettre à jour le sélecteur de personnes racines
+    const displayName = d.data.name.replace(/\//g, '').trim();
+    updateSelectorValue('root-person-results', d.data.id, displayName, { replaceOptions: true });
     
-    // Mettre à jour le sélecteur root-person-results
-    const rootPersonResults = document.getElementById('root-person-results');
-    if (rootPersonResults) {
-        rootPersonResults.innerHTML = '';
-        const option = document.createElement('option');
-        option.value = d.data.id;
-        option.textContent = d.data.name.replace(/\//g, '').trim();
-        rootPersonResults.appendChild(option);
-    }
 
     event.stopPropagation();
     displayGenealogicTree(d.data.id, true); 
@@ -381,20 +376,10 @@ function handleRootDescendants(d) {
         // Incrémenter avec vérification
         const newGenerations = Math.min(state.nombre_generation + 1, 101); // Maximum de 101
         
-
         state.nombre_generation = newGenerations;
 
-        // Mettre à jour le sélecteur avec vérifications
-        const generationsSelect = document.getElementById('generations');
-        if (generationsSelect) {
-            // Vérifier que la valeur existe dans le sélecteur
-            const optionExists = Array.from(generationsSelect.options)
-                .some(option => parseInt(option.value) === newGenerations);
-            
-            if (optionExists) {
-                generationsSelect.value = newGenerations.toString();
-            }
-        }
+        // Mettre à jour le sélecteur de générations
+        updateSelectorValue('generations', newGenerations.toString());
 
         updateRootToClosestDescendant(closestDescendant);     
 
@@ -412,12 +397,8 @@ function handleRootDescendants(d) {
                         .scale(0.8)
                 );
         }
-
-
     } 
 }
-
-
 
 /**
  * Gère les descendants des nœuds non-racine
@@ -544,17 +525,14 @@ function safeParseYear(dateStr) {
  */
 function updateRootToClosestDescendant(descendant) {
     const newRootPerson = state.gedcomData.individuals[descendant.id];
+    const displayName = newRootPerson.name.replace(/\//g, '').trim();
     
-    const rootPersonResults = document.getElementById('root-person-results');
-    rootPersonResults.innerHTML = '';
-
-    const option = document.createElement('option');
-    option.value = descendant.id;
-    option.textContent = newRootPerson.name.replace(/\//g, '').trim();
-    rootPersonResults.appendChild(option);
+    // Mettre à jour le sélecteur de personnes racines
+    updateSelectorValue('root-person-results', descendant.id, displayName, { replaceOptions: true });
 
     displayGenealogicTree(descendant.id);
 }
+
 
 /**
  * Ajoute les contrôles pour les ancêtres
@@ -640,28 +618,7 @@ function updateGenerationCount() {
  * @param {number} value - Nouvelle valeur pour le nombre de générations
  */
 function updateGenerationSelector(value) {
-    const generationsSelect = document.getElementById('generations');
-    
-    if (!generationsSelect) {
-        console.warn("Sélecteur de générations non trouvé");
-        return;
-    }
-    
-    // Vérifier si c'est un sélecteur standard ou personnalisé
-    if (generationsSelect.tagName === 'SELECT') {
-        // Sélecteur standard
-        const optionExists = Array.from(generationsSelect.options)
-            .some(option => parseInt(option.value) === value);
-        
-        if (optionExists) {
-            generationsSelect.value = value.toString();
-        }
-    } else {
-        // Sélecteur personnalisé
-        if (typeof generationsSelect.value !== 'undefined') {
-            generationsSelect.value = value.toString();
-        }
-    }
+    updateSelectorValue('generations', value.toString());
 }
 
 /**

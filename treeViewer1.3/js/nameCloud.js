@@ -30,9 +30,44 @@ export const nameCloudState = {
     movingRotation: false,
     autoShapeScale: 1,
     autoZoomScale: 1,
+    heatmapPosition: {
+        top: 60,
+        left: 20,
+        width: null,  // null signifie utiliser les valeurs par défaut
+        height: null
+    },
+    statsModalPosition: {
+        top: null,
+        left: null
+    },
+    statsButtonPosition: {
+        top: null,
+        left: null
+    },
 }
 
 export function processNamesCloudWithDate(config, containerElement = null) {
+
+    // Réinitialiser les positions seulement à la première initialisation
+    if (!nameCloudState.initialized) {
+        nameCloudState.heatmapPosition = {
+            top: 60,
+            left: 20,
+            width: null,
+            height: null
+        };
+        nameCloudState.statsModalPosition = {
+            top: null,
+            left: null
+        };
+        nameCloudState.statsButtonPosition = {
+            top: null,
+            left: null
+        };
+        nameCloudState.initialized = true;
+    }
+
+
     // Logique principale de traitement des données
     const nameData = processNamesData(config);
 
@@ -73,15 +108,25 @@ export function processNamesData(config) {
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
     
     persons.forEach(person => {
-        processPersonData(person, config, nameFrequency, stats);
+        processPersonData(person, config, nameFrequency, stats, { doNotClean: false});
     });
 
-    updateStats(stats, nameFrequency);
+    // updateStats(stats, nameFrequency);
 
-    return convertToNameData(nameFrequency);
+    // return convertToNameData(nameFrequency);
+    
+    const averageLifespan = updateStats(stats, nameFrequency);
+
+    const result = convertToNameData(nameFrequency);
+    
+    // Ajouter la moyenne à l'objet retourné
+    result.averageLifespan = averageLifespan;
+    
+    return result;
+
 }
 
-function processPersonData(person, config, nameFrequency, stats) {
+export function processPersonData(person, config, nameFrequency, stats, options = {}) {
     const hasDate = hasDateInRange(person, config, stats);
     
     if (config.type === 'prenoms') {
@@ -136,6 +181,8 @@ function processPersonData(person, config, nameFrequency, stats) {
                     stats.inPeriod++;
                     const ageStr = age.toString();
                     nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
+                    stats.lifespanSum += age;
+                    stats.lifespanCount++;
                 }
             }
         }
@@ -183,7 +230,8 @@ function processPersonData(person, config, nameFrequency, stats) {
             ];
             
             potentialLocations.forEach(location => {
-                const cleanedLocation = cleanLocation(location);
+                // const cleanedLocation = cleanLocation(location);
+                const cleanedLocation = options.doNotClean ? location : cleanLocation(location);
                 if (cleanedLocation) {
                     allLocations.push(cleanedLocation);
                 }
@@ -210,7 +258,9 @@ function initializeStats() {
         noDates: [],
         inPeriod: 0,
         uniqueNames: 0,
-        total: 0  // Ajoutez cette ligne
+        total: 0,
+        lifespanSum: 0,
+        lifespanCount: 0
     };
 }
 
@@ -221,10 +271,37 @@ function updateStats(stats, nameFrequency) {
     // Calculer le nombre total de personnes avec des occurrences
     stats.total = Object.values(nameFrequency).reduce((sum, count) => sum + count, 0);
 
-    // Affichage des statistiques (optionnel, vous pouvez le commenter si non nécessaire)
-    console.log(`\n personnes dans le nuage : ${stats.total}`+`, noms uniques : ${stats.uniqueNames}` + `, Personnes dans la période : ${stats.inPeriod}`);
+    // // Affichage des statistiques (optionnel, vous pouvez le commenter si non nécessaire)
+    // console.log(`\n personnes dans le nuage : ${stats.total}`+`, noms uniques : ${stats.uniqueNames}` + `, Personnes dans la période : ${stats.inPeriod}`);
     
     // Vous pouvez ajouter d'autres logs ou traitements si nécessaire
+    // Calculer la moyenne pondérée des durées de vie
+    let weightedSum = 0;
+    let totalCount = 0;
+    
+    if (nameFrequency && Object.keys(nameFrequency).length > 0) {
+        // Calculer la moyenne pondérée pour 'duree_vie'
+        Object.entries(nameFrequency).forEach(([age, count]) => {
+            // Vérifier que l'âge est un nombre valide
+            const ageNum = parseInt(age, 10);
+            if (!isNaN(ageNum)) {
+                weightedSum += ageNum * count;
+                totalCount += count;
+            }
+        });
+    }
+
+    // Ajouter la moyenne à stats
+    stats.averageLifespan = totalCount > 0 ? (weightedSum / totalCount).toFixed(1) : 0;
+
+    // Affichage des statistiques
+    console.log(`\n personnes dans le nuage : ${stats.total}` + 
+                `, noms uniques : ${stats.uniqueNames}` + 
+                `, Personnes dans la période : ${stats.inPeriod}` +
+                (stats.averageLifespan ? `, Durée de vie moyenne : ${stats.averageLifespan} ans` : ''));
+    
+    return stats.averageLifespan;
+
 }
 
 function convertToNameData(nameFrequency) {

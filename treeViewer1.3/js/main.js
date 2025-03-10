@@ -44,7 +44,8 @@ export const state = {
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
     isAnimationPaused: false,
-    targetAncestorId: "@I741@"
+    targetAncestorId: "@I739@",
+    treeOwner: 1
 };
 
 export { geocodeLocation, validateLocations };
@@ -112,18 +113,24 @@ function initialize() {
     // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
     initializeCustomSelectors();
 
+
     // Ajouter l'événement pour soumettre le formulaire avec Enter
-    document.addEventListener('DOMContentLoaded', function() {
-        const passwordInput = document.getElementById('password');
-        if (passwordInput) {
-            passwordInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    loadData();
-                }
-            });
-        }
-    });
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        console.log("Password input trouvé, ajout de l'écouteur d'événement pour Enter");
+        passwordInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                console.log("Touche Enter détectée");
+                event.preventDefault();
+                loadData();
+            }
+        });
+    } else {
+        console.warn("Élément 'password' non trouvé lors de l'initialisation");
+    }
+
+
+    
 
 }
 
@@ -140,77 +147,6 @@ function initializeGenerationSelect() {
         select.appendChild(option);
     }
 }
-
-/**
- * Charge les données GEDCOM
- */
-// export async function loadData() {
-//     const fileInput = document.getElementById('gedFile');
-//     const passwordInput = document.getElementById('password');
-//     toggleFullScreen();
-
-//     // for mobile phone
-//     nameCloudState.mobilePhone = false;
-//     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
-//     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
-    
-//     try {
-//         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
-//         state.gedcomData = parseGEDCOM(gedcomContent);
-        
-
-//         // // Nettoyer tous les conteneurs de fond d'écran existants
-//         // const loginBackground = document.querySelector('.login-background');
-//         // if (loginBackground) {
-//         //     loginBackground.remove();
-//         // }
-//         // const existingBackgroundContainer = document.querySelector('.background-container');
-//         // if (existingBackgroundContainer) {
-//         //     existingBackgroundContainer.remove();
-//         // }
-
-
-
-//         document.getElementById('password-form').style.display = 'none';
-
-//         // Cacher le bouton paramètres de la page d'accueil
-//         const settingsButton = document.getElementById('load-gedcom-button');
-//         if (settingsButton) {
-//             settingsButton.style.display = 'none';
-//         }
-
-//         document.getElementById('tree-container').style.display = 'block';
-
-//         // Initialiser le conteneur de fond d'écran
-//         initBackgroundContainer();
-
-
-//         // Chargement du fichier de géolocalisation
-//         await loadGeolocalisationFile();
-
-
-//         // Dispatch un événement personnalisé
-//         const event = new Event('gedcomLoaded');
-//         document.dispatchEvent(event);
-
-
-//         hideMap();
-
-//         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
-
-//         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
-//         setTimeout(() => {
-//             replaceRootPersonSelector();
-//         }, 500); // Petit délai pour s'assurer que tout est prêt
-
-
-        
-//     } catch (error) {
-//         console.error('Erreur complète:', error);
-//         alert(error.message);
-//     }
-// }
-
 
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
@@ -312,24 +248,46 @@ window.addEventListener('load', injectCustomStyle);
 
 
 
-
-
-
-
-
-
 /**
  * Charge le contenu du fichier GEDCOM
  * @private
  */
 async function loadGedcomContent(fileInput, passwordInput) {
     if ((!passwordInput.value) && (!fileInput.files[0])) {
-        throw new Error('Veuillez sélectionner un fichier');
+        throw new Error('Veuillez sélectionner un fichier ou entrer un mot de passe');
     }
 
     if (passwordInput.value) {
-        return await loadEncryptedContent(passwordInput.value);
+        try {
+            // Essayer d'abord avec arbre.enc
+            const content = await loadEncryptedContent(passwordInput.value, 'arbre.enc');
+            // Si succès avec arbre.enc, définir treeOwner = 1
+            state.treeOwner = 1;
+            console.log("Fichier arbre.enc ouvert avec succès. Owner: 1");
+            return content;
+        } catch (error) {
+            // Si le mot de passe est incorrect pour arbre.enc, essayer avec arbreX.enc
+            if (error.message === 'Mot de passe incorrect') {
+                console.log("Tentative d'ouverture du fichier arbreX.enc...");
+                try {
+                    const content = await loadEncryptedContent(passwordInput.value, 'arbreX.enc');
+                    // Si succès avec arbreX.enc, définir treeOwner = 2
+                    state.treeOwner = 2;
+                    console.log("Fichier arbreX.enc ouvert avec succès. Owner: 2");
+                    return content;
+                } catch (secondError) {
+                    // Si le mot de passe est également incorrect pour arbreX.enc
+                    throw new Error('Mot de passe incorrect pour les deux fichiers');
+                }
+            } else {
+                // Si c'est une autre erreur (comme un problème de réseau), la propager
+                throw error;
+            }
+        }
     } else {
+        // Pour un fichier téléchargé, définir treeOwner = 0 (ou autre valeur par défaut)
+        state.treeOwner = 0;
+        console.log("Fichier GEDCOM personnalisé chargé. Owner: 0");
         return await loadFileContent(fileInput.files[0]);
     }
 }
@@ -338,8 +296,13 @@ async function loadGedcomContent(fileInput, passwordInput) {
  * Charge le contenu crypté
  * @private
  */
-async function loadEncryptedContent(password) {
-    const response = await fetch('arbre.enc');
+async function loadEncryptedContent(password, filename) {
+    const response = await fetch(filename);
+    
+    if (!response.ok) {
+        throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response.statusText}`);
+    }
+    
     const encryptedData = await response.text();
     const decoded = atob(encryptedData);
     
@@ -350,10 +313,19 @@ async function loadEncryptedContent(password) {
         decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
     }
     
-    validatePassword(password, decrypted);
+    // Valider le mot de passe
+    await validatePassword(password, decrypted);
     
+    // Si la validation réussit, décompresser et retourner les données
     return pako.inflate(decrypted.slice(8), {to: 'string'});
 }
+
+
+
+
+
+
+
 
 /**
  * Valide le mot de passe
@@ -371,6 +343,15 @@ async function validatePassword(password, decrypted) {
     }
 }
 
+
+
+
+
+
+
+
+
+
 /**
  * Charge le contenu du fichier
  * @private
@@ -383,106 +364,6 @@ async function loadFileContent(file) {
         fileReader.readAsText(file);
     });
 }
-
-// /**
-//  * Ajoute une personne à l'historique des racines et met à jour le sélecteur
-//  * @param {Object} person - La personne à ajouter
-//  */
-// function addToRootHistory(person) {
-//     // const rootPersonResults = document.getElementById('root-person-results');
-
-//     if (!person || !person.id) {
-//         console.warn("Personne invalide passée à addToRootHistory");
-//         return;
-//     }
-    
-//     const rootPersonResults = document.getElementById('root-person-results');
-//     if (!rootPersonResults) {
-//         console.warn("Élément root-person-results non trouvé");
-//         return;
-//     }
-
-
-
-    
-//     // Récupérer l'historique des racines depuis le localStorage
-//     let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
-    
-//     // Vérifier si cette personne est déjà dans l'historique
-//     const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
-    
-//     // Si la personne n'est pas dans l'historique, l'ajouter
-//     if (existingIndex === -1) {
-//         rootHistory.push({
-//             id: person.id,
-//             name: person.name.replace(/\//g, '').trim()
-//         });
-        
-//         // Sauvegarder l'historique mis à jour
-//         localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
-//     }
-
-//     // Réinitialiser le sélecteur
-//     rootPersonResults.innerHTML = '';
-    
-//     // Remplir le sélecteur avec l'historique
-//     rootHistory.forEach(entry => {
-//         const option = document.createElement('option');
-//         option.value = entry.id;
-//         option.textContent = entry.name;
-//         rootPersonResults.appendChild(option);
-//     });
-
-//     // Ajouter l'option "clear history"
-//     const clearOption = document.createElement('option');
-//     clearOption.value = 'clear-history';
-//     clearOption.textContent = '--- Clear History ---';
-//     rootPersonResults.appendChild(clearOption);
-
-
-
-//     // Ajouter l'option "demo1"
-//     const demoOption = document.createElement('option');
-//     demoOption.value = 'demo1';
-//     demoOption.textContent = '--- Demo1 ---';
-//     rootPersonResults.appendChild(demoOption);
-    
-//     // Ajouter l'option "demo2"
-//     const demoOption2 = document.createElement('option');
-//     demoOption2.value = 'demo2';
-//     demoOption2.textContent = '--- Demo2 ---';
-//     rootPersonResults.appendChild(demoOption2);
-
-//     // // Ajouter l'option "heatMap1"
-//     // const heatMapOption = document.createElement('option');
-//     // heatMapOption.value = 'heatMap1';
-//     // heatMapOption.textContent = '--- heatMap1 ---';
-//     // rootPersonResults.appendChild(heatMapOption);
-    
-//     // // Ajouter l'option "demo2"
-//     // const heatMapOption2 = document.createElement('option');
-//     // heatMapOption2.value = 'heatMap2';
-//     // heatMapOption2.textContent = '--- heatMap2 ---';
-//     // rootPersonResults.appendChild(heatMapOption2);
-
-
-
-//     // Sélectionner la personne courante
-//     rootPersonResults.value = person.id;
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Ajoute une personne à l'historique des racines et met à jour le sélecteur
@@ -568,79 +449,6 @@ function fallbackUpdateRootPersonSelector(person) {
  * Gère le changement de sélection dans le sélecteur de personnes racines
  * @param {Event} event - L'événement de changement
  */
-// export function handleRootPersonChange(event) {
-//     const selectedValue = event.target.value;
-    
-//     if (selectedValue === 'clear-history') {
-//         // Vider l'historique
-//         localStorage.removeItem('rootPersonHistory');
-        
-//         // Garder uniquement la racine actuelle dans l'historique
-//         const currentPerson = state.gedcomData.individuals[state.rootPersonId];
-//         let newHistory = [{
-//             id: currentPerson.id,
-//             name: currentPerson.name.replace(/\//g, '').trim()
-//         }];
-        
-//         // Sauvegarder le nouvel historique
-//         localStorage.setItem('rootPersonHistory', JSON.stringify(newHistory));
-        
-//         // Mettre à jour le sélecteur avec seulement la racine actuelle
-//         addToRootHistory(currentPerson);
-        
-//         return;
-//     }
-
-//     if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
-        
-//         if (selectedValue === 'demo1'){ state.targetAncestorId = "@I736@" } //"@I6@" } //
-//         else { state.targetAncestorId = "@I1322@"}
-        
-//         showMap();
-
-//         // Réinitialiser l'état de l'animation avant de démarrer
-//         resetAnimationState();
-        
-//         // Forcer 2 générations
-//         state.nombre_generation = 2;
-//         document.getElementById('generations').value = '2';
-        
-//         // Mettre à jour l'état de pause
-//         const animationPauseBtn = document.getElementById('animationPauseBtn');
-//         animationPauseBtn.querySelector('span').textContent = '⏸️';
-        
-//         // Redessiner l'arbre d'abord
-//         displayGenealogicTree(null, true, false);
-        
-
-
-//         // Nettoyer tous les conteneurs de fond d'écran existants
-//         const loginBackground = document.querySelector('.login-background');
-//         if (loginBackground) {
-//             loginBackground.remove();
-//         }
-//         const existingBackgroundContainer = document.querySelector('.background-container');
-//         if (existingBackgroundContainer) {
-//             existingBackgroundContainer.remove();
-//         }
-
-
-//         // Démarrer l'animation après un court délai
-//         setTimeout(() => {
-//             startAncestorAnimation();
-//         }, 500);
-        
-//         // event.target.value = state.rootPersonId;
-
-//         const rootPersonResults = document.getElementById('root-person-results');
-//         if (rootPersonResults) {
-//             rootPersonResults.value = state.rootPersonId;
-//         }
-
-//         return;
-//     }
-// }
-
 export function handleRootPersonChange(event) {
     const selectedValue = event.target.value;
     
@@ -666,8 +474,8 @@ export function handleRootPersonChange(event) {
 
     if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
         
-        if (selectedValue === 'demo1'){ state.targetAncestorId = "@I741@" } //"@I6@" } //
-        else { state.targetAncestorId = "@I1327@"}
+        if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
+        else { state.targetAncestorId = "@I1322@"}
         
         showMap();
 

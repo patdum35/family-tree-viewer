@@ -7,28 +7,6 @@ export function createShapePath(shape, width, height, scale = 1.0) {
             return createHeartPath(width, height, scale);
         case 'etoile':
             return createStarPath(width, height, scale);
-        case 'arabesque':
-            return createArabesquePath(width, height, scale);
-        case 'A':
-            return createLetterAPath(width, height, scale);
-        case 'M':
-            return createLetterMPath(width, height, scale);
-        case 'puzzle':
-            return createPuzzlePath(width, height, scale);
-        case 'nuage':
-            return createCloudPath(width, height, scale);
-        case 'arbre':
-            return createTreePath(width, height, scale);
-        case 'carte':
-            return createCardPath(width, height, scale);
-        case 'ampoule':
-            return createBulbPath(width, height, scale);
-        case 'cerveau':
-            return createBrainPath(width, height, scale);
-        case 'maison':
-            return createHousePath(width, height, scale);
-        case 'ballon':
-            return createBalloonPath(width, height, scale);
         default:
             return createRectanglePath(scaledWidth, scaledHeight);
     }
@@ -41,8 +19,6 @@ export function createShapeMatrix() {
             return createHeartShapeMatrix();
         case 'etoile':
             return createStarShapeMatrix();
-        case 'arabesque':
-            return createArabesqueShapeMatrix();
         default:
             return createRectangleShapeMatrix();
     }
@@ -57,8 +33,6 @@ function computeShapeLimits()
             return computeHeartLimits();
         case 'etoile':
             return computeStarLimits();
-        case 'arabesque':
-            return computeArabesqueLimits();
         default:
             return computeRectangleLimits();
     }
@@ -112,7 +86,7 @@ export function createHeartPath(width, height, scale) {
 
 export function createHeartShapeMatrix() {
 
-    console.log(`Calcul de la shapeMap `);
+    // console.log(`Calcul de la shapeMap `);
     const matrixSize = 100;
     const shapeMap = Array.from({ length: matrixSize }, () => 
         Array(matrixSize).fill(0)
@@ -512,254 +486,6 @@ function isPointInPolygon(x, y, polygon) {
         if (intersect) inside = !inside;
     }
     return inside;
-}
-
-
-
-// ================ FORME DE PORTE MAROCAINE ARABESQUE ================
-
-
-// // Fonction pour générer le chemin SVG de la porte Type 1
-// export function createArabesquePath(width, height, scale) {
-//     const doorWidth = width * scale* 0.92;
-//     const doorHeight = height *scale * 0.75; // Réduite pour éviter le débordement
-//     const centerX = 0; //width / 2;
-//     const centerY = 0; //height / 2;
-    
-//     // Paramètres ajustables
-//     const baseWidth = doorWidth * 0.65;
-//     const topLobeSize = 0.40;
-//     const bottomLobeSize = 0.50;
-//     const lobeOverlap = 0.15;
-    
-//     // Calculs des dimensions
-//     const doorBottom = centerY + doorHeight/2 * 0.9;
-//     const rectHeight = doorHeight * 0.6;
-//     const arcStart = doorBottom - rectHeight;
-    
-//     // Paramètres des cercles
-//     const topLobeRadius = (baseWidth/2) * (1 + topLobeSize * 0.5);
-//     const bottomLobeRadius = (baseWidth/2) * (1 + bottomLobeSize * 0.5);
-    
-//     // Positions des centres des cercles
-//     const topLobeY = arcStart - topLobeRadius * (1 - lobeOverlap) * 0.9;
-//     const bottomLobeY = arcStart - bottomLobeRadius * lobeOverlap * 0.9;
-    
-//     // Points pour la base de la porte
-//     const leftBase = centerX - baseWidth/2;
-//     const rightBase = centerX + baseWidth/2;
-    
-//     // Calculer le point où l'arc rejoint le côté vertical
-//     function calculateJoinY(circleCenterX, circleCenterY, radius, sideX) {
-//         const dx = Math.abs(circleCenterX - sideX);
-//         if (dx > radius) return arcStart;
-//         const dy = Math.sqrt(Math.pow(radius, 2) - Math.pow(dx, 2));
-//         return circleCenterY + dy;
-//     }
-    
-//     const joinY1 = calculateJoinY(centerX, topLobeY, topLobeRadius, leftBase);
-//     const joinY2 = calculateJoinY(centerX, bottomLobeY, bottomLobeRadius, leftBase);
-//     const joinY = Math.max(joinY1, joinY2);
-    
-//     // Créer le chemin SVG
-//     let pathString = `M ${leftBase},${doorBottom}`;
-//     pathString += ` L ${leftBase},${joinY}`;
-//     pathString += ` A ${bottomLobeRadius} ${bottomLobeRadius} 0 0 1 ${centerX},${bottomLobeY - bottomLobeRadius}`;
-//     pathString += ` A ${bottomLobeRadius} ${bottomLobeRadius} 0 0 1 ${rightBase},${joinY}`;
-//     pathString += ` L ${rightBase},${doorBottom}`;
-//     pathString += ` Z`;
-    
-//     return pathString;
-// }
-
-
-// Fonction pour générer le chemin SVG d'une arabesque (porte marocaine)
-export function createArabesquePath(width, height, scale) {
-    const arabesqueWidth = width * scale * 0.92;
-    const arabesqueHeight = height * scale * 0.92;
-    const centerX = 0;
-    const centerY = 0;
-
-    // Dimensions et paramètres de la porte
-    const baseWidth = arabesqueWidth * 0.65;
-    const doorHeight = arabesqueHeight * 0.75;
-    const arcHeight = doorHeight * 0.45;
-    
-    // Points clés
-    const leftBase = centerX - baseWidth/2;
-    const rightBase = centerX + baseWidth/2;
-    const doorBottom = centerY + doorHeight/2 * 0.9;
-    const arcStart = doorBottom - (doorHeight - arcHeight);
-    
-    // Calcul des rayons pour les arcs
-    const arcWidth = baseWidth;
-    const arcRadius = (arcWidth * arcWidth + arcHeight * arcHeight) / (2 * arcHeight);
-    const arcCenterY = arcStart - arcRadius + arcHeight;
-    
-    // Créer le chemin SVG
-    let pathString = `M ${leftBase},${doorBottom}`; // Point de départ en bas à gauche
-    pathString += ` L ${leftBase},${arcStart}`; // Ligne verticale gauche
-    
-    // Grand arc formant le haut de la porte
-    pathString += ` A ${arcRadius} ${arcRadius} 0 0 1 ${rightBase} ${arcStart}`;
-    
-    // Ligne verticale droite et ligne horizontale du bas
-    pathString += ` L ${rightBase},${doorBottom}`;
-    pathString += ` Z`; // Fermer le chemin
-    
-    return pathString;
-}
-
-// Fonction pour créer la matrice de forme d'arabesque
-export function createArabesqueShapeMatrix() {
-    // console.log(`Calcul de la shapeMap pour l'arabesque`);
-    const matrixSize = 100;
-    const shapeMap = Array.from({ length: matrixSize }, () => 
-        Array(matrixSize).fill(0)
-    );
-
-    // Paramètres de l'arabesque
-    const baseWidthRatio = 0.65; // Largeur de la base par rapport à la largeur totale
-    const doorHeightRatio = 0.75; // Hauteur de la porte par rapport à la hauteur totale
-    const arcHeightRatio = 0.45; // Hauteur de l'arc par rapport à la hauteur de la porte
-    
-    // Dimensions normalisées (entre -1 et 1)
-    const baseWidth = baseWidthRatio * 2; // *2 pour avoir une échelle entre -1 et 1
-    const doorHeight = doorHeightRatio * 2;
-    const arcHeight = arcHeightRatio * doorHeight;
-    
-    // Points clés normalisés
-    const leftBase = -baseWidth/2;
-    const rightBase = baseWidth/2;
-    const doorBottom = doorHeight/2;
-    const arcStart = doorBottom - (doorHeight - arcHeight);
-    
-    // Calcul du rayon de l'arc
-    const arcWidth = baseWidth;
-    const arcRadius = (arcWidth * arcWidth + arcHeight * arcHeight) / (2 * arcHeight);
-    const arcCenterY = arcStart - arcRadius + arcHeight;
-    
-    // Trouver les bornes
-    const minX = leftBase;
-    const maxX = rightBase;
-    const minY = -doorHeight/2; // Approximation du point le plus haut
-    const maxY = doorBottom;
-    
-    // Remplir la matrice
-    for (let y = 0; y < matrixSize; y++) {
-        for (let x = 0; x < matrixSize; x++) {
-            // Normaliser x et y pour correspondre à l'espace de l'arabesque
-            const nx = minX + (x / (matrixSize - 1)) * (maxX - minX);
-            const ny = minY + (y / (matrixSize - 1)) * (maxY - minY);
-            
-            // Vérifier si le point est dans l'arabesque
-            const inside = isPointInArabesqueNormalized(nx, ny, leftBase, rightBase, doorBottom, arcStart, arcRadius, arcCenterY);
-            
-            if (inside) {
-                shapeMap[y][x] = 1;
-            }
-        }
-    }
-
-    return shapeMap;
-}
-
-// Fonction pour calculer les limites de l'arabesque
-export function computeArabesqueLimits() {
-    // Paramètres de l'arabesque
-    const baseWidthRatio = 0.65;
-    const doorHeightRatio = 0.75;
-    const arcHeightRatio = 0.45;
-    
-    // Dimensions normalisées
-    const baseWidth = baseWidthRatio * 2;
-    const doorHeight = doorHeightRatio * 2;
-    const arcHeight = arcHeightRatio * doorHeight;
-    
-    // Calculer les limites
-    minX = -baseWidth/2;
-    maxX = baseWidth/2;
-    maxY = doorHeight/2;
-    
-    // Calculer le point le plus haut de l'arc (approximation)
-    const arcStart = maxY - (doorHeight - arcHeight);
-    const arcWidth = baseWidth;
-    const arcRadius = (arcWidth * arcWidth + arcHeight * arcHeight) / (2 * arcHeight);
-    const arcCenterY = arcStart - arcRadius + arcHeight;
-    minY = arcCenterY - arcRadius;
-}
-
-// Fonction pour vérifier si un point est à l'intérieur d'une arabesque
-export function isPointInArabesque(x, y, centerX, centerY, width, height, scaleFactor = 1.0) {
-    // Adapter les dimensions
-    const arabesqueWidth = width * 0.92 * scaleFactor;
-    const arabesqueHeight = height * 0.92 * scaleFactor;
-    
-    // Paramètres de l'arabesque
-    const baseWidth = arabesqueWidth * 0.65;
-    const doorHeight = arabesqueHeight * 0.75;
-    const arcHeight = doorHeight * 0.45;
-    
-    // Points clés
-    const leftBase = centerX - baseWidth/2;
-    const rightBase = centerX + baseWidth/2;
-    const doorBottom = centerY + doorHeight/2 * 0.9;
-    const arcStart = doorBottom - (doorHeight - arcHeight);
-    
-    // Calcul du rayon de l'arc
-    const arcWidth = baseWidth;
-    const arcRadius = (arcWidth * arcWidth + arcHeight * arcHeight) / (2 * arcHeight);
-    const arcCenterY = arcStart - arcRadius + arcHeight;
-
-    // Vérifier si le point est dans la partie rectangulaire (en bas)
-    if (y >= arcStart && y <= doorBottom && x >= leftBase && x <= rightBase) {
-        return true;
-    }
-    
-    // Vérifier si le point est dans la partie en arc (en haut)
-    if (y < arcStart) {
-        // Calculer la distance entre le point et le centre de l'arc
-        const distanceToArcCenter = Math.sqrt(
-            Math.pow(x - centerX, 2) + 
-            Math.pow(y - arcCenterY, 2)
-        );
-        
-        // Le point est dans l'arc si sa distance au centre est inférieure au rayon
-        if (distanceToArcCenter <= arcRadius) {
-            // Vérifier également que le point est au-dessus de arcStart
-            // et à l'intérieur des limites horizontales extrapolées
-            const horizontalExtension = baseWidth/2 * (arcStart - y) / arcHeight;
-            if (x >= leftBase - horizontalExtension && x <= rightBase + horizontalExtension) {
-                return true;
-            }
-        }
-    }
-    
-    return false;
-}
-
-// Fonction utilitaire pour tester si un point est dans une arabesque avec coordonnées normalisées
-function isPointInArabesqueNormalized(nx, ny, leftBase, rightBase, doorBottom, arcStart, arcRadius, arcCenterY) {
-    // Test pour la partie rectangulaire
-    if (ny >= arcStart && ny <= doorBottom && nx >= leftBase && nx <= rightBase) {
-        return true;
-    }
-    
-    // Test pour la partie en arc
-    if (ny < arcStart) {
-        // Centre de l'arc est à x=0
-        const dx = nx - 0;
-        const dy = ny - arcCenterY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance <= arcRadius) {
-            // Vérifier également que le point est entre les limites horizontales projetées
-            const horizontalExtension = (rightBase - leftBase)/2 * (arcStart - ny) / (doorBottom - arcStart);
-            return (nx >= leftBase - horizontalExtension && nx <= rightBase + horizontalExtension);
-        }
-    }
-    
-    return false;
 }
 
 
@@ -1199,25 +925,4 @@ export function generateConcentricShapes(textGroup, shape, width, height) {
         .attr('stroke-width', 1)
         .lower();
 
-    // if (nameCloudState.isThreeZones)
-    // {
-    //     const pathString75 = createShapePath(shape, width, height, 0.75);
-    //     const pathString50 = createShapePath(shape, width, height, 0.5);
-            
-    //     textGroup.append('path')
-    //         .attr('class', 'shape-path-75')
-    //         .attr('d', pathString75)
-    //         .attr('stroke', 'green')
-    //         .attr('fill', 'none')
-    //         .attr('stroke-width', 1)
-    //         .lower();
-            
-    //     textGroup.append('path')
-    //         .attr('class', 'shape-path-50')
-    //         .attr('d', pathString50)
-    //         .attr('stroke', 'blue')
-    //         .attr('fill', 'none')
-    //         .attr('stroke-width', 1)
-    //         .lower();
-    // }
 }

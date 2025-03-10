@@ -58,7 +58,7 @@ export class HistoricDatePicker {
         modalOverlay.style.display = 'none';
         modalOverlay.style.justifyContent = 'center';
         modalOverlay.style.alignItems = 'center';
-        modalOverlay.style.zIndex = '2000';
+        modalOverlay.style.zIndex = '99999';
         modalOverlay.style.animation = 'fadeIn 0.3s ease-out';
         
         const modalContent = document.createElement('div');

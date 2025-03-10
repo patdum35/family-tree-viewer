@@ -72,6 +72,9 @@ export function createCustomSelector(config) {
     selectContainer.style.position = 'relative';
     selectContainer.style.width = dimensions.width;
     selectContainer.style.height = dimensions.height;
+    selectContainer.style.zIndex = '99900'; // Ajout d'un z-index élevé
+    selectContainer.className = 'custom-select-container'; // Ajout d'une classe
+
     
     // Élément qui simule le select
     const selectDisplay = document.createElement('div');
@@ -89,6 +92,8 @@ export function createCustomSelector(config) {
     selectDisplay.style.height = '100%';
     selectDisplay.style.boxSizing = 'border-box';
     selectDisplay.style.position = 'relative'; // Position relative pour la flèche
+    selectDisplay.style.zIndex = '99900'; // Même valeur que le conteneur
+    selectDisplay.className = 'custom-select-display'; // Ajout d'une classe
     
     // Texte affiché
     const displayText = document.createElement('span');
@@ -174,7 +179,7 @@ export function createCustomSelector(config) {
     optionsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
     optionsContainer.style.maxHeight = dimensions.dropdownMaxHeight;
     optionsContainer.style.overflowY = 'auto';
-    optionsContainer.style.zIndex = '1000';
+    optionsContainer.style.zIndex = '999999';
     optionsContainer.style.display = 'none';
     
     // Valeur cachée simulant un vrai select
@@ -264,18 +269,56 @@ export function createCustomSelector(config) {
 
 
 
-    // Toggle du dropdown
+    // Toggle du dropdownconst selectContainer = document.createElement('div')
     selectDisplay.addEventListener('click', () => {
         const isVisible = optionsContainer.style.display === 'block';
-        optionsContainer.style.display = isVisible ? 'none' : 'block';
-    });
-    
-    // Fermer le dropdown si on clique ailleurs
-    document.addEventListener('click', (event) => {
-        if (!selectContainer.contains(event.target)) {
+
+        if (!isVisible) {
+            // AVANT d'afficher le dropdown, le détacher et le rattacher au BODY
+            if (optionsContainer.parentNode) {
+                optionsContainer.parentNode.removeChild(optionsContainer);
+            }
+            
+            // Récupérer la position du sélecteur par rapport à la fenêtre
+            const rect = selectDisplay.getBoundingClientRect();
+            
+            // Appliquer cette position absolue en coordonnées de fenêtre
+            optionsContainer.style.position = 'fixed';
+            optionsContainer.style.top = (rect.bottom + 2) + 'px';
+            optionsContainer.style.left = rect.left + 'px';
+            optionsContainer.style.width = dimensions.dropdownWidth;
+            optionsContainer.style.zIndex = '999999';
+            
+            // L'ajouter directement au body pour qu'il soit au-dessus de tout
+            document.body.appendChild(optionsContainer);
+            
+            // Maintenant l'afficher
+            optionsContainer.style.display = 'block';
+        } else {
+            // Simplement masquer si déjà visible
             optionsContainer.style.display = 'none';
         }
     });
+
+
+    // Par celle-ci:
+    document.addEventListener('click', (event) => {
+        // Vérifier si le clic est à l'extérieur à la fois du container et du options container
+        const clickOutsideContainer = !selectContainer.contains(event.target);
+        const clickOutsideOptions = !optionsContainer.contains(event.target);
+        
+        if (clickOutsideContainer && clickOutsideOptions) {
+            optionsContainer.style.display = 'none';
+        }
+    });
+
+
+
+
+
+
+
+
     
     // Assembler le tout
     selectContainer.appendChild(selectDisplay);
@@ -359,4 +402,86 @@ export function createOptionsFromLists(labels, expandedLabels = null, values = n
             value: values ? values[index] : label
         };
     });
+}
+
+
+
+
+
+// ====================================
+// Utilitaires pour les sélecteurs
+// ====================================
+
+/**
+ * Met à jour la valeur et l'affichage d'un sélecteur, qu'il soit standard ou personnalisé
+ * @param {string} selectorId - ID du sélecteur à mettre à jour
+ * @param {string} value - Valeur à définir
+ * @param {string} displayText - Texte à afficher (optionnel)
+ * @param {Object} options - Options supplémentaires (optionnel)
+ * @returns {boolean} - true si la mise à jour a réussi, false sinon
+ */
+export function updateSelectorValue(selectorId, value, displayText, options = {}) {
+    const selector = document.getElementById(selectorId);
+    if (!selector) return false;
+    
+    try {
+        // Définir la valeur
+        if (typeof selector.value !== 'undefined') {
+            selector.value = value;
+        }
+        
+        // Mettre à jour l'affichage si nécessaire
+        if (displayText) {
+            if (typeof selector.updateDisplay === 'function') {
+                selector.updateDisplay(displayText);
+            } else if (selector.tagName === 'SELECT') {
+                // Pour un select standard
+                if (options.replaceOptions) {
+                    selector.innerHTML = '';
+                }
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = displayText;
+                selector.appendChild(option);
+                
+                // Sélectionner l'option
+                selector.value = value;
+            }
+        }
+        
+        return true;
+    } catch (error) {
+        console.warn(`Erreur lors de la mise à jour du sélecteur ${selectorId}:`, error);
+        return false;
+    }
+}
+
+/**
+ * Vérifie si un sélecteur contient une option avec une certaine valeur
+ * @param {string} selectorId - ID du sélecteur à vérifier
+ * @param {string|number} optionValue - Valeur à rechercher
+ * @returns {boolean} - true si l'option existe, false sinon
+ */
+export function selectorHasOption(selectorId, optionValue) {
+    const selector = document.getElementById(selectorId);
+    if (!selector) return false;
+    
+    try {
+        // Pour un sélecteur standard avec des options
+        if (selector.tagName === 'SELECT' && selector.options) {
+            return Array.from(selector.options)
+                .some(option => option.value == optionValue);
+        }
+        
+        // Pour un sélecteur personnalisé avec une méthode hasOption
+        if (typeof selector.hasOption === 'function') {
+            return selector.hasOption(optionValue);
+        }
+        
+        // Impossible de vérifier
+        return false;
+    } catch (error) {
+        console.warn(`Erreur lors de la vérification des options du sélecteur ${selectorId}:`, error);
+        return false;
+    }
 }

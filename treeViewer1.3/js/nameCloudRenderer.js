@@ -4,6 +4,7 @@ import { hasDateInRange, extractYear,  cleanProfession, cleanLocation,  } from '
 import { showPersonsList } from './nameCloudInteractions.js'
 import { updateTitleText } from './nameCloudUI.js'
 import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js'
+import { addStatisticsLabel } from './nameCloudAverageAge.js'
 
 let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
@@ -480,6 +481,13 @@ function drawNameCloud(svg, textGroup, words, color, config) {
     
     texts.append('title')
         .text(d => `${d.text}: ${d.originalSize} occurrences`);
+
+
+
+    // afficher la moyenne
+    // addAverageLabel(svg, textGroup, config);
+    addStatisticsLabel(svg, textGroup, config);
+
 }
 
 export const NameCloud = ({ nameData, config }) => {
