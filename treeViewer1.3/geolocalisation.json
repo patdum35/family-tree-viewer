@@ -4114,5 +4114,73 @@
   "Le Havre": {
     "lat": 49.4938975,
     "lon": 0.1079732
+  },
+  "Acigné, 35, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 48.1334474,
+    "lon": -1.5341182
+  },
+  "Betton, 35, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 48.1817122,
+    "lon": -1.6414898
+  },
+  "Gommerville, 76303, Seine-Maritime, Normandie, France": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Azay-le-Rideau, 37014, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2614793,
+    "lon": 0.4667128
+  },
+  "Saint-Martin-du-Manoir, 76616, Seine-Maritime, Normandie, France": {
+    "lat": 49.5313835,
+    "lon": 0.238674
+  },
+  "Hackbridge, Wallington, Royaume-Uni": {
+    "lat": 51.38007225,
+    "lon": -0.15566395000000027
+  },
+  "La-Touche-à-la-Vache, 22130 Créhen": {
+    "lat": 48.5215143,
+    "lon": -2.1962924
+  },
+  "la Tandourie, Corseul (22)": {
+    "lat": 48.5009151,
+    "lon": -2.182803
+  },
+  "Coëtlogon, 22, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.12966985,
+    "lon": -2.5361080747099845
+  },
+  "barcelone, espagne": {
+    "lat": 41.3828939,
+    "lon": 2.1774322
+  },
+  "malaunay, 76": {
+    "lat": 49.5280751,
+    "lon": 1.0403092
+  },
+  "Huismes, 37118, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2312241,
+    "lon": 0.2519958
+  },
+  "Manthelan, 37143, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.136387,
+    "lon": 0.7938916
+  },
+  "Médréac, 35, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.267486,
+    "lon": -2.066007
+  },
+  "la baillie, Saint-Cast Le Guildo, 22, Bretagne": {
+    "lat": 48.6279708,
+    "lon": -2.2824685
+  },
+  "Jouy-le-Moutier, 95323, Val-d'Oise, Ile-de-France, France": {
+    "lat": 49.0116,
+    "lon": 2.03194
+  },
+  "Hattenville, 76342, Seine-Maritime, Normandie, France": {
+    "lat": 49.6514049,
+    "lon": 0.5368215
   }
 }
