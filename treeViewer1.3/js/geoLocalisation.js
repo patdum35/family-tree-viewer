@@ -431,6 +431,63 @@ export function createInteractiveHeatmap(locationData, heatmapName) {
     heatmapWrapper.style.justifyContent = 'center';
     heatmapWrapper.style.alignItems = 'center';
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Conteneur interne
     const contentContainer = document.createElement('div');
     contentContainer.style.width = '90%';
@@ -966,337 +1023,6 @@ async function showHeatmapDialog(existingHeatmaps, type = 'all') {
 }
 
 
-// // // Variable globale pour le cache
-// // let geolocalisationCache = null;
-
-// // // Fonction pour charger le fichier au démarrage
-// // export async function loadGeolocalisationFile() {
-// //     try {
-// //         const response = await fetch('geolocalisation.json', { method: 'HEAD' });
-// //         if (response.ok) {
-// //             const dataResponse = await fetch('geolocalisation.json');
-// //             geolocalisationCache = await dataResponse.json();
-// //             console.log('Fichier de géolocalisation chargé');
-// //             return true;
-// //         }
-// //         return false;
-// //     } catch (error) {
-// //         return false;
-// //     }
-// // }
-
-// // export async function geocodeLocation(location) {
-// //     if (!location || location.trim() === '') return null;
-
-    
-// //     // console.log(" DEBUGGGGGGGGGG  : UTILSATION DU CACHE pour geolocalisation")
-// //     // Si le cache est disponible, chercher d'abord dedans
-// //     if (geolocalisationCache && geolocalisationCache[location]) {
-// //         // console.log(" UTILSATION DU CACHE pour geolocalisation")
-
-// //         return geolocalisationCache[location];
-// //     }
-
-// //     try {
-// //         await delay(Math.random() * 500);
-
-// //         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`, {
-// //             headers: {
-// //                 'User-Agent': 'GenealogyTreeApp/1.0'
-// //             }
-// //         });
-
-// //         if (!response.ok) {
-// //             console.error('Erreur de réponse:', response.status);
-// //             return null;
-// //         }
-
-// //         const data = await response.json();
-        
-// //         return data && data.length > 0 ? {
-// //             lat: parseFloat(data[0].lat),
-// //             lon: parseFloat(data[0].lon)
-// //         } : null;
-// //     } catch (error) {
-// //         console.error('Erreur de géocodage pour', location, ':', error);
-// //         return null;
-// //     }
-// // }
-
-
-// // export function generateGeocodeFile() {
-// //     generateGeocodeFileInternal();
-// // }
-
-// // // Rendre la fonction accessible globalement
-// // window.generateGeocodeFile = generateGeocodeFile;
-
-
-// // async function generateGeocodeFileInternal() {
-// //     const statusDiv = document.getElementById('geocoding-status');
-// //     const progressBar = document.getElementById('geocoding-bar');
-// //     const resultsList = document.getElementById('geocoding-results');
-// //     const maxLocations = parseInt(document.getElementById('maxLocations').value) || 0;
-    
-// //     document.getElementById('geocoding-progress').style.display = 'block';
-// //     resultsList.style.display = 'block';
-// //     resultsList.innerHTML = '';
-
-// //     // Collecter tous les lieux uniques
-// //     const locations = new Set();
-// //     for (const person of Object.values(state.gedcomData.individuals)) {
-// //         if (person.birthPlace) locations.add(person.birthPlace);
-// //         if (person.deathPlace) locations.add(person.deathPlace);
-        
-// //         if (person.spouseFamilies) {
-// //             person.spouseFamilies.forEach(famId => {
-// //                 const family = state.gedcomData.families[famId];
-// //                 if (family?.marriagePlace) locations.add(family.marriagePlace);
-// //             });
-// //         }
-// //     }
-
-// //     // Convertir en array et limiter si nécessaire
-// //     let locationsArray = Array.from(locations);
-// //     if (maxLocations > 0) {
-// //         locationsArray = locationsArray.slice(0, maxLocations);
-// //     }
-
-// //     const totalLocations = locationsArray.length;
-// //     let processed = 0;
-// //     const geolocalisationData = {};
-
-// //     // Charger les données existantes si disponibles
-// //     try {
-// //         const response = await fetch('geolocalisation.json');
-// //         if (response.ok) {
-// //             const existingData = await response.json();
-// //             Object.assign(geolocalisationData, existingData);
-// //             console.log('Données existantes chargées');
-// //         }
-// //     } catch (error) {
-// //         // Pas de fichier existant, on continue
-// //     }
-
-// //     for (const location of locationsArray) {
-// //         statusDiv.textContent = `Géocodage: ${processed + 1}/${totalLocations} - ${location}`;
-// //         progressBar.value = (processed / totalLocations) * 100;
-
-// //         try {
-// //             if (geolocalisationData[location]) {
-// //                 resultsList.innerHTML += `<option style="color: blue;">↺ ${location} (cache)</option>`;
-// //             } else {
-// //                 const coords = await geocodeLocation(location);
-// //                 if (coords) {
-// //                     geolocalisationData[location] = coords;
-// //                     resultsList.innerHTML += `<option style="color: green;">✓ ${location}</option>`;
-// //                 } else {
-// //                     resultsList.innerHTML += `<option style="color: red;">✗ ${location}</option>`;
-// //                 }
-// //             }
-// //         } catch (error) {
-// //             resultsList.innerHTML += `<option style="color: red;">✗ ${location} (${error.message})</option>`;
-// //         }
-
-// //         processed++;
-// //         if (!geolocalisationData[location]) {
-// //             await new Promise(resolve => setTimeout(resolve, 1000));
-// //         }
-// //     }
-
-// //     // Générer le fichier
-// //     const blob = new Blob([JSON.stringify(geolocalisationData, null, 2)], {type: 'application/json'});
-// //     const url = URL.createObjectURL(blob);
-    
-// //     const a = document.createElement('a');
-// //     a.href = url;
-// //     a.download = 'geolocalisation.json';
-// //     document.body.appendChild(a);
-// //     a.click();
-// //     document.body.removeChild(a);
-// //     URL.revokeObjectURL(url);
-
-// //     statusDiv.textContent = `Terminé ! ${processed} lieux traités`;
-// //     progressBar.value = 100;
-// // }
-
-
-
-
-
-
-
-
-
-// function applySmallScreenStyles(map, heatmapTitle) {
-//     const screenWidth = window.innerWidth;
-//     const isSmallScreen = screenWidth <= 410;
-    
-//     // 1. Gérer la barre de titre et son contenu
-//     const titleBar = document.querySelector('#namecloud-heatmap-wrapper > div');
-//     const mapContainer = document.getElementById('ancestors-heatmap');
-    
-//     if (titleBar && mapContainer) {
-//         if (isSmallScreen) {
-//             // Masquer la barre de titre originale
-//             titleBar.style.display = 'none';
-            
-//             // Créer un titre à l'intérieur de la carte
-//             let mapTitle = document.getElementById('heatmap-map-title');
-//             if (!mapTitle) {
-//                 mapTitle = document.createElement('div');
-//                 mapTitle.id = 'heatmap-map-title';
-//                 mapTitle.style.position = 'absolute';
-//                 mapTitle.style.top = '10px';
-//                 mapTitle.style.left = '10px';
-//                 mapTitle.style.zIndex = '1000';
-//                 mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-//                 mapTitle.style.padding = '3px 6px';
-//                 mapTitle.style.borderRadius = '4px';
-//                 mapTitle.style.fontSize = '12px';
-//                 mapTitle.style.fontWeight = 'bold';
-//                 mapTitle.style.maxWidth = '70%';
-//                 mapTitle.textContent = heatmapTitle || 'Heatmap';
-//                 mapContainer.appendChild(mapTitle);
-//             }
-            
-//             // Créer les boutons dans la carte
-//             let controlsContainer = document.getElementById('heatmap-map-controls');
-//             if (!controlsContainer) {
-//                 controlsContainer = document.createElement('div');
-//                 controlsContainer.id = 'heatmap-map-controls';
-//                 controlsContainer.style.position = 'absolute';
-//                 controlsContainer.style.top = '10px';
-//                 controlsContainer.style.right = '10px';
-//                 controlsContainer.style.zIndex = '1000';
-//                 controlsContainer.style.display = 'flex';
-//                 controlsContainer.style.gap = '5px';
-                
-//                 // Bouton refresh
-//                 const refreshBtn = document.createElement('button');
-//                 refreshBtn.innerHTML = '🔄';
-//                 refreshBtn.title = 'Rafraîchir la heatmap';
-//                 refreshBtn.style.width = '24px';
-//                 refreshBtn.style.height = '24px';
-//                 refreshBtn.style.padding = '0';
-//                 refreshBtn.style.border = '1px solid #ccc';
-//                 refreshBtn.style.borderRadius = '3px';
-//                 refreshBtn.style.backgroundColor = 'white';
-//                 refreshBtn.style.cursor = 'pointer';
-//                 refreshBtn.style.fontSize = '12px';
-//                 refreshBtn.style.display = 'flex';
-//                 refreshBtn.style.justifyContent = 'center';
-//                 refreshBtn.style.alignItems = 'center';
-                
-//                 // Bouton fermeture
-//                 const closeBtn = document.createElement('button');
-//                 closeBtn.innerHTML = '✖';
-//                 closeBtn.title = 'Fermer la heatmap';
-//                 closeBtn.style.width = '24px';
-//                 closeBtn.style.height = '24px';
-//                 closeBtn.style.padding = '0';
-//                 closeBtn.style.border = '1px solid #ccc';
-//                 closeBtn.style.borderRadius = '3px';
-//                 closeBtn.style.backgroundColor = 'white';
-//                 closeBtn.style.cursor = 'pointer';
-//                 closeBtn.style.fontSize = '12px';
-//                 closeBtn.style.display = 'flex';
-//                 closeBtn.style.justifyContent = 'center';
-//                 closeBtn.style.alignItems = 'center';
-                
-//                 // Ajouter les écouteurs d'événements
-//                 refreshBtn.addEventListener('click', () => {
-//                     if (typeof refreshHeatmap === 'function') {
-//                         refreshHeatmap();
-//                     }
-//                 });
-                
-//                 closeBtn.addEventListener('click', () => {
-//                     const wrapper = document.getElementById('namecloud-heatmap-wrapper');
-//                     if (wrapper) {
-//                         document.body.removeChild(wrapper);
-//                         // Restaurer les z-index si nécessaire
-//                         document.querySelectorAll('[data-original-z-index]').forEach(el => {
-//                             el.style.zIndex = el.dataset.originalZIndex;
-//                             delete el.dataset.originalZIndex;
-//                         });
-//                     }
-//                 });
-                
-//                 controlsContainer.appendChild(refreshBtn);
-//                 controlsContainer.appendChild(closeBtn);
-//                 mapContainer.appendChild(controlsContainer);
-//             }
-//         } else {
-//             // Rétablir l'affichage normal pour les écrans plus grands
-//             titleBar.style.display = 'flex';
-            
-//             // Supprimer les éléments spécifiques aux petits écrans s'ils existent
-//             const mapTitle = document.getElementById('heatmap-map-title');
-//             const controlsContainer = document.getElementById('heatmap-map-controls');
-            
-//             if (mapTitle) mapTitle.remove();
-//             if (controlsContainer) controlsContainer.remove();
-//         }
-//     }
-    
-//     // 2. Réduire la taille des boutons de zoom
-//     if (map) {
-//         const zoomControl = document.querySelector('.leaflet-control-zoom');
-//         if (zoomControl) {
-//             if (isSmallScreen) {
-//                 // Réduction plus importante des boutons de zoom
-//                 zoomControl.style.transform = 'scale(0.7)';
-//                 zoomControl.style.transformOrigin = 'top right';
-//                 zoomControl.style.marginTop = '40px'; // Décalage vers le bas
-//                 zoomControl.style.marginLeft = '-10px'; // Décalage vers la gauche
-
-//                 // Ajuster également les éléments internes des boutons zoom
-//                 const zoomButtons = zoomControl.querySelectorAll('a');
-//                 zoomButtons.forEach(btn => {
-//                     btn.style.width = '22px';
-//                     btn.style.height = '22px';
-//                     btn.style.lineHeight = '22px';
-//                     btn.style.fontSize = '14px';
-//                 });
-//             } else {
-//                 zoomControl.style.transform = 'none';
-//                 const zoomButtons = zoomControl.querySelectorAll('a');
-//                 zoomButtons.forEach(btn => {
-//                     btn.style.width = '';
-//                     btn.style.height = '';
-//                     btn.style.lineHeight = '';
-//                     btn.style.fontSize = '';
-//                 });
-//             }
-//         }
-
-
-
-
-
-
-
-
-
-//     }
-    
-//     // 3. Masquer l'attribution Leaflet sur petits écrans
-//     const attribution = document.querySelector('.leaflet-control-attribution');
-//     if (attribution) {
-//         attribution.style.display = isSmallScreen ? 'none' : 'block';
-//     }
-    
-//     // 4. Centrer la carte sur son centre actuel pour garder le contenu centré
-//     if (map) {
-//         const currentCenter = map.getCenter();
-//         const currentZoom = map.getZoom();
-//         map.invalidateSize();
-//         map.setView(currentCenter, currentZoom, { animate: false });
-//     }
-// }
-
-
 
 function applySmallScreenStyles(map, heatmapTitle) {
     const screenWidth = window.innerWidth;
@@ -1539,47 +1265,39 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
 
 
+    const resizeStyle = document.createElement('style');
+    resizeStyle.textContent = `
+      /* Style pour le coin de redimensionnement de la heatmap uniquement */
+      #namecloud-heatmap-wrapper {
+        position: relative; /* Assurez-vous que c'est bien en position relative */
+      }
+      
+      /* Rendre le coin de redimensionnement plus visible */
+      #namecloud-heatmap-wrapper::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        background-image: linear-gradient(135deg, transparent 50%, rgba(67, 97, 238, 0.8) 50%);
+        pointer-events: none; /* Important: laisse passer les clics vers l'élément réel de redimensionnement */
+        z-index: 9200;
+      }
+      
+      /* Version plus grande pour les mobiles */
+      @media (max-width: 768px) {
+        #namecloud-heatmap-wrapper::after {
+          width: 30px;
+          height: 30px;
+        }
+      }
+    `;
+    
+    document.head.appendChild(resizeStyle);
 
 
-
-
-    // // Appliquer les dimensions et positions sauvegardées
-    // if (nameCloudState.heatmapPosition) {
-    //     // Pour la position
-    //     if (nameCloudState.heatmapPosition.top !== null) {
-    //         heatmapWrapper.style.top = `${nameCloudState.heatmapPosition.top}px`;
-    //     }
-    //     if (nameCloudState.heatmapPosition.left !== null) {
-    //         heatmapWrapper.style.left = `${nameCloudState.heatmapPosition.left}px`;
-    //     }
-        
-    //     // Pour les dimensions
-    //     if (nameCloudState.heatmapPosition.width !== null) {
-    //         heatmapWrapper.style.width = `${nameCloudState.heatmapPosition.width}px`;
-    //     }
-    //     if (nameCloudState.heatmapPosition.height !== null) {
-    //         heatmapWrapper.style.height = `${nameCloudState.heatmapPosition.height}px`;
-    //     }
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Barre de titre avec poignée pour déplacer
+    
     const titleBar = document.createElement('div');
     titleBar.style.padding = '8px 12px';
     titleBar.style.backgroundColor = '#4361ee';
@@ -1620,8 +1338,79 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // Ajouter au body
     document.body.appendChild(heatmapWrapper);
 
-    // Rendre le conteneur déplaçable
-    makeElementDraggable(heatmapWrapper, titleBar);
+ 
+
+
+    // Ajouter une poignée de déplacement toujours visible
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'heatmap-drag-handle';
+    dragHandle.innerHTML = '⋮⋮'; // Symbole de déplacement (quatre points de suspension verticaux)
+    dragHandle.style.position = 'absolute';
+    dragHandle.style.top = '3px';
+    dragHandle.style.left = '3px';
+    dragHandle.style.width = '30px';
+    dragHandle.style.height = '30px';
+    dragHandle.style.borderRadius = '5px';
+    dragHandle.style.backgroundColor = 'rgba(67, 97, 238, 0.7)';
+    dragHandle.style.color = 'white';
+    dragHandle.style.fontSize = '18px';
+    dragHandle.style.display = 'flex';
+    dragHandle.style.justifyContent = 'center';
+    dragHandle.style.alignItems = 'center';
+    dragHandle.style.cursor = 'move';
+    dragHandle.style.zIndex = '9200';
+    dragHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    dragHandle.title = 'Déplacer la carte';
+
+    // Styles pour les petits écrans
+    const dragHandleStyle = document.createElement('style');
+    dragHandleStyle.textContent = `
+    .heatmap-drag-handle {
+        opacity: 0.4;
+        transition: opacity 0.2s ease;
+    }
+    
+    .heatmap-drag-handle:hover {
+        opacity: 1;
+    }
+    
+    /* Afficher seulement quand le bandeau titre est masqué */
+    .heatmap-drag-handle {
+        display: none;
+    }
+    
+    /* Afficher pour les petites tailles */
+    @media (max-width: 500px), (max-height: 400px) {
+        .heatmap-drag-handle {
+        display: flex;
+        }
+    }
+    `;
+
+    document.head.appendChild(dragHandleStyle);
+    heatmapWrapper.appendChild(dragHandle);
+
+
+
+
+
+
+
+   // Rendre le conteneur déplaçable
+//    makeElementDraggable(heatmapWrapper, titleBar);
+    // Modification de l'appel à makeElementDraggable pour inclure la nouvelle poignée
+    makeElementDraggable(heatmapWrapper, [titleBar, dragHandle]);
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1753,7 +1542,7 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
                 // Variable pour suivre l'état d'ouverture
                 let isDetailsOpen = false;
-                    // Fonctions de gestion des détails
+                // Fonctions de gestion des détails
                 const showDetails = () => {
                     // Fermer tous les autres détails ouverts
                     document.querySelectorAll('.heatmap-details-open').forEach(el => {
@@ -1775,40 +1564,51 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
                         <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
                         <p><strong>Nombre total d'occurrences :</strong> ${location.count}</p>
                     `;
-
+                
                     if (location.families && Object.keys(location.families).length > 0) {
-                        details += `<h4>Noms de famille :</h4><ul>`;
-                        const sortedFamilies = Object.entries(location.families)
-                            .sort((a, b) => b[1] - a[1])
-                            .slice(0, 5);
-
-                        sortedFamilies.forEach(([family, count]) => {
-                            details += `<li>${family}: ${count} occurrences</li>`;
-                        });
-                        
-                        if (Object.keys(location.families).length > 5) {
-                            details += `<li>... et ${Object.keys(location.families).length - 5} autres noms</li>`;
-                        }
-                        
-                        details += `</ul>`;
-                    }
-
-                    if (location.locations && location.locations.length > 0) {
-                        details += `<h4>Personnes :</h4>
-                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
+                        details += `<h4>Noms de famille (${Object.keys(location.families).length}):</h4>
+                        <div style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
                             <ul style="margin: 0; padding-left: 20px;">`;
                         
-                        location.locations.slice(0, 20).forEach(person => {
-                            details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
+                        // Trier les noms de famille par nombre d'occurrences
+                        const sortedFamilies = Object.entries(location.families)
+                            .sort((a, b) => b[1] - a[1]);
+                
+                        // Afficher tous les noms de famille
+                        sortedFamilies.forEach(([family, count]) => {
+                            details += `<li>${family}: ${count} occurrence${count > 1 ? 's' : ''}</li>`;
                         });
-
-                        if (location.locations.length > 20) {
-                            details += `<li>... et ${location.locations.length - 20} autres personnes</li>`;
-                        }
                         
                         details += `</ul></div>`;
                     }
-
+                
+                    if (location.locations && location.locations.length > 0) {
+                        details += `<h4>Personnes (${location.locations.length}):</h4>
+                        <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
+                            <ul style="margin: 0; padding-left: 20px;">`;
+                        
+                        // Trier les personnes par type d'événement et par année si disponible
+                        const sortedLocations = [...location.locations].sort((a, b) => {
+                            // D'abord par type d'événement
+                            if (a.type !== b.type) {
+                                return a.type.localeCompare(b.type);
+                            }
+                            // Ensuite par année si disponible
+                            if (a.year && b.year && a.year !== 'N/A' && b.year !== 'N/A') {
+                                return parseInt(a.year) - parseInt(b.year);
+                            }
+                            // Sinon par nom
+                            return a.name.localeCompare(b.name);
+                        });
+                        
+                        // Afficher toutes les personnes
+                        sortedLocations.forEach(person => {
+                            details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
+                        });
+                        
+                        details += `</ul></div>`;
+                    }
+                
                     detailsContainer.innerHTML = details;
                     
                     // Ajouter un gestionnaire d'événements pour le bouton de fermeture
@@ -1972,20 +1772,6 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // À la fin de createImprovedHeatmap, remplacez ou ajoutez ceci
     // Observer les changements de taille du conteneur pour le redimensionnement manuel
     if (window.ResizeObserver) {
-        // const resizeObserver = new ResizeObserver(entries => {
-        //     for (let entry of entries) {
-        //         if (entry.target.id === 'namecloud-heatmap-wrapper' && heatmapWrapper.map) {
-        //             const map = heatmapWrapper.map;
-        //             const currentCenter = map.getCenter();
-        //             const currentZoom = map.getZoom();
-                    
-        //             setTimeout(() => {
-        //                 map.invalidateSize();
-        //                 map.setView(currentCenter, currentZoom, { animate: false });
-        //             }, 10);
-        //         }
-        //     }
-        // });
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.target.id === 'namecloud-heatmap-wrapper' && heatmapWrapper.map) {
@@ -2017,19 +1803,6 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
         }
     }
 
-    // // Solution alternative si ResizeObserver n'est pas supporté
-    // heatmapWrapper.addEventListener('mouseup', function() {
-    //     if (heatmapWrapper.map) {
-    //         const map = heatmapWrapper.map;
-    //         const currentCenter = map.getCenter();
-    //         const currentZoom = map.getZoom();
-            
-    //         setTimeout(() => {
-    //             map.invalidateSize();
-    //             map.setView(currentCenter, currentZoom, { animate: false });
-    //         }, 10);
-    //     }
-    // });
 
 
 
@@ -2217,16 +1990,89 @@ export const attachFilterListeners = () => {
 
 
 
-// Fonction pour rendre un élément déplaçable
-function makeElementDraggable(element, handle) {
+// // Fonction pour rendre un élément déplaçable
+// function makeElementDraggable(element, handle) {
+//     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+//     if (handle) {
+//         // Si une poignée est fournie, le déplacement se fait via cette poignée
+//         handle.onmousedown = dragMouseDown;
+//     } else {
+//         // Sinon, on peut déplacer l'élément directement
+//         element.onmousedown = dragMouseDown;
+//     }
+
+//     function dragMouseDown(e) {
+//         e = e || window.event;
+//         e.preventDefault();
+//         // Obtenir la position de la souris au démarrage
+//         pos3 = e.clientX;
+//         pos4 = e.clientY;
+//         document.onmouseup = closeDragElement;
+//         // Appeler la fonction quand la souris bouge
+//         document.onmousemove = elementDrag;
+//     }
+
+//     function elementDrag(e) {
+//         e = e || window.event;
+//         e.preventDefault();
+//         // Calculer la nouvelle position
+//         pos1 = pos3 - e.clientX;
+//         pos2 = pos4 - e.clientY;
+//         pos3 = e.clientX;
+//         pos4 = e.clientY;
+        
+//         // Limiter le déplacement pour ne pas sortir de la fenêtre
+//         const newTop = (element.offsetTop - pos2);
+//         const newLeft = (element.offsetLeft - pos1);
+        
+//         // Empêcher de sortir à gauche ou en haut
+//         if (newTop < 0) pos2 = element.offsetTop;
+//         if (newLeft < 0) pos1 = element.offsetLeft;
+        
+//         // Empêcher de sortir à droite ou en bas
+//         const maxRight = window.innerWidth - element.offsetWidth;
+//         const maxBottom = window.innerHeight - element.offsetHeight;
+        
+//         if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+//         if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+        
+//         // Définir la nouvelle position de l'élément
+//         element.style.top = (element.offsetTop - pos2) + "px";
+//         element.style.left = (element.offsetLeft - pos1) + "px";
+//     }
+
+//     function closeDragElement() {
+//         // Arrêter de déplacer quand on relâche la souris
+//         document.onmouseup = null;
+//         document.onmousemove = null;
+//     }
+// }
+
+// Fonction makeElementDraggable modifiée pour accepter plusieurs poignées
+// Remplacer la fonction existante par celle-ci:
+function makeElementDraggable(element, handles) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     
-    if (handle) {
-        // Si une poignée est fournie, le déplacement se fait via cette poignée
-        handle.onmousedown = dragMouseDown;
-    } else {
-        // Sinon, on peut déplacer l'élément directement
+    // Convertir en tableau si ce n'est pas déjà le cas
+    if (!Array.isArray(handles)) {
+        handles = [handles];
+    }
+    
+    // Attacher l'événement à chaque poignée
+    handles.forEach(handle => {
+        if (handle) {
+            handle.onmousedown = dragMouseDown;
+            
+            // Support tactile
+            handle.ontouchstart = touchDragStart;
+        }
+    });
+    
+    // Si aucune poignée n'est fournie, l'élément entier devient la poignée
+    if (handles.length === 0 || !handles[0]) {
         element.onmousedown = dragMouseDown;
+        element.ontouchstart = touchDragStart;
     }
 
     function dragMouseDown(e) {
@@ -2238,6 +2084,19 @@ function makeElementDraggable(element, handle) {
         document.onmouseup = closeDragElement;
         // Appeler la fonction quand la souris bouge
         document.onmousemove = elementDrag;
+    }
+    
+    // Fonction pour gérer les événements tactiles
+    function touchDragStart(e) {
+        if (e.touches && e.touches.length === 1) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            pos3 = touch.clientX;
+            pos4 = touch.clientY;
+            document.ontouchend = closeDragElement;
+            document.ontouchcancel = closeDragElement;
+            document.ontouchmove = elementTouchDrag;
+        }
     }
 
     function elementDrag(e) {
@@ -2268,11 +2127,48 @@ function makeElementDraggable(element, handle) {
         element.style.top = (element.offsetTop - pos2) + "px";
         element.style.left = (element.offsetLeft - pos1) + "px";
     }
+    
+    // Fonction pour gérer le déplacement tactile
+    function elementTouchDrag(e) {
+        if (e.touches && e.touches.length === 1) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            
+            pos1 = pos3 - touch.clientX;
+            pos2 = pos4 - touch.clientY;
+            pos3 = touch.clientX;
+            pos4 = touch.clientY;
+            
+            // Appliquer les mêmes limites que pour la souris
+            const newTop = (element.offsetTop - pos2);
+            const newLeft = (element.offsetLeft - pos1);
+            
+            if (newTop < 0) pos2 = element.offsetTop;
+            if (newLeft < 0) pos1 = element.offsetLeft;
+            
+            const maxRight = window.innerWidth - element.offsetWidth;
+            const maxBottom = window.innerHeight - element.offsetHeight;
+            
+            if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+            if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+            
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+        }
+    }
 
     function closeDragElement() {
-        // Arrêter de déplacer quand on relâche la souris
+        // Arrêter de déplacer quand on relâche la souris ou le toucher
         document.onmouseup = null;
         document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchcancel = null;
+        document.ontouchmove = null;
+        
+        // Sauvegarder la position si la fonction existe
+        if (typeof saveHeatmapPosition === 'function') {
+            saveHeatmapPosition();
+        }
     }
 }
 

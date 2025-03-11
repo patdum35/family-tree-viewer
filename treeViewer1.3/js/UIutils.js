@@ -22,7 +22,8 @@ export function createCustomSelector(config) {
     // Valeurs par défaut pour les paramètres
     const options = config.options || [];
     const selectedValue = config.selectedValue || (options.length > 0 ? options[0].value : '');
-    
+    const dropdownAlign = config.dropdownAlign || 'left'; // 'left' par défaut, peut être 'right'
+
     // Couleurs par défaut
     const colors = {
         main: '#4CAF50', // Vert par défaut
@@ -284,8 +285,18 @@ export function createCustomSelector(config) {
             
             // Appliquer cette position absolue en coordonnées de fenêtre
             optionsContainer.style.position = 'fixed';
-            optionsContainer.style.top = (rect.bottom + 2) + 'px';
-            optionsContainer.style.left = rect.left + 'px';
+            optionsContainer.style.top = (rect.bottom + 1) + 'px';
+
+            // Positionner en fonction de l'alignement choisi
+            if (dropdownAlign === 'right') {
+                // Calculer la position à gauche pour que le dropdown soit aligné à droite avec le sélecteur
+                const dropdownWidth = parseInt(dimensions.dropdownWidth);
+                optionsContainer.style.left = (rect.right - dropdownWidth) + 'px';
+            } else {
+                optionsContainer.style.left = rect.left + 'px';
+            }
+
+
             optionsContainer.style.width = dimensions.dropdownWidth;
             optionsContainer.style.zIndex = '999999';
             

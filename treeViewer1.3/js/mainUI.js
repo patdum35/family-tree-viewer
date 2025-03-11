@@ -1036,6 +1036,7 @@ export function replaceRootPersonSelector(customOptions = null) {
             hover: ' #f57c00',   // Orange plus foncé au survol
             selected: ' #e65100' // Orange encore plus foncé pour l'option sélectionnée
         },
+        dropdownAlign: 'right',  // Nouvelle option pour l'alignement à droite
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
             width: '60px',
@@ -1476,6 +1477,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                 Object.assign(optionsContainer.style, {
                     right: 'auto',
                     transform: `translateX(-${offset}px)` // Décaler pour centrer le sélecteur
+                    // transform: `translateX(-${menuWidth - selectorWidth}px)`
                 });
             }
         }, 10); // Un petit délai pour s'assurer que le menu est ouvert
