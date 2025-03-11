@@ -1265,38 +1265,6 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
 
 
-    const resizeStyle = document.createElement('style');
-    resizeStyle.textContent = `
-      /* Style pour le coin de redimensionnement de la heatmap uniquement */
-      #namecloud-heatmap-wrapper {
-        position: relative; /* Assurez-vous que c'est bien en position relative */
-      }
-      
-      /* Rendre le coin de redimensionnement plus visible */
-      #namecloud-heatmap-wrapper::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 20px;
-        height: 20px;
-        background-image: linear-gradient(135deg, transparent 50%, rgba(67, 97, 238, 0.8) 50%);
-        pointer-events: none; /* Important: laisse passer les clics vers l'élément réel de redimensionnement */
-        z-index: 9200;
-      }
-      
-      /* Version plus grande pour les mobiles */
-      @media (max-width: 768px) {
-        #namecloud-heatmap-wrapper::after {
-          width: 30px;
-          height: 30px;
-        }
-      }
-    `;
-    
-    document.head.appendChild(resizeStyle);
-
-
     
     const titleBar = document.createElement('div');
     titleBar.style.padding = '8px 12px';
@@ -1344,7 +1312,7 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // Ajouter une poignée de déplacement toujours visible
     const dragHandle = document.createElement('div');
     dragHandle.className = 'heatmap-drag-handle';
-    dragHandle.innerHTML = '⋮⋮'; // Symbole de déplacement (quatre points de suspension verticaux)
+    dragHandle.innerHTML = '✥'; //'⋮⋮'; // Symbole de déplacement (quatre points de suspension verticaux)
     dragHandle.style.position = 'absolute';
     dragHandle.style.top = '3px';
     dragHandle.style.left = '3px';
@@ -1402,12 +1370,12 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // Créer une poignée de redimensionnement spécifique pour mobile
     const resizeHandle = document.createElement('div');
     resizeHandle.className = 'heatmap-resize-handle';
-    resizeHandle.innerHTML = '↘️'; // Emoji flèche diagonale
+    resizeHandle.innerHTML = '⤡'; //'↘️'; // Emoji flèche diagonale
     resizeHandle.style.position = 'absolute';
     resizeHandle.style.bottom = '0';
     resizeHandle.style.right = '0';
-    resizeHandle.style.width = '40px';
-    resizeHandle.style.height = '40px';
+    resizeHandle.style.width = '25px';
+    resizeHandle.style.height = '25px';
     resizeHandle.style.backgroundColor = 'rgba(67, 97, 238, 0.7)';
     resizeHandle.style.color = 'white';
     resizeHandle.style.fontSize = '24px';
