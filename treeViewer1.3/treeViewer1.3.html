@@ -54,7 +54,6 @@
     </div>
 
     <!-- Formulaire de mot de passe -->
-    <!-- <div id="password-form" style="display: flex; justify-content: center; align-items: center; height: 100vh;"> -->
     <div id="password-form" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; height: 100vh;">
         <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; box-sizing: border-box;">
             <div class="password-row">
@@ -156,15 +155,6 @@
                     </select>
                 </div>
 
-                <!-- Nouveau bloc pour la validation des lieux -->
-                <div class="settings-section">
-                    <h3>Validation des Lieux</h3>
-                    <button onclick="validateLocations()">Scanner les Lieux</button>
-                    <select id="unlocatableLocations" size="10" style="width: 100%; margin-top: 10px;">
-                        <option>Résultats apparaîtront ici</option>
-                    </select>
-                </div>
-
                 <!-- Section pour le géocodage -->
                 <div class="settings-section">
                     <h3>Géocodage Local</h3>
@@ -188,28 +178,6 @@
                         <option>Résultats apparaîtront ici</option>
                     </select>
                 </div>
-
-
-                <div class="settings-section">
-                    <h3>Heatmaps</h3>
-                    <div>
-                        <label for="heatmapMaxPersons">Nombre max. de personnes :</label>
-                        <input 
-                            type="number" 
-                            id="heatmapMaxPersons" 
-                            value="10" 
-                            min="1"
-                            max="10000"
-                            style="width: 80px;"
-                        >
-                    </div>
-                    <button onclick="createAncestorsHeatMap({type: 'all'})">Heatmap Complète</button>
-                    <button onclick="createAncestorsHeatMap({type: 'ancestors'})">Heatmap Ascendants</button>
-                    <button onclick="createAncestorsHeatMap({type: 'descendants'})">Heatmap Descendants</button>
-                </div>
-
-
-
 
 
             </div>
@@ -282,10 +250,6 @@
         import { 
             startAncestorAnimation 
         } from './js/treeAnimation.js';
-        import { 
-            validateLocations,
-            createAncestorsHeatMap 
-        } from './js/geoLocalisation.js';
         import {
             initBackgroundContainer
         } from './js/backgroundManager.js';
@@ -311,8 +275,6 @@
         window.openSettingsModal = openSettingsModal;
         window.closeSettingsModal = closeSettingsModal;
         window.saveTargetAncestorId = saveTargetAncestorId;
-        window.validateLocations = validateLocations;
-        window.createAncestorsHeatMap = createAncestorsHeatMap;
         window.initBackgroundContainer = initBackgroundContainer;
         window.toggleFullScreen = toggleFullScreen;
         window.startAnimation = () => {
