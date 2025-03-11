@@ -7,7 +7,7 @@ import { findYoungestPerson } from './utils.js';
 import { initBackgroundContainer } from './backgroundManager.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
-import { geocodeLocation, validateLocations, loadGeolocalisationFile } from './geoLocalisation.js';
+import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector  } from './mainUI.js'; 
 import { 
@@ -48,7 +48,7 @@ export const state = {
     treeOwner: 1
 };
 
-export { geocodeLocation, validateLocations };
+export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
 

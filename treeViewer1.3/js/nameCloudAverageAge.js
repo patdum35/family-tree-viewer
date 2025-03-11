@@ -1128,11 +1128,88 @@ export function addStatisticsLabel(svg, textGroup, config) {
  * @param {Object} element - L'élément SVG à rendre déplaçable
  * @param {string} type - Le type de statistiques
  */
+// function makeDraggable(element, type) {
+//     // Variables pour stocker la position initiale et le décalage
+//     let startX, startY, offsetX, offsetY;
+    
+//     // Gestionnaire pour le début du déplacement
+//     const dragStart = function(event) {
+//         // Récupérer les coordonnées actuelles
+//         const transform = d3.select(this).attr('transform');
+//         const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        
+//         if (translate) {
+//             // Position actuelle de l'élément
+//             const currentX = parseFloat(translate[1]);
+//             const currentY = parseFloat(translate[2]);
+            
+//             // Position initiale de la souris
+//             startX = event.sourceEvent.clientX;
+//             startY = event.sourceEvent.clientY;
+            
+//             // Calculer le décalage
+//             offsetX = currentX - startX;
+//             offsetY = currentY - startY;
+//         }
+//     };
+    
+//     // Gestionnaire pour le déplacement en cours
+//     const dragged = function(event) {
+//         // Calculer la nouvelle position
+//         const newX = event.sourceEvent.clientX + offsetX;
+//         const newY = event.sourceEvent.clientY + offsetY;
+        
+//         // Mettre à jour la position de l'élément
+//         d3.select(this).attr('transform', `translate(${newX}, ${newY})`);
+        
+//         // Mettre à jour les coordonnées stockées
+//         statsPositionsMap[type] = {
+//             ...statsPositionsMap[type],
+//             x: newX,
+//             y: newY
+//         };
+        
+//         // Repositionner le bouton associé
+//         setTimeout(() => forceRepositionButton(type), 10);
+//     };
+    
+//     // Gestionnaire pour la fin du déplacement
+//     const dragEnd = function(event) {
+//         // Mettre à jour les coordonnées finales
+//         const transform = d3.select(this).attr('transform');
+//         const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        
+//         if (translate) {
+//             const finalX = parseFloat(translate[1]);
+//             const finalY = parseFloat(translate[2]);
+            
+//             // Mettre à jour les coordonnées stockées
+//             statsPositionsMap[type] = {
+//                 ...statsPositionsMap[type],
+//                 x: finalX,
+//                 y: finalY
+//             };
+            
+//             // Repositionner le bouton associé
+//             setTimeout(() => forceRepositionButton(type), 10);
+//         }
+//     };
+    
+//     // Appliquer les gestionnaires de déplacement à l'élément
+//     element.call(
+//         d3.drag()
+//             .on('start', dragStart)
+//             .on('drag', dragged)
+//             .on('end', dragEnd)
+//     );
+// }
+
+
 function makeDraggable(element, type) {
     // Variables pour stocker la position initiale et le décalage
     let startX, startY, offsetX, offsetY;
     
-    // Gestionnaire pour le début du déplacement
+    // Gestionnaire pour le début du déplacement (souris)
     const dragStart = function(event) {
         // Récupérer les coordonnées actuelles
         const transform = d3.select(this).attr('transform');
@@ -1153,7 +1230,7 @@ function makeDraggable(element, type) {
         }
     };
     
-    // Gestionnaire pour le déplacement en cours
+    // Gestionnaire pour le déplacement en cours (souris)
     const dragged = function(event) {
         // Calculer la nouvelle position
         const newX = event.sourceEvent.clientX + offsetX;
@@ -1173,7 +1250,7 @@ function makeDraggable(element, type) {
         setTimeout(() => forceRepositionButton(type), 10);
     };
     
-    // Gestionnaire pour la fin du déplacement
+    // Gestionnaire pour la fin du déplacement (souris)
     const dragEnd = function(event) {
         // Mettre à jour les coordonnées finales
         const transform = d3.select(this).attr('transform');
@@ -1195,15 +1272,84 @@ function makeDraggable(element, type) {
         }
     };
     
-    // Appliquer les gestionnaires de déplacement à l'élément
+    // Appliquer les gestionnaires de déplacement à l'élément (souris)
     element.call(
         d3.drag()
             .on('start', dragStart)
             .on('drag', dragged)
             .on('end', dragEnd)
     );
+    
+    // Ajouter la gestion des événements tactiles pour les appareils mobiles
+    element.on('touchstart', function(event) {
+        // Empêcher le scroll de la page
+        event.preventDefault();
+        
+        const transform = d3.select(this).attr('transform');
+        const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        
+        if (translate && event.touches && event.touches[0]) {
+            // Position actuelle de l'élément
+            const currentX = parseFloat(translate[1]);
+            const currentY = parseFloat(translate[2]);
+            
+            // Position initiale du toucher
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+            
+            // Calculer le décalage
+            offsetX = currentX - startX;
+            offsetY = currentY - startY;
+        }
+    });
+    
+    element.on('touchmove', function(event) {
+        // Empêcher le scroll de la page
+        event.preventDefault();
+        
+        if (event.touches && event.touches[0]) {
+            // Calculer la nouvelle position
+            const newX = event.touches[0].clientX + offsetX;
+            const newY = event.touches[0].clientY + offsetY;
+            
+            // Mettre à jour la position de l'élément
+            d3.select(this).attr('transform', `translate(${newX}, ${newY})`);
+            
+            // Mettre à jour les coordonnées stockées
+            statsPositionsMap[type] = {
+                ...statsPositionsMap[type],
+                x: newX,
+                y: newY
+            };
+            
+            // Repositionner le bouton associé
+            setTimeout(() => forceRepositionButton(type), 10);
+        }
+    });
+    
+    element.on('touchend', function(event) {
+        // Empêcher le scroll de la page
+        event.preventDefault();
+        
+        const transform = d3.select(this).attr('transform');
+        const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        
+        if (translate) {
+            const finalX = parseFloat(translate[1]);
+            const finalY = parseFloat(translate[2]);
+            
+            // Mettre à jour les coordonnées stockées
+            statsPositionsMap[type] = {
+                ...statsPositionsMap[type],
+                x: finalX,
+                y: finalY
+            };
+            
+            // Repositionner le bouton associé
+            setTimeout(() => forceRepositionButton(type), 10);
+        }
+    });
 }
-
 
 /**
  * Force le repositionnement du bouton
