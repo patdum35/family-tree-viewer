@@ -1370,15 +1370,29 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // Créer une poignée de redimensionnement spécifique pour mobile
     const resizeHandle = document.createElement('div');
     resizeHandle.className = 'heatmap-resize-handle';
-    resizeHandle.innerHTML = '⤡'; //'↘️'; // Emoji flèche diagonale
+    // resizeHandle.innerHTML = '⤡'; //'↘️'; // Emoji flèche diagonale
+    resizeHandle.innerHTML = '⤡';
+    resizeHandle.style.fontFamily = 'Arial, sans-serif'; // Police simple et moderne
+    resizeHandle.style.fontSize = '23px'; // Taille légèrement augmentée
+    resizeHandle.style.fontWeight = 'bold'; // Rendre la flèche plus visible
+    resizeHandle.style.lineHeight = '1'; // Empêcher les problèmes de hauteur de ligne
+    resizeHandle.style.paddingBottom = '4px';
+    // resizeHandle.innerHTML = `
+    //     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: auto;">
+    //     <path d="M8 16L4 20L8 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    //     <path d="M20 4L24 8L20 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    //     <path d="M20 8L4 24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    //     </svg>
+    //     `;
+    
     resizeHandle.style.position = 'absolute';
     resizeHandle.style.bottom = '0';
     resizeHandle.style.right = '0';
     resizeHandle.style.width = '25px';
-    resizeHandle.style.height = '25px';
+    resizeHandle.style.height = '20px';
     resizeHandle.style.backgroundColor = 'rgba(67, 97, 238, 0.7)';
     resizeHandle.style.color = 'white';
-    resizeHandle.style.fontSize = '24px';
+    // resizeHandle.style.fontSize = '24px';
     resizeHandle.style.display = 'flex';
     resizeHandle.style.justifyContent = 'center';
     resizeHandle.style.alignItems = 'center';
