@@ -1396,8 +1396,172 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
 
 
+
+
+
+    // Créer une poignée de redimensionnement spécifique pour mobile
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'heatmap-resize-handle';
+    resizeHandle.innerHTML = '↘️'; // Emoji flèche diagonale
+    resizeHandle.style.position = 'absolute';
+    resizeHandle.style.bottom = '0';
+    resizeHandle.style.right = '0';
+    resizeHandle.style.width = '40px';
+    resizeHandle.style.height = '40px';
+    resizeHandle.style.backgroundColor = 'rgba(67, 97, 238, 0.7)';
+    resizeHandle.style.color = 'white';
+    resizeHandle.style.fontSize = '24px';
+    resizeHandle.style.display = 'flex';
+    resizeHandle.style.justifyContent = 'center';
+    resizeHandle.style.alignItems = 'center';
+    resizeHandle.style.cursor = 'nwse-resize';
+    resizeHandle.style.borderTopLeftRadius = '10px';
+    resizeHandle.style.zIndex = '9200';
+    resizeHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    resizeHandle.title = 'Redimensionner la carte';
+
+    // Ajouter des styles pour l'affichage conditionnel
+    const resizeHandleStyle = document.createElement('style');
+    resizeHandleStyle.textContent = `
+    .heatmap-resize-handle {
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+        display: none; /* Caché par défaut sur desktop */
+    }
+    
+    .heatmap-resize-handle:hover {
+        opacity: 1;
+    }
+    
+    /* Afficher uniquement sur les appareils tactiles/mobiles */
+    @media (max-width: 1024px), (pointer: coarse) {
+        .heatmap-resize-handle {
+        display: flex;
+        }
+        
+        /* Masquer le coin de redimensionnement natif sur mobile */
+        #namecloud-heatmap-wrapper {
+        resize: none !important;
+        }
+    }
+    `;
+
+    document.head.appendChild(resizeHandleStyle);
+    heatmapWrapper.appendChild(resizeHandle);
+
+    // Variables pour le suivi du redimensionnement
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+
+    // Fonction pour gérer le début du redimensionnement (souris)
+    resizeHandle.addEventListener('mousedown', (e) => {
+    initResize(e.clientX, e.clientY);
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+    e.preventDefault();
+    });
+
+    // Fonction pour gérer le début du redimensionnement (tactile)
+    resizeHandle.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        initResize(touch.clientX, touch.clientY);
+        document.addEventListener('touchmove', resizeTouch);
+        document.addEventListener('touchend', stopResize);
+        document.addEventListener('touchcancel', stopResize);
+        e.preventDefault();
+    }
+    });
+
+    // Initialisation du redimensionnement
+    function initResize(x, y) {
+    isResizing = true;
+    startX = x;
+    startY = y;
+    startWidth = heatmapWrapper.offsetWidth;
+    startHeight = heatmapWrapper.offsetHeight;
+    heatmapWrapper.style.userSelect = 'none'; // Empêcher la sélection de texte
+    document.body.style.cursor = 'nwse-resize'; // Changer le curseur du document
+    }
+
+    // Fonction de redimensionnement (souris)
+    function resize(e) {
+    if (!isResizing) return;
+    
+    // Calculer la nouvelle taille
+    const newWidth = startWidth + (e.clientX - startX);
+    const newHeight = startHeight + (e.clientY - startY);
+    
+    // Appliquer la nouvelle taille avec des minimums
+    heatmapWrapper.style.width = `${Math.max(200, newWidth)}px`;
+    heatmapWrapper.style.height = `${Math.max(150, newHeight)}px`;
+    
+    // Rafraîchir la carte si elle existe
+    if (heatmapWrapper.map) {
+        heatmapWrapper.map.invalidateSize();
+    }
+    }
+
+    // Fonction de redimensionnement (tactile)
+    function resizeTouch(e) {
+    if (!isResizing || e.touches.length !== 1) return;
+    
+    const touch = e.touches[0];
+    const newWidth = startWidth + (touch.clientX - startX);
+    const newHeight = startHeight + (touch.clientY - startY);
+    
+    heatmapWrapper.style.width = `${Math.max(200, newWidth)}px`;
+    heatmapWrapper.style.height = `${Math.max(150, newHeight)}px`;
+    
+    if (heatmapWrapper.map) {
+        heatmapWrapper.map.invalidateSize();
+    }
+    
+    // Empêcher le défilement de la page pendant le redimensionnement
+    e.preventDefault();
+    }
+
+    // Arrêt du redimensionnement
+    function stopResize() {
+    if (isResizing) {
+        isResizing = false;
+        heatmapWrapper.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        // Supprimer les écouteurs d'événements
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('touchmove', resizeTouch);
+        document.removeEventListener('mouseup', stopResize);
+        document.removeEventListener('touchend', stopResize);
+        document.removeEventListener('touchcancel', stopResize);
+        
+        // Sauvegarder la position et les dimensions
+        if (typeof saveHeatmapPosition === 'function') {
+        saveHeatmapPosition();
+        }
+    }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    // Rendre le conteneur déplaçable
-//    makeElementDraggable(heatmapWrapper, titleBar);
     // Modification de l'appel à makeElementDraggable pour inclure la nouvelle poignée
     makeElementDraggable(heatmapWrapper, [titleBar, dragHandle]);
 
@@ -1991,66 +2155,7 @@ export const attachFilterListeners = () => {
 
 
 // // Fonction pour rendre un élément déplaçable
-// function makeElementDraggable(element, handle) {
-//     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    
-//     if (handle) {
-//         // Si une poignée est fournie, le déplacement se fait via cette poignée
-//         handle.onmousedown = dragMouseDown;
-//     } else {
-//         // Sinon, on peut déplacer l'élément directement
-//         element.onmousedown = dragMouseDown;
-//     }
-
-//     function dragMouseDown(e) {
-//         e = e || window.event;
-//         e.preventDefault();
-//         // Obtenir la position de la souris au démarrage
-//         pos3 = e.clientX;
-//         pos4 = e.clientY;
-//         document.onmouseup = closeDragElement;
-//         // Appeler la fonction quand la souris bouge
-//         document.onmousemove = elementDrag;
-//     }
-
-//     function elementDrag(e) {
-//         e = e || window.event;
-//         e.preventDefault();
-//         // Calculer la nouvelle position
-//         pos1 = pos3 - e.clientX;
-//         pos2 = pos4 - e.clientY;
-//         pos3 = e.clientX;
-//         pos4 = e.clientY;
-        
-//         // Limiter le déplacement pour ne pas sortir de la fenêtre
-//         const newTop = (element.offsetTop - pos2);
-//         const newLeft = (element.offsetLeft - pos1);
-        
-//         // Empêcher de sortir à gauche ou en haut
-//         if (newTop < 0) pos2 = element.offsetTop;
-//         if (newLeft < 0) pos1 = element.offsetLeft;
-        
-//         // Empêcher de sortir à droite ou en bas
-//         const maxRight = window.innerWidth - element.offsetWidth;
-//         const maxBottom = window.innerHeight - element.offsetHeight;
-        
-//         if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-//         if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-        
-//         // Définir la nouvelle position de l'élément
-//         element.style.top = (element.offsetTop - pos2) + "px";
-//         element.style.left = (element.offsetLeft - pos1) + "px";
-//     }
-
-//     function closeDragElement() {
-//         // Arrêter de déplacer quand on relâche la souris
-//         document.onmouseup = null;
-//         document.onmousemove = null;
-//     }
-// }
-
 // Fonction makeElementDraggable modifiée pour accepter plusieurs poignées
-// Remplacer la fonction existante par celle-ci:
 function makeElementDraggable(element, handles) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     
