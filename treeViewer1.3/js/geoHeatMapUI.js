@@ -330,6 +330,21 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
  */
 function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle) {
     try {
+        // Vérifier si un conteneur de carte existe déjà
+        if (mapContainer._leaflet_id) {
+            console.log("Un conteneur de carte existe déjà, nettoyage en cours...");
+            
+            // Si une carte existe déjà dans ce conteneur, la supprimer
+            if (heatmapWrapper.map) {
+                heatmapWrapper.map.remove();
+                heatmapWrapper.map = null;
+            }
+            
+            // Réinitialiser l'ID Leaflet du conteneur
+            delete mapContainer._leaflet_id;
+        }
+        
+        // Maintenant, créer la carte
         const map = L.map('ancestors-heatmap').setView([46.2276, 2.2137], 6); // Vue centrée sur la France
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -387,10 +402,34 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         try {
             if (coordinates.length > 0) {
                 const bounds = L.latLngBounds(coordinates);
+                // const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
+                // if (bounds.isValid()) {
+                //     map.fitBounds(bounds, {
+                //         padding: [50, 50]
+                //     });
+                // }
                 if (bounds.isValid()) {
-                    map.fitBounds(bounds, {
-                        padding: [50, 50]
-                    });
+                    // Calculer le niveau de zoom idéal pour ces limites
+                    const idealZoom = map.getBoundsZoom(bounds, false, [50, 50]);
+                    
+                    // Limiter le zoom maximum à 7 (≈ 100-150km de rayon)
+                    // Plus le chiffre est petit, plus la vue est éloignée
+                    const maxAllowedZoom = 9;
+                    const finalZoom = Math.min(idealZoom, maxAllowedZoom);
+                    
+                    console.log(`Zoom calculé: ${idealZoom}, limité à: ${finalZoom}`);
+                    
+                    // Si on a dû limiter le zoom, utiliser le centre des limites
+                    if (finalZoom < idealZoom) {
+                        const center = bounds.getCenter();
+                        map.setView(center, finalZoom);
+                    } else {
+                        // Sinon, utiliser fitBounds classique
+                        map.fitBounds(bounds, {
+                            padding: [50, 50],
+                            maxZoom: maxAllowedZoom
+                        });
+                    }
                 }
             }
         } catch (error) {

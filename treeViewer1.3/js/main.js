@@ -164,6 +164,95 @@ export async function loadData() {
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
         state.gedcomData = parseGEDCOM(gedcomContent);
+
+
+
+
+        // Ajouter après la ligne:
+// state.gedcomData = parseGEDCOM(gedcomContent);
+
+// Analyser la structure du GEDCOM
+console.log("======= ANALYSE DE LA STRUCTURE GEDCOM =======");
+
+// 1. Analyser un individu typique (prendre le premier)
+const sampleIndividualId = Object.keys(state.gedcomData.individuals)[0];
+const sampleIndividual = state.gedcomData.individuals[sampleIndividualId];
+console.log("Structure d'un individu:", {
+    id: sampleIndividualId,
+    name: sampleIndividual.name,
+    familiesCount: sampleIndividual.families?.length || 0,
+    spouseFamiliesCount: sampleIndividual.spouseFamilies?.length || 0,
+    familiesComplete: JSON.stringify(sampleIndividual.families),
+    spouseFamiliesComplete: JSON.stringify(sampleIndividual.spouseFamilies),
+    fullData: JSON.stringify(sampleIndividual, null, 2)
+});
+
+// 2. Analyser une famille typique
+if (sampleIndividual.families && sampleIndividual.families.length > 0) {
+    const sampleFamilyId = sampleIndividual.families[0];
+    const sampleFamily = state.gedcomData.families[sampleFamilyId];
+    console.log("Structure d'une famille:", {
+        id: sampleFamilyId,
+        husband: sampleFamily.husband,
+        husbandName: sampleFamily.husband ? state.gedcomData.individuals[sampleFamily.husband]?.name : "N/A",
+        wife: sampleFamily.wife,
+        wifeName: sampleFamily.wife ? state.gedcomData.individuals[sampleFamily.wife]?.name : "N/A",
+        childrenCount: sampleFamily.children?.length || 0,
+        fullData: JSON.stringify(sampleFamily, null, 2)
+    });
+}
+
+// 3. Analyser les relations FAMC vs FAMS
+const relationships = {
+    onlyFAMC: 0,
+    onlyFAMS: 0,
+    bothTypes: 0,
+    noFamily: 0,
+    totalIndividuals: Object.keys(state.gedcomData.individuals).length
+};
+
+Object.entries(state.gedcomData.individuals).forEach(([id, person]) => {
+    const hasFAMC = person.families?.some(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children && family.children.includes(id);
+    }) || false;
+    
+    const hasFAMS = !!person.spouseFamilies?.length;
+    
+    if (hasFAMC && hasFAMS) relationships.bothTypes++;
+    else if (hasFAMC) relationships.onlyFAMC++;
+    else if (hasFAMS) relationships.onlyFAMS++;
+    else relationships.noFamily++;
+});
+
+console.log("Statistiques des relations familiales:", relationships);
+
+// 4. Vérifier s'il y a des auto-références (personne comme son propre parent)
+const selfReferences = [];
+Object.entries(state.gedcomData.individuals).forEach(([id, person]) => {
+    if (person.families) {
+        person.families.forEach(famId => {
+            const family = state.gedcomData.families[famId];
+            if (family) {
+                const isSelfParent = (family.husband === id || family.wife === id);
+                const isChild = family.children && family.children.includes(id);
+                
+                if (isSelfParent && isChild) {
+                    selfReferences.push({
+                        id,
+                        name: person.name,
+                        familyId: famId
+                    });
+                }
+            }
+        });
+    }
+});
+
+console.log("Personnes qui sont à la fois parent et enfant dans la même famille:", selfReferences);
+console.log("======= FIN DE L'ANALYSE =======");
+
+
         
         // IMPORTANT: Supprimer l'image de fond de la page d'accueil
         const loginBackground = document.querySelector('.login-background');
@@ -429,13 +518,21 @@ function fallbackUpdateRootPersonSelector(person) {
     // Ajouter l'option "demo1"
     const demoOption = document.createElement('option');
     demoOption.value = 'demo1';
-    demoOption.textContent = '--- Demo1 ---';
-    rootPersonResults.appendChild(demoOption);
+
     
     // Ajouter l'option "demo2"
     const demoOption2 = document.createElement('option');
     demoOption2.value = 'demo2';
-    demoOption2.textContent = '--- Demo2 ---';
+    if (state.treeOwner ===2 ) { 
+        demoOption.textContent = '--- démo Clou du spectacle ---';
+        demoOption2.textContent = '--- démo Spain ---';
+    } else { 
+        demoOption.textContent = '--démo Costaud la Planche--';
+        demoOption2.textContent = '--démo on descend tous de lui--'; 
+    }
+
+
+    rootPersonResults.appendChild(demoOption);
     rootPersonResults.appendChild(demoOption2);
 
     // Sélectionner la personne courante
@@ -474,8 +571,14 @@ export function handleRootPersonChange(event) {
 
     if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
         
-        if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
-        else { state.targetAncestorId = "@I1322@"}
+        if (state.treeOwner ===2 ) {
+            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I1152@"} //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I2179@"}
+        } else {
+            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I1322@"}
+        }
+
         
         showMap();
 

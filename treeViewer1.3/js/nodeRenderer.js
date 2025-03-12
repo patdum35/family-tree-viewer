@@ -119,8 +119,10 @@ export function drawNodeBoxes(nodeGroups) {
         if (!d.data) return "person-box";
         const classes = ["person-box"];
         if (d.data.isSpouse) classes.push("spouse");
-        if (d.data.isSibling) classes.push("sibling");
-        if (d.data.duplicate) classes.push("duplicate");
+        else if (d.data.isSibling) classes.push("sibling");
+        else if (d.data.duplicate) classes.push("duplicate");
+        else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+        else classes.push("normal");
         return classes.join(" ");
     })
     .attr("x", -state.boxWidth/2)

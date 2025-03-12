@@ -378,6 +378,155 @@ function refreshPersonList() {
     // Utiliser la fonction factoriséé pour filtrer les personnes
     const filteredPeople = filterPeopleByText(searchText, config);
     console.log(`Personnes filtrées: ${filteredPeople.length}`);
+
+
+
+    // Mettre à jour la heatmap si elle est visible
+    if (nameCloudState.isHeatmapVisible && document.querySelector('.person-list-modal')) {
+        try {
+            // Afficher un indicateur de chargement
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'refresh-map-indicator';
+            loadingIndicator.style.position = 'fixed';
+            loadingIndicator.style.top = '50%';
+            loadingIndicator.style.left = '50%';
+            loadingIndicator.style.transform = 'translate(-50%, -50%)';
+            loadingIndicator.style.backgroundColor = 'white';
+            loadingIndicator.style.padding = '10px 20px';
+            loadingIndicator.style.borderRadius = '8px';
+            loadingIndicator.style.zIndex = '10000';
+            loadingIndicator.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            loadingIndicator.textContent = 'Mise à jour de la carte...';
+            document.body.appendChild(loadingIndicator);
+            
+            // Utiliser setTimeout pour permettre l'affichage de l'indicateur
+            setTimeout(async () => {
+                try {
+                    // Créer les données de heatmap à partir des personnes filtrées
+                    const heatmapData = await createHeatmapDataForPeople(filteredPeople);
+                    
+                    // Mettre à jour la heatmap existante
+                    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+                    if (heatmapWrapper && heatmapWrapper.map && heatmapData && heatmapData.length > 0) {
+                        // Supprimer les couches existantes sauf la couche de tuiles
+                        heatmapWrapper.map.eachLayer(layer => {
+                            if (!(layer instanceof L.TileLayer)) {
+                                heatmapWrapper.map.removeLayer(layer);
+                            }
+                        });
+                        
+                        // Ajouter la nouvelle couche de chaleur
+                        L.heatLayer(
+                            heatmapData.map(loc => [loc.coords.lat, loc.coords.lon, 1]), 
+                            {
+                                radius: 25,
+                                blur: 15,
+                                maxZoom: 1
+                            }
+                        ).addTo(heatmapWrapper.map);
+                        
+                        // Ajouter des marqueurs interactifs
+                        heatmapData.forEach(location => {
+                            if (!location.coords || typeof location.coords.lat !== 'number' || typeof location.coords.lon !== 'number') {
+                                return;
+                            }
+                            
+                            const marker = L.circleMarker([location.coords.lat, location.coords.lon], {
+                                radius: 5,
+                                fillColor: 'white',
+                                color: '#000',
+                                weight: 1,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            }).addTo(heatmapWrapper.map);
+                            
+                            // Configurer la popup
+                            let popupContent = `
+                                <strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}<br>
+                                <strong>Occurrences :</strong> ${location.count}
+                            `;
+                            
+                            // Ajouter des détails si disponibles
+                            if (location.locations && location.locations.length > 0) {
+                                popupContent += `<br><strong>Personnes :</strong><br>`;
+                                const sortedLocations = [...location.locations].sort((a, b) => {
+                                    if (a.type !== b.type) return a.type.localeCompare(b.type);
+                                    return a.name.localeCompare(b.name);
+                                });
+                                
+                                sortedLocations.slice(0, 5).forEach(person => {
+                                    popupContent += `- ${person.name} (${person.type}${person.year ? ` - ${person.year}` : ''})<br>`;
+                                });
+                                
+                                if (sortedLocations.length > 5) {
+                                    popupContent += `... et ${sortedLocations.length - 5} autres`;
+                                }
+                            }
+                            
+                            marker.bindPopup(popupContent);
+                        });
+                        
+                        // Ajuster la vue
+                        try {
+                            if (heatmapData.length > 0) {
+                                const coordinates = heatmapData
+                                    .filter(loc => loc.coords && typeof loc.coords.lat === 'number' && typeof loc.coords.lon === 'number')
+                                    .map(loc => [loc.coords.lat, loc.coords.lon]);
+                                    
+                                if (coordinates.length > 0) {
+                                    const bounds = L.latLngBounds(coordinates);
+                                    if (bounds.isValid()) {
+                                        // Calculer le niveau de zoom idéal pour ces limites
+                                        const idealZoom = heatmapWrapper.map.getBoundsZoom(bounds, false, [50, 50]);
+                                        
+                                        // Limiter le zoom maximum à 7 (≈ 100-150km de rayon)
+                                        const maxAllowedZoom = 7;
+                                        const finalZoom = Math.min(idealZoom, maxAllowedZoom);
+                                        
+                                        // Si on a dû limiter le zoom, utiliser le centre des limites
+                                        if (finalZoom < idealZoom) {
+                                            const center = bounds.getCenter();
+                                            heatmapWrapper.map.setView(center, finalZoom);
+                                        } else {
+                                            // Sinon, utiliser fitBounds classique
+                                            heatmapWrapper.map.fitBounds(bounds, {
+                                                padding: [50, 50],
+                                                maxZoom: maxAllowedZoom
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Erreur lors de l\'ajustement de la vue:', error);
+                        }
+                        
+                        // Mettre à jour le titre de la heatmap
+                        const mapTitle = heatmapWrapper.querySelector('#heatmap-map-title');
+                        if (mapTitle) {
+                            const titleElement = document.querySelector('.person-list-modal h2');
+                            if (titleElement) {
+                                mapTitle.textContent = `Lieux pour ${titleElement.textContent.replace(/\([^)]*\)/, '').trim()}`;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour de la heatmap:', error);
+                } finally {
+                    // Supprimer l'indicateur de chargement
+                    const indicator = document.getElementById('refresh-map-indicator');
+                    if (indicator) {
+                        indicator.remove();
+                    }
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour de la heatmap:', error);
+        }
+    }
+
+
+
     
     // Ajouter un effet de transition
     personListModal.style.transition = 'opacity 0.3s ease';

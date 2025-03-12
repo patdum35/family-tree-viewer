@@ -1,6 +1,6 @@
 import { state, displayPersonDetails } from './main.js';
 import { startAncestorAnimation } from './treeAnimation.js';
-import { nameCloudState } from './nameCloud.js'
+import { nameCloudState, extractSearchTextFromTitle, filterPeopleByText } from './nameCloud.js'
 import { extractYear } from './nameCloudUtils.js';
 import { removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createDataForHeatMap, refreshHeatmap } from './geoHeatMapDataProcessor.js';
@@ -89,12 +89,59 @@ export function showPersonsList(name, people, config) {
     closeBtn.style.background = 'none';
     closeBtn.style.fontSize = '20px';
     closeBtn.style.cursor = 'pointer';
+    // closeBtn.onclick = () => {
+    //     if (modal.parentNode) {
+    //         modal.parentNode.removeChild(modal);
+            
+    //         // Restaurer la taille originale de la heatmap si elle était visible
+    //         if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
+    //             try {
+    //                 const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
+    //                 if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
+    //                 if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
+    //                 if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
+    //                 if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
+                    
+    //                 // Réinitialiser les variables de suivi
+    //                 lastSelectedLocationId = null;
+    //                 isIndividualMapMode = false;
+                    
+    //                 // Rafraîchir la carte avec les données initiales
+    //                 if (heatmapWrapper.map) {
+    //                     // Attendre un peu pour que les changements CSS prennent effet
+    //                     setTimeout(() => {
+    //                         if (typeof refreshHeatmap === 'function') {
+    //                             refreshHeatmap();
+    //                         } else if (heatmapWrapper.map) {
+    //                             heatmapWrapper.map.invalidateSize();
+    //                         }
+    //                     }, 100);
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Erreur lors de la restauration du style de la heatmap:', error);
+                    
+    //                 // Restaurer aux valeurs par défaut en cas d'erreur
+    //                 heatmapWrapper.style.top = '60px';
+    //                 heatmapWrapper.style.left = '20px';
+    //                 heatmapWrapper.style.width = 'calc(100% - 40px)';
+    //                 heatmapWrapper.style.height = 'calc(100% - 100px)';
+                    
+    //                 setTimeout(() => {
+    //                     if (heatmapWrapper.map) {
+    //                         heatmapWrapper.map.invalidateSize();
+    //                     }
+    //                 }, 100);
+    //             }
+    //         }
+    //     }
+    // };
+
     closeBtn.onclick = () => {
         if (modal.parentNode) {
             modal.parentNode.removeChild(modal);
             
             // Restaurer la taille originale de la heatmap si elle était visible
-            if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
+            if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
                 try {
                     const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
                     if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
@@ -106,15 +153,12 @@ export function showPersonsList(name, people, config) {
                     lastSelectedLocationId = null;
                     isIndividualMapMode = false;
                     
-                    // Rafraîchir la carte avec les données initiales
-                    if (heatmapWrapper.map) {
-                        // Attendre un peu pour que les changements CSS prennent effet
+                    // Rafraîchir la carte avec les données initiales (toutes les personnes)
+                    if (typeof refreshHeatmap === 'function') {
+                        refreshHeatmap();
+                    } else if (heatmapWrapper.map) {
                         setTimeout(() => {
-                            if (typeof refreshHeatmap === 'function') {
-                                refreshHeatmap();
-                            } else if (heatmapWrapper.map) {
-                                heatmapWrapper.map.invalidateSize();
-                            }
+                            heatmapWrapper.map.invalidateSize();
                         }, 100);
                     }
                 } catch (error) {
@@ -135,7 +179,6 @@ export function showPersonsList(name, people, config) {
             }
         }
     };
-
     // Liste des personnes
     const list = document.createElement('div');
     list.style.display = 'grid';
@@ -693,13 +736,44 @@ export function showPersonsList(name, people, config) {
 
 
     // Gestion de la touche Échap
+    // const handleEscape = (e) => {
+    //     if (e.key === 'Escape') {
+    //         if (modal.parentNode) {
+    //             modal.parentNode.removeChild(modal);
+                
+    //             // Restaurer la taille originale de la heatmap si elle était visible
+    //             if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
+    //                 try {
+    //                     const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
+    //                     if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
+    //                     if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
+    //                     if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
+    //                     if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
+                        
+    //                     setTimeout(() => {
+    //                         if (heatmapWrapper.map) {
+    //                             heatmapWrapper.map.invalidateSize();
+    //                         }
+    //                     }, 100);
+    //                 } catch (error) {
+    //                     console.error('Erreur lors de la restauration du style de la heatmap:', error);
+    //                 }
+                    
+    //                 // Réinitialiser les variables de suivi
+    //                 lastSelectedLocationId = null;
+    //                 isIndividualMapMode = false;
+    //             }
+    //         }
+    //         document.removeEventListener('keydown', handleEscape);
+    //     }
+    // };
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
             if (modal.parentNode) {
                 modal.parentNode.removeChild(modal);
                 
                 // Restaurer la taille originale de la heatmap si elle était visible
-                if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
+                if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
                     try {
                         const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
                         if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
@@ -707,23 +781,34 @@ export function showPersonsList(name, people, config) {
                         if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
                         if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
                         
-                        setTimeout(() => {
-                            if (heatmapWrapper.map) {
-                                heatmapWrapper.map.invalidateSize();
-                            }
-                        }, 100);
+                        // Rafraîchir la carte avec les données initiales (toutes les personnes)
+                        if (typeof refreshHeatmap === 'function') {
+                            refreshHeatmap();
+                        } else if (heatmapWrapper.map) {
+                            // heatmapWrapper.map.invalidateSize();
+                            setTimeout(() => {
+                                if (heatmapWrapper && heatmapWrapper.map) {
+                                    try {
+                                        heatmapWrapper.map.invalidateSize({ animate: false });
+                                    } catch (error) {
+                                        console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
+                                    }
+                                }
+                            }, 200);
+                        }
+                        
+                        // Réinitialiser les variables de suivi
+                        lastSelectedLocationId = null;
+                        isIndividualMapMode = false;
                     } catch (error) {
                         console.error('Erreur lors de la restauration du style de la heatmap:', error);
                     }
-                    
-                    // Réinitialiser les variables de suivi
-                    lastSelectedLocationId = null;
-                    isIndividualMapMode = false;
                 }
             }
             document.removeEventListener('keydown', handleEscape);
         }
     };
+
     document.addEventListener('keydown', handleEscape);
     
     // Gérer la redimension de fenêtre si la heatmap est visible
@@ -840,12 +925,122 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
     
     // Invalider la taille de la carte après un délai pour s'assurer que 
     // les modifications de style sont appliquées
+    // setTimeout(() => {
+    //     if (heatmapWrapper.map) {
+    //         heatmapWrapper.map.invalidateSize();
+    //     }
+    // }, 100);
+
+        // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
     setTimeout(() => {
-        if (heatmapWrapper.map) {
-            heatmapWrapper.map.invalidateSize();
+        if (heatmapWrapper && heatmapWrapper.map) {
+            // Vérifier que la carte a des dimensions non nulles
+            const mapContainer = heatmapWrapper.querySelector('#ancestors-heatmap');
+            if (mapContainer && mapContainer.offsetWidth > 0 && mapContainer.offsetHeight > 0) {
+                try {
+                    // Forcer un recalcul du style avant d'invalider la taille
+                    void mapContainer.offsetHeight;
+                    
+                    // Désactiver l'animation pendant l'invalidation
+                    heatmapWrapper.map.invalidateSize({
+                        animate: false,
+                        pan: false
+                    });
+                    
+                    console.log("Carte redimensionnée avec succès");
+                } catch (error) {
+                    console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
+                }
+            } else {
+                console.warn("Le conteneur de carte a des dimensions nulles, invalidation ignorée");
+            }
         }
-    }, 100);
+    }, 300); // Augmenter le délai à 300ms pour plus de sécurité
 }
+
+/**
+ * Affiche la heatmap et ajuste le layout pour l'écran partagé
+ * @param {HTMLElement} modal - La modale de liste de personnes
+ * @param {Object} config - La configuration actuelle
+ * @returns {Promise<HTMLElement|null>} - Le wrapper de heatmap ou null en cas d'erreur
+ */
+// async function showHeatmapAndAdjustLayout(modal, config) {
+//     // Afficher un indicateur de chargement
+//     const loadingIndicator = document.createElement('div');
+//     loadingIndicator.style.position = 'fixed';
+//     loadingIndicator.style.top = '50%';
+//     loadingIndicator.style.left = '50%';
+//     loadingIndicator.style.transform = 'translate(-50%, -50%)';
+//     loadingIndicator.style.backgroundColor = 'white';
+//     loadingIndicator.style.padding = '20px';
+//     loadingIndicator.style.borderRadius = '8px';
+//     loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+//     loadingIndicator.style.zIndex = '9999';
+//     loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+//     document.body.appendChild(loadingIndicator);
+    
+//     try {
+//         // Utiliser la fonction existante pour obtenir les données
+//         const heatmapData = await createDataForHeatMap(config);
+        
+//         // Supprimer l'indicateur de chargement
+//         document.body.removeChild(loadingIndicator);
+        
+//         if (!heatmapData || heatmapData.length === 0) {
+//             console.error("Aucune donnée géographique disponible");
+//             alert("Aucune donnée géographique disponible.");
+//             return null;
+//         }
+        
+//         // Créer un titre pour la heatmap
+//         let heatmapTitle = "Heatmap";
+//         if (config) {
+//             const configType = config.type;
+//             heatmapTitle = `Heatmap - ${configType === 'prenoms' ? 'Prénoms' : 
+//                 configType === 'noms' ? 'Noms' : 
+//                 configType === 'professions' ? 'Métiers' : 
+//                 configType === 'duree_vie' ? 'Durées de vie' : 
+//                 configType === 'age_procreation' ? 'Âges de procréation' : 
+//                 configType === 'lieux' ? 'Lieux' : 'Général'}`;
+//         }
+        
+//         // Utiliser la fonction existante pour créer la heatmap
+//         createImprovedHeatmap(heatmapData, heatmapTitle);
+        
+//         // Récupérer la référence à la heatmap nouvellement créée
+//         const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+//         if (!heatmapWrapper) {
+//             console.error("La heatmap n'a pas été créée correctement");
+//             return null;
+//         }
+        
+//         // Ajuster la disposition pour le mode écran partagé
+//         adjustSplitScreenLayout(modal, heatmapWrapper);
+        
+//         return heatmapWrapper;
+//     } catch (error) {
+//         console.error("Erreur lors de la création de la heatmap:", error);
+//         if (document.body.contains(loadingIndicator)) {
+//             document.body.removeChild(loadingIndicator);
+//         }
+//         alert("Erreur lors de la création de la carte: " + error.message);
+//         return null;
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Dans nameCloudInteractions.js, modifiez la fonction showHeatmapAndAdjustLayout
 
 /**
  * Affiche la heatmap et ajuste le layout pour l'écran partagé
@@ -869,8 +1064,30 @@ async function showHeatmapAndAdjustLayout(modal, config) {
     document.body.appendChild(loadingIndicator);
     
     try {
-        // Utiliser la fonction existante pour obtenir les données
-        const heatmapData = await createDataForHeatMap(config);
+        // Extraire le titre pour obtenir le texte de recherche
+        const titleElement = modal.querySelector('h2');
+        const searchText = extractSearchTextFromTitle(titleElement);
+        
+        let heatmapData;
+        
+        if (searchText) {
+            // Utiliser les personnes déjà filtrées que nous avons dans la liste
+            const filteredPeople = filterPeopleByText(searchText, config);
+            
+            if (filteredPeople && filteredPeople.length > 0) {
+                console.log(`Création de la heatmap pour ${filteredPeople.length} personnes filtrées avec "${searchText}"`);
+                
+                // Utiliser la fonction qui crée des données de heatmap à partir de personnes spécifiques
+                // Cette fonction existe déjà dans geoHeatMapDataProcessor.js sous le nom de updateHeatmapIfVisible
+                heatmapData = await createHeatmapDataForPeople(filteredPeople);
+            } else {
+                console.warn("Aucune personne filtrée trouvée pour", searchText);
+                heatmapData = await createDataForHeatMap(config);
+            }
+        } else {
+            // Fallback vers la méthode standard
+            heatmapData = await createDataForHeatMap(config);
+        }
         
         // Supprimer l'indicateur de chargement
         document.body.removeChild(loadingIndicator);
@@ -883,14 +1100,15 @@ async function showHeatmapAndAdjustLayout(modal, config) {
         
         // Créer un titre pour la heatmap
         let heatmapTitle = "Heatmap";
-        if (config) {
-            const configType = config.type;
-            heatmapTitle = `Heatmap - ${configType === 'prenoms' ? 'Prénoms' : 
-                configType === 'noms' ? 'Noms' : 
-                configType === 'professions' ? 'Métiers' : 
-                configType === 'duree_vie' ? 'Durées de vie' : 
-                configType === 'age_procreation' ? 'Âges de procréation' : 
-                configType === 'lieux' ? 'Lieux' : 'Général'}`;
+        if (titleElement) {
+            // Extraire un titre plus propre de l'élément de titre
+            const titleText = titleElement.textContent;
+            const match = titleText.match(/^(Personnes.+?)\s*\(\d+\s*personnes\)$/);
+            if (match && match[1]) {
+                heatmapTitle = `Heatmap - ${match[1]}`;
+            } else {
+                heatmapTitle = `Heatmap - ${titleText}`;
+            }
         }
         
         // Utiliser la fonction existante pour créer la heatmap
@@ -916,6 +1134,158 @@ async function showHeatmapAndAdjustLayout(modal, config) {
         return null;
     }
 }
+
+/**
+ * Créer les données de heatmap pour un ensemble spécifique de personnes
+ * @param {Array} people - Liste des personnes avec leurs IDs
+ * @returns {Promise<Array>} - Données formatées pour la heatmap
+ */
+async function createHeatmapDataForPeople(people) {
+    try {
+        // Récupérer les personnes complètes à partir de leurs IDs
+        const selectedPersons = people.map(p => state.gedcomData.individuals[p.id])
+            .filter(p => p !== undefined);
+        
+        // Collecter tous les lieux non nettoyés
+        const locationData = {};
+        const locationDetails = {};
+        
+        // Traiter chaque personne pour extraire ses lieux
+        for (const person of selectedPersons) {
+            // Fonction pour ajouter les détails d'un lieu
+            const addLocationDetail = (place, type, date) => {
+                if (!place || place.trim() === '') return;
+                
+                if (!locationDetails[place]) {
+                    locationDetails[place] = {
+                        events: [],
+                        families: {}
+                    };
+                }
+                
+                // Extraire l'année si disponible
+                let year = null;
+                if (date) {
+                    const match = date.match(/\d{4}/);
+                    if (match) {
+                        year = match[0];
+                    }
+                }
+                
+                // Ajouter l'événement
+                locationDetails[place].events.push({
+                    type: type,
+                    name: person.name.replace(/\//g, '').trim(),
+                    year: year
+                });
+                
+                // Ajouter le nom de famille
+                const familyName = person.name.split('/')[1]?.trim().toUpperCase();
+                if (familyName) {
+                    locationDetails[place].families[familyName] = 
+                        (locationDetails[place].families[familyName] || 0) + 1;
+                }
+            };
+            
+            // Ajouter les détails pour chaque type de lieu
+            if (person.birthPlace) addLocationDetail(person.birthPlace, 'Naissance', person.birthDate);
+            if (person.deathPlace) addLocationDetail(person.deathPlace, 'Décès', person.deathDate);
+            if (person.residPlace1) addLocationDetail(person.residPlace1, 'Résidence', null);
+            if (person.residPlace2) addLocationDetail(person.residPlace2, 'Résidence', null);
+            if (person.residPlace3) addLocationDetail(person.residPlace3, 'Résidence', null);
+            
+            // Ajouter les mariages
+            if (person.spouseFamilies) {
+                for (const famId of person.spouseFamilies) {
+                    const family = state.gedcomData.families[famId];
+                    if (family && family.marriagePlace) {
+                        addLocationDetail(family.marriagePlace, 'Mariage', family.marriageDate);
+                    }
+                }
+            }
+            
+            // Collecter les lieux pour la densité de la heatmap
+            const addLocationCount = (place) => {
+                if (place && place.trim() !== '') {
+                    locationData[place] = (locationData[place] || 0) + 1;
+                }
+            };
+            
+            addLocationCount(person.birthPlace);
+            addLocationCount(person.deathPlace);
+            addLocationCount(person.residPlace1);
+            addLocationCount(person.residPlace2);
+            addLocationCount(person.residPlace3);
+            
+            if (person.spouseFamilies) {
+                for (const famId of person.spouseFamilies) {
+                    const family = state.gedcomData.families[famId];
+                    if (family && family.marriagePlace) {
+                        addLocationCount(family.marriagePlace);
+                    }
+                }
+            }
+        }
+
+        // Convertir les données de lieu en format pour la heatmap
+        const heatmapData = {};
+        
+        // Géocoder chaque lieu et ajouter les détails
+        for (const [place, count] of Object.entries(locationData)) {
+            if (!place || place.trim() === '') continue;
+            
+            try {
+                const coords = await geocodeLocation(place);
+                
+                if (coords) {
+                    const key = `${coords.lat.toFixed(2)},${coords.lon.toFixed(2)}`;
+                    
+                    if (!heatmapData[key]) {
+                        heatmapData[key] = {
+                            coords: coords,
+                            count: 0,
+                            families: {},
+                            locations: [],
+                            placeName: place
+                        };
+                    }
+                    
+                    // Ajouter le nombre d'occurrences
+                    heatmapData[key].count += count;
+                    
+                    // Ajouter les détails du lieu si disponibles
+                    if (locationDetails[place]) {
+                        // Ajouter les événements
+                        heatmapData[key].locations.push(...locationDetails[place].events);
+                        
+                        // Fusionner les compteurs de noms de famille
+                        for (const [family, famCount] of Object.entries(locationDetails[place].families)) {
+                            heatmapData[key].families[family] = 
+                                (heatmapData[key].families[family] || 0) + famCount;
+                        }
+                    } else {
+                        // Fallback si pas de détails
+                        heatmapData[key].locations.push({
+                            type: 'Lieu',
+                            name: place,
+                            count: count
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur de géocodage pour "${place}":`, error);
+            }
+        }
+        
+        // Convertir l'objet en tableau
+        return Object.values(heatmapData);
+    } catch (error) {
+        console.error('Erreur lors de la création des données pour la heatmap:', error);
+        throw error;
+    }
+}
+
+
 
 export function showPersonActions(person, event) {
     console.log('Showing actions for:', person.name, person.id);
@@ -1036,6 +1406,23 @@ export function showInTree(personId) {
         modal.remove();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (function initializeGlobalListeners() {
     document.addEventListener('cloudMapRefreshed', (event) => {
