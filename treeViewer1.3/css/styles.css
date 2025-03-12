@@ -389,9 +389,14 @@ body {
 .search-highlight {
     fill: #ffeb3b;
 }
-.link {
+/* .link {
     fill: none;
     stroke: #ccc;
+    stroke-width: 1.5px;
+} */
+.link {
+    fill: none;
+    stroke: #AAA; /* Gris foncé au lieu de #ccc */
     stroke-width: 1.5px;
 }
 .link.spouse {
@@ -817,4 +822,42 @@ input[type=number] {
     white-space: nowrap;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+/* Style pour la personne racine */
+.person-box.root {
+    fill: #ffb347; /*#ffa500; /* #fff3e0; /* orange */ /*#b6d1f6; /* Bleu clair */
+    stroke: #4a90e2; /* Bordure bleue plus foncée */
+    stroke-width: 2px; /* Bordure légèrement plus épaisse pour la racine */
+}
+
+/* Style existant que vous avez probablement déjà */
+.person-box.normal {
+    /* fill: white; */
+    fill: #f0fbfb; /* #ddf9f9; /* Bleu clair */
+    /* stroke: #666;
+    stroke-width: 1px; */
+}
+
+
+.person-box.spouse {
+    fill: #fff7fa; /* #fff0f5; /* Rose extrêmement pâle (Lavender Blush) */
+    /* stroke: #ffccda;  */
+    /* Bordure rose très légère */
+}
+
+.person-box.sibling {
+    fill: #f7fff7; /* #f0fff0; /* Vert extrêmement pâle (Honeydew) */
+    /* stroke: #d6ecd6;  */
+    /* Bordure verte très légère */
+}
 
