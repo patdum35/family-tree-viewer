@@ -4,6 +4,23 @@ import { showPersonsList } from './nameCloudInteractions.js'
 import { hasDateInRange, cleanProfession, cleanLocation,  } from './nameCloudUtils.js';
 
 
+export function removeAllStatsElements() {
+    // Supprimer toutes les stats modals HTML
+    document.querySelectorAll('.html-stats-label').forEach(element => {
+        element.remove();
+    });
+    
+    // Supprimer tous les boutons de statistiques
+    Object.values(statsConfig).forEach(config => {
+        const button = document.getElementById(config.buttonId);
+        if (button) {
+            button.remove();
+        }
+    });
+}
+
+
+
 function initializeDistributionChart(data, container) {
     // S'assurer que d3 est disponible
     if (!window.d3) {
@@ -185,82 +202,6 @@ function prepareHistogramData(nameData) {
     })).sort((a, b) => a.age - b.age);
 }
 
-
-/**
- * Ajoute l'étiquette d'âge moyen (durée de vie ou procréation)
- * @param {Object} svg - L'élément SVG
- * @param {Object} textGroup - Le groupe de texte
- * @param {Object} config - La configuration
- */
-export function addAverageLabel(svg, textGroup, config) {
-    // Ne rien faire si ce n'est pas un nuage d'âge ou si la moyenne n'est pas disponible
-    if (!['duree_vie', 'age_procreation'].includes(config.type) || 
-        !nameCloudState.currentNameData || 
-        !nameCloudState.currentNameData.averageLifespan) {
-        return;
-    }
-    
-    // Récupérer la configuration pour ce type
-    const cfg = statsConfig[config.type];
-    
-    // Supprimer l'ancienne étiquette si elle existe
-    svg.selectAll(`.${cfg.containerClass}`).remove();
-    
-    // Récupérer la moyenne et l'arrondir
-    const average = parseFloat(nameCloudState.currentNameData.averageLifespan).toFixed(1);
-
-    // Calculer la position
-    const labelWidth = 140;
-    const labelHeight = 60;
-    const xPos = parseInt(svg.attr('width')) - labelWidth - 30; // 30px de marge
-    const yPos = 110; // position fixe en haut
-
-    // Stocker les coordonnées
-    statsPositionsMap[config.type] = {
-        x: xPos,
-        y: yPos,
-        width: labelWidth,
-        height: labelHeight
-    };
-    
-    // Créer un élément pour afficher la moyenne
-    const averageContainer = svg.append('g')
-        .attr('class', cfg.containerClass)
-        .attr('id', cfg.labelId)
-        .attr('transform', `translate(${xPos}, ${yPos})`);
-    
-    // Fond semi-transparent
-    averageContainer.append('rect')
-        .attr('width', labelWidth)
-        .attr('height', labelHeight)
-        .attr('fill', 'rgba(255, 255, 255, 0.8)')
-        .attr('rx', 5)
-        .attr('stroke', '#ccc')
-        .attr('stroke-width', 1);
-    
-    // Titre
-    averageContainer.append('text')
-        .attr('x', labelWidth / 2)
-        .attr('y', 20)
-        .attr('text-anchor', 'middle')
-        .style('font-family', 'Arial, sans-serif')
-        .style('font-size', '12px')
-        .text(cfg.labelText);
-    
-    // Valeur de la moyenne
-    averageContainer.append('text')
-        .attr('x', labelWidth / 2)
-        .attr('y', 45)
-        .attr('text-anchor', 'middle')
-        .style('font-family', 'Arial, sans-serif')
-        .style('font-size', '22px')
-        .style('font-weight', 'bold')
-        .style('fill', '#e53e3e')
-        .text(`${average} ans`);
-        
-    // Repositionner le bouton si nécessaire
-    setTimeout(() => forceRepositionButton(config.type), 50);
-}
 
 /**
  * Crée un modal avec les statistiques détaillées
@@ -551,48 +492,16 @@ const statsConfig = {
     }
 };
 
-// Variables globales pour stocker les positions
-const statsPositionsMap = {
-    'duree_vie': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    },
-    'age_procreation': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    },
-    'prenoms': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    },
-    'noms': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    },
-    'professions': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    },
-    'lieux': {
-        x: 0,
-        y: 0,
-        width: 140,
-        height: 60
-    }
+// // Variables globales pour stocker la position de la StatsModal
+let globalStatsPosition = {
+    x: 0,
+    y: 0,
+    width: 140,
+    height: 60,
+    userModified: false
 };
 
-// Map des écouteurs d'événement pour le redimensionnement
-const resizeListenersMap = {};
+let globalResizeListener = null;
 
 /**
  * Trouve l'élément le plus fréquent dans les données
@@ -652,8 +561,8 @@ export function addStatsLabel(svg, textGroup, config) {
     // Calculer la position
     const labelWidth = 140;
     const labelHeight = 60;
-    const xPos = parseInt(svg.attr('width')) - labelWidth - 30; // 30px de marge
-    const yPos = 110; // position fixe en haut
+    const xPos = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
+    const yPos = 85; // position fixe en haut
 
     // Stocker les coordonnées
     statsPositionsMap[config.type] = {
@@ -745,13 +654,6 @@ export function addStatsButton(container, nameData, type) {
     // Récupérer la configuration pour ce type
     const cfg = statsConfig[type];
     
-    // Vérifier que nous avons des coordonnées valides
-    const statsPositions = statsPositionsMap[type];
-    if (!statsPositions || statsPositions.x === 0) {
-        console.log(`Coordonnées invalides pour le bouton de ${type}, report...`);
-        setTimeout(() => addStatsButton(container, nameData, type), 300);
-        return;
-    }
     
     // Supprimer TOUS les boutons de statistiques (pour tous les types)
     Object.values(statsConfig).forEach(config => {
@@ -759,13 +661,11 @@ export function addStatsButton(container, nameData, type) {
         Array.from(buttons).forEach(button => button.remove());
     });
     
-    // Supprimer tous les écouteurs d'événement de redimensionnement
-    Object.entries(resizeListenersMap).forEach(([listenerType, listener]) => {
-        if (listener) {
-            window.removeEventListener('resize', listener);
-            resizeListenersMap[listenerType] = null;
-        }
-    });
+    // Supprimer l'écouteur global de redimensionnement s'il existe
+    if (globalResizeListener) {
+        window.removeEventListener('resize', globalResizeListener);
+        globalResizeListener = null;
+    }
     
     // Créer le bouton avec un ID fixe
     const button = document.createElement('button');
@@ -775,7 +675,7 @@ export function addStatsButton(container, nameData, type) {
     button.style.position = 'absolute';
     
     // Fixer la largeur du bouton à la même que l'étiquette
-    button.style.width = `${statsPositions.width}px`;
+    button.style.width = `${globalStatsPosition.width}px`;
     button.style.whiteSpace = 'nowrap';
     button.style.overflow = 'hidden';
     button.style.textOverflow = 'ellipsis';
@@ -823,13 +723,6 @@ export function addStatsButton(container, nameData, type) {
     
     container.appendChild(button);
     
-    // Ajouter un écouteur d'événement pour le redimensionnement
-    resizeListenersMap[type] = function() {
-        setTimeout(() => forceRepositionButton(type), 100);
-    };
-    
-    window.addEventListener('resize', resizeListenersMap[type]);
-    
     return button;
 }
 
@@ -855,26 +748,14 @@ function positionButtonRelativeToLabel(button, type) {
         button.style.width = `${labelRect.width}px`;
     } else {
         // Fallback à l'ancienne méthode si l'élément n'est pas trouvé
-        const statsPositions = statsPositionsMap[type];
-        const buttonX = statsPositions.x;
-        const buttonY = statsPositions.y + statsPositions.height + 10;
+        const buttonX = globalStatsPosition.x;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
         
         button.style.left = `${buttonX}px`;
         button.style.top = `${buttonY}px`;
     }
 }
 
-// /**
-//  * Force le repositionnement du bouton
-//  * @param {string} type - Le type de statistiques
-//  */
-// function forceRepositionButton(type) {
-//     const cfg = statsConfig[type];
-//     const button = document.getElementById(cfg.buttonId);
-//     if (button) {
-//         positionButtonRelativeToLabel(button, type);
-//     }
-// }
 
 /**
  * Crée un modal avec les statistiques de fréquence (nom, prénom, métier, lieu)
@@ -1112,248 +993,287 @@ function getTypeLabel(type) {
     }
 }
 
-// Fonction principale qui remplace l'ancienne addAverageLabel
+
 export function addStatisticsLabel(svg, textGroup, config) {
-    // Vérifie si le type est supporté
-    if (statsConfig[config.type]) {
-        addStatsLabel(svg, textGroup, config);
+    // Ne rien faire si le type n'est pas supporté
+    if (!statsConfig[config.type]) {
+        return;
     }
+    
+    // Récupérer la configuration pour ce type
+    const cfg = statsConfig[config.type];
+    
+    // Supprimer TOUTES les étiquettes HTML existantes
+    document.querySelectorAll('.html-stats-label').forEach(element => {
+        element.remove();
+    });
+    
+
+    // Supprimer l'ancienne étiquette SVG si elle existe
+    svg.selectAll(`.${cfg.containerClass}`).remove();
+    
+    // Supprimer aussi l'élément HTML existant s'il existe
+    const existingHTMLLabel = document.getElementById(`html-${cfg.labelId}`);
+    if (existingHTMLLabel) {
+        existingHTMLLabel.remove();
+    }
+    
+    // Variables pour le texte à afficher
+    let valueText = '';
+    let subtitleText = '';
+    
+    if (cfg.type === 'age') {
+        // Pour les types d'âge
+        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageLifespan) {
+            return;
+        }
+        valueText = `${parseFloat(nameCloudState.currentNameData.averageLifespan).toFixed(1)} ans`;
+    } else {
+        // Pour les types de fréquence
+        if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
+            return;
+        }
+        const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
+        valueText = mostFrequent.text;
+        subtitleText = `(${mostFrequent.size} occurrences)`;
+    }
+
+    // Position initiale ou récupérée
+    let initialX, initialY;
+    
+    // Utiliser la position globale sauvegardée si elle existe et a été modifiée par l'utilisateur
+    if (globalStatsPosition.userModified && globalStatsPosition.x !== 0) {
+        initialX = globalStatsPosition.x;
+        initialY = globalStatsPosition.y;
+    } else {
+        // Position par défaut basée sur la position du SVG
+        initialX = window.innerWidth - 165; // 170px depuis le bord droit
+        initialY = 85;  // 110px depuis le haut
+    }
+
+    // // Stocker les coordonnées
+    // statsPositionsMap[config.type] = {
+    //     x: initialX,
+    //     y: initialY,
+    //     width: 140,
+    //     height: 60
+    // };    
+
+
+    // Créer un élément HTML pour les statistiques
+    const container = document.createElement('div');
+    container.id = `html-${cfg.labelId}`;
+    container.className = `html-stats-label ${cfg.containerClass}`;
+    container.style.position = 'absolute';
+    container.style.left = `${initialX}px`;
+    container.style.top = `${initialY}px`;
+    container.style.width = '140px';
+    container.style.height = '60px';
+    container.style.padding = '5px';
+    container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    container.style.zIndex = '1000';
+    container.style.cursor = 'move';
+    container.style.fontFamily = 'Arial, sans-serif';
+    
+    // Ajouter le titre
+    const title = document.createElement('div');
+    title.textContent = cfg.labelText;
+    title.style.fontSize = '12px';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '5px';
+    container.appendChild(title);
+    
+    // Ajouter la valeur principale
+    const value = document.createElement('div');
+    value.textContent = valueText;
+    value.style.fontSize = '16px';
+    value.style.fontWeight = 'bold';
+    value.style.color = '#e53e3e';
+    value.style.textAlign = 'center';
+    container.appendChild(value);
+    
+    // Ajouter le sous-titre si nécessaire
+    if (subtitleText) {
+        const subtitle = document.createElement('div');
+        subtitle.textContent = subtitleText;
+        subtitle.style.fontSize = '12px';
+        subtitle.style.textAlign = 'center';
+        subtitle.style.marginTop = '2px';
+        container.appendChild(subtitle);
+    }
+    
+    // Ajouter au document
+    document.body.appendChild(container);
+    
+    
+    // Rendre l'élément déplaçable
+    makeElementDraggable(container, config.type);
+    
+    // Repositionner le bouton associé
+    setTimeout(() => forceRepositionButton(config.type), 50);
+
+    // Ajouter un événement de redimensionnement
+    if (globalResizeListener) {
+        window.removeEventListener('resize', globalResizeListener);
+    }
+    
+    // Créer un nouvel écouteur de redimensionnement
+    globalResizeListener = function() {
+        // Récupérer tous les éléments HTML de statistiques
+        const statsLabels = document.querySelectorAll('.html-stats-label');
+        
+        // Si aucun élément n'existe, ne rien faire
+        if (statsLabels.length === 0) return;
+        
+        // Lors du redimensionnement, si la position n'a pas été modifiée manuellement,
+        // repositionner selon les nouvelles dimensions
+        if (!globalStatsPosition.userModified) {
+            const newX = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
+            const newY = 85;
+            
+            // Mettre à jour la position de tous les éléments
+            statsLabels.forEach(element => {
+                element.style.left = `${newX}px`;
+                element.style.top = `${newY}px`;
+            });
+            
+            // Mettre à jour la position globale
+            globalStatsPosition.x = newX;
+            globalStatsPosition.y = newY;
+            
+            // Repositionner tous les boutons
+            Object.keys(statsConfig).forEach(type => {
+                const button = document.getElementById(statsConfig[type].buttonId);
+                if (button) forceRepositionButton(type);
+            });
+        }
+    };
+    
+    // Ajouter le nouvel écouteur
+    window.addEventListener('resize', globalResizeListener);
+
+    
 }
 
-
-
-
-/**
- * Rend un élément SVG déplaçable avec la souris
- * @param {Object} element - L'élément SVG à rendre déplaçable
- * @param {string} type - Le type de statistiques
- */
-// function makeDraggable(element, type) {
-//     // Variables pour stocker la position initiale et le décalage
-//     let startX, startY, offsetX, offsetY;
+// Fonction pour rendre un élément HTML déplaçable
+function makeElementDraggable(element, type) {
+    let isDragging = false;
+    let startX, startY;
+    let initialLeft, initialTop;
     
-//     // Gestionnaire pour le début du déplacement
-//     const dragStart = function(event) {
-//         // Récupérer les coordonnées actuelles
-//         const transform = d3.select(this).attr('transform');
-//         const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
-        
-//         if (translate) {
-//             // Position actuelle de l'élément
-//             const currentX = parseFloat(translate[1]);
-//             const currentY = parseFloat(translate[2]);
-            
-//             // Position initiale de la souris
-//             startX = event.sourceEvent.clientX;
-//             startY = event.sourceEvent.clientY;
-            
-//             // Calculer le décalage
-//             offsetX = currentX - startX;
-//             offsetY = currentY - startY;
-//         }
-//     };
+    // Gestionnaire mousedown (PC)
+    element.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = parseInt(element.style.left) || 0;
+        initialTop = parseInt(element.style.top) || 0;
+        e.preventDefault();
+    });
     
-//     // Gestionnaire pour le déplacement en cours
-//     const dragged = function(event) {
-//         // Calculer la nouvelle position
-//         const newX = event.sourceEvent.clientX + offsetX;
-//         const newY = event.sourceEvent.clientY + offsetY;
-        
-//         // Mettre à jour la position de l'élément
-//         d3.select(this).attr('transform', `translate(${newX}, ${newY})`);
-        
-//         // Mettre à jour les coordonnées stockées
-//         statsPositionsMap[type] = {
-//             ...statsPositionsMap[type],
-//             x: newX,
-//             y: newY
-//         };
-        
-//         // Repositionner le bouton associé
-//         setTimeout(() => forceRepositionButton(type), 10);
-//     };
+    // Gestionnaire touchstart (Mobile)
+    element.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        initialLeft = parseInt(element.style.left) || 0;
+        initialTop = parseInt(element.style.top) || 0;
+    }, { passive: true });
     
-//     // Gestionnaire pour la fin du déplacement
-//     const dragEnd = function(event) {
-//         // Mettre à jour les coordonnées finales
-//         const transform = d3.select(this).attr('transform');
-//         const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+    // Gestionnaire mousemove (PC)
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
         
-//         if (translate) {
-//             const finalX = parseFloat(translate[1]);
-//             const finalY = parseFloat(translate[2]);
-            
-//             // Mettre à jour les coordonnées stockées
-//             statsPositionsMap[type] = {
-//                 ...statsPositionsMap[type],
-//                 x: finalX,
-//                 y: finalY
-//             };
-            
-//             // Repositionner le bouton associé
-//             setTimeout(() => forceRepositionButton(type), 10);
-//         }
-//     };
-    
-//     // Appliquer les gestionnaires de déplacement à l'élément
-//     element.call(
-//         d3.drag()
-//             .on('start', dragStart)
-//             .on('drag', dragged)
-//             .on('end', dragEnd)
-//     );
-// }
-
-
-
-
-// Modifiez la fonction makeDraggable pour mieux gérer les événements tactiles
-function makeDraggable(element, type) {
-    // Variables pour stocker la position initiale et le décalage
-    let startX, startY, offsetX, offsetY;
-    let touchStarted = false;
-    
-    // Gestionnaire pour le début du déplacement (souris)
-    const dragStart = function(event) {
-        // Récupérer les coordonnées actuelles
-        const transform = d3.select(this).attr('transform');
-        const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        const newLeft = initialLeft + (e.clientX - startX);
+        const newTop = initialTop + (e.clientY - startY);
         
-        if (translate) {
-            // Position actuelle de l'élément
-            const currentX = parseFloat(translate[1]);
-            const currentY = parseFloat(translate[2]);
-            
-            // Position initiale de la souris
-            startX = event.sourceEvent.clientX;
-            startY = event.sourceEvent.clientY;
-            
-            // Calculer le décalage
-            offsetX = currentX - startX;
-            offsetY = currentY - startY;
-        }
-    };
-    
-    // Gestionnaire pour le déplacement en cours
-    const dragged = function(event) {
-        // Calculer la nouvelle position
-        const newX = event.sourceEvent.clientX + offsetX;
-        const newY = event.sourceEvent.clientY + offsetY;
+        element.style.left = `${newLeft}px`;
+        element.style.top = `${newTop}px`;
         
-        // Mettre à jour la position de l'élément
-        d3.select(this).attr('transform', `translate(${newX}, ${newY})`);
+        // Mettre à jour la position globale
+        globalStatsPosition.x = newLeft;
+        globalStatsPosition.y = newTop;
         
-        // Mettre à jour les coordonnées stockées
-        statsPositionsMap[type] = {
-            ...statsPositionsMap[type],
-            x: newX,
-            y: newY
-        };
+        // Repositionner les boutons
+        Object.keys(statsConfig).forEach(type => {
+            const button = document.getElementById(statsConfig[type].buttonId);
+            if (button) forceRepositionButton(type);
+        });
+    });
+    
+    // Gestionnaire touchmove (Mobile)
+    document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
         
-        // Repositionner le bouton associé
-        setTimeout(() => forceRepositionButton(type), 10);
-    };
-    
-    // Gestionnaire pour la fin du déplacement
-    const dragEnd = function(event) {
-        // Mettre à jour les coordonnées finales
-        const transform = d3.select(this).attr('transform');
-        const translate = /translate\(([^,]+),([^)]+)\)/.exec(transform);
+        e.preventDefault(); // Empêcher le scroll
         
-        if (translate) {
-            const finalX = parseFloat(translate[1]);
-            const finalY = parseFloat(translate[2]);
-            
-            // Mettre à jour les coordonnées stockées
-            statsPositionsMap[type] = {
-                ...statsPositionsMap[type],
-                x: finalX,
-                y: finalY
-            };
-            
-            // Repositionner le bouton associé
-            setTimeout(() => forceRepositionButton(type), 10);
-        }
-    };
+        const newLeft = initialLeft + (e.touches[0].clientX - startX);
+        const newTop = initialTop + (e.touches[0].clientY - startY);
+        
+        element.style.left = `${newLeft}px`;
+        element.style.top = `${newTop}px`;
+        
+        // Mettre à jour la position globale
+        globalStatsPosition.x = newLeft;
+        globalStatsPosition.y = newTop;
+        
+        // Repositionner les boutons
+        Object.keys(statsConfig).forEach(type => {
+            const button = document.getElementById(statsConfig[type].buttonId);
+            if (button) forceRepositionButton(type);
+        });
+    }, { passive: false });
     
-    // Appliquer les gestionnaires de déplacement à l'élément
-    element.call(
-        d3.drag()
-            .on('start', dragStart)
-            .on('drag', dragged)
-            .on('end', dragEnd)
-    );
-    
-    // Pour mobile, nous désactivons la gestion tactile directe 
-    // et nous utilisons seulement l'API d3.drag qui gère déjà les événements tactiles
-    // Mais nous prévenons les comportements par défaut des événements tactiles
-    
-    element.on("touchstart.tooltip", function(event) {
-        if (nameCloudState.mobilePhone) {
-            event.preventDefault();
-            event.stopPropagation();
-            touchStarted = true;
+    // Gestionnaires pour la fin du déplacement
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            // Marquer comme modifié par l'utilisateur
+            globalStatsPosition.userModified = true;
         }
     });
     
-    element.on("touchmove.tooltip", function(event) {
-        if (nameCloudState.mobilePhone && touchStarted) {
-            event.preventDefault();
-            event.stopPropagation();
+    document.addEventListener('touchend', function() {
+        if (isDragging) {
+            isDragging = false;
+            // Marquer comme modifié par l'utilisateur
+            globalStatsPosition.userModified = true;
         }
     });
     
-    element.on("touchend.tooltip", function(event) {
-        if (nameCloudState.mobilePhone) {
-            event.preventDefault();
-            event.stopPropagation();
-            touchStarted = false;
-        }
+    document.addEventListener('touchcancel', function() {
+        isDragging = false;
     });
 }
 
-/**
- * Force le repositionnement du bouton
- * @param {string} type - Le type de statistiques
- */
+// Modifiez également forceRepositionButton pour utiliser le nouvel élément HTML
 function forceRepositionButton(type) {
     const cfg = statsConfig[type];
     const button = document.getElementById(cfg.buttonId);
     
     if (!button) return;
     
-    // Essayer d'abord de trouver l'élément SVG correspondant
-    const labelElement = document.getElementById(cfg.labelId);
+    // Essayer d'abord de trouver l'élément HTML correspondant
+    const labelElement = document.getElementById(`html-${cfg.labelId}`);
     
     if (labelElement) {
-        // Obtenir la position exacte de l'étiquette via getBoundingClientRect
+        // Obtenir la position exacte de l'étiquette
         const labelRect = labelElement.getBoundingClientRect();
         
         // Positionner le bouton directement sous l'étiquette
         button.style.left = `${labelRect.left}px`;
         button.style.top = `${labelRect.bottom + 2}px`; // +2px pour un petit espace
         button.style.width = `${labelRect.width}px`;
-        
-        // Mettre à jour les coordonnées stockées
-        statsPositionsMap[type] = {
-            ...statsPositionsMap[type],
-            x: labelRect.left,
-            y: labelRect.top,
-            width: labelRect.width,
-            height: labelRect.height
-        };
     } else {
-        // Fallback à l'ancienne méthode si l'élément n'est pas trouvé
-        const statsPositions = statsPositionsMap[type];
-        if (!statsPositions) return;
-        
-        const buttonX = statsPositions.x;
-        const buttonY = statsPositions.y + statsPositions.height;
+        // Fallback si aucun élément n'est trouvé
+        const buttonX = globalStatsPosition.x;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
         
         button.style.left = `${buttonX}px`;
         button.style.top = `${buttonY}px`;
     }
-    
-    // Ajouter un log pour déboguer
-    // console.log(`Bouton ${cfg.buttonId} repositionné à L:${button.style.left}, T:${button.style.top}`);
 }
+
