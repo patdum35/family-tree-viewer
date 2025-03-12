@@ -44,6 +44,8 @@ export const nameCloudState = {
         top: null,
         left: null
     },
+    isHeatmapVisible: false,
+    heatmapWrapper: null,
 }
 
 export function processNamesCloudWithDate(config, containerElement = null) {
@@ -99,6 +101,17 @@ export function processNamesCloudWithDate(config, containerElement = null) {
 
     const message = "nombre de mots  = "  + nameData.length;
     showToast(message, 3000)
+
+    const cloudMapRefreshEvent = new CustomEvent('cloudMapRefreshed', {
+        detail: {
+            config: config,
+            timestamp: Date.now(),
+            totalWords: nameCloudState.totalWords,
+            placedWords: nameCloudState.placedWords
+        }
+    });
+    document.dispatchEvent(cloudMapRefreshEvent);
+
 }
 
 export function processNamesData(config) {
@@ -362,4 +375,155 @@ export function getPersonsFromTree(mode, rootPersonId = null) {
         // Toujours rétablir le nombre de générations initial
         state.nombre_generation = initialGenerations;
     }
+}
+
+/**
+ * Fonction génériques de filtrage des personnes selon un texte
+ * À placer avant handleClick dans nameCloudRenderer.js
+ * 
+ * @param {string} text - Le texte à rechercher
+ * @param {Object} config - La configuration actuelle
+ * @returns {Array} - Liste des personnes filtrées
+ */
+export function filterPeopleByText(text, config) {
+    if (!state.gedcomData) return [];
+    
+    const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+
+    return Object.values(state.gedcomData.individuals)
+        .filter(p => {
+            let matches = false;
+            
+            if (config.type === 'prenoms') {
+                const firstName = p.name.split('/')[0].trim();
+                matches = firstName.split(' ').some(name => 
+                    name.toLowerCase() === text.toLowerCase() || 
+                    name.toLowerCase().startsWith(text.toLowerCase() + ' ')
+                );
+            } else if (config.type === 'noms') {
+                matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === text.toLowerCase());
+            } else if (config.type === 'professions') {
+                const cleanedProfessions = cleanProfession(p.occupation);
+                matches = cleanedProfessions.includes(text.toLowerCase());
+            } else if (config.type === 'age_procreation') {
+                if (p.birthDate) {
+                    const parentBirthYear = extractYear(p.birthDate);
+                    
+                    // Pour chaque mariage
+                    if (p.spouseFamilies) {
+                        p.spouseFamilies.forEach(familyId => {
+                            const family = state.gedcomData.families[familyId];
+                            if (family && family.children) {
+                                family.children.forEach(childId => {
+                                    const child = state.gedcomData.individuals[childId];
+                                    if (child && child.birthDate) {
+                                        const childBirthYear = extractYear(child.birthDate);
+                                        if (childBirthYear > parentBirthYear) {
+                                            const ageAtChildBirth = childBirthYear - parentBirthYear;
+                                            if (ageAtChildBirth.toString() === text) {
+                                                matches = true;
+                                                p.date = `Parent né(e) en ${p.birthDate}, enfant: ${child.name.replace(/\//g, '')} né(e) en ${child.birthDate}`;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            } else if (config.type === 'duree_vie') {
+                // Calcul de la durée de vie
+                if (p.birthDate && p.deathDate) {
+                    const birthYear = extractYear(p.birthDate);
+                    const deathYear = extractYear(p.deathDate);
+                    
+                    // Vérifier que la personne a vécu pendant la période sélectionnée
+                    const startYear = Math.min(config.startDate, config.endDate);
+                    const endYear = Math.max(config.startDate, config.endDate);
+                    
+                    if (birthYear <= endYear && deathYear >= startYear) {
+                        const age = deathYear - birthYear;
+                        matches = age.toString() === text;
+                    }
+                }
+            } else if (config.type === 'lieux') {
+                const personLocations = [
+                    p.birthPlace, 
+                    p.deathPlace, 
+                    p.marriagePlace, 
+                    p.residPlace1, 
+                    p.residPlace2, 
+                    p.residPlace3
+                ];
+                
+                matches = personLocations.some(location => {
+                    const cleanedLocation = cleanLocation(location);
+                    return cleanedLocation === text;
+                });
+            }   
+
+            // Vérifier si la personne est dans l'arbre approprié selon le scope
+            const isInTree = 
+                config.scope === 'all' || 
+                (config.scope === 'descendants' && persons.some(descendant => descendant.id === p.id)) ||
+                (config.scope === 'ancestors' && persons.some(ancestor => ancestor.id === p.id));
+
+            return matches && isInTree && hasDateInRange(p, config);
+        })
+        .map(p => ({
+            name: p.name.replace(/\//g, ''),
+            id: p.id,
+            occupation: p.occupation || 'Non spécifiée'
+        }));
+}
+
+/**
+ * Fonction pour extraire le texte de recherche du titre d'une liste
+ * À placer dans geoHeatMapInteractions.js
+ */
+export function extractSearchTextFromTitle(titleElement) {
+    if (!titleElement) return null;
+    
+    const titleText = titleElement.textContent;
+    let searchText = null;
+    
+    // Pattern pour prénom/nom: "Personnes avec le prénom/nom "X" (Y personnes)"
+    let match = titleText.match(/avec le (?:prénom|nom) "([^"]+)"/);
+    if (match && match[1]) {
+        searchText = match[1];
+    }
+    
+    // Pattern pour métier: "Personnes avec la profession "X" (Y personnes)"
+    if (!searchText) {
+        match = titleText.match(/avec la profession "([^"]+)"/);
+        if (match && match[1]) {
+            searchText = match[1];
+        }
+    }
+    
+    // Pattern pour durée de vie: "Personnes ayant vécu X ans (Y personnes)"
+    if (!searchText) {
+        match = titleText.match(/ayant vécu (\d+) ans/);
+        if (match && match[1]) {
+            searchText = match[1];
+        }
+    }
+    
+    // Pattern pour âge de procréation: "Personnes ayant eu un enfant à X ans (Y personnes)"
+    if (!searchText) {
+        match = titleText.match(/ayant eu un enfant à (\d+) ans/);
+        if (match && match[1]) {
+            searchText = match[1];
+        }
+    }
+    
+    // Pattern pour lieux: "Personnes ayant un lien avec le lieu X (Y personnes)"
+    if (!searchText) {
+        match = titleText.match(/ayant un lien avec le lieu ([^(]+)/);
+        if (match && match[1]) {
+            searchText = match[1].trim();
+        }
+    }
+    
+    return searchText;
 }

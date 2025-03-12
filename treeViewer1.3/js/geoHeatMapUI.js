@@ -1,5 +1,3 @@
-import { state } from './main.js';
-import { displayPersonDetails } from './modalWindow.js';
 import { nameCloudState } from './nameCloud.js';
 import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
@@ -12,6 +10,8 @@ import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
  * @returns {HTMLElement} - L'élément wrapper de la heatmap créée
  */
 export function createImprovedHeatmap(locationData, heatmapTitle) {
+    
+    nameCloudState.isHeatmapVisible = true;
     // Fermer toute carte existante d'abord
     const existingMap = document.getElementById('namecloud-heatmap-wrapper');
     if (existingMap) {
@@ -20,6 +20,7 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
     // Créer un conteneur principal (semi-transparent) qui ne couvre pas tout l'écran
     const heatmapWrapper = document.createElement('div');
+    
 
     heatmapWrapper.id = 'namecloud-heatmap-wrapper';
     heatmapWrapper.style.position = 'fixed';
@@ -311,6 +312,10 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     setTimeout(() => {
         initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle);
     }, 100); // Petit délai pour s'assurer que le DOM est prêt
+
+
+    // Stocker la référence du wrapper
+    nameCloudState.heatmapWrapper = heatmapWrapper;
 
     return heatmapWrapper;
 }
@@ -689,6 +694,7 @@ function createMapControls(mapContainer, heatmapWrapper) {
     closeBtn.addEventListener('click', () => {
         const wrapper = document.getElementById('namecloud-heatmap-wrapper');
         if (wrapper) {
+            nameCloudState.isHeatmapVisible = false;
             document.body.removeChild(wrapper);
             // Restaurer les z-index si nécessaire
             document.querySelectorAll('[data-original-z-index]').forEach(el => {

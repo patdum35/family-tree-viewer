@@ -4,7 +4,7 @@ import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { ensureStatsExist, addStatsButton } from './nameCloudAverageAge.js';
+import { ensureStatsExist, addStatsButton, removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createImprovedHeatmap  } from './geoHeatMapUI.js';
 import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
@@ -508,12 +508,15 @@ function createSettingsButton() {
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
     closeButton.addEventListener('click', () => {
+        // Supprimer toutes les stats modals avant de fermer la CloudMap
+        removeAllStatsElements(); 
         document.body.removeChild(modal);
     });
 
     // Événement pour la touche Échap
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
+            removeAllStatsElements(); 
             document.body.removeChild(modal);
             document.removeEventListener('keydown', handleEscape);
         }
@@ -814,7 +817,7 @@ function showNameCloud(nameData, config) {
                 createImprovedHeatmap(heatmapData, heatmapTitle);
                 
                 // Attacher les écouteurs pour le rafraîchissement
-                attachFilterListeners();
+                // attachFilterListeners();
                 
                 // Ajouter les écouteurs d'événements aux contrôles
                 typeSelect.addEventListener('change', refreshHeatmap);

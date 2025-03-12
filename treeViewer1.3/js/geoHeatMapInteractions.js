@@ -1,5 +1,8 @@
 import { nameCloudState } from './nameCloud.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
+import { filterPeopleByText, extractSearchTextFromTitle } from './nameCloud.js';
+import { showPersonsList } from './nameCloudInteractions.js';
+
 
 /**
  * Sauvegarde la position et les dimensions de la heatmap
@@ -170,6 +173,7 @@ export function makeElementDraggable(element, handles) {
  * Attache des écouteurs d'événements aux filtres pour mettre à jour la heatmap automatiquement
  */
 export function attachFilterListeners() {
+
     // Fonction debounce pour éviter de réagir trop souvent
     const debounce = (func, wait) => {
         let timeout;
@@ -188,8 +192,10 @@ export function attachFilterListeners() {
         rootPerson: null
     };
     
+
     // Fonction pour vérifier si une valeur a réellement changé
     const hasValueChanged = (element, key) => {
+        
         // Si c'est un élément select ou input standard
         if (element.tagName === 'SELECT' || element.tagName === 'INPUT') {
             if (previousValues[key] === null) {
@@ -221,27 +227,49 @@ export function attachFilterListeners() {
         
         return false; // Par défaut, pas de changement
     };
+
     
-    // Fonction de rafraîchissement qui vérifie s'il y a eu un vrai changement
+    /**
+     * Modification de smartRefresh dans attachFilterListeners
+     */
     const smartRefresh = (element, key) => {
+        
         // Vérifier si la valeur a vraiment changé
+        console.log("[LOG BASE] smartRefresh appelé");
         if (hasValueChanged(element, key)) {
+            console.log("[LOG] smartRefresh - Valeur changée pour:", key);
+            // Mettre à jour la heatmap si elle est visible
             if (typeof refreshHeatmap === 'function' && 
                 document.getElementById('namecloud-heatmap-wrapper')) {
                 refreshHeatmap();
             }
+            
+            // Rafraîchir la liste après un petit délai
+            setTimeout(() => {
+                console.log("[LOG] Tentative d'appel à refreshPersonList");
+                refreshPersonList();
+            }, 400);
         }
     };
+    
     
     // Version debounced du rafraîchissement intelligent
     const debouncedSmartRefresh = debounce(smartRefresh, 1000);
     
     // Attacher des écouteurs aux éléments de typeSelect et scopeSelect
-    const typeSelect = document.querySelector('[data-text-key="typeSelect"]');
-    const scopeSelect = document.querySelector('[data-text-key="scopeSelect"]');
-    const startDateInput = document.querySelector('[data-text-key="startDateInput"]');
-    const endDateInput = document.querySelector('[data-text-key="endDateInput"]');
     const rootPersonSelect = document.querySelector('[data-text-key="rootPersonResults"]');
+    const typeSelect = document.querySelector('[data-text-key="typeSelect"], .custom-select-container[data-value]');
+    const scopeSelect = document.querySelector('[data-text-key="scopeSelect"], .custom-select-container[data-value]');
+    const startDateInput = document.querySelector('input[type="number"][data-text-key="startDateInput"]');
+    const endDateInput = document.querySelector('input[type="number"][data-text-key="endDateInput"]');
+    
+    console.log("Sélecteurs trouvés :", {
+        typeSelect: typeSelect ? typeSelect.outerHTML : null,
+        scopeSelect: scopeSelect ? scopeSelect.outerHTML : null,
+        startDateInput: startDateInput ? startDateInput.outerHTML : null,
+        endDateInput: endDateInput ? endDateInput.outerHTML : null
+    });
+
     
     // Pour le typeSelect
     if (typeSelect) {
@@ -262,14 +290,120 @@ export function attachFilterListeners() {
         endDateInput.addEventListener('change', () => debouncedSmartRefresh(endDateInput, 'endDate'));
     }
     
+
+
+    console.log("[TRACE] Éléments trouvés:", {
+        typeSelect: !!typeSelect,
+        scopeSelect: !!scopeSelect,
+        startDateInput: !!startDateInput,
+        endDateInput: !!endDateInput,
+        // validateButton: !!validateButton
+    });
+
     // Pour le bouton OK/Valider
     const validateButton = document.querySelector('button[title="Valider"]');
     if (validateButton) {
+        // Modification du gestionnaire du bouton Valider aussi dans geoHeatMapInteractions.js
         validateButton.addEventListener('click', () => {
             if (typeof refreshHeatmap === 'function' && 
                 document.getElementById('namecloud-heatmap-wrapper')) {
                 refreshHeatmap();
+                
+                // Rafraîchir la liste après un petit délai
+                setTimeout(refreshPersonList, 400);
             }
         });
     }
 }
+
+
+// Ajouter cet écouteur quelque part où il sera initialisé une seule fois
+document.addEventListener('refreshPersonList', (event) => {
+    console.log('Événement de rafraîchissement de liste reçu', event.detail);
+    
+    // Vérifier si une liste de personnes est actuellement affichée
+    const personListModal = document.querySelector('.person-list-modal');
+    if (!personListModal) return;
+    
+    // Extraire le texte de recherche
+    const titleElement = personListModal.querySelector('h2');
+    const searchText = extractSearchTextFromTitle(titleElement);
+    
+    if (!searchText) {
+        console.log("Impossible d'extraire le texte de recherche");
+        return;
+    }
+    
+    // Utiliser la configuration actuelle
+    const config = event.detail.config;
+    
+    // Filtrer les personnes
+    const filteredPeople = filterPeopleByText(searchText, config);
+    
+    // Fermer l'ancienne liste et en ouvrir une nouvelle
+    personListModal.remove();
+    showPersonsList(searchText, filteredPeople, config);
+});
+
+
+/**
+ * Fonction pour rafraîchir la liste de personnes
+ */
+function refreshPersonList() {
+
+    console.log("[LOG] Début de refreshPersonList");
+
+    // Vérifier si une liste de personnes est visible
+    const personListModal = document.querySelector('.person-list-modal');
+    if (!personListModal) return;
+    
+    // Récupérer le titre
+    const titleElement = personListModal.querySelector('h2');
+    const searchText = extractSearchTextFromTitle(titleElement);
+    
+    if (!searchText) {
+        console.log("Impossible d'extraire le texte de recherche du titre");
+        return;
+    }
+    
+    console.log("Texte de recherche extrait:", searchText);
+    
+    // Récupérer la configuration actuelle
+    const config = nameCloudState.currentConfig;
+    if (!config) {
+        console.log("Configuration actuelle non disponible");
+        return;
+    }
+    
+    // Utiliser la fonction factoriséé pour filtrer les personnes
+    const filteredPeople = filterPeopleByText(searchText, config);
+    console.log(`Personnes filtrées: ${filteredPeople.length}`);
+    
+    // Ajouter un effet de transition
+    personListModal.style.transition = 'opacity 0.3s ease';
+    personListModal.style.opacity = '0';
+    
+    // Attendre la fin de la transition avant de fermer/rouvrir
+    setTimeout(() => {
+        // Fermer la liste actuelle
+        personListModal.remove();
+        
+        // Afficher la liste mise à jour
+        showPersonsList(searchText, filteredPeople, config);
+        
+        // Ajouter un effet d'apparition à la nouvelle liste
+        setTimeout(() => {
+            const newListModal = document.querySelector('.person-list-modal');
+            if (newListModal) {
+                newListModal.style.opacity = '0';
+                newListModal.style.transition = 'opacity 0.3s ease';
+                
+                // Petit délai pour s'assurer que le style initial est appliqué
+                requestAnimationFrame(() => {
+                    newListModal.style.opacity = '1';
+                });
+            }
+        }, 10);
+    }, 300); // Attendre la fin de la transition
+}
+
