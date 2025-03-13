@@ -106,8 +106,6 @@ export function drawTree( isZoomRefresh = false ) {
     }
 
 
-
-
     setupZoom(svg, mainGroup);
 }
 

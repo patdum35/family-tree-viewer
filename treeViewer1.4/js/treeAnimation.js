@@ -199,19 +199,42 @@ function findNodeInTree(nodeId) {
  * Lance l'animation d'expansion vers l'ancêtre
  * @export
  */
+// function simplifyName(fullName) {
+//     // Séparer le nom entre les barres obliques
+//     const nameParts = fullName.split('/');
+    
+//     // Traiter les prénoms
+//     const firstNames = nameParts[0].trim().split(' ');
+//     const firstFirstName = firstNames[0]; // Garder uniquement le premier prénom
+    
+//     // Traiter le nom de famille
+//     const lastName = nameParts[1] ? nameParts[1].trim().toUpperCase() : '';
+    
+//     // Combiner le premier prénom et le nom de famille
+//     return `${firstFirstName} ${lastName}`.trim();
+// }
+
 function simplifyName(fullName) {
     // Séparer le nom entre les barres obliques
     const nameParts = fullName.split('/');
     
     // Traiter les prénoms
     const firstNames = nameParts[0].trim().split(' ');
-    const firstFirstName = firstNames[0]; // Garder uniquement le premier prénom
+    let firstFirstName = firstNames[0]; // Garder uniquement le premier prénom
     
     // Traiter le nom de famille
-    const lastName = nameParts[1] ? nameParts[1].trim().toUpperCase() : '';
+    let lastName = nameParts[1] ? nameParts[1].trim() : '';
+    
+    // Convertir le nom de famille en format Titre (première lettre majuscule, reste en minuscule)
+    if (lastName.length > 0) {
+        lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
+    }
+    
+    // Même traitement pour le prénom si nécessaire
+    firstFirstName = firstFirstName.charAt(0).toUpperCase() + firstFirstName.slice(1).toLowerCase();
     
     // Combiner le premier prénom et le nom de famille
-    return `${firstFirstName} ${lastName}`.trim();
+    return `${firstFirstName} ${lastName}`;
 }
 
 

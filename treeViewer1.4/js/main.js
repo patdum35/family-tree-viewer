@@ -7,7 +7,7 @@ import { findYoungestPerson } from './utils.js';
 import { initBackgroundContainer } from './backgroundManager.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
-import { geocodeLocation, validateLocations, loadGeolocalisationFile } from './geoLocalisation.js';
+import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector  } from './mainUI.js'; 
 import { 
@@ -48,7 +48,7 @@ export const state = {
     treeOwner: 1
 };
 
-export { geocodeLocation, validateLocations };
+export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
 
@@ -60,8 +60,6 @@ function openGedcomModal() {
 function closeGedcomModal() {
     document.getElementById('gedcom-modal').style.display = 'none';
 }
-
-
 
 // ajoutez des options pour différents types de heatmap
 export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
@@ -164,7 +162,8 @@ export async function loadData() {
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
         state.gedcomData = parseGEDCOM(gedcomContent);
-        
+
+
         // IMPORTANT: Supprimer l'image de fond de la page d'accueil
         const loginBackground = document.querySelector('.login-background');
         if (loginBackground) {
@@ -429,13 +428,21 @@ function fallbackUpdateRootPersonSelector(person) {
     // Ajouter l'option "demo1"
     const demoOption = document.createElement('option');
     demoOption.value = 'demo1';
-    demoOption.textContent = '--- Demo1 ---';
-    rootPersonResults.appendChild(demoOption);
+
     
     // Ajouter l'option "demo2"
     const demoOption2 = document.createElement('option');
     demoOption2.value = 'demo2';
-    demoOption2.textContent = '--- Demo2 ---';
+    if (state.treeOwner ===2 ) { 
+        demoOption.textContent = '--- démo Clou du spectacle ---';
+        demoOption2.textContent = '--- démo Spain ---';
+    } else { 
+        demoOption.textContent = '--démo Costaud la Planche--';
+        demoOption2.textContent = '--démo on descend tous de lui--'; 
+    }
+
+
+    rootPersonResults.appendChild(demoOption);
     rootPersonResults.appendChild(demoOption2);
 
     // Sélectionner la personne courante
@@ -474,8 +481,14 @@ export function handleRootPersonChange(event) {
 
     if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
         
-        if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
-        else { state.targetAncestorId = "@I1322@"}
+        if (state.treeOwner ===2 ) {
+            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I1152@"} //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I2179@"}
+        } else {
+            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I1322@"}
+        }
+
         
         showMap();
 

@@ -1,10 +1,9 @@
 import { state, showToast} from './main.js';
-import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
-import { hasDateInRange, extractYear,  cleanProfession, cleanLocation,  } from './nameCloudUtils.js';
-import { showPersonsList } from './nameCloudInteractions.js'
-import { updateTitleText } from './nameCloudUI.js'
-import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js'
-import { addStatisticsLabel } from './nameCloudAverageAge.js'
+import { nameCloudState, filterPeopleByText } from './nameCloud.js';
+import { showPersonsList } from './nameCloudInteractions.js';
+import { updateTitleText } from './nameCloudUI.js';
+import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js';
+import { addStatisticsLabel } from './nameCloudAverageAge.js';
 
 let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
@@ -257,102 +256,23 @@ function drawNameCloud(svg, textGroup, words, color, config) {
 
 
 
+
+    /**
+     * Version modifiée de handleClick utilisant la fonction factoriséé
+     * À remplacer dans nameCloudRenderer.js
+     */
     function handleClick(d) {
         if (!state.gedcomData) return;
         
-        const persons = getPersonsFromTree(config.scope, config.rootPersonId);
-    
-        const people = Object.values(state.gedcomData.individuals)
-            .filter(p => {
-                let matches = false;
-                
-                if (config.type === 'prenoms') {
-                    const firstName = p.name.split('/')[0].trim();
-                    matches = firstName.split(' ').some(name => 
-                        name.toLowerCase() === d.text.toLowerCase() || 
-                        name.toLowerCase().startsWith(d.text.toLowerCase() + ' ')
-                    );
-                } else if (config.type === 'noms') {
-                    matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === d.text.toLowerCase());
-                } else if (config.type === 'professions') {
-                    const cleanedProfessions = cleanProfession(p.occupation);
-                    matches = cleanedProfessions.includes(d.text.toLowerCase());
-                } else if (config.type === 'age_procreation') {
-                    if (p.birthDate) {
-                        const parentBirthYear = extractYear(p.birthDate);
-                        
-                        // Pour chaque mariage
-                        if (p.spouseFamilies) {
-                            p.spouseFamilies.forEach(familyId => {
-                                const family = state.gedcomData.families[familyId];
-                                if (family && family.children) {
-                                    family.children.forEach(childId => {
-                                        const child = state.gedcomData.individuals[childId];
-                                        if (child && child.birthDate) {
-                                            const childBirthYear = extractYear(child.birthDate);
-                                            if (childBirthYear > parentBirthYear) {
-                                                const ageAtChildBirth = childBirthYear - parentBirthYear;
-                                                if (ageAtChildBirth.toString() === d.text) {
-                                                    matches = true;
-                                                    p.date = `Parent né(e) en ${p.birthDate}, enfant: ${child.name.replace(/\//g, '')} né(e) en ${child.birthDate}`;
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    }
-                } else if (config.type === 'duree_vie') {
-                    // Calcul de la durée de vie
-                    if (p.birthDate && p.deathDate) {
-                        const birthYear = extractYear(p.birthDate);
-                        const deathYear = extractYear(p.deathDate);
-                        
-                        // Vérifier que la personne a vécu pendant la période sélectionnée
-                        const startYear = Math.min(config.startDate, config.endDate);
-                        const endYear = Math.max(config.startDate, config.endDate);
-                        
-                        if (birthYear <= endYear && deathYear >= startYear) {
-                            const age = deathYear - birthYear;
-                            matches = age.toString() === d.text;
-                        }
-                    }
-                } else if (config.type === 'lieux') {
-                    const personLocations = [
-                        p.birthPlace, 
-                        p.deathPlace, 
-                        p.marriagePlace, 
-                        p.residPlace1, 
-                        p.residPlace2, 
-                        p.residPlace3
-                    ];
-                    
-                    matches = personLocations.some(location => {
-                        const cleanedLocation = cleanLocation(location);
-                        return cleanedLocation === d.text;
-                    });
-                }   
-
-                // Vérifier si la personne est dans l'arbre approprié selon le scope
-                const isInTree = 
-                    config.scope === 'all' || 
-                    (config.scope === 'descendants' && persons.some(descendant => descendant.id === p.id)) ||
-                    (config.scope === 'ancestors' && persons.some(ancestor => ancestor.id === p.id));
-
-                return matches && isInTree && hasDateInRange(p, config);
-
-
-
-            })
-            .map(p => ({
-                name: p.name.replace(/\//g, ''),
-                id: p.id,
-                occupation: p.occupation || 'Non spécifiée' // Utiliser 'Non spécifiée' si l'occupation n'est pas définie
-            }));
+        // Utiliser la fonction factoriséé
+        const people = filterPeopleByText(d.text, config);
         
+        // Afficher la liste des personnes
         showPersonsList(d.text, people, config);
     }
+
+
+
 
 
     function createTempText(originalElement, d, props) {
@@ -366,6 +286,8 @@ function drawNameCloud(svg, textGroup, words, color, config) {
         }
 
         let tempGroup, tempText;
+
+        d3.select(originalElement).style('opacity', 0);
 
         if (isZoomed) {
             // Récupérer les coordonnées de l'élément original
@@ -485,7 +407,6 @@ function drawNameCloud(svg, textGroup, words, color, config) {
 
 
     // afficher la moyenne
-    // addAverageLabel(svg, textGroup, config);
     addStatisticsLabel(svg, textGroup, config);
 
 }

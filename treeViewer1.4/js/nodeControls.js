@@ -717,15 +717,19 @@ function handleNormalAncestors(node) {
  */
 export function handleAncestorsClick(event, d) {
     event.stopPropagation();
+    console.log("Clicked node data:", d.data);
     let newAncestorsAdded = false;
 
     if (d.data.isSibling) {
         const siblingsReference = d.parent.data.children.filter(child => 
             child.id == d.data.siblingReferenceId && child !== d.data
         );
+        console.log("Before handling normal ancestors:", d.data.children);
         newAncestorsAdded = handleSiblingAncestors(siblingsReference);
     } else {
+        console.log("Before handling normal ancestors:", d.data.children);
         newAncestorsAdded = handleNormalAncestors(d.data);
+        console.log("After handling normal ancestors:", d.data.children);
     }
 
     drawTree();
@@ -750,14 +754,90 @@ function restoreHiddenChildren(ddata) {
  * Construit de nouveaux ancêtres
  * @private
  */
+// function buildNewAncestors(ddata) {
+//     const person = state.gedcomData.individuals[ddata.id];
+//     ddata.children = [];
+   
+
+//     // console.log("debug buildNewAncestors for this node :",ddata.id,ddata.name);
+
+//     person.families.some(famId => {
+//         const family = state.gedcomData.families[famId];
+//         if (family) {
+//             // Ajouter les parents directement
+//             if (family.husband) {
+//                 const father = state.gedcomData.individuals[family.husband];
+//                 const familiesWithChildren = state.gedcomData.individuals[family.husband].families.filter(famId => {
+//                     const family = state.gedcomData.families[famId];
+//                     return family && family.children;
+//                 });
+//                 const genealogicalParentId = findGenealogicalParent(family.husband, familiesWithChildren);
+//                 const fatherSiblings = findSiblings(family.husband);
+//                 // console.log("debug buildNewAncestors fatherSiblings for this node :", family.husband,father.id, father.name, genealogicalParentId).
+//                 addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParentId);
+//                 addOtherSpouses(family.husband, family.wife, ddata);
+//                 ddata.children.push({
+//                     id: family.husband,
+//                     name: father.name,
+//                     generation: ddata.generation + 1,
+//                     children: [],
+//                     birthDate: father.birthDate,
+//                     deathDate: father.deathDate,
+//                     hasParents: true,
+//                     genealogicalParentId: genealogicalParentId
+//                 });
+
+
+//             }
+
+//             if (family.wife) {
+//                 const mother = state.gedcomData.individuals[family.wife];
+//                 const familiesWithChildren = state.gedcomData.individuals[family.wife].families.filter(famId => {
+//                     const family = state.gedcomData.families[famId];
+//                     return family && family.children;
+//                 });
+//                 const genealogicalParentId = findGenealogicalParent(family.wife, familiesWithChildren);
+//                 const motherSiblings = findSiblings(family.wife);
+//                 // console.log("debug buildNewAncestors motherSiblings for this node :", family.wife, motherSiblings);
+//                 addSiblingsToNode(motherSiblings, ddata, family.wife, genealogicalParentId);
+//                 addOtherSpouses(family.wife, family.husband, ddata);
+//                 ddata.children.push({
+//                     id: family.wife,
+//                     name: mother.name,
+//                     generation: ddata.generation + 1,
+//                     children: [],
+//                     birthDate: mother.birthDate,
+//                     deathDate: mother.deathDate,
+//                     hasParents: true,
+//                     genealogicalParentId: genealogicalParentId
+//                 });
+
+
+//             }
+//             return true;
+//         }
+//         return false;
+//     });
+// }
+
+
 function buildNewAncestors(ddata) {
     const person = state.gedcomData.individuals[ddata.id];
     ddata.children = [];
    
-
-    // console.log("debug buildNewAncestors for this node :",ddata.id,ddata.name);
-
-    person.families.some(famId => {
+    // IMPORTANT: Filtrer pour ne traiter que les familles où la personne est un enfant
+    // et non un parent (conjoint)
+    const familiesAsChild = person.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && 
+               family.children && 
+               family.children.includes(person.id) &&
+               family.husband !== person.id && 
+               family.wife !== person.id;
+    });
+    
+    // Utiliser familiesAsChild au lieu de person.families
+    familiesAsChild.forEach(famId => {
         const family = state.gedcomData.families[famId];
         if (family) {
             // Ajouter les parents directement
@@ -769,7 +849,6 @@ function buildNewAncestors(ddata) {
                 });
                 const genealogicalParentId = findGenealogicalParent(family.husband, familiesWithChildren);
                 const fatherSiblings = findSiblings(family.husband);
-                // console.log("debug buildNewAncestors fatherSiblings for this node :", family.husband,father.id, father.name, genealogicalParentId).
                 addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParentId);
                 addOtherSpouses(family.husband, family.wife, ddata);
                 ddata.children.push({
@@ -782,10 +861,9 @@ function buildNewAncestors(ddata) {
                     hasParents: true,
                     genealogicalParentId: genealogicalParentId
                 });
-
-
             }
 
+            // Faire de même pour la mère (wife)
             if (family.wife) {
                 const mother = state.gedcomData.individuals[family.wife];
                 const familiesWithChildren = state.gedcomData.individuals[family.wife].families.filter(famId => {
@@ -807,15 +885,10 @@ function buildNewAncestors(ddata) {
                     hasParents: true,
                     genealogicalParentId: genealogicalParentId
                 });
-
-
             }
-            return true;
         }
-        return false;
     });
 }
-
 
 // Fonction utilitaire pour ajouter les siblings à un nœud
 function addSiblingsToNode(siblings, node, parentId, genealogicalParentId) {

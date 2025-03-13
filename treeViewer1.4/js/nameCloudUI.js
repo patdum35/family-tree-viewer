@@ -4,8 +4,10 @@ import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { ensureStatsExist, addStatsButton } from './nameCloudAverageAge.js';
-import { geocodeLocation, createInteractiveHeatmap, createImprovedHeatmap, refreshHeatmap, attachFilterListeners, createDataForHeatMap  } from './geoLocalisation.js';
+import { ensureStatsExist, addStatsButton, removeAllStatsElements } from './nameCloudAverageAge.js';
+import { createImprovedHeatmap  } from './geoHeatMapUI.js';
+import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
+import { attachFilterListeners  } from './geoHeatMapInteractions.js';
             
 
 function createModalContainer() {
@@ -506,12 +508,15 @@ function createSettingsButton() {
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
     closeButton.addEventListener('click', () => {
+        // Supprimer toutes les stats modals avant de fermer la CloudMap
+        removeAllStatsElements(); 
         document.body.removeChild(modal);
     });
 
     // Événement pour la touche Échap
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
+            removeAllStatsElements(); 
             document.body.removeChild(modal);
             document.removeEventListener('keydown', handleEscape);
         }
@@ -754,320 +759,6 @@ function showNameCloud(nameData, config) {
     // À ajouter après la création du bouton de paramètres dans showNameCloud
     // Création du bouton de carte
     const mapButton = createMapButton();
-    // mapButton.addEventListener('click', async () => {
-    //     // Récupérer les paramètres actuels de filtrage
-    //     const currentConfig = {
-    //         type: typeSelect.value,
-    //         startDate: parseInt(startDateInput.value),
-    //         endDate: parseInt(endDateInput.value),
-    //         scope: scopeSelect.value,
-    //         rootPersonId: scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
-    //     };
-
-    //     // Vérifier si une heatmap est déjà affichée
-    //     if (document.getElementById('namecloud-heatmap-wrapper')) {
-    //         // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
-    //         refreshHeatmap();
-    //         return;
-    //     }
-        
-    //     // Création d'un indicateur de chargement
-    //     const loadingIndicator = document.createElement('div');
-    //     loadingIndicator.style.position = 'fixed';
-    //     loadingIndicator.style.top = '50%';
-    //     loadingIndicator.style.left = '50%';
-    //     loadingIndicator.style.transform = 'translate(-50%, -50%)';
-    //     loadingIndicator.style.backgroundColor = 'white';
-    //     loadingIndicator.style.padding = '20px';
-    //     loadingIndicator.style.borderRadius = '8px';
-    //     loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    //     loadingIndicator.style.zIndex = '9999';
-    //     loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
-    //     document.body.appendChild(loadingIndicator);
-        
-    //     try {
-            
-    //         // Obtenir la même liste de personnes que celle actuellement visualisée
-    //         // Au lieu d'utiliser nameCloudState.currentNameData directement, recréons le filtre
-            
-    //         // 1. Demander le même ensemble de données filtrées
-    //         // Nous allons utiliser la même fonction qui est appelée quand l'utilisateur 
-    //         // clique sur le bouton "OK" pour générer le nuage
-    //         let selectedPersons = [];
-            
-    //         // Utiliser l'approche directe - récupérer toutes les personnes du GEDCOM
-    //         // et les filtrer selon les mêmes critères que le nuage de noms
-    //         const allPersons = Object.values(state.gedcomData.individuals);
-            
-    //         // Filtrer par scope (all, ancestors, descendants)
-    //         let filteredByScope = [];
-    //         if (currentConfig.scope === 'all') {
-    //             filteredByScope = allPersons;
-    //         } else {
-    //             // Pour les ancêtres ou descendants, utiliser la même logique que le nameCloud
-    //             // Appel à une fonction qui existe probablement dans nameCloud.js ou un module similaire
-    //             const rootId = currentConfig.rootPersonId;
-                
-    //             if (!rootId) {
-    //                 throw new Error('ID de personne racine non spécifié pour le filtre ancêtres/descendants');
-    //             }
-                
-    //             // Importer les fonctions nécessaires
-    //             const { buildAncestorTree, buildDescendantTree } = await import('./treeOperations.js');
-                
-    //             if (currentConfig.scope === 'ancestors') {
-    //                 // Construire l'arbre des ancêtres
-    //                 const processed = new Set();
-    //                 const ancestorTree = buildAncestorTree(rootId, processed);
-                    
-    //                 // Fonction pour extraire les IDs des personnes de l'arbre
-    //                 const extractPersonIds = (node, ids = []) => {
-    //                     if (!node) return ids;
-                        
-    //                     if (node.id) {
-    //                         ids.push(node.id);
-    //                     }
-                        
-    //                     if (node.children) {
-    //                         node.children.forEach(child => extractPersonIds(child, ids));
-    //                     }
-                        
-    //                     return ids;
-    //                 };
-                    
-    //                 const ancestorIds = extractPersonIds(ancestorTree);
-    //                 filteredByScope = allPersons.filter(person => ancestorIds.includes(person.id));
-                    
-    //             } else { // descendants
-    //                 // Construire l'arbre des descendants
-    //                 const processed = new Set();
-    //                 const descendantTree = buildDescendantTree(rootId, processed);
-                    
-    //                 // Fonction pour extraire les IDs des personnes de l'arbre
-    //                 const extractPersonIds = (node, ids = []) => {
-    //                     if (!node) return ids;
-                        
-    //                     if (node.id) {
-    //                         ids.push(node.id);
-    //                     }
-                        
-    //                     if (node.children) {
-    //                         node.children.forEach(child => extractPersonIds(child, ids));
-    //                     }
-                        
-    //                     if (node.spouses) {
-    //                         node.spouses.forEach(spouse => {
-    //                             if (spouse.id) ids.push(spouse.id);
-    //                         });
-    //                     }
-                        
-    //                     return ids;
-    //                 };
-                    
-    //                 const descendantIds = extractPersonIds(descendantTree);
-    //                 filteredByScope = allPersons.filter(person => descendantIds.includes(person.id));
-    //             }
-    //         }
-            
-    //         // Filtrer par date
-    //         selectedPersons = filteredByScope.filter(person => {
-    //             const birthYear = person.birthDate ? 
-    //                 parseInt(person.birthDate.match(/\d{4}/)?.[0]) : null;
-                    
-    //             const deathYear = person.deathDate ? 
-    //                 parseInt(person.deathDate.match(/\d{4}/)?.[0]) : null;
-                
-    //             // Inclure la personne si:
-    //             // 1. Elle est née dans la période
-    //             if (birthYear && birthYear >= currentConfig.startDate && birthYear <= currentConfig.endDate) {
-    //                 return true;
-    //             }
-                
-    //             // 2. Elle est décédée dans la période
-    //             if (deathYear && deathYear >= currentConfig.startDate && deathYear <= currentConfig.endDate) {
-    //                 return true;
-    //             }
-                
-    //             // 3. Elle a vécu pendant la période (née avant, décédée après)
-    //             if (birthYear && deathYear && 
-    //                 birthYear <= currentConfig.startDate && deathYear >= currentConfig.endDate) {
-    //                 return true;
-    //             }
-                
-    //             // 4. Aucune date connue - on l'inclut par défaut selon la configuration du nameCloud
-    //             if (!birthYear && !deathYear) {
-    //                 return true;
-    //             }
-                
-    //             return false;
-    //         });
-            
-    //         console.log(`Nombre de personnes sélectionnées pour la heatmap: ${selectedPersons.length}`);
-
-            
-    //         if (selectedPersons.length === 0) {
-    //             document.body.removeChild(loadingIndicator);
-    //             alert('Aucune personne ne correspond aux critères sélectionnés.');
-    //             return;
-    //         }
-            
-    //         // Traiter les personnes et générer les données de heatmap
-    //         const processIndividualsForHeatmap = async (individuals) => {
-    //             const locationCounts = {};
-    //             const totalPersons = individuals.length;
-                
-    //             for (let i = 0; i < individuals.length; i++) {
-    //                 const person = individuals[i];
-                    
-    //                 const locations = [];
-                    
-    //                 // Ajouter le lieu de naissance s'il existe
-    //                 if (person.birthPlace) {
-    //                     locations.push({ 
-    //                         type: 'Naissance', 
-    //                         place: person.birthPlace,
-    //                         date: person.birthDate 
-    //                     });
-    //                 }
-                    
-    //                 // Ajouter le lieu de décès s'il existe
-    //                 if (person.deathPlace) {
-    //                     locations.push({ 
-    //                         type: 'Décès', 
-    //                         place: person.deathPlace,
-    //                         date: person.deathDate
-    //                     });
-    //                 }
-                    
-    //                 // Ajouter les lieux de mariage s'ils existent
-    //                 if (person.spouseFamilies && person.spouseFamilies.length > 0) {
-    //                     for (const famId of person.spouseFamilies) {
-    //                         const family = state.gedcomData.families[famId];
-    //                         if (family && family.marriagePlace) {
-    //                             locations.push({ 
-    //                                 type: 'Mariage', 
-    //                                 place: family.marriagePlace,
-    //                                 date: family.marriageDate
-    //                             });
-    //                         }
-    //                     }
-    //                 }
-                    
-    //                 // Géocoder et traiter chaque lieu (en utilisant le fichier geolocalisation.json)
-    //                 for (const location of locations) {
-    //                     try {
-    //                         // Utiliser la fonction geocodeLocation qui utilise déjà le cache
-    //                         const coords = await geocodeLocation(location.place);
-                            
-    //                         if (coords) {
-    //                             const key = `${coords.lat.toFixed(2)},${coords.lon.toFixed(2)}`;
-                                
-    //                             if (!locationCounts[key]) {
-    //                                 locationCounts[key] = {
-    //                                     coords: coords,
-    //                                     count: 0,
-    //                                     families: {},
-    //                                     locations: []
-    //                                 };
-    //                             }
-                                
-    //                             locationCounts[key].count++;
-                                
-    //                             // Extraire et compter le nom de famille
-    //                             const familyName = person.name.split('/')[1]?.trim().toUpperCase();
-    //                             if (familyName) {
-    //                                 locationCounts[key].families[familyName] = 
-    //                                     (locationCounts[key].families[familyName] || 0) + 1;
-    //                             }
-                                
-    //                             // Extraire l'année de l'événement si disponible
-    //                             let year = 'N/A';
-    //                             if (location.date) {
-    //                                 const match = location.date.match(/\d{4}/);
-    //                                 if (match) {
-    //                                     year = match[0];
-    //                                 }
-    //                             }
-                                
-    //                             locationCounts[key].locations.push({
-    //                                 type: location.type,
-    //                                 name: person.name.replace(/\//g, '').trim(),
-    //                                 year: year
-    //                             });
-    //                         }
-    //                     } catch (error) {
-    //                         console.error(`Erreur de géocodage pour ${location.place}:`, error);
-    //                     }
-    //                 }
-    //             }
-                
-    //             return Object.values(locationCounts);
-    //         };
-            
-    //         // Générer les données de heatmap
-    //         const heatmapData = await processIndividualsForHeatmap(selectedPersons);
-            
-    //         // Supprimer l'indicateur de chargement
-    //         document.body.removeChild(loadingIndicator);
-            
-    //         // Créer la heatmap interactive
-    //         if (heatmapData && heatmapData.length > 0) {
-
-    //             console.log(`Données de heatmap générées: ${heatmapData.length} lieux trouvés`);
-                
-    //             // Créer un titre pour la heatmap basé sur la configuration
-    //             let  heatmapTitle;
-    //             if (window.innerWidth<300) { 
-    //                 heatmapTitle = `${currentConfig.scope === 'all' ? 'Tous' : 
-    //                     currentConfig.scope === 'ancestors' ? 'Ascend.' : 'Descend.'} 
-    //                     (${currentConfig.startDate}-${currentConfig.endDate})`;
-    //             } else {
-    //                 heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? 'Tous' : 
-    //                     currentConfig.scope === 'ancestors' ? 'Ancêtres' : 'Descendants'} 
-    //                     (${currentConfig.startDate}-${currentConfig.endDate})`;                    
-    //             }
-                
-    //             // Utiliser la nouvelle fonction pour créer la heatmap améliorée
-    //             createImprovedHeatmap(heatmapData, heatmapTitle);
-
-    //             attachFilterListeners();
-                
-    //             // Ajouter des écouteurs d'événements aux éléments de filtrage
-    //             // pour mettre à jour la heatmap automatiquement
-    //             typeSelect.addEventListener('change', refreshHeatmap);
-    //             scopeSelect.addEventListener('change', refreshHeatmap);
-    //             startDateInput.addEventListener('change', refreshHeatmap);
-    //             endDateInput.addEventListener('change', refreshHeatmap);
-    //             if (finalRootPersonSelect) {
-    //                 finalRootPersonSelect.addEventListener('change', refreshHeatmap);
-    //             }
-                
-    //             // Le bouton OK
-    //             const showButton = document.querySelector('button[title="Valider"]');
-    //             if (showButton) {
-    //                 showButton.addEventListener('click', refreshHeatmap);
-    //             }
-
-
-
-
-
-
-
-    //         } else {
-    //             alert('Aucune donnée géographique disponible pour les personnes sélectionnées.');
-    //         }
-    //     } catch (error) {
-    //         console.error('Erreur lors de la génération de la heatmap:', error);
-    //         // Supprimer l'indicateur de chargement en cas d'erreur
-    //         if (document.body.contains(loadingIndicator)) {
-    //             document.body.removeChild(loadingIndicator);
-    //         }
-    //         alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
-    //     }
-    // });
-
-   
 
     mapButton.addEventListener('click', async () => {
         // Récupérer les paramètres actuels de filtrage
@@ -1126,7 +817,7 @@ function showNameCloud(nameData, config) {
                 createImprovedHeatmap(heatmapData, heatmapTitle);
                 
                 // Attacher les écouteurs pour le rafraîchissement
-                attachFilterListeners();
+                // attachFilterListeners();
                 
                 // Ajouter les écouteurs d'événements aux contrôles
                 typeSelect.addEventListener('change', refreshHeatmap);
@@ -1264,7 +955,7 @@ export const createNameCloudUI = {
 // Fonction à ajouter dans nameCloudUI.js
 function createMapButton() {
     const mapButton = document.createElement('button');
-    mapButton.innerHTML = '🗺️';
+    mapButton.innerHTML = '🌍'; //'🗺️';
     
     // Style de base similaire au bouton de paramètres existant
     mapButton.style.backgroundColor = 'transparent';
@@ -1278,6 +969,7 @@ function createMapButton() {
     mapButton.style.justifyContent = 'center';
     mapButton.style.alignItems = 'center';
     mapButton.title = 'Afficher la heatmap';
+    mapButton.style.marginTop = '2px';
     
     // Effet de survol avec légère animation
     mapButton.addEventListener('mouseover', () => {

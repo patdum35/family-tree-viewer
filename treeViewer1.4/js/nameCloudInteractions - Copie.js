@@ -89,59 +89,12 @@ export function showPersonsList(name, people, config) {
     closeBtn.style.background = 'none';
     closeBtn.style.fontSize = '20px';
     closeBtn.style.cursor = 'pointer';
-    // closeBtn.onclick = () => {
-    //     if (modal.parentNode) {
-    //         modal.parentNode.removeChild(modal);
-            
-    //         // Restaurer la taille originale de la heatmap si elle était visible
-    //         if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
-    //             try {
-    //                 const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-    //                 if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-    //                 if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-    //                 if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-    //                 if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                    
-    //                 // Réinitialiser les variables de suivi
-    //                 lastSelectedLocationId = null;
-    //                 isIndividualMapMode = false;
-                    
-    //                 // Rafraîchir la carte avec les données initiales
-    //                 if (heatmapWrapper.map) {
-    //                     // Attendre un peu pour que les changements CSS prennent effet
-    //                     setTimeout(() => {
-    //                         if (typeof refreshHeatmap === 'function') {
-    //                             refreshHeatmap();
-    //                         } else if (heatmapWrapper.map) {
-    //                             heatmapWrapper.map.invalidateSize();
-    //                         }
-    //                     }, 100);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Erreur lors de la restauration du style de la heatmap:', error);
-                    
-    //                 // Restaurer aux valeurs par défaut en cas d'erreur
-    //                 heatmapWrapper.style.top = '60px';
-    //                 heatmapWrapper.style.left = '20px';
-    //                 heatmapWrapper.style.width = 'calc(100% - 40px)';
-    //                 heatmapWrapper.style.height = 'calc(100% - 100px)';
-                    
-    //                 setTimeout(() => {
-    //                     if (heatmapWrapper.map) {
-    //                         heatmapWrapper.map.invalidateSize();
-    //                     }
-    //                 }, 100);
-    //             }
-    //         }
-    //     }
-    // };
-
     closeBtn.onclick = () => {
         if (modal.parentNode) {
             modal.parentNode.removeChild(modal);
             
             // Restaurer la taille originale de la heatmap si elle était visible
-            if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
+            if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
                 try {
                     const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
                     if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
@@ -153,12 +106,15 @@ export function showPersonsList(name, people, config) {
                     lastSelectedLocationId = null;
                     isIndividualMapMode = false;
                     
-                    // Rafraîchir la carte avec les données initiales (toutes les personnes)
-                    if (typeof refreshHeatmap === 'function') {
-                        refreshHeatmap();
-                    } else if (heatmapWrapper.map) {
+                    // Rafraîchir la carte avec les données initiales
+                    if (heatmapWrapper.map) {
+                        // Attendre un peu pour que les changements CSS prennent effet
                         setTimeout(() => {
-                            heatmapWrapper.map.invalidateSize();
+                            if (typeof refreshHeatmap === 'function') {
+                                refreshHeatmap();
+                            } else if (heatmapWrapper.map) {
+                                heatmapWrapper.map.invalidateSize();
+                            }
                         }, 100);
                     }
                 } catch (error) {
@@ -179,6 +135,7 @@ export function showPersonsList(name, people, config) {
             }
         }
     };
+
     // Liste des personnes
     const list = document.createElement('div');
     list.style.display = 'grid';
@@ -736,44 +693,13 @@ export function showPersonsList(name, people, config) {
 
 
     // Gestion de la touche Échap
-    // const handleEscape = (e) => {
-    //     if (e.key === 'Escape') {
-    //         if (modal.parentNode) {
-    //             modal.parentNode.removeChild(modal);
-                
-    //             // Restaurer la taille originale de la heatmap si elle était visible
-    //             if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
-    //                 try {
-    //                     const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-    //                     if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-    //                     if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-    //                     if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-    //                     if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                        
-    //                     setTimeout(() => {
-    //                         if (heatmapWrapper.map) {
-    //                             heatmapWrapper.map.invalidateSize();
-    //                         }
-    //                     }, 100);
-    //                 } catch (error) {
-    //                     console.error('Erreur lors de la restauration du style de la heatmap:', error);
-    //                 }
-                    
-    //                 // Réinitialiser les variables de suivi
-    //                 lastSelectedLocationId = null;
-    //                 isIndividualMapMode = false;
-    //             }
-    //         }
-    //         document.removeEventListener('keydown', handleEscape);
-    //     }
-    // };
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
             if (modal.parentNode) {
                 modal.parentNode.removeChild(modal);
                 
                 // Restaurer la taille originale de la heatmap si elle était visible
-                if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
+                if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
                     try {
                         const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
                         if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
@@ -781,34 +707,23 @@ export function showPersonsList(name, people, config) {
                         if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
                         if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
                         
-                        // Rafraîchir la carte avec les données initiales (toutes les personnes)
-                        if (typeof refreshHeatmap === 'function') {
-                            refreshHeatmap();
-                        } else if (heatmapWrapper.map) {
-                            // heatmapWrapper.map.invalidateSize();
-                            setTimeout(() => {
-                                if (heatmapWrapper && heatmapWrapper.map) {
-                                    try {
-                                        heatmapWrapper.map.invalidateSize({ animate: false });
-                                    } catch (error) {
-                                        console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
-                                    }
-                                }
-                            }, 200);
-                        }
-                        
-                        // Réinitialiser les variables de suivi
-                        lastSelectedLocationId = null;
-                        isIndividualMapMode = false;
+                        setTimeout(() => {
+                            if (heatmapWrapper.map) {
+                                heatmapWrapper.map.invalidateSize();
+                            }
+                        }, 100);
                     } catch (error) {
                         console.error('Erreur lors de la restauration du style de la heatmap:', error);
                     }
+                    
+                    // Réinitialiser les variables de suivi
+                    lastSelectedLocationId = null;
+                    isIndividualMapMode = false;
                 }
             }
             document.removeEventListener('keydown', handleEscape);
         }
     };
-
     document.addEventListener('keydown', handleEscape);
     
     // Gérer la redimension de fenêtre si la heatmap est visible
@@ -925,37 +840,11 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
     
     // Invalider la taille de la carte après un délai pour s'assurer que 
     // les modifications de style sont appliquées
-    // setTimeout(() => {
-    //     if (heatmapWrapper.map) {
-    //         heatmapWrapper.map.invalidateSize();
-    //     }
-    // }, 100);
-
-        // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
     setTimeout(() => {
-        if (heatmapWrapper && heatmapWrapper.map) {
-            // Vérifier que la carte a des dimensions non nulles
-            const mapContainer = heatmapWrapper.querySelector('#ancestors-heatmap');
-            if (mapContainer && mapContainer.offsetWidth > 0 && mapContainer.offsetHeight > 0) {
-                try {
-                    // Forcer un recalcul du style avant d'invalider la taille
-                    void mapContainer.offsetHeight;
-                    
-                    // Désactiver l'animation pendant l'invalidation
-                    heatmapWrapper.map.invalidateSize({
-                        animate: false,
-                        pan: false
-                    });
-                    
-                    console.log("Carte redimensionnée avec succès");
-                } catch (error) {
-                    console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
-                }
-            } else {
-                console.warn("Le conteneur de carte a des dimensions nulles, invalidation ignorée");
-            }
+        if (heatmapWrapper.map) {
+            heatmapWrapper.map.invalidateSize();
         }
-    }, 300); // Augmenter le délai à 300ms pour plus de sécurité
+    }, 100);
 }
 
 /**
@@ -1406,23 +1295,6 @@ export function showInTree(personId) {
         modal.remove();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 (function initializeGlobalListeners() {
     document.addEventListener('cloudMapRefreshed', (event) => {

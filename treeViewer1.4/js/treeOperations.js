@@ -408,12 +408,55 @@ function findInterBranchMarriages(rootId) {
 
 
 
+// export function buildCombinedTree(personId) {
+//     // Find closest descendant first
+//     const descendants = findDescendants(personId);
+//     const closestDescendant = findClosestDescendant(descendants, personId);
+//     const targetId = closestDescendant ? closestDescendant.id : personId;
+
+
+//     // Si pas de descendant proche, retourner un arbre d'ascendants
+//     if (!closestDescendant) {
+//         state.treeModeReal = 'ancestors';
+//         return buildAncestorTree(personId, new Set(), 0);
+//     }
+
+//     state.treeModeReal = 'both';
+//     // Build both trees
+//     const descendantsTree = buildDescendantTree(personId, new Set(), 0);
+//     const ancestorsTree = buildAncestorTree(targetId, new Set(), 0);
+    
+//     const rootPerson = state.gedcomData.individuals[personId];
+    
+//     return {
+//         id: personId,
+//         name: rootPerson.name,
+//         birthDate: rootPerson.birthDate,
+//         deathDate: rootPerson.deathDate,
+//         descendants: descendantsTree ? descendantsTree.children : [],
+//         ancestors: ancestorsTree ? ancestorsTree.children : [],
+//         spouses: rootPerson.spouseFamilies ? 
+//             rootPerson.spouseFamilies.map(famId => {
+//                 const family = state.gedcomData.families[famId];
+//                 const spouseId = family.husband === personId ? family.wife : family.husband;
+//                 const spouse = state.gedcomData.individuals[spouseId];
+//                 return {
+//                     id: spouseId,
+//                     name: spouse.name,
+//                     birthDate: spouse.birthDate,
+//                     deathDate: spouse.deathDate
+//                 };
+//             }) : []
+//     };
+// }
+
+
+
 export function buildCombinedTree(personId) {
     // Find closest descendant first
     const descendants = findDescendants(personId);
     const closestDescendant = findClosestDescendant(descendants, personId);
     const targetId = closestDescendant ? closestDescendant.id : personId;
-
 
     // Si pas de descendant proche, retourner un arbre d'ascendants
     if (!closestDescendant) {
@@ -438,15 +481,23 @@ export function buildCombinedTree(personId) {
         spouses: rootPerson.spouseFamilies ? 
             rootPerson.spouseFamilies.map(famId => {
                 const family = state.gedcomData.families[famId];
+                if (!family) return null; // Vérifier si la famille existe
+                
                 const spouseId = family.husband === personId ? family.wife : family.husband;
+                // Vérifier si le spouseId existe
+                if (!spouseId) return null;
+                
                 const spouse = state.gedcomData.individuals[spouseId];
+                // Vérifier si le spouse existe dans les données
+                if (!spouse) return null;
+                
                 return {
                     id: spouseId,
                     name: spouse.name,
                     birthDate: spouse.birthDate,
                     deathDate: spouse.deathDate
                 };
-            }) : []
+            }).filter(spouse => spouse !== null) : [] // Filtrer les valeurs null
     };
 }
 

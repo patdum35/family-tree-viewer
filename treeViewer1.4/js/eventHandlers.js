@@ -693,70 +693,16 @@ export function selectRootPerson() {
 // }
 
 
-// Fonction pour la sélection d'une personne trouvée
-export function selectFoundPerson(personId) {
-    if (!personId) return;
-    
-    const resultsSelect = document.getElementById('root-person-results');
-    
-    // Désactiver le clignotement s'il existe
-    if (resultsSelect) {
-        if (typeof resultsSelect.setBlinking === 'function') {
-            resultsSelect.setBlinking(false);
-        } else {
-            resultsSelect.style.animation = 'none';
-            resultsSelect.style.backgroundColor = 'orange';
-        }
-    }
-    
-    // Afficher la personne comme racine
-    displayGenealogicTree(personId, true);
-    
-    // IMPORTANT: Après avoir affiché l'arbre avec la nouvelle personne racine,
-    // réinitialiser le sélecteur pour afficher l'historique
-    setTimeout(() => {
-        // Récupération de l'historique des racines depuis le localStorage
-        // qui doit maintenant inclure la personne sélectionnée
-        let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
-        
-        // Création des options pour l'historique
-        const options = rootHistory.map(entry => ({
-            value: entry.id,
-            label: entry.name
-        }));
-        
-        // Ajouter l'option "Clear History"
-        options.push({ value: 'clear-history', label: '--- Clear History ---' });
-        
-        // Ajouter les options pour les démos
-        options.push({ value: 'demo1', label: '--- Demo1 ---' });
-        options.push({ value: 'demo2', label: '--- Demo2 ---' });
-        
-        // Mettre à jour le sélecteur avec ces options
-        if (resultsSelect && typeof resultsSelect.updateOptions === 'function') {
-            // Définir la personne sélectionnée comme valeur actuelle
-            resultsSelect.value = personId;
-            
-            // Mettre à jour les options
-            resultsSelect.updateOptions(options);
-            
-            // Mettre à jour l'affichage si possible
-            const selectedPerson = rootHistory.find(entry => entry.id === personId);
-            if (selectedPerson) {
-                updateSelectorDisplayText(resultsSelect, selectedPerson.name);
-            }
-        } else {
-            // Si le sélecteur personnalisé n'est pas disponible, on essaie de le recréer
-            import('./mainUI.js').then(module => {
-                if (typeof module.replaceRootPersonSelector === 'function') {
-                    module.replaceRootPersonSelector();
-                }
-            });
-        }
-    }, 100);
-}
 
-// Fonction pour la recherche
+
+
+
+
+// ====================================
+// 2. Modifications dans eventHandlers.js
+// ====================================
+
+// Fonction améliorée pour la recherche
 export function searchRootPerson(event) {
     const searchInput = document.getElementById('root-person-search');
     const resultsSelect = document.getElementById('root-person-results');
@@ -783,97 +729,72 @@ export function searchRootPerson(event) {
             label: "Select"
         });
         
-        // Si nous avons un sélecteur personnalisé, utiliser sa méthode updateOptions
-        if (resultsSelect) {
-            // Effacer le contenu actuel
-            if (typeof resultsSelect.innerHTML === 'string') {
-                resultsSelect.innerHTML = '';
-            }
-            
-            // Mettre à jour avec les nouveaux résultats
-            if (typeof resultsSelect.updateOptions === 'function') {
-                resultsSelect.updateOptions(options);
-                
-                // Forcer l'affichage de "Select" comme texte affiché avec troncature
-                updateSelectorDisplayText(resultsSelect, "Select");
-            } else {
-                // Fallback pour le sélecteur standard
-                const selectOption = document.createElement('option');
-                selectOption.value = "";
-                selectOption.textContent = "Select";
-                selectOption.selected = true;
-                resultsSelect.appendChild(selectOption);
-                
-                options.slice(1).forEach(option => { // Ignorer le premier ("Select") qu'on vient d'ajouter
-                    const optElement = document.createElement('option');
-                    optElement.value = option.value;
-                    optElement.textContent = option.label;
-                    resultsSelect.appendChild(optElement);
-                });
-            }
-            
-            // Activer le clignotement
-            if (typeof resultsSelect.setBlinking === 'function') {
-                resultsSelect.setBlinking(true); // Utiliser l'orange vif défini dans la méthode
-            } else {
-                resultsSelect.style.display = 'block';
-                // Créer une animation de clignotement directement
-                const orangeVif = '#FF5722';
-                resultsSelect.style.animation = 'none'; // Réinitialiser toute animation existante
-                resultsSelect.style.backgroundColor = orangeVif;
-                
-                // On utilise setTimeout pour forcer un recalcul du style et appliquer l'animation
-                setTimeout(() => {
-                    // Appliquer l'animation directement si elle n'existe pas déjà
-                    if (!document.getElementById('blink-keyframes-fallback')) {
-                        const styleElement = document.createElement('style');
-                        styleElement.id = 'blink-keyframes-fallback';
-                        styleElement.textContent = `
-                            @keyframes blink-fallback {
-                                0% { background-color: #FF5722; }
-                                50% { background-color: rgba(255, 87, 34, 0.5); }
-                                100% { background-color: #FF5722; }
-                            }
-                        `;
-                        document.head.appendChild(styleElement);
-                    }
-                    resultsSelect.style.animation = 'blink-fallback 0.7s infinite';
-                }, 10);
-            }
-        } else {
-            // Cas où le sélecteur n'existe pas encore, créer un nouveau
-            import('./mainUI.js').then(module => {
-                if (typeof module.replaceRootPersonSelector === 'function') {
-                    const newSelector = module.replaceRootPersonSelector(options);
-                    if (newSelector) {
-                        // Forcer l'affichage de "Select" comme texte affiché avec troncature
-                        updateSelectorDisplayText(newSelector, "Select");
-                        
-                        if (typeof newSelector.setBlinking === 'function') {
-                            newSelector.setBlinking(true);
-                        }
+        // Si nous avons un sélecteur personnalisé, utiliser replaceRootPersonSelector
+        // pour garantir une transition propre vers le mode recherche
+        import('./mainUI.js').then(module => {
+            if (typeof module.replaceRootPersonSelector === 'function') {
+                const newSelector = module.replaceRootPersonSelector(options);
+                if (newSelector) {
+                    // Forcer l'affichage de "Select" comme texte affiché avec troncature
+                    module.updateSelectorDisplayText(newSelector, "Select");
+                    
+                    if (typeof newSelector.setBlinking === 'function') {
+                        newSelector.setBlinking(true);
                     }
                 }
-            });
-        }
+            }
+        });
     } else {
         alert('Aucune personne trouvée');
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Fonction améliorée pour la sélection d'une personne trouvée
+export function selectFoundPerson(personId) {
+    if (!personId) return;
+    
+    const resultsSelect = document.getElementById('root-person-results');
+    
+    // Désactiver le clignotement s'il existe
+    if (resultsSelect) {
+        if (typeof resultsSelect.setBlinking === 'function') {
+            resultsSelect.setBlinking(false);
+        } else {
+            resultsSelect.style.animation = 'none';
+            resultsSelect.style.backgroundColor = 'orange';
+        }
+    }
+    
+    // Afficher la personne comme racine
+    displayGenealogicTree(personId, true);
+    
+    // Attendre que l'arbre soit affiché et que l'historique soit mis à jour
+    setTimeout(() => {
+        // Forcer une recréation complète du sélecteur en mode historique
+        // plutôt que d'essayer de mettre à jour celui existant
+        import('./mainUI.js').then(module => {
+            if (typeof module.replaceRootPersonSelector === 'function') {
+                // Recréer le sélecteur avec l'historique mis à jour
+                const newSelector = module.replaceRootPersonSelector();
+                
+                // S'assurer que la personne sélectionnée est choisie comme valeur courante
+                if (newSelector) {
+                    // Rechercher la personne dans l'historique mis à jour
+                    const rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+                    const selectedPerson = rootHistory.find(entry => entry.id === personId);
+                    
+                    if (selectedPerson) {
+                        // Définir la valeur sélectionnée
+                        newSelector.value = personId;
+                        
+                        // Mettre à jour l'affichage avec le nom tronqué
+                        module.updateSelectorDisplayText(newSelector, selectedPerson.name);
+                    }
+                }
+            }
+        });
+    }, 200); // Augmenter le délai pour s'assurer que tout est bien synchronisé
+}
 
 
 
