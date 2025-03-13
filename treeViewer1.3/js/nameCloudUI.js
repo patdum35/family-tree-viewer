@@ -969,6 +969,7 @@ function createMapButton() {
     mapButton.style.justifyContent = 'center';
     mapButton.style.alignItems = 'center';
     mapButton.title = 'Afficher la heatmap';
+    mapButton.style.marginTop = '2px';
     
     // Effet de survol avec légère animation
     mapButton.addEventListener('mouseover', () => {
