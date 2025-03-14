@@ -20,7 +20,6 @@ export function removeAllStatsElements() {
 }
 
 
-
 function initializeDistributionChart(data, container) {
     // S'assurer que d3 est disponible
     if (!window.d3) {
@@ -31,8 +30,8 @@ function initializeDistributionChart(data, container) {
     // Vider le conteneur
     d3.select(container).html("");
     
-    // Dimensions du graphique avec marges réduites
-    const margin = {top: 20, right: 15, bottom: 30, left: 30}; // Marges réduites
+    // Dimensions du graphique
+    const margin = {top: 20, right: 15, bottom: 30, left: 30};
     const width = container.clientWidth - margin.left - margin.right;
     const height = container.clientHeight - margin.top - margin.bottom;
     
@@ -53,36 +52,97 @@ function initializeDistributionChart(data, container) {
         return;
     }
     
-    // Échelles X et Y
-    const x = d3.scaleBand()
-        .domain(data.map(d => d.age))
-        .range([0, width])
-        .padding(0.1);
+    // Trouver l'âge min et max dans les données pour définir l'échelle
+    const minAge = d3.min(data, d => d.age);
+    const maxAge = d3.max(data, d => d.age);
+    
+    // Créer une échelle qui inclut tous les âges possibles (pas seulement ceux présents)
+    // Pour garantir un espacement uniforme même avec des "trous"
+    const allPossibleAges = [];
+    for (let age = minAge; age <= maxAge; age++) {
+        allPossibleAges.push(age);
+    }
+    
+    // Échelle X - utiliser une échelle linéaire au lieu de scaleBand pour un espacement uniforme
+    const x = d3.scaleLinear()
+        .domain([minAge - 0.5, maxAge + 0.5]) // Élargir légèrement le domaine
+        .range([0, width]);
+    
+    // Largeur de barre constante (indépendante du nombre de données)
+    const barWidth = Math.min(20, width / (maxAge - minAge + 5)); // Limite la largeur max
+    
+    // Déterminer le maximum pour l'échelle Y
+    const yMax = d3.max(data, d => Math.max(d.males || 0, d.females || 0));
     
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.count)])
+        .domain([0, yMax])
         .nice()
         .range([height, 0]);
     
-    // Barres
-    svg.selectAll(".bar")
+    // Créer des groupes pour chaque âge présent dans les données
+    const ageGroups = svg.selectAll(".age-group")
         .data(data)
-        .enter().append("rect")
-        .attr("class", "bar")
-        .attr("x", d => x(d.age))
-        .attr("y", d => y(d.count))
-        .attr("width", x.bandwidth())
-        .attr("height", d => height - y(d.count))
+        .enter().append("g")
+        .attr("class", "age-group")
+        .attr("transform", d => `translate(${x(d.age) - barWidth/2}, 0)`);
+    
+    // Barres pour les hommes (bleu)
+    ageGroups.append("rect")
+        .attr("class", "bar-male")
+        .attr("x", 0)
+        .attr("y", d => y(d.males || 0))
+        .attr("width", barWidth / 2)
+        .attr("height", d => height - y(d.males || 0))
         .attr("fill", "#4299e1")
         .attr("rx", 2);
     
-    // Vérifier si les données ont une propriété average (à partir de data, pas nameData)
-    const averageLifespan = data.averageLifespan;
-    if (averageLifespan) {
-        const avgAge = parseFloat(averageLifespan);
-        const avgX = x(Math.round(avgAge)) + x.bandwidth() / 2;
+    // Barres pour les femmes (rose)
+    ageGroups.append("rect")
+        .attr("class", "bar-female")
+        .attr("x", barWidth / 2)
+        .attr("y", d => y(d.females || 0))
+        .attr("width", barWidth / 2)
+        .attr("height", d => height - y(d.females || 0))
+        .attr("fill", "#F687B3")
+        .attr("rx", 2);
+    
+    // Légende
+    const legend = svg.append("g")
+        .attr("transform", `translate(${width - 80}, 10)`);
+    
+    // Légende pour hommes
+    legend.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", "#4299e1")
+        .attr("rx", 2);
+    
+    legend.append("text")
+        .attr("x", 16)
+        .attr("y", 9)
+        .attr("font-size", "10px")
+        .text("Hommes");
+    
+    // Légende pour femmes
+    legend.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", "#F687B3")
+        .attr("y", 16)
+        .attr("rx", 2);
+    
+    legend.append("text")
+        .attr("x", 16)
+        .attr("y", 25)
+        .attr("font-size", "10px")
+        .text("Femmes");
+    
+    // Ajouter les moyennes
+    // Moyenne générale
+    if (data.averageData) {
+        const avgAge = parseFloat(data.averageData);
+        const avgX = x(avgAge);
         
-        // Ligne verticale pour la moyenne
         svg.append("line")
             .attr("x1", avgX)
             .attr("x2", avgX)
@@ -92,32 +152,92 @@ function initializeDistributionChart(data, container) {
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "5,5");
         
-        // Étiquette pour la moyenne plus compacte
         svg.append("text")
             .attr("x", avgX)
-            .attr("y", 0)
+            .attr("y", 10)
             .attr("text-anchor", "middle")
-            .attr("font-size", "11px") // Taille réduite
+            .attr("font-size", "11px")
             .attr("fill", "#e53e3e")
-            .text(`Moy: ${avgAge}a`); // Texte plus court
+            .text(`Moy: ${avgAge}a`);
     }
     
-    // Axes avec moins de graduations
-    const tickFrequency = Math.ceil(data.length / 10); // Réduire le nombre de graduations
+    // Moyenne pour les hommes
+    if (data.maleAverageData) {
+        const maleAvg = parseFloat(data.maleAverageData);
+        const maleX = x(maleAvg);
+        
+        svg.append("line")
+            .attr("x1", maleX)
+            .attr("x2", maleX)
+            .attr("y1", height)
+            .attr("y2", height / 2)
+            .attr("stroke", "#2b6cb0")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "3,3");
+        
+        svg.append("text")
+            .attr("x", maleX)
+            .attr("y", height / 2 - 5)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "9px")
+            .attr("fill", "#2b6cb0")
+            .text(`H: ${maleAvg}`);
+    }
     
+    // Moyenne pour les femmes
+    if (data.femaleAverageData) {
+        const femaleAvg = parseFloat(data.femaleAverageData);
+        const femaleX = x(femaleAvg);
+        
+        svg.append("line")
+            .attr("x1", femaleX)
+            .attr("x2", femaleX)
+            .attr("y1", height)
+            .attr("y2", height / 2)
+            .attr("stroke", "#d53f8c")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "3,3");
+        
+        svg.append("text")
+            .attr("x", femaleX)
+            .attr("y", height / 2 - 20)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "9px")
+            .attr("fill", "#d53f8c")
+            .text(`F: ${femaleAvg}`);
+    }
+    
+    // Générer des étiquettes d'axe X avec un espacement adapté à la taille de l'écran et au type de données
+    const tickValues = [];
+    let tickStep = 5; // Espacement par défaut de 5 ans
+
+    // Si écran petit ET type = durée de vie, utiliser un espacement de 10 ans
+    if (window.innerWidth < 420 && (nameCloudState.currentConfig && nameCloudState.currentConfig.type === 'duree_vie')) {
+        tickStep = 10;
+    }
+
+    // Commencer par un multiple de tickStep supérieur ou égal à minAge
+    let start = Math.ceil(minAge / tickStep) * tickStep;
+    // Aller jusqu'à un multiple de tickStep inférieur ou égal à maxAge
+    for (let age = start; age <= maxAge; age += tickStep) {
+        tickValues.push(age);
+    }
+    
+    // Axe X avec étiquettes tous les 5 ans
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).tickValues(x.domain().filter((_, i) => i % tickFrequency === 0)));
+        .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(d3.format('d')));
     
+    // Axe Y
     svg.append("g")
-        .call(d3.axisLeft(y).ticks(5)); // Réduire le nombre de graduations
+        .call(d3.axisLeft(y).ticks(5));
     
-    // Étiquettes des axes plus compactes
+    // Étiquettes des axes
     svg.append("text")
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom - 5)
-        .attr("font-size", "10px") // Taille réduite
+        .attr("font-size", "10px")
         .text("Âge");
     
     svg.append("text")
@@ -125,26 +245,27 @@ function initializeDistributionChart(data, container) {
         .attr("transform", "rotate(-90)")
         .attr("y", -margin.left + 12)
         .attr("x", -height / 2)
-        .attr("font-size", "10px") // Taille réduite
+        .attr("font-size", "10px")
         .text("Nombre");
 }
 
-// Modifications simples pour la fonction addStatItem pour éviter le retour à la ligne
+
 function addStatItem(grid, label, value, color = 'inherit') {
     const labelDiv = document.createElement('div');
     labelDiv.textContent = label + ':';
     labelDiv.style.fontWeight = 'normal';
-    labelDiv.style.whiteSpace = 'nowrap'; // Empêcher le retour à la ligne
-    labelDiv.style.overflow = 'hidden'; // Masquer le texte qui déborde
-    labelDiv.style.textOverflow = 'ellipsis'; // Afficher des points de suspension si nécessaire
+    labelDiv.style.whiteSpace = 'nowrap';
+    labelDiv.style.overflow = 'hidden';
+    labelDiv.style.textOverflow = 'ellipsis';
+    labelDiv.style.fontSize = '14px'; // Ajout de cette ligne pour réduire la taille du texte
     
     const valueDiv = document.createElement('div');
-    valueDiv.textContent = value;
+    valueDiv.innerHTML = value; // On garde innerHTML ici pour les valeurs qui contiennent du HTML
     valueDiv.style.fontWeight = 'bold';
     valueDiv.style.color = color;
-    valueDiv.style.whiteSpace = 'nowrap'; // Empêcher le retour à la ligne
-    valueDiv.style.overflow = 'hidden'; // Masquer le texte qui déborde
-    valueDiv.style.textOverflow = 'ellipsis'; // Afficher des points de suspension si nécessaire
+    valueDiv.style.whiteSpace = 'nowrap';
+    valueDiv.style.overflow = 'hidden';
+    valueDiv.style.textOverflow = 'ellipsis';
     
     grid.appendChild(labelDiv);
     grid.appendChild(valueDiv);
@@ -181,6 +302,42 @@ function calculateMedian(nameData) {
     }
 }
 
+
+// Fonction pour calculer la médiane par sexe
+function calculateMedianBySex(nameData, sex) {
+    const ages = [];
+    
+    // Extraire tous les âges avec leur fréquence pour le sexe spécifié
+    nameData.forEach(item => {
+        const age = parseInt(item.text);
+        const count = sex === 'M' ? (item.males || 0) : (item.females || 0);
+        
+        // Ajouter l'âge 'count' fois
+        for (let i = 0; i < count; i++) {
+            ages.push(age);
+        }
+    });
+    
+    // Si pas de données pour ce sexe
+    if (ages.length === 0) {
+        return 'N/A';
+    }
+    
+    // Trier les âges
+    ages.sort((a, b) => a - b);
+    
+    // Calculer la médiane
+    const middle = Math.floor(ages.length / 2);
+    
+    if (ages.length % 2 === 0) {
+        // Si le nombre d'éléments est pair, la médiane est la moyenne des deux éléments du milieu
+        return ((ages[middle - 1] + ages[middle]) / 2).toFixed(1);
+    } else {
+        // Si le nombre d'éléments est impair, la médiane est l'élément du milieu
+        return ages[middle].toString();
+    }
+}
+
 // Fonction pour calculer le mode (âge le plus fréquent)
 function calculateMode(nameData) {
     if (!nameData || nameData.length === 0) return 'N/A';
@@ -193,16 +350,49 @@ function calculateMode(nameData) {
     return modeItem.text + ' ans';
 }
 
-// Fonction pour préparer les données pour un histogramme
+
 function prepareHistogramData(nameData) {
-    // Convertir les données du nuage en format pour l'histogramme
-    return nameData.map(item => ({
-        age: parseInt(item.text),
-        count: item.size
-    })).sort((a, b) => a.age - b.age);
+    
+    // Créer un tableau d'objets contenant les deux distributions
+    const histogramData = [];
+    
+    // Parcourir les données et extraire les informations par âge et par sexe
+    nameData.forEach(item => {
+        const age = parseInt(item.text);
+        
+        if (!isNaN(age)) {
+            // Vérifier si l'âge existe déjà dans l'histogramme
+            let entry = histogramData.find(d => d.age === age);
+            
+            if (!entry) {
+                entry = {
+                    age: age,
+                    count: 0,
+                    males: 0,
+                    females: 0
+                };
+                histogramData.push(entry);
+            }
+            
+            // Si nous avons des compteurs séparés par sexe, les utiliser
+            if (item.males !== undefined && item.females !== undefined) {
+                entry.males += item.males;
+                entry.females += item.females;
+                entry.count = entry.males + entry.females;
+            } else {
+                // Sinon, distribuer le total équitablement (par défaut)
+                entry.males += Math.floor(item.size / 2);
+                entry.females += Math.ceil(item.size / 2);
+                entry.count += item.size;
+            }
+        }
+    });
+    
+    // Trier par âge
+    const sortedData = histogramData.sort((a, b) => a.age - b.age);
+    
+    return sortedData;
 }
-
-
 /**
  * Crée un modal avec les statistiques détaillées
  * @param {Object} nameData - Les données à afficher
@@ -220,10 +410,49 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     // Récupérer la configuration pour ce type
     const cfg = statsConfig[type];
     
+    // S'assurer que les stats existent
+    nameData = ensureStatsExist(nameData);
+
+    if (!nameData.stats) {
+        console.error("Impossible de calculer les statistiques");
+        return;
+    }
+
     // Préparation des données pour le graphique
     const histogramData = prepareHistogramData(nameData);
-    histogramData.averageLifespan = nameData.averageLifespan;
+    histogramData.averageData = nameData.averageData;
+    histogramData.maleAverageData = nameData.maleAverageData;
+    histogramData.femaleAverageData = nameData.femaleAverageData;
     
+
+    // Calculer le nombre total d'hommes et de femmes
+    let maleCount = 0;
+    let femaleCount = 0;
+
+    nameData.forEach(item => {
+        if (item.males) maleCount += item.males;
+        if (item.females) femaleCount += item.females;
+    });
+
+    // Arrondir les nombres pour éviter les décimales
+    maleCount = Math.round(maleCount);
+    femaleCount = Math.round(femaleCount);
+
+    // Vérifier que la somme correspond au total
+    const totalCount = maleCount + femaleCount;
+    if (totalCount !== nameData.stats.count && nameData.stats.count) {
+        // Ajuster pour s'assurer que la somme est correcte
+        const diff = nameData.stats.count - totalCount;
+        if (diff !== 0) {
+            // Ajouter la différence au plus grand groupe
+            if (maleCount >= femaleCount) {
+                maleCount += diff;
+            } else {
+                femaleCount += diff;
+            }
+        }
+    }
+  
     // Création du modal
     const modal = document.createElement('div');
     modal.className = `${cfg.buttonClass}-modal`;
@@ -297,22 +526,26 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         
         // Formatage des statistiques sur la première ligne
         const average = document.createElement('div');
-        average.innerHTML = `<span style="font-size:12px">Moyenne:</span> <span style="color:#3949AB;font-weight:bold">${stats.average}ans</span>`;
+        average.innerHTML = `<span style="font-size:12px">Moyenne:</span> <span style="color:#3949AB;font-weight:bold">${nameData.stats.average}ans</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3;font-weight:bold">F:${nameData.femaleAverageData || 'N/A'}</span>)</span>`;
         average.style.whiteSpace = 'nowrap';
         average.style.marginRight = '10px';
-        
+
         const median = document.createElement('div');
-        median.innerHTML = `<span style="font-size:12px">Médiane:</span> <span style="font-weight:bold">${calculateMedian(nameData).replace(' ans', 'a')}</span>`;
+        const maleMedian = calculateMedianBySex(nameData, 'M');
+        const femaleMedian = calculateMedianBySex(nameData, 'F');
+        median.innerHTML = `<span style="font-size:12px">Médiane:</span> <span style="font-weight:bold">${calculateMedian(nameData).replace(' ans', 'a')}</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${maleMedian}</span> / <span style="color:#F687B3;font-weight:bold">F:${femaleMedian}</span>)</span>`;
         median.style.whiteSpace = 'nowrap';
         median.style.marginRight = '10px';
+
+
         
         const min = document.createElement('div');
-        min.innerHTML = `<span style="font-size:12px">Min:</span> <span style="font-weight:bold">${stats.min}a</span>`;
+        min.innerHTML = `<span style="font-size:12px">Min:</span> <span style="font-weight:bold">${nameData.stats.min}a</span>`;
         min.style.whiteSpace = 'nowrap';
         min.style.marginRight = '10px';
         
         const max = document.createElement('div');
-        max.innerHTML = `<span style="font-size:12px">Max:</span> <span style="font-weight:bold">${stats.max}a</span>`;
+        max.innerHTML = `<span style="font-size:12px">Max:</span> <span style="font-weight:bold">${nameData.stats.max}a</span>`;
         max.style.whiteSpace = 'nowrap';
         
         row1.appendChild(average);
@@ -327,9 +560,12 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         row2.style.flexWrap = 'nowrap';
         
         const count = document.createElement('div');
-        count.innerHTML = `<span style="font-size:12px">Échantillon:</span> <span style="font-weight:bold">${stats.count} pers.</span>`;
+        // Modification ici pour inclure les compteurs par sexe avec couleurs
+        count.innerHTML = `<span style="font-size:12px">Échantillon:</span> <span style="font-weight:bold">${nameData.stats.count} pers. </span> <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`;
         count.style.whiteSpace = 'nowrap';
         count.style.marginRight = '10px';
+
+
         
         const mode = document.createElement('div');
         mode.innerHTML = `<span style="font-size:12px">Age plus fréquent</span> <span style="font-weight:bold">${calculateMode(nameData).replace(' ans', 'a')}</span>`;
@@ -344,18 +580,24 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         // Version standard pour les écrans normaux
         const grid = document.createElement('div');
         grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = '70% 30%'; // Plus d'espace pour la colonne des valeurs
+        grid.style.gridTemplateColumns = '47% 53%'; // Plus d'espace pour la colonne des valeurs
         grid.style.gap = '8px'; // Espacement réduit
         grid.style.marginBottom = '15px';
         
         // Ajout des statistiques principales
-        addStatItem(grid, `${cfg.modalStatsPrefix}moyenne`, `${stats.average} ans`, '#3949AB');
-        addStatItem(grid, `${cfg.modalStatsPrefix}médiane`, calculateMedian(nameData), '#3949AB');
+        addStatItem(grid, `Moyenne`, `${nameData.stats.average} ans <span style="font-size:12px">(<span style="color:#4299e1">H: ${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3">F: ${nameData.femaleAverageData || 'N/A'}</span>)</span>`, '#3949AB');
+
+        const maleMedian = calculateMedianBySex(nameData, 'M');
+        const femaleMedian = calculateMedianBySex(nameData, 'F');
+        addStatItem(grid, `Médiane`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">H: ${maleMedian}</span> / <span style="color:#F687B3">F: ${femaleMedian}</span>)</span>`, '#3949AB');
+
         addStatItem(grid, 'Minimum', `${stats.min} ans`);
         addStatItem(grid, 'Maximum', `${stats.max} ans`);
-        addStatItem(grid, 'Nombre de personnes', stats.count);
-        addStatItem(grid, 'Age le plus fréquent', calculateMode(nameData));
         
+        // Modification ici pour inclure les compteurs par sexe
+        addStatItem(grid, 'Nombre de personnes', `${nameData.stats.count} <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`);
+        addStatItem(grid, 'Age le plus fréquent', calculateMode(nameData));
+
         statsContainer.appendChild(grid);
     }
 
@@ -392,6 +634,8 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     }, 100);
 }
 
+
+
 /**
  * Vérifie si les statistiques existent, sinon les calcule
  * @param {Object} nameData - Les données à vérifier
@@ -412,7 +656,7 @@ export function ensureStatsExist(nameData) {
             const maxAge = Math.max(...ages.map(d => d.age));
             
             nameData.stats = {
-                average: nameData.averageLifespan || 0,
+                average: nameData.averageData || 0,
                 count: totalCount,
                 min: minAge,
                 max: maxAge
@@ -443,9 +687,9 @@ const statsConfig = {
         buttonId: 'procreation-age-stats-button',
         buttonClass: 'procreation-age-stats-button',
         containerClass: 'procreation-average-container',
-        title: 'Âge moyen de procréation',
-        modalTitle: 'Stats âge de procréation',
-        labelText: 'Âge moyen de procréation',
+        title: 'Âge moy. de procréation',
+        modalTitle: 'Âge de procréation',
+        labelText: 'Âge moy. de procréation',
         modalStatsPrefix: 'Âge de procréation ',
         chartId: 'procreation-age-chart-container',
         type: 'age'
@@ -539,14 +783,22 @@ export function addStatsLabel(svg, textGroup, config) {
     // Variables pour le texte à afficher
     let valueText = '';
     let subtitleText = '';
+    let genderText = '';
     
     if (cfg.type === 'age') {
         // Pour les types d'âge (durée de vie, procréation)
-        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageLifespan) {
+        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageData) {
             return;
         }
         
-        valueText = `${parseFloat(nameCloudState.currentNameData.averageLifespan).toFixed(1)} ans`;
+        valueText = `${parseFloat(nameCloudState.currentNameData.averageData).toFixed(1)} ans`;
+
+        // Ajouter les moyennes par sexe si disponibles
+        if (nameCloudState.currentNameData.maleAverageData && 
+            nameCloudState.currentNameData.femaleAverageData) {
+            genderText = `H: ${nameCloudState.currentNameData.maleAverageData} ans / F: ${nameCloudState.currentNameData.femaleAverageData} ans`;
+        }
+
     } else {
         // Pour les types de fréquence (noms, prénoms, métiers, lieux)
         if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
@@ -561,6 +813,8 @@ export function addStatsLabel(svg, textGroup, config) {
     // Calculer la position
     const labelWidth = 140;
     const labelHeight = 60;
+    // const labelHeight = genderText ? 75 : 60; // Augmenter la hauteur si on a le texte de genre
+    
     const xPos = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
     const yPos = 85; // position fixe en haut
 
@@ -613,7 +867,16 @@ export function addStatsLabel(svg, textGroup, config) {
         .style('fill', '#e53e3e')
         .text(valueText);
     
-
+    // Ajouter les moyennes par sexe
+    if (genderText) {
+        container.append('text')
+            .attr('x', labelWidth / 2)
+            .attr('y', 60)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Arial, sans-serif')
+            .style('font-size', '12px')
+            .text(genderText);
+    }
 
     
     // Ajouter la fonctionnalité de glisser-déposer
@@ -1021,13 +1284,20 @@ export function addStatisticsLabel(svg, textGroup, config) {
     // Variables pour le texte à afficher
     let valueText = '';
     let subtitleText = '';
+    let genderText = '';
     
     if (cfg.type === 'age') {
         // Pour les types d'âge
-        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageLifespan) {
+        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageData) {
             return;
         }
-        valueText = `${parseFloat(nameCloudState.currentNameData.averageLifespan).toFixed(1)} ans`;
+        valueText = `${parseFloat(nameCloudState.currentNameData.averageData).toFixed(1)} ans`;
+        
+        // Ajouter les moyennes par sexe si disponibles
+        if (nameCloudState.currentNameData.maleAverageData && 
+            nameCloudState.currentNameData.femaleAverageData) {
+            genderText = `H: ${nameCloudState.currentNameData.maleAverageData} ans / F: ${nameCloudState.currentNameData.femaleAverageData} ans`;
+        }
     } else {
         // Pour les types de fréquence
         if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
@@ -1051,15 +1321,6 @@ export function addStatisticsLabel(svg, textGroup, config) {
         initialY = 85;  // 110px depuis le haut
     }
 
-    // // Stocker les coordonnées
-    // statsPositionsMap[config.type] = {
-    //     x: initialX,
-    //     y: initialY,
-    //     width: 140,
-    //     height: 60
-    // };    
-
-
     // Créer un élément HTML pour les statistiques
     const container = document.createElement('div');
     container.id = `html-${cfg.labelId}`;
@@ -1069,6 +1330,8 @@ export function addStatisticsLabel(svg, textGroup, config) {
     container.style.top = `${initialY}px`;
     container.style.width = '140px';
     container.style.height = '60px';
+
+
     container.style.padding = '5px';
     container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
     container.style.border = '1px solid #ccc';
@@ -1094,6 +1357,17 @@ export function addStatisticsLabel(svg, textGroup, config) {
     value.style.color = '#e53e3e';
     value.style.textAlign = 'center';
     container.appendChild(value);
+
+    // Ajouter les moyennes par sexe
+    if (genderText) {
+        const gender = document.createElement('div');
+        gender.textContent = genderText;
+        gender.style.fontSize = '12px';
+        gender.style.textAlign = 'center';
+        gender.style.marginTop = '2px';
+        container.appendChild(gender);
+    }
+
     
     // Ajouter le sous-titre si nécessaire
     if (subtitleText) {
@@ -1109,11 +1383,14 @@ export function addStatisticsLabel(svg, textGroup, config) {
     document.body.appendChild(container);
     
     
-    // Rendre l'élément déplaçable
+    // Rendre l'élément déplaçablef
     makeElementDraggable(container, config.type);
     
     // Repositionner le bouton associé
     setTimeout(() => forceRepositionButton(config.type), 50);
+
+    // Mise à jour de globalStatsPosition pour tenir compte de la nouvelle hauteur
+    // globalStatsPosition.height = genderText ? 75 : 60; 
 
     // Ajouter un événement de redimensionnement
     if (globalResizeListener) {

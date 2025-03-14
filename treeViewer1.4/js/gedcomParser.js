@@ -48,7 +48,8 @@ export function parseGEDCOM(gedcomText) {
             if (tag === "INDI") {
                 individuals[id] = { 
                     id, 
-                    name: "", 
+                    name: "",
+                    sex: "", 
                     birthDate: "", 
                     birthPlace: "",
                     deathDate: "",
@@ -85,6 +86,8 @@ export function parseGEDCOM(gedcomText) {
         } else if (currentEntity && level === "1") {
             if (tag === "NAME" && currentEntity.name !== undefined) {
                 currentEntity.name = data;
+            } else if (tag === "SEX" && currentEntity.sex !== undefined) {
+                currentEntity.sex = data;  // M ou F typiquement
             } else if (tag === "BIRT") {
                 currentEntity._expectingBirthDate = true;
                 currentEntity._expectingBirthPlace = true;

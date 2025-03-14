@@ -123,18 +123,16 @@ export function processNamesData(config) {
     persons.forEach(person => {
         processPersonData(person, config, nameFrequency, stats, { doNotClean: false});
     });
-
-    // updateStats(stats, nameFrequency);
-
-    // return convertToNameData(nameFrequency);
-    
-    const averageLifespan = updateStats(stats, nameFrequency);
+   
+    const averages = updateStats(stats, nameFrequency);
 
     const result = convertToNameData(nameFrequency);
     
     // Ajouter la moyenne à l'objet retourné
-    result.averageLifespan = averageLifespan;
-    
+    result.averageData = averages.average;
+    result.maleAverageData = averages.male;
+    result.femaleAverageData = averages.female;
+
     return result;
 
 }
@@ -193,12 +191,39 @@ export function processPersonData(person, config, nameFrequency, stats, options 
                 if (age >= 0 && age <= 150) {
                     stats.inPeriod++;
                     const ageStr = age.toString();
-                    nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
-                    stats.lifespanSum += age;
-                    stats.lifespanCount++;
+                    
+                    // Initialiser l'objet avec compteurs par sexe s'il n'existe pas
+                    if (!nameFrequency[ageStr]) {
+                        nameFrequency[ageStr] = {
+                            count: 0,
+                            males: 0,
+                            females: 0
+                        };
+                    } else if (typeof nameFrequency[ageStr] === 'number') {
+                        // Convertir l'ancien format (simple nombre) en objet avec compteurs par sexe
+                        nameFrequency[ageStr] = {
+                            count: nameFrequency[ageStr],
+                            males: 0,
+                            females: 0
+                        };
+                    }
+                    
+                    // Incrémenter le compteur total
+                    nameFrequency[ageStr].count++;
+                    
+                    // Incrémenter le compteur par sexe
+                    if (person.sex === 'M') {
+                        nameFrequency[ageStr].males++;
+                    } else if (person.sex === 'F') {
+                        nameFrequency[ageStr].females++;
+                    } else {
+                        // Si le sexe n'est pas spécifié, répartir équitablement
+                        nameFrequency[ageStr].males += 0.5;
+                        nameFrequency[ageStr].females += 0.5;
+                    }
                 }
             }
-        }
+        }       
     } else if (config.type === 'age_procreation') {
         if (person.birthDate) {
             const parentBirthYear = extractYear(person.birthDate);
@@ -220,7 +245,36 @@ export function processPersonData(person, config, nameFrequency, stats, options 
                                     if (ageAtChildBirth >= 5 && ageAtChildBirth <= 100) {
                                         stats.inPeriod++;
                                         const ageStr = ageAtChildBirth.toString();
-                                        nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
+                                        // Initialiser l'objet avec compteurs par sexe s'il n'existe pas
+                                        if (!nameFrequency[ageStr]) {
+                                            nameFrequency[ageStr] = {
+                                                count: 0,
+                                                males: 0,
+                                                females: 0
+                                            };
+                                        } else if (typeof nameFrequency[ageStr] === 'number') {
+                                            // Convertir l'ancien format (simple nombre) en objet avec compteurs par sexe
+                                            nameFrequency[ageStr] = {
+                                                count: nameFrequency[ageStr],
+                                                males: 0,
+                                                females: 0
+                                            };
+                                        }
+                                        
+                                        // Incrémenter le compteur total
+                                        nameFrequency[ageStr].count++;
+                                        
+                                        // Incrémenter le compteur par sexe
+                                        if (person.sex === 'M') {
+                                            nameFrequency[ageStr].males++;
+                                        } else if (person.sex === 'F') {
+                                            nameFrequency[ageStr].females++;
+                                        } else {
+                                            // Si le sexe n'est pas spécifié, répartir équitablement
+                                            nameFrequency[ageStr].males += 0.5;
+                                            nameFrequency[ageStr].females += 0.5;
+                                        }
+                                        // nameFrequency[ageStr] = (nameFrequency[ageStr] || 0) + 1;
                                     }
                                 }
                             }
@@ -272,54 +326,166 @@ function initializeStats() {
         inPeriod: 0,
         uniqueNames: 0,
         total: 0,
-        lifespanSum: 0,
-        lifespanCount: 0
     };
 }
+
+
+
+// function updateStats(stats, nameFrequency) {
+//     // Mettre à jour le nombre de noms uniques
+//     stats.uniqueNames = Object.keys(nameFrequency).length;
+
+//     // Calculer le nombre total de personnes avec des occurrences
+//     stats.total = Object.values(nameFrequency).reduce((sum, count) => sum + count, 0);
+
+//     // Calculer la moyenne pondérée des durées de vie
+//     let weightedSum = 0;
+//     let totalCount = 0;
+    
+//     if (nameFrequency && Object.keys(nameFrequency).length > 0) {
+//         Object.entries(nameFrequency).forEach(([age, count]) => {
+//             // Vérifier que l'âge est un nombre valide
+//             const ageNum = parseInt(age, 10);
+//             if (!isNaN(ageNum)) {
+//                 weightedSum += ageNum * count;
+//                 totalCount += count;
+//             }
+//         });
+//     }
+
+
+//     // Calculer la moyenne
+//     const average = totalCount > 0 ? (weightedSum / totalCount).toFixed(1) : 0;
+
+//     // Affichage des statistiques
+//     console.log(`\n personnes dans le nuage : ${stats.total}` + 
+//                 `, noms uniques : ${stats.uniqueNames}` + 
+//                 `, Personnes dans la période : ${stats.inPeriod}` +
+//                 (average ? `, Moyenne : ${average} ans` : ''));
+    
+//     return average;
+
+
+// }
+
 
 function updateStats(stats, nameFrequency) {
     // Mettre à jour le nombre de noms uniques
     stats.uniqueNames = Object.keys(nameFrequency).length;
 
-    // Calculer le nombre total de personnes avec des occurrences
-    stats.total = Object.values(nameFrequency).reduce((sum, count) => sum + count, 0);
-
-    // // Affichage des statistiques (optionnel, vous pouvez le commenter si non nécessaire)
-    // console.log(`\n personnes dans le nuage : ${stats.total}`+`, noms uniques : ${stats.uniqueNames}` + `, Personnes dans la période : ${stats.inPeriod}`);
-    
-    // Vous pouvez ajouter d'autres logs ou traitements si nécessaire
-    // Calculer la moyenne pondérée des durées de vie
-    let weightedSum = 0;
+    // Variables pour les calculs
+    let totalSum = 0;
     let totalCount = 0;
+    let maleSum = 0;
+    let maleCount = 0;
+    let femaleSum = 0;
+    let femaleCount = 0;
     
-    if (nameFrequency && Object.keys(nameFrequency).length > 0) {
-        // Calculer la moyenne pondérée pour 'duree_vie'
-        Object.entries(nameFrequency).forEach(([age, count]) => {
-            // Vérifier que l'âge est un nombre valide
+    // Vérifier si nameFrequency utilise le nouveau format (avec males/females)
+    const useGenderStats = Object.values(nameFrequency).some(value => 
+        typeof value === 'object' && 'count' in value);
+    
+    if (useGenderStats) {
+        // Nouveau format avec genre
+        Object.entries(nameFrequency).forEach(([age, data]) => {
             const ageNum = parseInt(age, 10);
             if (!isNaN(ageNum)) {
-                weightedSum += ageNum * count;
+                // Total
+                totalSum += ageNum * data.count;
+                totalCount += data.count;
+                
+                // Hommes
+                maleSum += ageNum * data.males;
+                maleCount += data.males;
+                
+                // Femmes
+                femaleSum += ageNum * data.females;
+                femaleCount += data.females;
+            }
+        });
+        
+        // Calculer le nombre total de personnes
+        stats.total = totalCount;
+    } else {
+        // Ancien format (pour rétrocompatibilité)
+        Object.entries(nameFrequency).forEach(([age, count]) => {
+            const ageNum = parseInt(age, 10);
+            if (!isNaN(ageNum)) {
+                totalSum += ageNum * count;
                 totalCount += count;
             }
         });
+        
+        // Calculer le nombre total de personnes
+        stats.total = Object.values(nameFrequency).reduce((sum, count) => 
+            sum + (typeof count === 'number' ? count : 0), 0);
     }
 
-    // Ajouter la moyenne à stats
-    stats.averageLifespan = totalCount > 0 ? (weightedSum / totalCount).toFixed(1) : 0;
+    // Calculer les moyennes
+    const average = totalCount > 0 ? (totalSum / totalCount).toFixed(1) : 0;
+    const maleAverage = maleCount > 0 ? (maleSum / maleCount).toFixed(1) : 0;
+    const femaleAverage = femaleCount > 0 ? (femaleSum / femaleCount).toFixed(1) : 0;
 
     // Affichage des statistiques
     console.log(`\n personnes dans le nuage : ${stats.total}` + 
                 `, noms uniques : ${stats.uniqueNames}` + 
                 `, Personnes dans la période : ${stats.inPeriod}` +
-                (stats.averageLifespan ? `, Durée de vie moyenne : ${stats.averageLifespan} ans` : ''));
+                (average ? `, Moyenne : ${average} ans` : '') +
+                (maleAverage ? `, Hommes : ${maleAverage} ans` : '') +
+                (femaleAverage ? `, Femmes : ${femaleAverage} ans` : ''));
     
-    return stats.averageLifespan;
-
+    // Renvoyer un objet avec toutes les moyennes
+    return {
+        average: average,
+        male: maleAverage,
+        female: femaleAverage
+    };
 }
+
+
+// function convertToNameData(nameFrequency) {
+//     return Object.entries(nameFrequency)
+//         .map(([text, size]) => ({ text, size }))
+//         .sort((a, b) => b.size - a.size);
+// }
+// function convertToNameData(nameFrequency) {
+//     // Vérifier si nameFrequency utilise le nouveau format
+//     const useGenderStats = Object.values(nameFrequency).some(value => 
+//         typeof value === 'object' && 'count' in value);
+    
+//     if (useGenderStats) {
+//         return Object.entries(nameFrequency)
+//             .map(([text, data]) => ({ text, size: data.count }))
+//             .sort((a, b) => b.size - a.size);
+//     } else {
+//         // Ancien format pour rétrocompatibilité
+//         return Object.entries(nameFrequency)
+//             .map(([text, size]) => ({ text, size }))
+//             .sort((a, b) => b.size - a.size);
+//     }
+// }
 
 function convertToNameData(nameFrequency) {
     return Object.entries(nameFrequency)
-        .map(([text, size]) => ({ text, size }))
+        .map(([text, value]) => {
+            // Vérifier si la valeur est un objet avec des compteurs par sexe
+            if (typeof value === 'object' && value !== null && 'count' in value) {
+                return {
+                    text,
+                    size: value.count,
+                    males: value.males || 0,
+                    females: value.females || 0
+                };
+            } else {
+                // Ancien format (simple nombre)
+                return {
+                    text,
+                    size: value,
+                    males: 0,
+                    females: 0
+                };
+            }
+        })
         .sort((a, b) => b.size - a.size);
 }
 

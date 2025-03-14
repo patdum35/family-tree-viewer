@@ -235,9 +235,7 @@ export function attachFilterListeners() {
     const smartRefresh = (element, key) => {
         
         // Vérifier si la valeur a vraiment changé
-        console.log("[LOG BASE] smartRefresh appelé");
         if (hasValueChanged(element, key)) {
-            console.log("[LOG] smartRefresh - Valeur changée pour:", key);
             // Mettre à jour la heatmap si elle est visible
             if (typeof refreshHeatmap === 'function' && 
                 document.getElementById('namecloud-heatmap-wrapper')) {
@@ -246,7 +244,6 @@ export function attachFilterListeners() {
             
             // Rafraîchir la liste après un petit délai
             setTimeout(() => {
-                console.log("[LOG] Tentative d'appel à refreshPersonList");
                 refreshPersonList();
             }, 400);
         }
@@ -263,12 +260,6 @@ export function attachFilterListeners() {
     const startDateInput = document.querySelector('input[type="number"][data-text-key="startDateInput"]');
     const endDateInput = document.querySelector('input[type="number"][data-text-key="endDateInput"]');
     
-    console.log("Sélecteurs trouvés :", {
-        typeSelect: typeSelect ? typeSelect.outerHTML : null,
-        scopeSelect: scopeSelect ? scopeSelect.outerHTML : null,
-        startDateInput: startDateInput ? startDateInput.outerHTML : null,
-        endDateInput: endDateInput ? endDateInput.outerHTML : null
-    });
 
     
     // Pour le typeSelect
@@ -292,14 +283,6 @@ export function attachFilterListeners() {
     
 
 
-    console.log("[TRACE] Éléments trouvés:", {
-        typeSelect: !!typeSelect,
-        scopeSelect: !!scopeSelect,
-        startDateInput: !!startDateInput,
-        endDateInput: !!endDateInput,
-        // validateButton: !!validateButton
-    });
-
     // Pour le bouton OK/Valider
     const validateButton = document.querySelector('button[title="Valider"]');
     if (validateButton) {
@@ -319,7 +302,7 @@ export function attachFilterListeners() {
 
 // Ajouter cet écouteur quelque part où il sera initialisé une seule fois
 document.addEventListener('refreshPersonList', (event) => {
-    console.log('Événement de rafraîchissement de liste reçu', event.detail);
+    // console.log('Événement de rafraîchissement de liste reçu', event.detail);
     
     // Vérifier si une liste de personnes est actuellement affichée
     const personListModal = document.querySelector('.person-list-modal');
@@ -351,7 +334,6 @@ document.addEventListener('refreshPersonList', (event) => {
  */
 function refreshPersonList() {
 
-    console.log("[LOG] Début de refreshPersonList");
 
     // Vérifier si une liste de personnes est visible
     const personListModal = document.querySelector('.person-list-modal');
@@ -366,7 +348,6 @@ function refreshPersonList() {
         return;
     }
     
-    console.log("Texte de recherche extrait:", searchText);
     
     // Récupérer la configuration actuelle
     const config = nameCloudState.currentConfig;
@@ -377,7 +358,7 @@ function refreshPersonList() {
     
     // Utiliser la fonction factoriséé pour filtrer les personnes
     const filteredPeople = filterPeopleByText(searchText, config);
-    console.log(`Personnes filtrées: ${filteredPeople.length}`);
+    // console.log(`Personnes filtrées: ${filteredPeople.length}`);
 
 
 

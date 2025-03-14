@@ -9,6 +9,7 @@ import { buildDescendantTree } from './treeOperations.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { initBackgroundContainer, updateBackgroundImage } from './backgroundManager.js';
 import { extractYear } from './utils.js';
+import { initAnimationMap as initMap, updateAnimationMapMarkers, collectPersonLocations, locationSymbols} from './mapUtils.js';
 
 let animationTimeouts = [];
 let optimalSpeechRate = 0.9;
@@ -24,28 +25,21 @@ export function getTargetAncestorId() {
 }
 
 function initAnimationMap() {
-    // Initialiser la carte
-    const mapContainer = document.getElementById('animation-map');
-    if (!mapContainer) return null;
-
-    animationMap = L.map('animation-map', {
+    // Utiliser la fonction centralisée
+    animationMap = initMap('animation-map', {
         center: [46.2276, 2.2137], // Centre de la France
         zoom: 5,
         zoomControl: false,
         attributionControl: false
     });
-
-    // Ajouter la couche de tuiles OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(animationMap);
-
+    
     // Initialiser la liste des marqueurs
     window.animationMapMarkers = [];
-
 
     return animationMap;
 }
 
-function updateAnimationMapLocations(locations, locationSymbols) {
+async function updateAnimationMapLocations(locations, locationSymbols) {
     // Nettoyer les marqueurs existants
     if (window.animationMapMarkers) {
         window.animationMapMarkers.forEach(marker => animationMap.removeLayer(marker));
@@ -55,81 +49,20 @@ function updateAnimationMapLocations(locations, locationSymbols) {
     // Filtrer les lieux non vides
     const validLocations = locations.filter(loc => loc.place && loc.place.trim() !== '');
 
-    // Géocoder et placer les marqueurs
-    const locationPromises = validLocations.map(location => 
-        geocodeLocation(location.place)
-            .then(coords => coords ? { ...location, coords } : null)
-            .catch(() => null)
-    );
+    if (validLocations.length === 0) {
+        console.log('Aucune localisation valide trouvée');
+        return;
+    }
 
-    Promise.all(locationPromises)
-        .then(locationsWithCoords => {
-            // Filtrer les localisations avec coordonnées valides
-            const validLocationsWithCoords = locationsWithCoords.filter(loc => 
-                loc && loc.coords && 
-                !isNaN(loc.coords.lat) && 
-                !isNaN(loc.coords.lon)
-            );
-
-            if (validLocationsWithCoords.length === 0) {
-                console.log('Aucune localisation valide trouvée');
-                return;
-            }
-
-            validLocationsWithCoords.forEach(location => {
-                const markerIcon = L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div style="font-size: 20px; display: flex; justify-content: center; align-items: center;">
-                             ${locationSymbols[location.type]}
-                           </div>`,
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
-                });
-
-                const marker = L.marker([location.coords.lat, location.coords.lon], { icon: markerIcon })
-                    .addTo(animationMap)
-                    .bindPopup(`${location.type}: ${location.place}`);
-
-                window.animationMapMarkers.push(marker);
-            });
-
-            // Gestion du zoom et du centrage
-            if (window.animationMapMarkers.length > 0) {
-                const coordinates = window.animationMapMarkers.map(m => m.getLatLng());
-                
-                // Calculs précédents conservés...
-                const distances = [];
-                for (let i = 0; i < coordinates.length; i++) {
-                    for (let j = i + 1; j < coordinates.length; j++) {
-                        const distance = coordinates[i].distanceTo(coordinates[j]) / 1000; // en km
-                        distances.push(distance);
-                    }
-                }
-
-                const maxDistance = distances.length > 0 ? Math.max(...distances) : 0;
-
-                const bounds = new L.LatLngBounds(coordinates);
-                const center = bounds.getCenter();
-
-                const zoom = Math.max(
-                    6, 
-                    Math.min(
-                        10, 
-                        10 - Math.log2(Math.min(maxDistance, 200) / 10)
-                    )
-                );
-
-                // Transition fluide vers la nouvelle vue
-                animationMap.flyTo(center, zoom, {
-                    animate: true,
-                    duration: 1.5 // Durée de l'animation en secondes
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors du géocodage:', error);
-        });
+    // Utiliser la fonction centralisée pour mettre à jour les marqueurs
+    window.animationMapMarkers = await updateAnimationMapMarkers(animationMap, validLocations, {
+        enhanced: true,  // Utiliser les marqueurs améliorés avec cercle // i false :Utiliser les marqueurs simples
+        fitToMarkers: true,
+        duration: 1.5
+    });
 }
+
+
 
 /**
  * Trouve le chemin entre une personne et son ancêtre
@@ -199,21 +132,6 @@ function findNodeInTree(nodeId) {
  * Lance l'animation d'expansion vers l'ancêtre
  * @export
  */
-// function simplifyName(fullName) {
-//     // Séparer le nom entre les barres obliques
-//     const nameParts = fullName.split('/');
-    
-//     // Traiter les prénoms
-//     const firstNames = nameParts[0].trim().split(' ');
-//     const firstFirstName = firstNames[0]; // Garder uniquement le premier prénom
-    
-//     // Traiter le nom de famille
-//     const lastName = nameParts[1] ? nameParts[1].trim().toUpperCase() : '';
-    
-//     // Combiner le premier prénom et le nom de famille
-//     return `${firstFirstName} ${lastName}`.trim();
-// }
-
 function simplifyName(fullName) {
     // Séparer le nom entre les barres obliques
     const nameParts = fullName.split('/');
@@ -388,43 +306,15 @@ export function startAncestorAnimation() {
                         }
                     }
 
+                    // Utiliser la fonction centralisée pour collecter les lieux
+                    const validLocations = collectPersonLocations(person, state.gedcomData.families);
 
-
-
-                    // Collecter les lieux
-                    const locations = [
-                        { type: 'Naissance', place: person.birthPlace },
-                        { type: 'Mariage', place: null },
-                        { type: 'Décès', place: person.deathPlace },
-                        { type: 'Résidence1', place: person.residPlace1 },
-                        { type: 'Résidence2', place: person.residPlace2 },
-                        { type: 'Résidence3', place: person.residPlace3 }
-                    ];
-
-                    // Rechercher le lieu de mariage
-                    if (person.spouseFamilies && person.spouseFamilies.length > 0) {
-                        const marriageFamily = state.gedcomData.families[person.spouseFamilies[0]];
-                        locations[1].place = marriageFamily ? marriageFamily.marriagePlace : null;
-                    }
-
-                    // Filtrer les lieux non-nuls
-                    const validLocations = locations.filter(loc => loc.place);
-
-                    // Symboles pour chaque type de lieu
-                    const locationSymbols = {
-                        'Naissance': '🌳', //'👶'
-                        'Mariage': '❤️', //<span style="color: #FF0000;">🔗</span>', //.'💍'
-                        'Décès': '✝️', //'✟' //'✟', 
-                        'Résidence1': '🏠',
-                        'Résidence2': '🏠',
-                        'Résidence3': '🏠'
-                    };
 
                     // Mettre à jour la carte
                     if (validLocations.length > 0) {
-                        updateAnimationMapLocations(validLocations, locationSymbols);
+                        // updateAnimationMapLocations(validLocations, locationSymbols);
+                        updateAnimationMapLocations(validLocations);
                     }
-
 
 
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
@@ -519,15 +409,21 @@ export function stopAnimation() {
 
 export function resetMap() {
     // Supprimer le marqueur et réinitialiser la carte
-    if (animationMarker) {
-        animationMap.removeLayer(animationMarker);
-        animationMarker = null;
+    if (window.animationMapMarkers) {
+        window.animationMapMarkers.forEach(marker => {
+            if (animationMap) animationMap.removeLayer(marker);
+        });
+        window.animationMapMarkers = [];
     }
+    
     if (animationMap) {
         animationMap.remove();
         animationMap = null;
     }
 }
+
+
+
 
 export function resetAnimationState() {
     animationState = {

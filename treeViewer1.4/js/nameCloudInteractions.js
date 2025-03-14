@@ -6,6 +6,7 @@ import { removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createDataForHeatMap, refreshHeatmap } from './geoHeatMapDataProcessor.js';
 import { createImprovedHeatmap } from './geoHeatMapUI.js';
 import { geocodeLocation } from './geoLocalisation.js';
+import { collectPersonLocations, createEnhancedMarkerIcon, fitMapToMarkers, clearMap, addMapTitle, addMapButton, addLoadingOverlay, removeLoadingOverlay, setupCustomPopupStyle } from './mapUtils.js';
 
 
 window.lastSelectedLocationId = null;
@@ -243,9 +244,331 @@ export function showPersonsList(name, people, config) {
      * @param {string} personId - ID de la personne
      * @returns {Promise<void>}
      */
-    async function createIndividualLocationMap(personId) {
-        // console.log("Début createIndividualLocationMap pour personId:", personId);
+    // async function createIndividualLocationMap(personId) {
+    //     // console.log("Début createIndividualLocationMap pour personId:", personId);
         
+    //     // Vérifier que le wrapper de la heatmap existe
+    //     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    //     if (!heatmapWrapper) {
+    //         console.error("Wrapper de heatmap non trouvé");
+    //         return;
+    //     }
+        
+    //     // Vérifier que la carte existe dans le wrapper
+    //     if (!heatmapWrapper.map) {
+    //         console.error("Carte Leaflet non trouvée dans le wrapper");
+    //         return;
+    //     }
+        
+    //     // Récupérer les informations de la personne
+    //     const person = state.gedcomData.individuals[personId];
+    //     if (!person) {
+    //         console.error("Personne non trouvée avec l'ID:", personId);
+    //         return;
+    //     }
+        
+    //     console.log("Personne trouvée:", person.name);
+        
+    //     // Symboles pour chaque type de lieu
+    //     const locationSymbols = {
+    //         'Naissance': '👶', 
+    //         'Mariage': '💍',
+    //         'Décès': '✝️',
+    //         'Résidence1': '🏠',
+    //         'Résidence2': '🏠',
+    //         'Résidence3': '🏠'
+    //     };
+        
+    //     // Collecter les lieux
+    //     const locations = [
+    //         { type: 'Naissance', place: person.birthPlace },
+    //         { type: 'Décès', place: person.deathPlace },
+    //         { type: 'Résidence1', place: person.residPlace1 },
+    //         { type: 'Résidence2', place: person.residPlace2 },
+    //         { type: 'Résidence3', place: person.residPlace3 }
+    //     ];
+        
+    //     // Rechercher les lieux de mariage
+    //     if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+    //         person.spouseFamilies.forEach((famId, index) => {
+    //             const family = state.gedcomData.families[famId];
+    //             if (family && family.marriagePlace) {
+    //                 locations.push({ 
+    //                     type: 'Mariage', 
+    //                     place: family.marriagePlace 
+    //                 });
+    //             }
+    //         });
+    //     }
+        
+    //     // Filtrer les lieux non vides
+    //     const validLocations = locations.filter(loc => loc.place && loc.place.trim() !== '');
+    //     console.log("Lieux valides trouvés:", validLocations.length);
+        
+    //     if (validLocations.length === 0) {
+    //         console.log('Aucun lieu trouvé pour cette personne');
+    //         alert('Aucun lieu trouvé pour cette personne');
+    //         return;
+    //     }
+        
+    //     // Afficher un indicateur de chargement
+    //     const loadingOverlay = document.createElement('div');
+    //     loadingOverlay.id = 'map-loading-overlay';
+    //     loadingOverlay.style.position = 'absolute';
+    //     loadingOverlay.style.top = '0';
+    //     loadingOverlay.style.left = '0';
+    //     loadingOverlay.style.width = '100%';
+    //     loadingOverlay.style.height = '100%';
+    //     loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+    //     loadingOverlay.style.display = 'flex';
+    //     loadingOverlay.style.justifyContent = 'center';
+    //     loadingOverlay.style.alignItems = 'center';
+    //     loadingOverlay.style.zIndex = '9500';
+    //     loadingOverlay.innerHTML = `<div style="text-align: center;"><p>Chargement des lieux...</p><progress style="width: 200px;"></progress></div>`;
+        
+    //     // Ajouter l'overlay de chargement à la heatmap
+    //     const existingOverlay = document.getElementById('map-loading-overlay');
+    //     if (existingOverlay) existingOverlay.remove();
+    //     heatmapWrapper.appendChild(loadingOverlay);
+        
+    //     try {
+    //         // Récupérer la carte
+    //         const map = heatmapWrapper.map;
+    //         // console.log("Carte récupérée:", map);
+            
+    //         // Nettoyer toutes les couches existantes sauf la couche de tuiles
+    //         map.eachLayer(layer => {
+    //             if (layer instanceof L.TileLayer) {
+    //                 console.log("Couche de tuiles préservée");
+    //             } else {
+    //                 console.log("Suppression d'une couche:", layer);
+    //                 map.removeLayer(layer);
+    //             }
+    //         });
+            
+    //         // Tableau pour stocker les marqueurs
+    //         const markers = [];
+            
+    //         // Géocoder et placer les marqueurs
+    //         for (const location of validLocations) {
+    //             try {
+    //                 console.log("Géocodage de:", location.place);
+    //                 const coords = await geocodeLocation(location.place);
+                    
+    //                 if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+    //                     console.log("Coordonnées trouvées:", coords);
+                        
+    //                     // Créer l'icône pour le marqueur avec un style amélioré
+    //                     const markerIcon = L.divIcon({
+    //                         className: 'custom-marker',
+    //                         html: `<div style="
+    //                             font-size: 28px;
+    //                             display: flex;
+    //                             justify-content: center;
+    //                             align-items: center;
+    //                             width: 40px;
+    //                             height: 40px;
+    //                             background-color: white;
+    //                             border: 2px solid #3388ff;
+    //                             border-radius: 50%;
+    //                             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    //                             text-shadow: 0 0 3px white;
+    //                         ">${locationSymbols[location.type]}</div>`,
+    //                         iconSize: [40, 40],
+    //                         iconAnchor: [20, 20],
+    //                         popupAnchor: [0, -20]
+    //                     });
+                        
+    //                     // Créer et ajouter le marqueur
+    //                     const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
+    //                         .addTo(map)
+    //                         .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
+                        
+    //                     markers.push(marker);
+    //                     // console.log("Marqueur ajouté pour:", location.place);
+    //                 } else {
+    //                     console.warn("Coordonnées invalides pour:", location.place);
+    //                 }
+    //             } catch (error) {
+    //                 console.error(`Erreur lors du géocodage de ${location.place}:`, error);
+    //             }
+    //         }
+            
+    //         // Vérifier si des marqueurs ont été ajoutés
+    //         if (markers.length === 0) {
+    //             console.warn("Aucun marqueur n'a pu être ajouté à la carte");
+    //             alert("Aucun lieu n'a pu être localisé sur la carte");
+    //             loadingOverlay.remove();
+    //             return;
+    //         }
+            
+    //         // Ajuster la vue de la carte pour inclure tous les marqueurs
+    //         // console.log("Ajustement de la vue de la carte pour inclure tous les marqueurs");
+            
+
+            
+    //         /**
+    //          * Applique une transition fluide entre deux vues de carte
+    //          * À intégrer dans la fonction createIndividualLocationMap
+    //          */
+
+
+    //         // Créer les limites à partir des marqueurs
+    //         const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
+
+    //         // Vérifier si les limites sont valides
+    //         if (bounds.isValid()) {
+    //             // Calculer le centre des limites
+    //             const center = bounds.getCenter();
+                
+    //             // Calculer le niveau de zoom pour afficher toutes les limites
+    //             const zoomLevel = map.getBoundsZoom(bounds, false, [50, 50]);
+                
+    //             // Limiter le niveau de zoom au maximum spécifié
+    //             const limitedZoom = Math.min(zoomLevel, 9); // 7 ≈ 200km de rayon, 9 = 50km
+                
+    //             // console.log(`Niveau de zoom calculé: ${zoomLevel}, limité à: ${limitedZoom}`);
+                
+    //             // Appliquer le zoom limité avec une transition fluide
+    //             // Utiliser une durée plus longue (1.5 secondes) pour une animation plus visible
+    //             map.flyTo(center, limitedZoom, {
+    //                 animate: true,
+    //                 duration: 1.5, // Durée en secondes
+    //                 easeLinearity: 0.25, // Rend l'animation plus douce
+    //             });
+                
+    //             // Ajouter un petit délai avant d'ajouter les popups pour éviter les problèmes pendant l'animation
+    //             setTimeout(() => {
+    //                 // Si nous voulons montrer une popup automatiquement pour le premier marqueur
+    //                 if (markers.length > 0) {
+    //                     // Optionnel: ouvrir automatiquement la popup du premier marqueur 
+    //                     // markers[0].openPopup();
+    //                 }
+    //             }, 1600); // Juste après la fin de l'animation
+    //         } else {
+    //             console.warn("Limites invalides pour l'ajustement de la vue");
+                
+    //             // Fallback: centrer sur le premier marqueur avec un zoom fixe
+    //             if (markers.length > 0) {
+    //                 map.flyTo(markers[0].getLatLng(), 7, {
+    //                     animate: true,
+    //                     duration: 1.5,
+    //                     easeLinearity: 0.25
+    //                 });
+    //             }
+    //         }
+
+    //         // Améliorer aussi les popups pour plus de lisibilité
+    //         markers.forEach(marker => {
+    //             // Personnaliser le style de la popup
+    //             const popup = marker.getPopup();
+    //             if (popup) {
+    //                 popup.options.className = 'custom-popup';
+                    
+    //                 // Ajouter un style personnalisé pour les popups
+    //                 if (!document.getElementById('custom-popup-style')) {
+    //                     const style = document.createElement('style');
+    //                     style.id = 'custom-popup-style';
+    //                     style.textContent = `
+    //                         .custom-popup .leaflet-popup-content-wrapper {
+    //                             background-color: rgba(255, 255, 255, 0.95);
+    //                             border-radius: 8px;
+    //                             box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+    //                         }
+    //                         .custom-popup .leaflet-popup-content {
+    //                             margin: 13px 19px;
+    //                             font-size: 14px;
+    //                             line-height: 1.4;
+    //                         }
+    //                         .custom-popup .leaflet-popup-tip {
+    //                             background-color: rgba(255, 255, 255, 0.95);
+    //                         }
+    //                     `;
+    //                     document.head.appendChild(style);
+    //                 }
+    //             }
+    //         });
+
+
+    //         // Ajouter un titre à la carte
+    //         const mapTitle = document.createElement('div');
+    //         mapTitle.className = 'individual-map-title';
+    //         mapTitle.style.position = 'absolute';
+    //         mapTitle.style.top = '10px';
+    //         mapTitle.style.left = '50%';
+    //         mapTitle.style.transform = 'translateX(-50%)';
+    //         mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    //         mapTitle.style.padding = '5px 10px';
+    //         mapTitle.style.borderRadius = '4px';
+    //         mapTitle.style.zIndex = '9100';
+    //         mapTitle.style.fontSize = '14px';
+    //         mapTitle.style.fontWeight = 'bold';
+    //         mapTitle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    //         mapTitle.textContent = `Lieux de ${person.name.replace(/\//g, '')}`;
+            
+    //         // Supprimer l'ancien titre s'il existe
+    //         const existingTitle = heatmapWrapper.querySelector('.individual-map-title');
+    //         if (existingTitle) existingTitle.remove();
+            
+    //         heatmapWrapper.appendChild(mapTitle);
+            
+    //         // Ajouter un bouton pour revenir à la heatmap originale
+    //         const resetButton = document.createElement('button');
+    //         resetButton.className = 'reset-heatmap-button';
+    //         resetButton.style.position = 'absolute';
+    //         resetButton.style.bottom = '10px';
+    //         resetButton.style.right = '10px';
+    //         resetButton.style.backgroundColor = '#4361ee';
+    //         resetButton.style.color = 'white';
+    //         resetButton.style.border = 'none';
+    //         resetButton.style.borderRadius = '4px';
+    //         resetButton.style.padding = '5px 10px';
+    //         resetButton.style.cursor = 'pointer';
+    //         resetButton.style.zIndex = '9100';
+    //         resetButton.style.fontSize = '14px';
+    //         resetButton.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    //         resetButton.textContent = 'Voir tous les lieux';
+            
+    //         // Supprimer l'ancien bouton s'il existe
+    //         const existingButton = heatmapWrapper.querySelector('.reset-heatmap-button');
+    //         if (existingButton) existingButton.remove();
+            
+    //         resetButton.addEventListener('click', () => {
+    //             // Rétablir la heatmap originale
+    //             if (typeof refreshHeatmap === 'function') {
+    //                 refreshHeatmap();
+                    
+    //                 // Réinitialiser les variables de suivi
+    //                 window.lastSelectedLocationId = null;
+    //                 window.isIndividualMapMode = false;
+                    
+    //                 // Mettre à jour l'apparence des icônes de localisation
+    //                 document.querySelectorAll('.location-icon').forEach(icon => {
+    //                     icon.style.color = '';
+    //                     icon.style.backgroundColor = '';
+    //                 });
+    //             }
+                
+    //             // Supprimer le titre et le bouton de reset
+    //             mapTitle.remove();
+    //             resetButton.remove();
+    //         });
+            
+    //         heatmapWrapper.appendChild(resetButton);
+            
+    //         // console.log("Carte individuelle créée avec succès");
+            
+    //     } catch (error) {
+    //         console.error('Erreur lors de la création de la carte individuelle:', error);
+    //         alert('Erreur lors de la création de la carte: ' + error.message);
+    //     } finally {
+    //         // Supprimer l'overlay de chargement
+    //         loadingOverlay.remove();
+    //     }
+    // }
+
+    
+    async function createIndividualLocationMap(personId) {
         // Vérifier que le wrapper de la heatmap existe
         const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
         if (!heatmapWrapper) {
@@ -259,6 +582,9 @@ export function showPersonsList(name, people, config) {
             return;
         }
         
+        // Configurer le style personnalisé pour les popups
+        setupCustomPopupStyle();
+
         // Récupérer les informations de la personne
         const person = state.gedcomData.individuals[personId];
         if (!person) {
@@ -268,88 +594,30 @@ export function showPersonsList(name, people, config) {
         
         console.log("Personne trouvée:", person.name);
         
-        // Symboles pour chaque type de lieu
-        const locationSymbols = {
-            'Naissance': '👶', 
-            'Mariage': '💍',
-            'Décès': '✝️',
-            'Résidence1': '🏠',
-            'Résidence2': '🏠',
-            'Résidence3': '🏠'
-        };
+        // Collecter les lieux de la personne avec la fonction centralisée
+        const locations = collectPersonLocations(person, state.gedcomData.families);
         
-        // Collecter les lieux
-        const locations = [
-            { type: 'Naissance', place: person.birthPlace },
-            { type: 'Décès', place: person.deathPlace },
-            { type: 'Résidence1', place: person.residPlace1 },
-            { type: 'Résidence2', place: person.residPlace2 },
-            { type: 'Résidence3', place: person.residPlace3 }
-        ];
-        
-        // Rechercher les lieux de mariage
-        if (person.spouseFamilies && person.spouseFamilies.length > 0) {
-            person.spouseFamilies.forEach((famId, index) => {
-                const family = state.gedcomData.families[famId];
-                if (family && family.marriagePlace) {
-                    locations.push({ 
-                        type: 'Mariage', 
-                        place: family.marriagePlace 
-                    });
-                }
-            });
-        }
-        
-        // Filtrer les lieux non vides
-        const validLocations = locations.filter(loc => loc.place && loc.place.trim() !== '');
-        console.log("Lieux valides trouvés:", validLocations.length);
-        
-        if (validLocations.length === 0) {
+        if (locations.length === 0) {
             console.log('Aucun lieu trouvé pour cette personne');
             alert('Aucun lieu trouvé pour cette personne');
             return;
         }
         
         // Afficher un indicateur de chargement
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.id = 'map-loading-overlay';
-        loadingOverlay.style.position = 'absolute';
-        loadingOverlay.style.top = '0';
-        loadingOverlay.style.left = '0';
-        loadingOverlay.style.width = '100%';
-        loadingOverlay.style.height = '100%';
-        loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.justifyContent = 'center';
-        loadingOverlay.style.alignItems = 'center';
-        loadingOverlay.style.zIndex = '9500';
-        loadingOverlay.innerHTML = `<div style="text-align: center;"><p>Chargement des lieux...</p><progress style="width: 200px;"></progress></div>`;
-        
-        // Ajouter l'overlay de chargement à la heatmap
-        const existingOverlay = document.getElementById('map-loading-overlay');
-        if (existingOverlay) existingOverlay.remove();
-        heatmapWrapper.appendChild(loadingOverlay);
+        const loadingOverlay = addLoadingOverlay(heatmapWrapper, 'Chargement des lieux...');
         
         try {
             // Récupérer la carte
             const map = heatmapWrapper.map;
-            // console.log("Carte récupérée:", map);
             
             // Nettoyer toutes les couches existantes sauf la couche de tuiles
-            map.eachLayer(layer => {
-                if (layer instanceof L.TileLayer) {
-                    console.log("Couche de tuiles préservée");
-                } else {
-                    console.log("Suppression d'une couche:", layer);
-                    map.removeLayer(layer);
-                }
-            });
+            clearMap(map);
             
             // Tableau pour stocker les marqueurs
             const markers = [];
             
             // Géocoder et placer les marqueurs
-            for (const location of validLocations) {
+            for (const location of locations) {
                 try {
                     console.log("Géocodage de:", location.place);
                     const coords = await geocodeLocation(location.place);
@@ -358,25 +626,7 @@ export function showPersonsList(name, people, config) {
                         console.log("Coordonnées trouvées:", coords);
                         
                         // Créer l'icône pour le marqueur avec un style amélioré
-                        const markerIcon = L.divIcon({
-                            className: 'custom-marker',
-                            html: `<div style="
-                                font-size: 28px;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                width: 40px;
-                                height: 40px;
-                                background-color: white;
-                                border: 2px solid #3388ff;
-                                border-radius: 50%;
-                                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-                                text-shadow: 0 0 3px white;
-                            ">${locationSymbols[location.type]}</div>`,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20],
-                            popupAnchor: [0, -20]
-                        });
+                        const markerIcon = createEnhancedMarkerIcon(location.type);
                         
                         // Créer et ajouter le marqueur
                         const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
@@ -384,7 +634,6 @@ export function showPersonsList(name, people, config) {
                             .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
                         
                         markers.push(marker);
-                        // console.log("Marqueur ajouté pour:", location.place);
                     } else {
                         console.warn("Coordonnées invalides pour:", location.place);
                     }
@@ -402,137 +651,27 @@ export function showPersonsList(name, people, config) {
             }
             
             // Ajuster la vue de la carte pour inclure tous les marqueurs
-            // console.log("Ajustement de la vue de la carte pour inclure tous les marqueurs");
+            await fitMapToMarkers(map, markers, {
+                maxZoom: 9,
+                animate: true,
+                duration: 1.5,
+                easeLinearity: 0.25
+            });
             
-
-            
-            /**
-             * Applique une transition fluide entre deux vues de carte
-             * À intégrer dans la fonction createIndividualLocationMap
-             */
-
-
-            // Créer les limites à partir des marqueurs
-            const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
-
-            // Vérifier si les limites sont valides
-            if (bounds.isValid()) {
-                // Calculer le centre des limites
-                const center = bounds.getCenter();
-                
-                // Calculer le niveau de zoom pour afficher toutes les limites
-                const zoomLevel = map.getBoundsZoom(bounds, false, [50, 50]);
-                
-                // Limiter le niveau de zoom au maximum spécifié
-                const limitedZoom = Math.min(zoomLevel, 9); // 7 ≈ 200km de rayon, 9 = 50km
-                
-                // console.log(`Niveau de zoom calculé: ${zoomLevel}, limité à: ${limitedZoom}`);
-                
-                // Appliquer le zoom limité avec une transition fluide
-                // Utiliser une durée plus longue (1.5 secondes) pour une animation plus visible
-                map.flyTo(center, limitedZoom, {
-                    animate: true,
-                    duration: 1.5, // Durée en secondes
-                    easeLinearity: 0.25, // Rend l'animation plus douce
-                });
-                
-                // Ajouter un petit délai avant d'ajouter les popups pour éviter les problèmes pendant l'animation
-                setTimeout(() => {
-                    // Si nous voulons montrer une popup automatiquement pour le premier marqueur
-                    if (markers.length > 0) {
-                        // Optionnel: ouvrir automatiquement la popup du premier marqueur 
-                        // markers[0].openPopup();
-                    }
-                }, 1600); // Juste après la fin de l'animation
-            } else {
-                console.warn("Limites invalides pour l'ajustement de la vue");
-                
-                // Fallback: centrer sur le premier marqueur avec un zoom fixe
-                if (markers.length > 0) {
-                    map.flyTo(markers[0].getLatLng(), 7, {
-                        animate: true,
-                        duration: 1.5,
-                        easeLinearity: 0.25
-                    });
-                }
-            }
-
             // Améliorer aussi les popups pour plus de lisibilité
             markers.forEach(marker => {
                 // Personnaliser le style de la popup
                 const popup = marker.getPopup();
                 if (popup) {
                     popup.options.className = 'custom-popup';
-                    
-                    // Ajouter un style personnalisé pour les popups
-                    if (!document.getElementById('custom-popup-style')) {
-                        const style = document.createElement('style');
-                        style.id = 'custom-popup-style';
-                        style.textContent = `
-                            .custom-popup .leaflet-popup-content-wrapper {
-                                background-color: rgba(255, 255, 255, 0.95);
-                                border-radius: 8px;
-                                box-shadow: 0 3px 14px rgba(0,0,0,0.4);
-                            }
-                            .custom-popup .leaflet-popup-content {
-                                margin: 13px 19px;
-                                font-size: 14px;
-                                line-height: 1.4;
-                            }
-                            .custom-popup .leaflet-popup-tip {
-                                background-color: rgba(255, 255, 255, 0.95);
-                            }
-                        `;
-                        document.head.appendChild(style);
-                    }
                 }
             });
-
-
+    
             // Ajouter un titre à la carte
-            const mapTitle = document.createElement('div');
-            mapTitle.className = 'individual-map-title';
-            mapTitle.style.position = 'absolute';
-            mapTitle.style.top = '10px';
-            mapTitle.style.left = '50%';
-            mapTitle.style.transform = 'translateX(-50%)';
-            mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-            mapTitle.style.padding = '5px 10px';
-            mapTitle.style.borderRadius = '4px';
-            mapTitle.style.zIndex = '9100';
-            mapTitle.style.fontSize = '14px';
-            mapTitle.style.fontWeight = 'bold';
-            mapTitle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-            mapTitle.textContent = `Lieux de ${person.name.replace(/\//g, '')}`;
-            
-            // Supprimer l'ancien titre s'il existe
-            const existingTitle = heatmapWrapper.querySelector('.individual-map-title');
-            if (existingTitle) existingTitle.remove();
-            
-            heatmapWrapper.appendChild(mapTitle);
+            addMapTitle(heatmapWrapper, `Lieux de ${person.name.replace(/\//g, '')}`);
             
             // Ajouter un bouton pour revenir à la heatmap originale
-            const resetButton = document.createElement('button');
-            resetButton.className = 'reset-heatmap-button';
-            resetButton.style.position = 'absolute';
-            resetButton.style.bottom = '10px';
-            resetButton.style.right = '10px';
-            resetButton.style.backgroundColor = '#4361ee';
-            resetButton.style.color = 'white';
-            resetButton.style.border = 'none';
-            resetButton.style.borderRadius = '4px';
-            resetButton.style.padding = '5px 10px';
-            resetButton.style.cursor = 'pointer';
-            resetButton.style.zIndex = '9100';
-            resetButton.style.fontSize = '14px';
-            resetButton.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-            resetButton.textContent = 'Voir tous les lieux';
-            
-            // Supprimer l'ancien bouton s'il existe
-            const existingButton = heatmapWrapper.querySelector('.reset-heatmap-button');
-            if (existingButton) existingButton.remove();
-            
-            resetButton.addEventListener('click', () => {
+            addMapButton(heatmapWrapper, 'Voir tous les lieux', () => {
                 // Rétablir la heatmap originale
                 if (typeof refreshHeatmap === 'function') {
                     refreshHeatmap();
@@ -549,22 +688,48 @@ export function showPersonsList(name, people, config) {
                 }
                 
                 // Supprimer le titre et le bouton de reset
-                mapTitle.remove();
-                resetButton.remove();
+                const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
+                if (mapTitle) mapTitle.remove();
+                
+                const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
+                if (resetButton) resetButton.remove();
             });
-            
-            heatmapWrapper.appendChild(resetButton);
-            
-            // console.log("Carte individuelle créée avec succès");
             
         } catch (error) {
             console.error('Erreur lors de la création de la carte individuelle:', error);
             alert('Erreur lors de la création de la carte: ' + error.message);
         } finally {
             // Supprimer l'overlay de chargement
-            loadingOverlay.remove();
+            removeLoadingOverlay(heatmapWrapper);
         }
+
+        // Mettre à jour les variables de suivi
+        window.lastSelectedLocationId = personId;
+        window.isIndividualMapMode = true;
+
+        // Mettre en évidence l'icône de localisation correspondante
+        document.querySelectorAll('.location-icon').forEach(icon => {
+            const parentElement = icon.closest('[data-person-id]');
+            const iconPersonId = parentElement ? parentElement.dataset.personId : null;
+            
+            if (iconPersonId === personId) {
+                icon.style.color = '#ffffff';
+                icon.style.backgroundColor = '#4361ee';
+                icon.style.opacity = '1';
+            } else {
+                icon.style.color = '';
+                icon.style.backgroundColor = '';
+                icon.style.opacity = '0.7';
+            }
+        });
+
+
+
     }
+
+
+
+
 
 
     peopleWithDates.forEach((person, index) => {
