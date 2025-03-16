@@ -124,17 +124,31 @@ export function displayPersonDetails(personId) {
     // Style général pour les conteneurs
     const sectionStyle = `
         <style>
-            /* Style pour le modal complètement transparent */
+        /* Style unifié pour le modal */
             #person-details-modal {
-                background-color: transparent !important;
-                width: calc(100% - 20px) !important;
-                left: 10px !important;
-                right: 10px !important;
-            }
-            .modal-content {
                 background-color: rgba(255, 255, 255, 0.95) !important;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
-                cursor: move; /* Indiquer que la modale est déplaçable */
+                border-radius: 8px !important;
+                position: absolute !important;
+                overflow: auto !important;
+                max-width: calc(100% - 20px) !important;
+                max-height: calc(100% - 50px) !important;
+            }
+            
+            .modal-content {
+                background-color: transparent !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+                padding: 10px !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+            }
+            
+            #person-details-content {
+                width: 100% !important;
+                max-width: 100% !important;
             }
             /* Réduire la hauteur du bandeau titre */
             #modal-person-name {
@@ -195,6 +209,9 @@ export function displayPersonDetails(personId) {
             }
         </style>
     `;
+
+
+
 
     // Nettoyer l'ID en retirant les @ s'ils existent
     const cleanId = personId.replace(/@/g, '');
@@ -383,7 +400,8 @@ export function displayPersonDetails(personId) {
         modal.style.left = 'auto';
         modal.style.right = 'auto';
         modal.style.width = 'auto';
-        modal.style.maxWidth = '600px';
+        modal.style.maxWidth = `${window.innerWidth - 10}px`;
+        modal.style.maxHeight= `${window.innerHeight - 50}px`;
     }
 
     // Rendre la modale déplaçable
@@ -392,6 +410,11 @@ export function displayPersonDetails(personId) {
     }, 100);
     
 
+    // Ajouter cet écouteur d'événement pour le resize de l'écran
+    window.addEventListener('resize', adjustModalOnResize);
+
+
+
     // Créer la carte avec un petit délai pour assurer que le DOM est prêt
     setTimeout(() => {
         displayEnhancedLocationMap(personId);
@@ -399,26 +422,55 @@ export function displayPersonDetails(personId) {
 }
    
    
-//Mise à jour de makeModalDraggable pour fonctionner en tactile
+
+// makeModalDraggable pour fonctionner en tactile    
 function makeModalDraggable() {
     const modal = document.getElementById('person-details-modal');
     const modalHeader = modal.querySelector('.modal-header');
+    const modalContent = modal.querySelector('.modal-content');
+    const detailsContent = document.getElementById('person-details-content');
     
     if (!modalHeader) return;
     
     // Supprimer les contraintes de style qui bloquent le déplacement
     modal.style.setProperty('position', 'absolute', 'important');
     
+    // Forcer le contenu à occuper tout l'espace disponible
+    modal.style.setProperty('overflow', 'auto', 'important');
+    modal.style.setProperty('background-color', 'rgba(255, 255, 255, 0.95)', 'important');
+    modal.style.setProperty('box-shadow', '0 4px 15px rgba(0, 0, 0, 0.15)', 'important');
+    modal.style.setProperty('border-radius', '8px', 'important');
+    
+    // Supprimer toutes les limitations de largeur sur le contenu
+    modalContent.style.setProperty('width', '100%', 'important');
+    modalContent.style.setProperty('max-width', '100%', 'important');
+    modalContent.style.setProperty('overflow', 'visible', 'important');
+    modalContent.style.setProperty('box-sizing', 'border-box', 'important');
+    modalContent.style.setProperty('margin', '0', 'important');
+    modalContent.style.setProperty('padding', '10px', 'important');
+    
+    // S'assurer que le contenu des détails s'adapte également
+    detailsContent.style.setProperty('width', '100%', 'important');
+    detailsContent.style.setProperty('max-width', '100%', 'important');
+    
+    // Récupérer les limites max de l'écran
+    const maxAvailableWidth = window.innerWidth - 20;
+    const maxAvailableHeight = window.innerHeight - 50;
+    
     // Charger la position/taille depuis le stockage si disponible
     if (state.modalSettings && state.modalSettings.personDetailsModal) {
         const settings = state.modalSettings.personDetailsModal;
-        if (settings.width) modal.style.setProperty('width', `${settings.width}px`, 'important');
-        if (settings.height) modal.style.setProperty('height', `${settings.height}px`, 'important');
+        // Limiter la largeur/hauteur au maximum disponible
+        const width = Math.min(settings.width || 600, maxAvailableWidth);
+        const height = Math.min(settings.height || 'auto', maxAvailableHeight);
+        
+        modal.style.setProperty('width', `${width}px`, 'important');
+        if (height !== 'auto') modal.style.setProperty('height', `${height}px`, 'important');
         if (settings.left) modal.style.setProperty('left', `${settings.left}px`, 'important');
         if (settings.top) modal.style.setProperty('top', `${settings.top}px`, 'important');
     } else {
         // Valeurs par défaut si aucun paramètre n'est sauvegardé
-        modal.style.setProperty('width', '600px', 'important');
+        modal.style.setProperty('width', `${Math.min(600, maxAvailableWidth)}px`, 'important');
         modal.style.setProperty('height', 'auto', 'important');
     }
     
@@ -428,6 +480,11 @@ function makeModalDraggable() {
     modal.style.setProperty('transform', 'none', 'important');
     modal.style.setProperty('margin', '0', 'important');
     
+
+
+
+
+
     // Variables pour le tracking
     let isDragging = false;
     let startX, startY, startLeft, startTop;
@@ -528,17 +585,43 @@ function makeModalDraggable() {
 // Mise à jour de addResizeHandles pour fonctionner avec les événements tactiles
 function addResizeHandles(modal) {
     // Supprimer des poignées existantes
-    const existingHandles = modal.querySelectorAll('.resize-handle');
+    const existingHandles = document.querySelectorAll('.resize-handle');
     existingHandles.forEach(handle => handle.remove());
     
     // Positions des poignées
     const positions = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne'];
+    
+    // Créer un conteneur spécifique pour les poignées qui reste fixe
+    // lors du défilement du contenu
+    let handleContainer = document.getElementById('resize-handles-container');
+    if (!handleContainer) {
+        handleContainer = document.createElement('div');
+        handleContainer.id = 'resize-handles-container';
+        handleContainer.style.position = 'absolute';
+        handleContainer.style.top = '0';
+        handleContainer.style.left = '0';
+        handleContainer.style.right = '0';
+        handleContainer.style.bottom = '0';
+        handleContainer.style.pointerEvents = 'none'; // Permets les clics à travers
+        handleContainer.style.zIndex = '1000';
+        
+        // Ajouter le conteneur au document BODY plutôt qu'à la modale
+        document.body.appendChild(handleContainer);
+    }
+    
+    // Ajuster le conteneur pour qu'il couvre exactement la modale
+    const modalRect = modal.getBoundingClientRect();
+    handleContainer.style.width = `${modal.offsetWidth}px`;
+    handleContainer.style.height = `${modal.offsetHeight}px`;
+    handleContainer.style.left = `${modalRect.left}px`;
+    handleContainer.style.top = `${modalRect.top}px`;
     
     positions.forEach(pos => {
         const handle = document.createElement('div');
         handle.className = `resize-handle resize-${pos}`;
         handle.style.position = 'absolute';
         handle.style.zIndex = '1001';
+        handle.style.pointerEvents = 'auto'; // Cette poignée capturera les événements
         
         // Configurer l'apparence et la position de chaque poignée selon sa position
         switch(pos) {
@@ -558,7 +641,7 @@ function addResizeHandles(modal) {
                 handle.style.cursor = 'nwse-resize';
                 handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
                 break;
-            case 's':  // Sud (bas)
+                case 's':  // Sud (bas)
                 handle.style.bottom = '0px';
                 handle.style.left = '50%';
                 handle.style.transform = 'translateX(-50%)';
@@ -608,27 +691,50 @@ function addResizeHandles(modal) {
                 break;
         }
         
-        // Pour les poignées invisibles (haut, bas, gauche, droite), ajouter une couleur au survol
-        if (!['se', 'sw', 'nw', 'ne'].includes(pos)) {
-            handle.style.backgroundColor = 'rgba(0,0,0,0.05)';
-            handle.style.transition = 'background-color 0.3s';
-            handle.style.touchAction = 'none'; // Empêcher le scroll en tactile
-            
-            handle.addEventListener('mouseover', () => {
-                handle.style.backgroundColor = 'rgba(0,0,0,0.2)';
-            });
-            
-            handle.addEventListener('mouseout', () => {
-                handle.style.backgroundColor = 'rgba(0,0,0,0.05)';
-            });
-        }
+        // Configurer les événements de redimensionnement pour cette poignée
+        setupResizeEvents(handle, modal, pos, handleContainer);
         
-        // Configurer les événements de redimensionnement avec support tactile
-        setupResizeEvents(handle, modal, pos);
-        
-        modal.appendChild(handle);
+        // Ajouter la poignée au conteneur fixe, pas à la modale scrollable
+        handleContainer.appendChild(handle);
     });
+    
+    // Mettre à jour la position du conteneur de poignées quand la modale bouge
+    const updateHandleContainer = () => {
+        if (handleContainer && modal.style.display !== 'none') {
+            const rect = modal.getBoundingClientRect();
+            handleContainer.style.width = `${modal.offsetWidth}px`;
+            handleContainer.style.height = `${modal.offsetHeight}px`;
+            handleContainer.style.left = `${rect.left}px`;
+            handleContainer.style.top = `${rect.top}px`;
+        }
+    };
+    
+    // Observer les changements de position/taille de la modale
+    const modalObserver = new MutationObserver(updateHandleContainer);
+    modalObserver.observe(modal, { attributes: true, attributeFilter: ['style'] });
+    
+    // Et aussi mettre à jour lors du défilement
+    window.addEventListener('scroll', updateHandleContainer);
+    modal.addEventListener('scroll', updateHandleContainer);
+    
+    // Stocker les références pour le nettoyage
+    modal._handleContainer = handleContainer;
+    modal._modalObserver = modalObserver;
+
+    // Ajout d'un délai pour s'assurer que la modale est complètement rendue
+    setTimeout(() => {
+        // Recalculer la position et la taille du conteneur de poignées
+        const updatedRect = modal.getBoundingClientRect();
+        handleContainer.style.width = `${modal.offsetWidth}px`;
+        handleContainer.style.height = `${modal.offsetHeight}px`;
+        handleContainer.style.left = `${updatedRect.left}px`;
+        handleContainer.style.top = `${updatedRect.top}px`;
+    }, 50);  // Un petit délai de 50ms devrait suffire
+
+
 }
+
+
 
 //Configuration des événements de redimensionnement pour la souris et le tactile
 function setupResizeEvents(handle, modal, pos) {
@@ -696,9 +802,16 @@ function setupResizeEvents(handle, modal, pos) {
         let newLeft = startLeft;
         let newTop = startTop;
         
+        // Obtenir la largeur maximale de la modale
+        const maxModalWidth = parseInt(window.innerWidth - 10);
+        
         // Redimensionnement horizontal
         if (pos.includes('e')) {
             newWidth = startWidth + (clientX - startX);
+            // Limiter à la largeur maximale
+            if (newWidth > maxModalWidth) {
+                newWidth = maxModalWidth;
+            }
         } else if (pos.includes('w')) {
             newWidth = startWidth - (clientX - startX);
             newLeft = startLeft + (clientX - startX);
@@ -713,7 +826,7 @@ function setupResizeEvents(handle, modal, pos) {
         }
         
         // Appliquer les nouvelles dimensions avec limites min.
-        if (newWidth >= 300) {
+        if (newWidth >= 300 && newWidth <= maxModalWidth) {
             modal.style.setProperty('width', `${newWidth}px`, 'important');
             modal.style.setProperty('left', `${newLeft}px`, 'important');
         }
@@ -739,6 +852,51 @@ function setupResizeEvents(handle, modal, pos) {
             document.removeEventListener('touchend', stopResize);
             document.removeEventListener('touchcancel', stopResize);
         }
+    }
+}
+
+
+// Ajouter cette fonction à la fin du fichier
+function adjustModalOnResize() {
+    const modal = document.getElementById('person-details-modal');
+    if (modal && modal.style.display === 'block') {
+        // Limiter la largeur et la hauteur au maximum disponible avec marge de 10px
+        const maxAvailableWidth = window.innerWidth - 10;
+        const maxAvailableHeight = window.innerHeight - 50;
+        const currentWidth = parseInt(modal.style.width);
+        const currentHeight = parseInt(modal.style.height);
+        
+        // Si la largeur actuelle dépasse l'espace disponible, réduire
+        if (currentWidth > maxAvailableWidth) {
+            modal.style.width = `${maxAvailableWidth}px`;
+            
+            // S'assurer que la modale reste visible dans la fenêtre
+            const currentLeft = parseInt(modal.style.left);
+            if (currentLeft + currentWidth > window.innerWidth) {
+                modal.style.left = `${window.innerWidth - currentWidth - 5}px`;
+            }
+            
+            // Mettre à jour les paramètres sauvegardés
+            if (state.modalSettings && state.modalSettings.personDetailsModal) {
+                state.modalSettings.personDetailsModal.width = maxAvailableWidth;
+            }
+        }
+        // Si la hauteur actuelle dépasse l'espace disponible, réduire
+        if (currentHeight > maxAvailableHeight) {
+            modal.style.height = `${maxAvailableHeight}px`;
+            
+            // S'assurer que la modale reste visible dans la fenêtre
+            const currentTop= parseInt(modal.style.top);
+            if (currentTop + currentHeight > window.innerHeight) {
+                modal.style.top = `${window.innerHeight - currentHeight - 5}px`;
+            }
+            
+            // Mettre à jour les paramètres sauvegardés
+            if (state.modalSettings && state.modalSettings.personDetailsModal) {
+                state.modalSettings.personDetailsModal.height = maxAvailableHeight;
+            }
+        }
+
     }
 }
 
@@ -779,6 +937,21 @@ function extractAndLinkUrls(text) {
  */
 export function closePersonDetails() {
     const modal = document.getElementById('person-details-modal');
+
+    // Nettoyer les observateurs et le conteneur de poignées
+    if (modal._modalObserver) {
+        modal._modalObserver.disconnect();
+        delete modal._modalObserver;
+    }
+    
+    if (modal._handleContainer) {
+        document.body.removeChild(modal._handleContainer);
+        delete modal._handleContainer;
+    }
+
+    // Supprimer l'écouteur d'événement resize
+    window.removeEventListener('resize', adjustModalOnResize);
+
     modal.style.display = 'none';
 }
 
