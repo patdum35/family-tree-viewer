@@ -877,7 +877,7 @@ export function resetView() {
     
     if (zoom) {
         let transform = d3.zoomIdentity;
-        if (state.treeMode === 'descendants') {
+        if (state.treeMode === 'descendants' || state.treeMode === 'directDescendants') {
             // Pour les descendants, commencer du côté droit
             transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
         } else {

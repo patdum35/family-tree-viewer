@@ -169,21 +169,27 @@ export function hasDateInRange(person, config, stats) {
     };
 
 
-
+    // Variable pour stocker la date pertinente
+    let relevantDate = null;
+    let currentDate = null
 
     // Vérifier dates directes
+    
     if (person.birthDate && isYearIntarget(extractYear(person.birthDate))) {
         // stats.directDates.birth++;
         // stats.directDates.people.add(person.id);
-        return true;
+        relevantDate = extractYear(person.birthDate);
+        return { inRange: true, date: relevantDate };
     }
     if (person.deathDate && isYearIntarget(extractYear(person.deathDate))) {
         // stats.directDates.death++;
         // stats.directDates.people.add(person.id);
         if (person.birthDate && isValidYear(extractYear(person.birthDate)))
-            return false;
-        else
-            return true;
+            return { inRange: false, date: null };
+        else {
+            relevantDate = extractYear(person.deathDate);
+            return { inRange: true, date: relevantDate };
+        }
     }
 
     // Vérifier mariages
@@ -193,7 +199,8 @@ export function hasDateInRange(person, config, stats) {
             if (family && family.marriageDate && isYearIntarget(extractYear(family.marriageDate))) {
                 // stats.directDates.marriage++;
                 // stats.directDates.people.add(person.id);
-                return true;
+                relevantDate = extractYear(family.marriageDate);
+                return { inRange: true, date: relevantDate };
             }
         }
     }
@@ -201,7 +208,8 @@ export function hasDateInRange(person, config, stats) {
     // Chercher dans les ancêtres/descendants si pas de date directe
     const dateInfo = findDateForPerson(person.id, stats);
     if (dateInfo && isYearIntarget(dateInfo.year)) {
-        return true;
+        relevantDate = dateInfo.year;
+        return { inRange: true, date: relevantDate };
     }
 
     // Si aucune date trouvée, ajouter aux stats noDates
@@ -210,7 +218,7 @@ export function hasDateInRange(person, config, stats) {
     //     name: person.name.replace(/\//g, '')
     // });
 
-    return false;
+    return { inRange: false, date: null };
 }
 
 function findDateForPerson(personId, stats) {

@@ -44,6 +44,7 @@ let verylargeWordThreshold = 75;
 let largeWordThreshold = 34;
 let mediumWordThreshold = 24;
 let standardThreshold = 17;
+let padding_Local = 4;
 
 // ================ FORME DE CŒUR ================
 export function createHeartPath(width, height, scale) {
@@ -525,8 +526,8 @@ export function isWordInZone(word, outerZone, innerZone, shape, centerX, centerY
     const wordDim = getWordDimensions(word);
 
     let safetyOverlap;
-    safetyOverlap = Math.max(1, 7 - nameCloudState.paddingLocal);
-    if (word.size > verylargeWordThreshold) {safetyOverlap =  Math.max(1, 5 - nameCloudState.paddingLocal);}
+    safetyOverlap = Math.max(1, 7 - padding_Local);
+    if (word.size > verylargeWordThreshold) {safetyOverlap =  Math.max(1, 5 - padding_Local);}
 
     const halfWidth = wordDim.width / safetyOverlap;   // plus le dividende est grand , plus les mots sont superposés
     const halfHeight = wordDim.height / safetyOverlap;
@@ -572,19 +573,19 @@ export function getWordDimensions(word) {
 export function checkCollision(word, x, y, placedWords) {
     const wordDim = getWordDimensions(word);
     let safetyMargin;
-    if (nameCloudState.paddingLocal >= 4)
+    if (padding_Local >= 4)
     { 
-        safetyMargin = word.size * Math.max(0.1, (4/nameCloudState.paddingLocal)*0.6); 
+        safetyMargin = word.size * Math.max(0.1, (4/padding_Local)*0.6); 
     }  // 0.6 //0.1; //Plus le nombre est grand et positif plus les mots sont ressérés
     else
     {
-        if (nameCloudState.paddingLocal == 3)
+        if (padding_Local == 4)
             safetyMargin = word.size * 0.7;
-        else if (nameCloudState.paddingLocal == 3)
+        else if (padding_Local == 3)
             safetyMargin = word.size * 0.8;
-        else if (nameCloudState.paddingLocal == 2)
+        else if (padding_Local == 2)
             safetyMargin = word.size * 0.9;
-        else if (nameCloudState.paddingLocal == 1)
+        else if (padding_Local == 1)
             safetyMargin = word.size * 1.0;
     }
     
@@ -597,25 +598,25 @@ export function checkCollision(word, x, y, placedWords) {
     if (word.size >= verylargeWordThreshold ) {
         safetyMargin = word.size * 0.1 ; // Marge très négative pour les grands mots au centre
     } else if (word.size >= largeWordThreshold ) {
-        if( nameCloudState.paddingLocal <= 2) {
+        if( padding_Local <= 2) {
             safetyMargin = word.size * 0.8 ; // Marge très négative pour les grands mots au centre
         }
     } else if (word.size >= mediumWordThreshold ) {
-        if( nameCloudState.paddingLocal <= 2) {
+        if( padding_Local <= 2) {
             safetyMargin = safetyMargin + 0.01*word.size ; // Marge très négative pour les grands mots au centre
         } else {
             safetyMargin = safetyMargin + 0.03*word.size ; // Marge très négative pour les grands mots au centre
         }
         
     } else if (word.size >= standardThreshold ) {
-        if( nameCloudState.paddingLocal <= 2) {
+        if( padding_Local <= 2) {
             safetyMargin = safetyMargin + 0.05*word.size ; // Marge très négative pour les grands mots au centre
         } else {
             safetyMargin = safetyMargin + 0.1*word.size ; // Marge très négative pour les grands mots au centre
         }
 
     } else {
-        if( nameCloudState.paddingLocal <= 2) {
+        if( padding_Local <= 2) {
             safetyMargin = safetyMargin + 0.01*word.size ; // Ou autre valeur qui fonctionnait pour vous
         } else {
             safetyMargin = safetyMargin + 0.2*word.size ; // Marge très négative pour les grands mots au centre
@@ -642,6 +643,13 @@ export function checkCollision(word, x, y, placedWords) {
 }
 
 function computeWordsGroups(words, shape) {
+    padding_Local = nameCloudState.paddingLocal;
+    if ((nameCloudState.currentConfig.type === 'duree_vie') || (nameCloudState.currentConfig.type === 'age_marriage') || (nameCloudState.currentConfig.type === 'age_first_child')  || (nameCloudState.currentConfig.type === 'nombre_enfants')  ||(nameCloudState.currentConfig.type === 'age_procreation') )
+    {
+        padding_Local = nameCloudState.paddingLocal + 1;
+    }
+    
+    
     largeWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.7 + nameCloudState.minFontSize;  // 34.5
     mediumWordThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.4 + nameCloudState.minFontSize;  // 24
     standardThreshold = (nameCloudState.maxFontSize - nameCloudState.minFontSize) * 0.2 + nameCloudState.minFontSize; // 17

@@ -111,10 +111,11 @@ export function buildAncestorTree(personId, processed = new Set(), generation = 
     const person = state.gedcomData.individuals[personId];
     const node = createBaseNode(person, personId, generation);
     
-    const siblings = findSiblings(personId, processed, new Set());
-    processed.add(personId);
-    
-    processSiblingsGenerationLevel(node, siblings, personId, person, processed, generation, parentNode);
+    if (state.treeModeReal === 'ancestors') {
+        const siblings = findSiblings(personId, processed, new Set());
+        processed.add(personId);   
+        processSiblingsGenerationLevel(node, siblings, personId, person, processed, generation, parentNode);
+    }
     processFamiliesAsChild(node, person, processed, generation);
     
     return node;
@@ -292,24 +293,26 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
                         const childPerson = state.gedcomData.individuals[childId];
                         let spouseNode = null;
 
-                        if (childPerson.spouseFamilies) {
-                            const spouseFam = state.gedcomData.families[childPerson.spouseFamilies[0]];
-                            if (spouseFam) {
-                                const spouseId = spouseFam.husband === childId ? spouseFam.wife : spouseFam.husband;
-                                if (spouseId) {
-                                    const spouse = state.gedcomData.individuals[spouseId];
-                                    if (spouse) {
-                                        spouseNode = {
-                                            id: spouseId,
-                                            name: spouse.name,
-                                            generation: generation + 1,
-                                            isSpouse: true,
-                                            spouseOf: childId,
-                                            children: [],
-                                            birthDate: spouse.birthDate,
-                                            deathDate: spouse.deathDate,
-                                            duplicate: processed.has(spouseId)
-                                        };
+                        if (state.treeModeReal === 'descendants') {
+                            if (childPerson.spouseFamilies) {
+                                const spouseFam = state.gedcomData.families[childPerson.spouseFamilies[0]];
+                                if (spouseFam) {
+                                    const spouseId = spouseFam.husband === childId ? spouseFam.wife : spouseFam.husband;
+                                    if (spouseId) {
+                                        const spouse = state.gedcomData.individuals[spouseId];
+                                        if (spouse) {
+                                            spouseNode = {
+                                                id: spouseId,
+                                                name: spouse.name,
+                                                generation: generation + 1,
+                                                isSpouse: true,
+                                                spouseOf: childId,
+                                                children: [],
+                                                birthDate: spouse.birthDate,
+                                                deathDate: spouse.deathDate,
+                                                duplicate: processed.has(spouseId)
+                                            };
+                                        }
                                     }
                                 }
                             }

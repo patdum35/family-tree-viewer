@@ -4,7 +4,7 @@ import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { ensureStatsExist, addStatsButton, removeAllStatsElements } from './nameCloudAverageAge.js';
+import { ensureStatsExist, addStatsButton, updateStatsButtons, removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createImprovedHeatmap  } from './geoHeatMapUI.js';
 import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
@@ -144,9 +144,10 @@ function createStandardTypeSelect(config) {
 
 function createTypeSelect(config) {
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Vie', 'Procréat', 'Lieux']; 
-    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Durée de Vie', 'Ages de Procréation', 'Lieux'];          
-    const typeValues = ['prenoms', 'noms', 'professions', 'duree_vie', 'age_procreation', 'lieux'];
+    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Lieux', 'Vie', 'Procréat', '1er Enf.', 'Mariage',  'Nb Enf.']; 
+    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Lieux', 'Durée de Vie', 'Ages de procréation', 'Age au 1er enfant', 'Age de Mariage', 'Nombre d\'enfants'];          
+    const typeValues = ['prenoms', 'noms', 'professions', 'lieux', 'duree_vie', 'age_procreation', 'age_first_child', 'age_marriage', 'nombre_enfants'];
+    
     
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -168,18 +169,18 @@ function createTypeSelect(config) {
         dimensions: {
             width: '60px',
             height: '25px',
-            dropdownWidth: '160px',
+            dropdownWidth: '170px',
             // Hauteur fixe au lieu d'une hauteur maximale
             // Calculée en fonction du nombre d'options et de leur hauteur
             // dropdownFixedHeight: `${(options.length) * 50}px` // 38px par option (padding 10px haut+bas + texte)
-            dropdownMaxHeight: '300px'
+            dropdownMaxHeight: '345px'
 
         },
         
         // Padding très réduit pour maximiser la compacité
         padding: {
             display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
-            options: { x: 8, y: 10 }     // Padding pour les options
+            options: { x: 1, y: 1 }     // Padding pour les options
         },
         
         // Configuration précise de la flèche comme dans l'original
@@ -208,7 +209,7 @@ function createTypeSelect(config) {
             optionElement.style.textAlign = 'center';
             
             // Padding spécifique
-            optionElement.style.padding = '10px 8px';
+            optionElement.style.padding = '6px 4px';
         },
         
     });
@@ -217,9 +218,9 @@ function createTypeSelect(config) {
 function createScopeSelect(config) {
     // Définir les options et les valeurs correspondantes
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Tout', 'Ascend', 'Descend']; 
-    const typeOptionsExpanded = ['Tout le fichier', 'Ascendants de la racine', 'Desccendants de la racine'];       
-    const typeValues = ['all', 'ancestors', 'descendants'];
+    const typeOptions = ['Tout', 'Asc dir.','Ascend', 'Desc dir',  'Descend']; 
+    const typeOptionsExpanded = ['Tout le fichier', 'Ascendants directs de la racine', 'Ascendants + fratrie de la racine', 'Desccendants directs de la racine' , 'Desccendants + conjoints de la racine'];       
+    const typeValues = ['all', 'directAncestors', 'ancestors', 'directDescendants', 'descendants'];
     
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -241,7 +242,7 @@ function createScopeSelect(config) {
         dimensions: {
             width: '60px',
             height: '25px',
-            dropdownWidth: '200px',
+            dropdownWidth: '280px',
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
@@ -533,13 +534,20 @@ export function updateTitleText(element, cfg) {
         titleText = `${nameCloudState.totalWords} Noms`;
     } else if (cfg.type === 'professions') {
         titleText = `${nameCloudState.totalWords} Métiers`;
+    } else if (cfg.type === 'lieux'){
+        titleText = `${nameCloudState.totalWords} Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
     } else if (cfg.type === 'duree_vie') {
         titleText = `${nameCloudState.totalWords} Durées de vie `;
     } else if (cfg.type === 'age_procreation') {
         titleText = `${nameCloudState.totalWords} Ages de procréation`;
-    } else {
-        titleText = `${nameCloudState.totalWords} Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
+    } else if (cfg.type === 'age_marriage') {
+        titleText = `${nameCloudState.totalWords} Ages de mariage`;
+    } else if (cfg.type === 'age_first_child') {
+        titleText = `${nameCloudState.totalWords} Ages au 1er enfant`;
+    } else if (cfg.type === 'nombre_enfants') {
+        titleText = `${nameCloudState.totalWords} Nombres d'enfants`;
     }
+
     
     if (!nameCloudState.mobilePhone || window.innerWidth > 800) 
         titleText = titleText + ` entre ${cfg.startDate} et ${cfg.endDate}`;
@@ -640,7 +648,7 @@ function showNameCloud(nameData, config) {
     rootPersonContainer.style.marginTop = '3px';
 
     function updateRootPersonVisibility() {
-        const isRootPersonNeeded = ['ancestors', 'descendants'].includes(scopeSelect.value);
+        const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(scopeSelect.value);
         rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
     }
     scopeSelect.addEventListener('change', updateRootPersonVisibility);
@@ -693,24 +701,22 @@ function showNameCloud(nameData, config) {
 
 
         // Tous les types supportés
-        const supportedTypes = ['duree_vie', 'age_procreation', 'prenoms', 'noms', 'professions', 'lieux'];
+        const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
 
         if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
             // Préparer les données statistiques si nécessaire pour les types d'âge
-            if (['duree_vie', 'age_procreation'].includes(newConfig.type)) {
+            if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
                 ensureStatsExist(nameCloudState.currentNameData);
             }
             
             // Ajouter le bouton des statistiques détaillées avec le type approprié
-            addStatsButton(container, nameCloudState.currentNameData, newConfig.type);
+            // addStatsButton(container, nameCloudState.currentNameData, newConfig.type);
+            updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type);
         }
-
-
-
-
 
         
     }
+
 
     // Ajouter les écouteurs d'événements
     typeSelect.addEventListener('change', generateNameCloud);
@@ -805,11 +811,11 @@ function showNameCloud(nameData, config) {
                 let heatmapTitle;
                 if (window.innerWidth < 300) { 
                     heatmapTitle = `${currentConfig.scope === 'all' ? 'Tous' : 
-                        currentConfig.scope === 'ancestors' ? 'Ascend.' : 'Descend.'} 
+                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ascend.' : 'Descend.'} 
                         (${currentConfig.startDate}-${currentConfig.endDate})`;
                 } else {
                     heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? 'Tous' : 
-                        currentConfig.scope === 'ancestors' ? 'Ancêtres' : 'Descendants'} 
+                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ancêtres' : 'Descendants'} 
                         (${currentConfig.startDate}-${currentConfig.endDate})`;                    
                 }
                 

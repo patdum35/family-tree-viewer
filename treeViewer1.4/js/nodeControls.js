@@ -49,7 +49,7 @@ export function handleRootChange(event, d) {
         
         if (zoom) {
             let transform = d3.zoomIdentity;
-            if (state.treeModeReal  === 'descendants') {
+            if (state.treeModeReal  === 'descendants' || state.treeModeReal === 'directDescendants') {
                 transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
             } else {
                 transform = transform.translate(state.boxWidth, height / 2);
@@ -69,7 +69,7 @@ export function handleRootChange(event, d) {
  * @export
  */
 export function addDescendantsControls(nodeGroups) {
-    if (state.treeModeReal  === 'descendants') {
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal === 'directDescendants') {
         nodeGroups.append("text")
             .filter(d => {
                 if (d.data.isSibling) return false;
@@ -191,7 +191,7 @@ function createPersonNode(personId, generation, options = {}) {
 function handleDescendantsClick(event, d) {
     event.stopPropagation();
     
-    if (state.treeModeReal  === 'descendants') {
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal === 'directDescendants') {
         const { targetNode, targetId } = findTargetNode(d);
         const childrenIds = findChildrenIds(targetId);
 
@@ -206,18 +206,20 @@ function handleDescendantsClick(event, d) {
 
                 // Ajouter les spouses de l'enfant
                 const child = state.gedcomData.individuals[childId];
-                if (child.spouseFamilies) {
-                    child.spouseFamilies.forEach(spouseFamId => {
-                        const spouseFamily = state.gedcomData.families[spouseFamId];
-                        const spouseId = spouseFamily.husband === childId ? spouseFamily.wife : spouseFamily.husband;
-                        if (spouseId) {
-                            const spouseNode = createPersonNode(spouseId, targetNode.data.generation + 1, {
-                                isSpouse: true,
-                                spouseOf: childId
-                            });
-                            childrenWithSpouses.push(spouseNode);
-                        }
-                    });
+                if (state.treeModeReal === 'descendants') {
+                    if (child.spouseFamilies) {
+                        child.spouseFamilies.forEach(spouseFamId => {
+                            const spouseFamily = state.gedcomData.families[spouseFamId];
+                            const spouseId = spouseFamily.husband === childId ? spouseFamily.wife : spouseFamily.husband;
+                            if (spouseId) {
+                                const spouseNode = createPersonNode(spouseId, targetNode.data.generation + 1, {
+                                    isSpouse: true,
+                                    spouseOf: childId
+                                });
+                                childrenWithSpouses.push(spouseNode);
+                            }
+                        });
+                    }
                 }
             });
 
@@ -539,7 +541,7 @@ function updateRootToClosestDescendant(descendant) {
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
 export function addAncestorsControls(nodeGroups) {
-    if (state.treeModeReal  === 'descendants') return;
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants'  ) return;
     nodeGroups.append("text")
         .filter(function(d) {
             d.ShowAncestorsButton = shouldShowAncestorsButton(d);
@@ -848,9 +850,11 @@ function buildNewAncestors(ddata) {
                     return family && family.children;
                 });
                 const genealogicalParentId = findGenealogicalParent(family.husband, familiesWithChildren);
-                const fatherSiblings = findSiblings(family.husband);
-                addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParentId);
-                addOtherSpouses(family.husband, family.wife, ddata);
+                if (state.treeModeReal === 'ancestors') {
+                    const fatherSiblings = findSiblings(family.husband);
+                    addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParentId);
+                    addOtherSpouses(family.husband, family.wife, ddata);
+                }
                 ddata.children.push({
                     id: family.husband,
                     name: father.name,
@@ -871,10 +875,12 @@ function buildNewAncestors(ddata) {
                     return family && family.children;
                 });
                 const genealogicalParentId = findGenealogicalParent(family.wife, familiesWithChildren);
-                const motherSiblings = findSiblings(family.wife);
-                // console.log("debug buildNewAncestors motherSiblings for this node :", family.wife, motherSiblings);
-                addSiblingsToNode(motherSiblings, ddata, family.wife, genealogicalParentId);
-                addOtherSpouses(family.wife, family.husband, ddata);
+                if (state.treeModeReal === 'ancestors') {
+                    const motherSiblings = findSiblings(family.wife);
+                    // console.log("debug buildNewAncestors motherSiblings for this node :", family.wife, motherSiblings);
+                    addSiblingsToNode(motherSiblings, ddata, family.wife, genealogicalParentId);
+                    addOtherSpouses(family.wife, family.husband, ddata);
+                }
                 ddata.children.push({
                     id: family.wife,
                     name: mother.name,

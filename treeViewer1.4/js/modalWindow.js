@@ -114,10 +114,46 @@ export function displayPersonDetails(personId) {
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
 
+
+
+    // Ajouter un style pour personnaliser les ascenseurs
+    const style = document.createElement("style");
+    style.textContent = `
+        .custom-modal::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .custom-modal::-webkit-scrollbar-button {
+            height: 0px;
+            width: 0px;
+            display: none;
+        }
+
+        .custom-modal::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 6px; 
+            border: 3px solid transparent;
+            }
+
+        .custom-modal::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            margin: 30px;
+        }
+    `;
+    // Ajouter le style au document
+    document.head.appendChild(style);
+
+
+
+
     const modalName = document.getElementById('modal-person-name');
     const detailsContent = document.getElementById('person-details-content');
     const modal = document.getElementById('person-details-modal');
     
+    modal.className = `modal-person-name custom-modal`;
+
     // Rendre l'arrière-plan de la modale semi-transparent
     modal.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
 
@@ -404,7 +440,7 @@ export function displayPersonDetails(personId) {
         modal.style.maxHeight= `${window.innerHeight - 50}px`;
     }
 
-    // Rendre la modale déplaçable
+    // Rendre la modale déplaçable et resizable
     setTimeout(() => {
         makeModalDraggable();
     }, 100);
@@ -412,7 +448,6 @@ export function displayPersonDetails(personId) {
 
     // Ajouter cet écouteur d'événement pour le resize de l'écran
     window.addEventListener('resize', adjustModalOnResize);
-
 
 
     // Créer la carte avec un petit délai pour assurer que le DOM est prêt
@@ -636,8 +671,8 @@ function addResizeHandles(modal) {
             case 'se': // Sud-Est (bas droite)
                 handle.style.right = '0px';
                 handle.style.bottom = '0px';
-                handle.style.width = '20px';
-                handle.style.height = '20px';
+                handle.style.width = '25px';
+                handle.style.height = '25px';
                 handle.style.cursor = 'nwse-resize';
                 handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
                 break;
@@ -652,8 +687,8 @@ function addResizeHandles(modal) {
             case 'sw': // Sud-Ouest (bas gauche)
                 handle.style.left = '0px';
                 handle.style.bottom = '0px';
-                handle.style.width = '20px';
-                handle.style.height = '20px';
+                handle.style.width = '25px';
+                handle.style.height = '25px';
                 handle.style.cursor = 'nesw-resize';
                 handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
                 break;
@@ -668,8 +703,8 @@ function addResizeHandles(modal) {
             case 'nw': // Nord-Ouest (haut gauche)
                 handle.style.left = '0px';
                 handle.style.top = '0px';
-                handle.style.width = '20px';
-                handle.style.height = '20px';
+                handle.style.width = '25px';
+                handle.style.height = '25px';
                 handle.style.cursor = 'nwse-resize';
                 handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
                 break;
@@ -684,8 +719,8 @@ function addResizeHandles(modal) {
             case 'ne': // Nord-Est (haut droite)
                 handle.style.right = '0px';
                 handle.style.top = '0px';
-                handle.style.width = '20px';
-                handle.style.height = '20px';
+                handle.style.width = '25px';
+                handle.style.height = '25px';
                 handle.style.cursor = 'nesw-resize';
                 handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
                 break;
@@ -856,6 +891,9 @@ function setupResizeEvents(handle, modal, pos) {
 }
 
 
+
+
+
 // Ajouter cette fonction à la fin du fichier
 function adjustModalOnResize() {
     const modal = document.getElementById('person-details-modal');
@@ -944,10 +982,29 @@ export function closePersonDetails() {
         delete modal._modalObserver;
     }
     
+    // Nettoyer le conteneur de poignées spécifique à la modale
     if (modal._handleContainer) {
-        document.body.removeChild(modal._handleContainer);
+        if (document.body.contains(modal._handleContainer)) {
+            document.body.removeChild(modal._handleContainer);
+        }
         delete modal._handleContainer;
     }
+
+    // Nettoyer TOUS les conteneurs de poignées par sécurité
+    const allHandleContainers = document.querySelectorAll('#resize-handles-container');
+    allHandleContainers.forEach(container => {
+        if (document.body.contains(container)) {
+            document.body.removeChild(container);
+        }
+    });
+
+    // Nettoyer également toutes les poignées individuelles qui pourraient rester
+    const allHandles = document.querySelectorAll('.resize-handle');
+    allHandles.forEach(handle => {
+        if (handle.parentNode) {
+            handle.parentNode.removeChild(handle);
+        }
+    });
 
     // Supprimer l'écouteur d'événement resize
     window.removeEventListener('resize', adjustModalOnResize);

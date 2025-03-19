@@ -575,9 +575,9 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     
     // Construire l'arbre selon le mode
     state.treeModeReal = state.treeMode;
-    state.currentTree = state.treeMode === 'descendants' 
+    state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
         ? buildDescendantTree(person.id)
-        : state.treeMode === 'ancestors'
+        : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
         ? buildAncestorTree(person.id)
         : buildCombinedTree(person.id); // Pour le mode 'both'
 
@@ -642,10 +642,14 @@ export function updateTreeMode(mode) {
     // pour mettre à jour la description
     const description = document.getElementById('treeModeDescription');
     if (description) {
-        if (mode === 'ancestors') {
-            description.textContent = 'Ascendants';
+        if (mode === 'directAncestors') {
+            description.textContent = 'Ascendants directs';
+        } else if (mode === 'ancestors') {
+            description.textContent = 'Ascendants + fratrie';
+        } else if (mode === 'directDescendants'){
+            description.textContent = 'Descendants direct';
         } else if (mode === 'descendants') {
-            description.textContent = 'Descendants';
+            description.textContent = 'Descendants + conjoints';
         } else {
             description.textContent = 'Ascendants + Descendants';
         }

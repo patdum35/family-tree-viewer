@@ -160,9 +160,9 @@ function replaceTreeModeSelector() {
     const titleValue = originalSelect.getAttribute('title');
     
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Asc.', 'Desc.', 'A+D']; 
-    const typeOptionsExpanded = ['Ascendants', 'Descendants', 'Ascend+Descend'];          
-    const typeValues = ['ancestors', 'descendants', 'both'];
+    const typeOptions = ['Ascd', 'Asc.', 'Desd', 'Desc.', 'A+D']; 
+    const typeOptionsExpanded = ['Ascendants directs', 'Ascendants + fratrie', 'Descendants directs', 'Descendants + conjoints', 'Ascend+Descend'];          
+    const typeValues = ['directAncestors', 'ancestors', 'directDescendants', 'descendants', 'both'];
     
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -181,7 +181,7 @@ function replaceTreeModeSelector() {
         dimensions: {
             width: '45px',
             height: '25px',
-            dropdownWidth: '140px'
+            dropdownWidth: '180px'
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
@@ -269,25 +269,6 @@ function replaceTreeModeSelector() {
     parentElement.replaceChild(customSelector, originalSelect);   
 }
 
-
-
-
-
-
-
-
-
-/**
- * Tronque un texte à un certain nombre de caractères
- * et ajoute des points de suspension si nécessaire
- */
-// function truncateText(text, maxLength = 6) {
-//     if (!text) return '';
-//     if (text.length <= maxLength) return text;
-//     return text.substring(0, maxLength) ;
-// }
-
-
 /**
  * Tronque un texte à un certain nombre de caractères,
  * ajoute des points de suspension si nécessaire,
@@ -312,7 +293,6 @@ function truncateText(text, maxLength = 6) {
     return formattedText.substring(0, maxLength);
 }
 
-
 // Fonction pour mettre à jour l'affichage du texte dans le sélecteur
 export function updateSelectorDisplayText(selector, text) {
     if (!selector) return;
@@ -326,7 +306,6 @@ export function updateSelectorDisplayText(selector, text) {
         displayElement.textContent = truncateText(text);
     }
 }
-
 
 // ====================================
 // 1. Modifications dans mainUI.js

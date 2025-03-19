@@ -94,11 +94,11 @@ export function drawTree( isZoomRefresh = false ) {
     drawLinks(mainGroup, layoutResult);
  
  
-    if (state.treeModeReal  !== 'descendants') {
+    if (state.treeModeReal  !== 'descendants' && state.treeModeReal  !== 'directDescendants') {
         adjustLevel0SiblingsPosition(mainGroup);
     }
  
-    if (state.treeModeReal  === 'descendants') {
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
         drawSpouseLinks(mainGroup, layoutResult);
     } else {
         drawSiblingLinks(mainGroup, layoutResult);
@@ -423,7 +423,7 @@ function createTreeLayout() {
         .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.4]);
 
     // Inverser la direction pour le mode descendants
-    if (state.treeModeReal  === 'descendants') {
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
         layout.nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.4]);
     }
 
@@ -447,7 +447,7 @@ function createTreeLayout() {
 
         }
 
-        if (state.treeModeReal  === 'descendants') {
+        if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
             // Pour les couples entrelacés (personne + spouse)
             if (a.data.isSpouse || b.data.isSpouse) {
                 return 0.8;  // Espacement réduit entre une personne et son spouse
@@ -498,7 +498,7 @@ function drawLinks(group, layout) {
         .attr("class", d => {
             if (!d.source?.data || !d.target?.data) return "link hidden";
             if (d.source.data._isDescendantLink) return "link hidden";
-            if (state.treeModeReal  === 'descendants' && d.target.data.isSpouse) return "link hidden";
+            if ((state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') && d.target.data.isSpouse) return "link hidden";
             if (d.target.data.isSibling) return "link hidden";
             return "link";
         })
@@ -511,7 +511,7 @@ function drawLinks(group, layout) {
  * @param {Object} layout - Le layout de l'arbre
  */
 function drawSpouseLinks(group, layout) {
-    if (state.treeModeReal  !== 'descendants') return;
+    if (state.treeModeReal  !== 'descendants' && state.treeModeReal  !== 'directDescendants') return;
 
     // Collecter tous les liens spouse-enfants
     const spouseLinks = [];
@@ -573,7 +573,7 @@ function createLinkPath(d) {
     if (d.source.data._isDescendantLink) return "";
     if (d.target.data.isSibling && d.source.data.generation < d.target.data.generation) return "";
 
-    if (state.treeModeReal  === 'descendants')
+    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants')
     {
         return `M${d.source.y - (state.boxWidth/2)},${d.source.x}
                 H${(d.source.y + d.target.y)/2}

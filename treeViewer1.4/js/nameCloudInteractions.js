@@ -14,15 +14,51 @@ window.isIndividualMapMode = false;
 
 export function showPersonsList(name, people, config) {
     
-    const modal = document.createElement('div');
-    modal.className = 'person-list-modal'; // Ajouter une classe pour faciliter la sélection ultérieure
     
+    // Ajouter un style pour personnaliser les ascenseurs
+    const style = document.createElement("style");
+    style.textContent = `
+        .custom-modal::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .custom-modal::-webkit-scrollbar-button {
+            height: 0px;
+            width: 0px;
+            display: none;
+        }
+
+        .custom-modal::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 6px; 
+            border: 3px solid transparent;
+            }
+
+        .custom-modal::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            margin: 30px;
+        }
+    `;
+    // Ajouter le style au document
+    document.head.appendChild(style);
+    
+    const modal = document.createElement('div');
+    // modal.className = 'person-list-modal'; // Ajouter une classe pour faciliter la sélection ultérieure
+
+    modal.className = `person-list-modal custom-modal`; // Ajouter une classe pour faciliter la sélection ultérieure
+
+
     // Position et taille différentes si la heatmap est visible
     let heatmapWrapper = null;
 
     if (nameCloudState.isHeatmapVisible)  {
         heatmapWrapper = nameCloudState.heatmapWrapper
         adjustSplitScreenLayout(modal, heatmapWrapper);
+        modal.style.backgroundColor = 'transparent'; // Fond transparent au lieu de rgba(0,0,0,0.8)
+        // modal.style.pointerEvents = 'auto'; // Important: assure que la modale capte les événements
+        modal.style.pointerEvents = 'none'; // Permet aux clics de passer à travers
     } else {
         // Configuration standard (sans heatmap visible)
         modal.style.position = 'fixed';
@@ -30,7 +66,9 @@ export function showPersonsList(name, people, config) {
         modal.style.left = '0';
         modal.style.width = '100%';
         modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        modal.style.backgroundColor = 'transparent'; // Fond transparent au lieu de rgba(0,0,0,0.8)
+        // modal.style.pointerEvents = 'auto'; // Important: assure que la modale capte les événements
+        modal.style.pointerEvents = 'none'; // Permet aux clics de passer à travers
     }
     
     modal.style.display = 'flex';
@@ -42,21 +80,35 @@ export function showPersonsList(name, people, config) {
     content.style.backgroundColor = 'white';
     content.style.padding = '20px';
     content.style.borderRadius = '10px';
+
+
+    content.style.border = '2px solid rgba(200, 220, 255, 0.9)'; // Bordure bleue pâle
+    content.style.boxShadow = '0 0 15px rgba(200, 220, 255, 0.5)'; // Ombre bleue légère
+    // content.style.pointerEvents = 'auto'; // Assure que le contenu capte les événements
+
     
     // Ajuster la taille du contenu si la heatmap est visible
     if (nameCloudState.isHeatmapVisible)  {
-        content.style.width = '90%';
-        content.style.maxWidth = '100%';
-        content.style.height = '90%';
-        content.style.maxHeight = '100%';
+        // content.style.width = '90%';
+        // content.style.maxWidth = '100%';
+        // content.style.height = '90%';
+        content.style.maxHeight = '80vh';
     } else {
-        content.style.width = '80%';
-        content.style.maxWidth = '800px';
+        // content.style.width = '80%';
+        // content.style.maxWidth = '800px';
         content.style.maxHeight = '80vh';
     }
+  
     
+    // modal.style.width = 'fit-content';
+    // modal.style.height = 'fit-content';
+
     content.style.overflowY = 'auto';
     content.style.position = 'relative';
+
+    content.style.pointerEvents = 'auto'; // S'assure que le contenu de la modale capte les événements
+
+
 
     // Titre
     const title = document.createElement('h2');
@@ -79,6 +131,16 @@ export function showPersonsList(name, people, config) {
     title.style.paddingBottom = '5px';
     title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px'; 
 
+    title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle
+    title.style.padding = '8px';
+    title.style.borderRadius = '8px 8px 0 0'; // Coins arrondis en haut seulement
+    title.style.marginTop = '-20px'; // Pour compenser le padding du contenu
+    title.style.marginLeft = '-20px'; 
+    title.style.marginRight = '-20px';
+    title.style.paddingLeft = '20px';
+    title.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)'; // Bordure bleue pâle
+
+
     // Bouton de fermeture
     const closeBtn = document.createElement('button');
     closeBtn.id = 'person-list-close-button';  // Ajout d'un ID unique
@@ -90,55 +152,13 @@ export function showPersonsList(name, people, config) {
     closeBtn.style.background = 'none';
     closeBtn.style.fontSize = '20px';
     closeBtn.style.cursor = 'pointer';
-    // closeBtn.onclick = () => {
-    //     if (modal.parentNode) {
-    //         modal.parentNode.removeChild(modal);
-            
-    //         // Restaurer la taille originale de la heatmap si elle était visible
-    //         if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
-    //             try {
-    //                 const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-    //                 if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-    //                 if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-    //                 if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-    //                 if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                    
-    //                 // Réinitialiser les variables de suivi
-    //                 lastSelectedLocationId = null;
-    //                 isIndividualMapMode = false;
-                    
-    //                 // Rafraîchir la carte avec les données initiales
-    //                 if (heatmapWrapper.map) {
-    //                     // Attendre un peu pour que les changements CSS prennent effet
-    //                     setTimeout(() => {
-    //                         if (typeof refreshHeatmap === 'function') {
-    //                             refreshHeatmap();
-    //                         } else if (heatmapWrapper.map) {
-    //                             heatmapWrapper.map.invalidateSize();
-    //                         }
-    //                     }, 100);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Erreur lors de la restauration du style de la heatmap:', error);
-                    
-    //                 // Restaurer aux valeurs par défaut en cas d'erreur
-    //                 heatmapWrapper.style.top = '60px';
-    //                 heatmapWrapper.style.left = '20px';
-    //                 heatmapWrapper.style.width = 'calc(100% - 40px)';
-    //                 heatmapWrapper.style.height = 'calc(100% - 100px)';
-                    
-    //                 setTimeout(() => {
-    //                     if (heatmapWrapper.map) {
-    //                         heatmapWrapper.map.invalidateSize();
-    //                     }
-    //                 }, 100);
-    //             }
-    //         }
-    //     }
-    // };
 
     closeBtn.onclick = () => {
+        // console.log("Fermeture explicite de la modale via le bouton de fermeture");
+        // Nettoyer toutes les poignées de redimensionnement
+        removeAllResizeHandles();
         if (modal.parentNode) {
+            modal.removeAttribute('data-splitscreen-mode');
             modal.parentNode.removeChild(modal);
             
             // Restaurer la taille originale de la heatmap si elle était visible
@@ -163,7 +183,7 @@ export function showPersonsList(name, people, config) {
                         }, 100);
                     }
                 } catch (error) {
-                    console.error('Erreur lors de la restauration du style de la heatmap:', error);
+                    // console.error('Erreur lors de la restauration du style de la heatmap:', error);
                     
                     // Restaurer aux valeurs par défaut en cas d'erreur
                     heatmapWrapper.style.top = '60px';
@@ -180,6 +200,9 @@ export function showPersonsList(name, people, config) {
             }
         }
     };
+
+
+
     // Liste des personnes
     const list = document.createElement('div');
     list.style.display = 'grid';
@@ -244,330 +267,6 @@ export function showPersonsList(name, people, config) {
      * @param {string} personId - ID de la personne
      * @returns {Promise<void>}
      */
-    // async function createIndividualLocationMap(personId) {
-    //     // console.log("Début createIndividualLocationMap pour personId:", personId);
-        
-    //     // Vérifier que le wrapper de la heatmap existe
-    //     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-    //     if (!heatmapWrapper) {
-    //         console.error("Wrapper de heatmap non trouvé");
-    //         return;
-    //     }
-        
-    //     // Vérifier que la carte existe dans le wrapper
-    //     if (!heatmapWrapper.map) {
-    //         console.error("Carte Leaflet non trouvée dans le wrapper");
-    //         return;
-    //     }
-        
-    //     // Récupérer les informations de la personne
-    //     const person = state.gedcomData.individuals[personId];
-    //     if (!person) {
-    //         console.error("Personne non trouvée avec l'ID:", personId);
-    //         return;
-    //     }
-        
-    //     console.log("Personne trouvée:", person.name);
-        
-    //     // Symboles pour chaque type de lieu
-    //     const locationSymbols = {
-    //         'Naissance': '👶', 
-    //         'Mariage': '💍',
-    //         'Décès': '✝️',
-    //         'Résidence1': '🏠',
-    //         'Résidence2': '🏠',
-    //         'Résidence3': '🏠'
-    //     };
-        
-    //     // Collecter les lieux
-    //     const locations = [
-    //         { type: 'Naissance', place: person.birthPlace },
-    //         { type: 'Décès', place: person.deathPlace },
-    //         { type: 'Résidence1', place: person.residPlace1 },
-    //         { type: 'Résidence2', place: person.residPlace2 },
-    //         { type: 'Résidence3', place: person.residPlace3 }
-    //     ];
-        
-    //     // Rechercher les lieux de mariage
-    //     if (person.spouseFamilies && person.spouseFamilies.length > 0) {
-    //         person.spouseFamilies.forEach((famId, index) => {
-    //             const family = state.gedcomData.families[famId];
-    //             if (family && family.marriagePlace) {
-    //                 locations.push({ 
-    //                     type: 'Mariage', 
-    //                     place: family.marriagePlace 
-    //                 });
-    //             }
-    //         });
-    //     }
-        
-    //     // Filtrer les lieux non vides
-    //     const validLocations = locations.filter(loc => loc.place && loc.place.trim() !== '');
-    //     console.log("Lieux valides trouvés:", validLocations.length);
-        
-    //     if (validLocations.length === 0) {
-    //         console.log('Aucun lieu trouvé pour cette personne');
-    //         alert('Aucun lieu trouvé pour cette personne');
-    //         return;
-    //     }
-        
-    //     // Afficher un indicateur de chargement
-    //     const loadingOverlay = document.createElement('div');
-    //     loadingOverlay.id = 'map-loading-overlay';
-    //     loadingOverlay.style.position = 'absolute';
-    //     loadingOverlay.style.top = '0';
-    //     loadingOverlay.style.left = '0';
-    //     loadingOverlay.style.width = '100%';
-    //     loadingOverlay.style.height = '100%';
-    //     loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-    //     loadingOverlay.style.display = 'flex';
-    //     loadingOverlay.style.justifyContent = 'center';
-    //     loadingOverlay.style.alignItems = 'center';
-    //     loadingOverlay.style.zIndex = '9500';
-    //     loadingOverlay.innerHTML = `<div style="text-align: center;"><p>Chargement des lieux...</p><progress style="width: 200px;"></progress></div>`;
-        
-    //     // Ajouter l'overlay de chargement à la heatmap
-    //     const existingOverlay = document.getElementById('map-loading-overlay');
-    //     if (existingOverlay) existingOverlay.remove();
-    //     heatmapWrapper.appendChild(loadingOverlay);
-        
-    //     try {
-    //         // Récupérer la carte
-    //         const map = heatmapWrapper.map;
-    //         // console.log("Carte récupérée:", map);
-            
-    //         // Nettoyer toutes les couches existantes sauf la couche de tuiles
-    //         map.eachLayer(layer => {
-    //             if (layer instanceof L.TileLayer) {
-    //                 console.log("Couche de tuiles préservée");
-    //             } else {
-    //                 console.log("Suppression d'une couche:", layer);
-    //                 map.removeLayer(layer);
-    //             }
-    //         });
-            
-    //         // Tableau pour stocker les marqueurs
-    //         const markers = [];
-            
-    //         // Géocoder et placer les marqueurs
-    //         for (const location of validLocations) {
-    //             try {
-    //                 console.log("Géocodage de:", location.place);
-    //                 const coords = await geocodeLocation(location.place);
-                    
-    //                 if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
-    //                     console.log("Coordonnées trouvées:", coords);
-                        
-    //                     // Créer l'icône pour le marqueur avec un style amélioré
-    //                     const markerIcon = L.divIcon({
-    //                         className: 'custom-marker',
-    //                         html: `<div style="
-    //                             font-size: 28px;
-    //                             display: flex;
-    //                             justify-content: center;
-    //                             align-items: center;
-    //                             width: 40px;
-    //                             height: 40px;
-    //                             background-color: white;
-    //                             border: 2px solid #3388ff;
-    //                             border-radius: 50%;
-    //                             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    //                             text-shadow: 0 0 3px white;
-    //                         ">${locationSymbols[location.type]}</div>`,
-    //                         iconSize: [40, 40],
-    //                         iconAnchor: [20, 20],
-    //                         popupAnchor: [0, -20]
-    //                     });
-                        
-    //                     // Créer et ajouter le marqueur
-    //                     const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
-    //                         .addTo(map)
-    //                         .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
-                        
-    //                     markers.push(marker);
-    //                     // console.log("Marqueur ajouté pour:", location.place);
-    //                 } else {
-    //                     console.warn("Coordonnées invalides pour:", location.place);
-    //                 }
-    //             } catch (error) {
-    //                 console.error(`Erreur lors du géocodage de ${location.place}:`, error);
-    //             }
-    //         }
-            
-    //         // Vérifier si des marqueurs ont été ajoutés
-    //         if (markers.length === 0) {
-    //             console.warn("Aucun marqueur n'a pu être ajouté à la carte");
-    //             alert("Aucun lieu n'a pu être localisé sur la carte");
-    //             loadingOverlay.remove();
-    //             return;
-    //         }
-            
-    //         // Ajuster la vue de la carte pour inclure tous les marqueurs
-    //         // console.log("Ajustement de la vue de la carte pour inclure tous les marqueurs");
-            
-
-            
-    //         /**
-    //          * Applique une transition fluide entre deux vues de carte
-    //          * À intégrer dans la fonction createIndividualLocationMap
-    //          */
-
-
-    //         // Créer les limites à partir des marqueurs
-    //         const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
-
-    //         // Vérifier si les limites sont valides
-    //         if (bounds.isValid()) {
-    //             // Calculer le centre des limites
-    //             const center = bounds.getCenter();
-                
-    //             // Calculer le niveau de zoom pour afficher toutes les limites
-    //             const zoomLevel = map.getBoundsZoom(bounds, false, [50, 50]);
-                
-    //             // Limiter le niveau de zoom au maximum spécifié
-    //             const limitedZoom = Math.min(zoomLevel, 9); // 7 ≈ 200km de rayon, 9 = 50km
-                
-    //             // console.log(`Niveau de zoom calculé: ${zoomLevel}, limité à: ${limitedZoom}`);
-                
-    //             // Appliquer le zoom limité avec une transition fluide
-    //             // Utiliser une durée plus longue (1.5 secondes) pour une animation plus visible
-    //             map.flyTo(center, limitedZoom, {
-    //                 animate: true,
-    //                 duration: 1.5, // Durée en secondes
-    //                 easeLinearity: 0.25, // Rend l'animation plus douce
-    //             });
-                
-    //             // Ajouter un petit délai avant d'ajouter les popups pour éviter les problèmes pendant l'animation
-    //             setTimeout(() => {
-    //                 // Si nous voulons montrer une popup automatiquement pour le premier marqueur
-    //                 if (markers.length > 0) {
-    //                     // Optionnel: ouvrir automatiquement la popup du premier marqueur 
-    //                     // markers[0].openPopup();
-    //                 }
-    //             }, 1600); // Juste après la fin de l'animation
-    //         } else {
-    //             console.warn("Limites invalides pour l'ajustement de la vue");
-                
-    //             // Fallback: centrer sur le premier marqueur avec un zoom fixe
-    //             if (markers.length > 0) {
-    //                 map.flyTo(markers[0].getLatLng(), 7, {
-    //                     animate: true,
-    //                     duration: 1.5,
-    //                     easeLinearity: 0.25
-    //                 });
-    //             }
-    //         }
-
-    //         // Améliorer aussi les popups pour plus de lisibilité
-    //         markers.forEach(marker => {
-    //             // Personnaliser le style de la popup
-    //             const popup = marker.getPopup();
-    //             if (popup) {
-    //                 popup.options.className = 'custom-popup';
-                    
-    //                 // Ajouter un style personnalisé pour les popups
-    //                 if (!document.getElementById('custom-popup-style')) {
-    //                     const style = document.createElement('style');
-    //                     style.id = 'custom-popup-style';
-    //                     style.textContent = `
-    //                         .custom-popup .leaflet-popup-content-wrapper {
-    //                             background-color: rgba(255, 255, 255, 0.95);
-    //                             border-radius: 8px;
-    //                             box-shadow: 0 3px 14px rgba(0,0,0,0.4);
-    //                         }
-    //                         .custom-popup .leaflet-popup-content {
-    //                             margin: 13px 19px;
-    //                             font-size: 14px;
-    //                             line-height: 1.4;
-    //                         }
-    //                         .custom-popup .leaflet-popup-tip {
-    //                             background-color: rgba(255, 255, 255, 0.95);
-    //                         }
-    //                     `;
-    //                     document.head.appendChild(style);
-    //                 }
-    //             }
-    //         });
-
-
-    //         // Ajouter un titre à la carte
-    //         const mapTitle = document.createElement('div');
-    //         mapTitle.className = 'individual-map-title';
-    //         mapTitle.style.position = 'absolute';
-    //         mapTitle.style.top = '10px';
-    //         mapTitle.style.left = '50%';
-    //         mapTitle.style.transform = 'translateX(-50%)';
-    //         mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-    //         mapTitle.style.padding = '5px 10px';
-    //         mapTitle.style.borderRadius = '4px';
-    //         mapTitle.style.zIndex = '9100';
-    //         mapTitle.style.fontSize = '14px';
-    //         mapTitle.style.fontWeight = 'bold';
-    //         mapTitle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-    //         mapTitle.textContent = `Lieux de ${person.name.replace(/\//g, '')}`;
-            
-    //         // Supprimer l'ancien titre s'il existe
-    //         const existingTitle = heatmapWrapper.querySelector('.individual-map-title');
-    //         if (existingTitle) existingTitle.remove();
-            
-    //         heatmapWrapper.appendChild(mapTitle);
-            
-    //         // Ajouter un bouton pour revenir à la heatmap originale
-    //         const resetButton = document.createElement('button');
-    //         resetButton.className = 'reset-heatmap-button';
-    //         resetButton.style.position = 'absolute';
-    //         resetButton.style.bottom = '10px';
-    //         resetButton.style.right = '10px';
-    //         resetButton.style.backgroundColor = '#4361ee';
-    //         resetButton.style.color = 'white';
-    //         resetButton.style.border = 'none';
-    //         resetButton.style.borderRadius = '4px';
-    //         resetButton.style.padding = '5px 10px';
-    //         resetButton.style.cursor = 'pointer';
-    //         resetButton.style.zIndex = '9100';
-    //         resetButton.style.fontSize = '14px';
-    //         resetButton.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-    //         resetButton.textContent = 'Voir tous les lieux';
-            
-    //         // Supprimer l'ancien bouton s'il existe
-    //         const existingButton = heatmapWrapper.querySelector('.reset-heatmap-button');
-    //         if (existingButton) existingButton.remove();
-            
-    //         resetButton.addEventListener('click', () => {
-    //             // Rétablir la heatmap originale
-    //             if (typeof refreshHeatmap === 'function') {
-    //                 refreshHeatmap();
-                    
-    //                 // Réinitialiser les variables de suivi
-    //                 window.lastSelectedLocationId = null;
-    //                 window.isIndividualMapMode = false;
-                    
-    //                 // Mettre à jour l'apparence des icônes de localisation
-    //                 document.querySelectorAll('.location-icon').forEach(icon => {
-    //                     icon.style.color = '';
-    //                     icon.style.backgroundColor = '';
-    //                 });
-    //             }
-                
-    //             // Supprimer le titre et le bouton de reset
-    //             mapTitle.remove();
-    //             resetButton.remove();
-    //         });
-            
-    //         heatmapWrapper.appendChild(resetButton);
-            
-    //         // console.log("Carte individuelle créée avec succès");
-            
-    //     } catch (error) {
-    //         console.error('Erreur lors de la création de la carte individuelle:', error);
-    //         alert('Erreur lors de la création de la carte: ' + error.message);
-    //     } finally {
-    //         // Supprimer l'overlay de chargement
-    //         loadingOverlay.remove();
-    //     }
-    // }
-
-    
     async function createIndividualLocationMap(personId) {
         // Vérifier que le wrapper de la heatmap existe
         const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
@@ -722,14 +421,7 @@ export function showPersonsList(name, people, config) {
                 icon.style.opacity = '0.7';
             }
         });
-
-
-
     }
-
-
-
-
 
 
     peopleWithDates.forEach((person, index) => {
@@ -885,7 +577,7 @@ export function showPersonsList(name, people, config) {
         personDiv.appendChild(dateSpan);
 
         personDiv.addEventListener('click', (event) => {
-            console.log('Clicked on person:', person.name, person.id);
+            // console.log('Clicked on person:', person.name, person.id);
             event.stopPropagation();
             showPersonActions(person, event);
         });
@@ -901,40 +593,12 @@ export function showPersonsList(name, people, config) {
 
 
     // Gestion de la touche Échap
-    // const handleEscape = (e) => {
-    //     if (e.key === 'Escape') {
-    //         if (modal.parentNode) {
-    //             modal.parentNode.removeChild(modal);
-                
-    //             // Restaurer la taille originale de la heatmap si elle était visible
-    //             if ((nameCloudState.isHeatmapVisible)  && heatmapWrapper) {
-    //                 try {
-    //                     const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-    //                     if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-    //                     if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-    //                     if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-    //                     if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                        
-    //                     setTimeout(() => {
-    //                         if (heatmapWrapper.map) {
-    //                             heatmapWrapper.map.invalidateSize();
-    //                         }
-    //                     }, 100);
-    //                 } catch (error) {
-    //                     console.error('Erreur lors de la restauration du style de la heatmap:', error);
-    //                 }
-                    
-    //                 // Réinitialiser les variables de suivi
-    //                 lastSelectedLocationId = null;
-    //                 isIndividualMapMode = false;
-    //             }
-    //         }
-    //         document.removeEventListener('keydown', handleEscape);
-    //     }
-    // };
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
+            // console.log("Fermeture par touche Escape", new Error().stack);
+            removeAllResizeHandles();
             if (modal.parentNode) {
+                modal.removeAttribute('data-splitscreen-mode');
                 modal.parentNode.removeChild(modal);
                 
                 // Restaurer la taille originale de la heatmap si elle était visible
@@ -975,6 +639,8 @@ export function showPersonsList(name, people, config) {
     };
 
     document.addEventListener('keydown', handleEscape);
+
+
     
     // Gérer la redimension de fenêtre si la heatmap est visible
     if ((nameCloudState.isHeatmapVisible) ) {
@@ -1025,7 +691,27 @@ export function showPersonsList(name, people, config) {
             if (originalCloseHandler) originalCloseHandler.call(closeBtn, e);
         };
     }
+
+
+
+    modal.addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        // console.log("Mousedown sur la modale intercepté");
+    });
+    
+    content.addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+        // console.log("Mousedown sur le contenu intercepté");
+    });
+
+
+
+    makeModalDraggableAndResizable(modal, title);
+
+
+
 }
+
 
 /**
  * Ajuste la disposition en mode écran partagé pour la modale et la heatmap
@@ -1033,6 +719,10 @@ export function showPersonsList(name, people, config) {
  * @param {HTMLElement} heatmapWrapper - Le wrapper de la heatmap
  */
 function adjustSplitScreenLayout(modal, heatmapWrapper) {
+    
+    console.log("Debug  Ajustement de la disposition en mode écran partagé");
+    
+    modal.setAttribute('data-splitscreen-mode', 'true');
     const isLandscape = window.innerWidth > window.innerHeight;
     
     // Sauvegarder le style original pour restauration ultérieure
@@ -1050,9 +740,21 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
         modal.style.position = 'fixed';
         modal.style.top = '0';
         modal.style.left = '50%';
-        modal.style.width = '50%';
-        modal.style.height = '100%';
-        
+        modal.style.width = '48%';
+        modal.style.height = '95%';
+        const content = modal.querySelector('div');
+        if (content) {
+            content.style.position = 'relative'; // Au lieu de fixed
+            content.style.width = '90%';
+            content.style.maxWidth = '95%';
+            content.style.height = '90%';
+            content.style.maxHeight = '95%';
+            content.style.top = '5%';  // Centrer verticalement
+            content.style.left = '2%'; // Centrer horizontalement
+            content.style.transform = 'none'; // Supprimer le transform qui pourrait interférer
+        }
+
+
         heatmapWrapper.style.width = '50%';
         heatmapWrapper.style.height = 'calc(100% - 60px)';
         heatmapWrapper.style.left = '0';
@@ -1063,7 +765,7 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
         // là où se termine la heatmap, en évitant tout chevauchement
         
         const mapHeight = 'calc(50% - 30px)'; // Réduire légèrement la hauteur de la carte
-        const modalTop = 'calc(50% - 30px)'; // Début de la modale après la carte
+        const modalTop = 'calc(50% - 2px)'; // Début de la modale après la carte
         
 
 
@@ -1077,26 +779,34 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
         modal.style.position = 'fixed';
         modal.style.top = modalTop; // Commencer exactement où se termine la carte
         modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = 'calc(50% + 30px)'; // Augmenter légèrement la hauteur
-        modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        modal.style.width = '90%';
+        modal.style.height = 'calc(48% )'; // Augmenter légèrement la hauteur
+        // modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        modal.style.backgroundColor = 'transparent';
+        modal.style.pointerEvents = 'none'; // Permet aux clics de passer à travers
+        // modal.style.pointerEvents = 'auto'; // Changé de 'none' à 'auto'
         
-        // S'assurer que le contenu de la modale est correctement positionné
-        const content = modal.querySelector('div'); // Le premier div dans la modale est généralement le contenu
+
+        // IMPORTANT: Configurer aussi le contenu principal
+        const content = modal.querySelector('div'); 
         if (content) {
-            content.style.maxHeight = 'calc(100% - 20px)'; // Légèrement moins que la hauteur de la modale
+            content.style.position = 'relative'; // Au lieu de fixed
+            content.style.width = '90%';
+            content.style.maxWidth = '100%';
+            content.style.height = 'calc(100% - 40px)'; // Laisser un peu d'espace
+            content.style.maxHeight = '100%';
+            content.style.top = '20px';  // Un peu d'espace en haut
+            content.style.left = '5%';   // Centrer horizontalement
+            content.style.margin = '0 auto'; // Centrage horizontal
+            content.style.transform = 'none'; // Supprimer le transform
+            content.style.pointerEvents = 'auto'; // S'assurer que les clics fonctionnent
         }
+
+
     }
     
-    // Invalider la taille de la carte après un délai pour s'assurer que 
-    // les modifications de style sont appliquées
-    // setTimeout(() => {
-    //     if (heatmapWrapper.map) {
-    //         heatmapWrapper.map.invalidateSize();
-    //     }
-    // }, 100);
 
-        // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
+    // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
     setTimeout(() => {
         if (heatmapWrapper && heatmapWrapper.map) {
             // Vérifier que la carte a des dimensions non nulles
@@ -1122,90 +832,6 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
         }
     }, 300); // Augmenter le délai à 300ms pour plus de sécurité
 }
-
-/**
- * Affiche la heatmap et ajuste le layout pour l'écran partagé
- * @param {HTMLElement} modal - La modale de liste de personnes
- * @param {Object} config - La configuration actuelle
- * @returns {Promise<HTMLElement|null>} - Le wrapper de heatmap ou null en cas d'erreur
- */
-// async function showHeatmapAndAdjustLayout(modal, config) {
-//     // Afficher un indicateur de chargement
-//     const loadingIndicator = document.createElement('div');
-//     loadingIndicator.style.position = 'fixed';
-//     loadingIndicator.style.top = '50%';
-//     loadingIndicator.style.left = '50%';
-//     loadingIndicator.style.transform = 'translate(-50%, -50%)';
-//     loadingIndicator.style.backgroundColor = 'white';
-//     loadingIndicator.style.padding = '20px';
-//     loadingIndicator.style.borderRadius = '8px';
-//     loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-//     loadingIndicator.style.zIndex = '9999';
-//     loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
-//     document.body.appendChild(loadingIndicator);
-    
-//     try {
-//         // Utiliser la fonction existante pour obtenir les données
-//         const heatmapData = await createDataForHeatMap(config);
-        
-//         // Supprimer l'indicateur de chargement
-//         document.body.removeChild(loadingIndicator);
-        
-//         if (!heatmapData || heatmapData.length === 0) {
-//             console.error("Aucune donnée géographique disponible");
-//             alert("Aucune donnée géographique disponible.");
-//             return null;
-//         }
-        
-//         // Créer un titre pour la heatmap
-//         let heatmapTitle = "Heatmap";
-//         if (config) {
-//             const configType = config.type;
-//             heatmapTitle = `Heatmap - ${configType === 'prenoms' ? 'Prénoms' : 
-//                 configType === 'noms' ? 'Noms' : 
-//                 configType === 'professions' ? 'Métiers' : 
-//                 configType === 'duree_vie' ? 'Durées de vie' : 
-//                 configType === 'age_procreation' ? 'Âges de procréation' : 
-//                 configType === 'lieux' ? 'Lieux' : 'Général'}`;
-//         }
-        
-//         // Utiliser la fonction existante pour créer la heatmap
-//         createImprovedHeatmap(heatmapData, heatmapTitle);
-        
-//         // Récupérer la référence à la heatmap nouvellement créée
-//         const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-//         if (!heatmapWrapper) {
-//             console.error("La heatmap n'a pas été créée correctement");
-//             return null;
-//         }
-        
-//         // Ajuster la disposition pour le mode écran partagé
-//         adjustSplitScreenLayout(modal, heatmapWrapper);
-        
-//         return heatmapWrapper;
-//     } catch (error) {
-//         console.error("Erreur lors de la création de la heatmap:", error);
-//         if (document.body.contains(loadingIndicator)) {
-//             document.body.removeChild(loadingIndicator);
-//         }
-//         alert("Erreur lors de la création de la carte: " + error.message);
-//         return null;
-//     }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Dans nameCloudInteractions.js, modifiez la fonction showHeatmapAndAdjustLayout
 
 /**
  * Affiche la heatmap et ajuste le layout pour l'écran partagé
@@ -1450,8 +1076,6 @@ async function createHeatmapDataForPeople(people) {
     }
 }
 
-
-
 export function showPersonActions(person, event) {
     console.log('Showing actions for:', person.name, person.id);
 
@@ -1573,22 +1197,6 @@ export function showInTree(personId) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (function initializeGlobalListeners() {
     document.addEventListener('cloudMapRefreshed', (event) => {
         // console.log('CloudMap rafraîchie', event.detail);
@@ -1603,3 +1211,525 @@ export function showInTree(personId) {
     });
 })();
 
+
+/**
+ * Rend une modale déplaçable et redimensionnable - solution simplifiée et stabilisée
+ * @param {HTMLElement} modal - L'élément de la modale
+ * @param {HTMLElement} handle - L'élément qui sert de poignée pour déplacer la modale (titre)
+ */
+function makeModalDraggableAndResizable(modal, handle) {
+    // 1. Trouver le contenu réel qui doit être redimensionné
+    const content = modal.querySelector('div');
+    if (!content) return;
+    
+    // 2. S'assurer que le contenu est correctement positionné
+    content.style.position = 'fixed';
+    content.style.overflow = 'auto';
+    
+    
+    // 3. Gestion du déplacement
+    handle.style.cursor = 'move';
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+    
+    // Démarrer le déplacement (souris)
+    handle.addEventListener('mousedown', function(e) {
+        if (e.target.id === 'person-list-close-button') return;
+        
+        const rect = content.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        startX = e.clientX;
+        startY = e.clientY;
+        isDragging = true;
+        modal.setAttribute('data-dragging', 'true'); // Ajouter un flag
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        e.preventDefault();
+    });
+    
+    // Démarrer le déplacement (tactile)
+    handle.addEventListener('touchstart', function(e) {
+        if (e.target.id === 'person-list-close-button') return;
+        
+        const touch = e.touches[0];
+        const rect = content.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isDragging = true;
+        
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend', onTouchEnd);
+        e.preventDefault();
+    });
+    
+    // Déplacer avec la souris
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        
+        moveContent(e.clientX, e.clientY);
+        e.preventDefault();
+    }
+    
+    // Déplacer avec le toucher
+    function onTouchMove(e) {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        moveContent(touch.clientX, touch.clientY);
+        e.preventDefault();
+    }
+    
+
+
+    function moveContent(clientX, clientY) {
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        
+        // Vérifier le mode splitscreen
+        const isSplitscreen = modal.getAttribute('data-splitscreen-mode') === 'true';
+        
+        // Vérifier le mode de positionnement actuel
+        const isRelativePosition = content.style.position === 'relative';
+        
+        if (isSplitscreen && isRelativePosition) {
+            // En mode splitscreen + position relative, utiliser des pourcentages
+            const parentRect = modal.getBoundingClientRect();
+            const deltaXPercent = (dx / parentRect.width) * 100;
+            const deltaYPercent = (dy / parentRect.height) * 100;
+            
+            // Récupérer les positions actuelles en pourcentage
+            let currentLeft = parseFloat(content.style.left) || 0;
+            let currentTop = parseFloat(content.style.top) || 0;
+            
+            // Si la valeur actuelle contient "%", alors on utilise directement la valeur
+            if (content.style.left.includes('%')) {
+                currentLeft = parseFloat(content.style.left);
+            }
+            
+            if (content.style.top.includes('%')) {
+                currentTop = parseFloat(content.style.top);
+            }
+            
+            // Calculer les nouvelles positions en pourcentage
+            const newLeft = currentLeft + deltaXPercent;
+            const newTop = currentTop + deltaYPercent;
+            
+            // Limiter entre 0% et 90% pour éviter la sortie complète
+            const limitedLeft = Math.max(0, Math.min(90, newLeft)); 
+            const limitedTop = Math.max(0, Math.min(90, newTop));
+            
+            // Appliquer les nouvelles positions
+            content.style.left = `${limitedLeft}%`;
+            content.style.top = `${limitedTop}%`;
+            
+            // En mode splitscreen, on met à jour les points de départ
+            startX = clientX;
+            startY = clientY;
+        } else {
+            // Mode standard avec position fixed - on garde la logique d'origine
+            // IMPORTANT: En mode normal, on ne met PAS à jour startX et startY
+            content.style.left = `${initialLeft + dx}px`;
+            content.style.top = `${initialTop + dy}px`;
+            content.style.transform = 'none';
+            
+            // Limites d'écran pour position fixed
+            const rect = content.getBoundingClientRect();
+            if (rect.top < 0) content.style.top = '0px';
+            if (rect.left < 0) content.style.left = '0px';
+            if (rect.right > window.innerWidth) 
+                content.style.left = `${window.innerWidth - rect.width}px`;
+            if (rect.bottom > window.innerHeight) 
+                content.style.top = `${window.innerHeight - rect.height}px`;
+        }
+    }
+
+    
+    // Arrêter le déplacement (souris)
+    function onMouseUp() {
+        isDragging = false;
+        modal.setAttribute('data-dragging', 'false'); // Réinitialiser le flag
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Actualiser les poignées
+        createResizeHandles();
+    }
+    
+    // Arrêter le déplacement (tactile)
+    function onTouchEnd() {
+        isDragging = false;
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        
+        // Actualiser les poignées
+        createResizeHandles();
+    }
+    
+    // 4. Gestion du redimensionnement
+    function createResizeHandles() {
+        // Supprimer les anciennes poignées
+        content.querySelectorAll('.resize-handle').forEach(h => h.remove());
+
+        // IMPORTANT: Forcer l'initialisation correcte des coordonnées
+        // Si la modale utilise transform pour le centrage, cela cause des problèmes
+        const rect = content.getBoundingClientRect();
+        
+        // Si la position est centrée avec transform, la convertir en coordonnées absolues
+        if (content.style.transform && content.style.transform.includes('translate')) {
+            // Garder la taille actuelle
+            const width = rect.width;
+            const height = rect.height;
+            
+            // Calculer la position absolue
+            const left = rect.left;
+            const top = rect.top;
+            
+            // Appliquer les nouvelles coordonnées sans transform
+            content.style.left = `${left}px`;
+            content.style.top = `${top}px`;
+            content.style.transform = 'none';
+            
+            // S'assurer que la taille reste la même
+            content.style.width = `${width}px`;
+            content.style.height = `${height}px`;
+        }
+        
+        
+        // Positions des poignées
+        const positions = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne'];
+        
+        positions.forEach(pos => {
+            const handle = document.createElement('div');
+            handle.className = `resize-handle resize-${pos}`;
+            handle.style.position = 'absolute';
+            handle.style.zIndex = '9999';
+            
+            // Configurer l'apparence et la position de chaque poignée selon sa position
+            switch(pos) {
+                case 'e':  // Est (droite)
+                    handle.style.right = '0px';
+                    handle.style.top = '50%';
+                    handle.style.transform = 'translateY(-50%)';
+                    handle.style.width = '10px';
+                    handle.style.height = '100%';
+                    handle.style.cursor = 'ew-resize';
+                    break;
+                case 'se': // Sud-Est (bas droite)
+                    handle.style.right = '0px';
+                    handle.style.bottom = '0px';
+                    // handle.style.width = '20px';
+                    // handle.style.height = '20px';
+                    // handle.style.cursor = 'nwse-resize';
+                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.5)';
+                    handle.style.width = '30px';
+                    handle.style.height = '30px';
+                    handle.style.cursor = 'nwse-resize';
+                    handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    // handle.style.width = '25px';
+                    // handle.style.height = '25px';
+                    // handle.style.cursor = 'nwse-resize';
+                    // handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+
+
+                    break;
+                case 's':  // Sud (bas)
+                    handle.style.bottom = '0px';
+                    handle.style.left = '50%';
+                    handle.style.transform = 'translateX(-50%)';
+                    handle.style.width = '100%';
+                    handle.style.height = '10px';
+                    handle.style.cursor = 'ns-resize';
+                    break;
+                case 'sw': // Sud-Ouest (bas gauche)
+                    handle.style.left = '0px';
+                    handle.style.bottom = '0px';
+                    handle.style.width = '35px';
+                    handle.style.height = '35px';
+                    handle.style.cursor = 'nesw-resize';
+                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
+                    handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'w':  // Ouest (gauche)
+                    handle.style.left = '0px';
+                    handle.style.top = '50%';
+                    handle.style.transform = 'translateY(-50%)';
+                    handle.style.width = '10px';
+                    handle.style.height = '100%';
+                    handle.style.cursor = 'ew-resize';
+                    break;
+                case 'nw': // Nord-Ouest (haut gauche)
+                    handle.style.left = '0px';
+                    handle.style.top = '0px';
+                    handle.style.width = '35px';
+                    handle.style.height = '35px';
+                    handle.style.cursor = 'nwse-resize';
+                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
+                    handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'n':  // Nord (haut)
+                    handle.style.top = '0px';
+                    handle.style.left = '50%';
+                    handle.style.transform = 'translateX(-50%)';
+                    handle.style.width = '100%';
+                    handle.style.height = '10px';
+                    handle.style.cursor = 'ns-resize';
+                    break;
+                case 'ne': // Nord-Est (haut droite)
+                    handle.style.right = '0px';
+                    handle.style.top = '0px';
+                    handle.style.width = '20px';
+                    handle.style.height = '20px';
+                    handle.style.cursor = 'nesw-resize';
+                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
+                    handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+            }
+ 
+            setupResizeHandlers(handle, pos);
+            
+            // Ajouter la poignée au contenu
+            content.appendChild(handle);
+        });
+    }
+
+
+
+    // Fonction pour configurer les gestionnaires d'événements pour chaque poignée
+    function setupResizeHandlers(handle, pos) {
+        let isResizing = false;
+        let resizeStartX, resizeStartY, initialWidth, initialHeight, initialLeft, initialTop;
+        
+        // Démarrer le redimensionnement (souris)
+        handle.addEventListener('mousedown', function(e) {
+            if (e.target.id === 'person-list-close-button') return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const rect = content.getBoundingClientRect();
+            initialWidth = rect.width;
+            initialHeight = rect.height;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+            isResizing = true;
+            
+            document.addEventListener('mousemove', onResizeMove);
+            document.addEventListener('mouseup', onResizeEnd);
+        });
+        
+        // Démarrer le redimensionnement (tactile)
+        handle.addEventListener('touchstart', function(e) {
+            if (e.target.id === 'person-list-close-button') return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const touch = e.touches[0];
+            const rect = content.getBoundingClientRect();
+            initialWidth = rect.width;
+            initialHeight = rect.height;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            resizeStartX = touch.clientX;
+            resizeStartY = touch.clientY;
+            isResizing = true;
+            
+            document.addEventListener('touchmove', onResizeTouchMove, { passive: false });
+            document.addEventListener('touchend', onResizeEnd);
+        });
+        
+        // Redimensionner avec la souris
+        function onResizeMove(e) {
+            if (!isResizing) return;
+            
+            resizeContent(e.clientX, e.clientY);
+            e.preventDefault();
+        }
+        
+        // Redimensionner avec le toucher
+        function onResizeTouchMove(e) {
+            if (!isResizing) return;
+            
+            const touch = e.touches[0];
+            resizeContent(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }
+        
+        // Fonction commune pour redimensionner
+        function resizeContent(clientX, clientY) {
+            const dx = clientX - resizeStartX;
+            const dy = clientY - resizeStartY;
+            
+            // Valeurs par défaut (pas de changement)
+            let newWidth = initialWidth;
+            let newHeight = initialHeight;
+            let newLeft = initialLeft;
+            let newTop = initialTop;
+            
+            // Redimensionnement horizontal
+            if (pos.includes('e')) {
+                newWidth = initialWidth + dx;
+            } else if (pos.includes('w')) {
+                newWidth = initialWidth - dx;
+                newLeft = initialLeft + dx;
+            }
+            
+            // Redimensionnement vertical
+            if (pos.includes('s')) {
+                newHeight = initialHeight + dy;
+            } else if (pos.includes('n')) {
+                newHeight = initialHeight - dy;
+                newTop = initialTop + dy;
+            }
+            
+            // Limites minimales
+            const minWidth = 300;
+            const minHeight = 200;
+            
+            // Vérifier le mode splitscreen
+            const isSplitscreen = modal.getAttribute('data-splitscreen-mode') === 'true';
+            const isRelativePosition = content.style.position === 'relative';
+            
+            // Gestion différente selon le mode
+            if (isSplitscreen && isRelativePosition) {
+                // Pour le mode splitscreen, adapter les limites
+                // (implementation plus simple car les positions sont déjà relatives)
+                if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {
+                    content.style.width = `${newWidth}px`;
+                }
+                
+                if ((pos.includes('n') || pos.includes('s')) && newHeight >= minHeight) {
+                    content.style.height = `${newHeight}px`;
+                }
+            } else {
+                // Appliquer les nouvelles dimensions avec limites
+                if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {
+                    content.style.width = `${newWidth}px`;
+                    if (pos.includes('w')) {
+                        content.style.left = `${newLeft}px`;
+                    }
+                }
+                
+                if ((pos.includes('n') || pos.includes('s')) && newHeight >= minHeight) {
+                    content.style.height = `${newHeight}px`;
+                    if (pos.includes('n')) {
+                        content.style.top = `${newTop}px`;
+                    }
+                }
+                
+                // Assurer que la modale reste dans l'écran
+                const rect = content.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    content.style.width = `${window.innerWidth - rect.left}px`;
+                }
+                if (rect.bottom > window.innerHeight) {
+                    content.style.height = `${window.innerHeight - rect.top}px`;
+                }
+                if (rect.left < 0 && pos.includes('w')) {
+                    const adjustedWidth = initialWidth + initialLeft;
+                    content.style.left = '0px';
+                    content.style.width = `${adjustedWidth}px`;
+                }
+                if (rect.top < 0 && pos.includes('n')) {
+                    const adjustedHeight = initialHeight + initialTop;
+                    content.style.top = '0px';
+                    content.style.height = `${adjustedHeight}px`;
+                }
+            }
+        }
+
+        
+        
+        // Arrêter le redimensionnement
+        function onResizeEnd() {
+            isResizing = false;
+            document.removeEventListener('mousemove', onResizeMove);
+            document.removeEventListener('touchmove', onResizeTouchMove);
+            document.removeEventListener('mouseup', onResizeEnd);
+            document.removeEventListener('touchend', onResizeEnd);
+        }
+    }
+
+
+    // 5. Centrer initialement le contenu si nécessaire
+    if (!content.style.left || !content.style.top) {
+        content.style.left = '50%';
+        content.style.top = '50%';
+        content.style.transform = 'translate(-50%, -50%)';
+    }
+    
+    // 6. Nettoyer les poignées lors de la fermeture
+    const closeButton = document.getElementById('person-list-close-button');
+    if (closeButton) {
+        const originalOnClick = closeButton.onclick;
+        closeButton.onclick = function(e) {
+            content.querySelectorAll('.resize-handle').forEach(h => h.remove());
+            
+            if (originalOnClick) {
+                originalOnClick.call(this, e);
+            }
+        };
+    }
+    
+    // 7. Gestion de la touche Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            content.querySelectorAll('.resize-handle').forEach(h => h.remove());
+        }
+    });
+    
+    // 8. Initialiser les poignées
+    createResizeHandles();
+}
+
+
+
+/**
+ * Fonction de nettoyage pour supprimer toutes les poignées de redimensionnement
+ */
+function removeAllResizeHandles() {
+    // Nettoyer toutes les poignées individuelles
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+        if (handle.parentNode) {
+            handle.parentNode.removeChild(handle);
+        }
+    });
+    
+    // Nettoyer le conteneur de poignées
+    const handleContainer = document.getElementById('resize-handles-container');
+    if (handleContainer && handleContainer.parentNode) {
+        handleContainer.parentNode.removeChild(handleContainer);
+    }
+    
+    // Arrêter tous les observateurs
+    document.querySelectorAll('[data-has-observer="true"]').forEach(el => {
+        if (el._modalObserver) {
+            el._modalObserver.disconnect();
+            delete el._modalObserver;
+        }
+    });
+    
+    // Supprimer les écouteurs d'événements window si nécessaire
+    window.removeEventListener('scroll', updateHandleContainerPosition);
+}
+
+// Fonction utilitaire pour mettre à jour la position du conteneur de poignées
+function updateHandleContainerPosition() {
+    const handleContainer = document.getElementById('resize-handles-container');
+    if (!handleContainer) return;
+    
+    const targetModal = document.querySelector('[data-has-observer="true"]');
+    if (targetModal) {
+        const rect = targetModal.getBoundingClientRect();
+        handleContainer.style.width = `${targetModal.offsetWidth}px`;
+        handleContainer.style.height = `${targetModal.offsetHeight}px`;
+        handleContainer.style.left = `${rect.left}px`;
+        handleContainer.style.top = `${rect.top}px`;
+    }
+}
