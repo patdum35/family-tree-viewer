@@ -96,6 +96,14 @@ export function showPersonsList(name, people, config) {
     } else {
         // content.style.width = '80%';
         // content.style.maxWidth = '800px';
+        // content.style.maxHeight = '80vh';
+        // Centrage horizontal en mode normal (sans heatmap)
+        content.style.position = 'fixed';
+        content.style.top = '50%';
+        content.style.left = '50%';
+        content.style.transform = 'translate(-55%, -50%)';
+        content.style.maxWidth = '700px';
+        content.style.width = '75%';
         content.style.maxHeight = '80vh';
     }
   
@@ -107,6 +115,32 @@ export function showPersonsList(name, people, config) {
     content.style.position = 'relative';
 
     content.style.pointerEvents = 'auto'; // S'assure que le contenu de la modale capte les événements
+
+
+
+
+
+
+
+    // Créer un conteneur pour l'en-tête qui restera fixe
+    const headerContainer = document.createElement('div');
+    headerContainer.style.position = 'sticky';
+    headerContainer.style.top = '0';
+    headerContainer.style.zIndex = '1001';
+    headerContainer.style.backgroundColor = 'rgba(235, 245, 255, 0.95)';
+    headerContainer.style.padding = '8px';
+    headerContainer.style.borderRadius = '8px 8px 0 0';
+    headerContainer.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)';
+    headerContainer.style.marginTop = '-20px';
+    headerContainer.style.marginLeft = '-20px';
+    headerContainer.style.marginRight = '-20px';
+    headerContainer.style.paddingLeft = '20px';
+    headerContainer.style.display = 'flex';
+    headerContainer.style.justifyContent = 'space-between';
+    headerContainer.style.alignItems = 'center';
+    headerContainer.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+
+
 
 
 
@@ -126,32 +160,54 @@ export function showPersonsList(name, people, config) {
                         `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
                         'Personnes';
 
-    title.style.marginBottom = '10px';
-    title.style.borderBottom = '1px solid #eee';
-    title.style.paddingBottom = '5px';
-    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px'; 
+    // title.style.marginBottom = '10px';
+    // title.style.borderBottom = '1px solid #eee';
+    // title.style.paddingBottom = '5px';
+    // title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px'; 
 
     title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle
-    title.style.padding = '8px';
-    title.style.borderRadius = '8px 8px 0 0'; // Coins arrondis en haut seulement
-    title.style.marginTop = '-20px'; // Pour compenser le padding du contenu
-    title.style.marginLeft = '-20px'; 
-    title.style.marginRight = '-20px';
-    title.style.paddingLeft = '20px';
+    // title.style.padding = '8px';
+    // title.style.borderRadius = '8px 8px 0 0'; // Coins arrondis en haut seulement
+    // title.style.marginTop = '-20px'; // Pour compenser le padding du contenu
+    // title.style.marginLeft = '-20px'; 
+    // title.style.marginRight = '-20px';
+    // title.style.paddingLeft = '20px';
     title.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)'; // Bordure bleue pâle
+
+
+    title.style.marginBottom = '0';  // Changer à 0 car l'en-tête a déjà un padding
+    title.style.paddingBottom = '0';
+    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px';
+    title.style.flex = '1';  // Permet au titre de prendre l'espace disponible
 
 
     // Bouton de fermeture
     const closeBtn = document.createElement('button');
     closeBtn.id = 'person-list-close-button';  // Ajout d'un ID unique
     closeBtn.innerHTML = '×';
-    closeBtn.style.position = 'absolute';
+    // closeBtn.style.position = 'absolute';
     closeBtn.style.right = '10px';
     closeBtn.style.top = '10px';
     closeBtn.style.border = 'none';
     closeBtn.style.background = 'none';
     closeBtn.style.fontSize = '20px';
     closeBtn.style.cursor = 'pointer';
+    closeBtn.style.marginLeft = '10px';  // Espace entre le titre et le bouton
+    
+
+
+    // Ajouter le titre et le bouton à l'en-tête
+    headerContainer.appendChild(title);
+    headerContainer.appendChild(closeBtn);
+
+    // Ajouter l'en-tête au contenu avant la liste
+    content.appendChild(headerContainer);
+
+    // Ajuster le style du content pour accommoder l'en-tête fixe
+    content.style.paddingTop = '0';  // Réduire le padding car l'en-tête a son propre padding
+
+
+
 
     closeBtn.onclick = () => {
         // console.log("Fermeture explicite de la modale via le bouton de fermeture");
@@ -585,8 +641,8 @@ export function showPersonsList(name, people, config) {
         list.appendChild(personDiv);
     });
 
-    content.appendChild(closeBtn);
-    content.appendChild(title);
+    // content.appendChild(closeBtn);
+    // content.appendChild(title);
     content.appendChild(list);
     modal.appendChild(content);
     document.body.appendChild(modal);

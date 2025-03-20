@@ -169,6 +169,7 @@ export function displayPersonDetails(personId) {
                 overflow: auto !important;
                 max-width: calc(100% - 20px) !important;
                 max-height: calc(100% - 50px) !important;
+                /*left: 10px !important; */
             }
             
             .modal-content {
@@ -198,6 +199,15 @@ export function displayPersonDetails(personId) {
                 min-height: unset !important;
                 background-color: rgba(248, 249, 250, 0.95) !important;
                 border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+
+                /* Rendre l'en-tête fixe */
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 1001 !important;
+                width: 100% !important;
+                
+                /* Ajouter une ombre pour démarcation visuelle */
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
             }
             .details-section {
                 margin-bottom: 6px;
@@ -433,13 +443,20 @@ export function displayPersonDetails(personId) {
 
     // Position initiale centrée si pas de position sauvegardée
     if (!state.modalSettings || !state.modalSettings.personDetailsModal) {
-        modal.style.left = 'auto';
+        // Définir d'abord les dimensions
+        const modalWidth = Math.min(600, window.innerWidth - 20); // Largeur initiale de 600px maximum
+        modal.style.width = `${modalWidth}px`;
+        modal.style.maxWidth = `${window.innerWidth - 20}px`;
+        modal.style.maxHeight = `${window.innerHeight - 50}px`;
+        
+        // Centrer horizontalement
+        modal.style.left = `${(window.innerWidth - modalWidth) / 2}px`;
         modal.style.right = 'auto';
-        modal.style.width = 'auto';
-        modal.style.maxWidth = `${window.innerWidth - 10}px`;
-        modal.style.maxHeight= `${window.innerHeight - 50}px`;
+        
+        // Centrer verticalement (optionnel)
+        const modalHeight = Math.min(400, window.innerHeight - 50); // Hauteur initiale estimée
+        modal.style.top = `${(window.innerHeight - modalHeight) / 2}px`;
     }
-
     // Rendre la modale déplaçable et resizable
     setTimeout(() => {
         makeModalDraggable();

@@ -2,7 +2,7 @@
 // Animation de l'arbre
 // ====================================
 import { state, showMap  } from './main.js';
-import { handleAncestorsClick } from './nodeControls.js';
+import { handleAncestorsClick, handleDescendants } from './nodeControls.js';
 import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
 import { buildDescendantTree } from './treeOperations.js';
 // import { geocodeLocation } from './modalWindow.js';
@@ -107,11 +107,12 @@ function findAncestorPath(startId, targetAncestorId) {
     
     // Trouver le chemin depuis l'ancêtre jusqu'à la racine actuelle
     const path = findNodeAndPath(descendantTree, startId);
-    
+    const descendPath = [...path]; // Crée une copie du tableau
+
     // Inverser le chemin pour aller de la racine vers l'ancêtre
     const finalPath = path ? path.reverse() : [];
-    
-    return finalPath;
+   
+    return [finalPath, descendPath];
 }
 
 /**
@@ -242,6 +243,7 @@ let animationController = null;
 
 let animationState = {
     path: [],          // Le chemin complet de l'animation
+    descendpath: [],   // Le chemin complet descendant
     currentIndex: 0,   // L'index du nœud actuel
     isPaused: false
 };
@@ -268,7 +270,15 @@ export function startAncestorAnimation() {
 
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
-        animationState.path = findAncestorPath(state.rootPersonId, state.targetAncestorId);
+        [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
+        // console.log("Chemin trouvé:", animationState.path);
+        // console.log("Chemin trouvé descendant:", animationState.descendpath);
+        
+        if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+            animationState.path = animationState.descendpath;
+        }
+
+
         animationState.currentIndex = 0;
         animationState.isPaused = false;
     }
@@ -293,6 +303,7 @@ export function startAncestorAnimation() {
 
                 const nodeId = animationState.path[i];
                 const node = findNodeInTree(nodeId);
+                // console.log("Noeud trouvé ? :",i,  nodeId, node);
 
                 if (node) {
 
@@ -328,7 +339,15 @@ export function startAncestorAnimation() {
                     // Actions sur le nœud
                     if (!node.data.children || node.data.children.length === 0) {
                         const event = new Event('click');
-                        handleAncestorsClick(event, node);
+                        if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+                            // handleNonRootDescendants(event, node);
+                            console.log("debug handleDescendants", node);
+                            handleDescendants(node);
+                        } else {
+                            handleAncestorsClick(event, node);
+                        }
+
+
                         drawTree();
                     }
 
@@ -439,4 +458,5 @@ export function resetAnimationState() {
 
     // Arrêter toute animation en cours
     stopAnimation();
+
 }

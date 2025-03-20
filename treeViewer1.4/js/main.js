@@ -9,7 +9,7 @@ import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './tre
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector  } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation  } from './mainUI.js'; 
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -31,6 +31,7 @@ import {
 export const state = {
     gedcomData: null,
     rootPersonId: null,
+    rootPerson: null,
     currentTree: null,
     nombre_prenoms: 2,
     nombre_lettersInPrenoms: 20,
@@ -44,7 +45,11 @@ export const state = {
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
     isAnimationPaused: false,
+    isAnimationLaunched: false,
     targetAncestorId: "@I739@",
+    animationTargetAncestorId: "@I739@",
+    animationRootPersonId: '@I1@',
+
     treeOwner: 1
 };
 
@@ -369,21 +374,27 @@ async function loadFileContent(file) {
  * @param {Object} person - La personne à ajouter
  */
 function addToRootHistory(person) {
-    // Utiliser la fonction de mise à jour du sélecteur personnalisé
-    // au lieu de manipuler directement le sélecteur standard
-    import('./mainUI.js').then(module => {
-        if (typeof module.updateRootPersonSelector === 'function') {
-            module.updateRootPersonSelector(person);
-        } else {
-            console.warn("La fonction updateRootPersonSelector n'est pas disponible");
+
+
+    if (person.name === state.gedcomData.individuals[person.id].name) {
+        console.log('-----------debug addToRootHistory OK', person.id, person.name, state.gedcomData.individuals[person.id].name);
+
+        // Utiliser la fonction de mise à jour du sélecteur personnalisé
+        // au lieu de manipuler directement le sélecteur standard
+        import('./mainUI.js').then(module => {
+            if (typeof module.updateRootPersonSelector === 'function') {
+                module.updateRootPersonSelector(person);
+            } else {
+                console.warn("La fonction updateRootPersonSelector n'est pas disponible");
+                // Comportement de secours en cas d'échec
+                fallbackUpdateRootPersonSelector(person);
+            }
+        }).catch(error => {
+            console.error("Erreur lors de l'import de mainUI.js:", error);
             // Comportement de secours en cas d'échec
             fallbackUpdateRootPersonSelector(person);
-        }
-    }).catch(error => {
-        console.error("Erreur lors de l'import de mainUI.js:", error);
-        // Comportement de secours en cas d'échec
-        fallbackUpdateRootPersonSelector(person);
-    });
+        });
+    }
 }
 
 // Fonction de secours qui utilise le code original
@@ -494,6 +505,8 @@ export function handleRootPersonChange(event) {
 
         // Réinitialiser l'état de l'animation avant de démarrer
         resetAnimationState();
+
+        state.isAnimationLaunched = true;
         
         // Forcer 2 générations
         state.nombre_generation = 2;
@@ -534,6 +547,9 @@ export function handleRootPersonChange(event) {
             customSelector.value = state.rootPersonId;
         }
         
+
+        enforceTextTruncation();
+
         return;
     }
 }
@@ -549,14 +565,17 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     resetAnimationState();
 
     // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
-    const person = rootPersonId 
-        ? state.gedcomData.individuals[rootPersonId]
-        : state.rootPersonId 
-            ? state.gedcomData.individuals[state.rootPersonId]
-            : findYoungestPerson();
+    let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
+
+
 
     // Important : toujours sauvegarder l'ID de la personne courante
-    state.rootPersonId = rootPersonId || person.id;
+    if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
+        state.rootPersonId = rootPersonId || person.id;
+        state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
+    } 
+
+
 
     // Si c'est l'initialisation, configurer le sélecteur avec la première racine
     if (isInit) {
@@ -567,20 +586,32 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         rootPersonResults.style.backgroundColor = 'orange';
     } else {
         // Sinon, ajouter la nouvelle racine à l'historique
-        addToRootHistory(person);
+        if (!state.isAnimationLaunched || (!state.treeModeReal==='descendants'&& !state.treeModeReal==='directDescendants'))  {
+         addToRootHistory(person);
+        }
     }
 
 
+
+
     updateBoxWidth();
-    
+
     // Construire l'arbre selon le mode
     state.treeModeReal = state.treeMode;
-    state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
-        ? buildDescendantTree(person.id)
-        : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
-        ? buildAncestorTree(person.id)
-        : buildCombinedTree(person.id); // Pour le mode 'both'
 
+
+    if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
+        const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
+        state.currentTree =  buildDescendantTree(tempPerson.id);
+    }
+    else {
+
+        state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
+            ? buildDescendantTree(person.id)
+            : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
+            ? buildAncestorTree(person.id)
+            : buildCombinedTree(person.id); // Pour le mode 'both'
+    }
 
 
     drawTree(isZoomRefresh);

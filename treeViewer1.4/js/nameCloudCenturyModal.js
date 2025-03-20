@@ -65,14 +65,14 @@ export function showCenturyStatsModal(type) {
             modal.style.position = 'fixed';
             modal.style.top = '50%';
             modal.style.left = '50%';
-            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.transform = 'translate(-54%, -50%)';
             modal.style.backgroundColor = 'white';
             modal.style.padding = '10px';
             modal.style.borderRadius = '8px';
             modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
             modal.style.zIndex = '1100';
             modal.style.maxWidth = '800px';
-            modal.style.width = '90%';
+            modal.style.width = '85%';
             modal.style.maxHeight = '95vh';
             modal.style.overflow = 'auto';
             
@@ -85,6 +85,25 @@ export function showCenturyStatsModal(type) {
             header.style.marginBottom = '5px';
             header.style.borderBottom = '1px solid #eee';
             header.style.paddingBottom = '2px';
+            // Nouvelles propriétés pour rendre l'en-tête sticky
+            header.style.position = 'sticky';
+            header.style.top = '0';
+            header.style.backgroundColor = 'white';
+            header.style.zIndex = '1101';
+            header.style.paddingTop = '10px';
+            header.style.width = '100%';
+            header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            // Ajuster la marge pour éviter le déplacement du contenu
+            header.style.marginBottom = '15px';
+            header.style.marginLeft = '-20px';  // Compenser le padding du modal
+            header.style.marginRight = '-20px'; // Compenser le padding du modal
+            header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
+            header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
+
+
+
+
+
             
             const title = document.createElement('h2');
             title.textContent = `Évolution ${cfg.modalArticle} ${cfg.modalTitle} par siècle`;

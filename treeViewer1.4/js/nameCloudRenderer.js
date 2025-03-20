@@ -14,7 +14,7 @@ function setupZoom(svg, width, height) {
         .attr('transform', `translate(${width / 2},${height / 2})`);
     
     const zoom = d3.zoom()
-        .scaleExtent([0.5, 5])
+        .scaleExtent([0.5, 15])
         .translateExtent([[-width, -height], [2 * width, 2 * height]])
         .on('zoom', (event) => {
             textGroup.attr('transform', event.transform);

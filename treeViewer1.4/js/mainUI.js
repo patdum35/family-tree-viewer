@@ -293,6 +293,28 @@ function truncateText(text, maxLength = 6) {
     return formattedText.substring(0, maxLength);
 }
 
+
+
+export function enforceTextTruncation() {
+    // Cette fonction recherche tous les sélecteurs personnalisés dans le DOM
+    // et applique la troncature à leur texte affiché
+    document.querySelectorAll('[data-text-key]').forEach(selector => {
+        const displayElement = selector.querySelector('div span');
+        if (displayElement) {
+            // Si c'est le sélecteur rootPersonResults, appliquer la troncature
+            if (selector.getAttribute('data-text-key') === 'rootPersonResults') {
+                const fullText = displayElement.textContent || '';
+                // Sauvegarder le texte complet s'il n'est pas déjà enregistré
+                if (!displayElement.dataset.fullText) {
+                    displayElement.dataset.fullText = fullText;
+                }
+                // Appliquer la troncature
+                updateSelectorDisplayText(selector, fullText);
+            }
+        }
+    });
+}
+
 // Fonction pour mettre à jour l'affichage du texte dans le sélecteur
 export function updateSelectorDisplayText(selector, text) {
     if (!selector) return;
@@ -862,27 +884,32 @@ export function replaceRootPersonSelector(customOptions = null) {
 
 // Fonction pour mettre à jour le sélecteur de personnes racines 
 export function updateRootPersonSelector(person) {
-    // Si le sélecteur personnalisé n'a pas encore été initialisé, on ne fait rien
-    if (!selectorsInitialized) return null;
-    
-    // Récupérer l'historique des racines depuis le localStorage
-    let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
-    
-    // Vérifier si cette personne est déjà dans l'historique
-    const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
-    
-    // Si la personne n'est pas dans l'historique, l'ajouter
-    if (existingIndex === -1) {
-        rootHistory.push({
-            id: person.id,
-            name: person.name.replace(/\//g, '').trim()
-        });
+
+    if (person.name === state.gedcomData.individuals[person.id].name) {
+ 
+        // Si le sélecteur personnalisé n'a pas encore été initialisé, on ne fait rien
+        if (!selectorsInitialized) return null;
         
-        // Sauvegarder l'historique mis à jour
-        localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
+        // Récupérer l'historique des racines depuis le localStorage
+        let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+        
+        // Vérifier si cette personne est déjà dans l'historique
+        const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
+        
+        // Si la personne n'est pas dans l'historique, l'ajouter
+        if (existingIndex === -1) {
+            rootHistory.push({
+                id: person.id,
+                name: person.name.replace(/\//g, '').trim()
+            });
+            
+            // Sauvegarder l'historique mis à jour
+            localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
+        }
+        
+        // Plutôt que de mettre à jour le sélecteur existant, forcer sa recréation
+        // pour garantir qu'il soit en mode historique
+        return replaceRootPersonSelector();
+
     }
-    
-    // Plutôt que de mettre à jour le sélecteur existant, forcer sa recréation
-    // pour garantir qu'il soit en mode historique
-    return replaceRootPersonSelector();
 }

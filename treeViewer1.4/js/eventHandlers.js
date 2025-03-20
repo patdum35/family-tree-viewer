@@ -874,6 +874,8 @@ export function resetView() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
     const zoom = getZoom();
+
+    state.isAnimationLaunched = false;
     
     if (zoom) {
         let transform = d3.zoomIdentity;
