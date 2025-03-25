@@ -12,6 +12,8 @@ import { collectPersonLocations, createEnhancedMarkerIcon, fitMapToMarkers, clea
 window.lastSelectedLocationId = null;
 window.isIndividualMapMode = false;
 
+
+
 export function showPersonsList(name, people, config) {
     
     
@@ -160,18 +162,9 @@ export function showPersonsList(name, people, config) {
                         `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
                         'Personnes';
 
-    // title.style.marginBottom = '10px';
-    // title.style.borderBottom = '1px solid #eee';
-    // title.style.paddingBottom = '5px';
-    // title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px'; 
+
 
     title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle
-    // title.style.padding = '8px';
-    // title.style.borderRadius = '8px 8px 0 0'; // Coins arrondis en haut seulement
-    // title.style.marginTop = '-20px'; // Pour compenser le padding du contenu
-    // title.style.marginLeft = '-20px'; 
-    // title.style.marginRight = '-20px';
-    // title.style.paddingLeft = '20px';
     title.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)'; // Bordure bleue pâle
 
 
@@ -264,6 +257,7 @@ export function showPersonsList(name, people, config) {
     list.style.display = 'grid';
     list.style.gap = '2px';  // Espacement réduit
     list.style.fontSize = '14px';  // Taille de police réduite
+    list.style.paddingTop = '20px';
 
     // Trier les personnes par date
     const peopleWithDates = people.map(person => {
@@ -1425,13 +1419,12 @@ function makeModalDraggableAndResizable(modal, handle) {
         createResizeHandles();
     }
     
-    // 4. Gestion du redimensionnement
+    // Gestion du redimensionnement
     function createResizeHandles() {
         // Supprimer les anciennes poignées
         content.querySelectorAll('.resize-handle').forEach(h => h.remove());
-
+    
         // IMPORTANT: Forcer l'initialisation correcte des coordonnées
-        // Si la modale utilise transform pour le centrage, cela cause des problèmes
         const rect = content.getBoundingClientRect();
         
         // Si la position est centrée avec transform, la convertir en coordonnées absolues
@@ -1454,7 +1447,6 @@ function makeModalDraggableAndResizable(modal, handle) {
             content.style.height = `${height}px`;
         }
         
-        
         // Positions des poignées
         const positions = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne'];
         
@@ -1463,6 +1455,7 @@ function makeModalDraggableAndResizable(modal, handle) {
             handle.className = `resize-handle resize-${pos}`;
             handle.style.position = 'absolute';
             handle.style.zIndex = '9999';
+            handle.style.background = 'transparent'; // Rendre invisible par défaut
             
             // Configurer l'apparence et la position de chaque poignée selon sa position
             switch(pos) {
@@ -1477,20 +1470,16 @@ function makeModalDraggableAndResizable(modal, handle) {
                 case 'se': // Sud-Est (bas droite)
                     handle.style.right = '0px';
                     handle.style.bottom = '0px';
-                    // handle.style.width = '20px';
-                    // handle.style.height = '20px';
-                    // handle.style.cursor = 'nwse-resize';
-                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.5)';
                     handle.style.width = '30px';
                     handle.style.height = '30px';
                     handle.style.cursor = 'nwse-resize';
-                    handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-                    // handle.style.width = '25px';
-                    // handle.style.height = '25px';
-                    // handle.style.cursor = 'nwse-resize';
-                    // handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-
-
+                    // Montrer un indicateur visuel uniquement au survol
+                    handle.addEventListener('mouseover', () => {
+                        handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                    });
+                    handle.addEventListener('mouseout', () => {
+                        handle.style.background = 'transparent';
+                    });
                     break;
                 case 's':  // Sud (bas)
                     handle.style.bottom = '0px';
@@ -1506,8 +1495,13 @@ function makeModalDraggableAndResizable(modal, handle) {
                     handle.style.width = '35px';
                     handle.style.height = '35px';
                     handle.style.cursor = 'nesw-resize';
-                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
-                    handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    // Montrer un indicateur visuel uniquement au survol
+                    handle.addEventListener('mouseover', () => {
+                        handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                    });
+                    handle.addEventListener('mouseout', () => {
+                        handle.style.background = 'transparent';
+                    });
                     break;
                 case 'w':  // Ouest (gauche)
                     handle.style.left = '0px';
@@ -1523,8 +1517,13 @@ function makeModalDraggableAndResizable(modal, handle) {
                     handle.style.width = '35px';
                     handle.style.height = '35px';
                     handle.style.cursor = 'nwse-resize';
-                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
-                    handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    // Montrer un indicateur visuel uniquement au survol
+                    handle.addEventListener('mouseover', () => {
+                        handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                    });
+                    handle.addEventListener('mouseout', () => {
+                        handle.style.background = 'transparent';
+                    });
                     break;
                 case 'n':  // Nord (haut)
                     handle.style.top = '0px';
@@ -1540,19 +1539,22 @@ function makeModalDraggableAndResizable(modal, handle) {
                     handle.style.width = '20px';
                     handle.style.height = '20px';
                     handle.style.cursor = 'nesw-resize';
-                    // handle.style.backgroundColor = 'rgba(100, 150, 255, 0.2)';
-                    handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    // Montrer un indicateur visuel uniquement au survol
+                    handle.addEventListener('mouseover', () => {
+                        handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                    });
+                    handle.addEventListener('mouseout', () => {
+                        handle.style.background = 'transparent';
+                    });
                     break;
             }
- 
+    
             setupResizeHandlers(handle, pos);
             
             // Ajouter la poignée au contenu
             content.appendChild(handle);
         });
     }
-
-
 
     // Fonction pour configurer les gestionnaires d'événements pour chaque poignée
     function setupResizeHandlers(handle, pos) {
@@ -1586,6 +1588,9 @@ function makeModalDraggableAndResizable(modal, handle) {
             e.preventDefault();
             e.stopPropagation();
             
+            // Rendre la poignée visible lors du toucher en mode tactile
+            showResizeHandleVisual(handle, pos);
+            
             const touch = e.touches[0];
             const rect = content.getBoundingClientRect();
             initialWidth = rect.width;
@@ -1600,7 +1605,76 @@ function makeModalDraggableAndResizable(modal, handle) {
             document.addEventListener('touchend', onResizeEnd);
         });
         
-        // Redimensionner avec la souris
+        // Fonction pour afficher la visualisation de la poignée
+        function showResizeHandleVisual(handle, pos) {
+            // Définir le style de fond selon la position
+            switch(pos) {
+                case 'se':
+                    handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'sw':
+                    handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'nw':
+                    handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'ne':
+                    handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                    break;
+                case 'e':
+                case 'w':
+                    handle.style.background = 'rgba(0,0,0,0.2)';
+                    break;
+                case 'n':
+                case 's':
+                    handle.style.background = 'rgba(0,0,0,0.2)';
+                    break;
+            }
+            
+            // Ajouter un indicateur de curseur visuel pour le tactile
+            const cursorIndicator = document.createElement('div');
+            cursorIndicator.className = 'touch-cursor-indicator';
+            cursorIndicator.style.position = 'absolute';
+            cursorIndicator.style.width = '24px';
+            cursorIndicator.style.height = '24px';
+            cursorIndicator.style.pointerEvents = 'none';
+            cursorIndicator.style.zIndex = '10002';
+            
+            // Définir l'indicateur selon la direction
+            if (pos.includes('e') || pos.includes('w')) {
+                cursorIndicator.innerHTML = '⟷'; // Indicateur horizontal
+            } else if (pos.includes('n') || pos.includes('s')) {
+                cursorIndicator.innerHTML = '⟺'; // Indicateur vertical
+            } else {
+                cursorIndicator.innerHTML = '⤡'; // Indicateur diagonal
+            }
+            
+            // Positionner l'indicateur près de la poignée
+            handle.appendChild(cursorIndicator);
+            
+            // Stocker une référence pour la suppression
+            handle._cursorIndicator = cursorIndicator;
+        }
+        
+         // Arrêter le redimensionnement
+        function onResizeEnd() {
+            isResizing = false;
+            document.removeEventListener('mousemove', onResizeMove);
+            document.removeEventListener('touchmove', onResizeTouchMove);
+            document.removeEventListener('mouseup', onResizeEnd);
+            document.removeEventListener('touchend', onResizeEnd);
+            
+            // Masquer la poignée après le redimensionnement
+            handle.style.background = 'transparent';
+            
+            // Supprimer l'indicateur de curseur
+            if (handle._cursorIndicator) {
+                handle._cursorIndicator.remove();
+                delete handle._cursorIndicator;
+            }
+        }
+        
+          // Redimensionner avec la souris
         function onResizeMove(e) {
             if (!isResizing) return;
             
@@ -1700,16 +1774,6 @@ function makeModalDraggableAndResizable(modal, handle) {
             }
         }
 
-        
-        
-        // Arrêter le redimensionnement
-        function onResizeEnd() {
-            isResizing = false;
-            document.removeEventListener('mousemove', onResizeMove);
-            document.removeEventListener('touchmove', onResizeTouchMove);
-            document.removeEventListener('mouseup', onResizeEnd);
-            document.removeEventListener('touchend', onResizeEnd);
-        }
     }
 
 

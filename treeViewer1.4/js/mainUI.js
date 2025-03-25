@@ -1,7 +1,7 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree } from './main.js';
+import { state, displayGenealogicTree, showToast } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { selectFoundPerson } from './eventHandlers.js';
 
@@ -293,8 +293,6 @@ function truncateText(text, maxLength = 6) {
     return formattedText.substring(0, maxLength);
 }
 
-
-
 export function enforceTextTruncation() {
     // Cette fonction recherche tous les sélecteurs personnalisés dans le DOM
     // et applique la troncature à leur texte affiché
@@ -329,9 +327,6 @@ export function updateSelectorDisplayText(selector, text) {
     }
 }
 
-// ====================================
-// 1. Modifications dans mainUI.js
-// ====================================
 
 // Ajout d'un état global pour suivre le mode du sélecteur
 let selectorMode = 'history'; // Valeurs possibles: 'history', 'search'
@@ -881,7 +876,6 @@ export function replaceRootPersonSelector(customOptions = null) {
 // ====================================
 // 3. Version améliorée de updateRootPersonSelector
 // ====================================
-
 // Fonction pour mettre à jour le sélecteur de personnes racines 
 export function updateRootPersonSelector(person) {
 
@@ -912,4 +906,772 @@ export function updateRootPersonSelector(person) {
         return replaceRootPersonSelector();
 
     }
+}
+
+// Version corrigée de la fonction setupPaperTextureBackground
+function setupPaperTextureBackground(svg) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const defs = svg.append("defs");
+    
+    // Nettoyer tout fond existant
+    svg.selectAll(".background-element").remove();
+    
+    // Créer un groupe pour le fond
+    const bgGroup = svg.append("g")
+        .attr("class", "background-element")
+        .attr("pointer-events", "none")
+        .lower();
+    
+    // Fond de base avec gradient subtil mais visible
+    const bgGradient = defs.append("linearGradient")
+        .attr("id", "paper-bg-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "100%");
+        
+    bgGradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#f7f7f7");
+        
+    bgGradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#efefef");
+    
+    bgGroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "url(#paper-bg-gradient)");
+    
+    // Créer une texture de papier visible
+    const noisePattern = defs.append("pattern")
+        .attr("id", "noise-pattern")
+        .attr("patternUnits", "userSpaceOnUse")
+        .attr("width", 200)
+        .attr("height", 200);
+    
+    // Fond du motif
+    noisePattern.append("rect")
+        .attr("width", 200)
+        .attr("height", 200)
+        .attr("fill", "transparent");
+    
+    // Créer une texture plus visible
+    for (let i = 0; i < 5000; i++) {
+        const x = Math.random() * 200;
+        const y = Math.random() * 200;
+        const size = Math.random() * 1.2 + 0.3;
+        const opacity = Math.random() * 0.1 + 0.04; // Opacité plus élevée
+        
+        noisePattern.append("circle")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", size)
+            .attr("fill", i % 5 === 0 ? "#aaaaaa" : "#707070") // Couleurs plus visibles
+            .attr("opacity", opacity);
+    }
+    
+    // Ajouter quelques lignes/fibres de papier
+    for (let i = 0; i < 50; i++) {
+        const x1 = Math.random() * 200;
+        const y1 = Math.random() * 200;
+        const length = Math.random() * 30 + 10;
+        const angle = Math.random() * Math.PI * 2;
+        const x2 = x1 + Math.cos(angle) * length;
+        const y2 = y1 + Math.sin(angle) * length;
+        
+        noisePattern.append("line")
+            .attr("x1", x1)
+            .attr("y1", y1)
+            .attr("x2", x2)
+            .attr("y2", y2)
+            .attr("stroke", "#bbbbbb") // Couleur plus visible
+            .attr("stroke-width", 0.7)
+            .attr("opacity", 0.4); // Opacité plus élevée
+    }
+    
+    // Appliquer le motif de texture
+    bgGroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "url(#noise-pattern)")
+        .attr("pointer-events", "none");
+    
+    // Ajouter quelques taches de papier plus grandes
+    for (let i = 0; i < 20; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * 40 + 20;
+        
+        bgGroup.append("circle")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", size)
+            .attr("fill", "#e8e8e8")
+            .attr("opacity", Math.random() * 0.2 + 0.1);
+    }
+    
+    // Ajouter une vignette légère
+    const vignetteGradient = defs.append("radialGradient")
+        .attr("id", "paper-vignette")
+        .attr("cx", "50%")
+        .attr("cy", "50%")
+        .attr("r", "70%")
+        .attr("fx", "50%")
+        .attr("fy", "50%");
+        
+    vignetteGradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#00000000");
+        
+    vignetteGradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#00000033"); // Plus visible
+        
+    bgGroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "url(#paper-vignette)")
+        .attr("pointer-events", "none");
+}
+
+
+
+/**
+ * Crée et affiche un dialogue pour sélectionner une image de fond
+ * @param {Function} onSelect - Fonction à appeler avec le chemin de l'image sélectionnée
+ */
+export function createImageSelectorDialog(onSelect) {
+    // Vérifier si le dialogue existe déjà
+    if (document.getElementById('image-selector-dialog')) {
+        document.getElementById('image-selector-dialog').remove();
+    }
+    
+    // Créer le dialogue
+    const dialog = document.createElement('div');
+    dialog.id = 'image-selector-dialog';
+    dialog.style.position = 'fixed';
+    dialog.style.top = '50%';
+    dialog.style.left = '50%';
+    dialog.style.transform = 'translate(-50%, -50%)';
+    dialog.style.backgroundColor = 'white';
+    dialog.style.padding = '20px';
+    dialog.style.borderRadius = '8px';
+    dialog.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    dialog.style.zIndex = '10000';
+    dialog.style.maxWidth = '90%';
+    dialog.style.maxHeight = '80%';
+    dialog.style.overflow = 'auto';
+    
+    // Titre
+    const title = document.createElement('h3');
+    title.textContent = 'Sélectionner une image de fond';
+    title.style.marginTop = '0';
+    title.style.marginBottom = '10px';
+    dialog.appendChild(title);
+    
+    // Bouton de fermeture
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.border = 'none';
+    closeButton.style.background = 'none';
+    closeButton.style.fontSize = '20px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.onclick = () => dialog.remove();
+    dialog.appendChild(closeButton);
+    
+    // Conteneur pour les images
+    const imageContainer = document.createElement('div');
+    imageContainer.style.display = 'grid';
+    imageContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+    imageContainer.style.gap = '10px';
+    imageContainer.style.marginTop = '15px';
+    dialog.appendChild(imageContainer);
+    
+    
+    
+        // Option pour télécharger une image personnalisée
+    const uploadSection = document.createElement('div');
+    uploadSection.style.gridColumn = '1 / -1';
+    uploadSection.style.marginTop = '20px';
+    uploadSection.style.padding = '10px';
+    uploadSection.style.backgroundColor = '#f5f5f5';
+    uploadSection.style.borderRadius = '4px';
+    imageContainer.appendChild(uploadSection);
+    
+    const uploadTitle = document.createElement('h4');
+    uploadTitle.textContent = 'Télécharger une image';
+    uploadTitle.style.marginTop = '0';
+    uploadTitle.style.marginBottom = '10px';
+    uploadSection.appendChild(uploadTitle);
+    
+    const uploadInput = document.createElement('input');
+    uploadInput.type = 'file';
+    uploadInput.accept = 'image/*';
+    uploadInput.style.width = '100%';
+    uploadInput.style.marginBottom = '10px';
+    uploadSection.appendChild(uploadInput);
+    
+    uploadInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                onSelect(e.target.result);
+                dialog.remove();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    
+    
+    
+    // Liste des dossiers à explorer
+    const folders = [
+        'background_images',
+        'background_images_download'
+    ];
+    
+    // Créer un titre pour chaque dossier
+    folders.forEach(folder => {
+        const folderTitle = document.createElement('h4');
+        // folderTitle.textContent = folder;
+        folderTitle.textContent = folder === 'background_images' ? 'Images intégrées' : 'Images téléchargées';
+        folderTitle.style.gridColumn = '1 / -1';
+        folderTitle.style.marginBottom = '5px';
+        folderTitle.style.marginTop = '15px';
+        imageContainer.appendChild(folderTitle);
+        
+        // Tenter de charger les images
+        // fetch(`/${folder}/`)
+        //     .then(response => {
+                // Si le dossier existe et est accessible
+                // if (response.ok) {
+                    // Simuler une liste d'images car la plupart des serveurs ne permettent pas 
+                    // de lister le contenu du répertoire
+                    const potentialImages = [
+                        'antiquite.jpg',
+                        'bourbons.jpg',
+                        'capetiens.jpg',
+                        'carolingiens.jpg',
+                        'contemporain.jpg',
+                        'empire.jpg',
+                        'merovingiens.jpg',
+                        'republique.jpg',
+                        'restauration.jpg',
+                        'revolution.jpg',
+                        'valois.jpg'
+                    ];
+                    
+                    // Créer une vignette pour chaque image potentielle
+                    potentialImages.forEach(imageName => {
+                        const imagePath = `${folder}/${imageName}`;
+                        
+                        // Créer l'élément pour la vignette
+                        const thumbnailContainer = document.createElement('div');
+                        thumbnailContainer.style.display = 'flex';
+                        thumbnailContainer.style.flexDirection = 'column';
+                        thumbnailContainer.style.alignItems = 'center';
+                        thumbnailContainer.style.cursor = 'pointer';
+                        thumbnailContainer.style.padding = '5px';
+                        thumbnailContainer.style.border = '1px solid #eee';
+                        thumbnailContainer.style.borderRadius = '4px';
+                        thumbnailContainer.onclick = () => {
+                            onSelect(imagePath);
+                            dialog.remove();
+                        };
+                        
+                        // Image de la vignette
+                        const thumbnail = document.createElement('img');
+                        thumbnail.src = imagePath;
+                        thumbnail.alt = imageName;
+                        thumbnail.onerror = function() {
+                            // Remplacer par une image de remplacement ou un message
+                            this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Crect width="40" height="40" fill="%23f0f0f0"/%3E%3Ctext x="50%" y="50%" font-family="sans-serif" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="%23999"%3ENon disponible%3C/text%3E%3C/svg%3E';
+                            label.textContent += " (non disponible)";
+                            thumbnailContainer.style.opacity = "0.5";
+                            thumbnailContainer.style.cursor = "default";
+                            thumbnailContainer.onclick = null; // Désactiver le clic
+                        };
+                        
+                        thumbnail.style.width = '100%';
+                        thumbnail.style.height = '80px';
+                        thumbnail.style.objectFit = 'cover';
+                        thumbnail.style.marginBottom = '5px';
+                        thumbnail.style.borderRadius = '4px';
+                        thumbnailContainer.appendChild(thumbnail);
+                        
+                        // Nom de l'image
+                        const label = document.createElement('span');
+                        label.textContent = imageName.split('.')[0];
+                        label.style.fontSize = '12px';
+                        label.style.textAlign = 'center';
+                        label.style.overflow = 'hidden';
+                        label.style.textOverflow = 'ellipsis';
+                        label.style.whiteSpace = 'nowrap';
+                        label.style.width = '100%';
+                        thumbnailContainer.appendChild(label);
+                        
+                        // Ajouter la vignette au conteneur
+                        imageContainer.appendChild(thumbnailContainer);
+                    });
+            //     } else {
+            //         // Si le dossier n'est pas accessible
+            //         const errorMessage = document.createElement('p');
+            //         errorMessage.textContent = `Dossier ${folder} non accessible`;
+            //         errorMessage.style.gridColumn = '1 / -1';
+            //         errorMessage.style.color = '#999';
+            //         imageContainer.appendChild(errorMessage);
+            //     }
+            // })
+            // .catch(error => {
+            //     console.error(`Erreur lors de l'accès au dossier ${folder}:`, error);
+            //     const errorMessage = document.createElement('p');
+            //     errorMessage.textContent = `Erreur lors de l'accès au dossier ${folder}`;
+            //     errorMessage.style.gridColumn = '1 / -1';
+            //     errorMessage.style.color = 'red';
+            //     imageContainer.appendChild(errorMessage);
+            // });
+    });
+    
+
+    // Ajouter le dialogue au document
+    document.body.appendChild(dialog);
+    
+    // Ajouter une superposition sombre pour le fond
+    const overlay = document.createElement('div');
+    overlay.id = 'image-selector-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.right = '0';
+    overlay.style.bottom = '0';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '9999';
+    overlay.onclick = () => {
+        dialog.remove();
+        overlay.remove();
+    };
+    document.body.appendChild(overlay);
+    
+    // Mettre le dialogue au-dessus de l'overlay
+    dialog.style.zIndex = '10000';
+    
+    return dialog;
+}
+
+/**
+ * Crée et ajoute un sélecteur de fond d'écran dans la modal des paramètres
+ * @export
+ */
+export function initBackgroundSelector() {
+    // Importer la fonction createImageSelectorDialog
+    import('./mainUI.js').then(module => {
+        // La fonction est déjà disponible dans ce scope, mais nous l'importons 
+        // pour être sûrs qu'elle est définie quand elle sera utilisée
+        if (typeof module.createImageSelectorDialog !== 'function') {
+            console.warn("Fonction createImageSelectorDialog non disponible");
+        }
+    });
+    
+    // Vérifier si la section existe déjà
+    if (document.getElementById('background-selector-section')) return;
+    
+    // Créer une nouvelle section pour le sélecteur de fond
+    const section = document.createElement('div');
+    section.className = 'settings-section';
+    section.id = 'background-selector-section';
+    section.style.marginBottom = '15px'; // Réduit l'espacement
+    
+    // Ajouter un titre avec style compact
+    const heading = document.createElement('h3');
+    heading.textContent = 'Fond d\'écran';
+    heading.style.marginTop = '0';
+    heading.style.marginBottom = '5px'; // Réduit l'espacement
+    section.appendChild(heading);
+    
+    // Options de fond d'écran disponibles
+    const backgroundOptions = [
+        { value: 'none', label: 'Aucun' },
+        { value: 'customImage', label: 'Image personnalisée...' }, // Nouvelle option
+        // Styles artistiques
+        { value: 'pollock', label: 'Pollock' },
+        { value: 'kandinsky', label: 'Kandinsky' },
+        { value: 'miro', label: 'Miró' },
+        // Arbres et nature
+        { value: 'treeBranches', label: 'Branches d\'arbre' },
+        { value: 'fallingLeaves', label: 'Feuilles tombantes' },
+        { value: 'growingTree', label: 'Arbre qui pousse' },
+        { value: 'treeRings', label: 'Anneaux d\'arbre' },
+        { value: 'fractal', label: 'Fractal' },
+        // Textures et motifs de base
+        { value: 'parchment', label: 'Parchemin' },
+        { value: 'grid', label: 'Grille' },
+        { value: 'paperTexture', label: 'Texture papier' },
+        { value: 'simpleBackground', label: 'Dégradé simple' },
+        { value: 'curvedLines', label: 'Lignes courbes' },
+        { value: 'organicPattern', label: 'Motif organique' },
+        { value: 'artDeco', label: 'Art Déco' }
+    ];
+    
+    // Style plus compact: Label et sélecteur sur la même ligne
+    const controlRow = document.createElement('div');
+    controlRow.style.display = 'flex';
+    controlRow.style.alignItems = 'center';
+    controlRow.style.marginBottom = '5px'; // Réduit l'espacement
+    
+    // Créer un label pour le sélecteur
+    const label = document.createElement('label');
+    label.setAttribute('for', 'background-select');
+    label.textContent = 'Style:';
+    label.style.marginRight = '10px';
+    label.style.minWidth = '50px';
+    controlRow.appendChild(label);
+    
+    // Créer le sélecteur personnalisé
+    const customSelector = createCustomSelector({
+        options: backgroundOptions,
+        selectedValue: localStorage.getItem('preferredBackground') || 'treeBranches', // Valeur sauvegardée ou par défaut
+        colors: {
+            main: '#9C27B0',    // Violet pour le sélecteur principal
+            options: '#9C27B0', // Violet pour les options
+            hover: '#7B1FA2',   // Violet plus foncé au survol
+            selected: '#4A148C' // Violet encore plus foncé pour l'option sélectionnée
+        },
+        dimensions: {
+            width: '170px',
+            height: '25px', // Plus petit pour être plus compact
+            dropdownWidth: '220px'
+        },
+        padding: {
+            display: { x: 8, y: 3 }, // Padding vertical réduit
+            options: { x: 10, y: 5 } // Padding vertical réduit pour les options
+        },
+        arrow: {
+            position: 'right',
+            size: 6,
+            offset: { x: -10, y: 0 }
+        },
+        onChange: (value) => {
+            // Traitement spécial pour l'option d'image personnalisée
+            if (value === 'customImage') {
+                // Récupérer la valeur actuelle pour restauration en cas d'annulation
+                const currentBg = localStorage.getItem('preferredBackground') || 'treeBranches';
+                
+                // Ouvrir le sélecteur d'image
+                import('./mainUI.js').then(module => {
+                    const createImageSelectorDialog = module.createImageSelectorDialog;
+                    if (typeof createImageSelectorDialog === 'function') {
+                        createImageSelectorDialog((imagePath) => {
+                            // Sauvegarder le chemin de l'image
+                            localStorage.setItem('customImagePath', imagePath);
+                            // Définir le type de fond sur "customImage"
+                            localStorage.setItem('preferredBackground', 'customImage');
+                            // Appliquer le fond
+                            applyBackground('customImage');
+                        });
+                    } else {
+                        console.error("Fonction createImageSelectorDialog non disponible");
+                        // Restaurer l'ancienne valeur
+                        customSelector.value = currentBg;
+                        if (window.showToast) {
+                            window.showToast("Erreur: Sélecteur d'image non disponible", 3000);
+                        }
+                    }
+                }).catch(error => {
+                    console.error("Erreur lors du chargement du module mainUI:", error);
+                    // Restaurer l'ancienne valeur
+                    customSelector.value = currentBg;
+                });
+            } else {
+                // Pour les autres types de fond, procéder normalement
+                applyBackground(value);
+                
+                // Sauvegarder la préférence dans localStorage
+                localStorage.setItem('preferredBackground', value);
+            }
+        },
+        // Style particulier pour l'option d'image personnalisée
+        customizeOptionElement: (optionElement, option) => {
+            if (option.value === 'customImage') {
+                optionElement.style.fontStyle = 'italic';
+            }
+        }
+    });
+    
+    // Donner un ID au sélecteur
+    customSelector.id = 'background-select';
+    
+    // Ajouter le sélecteur au conteneur
+    controlRow.appendChild(customSelector);
+    section.appendChild(controlRow);
+    
+    // Ajouter une indication du chemin d'image actuel si une image personnalisée est sélectionnée
+    const customImagePath = localStorage.getItem('customImagePath');
+    if (customImagePath && localStorage.getItem('preferredBackground') === 'customImage') {
+        const pathInfo = document.createElement('div');
+        pathInfo.style.fontSize = '12px';
+        pathInfo.style.color = '#666';
+        pathInfo.style.marginTop = '5px';
+        pathInfo.style.overflowX = 'hidden';
+        pathInfo.style.textOverflow = 'ellipsis';
+        pathInfo.style.whiteSpace = 'nowrap';
+        
+        // Extraire le nom du fichier du chemin complet
+        const fileName = customImagePath.split('/').pop();
+        pathInfo.textContent = `Image: ${fileName}`;
+        
+        section.appendChild(pathInfo);
+    }
+    
+    // Ajouter la section au modal des paramètres
+    const settingsContent = document.getElementById('settings-content');
+    if (settingsContent) {
+        // Ajouter au début de la modal
+        if (settingsContent.firstChild) {
+            settingsContent.insertBefore(section, settingsContent.firstChild);
+        } else {
+            settingsContent.appendChild(section);
+        }
+        
+        // Rendre tous les sections de la modale plus compactes
+        const allSections = settingsContent.querySelectorAll('.settings-section');
+        allSections.forEach(sec => {
+            sec.style.marginBottom = '15px'; // Réduire l'espacement vertical entre les sections
+            
+            // Réduire l'espacement pour les titres h3
+            const title = sec.querySelector('h3');
+            if (title) {
+                title.style.marginTop = '0';
+                title.style.marginBottom = '5px';
+            }
+            
+            // Réduire l'espacement pour les boutons
+            const buttons = sec.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.style.marginTop = '5px';
+                btn.style.padding = '5px 10px';
+            });
+            
+            // Réduire l'espacement pour les inputs
+            const inputs = sec.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.style.marginTop = '3px';
+                input.style.marginBottom = '3px';
+            });
+        });
+    }
+    
+    // Charger la préférence sauvegardée
+    const savedBackground = localStorage.getItem('preferredBackground');
+    if (savedBackground) {
+        customSelector.value = savedBackground;
+        // Appliquer le fond sauvegardé
+        setTimeout(() => applyBackground(savedBackground), 100);
+    }
+}
+
+/**
+ * Fonction améliorée pour appliquer le fond d'écran sélectionné
+ * @param {string} backgroundType - Type de fond à appliquer
+ */
+function applyBackground(backgroundType) {
+    // Stocker le dernier fond utilisé
+    const previousBackground = localStorage.getItem('lastAppliedBackground');
+    
+    // Feedback immédiat
+    if (window.showToast) {
+        window.showToast(`Application du fond: ${backgroundType}`, 1000);
+    }
+    
+    // Importer le module de gestion de fond d'écran
+    import('./backgroundManager.js').then(module => {
+        // D'abord nettoyer l'ancien conteneur de fond s'il existe
+        const container = document.querySelector('.background-container');
+        if (container) {
+            container.remove();
+        }
+        
+        // Si on a sélectionné "aucun", ne rien faire de plus
+        if (backgroundType === 'none') {
+            // Sauvegarder pour pouvoir restaurer en cas d'erreur
+            localStorage.setItem('lastAppliedBackground', backgroundType);
+            return;
+        }
+        
+        try {
+            // Créer un nouveau conteneur de fond
+            module.initBackgroundContainer();
+            
+            // Récupérer le SVG principal
+            const svg = d3.select("#tree-svg");
+            if (!svg.node()) {
+                throw new Error("SVG principal non trouvé");
+            }
+            
+            // Cas spécial pour l'image personnalisée
+            if (backgroundType === 'customImage') {
+                const imagePath = localStorage.getItem('customImagePath');
+                if (!imagePath) {
+                    throw new Error("Aucun chemin d'image défini");
+                }
+                
+                if (typeof module.setupCustomImageBackground === 'function') {
+                    module.setupCustomImageBackground(svg, imagePath);
+                } else {
+                    throw new Error("Fonction setupCustomImageBackground non disponible");
+                }
+            }
+            // Tenter d'appliquer le fond sélectionné
+            else if (backgroundType === 'pollock') {
+                if (typeof module.setupPollockBackground === 'function') {
+                    module.setupPollockBackground(svg);
+                } else {
+                    throw new Error("Fonction setupPollockBackground non disponible");
+                }
+            }
+            // Suite des conditions pour les autres types de fond...
+            else if (backgroundType === 'kandinsky') {
+                if (typeof module.setupKandinskyBackground === 'function') {
+                    module.setupKandinskyBackground(svg);
+                } else {
+                    throw new Error("Fonction setupKandinskyBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'miro') {
+                if (typeof module.setupMiroBackground === 'function') {
+                    module.setupMiroBackground(svg);
+                } else {
+                    throw new Error("Fonction setupMiroBackground non disponible");
+                }
+            }
+            // Styles de base corrigés
+            else if (backgroundType === 'parchment') {
+                if (typeof module.setupParchmentBackgroundFixed === 'function') {
+                    module.setupParchmentBackgroundFixed(svg);
+                } else {
+                    throw new Error("Fonction setupParchmentBackgroundFixed non disponible");
+                }
+            }
+            else if (backgroundType === 'grid') {
+                if (typeof module.setupGridBackgroundFixed === 'function') {
+                    module.setupGridBackgroundFixed(svg);
+                } else {
+                    throw new Error("Fonction setupGridBackgroundFixed non disponible");
+                }
+            }
+            // Autres styles existants
+            else if (backgroundType === 'treeBranches') {
+                if (typeof module.setupTreeBranchesBackground === 'function') {
+                    module.setupTreeBranchesBackground(svg);
+                } else {
+                    throw new Error("Fonction setupTreeBranchesBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'fallingLeaves') {
+                if (typeof module.setupFallingLeavesBackground === 'function') {
+                    module.setupFallingLeavesBackground(svg);
+                } else {
+                    throw new Error("Fonction setupFallingLeavesBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'growingTree') {
+                if (typeof module.setupGrowingTreeBackground === 'function') {
+                    module.setupGrowingTreeBackground(svg);
+                } else {
+                    throw new Error("Fonction setupGrowingTreeBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'simpleBackground') {
+                if (typeof module.setupSimpleBackground === 'function') {
+                    module.setupSimpleBackground(svg);
+                } else {
+                    throw new Error("Fonction setupSimpleBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'paperTexture') {
+                if (typeof module.setupPaperTextureBackground === 'function') {
+                    module.setupPaperTextureBackground(svg);
+                } else {
+                    throw new Error("Fonction setupPaperTextureBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'curvedLines') {
+                if (typeof module.setupCurvedLinesBackground === 'function') {
+                    module.setupCurvedLinesBackground(svg);
+                } else {
+                    throw new Error("Fonction setupCurvedLinesBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'treeRings') {
+                if (typeof module.setupTreeRingsBackground === 'function') {
+                    module.setupTreeRingsBackground(svg);
+                } else {
+                    throw new Error("Fonction setupTreeRingsBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'fractal') {
+                if (typeof module.setupFractalBackground === 'function') {
+                    module.setupFractalBackground(svg);
+                } else {
+                    throw new Error("Fonction setupFractalBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'organicPattern') {
+                if (typeof module.setupOrganicPatternBackground === 'function') {
+                    module.setupOrganicPatternBackground(svg);
+                } else {
+                    throw new Error("Fonction setupOrganicPatternBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'artDeco') {
+                if (typeof module.setupArtDecoBackground === 'function') {
+                    module.setupArtDecoBackground(svg);
+                } else {
+                    throw new Error("Fonction setupArtDecoBackground non disponible");
+                }
+            }
+            else {
+                throw new Error(`Type de fond inconnu: ${backgroundType}`);
+            }
+            
+            // Si on arrive ici, c'est que tout s'est bien passé
+            localStorage.setItem('lastAppliedBackground', backgroundType);
+            
+        } catch (error) {
+            console.error(`Erreur lors de l'application du fond ${backgroundType}:`, error);
+            
+            // Feedback d'erreur
+            if (window.showToast) {
+                window.showToast(`Erreur: ${error.message}`, 3000);
+            }
+            
+            // Tenter de restaurer le fond précédent
+            if (previousBackground && previousBackground !== backgroundType) {
+                console.log(`Tentative de restauration du fond précédent: ${previousBackground}`);
+                
+                // Déjà supprimé le conteneur précédent, donc il faut en créer un nouveau
+                setTimeout(() => {
+                    try {
+                        module.initBackgroundContainer();
+                        applyBackground(previousBackground);
+                    } catch (e) {
+                        console.error("Erreur lors de la restauration du fond précédent:", e);
+                    }
+                }, 500);
+            }
+        }
+    }).catch(error => {
+        console.error("Erreur lors du chargement du module backgroundManager:", error);
+        
+        // Feedback d'erreur
+        if (window.showToast) {
+            window.showToast(`Erreur: ${error.message}`, 3000);
+        }
+    });
 }

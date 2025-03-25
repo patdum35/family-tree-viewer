@@ -9,7 +9,8 @@ import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './tre
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation  } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation , initBackgroundSelector } from './mainUI.js'; 
+
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -49,6 +50,7 @@ export const state = {
     targetAncestorId: "@I739@",
     animationTargetAncestorId: "@I739@",
     animationRootPersonId: '@I1@',
+    isTouchDevice: false,
 
     treeOwner: 1
 };
@@ -117,6 +119,11 @@ function initialize() {
     initializeCustomSelectors();
 
 
+
+
+
+
+
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
     if (passwordInput) {
@@ -155,6 +162,12 @@ function initializeGenerationSelect() {
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData() {
+  
+    // Utilisation
+    const device = detectDeviceType();
+    showToast("isMobile= " + device.isMobile + " , hasTouchScreen=" + device.hasTouchScreen + ", inputType=" + device.inputType + ", Width="+ device.viewportWidth + ", Height="+ device.viewportHeight, 2000);
+    if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+  
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
     toggleFullScreen();
@@ -698,9 +711,7 @@ export function openSettingsModal() {
     const currentTargetId = localStorage.getItem('targetAncestorId') || '@I741@';
     document.getElementById('targetAncestorId').value = currentTargetId;
 
-
-
-
+    initBackgroundSelector();
 
 }
 
@@ -832,6 +843,86 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+
+
+
+function detectInputType() {
+  // Vérifie si l'appareil utilise principalement une souris
+  const prefersMouse = window.matchMedia('(pointer: fine)').matches;
+  
+  // Vérifie si l'appareil utilise principalement un toucher
+  const prefersTouch = window.matchMedia('(pointer: coarse)').matches;
+  
+  // Vérifie si l'appareil n'a pas de dispositif de pointage principal
+  const noPointer = window.matchMedia('(pointer: none)').matches;
+  
+  if (prefersMouse) return "souris";
+  if (prefersTouch) return "tactile";
+  if (noPointer) return "sans_pointeur";
+  
+  // Fallback pour les navigateurs qui ne supportent pas ces media queries
+  return "inconnu";
+}
+
+
+function detectDeviceType() {
+  const deviceInfo = {
+    isMobile: false,
+    hasTouchScreen: false,
+    inputType: "inconnu",
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight
+  };
+  
+  // Détection par user-agent
+  deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Détection de l'écran tactile
+  deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
+                              (navigator.maxTouchPoints > 0) || 
+                              (navigator.msMaxTouchPoints > 0);
+  
+  // Détection du type d'entrée principal
+  if (window.matchMedia) {
+    if (window.matchMedia('(pointer: fine)').matches) {
+      deviceInfo.inputType = "souris";
+    } else if (window.matchMedia('(pointer: coarse)').matches) {
+      deviceInfo.inputType = "tactile";
+    }
+  }
+  
+  
+  
+  // // Utilisation
+  // if (hasTouchScreen()) {
+  //   console.log("Écran tactile détecté");
+  // } else {
+  //   console.log("Pas d'écran tactile détecté");
+  // }
+
+  
+  
+  // // Utilisation
+  // console.log(`Type d'entrée principal: ${detectInputType()}`);
+
+
+  
+  return deviceInfo;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Exposer la fonction et le compteur globalement
 window.showToast = showToast;
 window.actionCounters = actionCounters;
@@ -857,3 +948,5 @@ export {
 };
 
 window.addEventListener('load', initialize);
+
+

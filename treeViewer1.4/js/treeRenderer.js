@@ -5,6 +5,7 @@ import { isNodeHidden } from './utils.js';
 import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
 import { resetView } from './eventHandlers.js';
+import { setupElegantBackground } from './backgroundManager.js';
 
 let zoom;
 let lastTransform = null;
@@ -30,6 +31,12 @@ export function drawTree( isZoomRefresh = false ) {
     processSpouses(rootHierarchy);
 
     const svg = setupSVG();
+    
+    // Ajouter le fond élégant de votre choix
+    setupElegantBackground(svg);  // Ou l'une des autres options
+    
+    
+    
     const mainGroup = createMainGroup(svg);
     const treeLayout = createTreeLayout();
     
@@ -87,8 +94,6 @@ export function drawTree( isZoomRefresh = false ) {
 
 
     drawNodes(mainGroup, layoutResult, isZoomRefresh);
-
-
 
     // Dessiner les liens selon le mode
     drawLinks(mainGroup, layoutResult);

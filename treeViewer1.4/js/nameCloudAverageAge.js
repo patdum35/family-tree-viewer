@@ -770,13 +770,13 @@ function makeElementDraggable(element, type) {
         // Repositionner les boutons
         Object.keys(statsConfig).forEach(type => {
             // D'abord le bouton principal
-            const button = document.getElementById(statsConfig[configType].buttonId);
-            if (button) forceRepositionButton(configType);
+            const button = document.getElementById(statsConfig[type].buttonId);
+            if (button) forceRepositionButton(type);
             
             // Puis le bouton de statistiques par siècle
-            const centuryButton = document.getElementById(`century-stats-button-${configType}`);
+            const centuryButton = document.getElementById(`century-stats-button-${type}`);
             if (centuryButton) {
-                const mainButton = document.getElementById(statsConfig[configType].buttonId);
+                const mainButton = document.getElementById(statsConfig[type].buttonId);
                 if (mainButton) {
                     const rect = mainButton.getBoundingClientRect();
                     centuryButton.style.left = `${rect.left}px`;

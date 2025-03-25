@@ -100,37 +100,199 @@ export function drawRootNode(mainGroup, rootData) {
  * Dessine les rectangles des nœuds
  * @private
  */
-export function drawNodeBoxes(nodeGroups) {
-    // nodeGroups.append("rect")
-    //     .attr("class", d => {
-    //         if (!d.data) return "person-box";
-    //         if (d.data.isSpouse) return "person-box spouse";
-    //         if (d.data.isSibling) return "person-box sibling";
-    //         return "person-box";
-    //     })
-    //     .attr("x", -state.boxWidth/2)
-    //     .attr("y", -state.boxHeight/2)
-    //     .attr("width", state.boxWidth)
-    //     .attr("height", state.boxHeight)
-    //     .attr("rx", 5);
+// export function drawNodeBoxes(nodeGroups) {
+//     // nodeGroups.append("rect")
+//     //     .attr("class", d => {
+//     //         if (!d.data) return "person-box";
+//     //         if (d.data.isSpouse) return "person-box spouse";
+//     //         if (d.data.isSibling) return "person-box sibling";
+//     //         return "person-box";
+//     //     })
+//     //     .attr("x", -state.boxWidth/2)
+//     //     .attr("y", -state.boxHeight/2)
+//     //     .attr("width", state.boxWidth)
+//     //     .attr("height", state.boxHeight)
+//     //     .attr("rx", 5);
 
+//     nodeGroups.append("rect")
+//     .attr("class", d => {
+//         if (!d.data) return "person-box";
+//         const classes = ["person-box"];
+//         if (d.data.isSpouse) classes.push("spouse");
+//         else if (d.data.isSibling) classes.push("sibling");
+//         else if (d.data.duplicate) classes.push("duplicate");
+//         else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//         else classes.push("normal");
+//         return classes.join(" ");
+//     })
+//     .attr("x", -state.boxWidth/2)
+//     .attr("y", -state.boxHeight/2)
+//     .attr("width", state.boxWidth)
+//     .attr("height", state.boxHeight)
+//     .attr("rx", 5);
+// }
+
+// export function drawNodeBoxes(nodeGroups) {
+//     // Définir un filtre pour l'ombre portée
+//     const defs = d3.select("svg").append("defs");
+    
+//     // Créer un filtre pour l'ombre
+//     const filter = defs.append("filter")
+//         .attr("id", "drop-shadow")
+//         .attr("height", "130%");
+    
+//     // Ajouter les composants du filtre
+//     filter.append("feGaussianBlur")
+//         .attr("in", "SourceAlpha")
+//         .attr("stdDeviation", 3)
+//         .attr("result", "blur");
+        
+//     filter.append("feOffset")
+//         .attr("in", "blur")
+//         .attr("dx", 3)
+//         .attr("dy", 3)
+//         .attr("result", "offsetBlur");
+        
+//     // Fusionner l'original avec l'ombre
+//     const feMerge = filter.append("feMerge");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "offsetBlur");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "SourceGraphic");
+    
+//     // Ajouter les rectangles avec effet d'ombre
+//     nodeGroups.append("rect")
+//         .attr("class", d => {
+//             if (!d.data) return "person-box";
+//             const classes = ["person-box"];
+//             if (d.data.isSpouse) classes.push("spouse");
+//             else if (d.data.isSibling) classes.push("sibling");
+//             else if (d.data.duplicate) classes.push("duplicate");
+//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//             else classes.push("normal");
+//             return classes.join(" ");
+//         })
+//         .attr("x", -state.boxWidth/2)
+//         .attr("y", -state.boxHeight/2)
+//         .attr("width", state.boxWidth)
+//         .attr("height", state.boxHeight)
+//         .attr("rx", 3) // Arrondir davantage les coins
+//         .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
+//         .style("stroke", "#333")
+//         .style("stroke-width", "1px");
+// }
+
+// export function drawNodeBoxes(nodeGroups) {
+//     // Définir un filtre pour l'ombre portée
+//     const defs = d3.select("svg").append("defs");
+    
+//     // Créer un filtre pour l'ombre
+//     const filter = defs.append("filter")
+//         .attr("id", "drop-shadow")
+//         .attr("height", "125%"); // Légèrement réduit
+    
+//     // Ajouter les composants du filtre
+//     filter.append("feGaussianBlur")
+//         .attr("in", "SourceAlpha")
+//         .attr("stdDeviation", 2) // Réduit de 3 à 2 pour une ombre plus fine
+//         .attr("result", "blur");
+        
+//     filter.append("feOffset")
+//         .attr("in", "blur")
+//         .attr("dx", 2) // Réduit de 3 à 2 pour un décalage horizontal plus petit
+//         .attr("dy", 2) // Réduit de 3 à 2 pour un décalage vertical plus petit
+//         .attr("result", "offsetBlur");
+        
+//     // Contrôler l'opacité de l'ombre
+//     filter.append("feComponentTransfer")
+//         .append("feFuncA")
+//         .attr("type", "linear")
+//         .attr("slope", "0.5"); // Réduire l'opacité à 50%
+        
+//     // Fusionner l'original avec l'ombre
+//     const feMerge = filter.append("feMerge");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "offsetBlur");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "SourceGraphic");
+    
+//     // Ajouter les rectangles avec effet d'ombre
+//     nodeGroups.append("rect")
+//         .attr("class", d => {
+//             if (!d.data) return "person-box";
+//             const classes = ["person-box"];
+//             if (d.data.isSpouse) classes.push("spouse");
+//             else if (d.data.isSibling) classes.push("sibling");
+//             else if (d.data.duplicate) classes.push("duplicate");
+//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//             else classes.push("normal");
+//             return classes.join(" ");
+//         })
+//         .attr("x", -state.boxWidth/2)
+//         .attr("y", -state.boxHeight/2)
+//         .attr("width", state.boxWidth)
+//         .attr("height", state.boxHeight)
+//         .attr("rx", 3) // Coins arrondis
+//         .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
+//         .style("stroke", "#333")
+//         .style("stroke-width", "0.5px"); // Bordure plus fine
+// }
+
+export function drawNodeBoxes(nodeGroups) {
+    // Définir un filtre pour l'ombre portée
+    const defs = d3.select("svg").append("defs");
+    
+    // Créer un filtre pour l'ombre
+    const filter = defs.append("filter")
+        .attr("id", "drop-shadow")
+        .attr("height", "125%"); // Légèrement réduit
+    
+    // Ajouter les composants du filtre
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha")
+        .attr("stdDeviation", 2) // Ombre plus fine
+        .attr("result", "blur");
+        
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", 2) // Décalage horizontal plus petit
+        .attr("dy", 2) // Décalage vertical plus petit
+        .attr("result", "offsetBlur");
+        
+    // Contrôler l'opacité de l'ombre
+    filter.append("feComponentTransfer")
+        .append("feFuncA")
+        .attr("type", "linear")
+        .attr("slope", "0.5"); // Opacité à 50%
+        
+    // Fusionner l'original avec l'ombre
+    const feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode")
+        .attr("in", "offsetBlur");
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
+    
+    // Ajouter les rectangles avec effet d'ombre
     nodeGroups.append("rect")
-    .attr("class", d => {
-        if (!d.data) return "person-box";
-        const classes = ["person-box"];
-        if (d.data.isSpouse) classes.push("spouse");
-        else if (d.data.isSibling) classes.push("sibling");
-        else if (d.data.duplicate) classes.push("duplicate");
-        else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
-        else classes.push("normal");
-        return classes.join(" ");
-    })
-    .attr("x", -state.boxWidth/2)
-    .attr("y", -state.boxHeight/2)
-    .attr("width", state.boxWidth)
-    .attr("height", state.boxHeight)
-    .attr("rx", 5);
+        .attr("class", d => {
+            if (!d.data) return "person-box";
+            const classes = ["person-box"];
+            if (d.data.isSpouse) classes.push("spouse");
+            else if (d.data.isSibling) classes.push("sibling");
+            else if (d.data.duplicate) classes.push("duplicate");
+            else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+            else classes.push("normal");
+            return classes.join(" ");
+        })
+        .attr("x", -state.boxWidth/2)
+        .attr("y", -state.boxHeight/2)
+        .attr("width", state.boxWidth)
+        .attr("height", state.boxHeight)
+        .attr("rx", 3) // Coins arrondis
+        .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
+        // Ne pas définir stroke et stroke-width ici pour préserver les styles CSS des classes
 }
+
 
 /**
  * Dessine le contenu des nœuds (nom, dates)

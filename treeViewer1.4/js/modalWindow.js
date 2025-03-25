@@ -108,40 +108,95 @@ function formatGedcomDate(dateStr) {
     return formattedDate;
 }
 
+
 export function displayPersonDetails(personId) {
     console.log("Affichage des détails de la personne :", personId);
     
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
 
-
-
     // Ajouter un style pour personnaliser les ascenseurs
     const style = document.createElement("style");
-    style.textContent = `
-        .custom-modal::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        .custom-modal::-webkit-scrollbar-button {
-            height: 0px;
-            width: 0px;
-            display: none;
-        }
-
-        .custom-modal::-webkit-scrollbar-thumb {
-            background-color: #888;
-            border-radius: 6px; 
-            border: 3px solid transparent;
+    
+    if (state.isTouchDevice) {
+        // Sur les appareils tactiles, masquer complètement les scrollbars mais garder la fonctionnalité
+        style.textContent = `
+            /* Masquer les scrollbars sur les appareils tactiles tout en gardant la fonctionnalité */
+            .modal-person-name {
+                -ms-overflow-style: none;  /* IE et Edge */
+                scrollbar-width: none;  /* Firefox */
+            }
+            .modal-person-name::-webkit-scrollbar {
+                display: none; /* Chrome, Safari et Opera */
+            }
+        `;
+    } else {
+        // Style standard pour les ascenseurs sur les appareils non-tactiles
+        style.textContent = `
+            .custom-modal::-webkit-scrollbar {
+                width: 10px;
+                height: 10px;
             }
 
-        .custom-modal::-webkit-scrollbar-track {
-            background-color: #f1f1f1;
-            border-radius: 4px;
-            margin: 30px;
-        }
-    `;
+            .custom-modal::-webkit-scrollbar-button {
+                height: 0px;
+                width: 0px;
+                display: none;
+            }
+
+            .custom-modal::-webkit-scrollbar-thumb {
+                background-color: #888;
+                border-radius: 6px; 
+                border: 3px solid transparent;
+            }
+
+            .custom-modal::-webkit-scrollbar-track {
+                background-color: #f1f1f1;
+                border-radius: 4px;
+                margin: 30px;
+            }
+        `;
+    }
+    
+    // Ajouter le style au document
+    document.head.appendChild(style);
+
+//     // Le reste de votre code continue ici...
+
+// export function displayPersonDetails(personId) {
+//     console.log("Affichage des détails de la personne :", personId);
+    
+//     const person = state.gedcomData.individuals[personId];
+//     if (!person) return;
+
+
+
+//     // Ajouter un style pour personnaliser les ascenseurs
+//     const style = document.createElement("style");
+//     style.textContent = `
+//         .custom-modal::-webkit-scrollbar {
+//             width: 10px;
+//             height: 10px;
+//         }
+
+//         .custom-modal::-webkit-scrollbar-button {
+//             height: 0px;
+//             width: 0px;
+//             display: none;
+//         }
+
+//         .custom-modal::-webkit-scrollbar-thumb {
+//             background-color: #888;
+//             border-radius: 6px; 
+//             border: 3px solid transparent;
+//             }
+
+//         .custom-modal::-webkit-scrollbar-track {
+//             background-color: #f1f1f1;
+//             border-radius: 4px;
+//             margin: 30px;
+//         }
+//     `;
     // Ajouter le style au document
     document.head.appendChild(style);
 
@@ -668,12 +723,97 @@ function addResizeHandles(modal) {
     handleContainer.style.left = `${modalRect.left}px`;
     handleContainer.style.top = `${modalRect.top}px`;
     
+    // positions.forEach(pos => {
+    //     const handle = document.createElement('div');
+    //     handle.className = `resize-handle resize-${pos}`;
+    //     handle.style.position = 'absolute';
+    //     handle.style.zIndex = '1001';
+    //     handle.style.pointerEvents = 'auto'; // Cette poignée capturera les événements
+        
+    //     // Configurer l'apparence et la position de chaque poignée selon sa position
+    //     switch(pos) {
+    //         case 'e':  // Est (droite)
+    //             handle.style.right = '0px';
+    //             handle.style.top = '50%';
+    //             handle.style.transform = 'translateY(-50%)';
+    //             handle.style.width = '10px';
+    //             handle.style.height = '100%';
+    //             handle.style.cursor = 'ew-resize';
+    //             break;
+    //         case 'se': // Sud-Est (bas droite)
+    //             handle.style.right = '0px';
+    //             handle.style.bottom = '0px';
+    //             handle.style.width = '25px';
+    //             handle.style.height = '25px';
+    //             handle.style.cursor = 'nwse-resize';
+    //             handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+    //             break;
+    //             case 's':  // Sud (bas)
+    //             handle.style.bottom = '0px';
+    //             handle.style.left = '50%';
+    //             handle.style.transform = 'translateX(-50%)';
+    //             handle.style.width = '100%';
+    //             handle.style.height = '10px';
+    //             handle.style.cursor = 'ns-resize';
+    //             break;
+    //         case 'sw': // Sud-Ouest (bas gauche)
+    //             handle.style.left = '0px';
+    //             handle.style.bottom = '0px';
+    //             handle.style.width = '25px';
+    //             handle.style.height = '25px';
+    //             handle.style.cursor = 'nesw-resize';
+    //             handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+    //             break;
+    //         case 'w':  // Ouest (gauche)
+    //             handle.style.left = '0px';
+    //             handle.style.top = '50%';
+    //             handle.style.transform = 'translateY(-50%)';
+    //             handle.style.width = '10px';
+    //             handle.style.height = '100%';
+    //             handle.style.cursor = 'ew-resize';
+    //             break;
+    //         case 'nw': // Nord-Ouest (haut gauche)
+    //             handle.style.left = '0px';
+    //             handle.style.top = '0px';
+    //             handle.style.width = '25px';
+    //             handle.style.height = '25px';
+    //             handle.style.cursor = 'nwse-resize';
+    //             handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+    //             break;
+    //         case 'n':  // Nord (haut)
+    //             handle.style.top = '0px';
+    //             handle.style.left = '50%';
+    //             handle.style.transform = 'translateX(-50%)';
+    //             handle.style.width = '100%';
+    //             handle.style.height = '10px';
+    //             handle.style.cursor = 'ns-resize';
+    //             break;
+    //         case 'ne': // Nord-Est (haut droite)
+    //             handle.style.right = '0px';
+    //             handle.style.top = '0px';
+    //             handle.style.width = '25px';
+    //             handle.style.height = '25px';
+    //             handle.style.cursor = 'nesw-resize';
+    //             handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+    //             break;
+    //     }
+        
+    //     // Configurer les événements de redimensionnement pour cette poignée
+    //     setupResizeEvents(handle, modal, pos, handleContainer);
+        
+    //     // Ajouter la poignée au conteneur fixe, pas à la modale scrollable
+    //     handleContainer.appendChild(handle);
+    // });
+    
+    
+
     positions.forEach(pos => {
         const handle = document.createElement('div');
         handle.className = `resize-handle resize-${pos}`;
         handle.style.position = 'absolute';
         handle.style.zIndex = '1001';
-        handle.style.pointerEvents = 'auto'; // Cette poignée capturera les événements
+        handle.style.pointerEvents = 'auto';
+        handle.style.background = 'transparent'; // Rendre invisible par défaut
         
         // Configurer l'apparence et la position de chaque poignée selon sa position
         switch(pos) {
@@ -691,9 +831,15 @@ function addResizeHandles(modal) {
                 handle.style.width = '25px';
                 handle.style.height = '25px';
                 handle.style.cursor = 'nwse-resize';
-                handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                // Montrer un indicateur visuel uniquement au survol
+                handle.addEventListener('mouseover', () => {
+                    handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                });
+                handle.addEventListener('mouseout', () => {
+                    handle.style.background = 'transparent';
+                });
                 break;
-                case 's':  // Sud (bas)
+            case 's':  // Sud (bas)
                 handle.style.bottom = '0px';
                 handle.style.left = '50%';
                 handle.style.transform = 'translateX(-50%)';
@@ -707,7 +853,13 @@ function addResizeHandles(modal) {
                 handle.style.width = '25px';
                 handle.style.height = '25px';
                 handle.style.cursor = 'nesw-resize';
-                handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                // Montrer un indicateur visuel uniquement au survol
+                handle.addEventListener('mouseover', () => {
+                    handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                });
+                handle.addEventListener('mouseout', () => {
+                    handle.style.background = 'transparent';
+                });
                 break;
             case 'w':  // Ouest (gauche)
                 handle.style.left = '0px';
@@ -723,7 +875,13 @@ function addResizeHandles(modal) {
                 handle.style.width = '25px';
                 handle.style.height = '25px';
                 handle.style.cursor = 'nwse-resize';
-                handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                // Montrer un indicateur visuel uniquement au survol
+                handle.addEventListener('mouseover', () => {
+                    handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                });
+                handle.addEventListener('mouseout', () => {
+                    handle.style.background = 'transparent';
+                });
                 break;
             case 'n':  // Nord (haut)
                 handle.style.top = '0px';
@@ -739,16 +897,29 @@ function addResizeHandles(modal) {
                 handle.style.width = '25px';
                 handle.style.height = '25px';
                 handle.style.cursor = 'nesw-resize';
-                handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                // Montrer un indicateur visuel uniquement au survol
+                handle.addEventListener('mouseover', () => {
+                    handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
+                });
+                handle.addEventListener('mouseout', () => {
+                    handle.style.background = 'transparent';
+                });
                 break;
         }
-        
         // Configurer les événements de redimensionnement pour cette poignée
         setupResizeEvents(handle, modal, pos, handleContainer);
         
         // Ajouter la poignée au conteneur fixe, pas à la modale scrollable
         handleContainer.appendChild(handle);
     });
+    
+
+    
+    
+    
+    
+    
+    
     
     // Mettre à jour la position du conteneur de poignées quand la modale bouge
     const updateHandleContainer = () => {
@@ -810,6 +981,10 @@ function setupResizeEvents(handle, modal, pos) {
         e.stopPropagation();
         
         const touch = e.touches[0];
+        
+        // Rendre la poignée visible lors du toucher en mode tactile
+        showResizeHandleVisual(handle, pos);
+
         startResize(touch.clientX, touch.clientY);
         
         document.addEventListener('touchmove', resizeWithTouch);
@@ -817,6 +992,57 @@ function setupResizeEvents(handle, modal, pos) {
         document.addEventListener('touchcancel', stopResize);
     });
     
+     // Fonction pour poignées visiable pendant ele resiz
+    function showResizeHandleVisual(handle, pos) {
+        // Définir le style de fond selon la position
+        switch(pos) {
+            case 'se':
+                handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                break;
+            case 'sw':
+                handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                break;
+            case 'nw':
+                handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                break;
+            case 'ne':
+                handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
+                break;
+            case 'e':
+            case 'w':
+                handle.style.background = 'rgba(0,0,0,0.2)';
+                break;
+            case 'n':
+            case 's':
+                handle.style.background = 'rgba(0,0,0,0.2)';
+                break;
+        }
+        
+        // Ajouter un indicateur de curseur visuel pour le tactile
+        const cursorIndicator = document.createElement('div');
+        cursorIndicator.className = 'touch-cursor-indicator';
+        cursorIndicator.style.position = 'absolute';
+        cursorIndicator.style.width = '24px';
+        cursorIndicator.style.height = '24px';
+        cursorIndicator.style.pointerEvents = 'none';
+        cursorIndicator.style.zIndex = '10002';
+        
+        // Définir l'indicateur selon la direction
+        if (pos.includes('e') || pos.includes('w')) {
+            cursorIndicator.innerHTML = '⟷'; // Indicateur horizontal
+        } else if (pos.includes('n') || pos.includes('s')) {
+            cursorIndicator.innerHTML = '⟺'; // Indicateur vertical
+        } else {
+            cursorIndicator.innerHTML = '⤡'; // Indicateur diagonal
+        }
+        
+        // Positionner l'indicateur près de la poignée
+        handle.appendChild(cursorIndicator);
+        
+        // Stocker une référence pour la suppression
+        handle._cursorIndicator = cursorIndicator;
+    }
+            
     // Fonction commune pour démarrer le redimensionnement
     function startResize(x, y) {
         isResizing = true;
@@ -903,6 +1129,15 @@ function setupResizeEvents(handle, modal, pos) {
             document.removeEventListener('mouseup', stopResize);
             document.removeEventListener('touchend', stopResize);
             document.removeEventListener('touchcancel', stopResize);
+            
+            // Masquer la poignée après le redimensionnement
+            handle.style.background = 'transparent';
+            
+            // Supprimer l'indicateur de curseur
+            if (handle._cursorIndicator) {
+                handle._cursorIndicator.remove();
+                delete handle._cursorIndicator;
+            }
         }
     }
 }
