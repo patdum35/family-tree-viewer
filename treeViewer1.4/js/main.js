@@ -9,7 +9,8 @@ import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './tre
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation , initBackgroundSelector } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation } from './mainUI.js'; 
+import { createEnhancedSettingsModal } from './treeSettingsModal.js'
 
 import { 
     displayPersonDetails, 
@@ -703,17 +704,26 @@ export function updateTreeMode(mode) {
 }
 
 // Fonctions de gestion de la modal de paramètres
+// export function openSettingsModal() {
+//     const settingsModal = document.getElementById('settings-modal');
+//     settingsModal.style.display = 'block';
+
+//     // Charger la valeur actuelle
+//     const currentTargetId = localStorage.getItem('targetAncestorId') || '@I741@';
+//     document.getElementById('targetAncestorId').value = currentTargetId;
+
+//     initBackgroundSelector();
+
+// }
+
+
 export function openSettingsModal() {
-    const settingsModal = document.getElementById('settings-modal');
-    settingsModal.style.display = 'block';
-
-    // Charger la valeur actuelle
-    const currentTargetId = localStorage.getItem('targetAncestorId') || '@I741@';
-    document.getElementById('targetAncestorId').value = currentTargetId;
-
-    initBackgroundSelector();
-
+    // Option 1: Utiliser directement la nouvelle modal
+    createEnhancedSettingsModal();
 }
+
+
+
 
 export function closeSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
