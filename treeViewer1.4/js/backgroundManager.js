@@ -5079,6 +5079,1132 @@ function setupGridBackgroundFixed(svg) {
     }
 }
 
+// Fond avec bulles transparentes et brillantes avec tous les paramètres utilisateur
+
+function setupBubblesBackground(svg) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const defs = svg.append("defs");
+    
+    // Récupérer tous les paramètres
+    const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
+    const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
+    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
+    const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
+    
+    console.log("PARAMÈTRES BULLES:", {
+        opacity,
+        patternVisibility,
+        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
+        animationSpeed,
+        customColor
+    });
+    
+    // Nettoyer tout fond existant
+    svg.selectAll(".background-element").remove();
+    
+    // Créer un groupe pour le fond
+    const bgGroup = svg.append("g")
+        .attr("class", "background-element")
+        .attr("pointer-events", "none")
+        .style("opacity", opacity)
+        .lower();
+    
+    // Fond de base avec gradient subtil
+    const baseColor = d3.rgb(customColor);
+    
+    // Créer un dégradé radial du centre vers l'extérieur
+    const gradientId = `bubbles-bg-gradient-${Date.now()}`;
+    const bgGradient = defs.append("radialGradient")
+        .attr("id", gradientId)
+        .attr("cx", "50%")
+        .attr("cy", "50%")
+        .attr("r", "70%")
+        .attr("fx", "50%")
+        .attr("fy", "50%");
+    
+    // Couleur centrale légèrement plus claire
+    const centerColor = d3.rgb(
+        Math.min(255, baseColor.r * 0.2 + 220),
+        Math.min(255, baseColor.g * 0.2 + 220),
+        Math.min(255, baseColor.b * 0.2 + 230)
+    );
+    
+    // Couleur extérieure légèrement plus foncée
+    const outerColor = d3.rgb(
+        Math.min(255, baseColor.r * 0.2 + 210),
+        Math.min(255, baseColor.g * 0.2 + 210),
+        Math.min(255, baseColor.b * 0.2 + 220)
+    );
+    
+    bgGradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", centerColor.toString());
+    
+    bgGradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", outerColor.toString());
+    
+    bgGroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", `url(#${gradientId})`);
+    
+    // Créer un filtre de flou pour adoucir les ombres
+    const blurFilter = defs.append("filter")
+        .attr("id", "soft-blur")
+        .attr("x", "-50%")
+        .attr("y", "-50%")
+        .attr("width", "200%")
+        .attr("height", "200%");
+        
+    blurFilter.append("feGaussianBlur")
+        .attr("in", "SourceGraphic")
+        .attr("stdDeviation", "1");
+        
+    // Définir un gradient pour les bulles (semi-transparent)
+    const bubbleGradientId = `bubble-gradient-${Date.now()}`;
+    const bubbleGradient = defs.append("radialGradient")
+        .attr("id", bubbleGradientId)
+        .attr("cx", "35%")
+        .attr("cy", "35%")
+        .attr("r", "60%")
+        .attr("fx", "35%")
+        .attr("fy", "35%");
+    
+    // Créer un effet semi-transparent avec dégradé pour aspect 3D
+    bubbleGradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", `rgba(255, 255, 255, 0.85)`);
+    
+    bubbleGradient.append("stop")
+        .attr("offset", "25%")
+        .attr("stop-color", `rgba(245, 245, 255, 0.75)`);
+    
+    bubbleGradient.append("stop")
+        .attr("offset", "70%")
+        .attr("stop-color", `rgba(230, 230, 255, 0.65)`);
+    
+    bubbleGradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", `rgba(220, 220, 255, 0.6)`);
+    
+    // Créer les bulles en ordre de profondeur pour une superposition correcte
+    // 1. Générer toutes les bulles d'abord
+    const bubbleData = [];
+    const numBubbles = Math.floor(20 + patternVisibility * 80);
+    
+    for (let i = 0; i < numBubbles; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        
+        // Attribuer un z-index pour la profondeur (les petites bulles en arrière-plan)
+        // Les grandes bulles auront tendance à être au premier plan
+        const zIndex = size * (0.8 + Math.random() * 0.4); // Un peu de hasard mais favorise les grandes bulles
+        
+        bubbleData.push({
+            x: x,
+            y: y,
+            r: size,
+            zIndex: zIndex
+        });
+    }
+    
+    // 2. Trier les bulles par z-index (profondeur) - d'abord les plus petites (arrière-plan)
+    bubbleData.sort((a, b) => a.zIndex - b.zIndex);
+    
+    // 3. Dessiner les bulles dans l'ordre de profondeur
+    const bubbles = [];
+    
+    bubbleData.forEach((data, i) => {
+        // Couleur du contour légèrement teintée de la couleur personnalisée
+        const strokeColorBase = d3.rgb(
+            Math.min(255, baseColor.r * 0.5 + 100),
+            Math.min(255, baseColor.g * 0.5 + 100),
+            Math.min(255, baseColor.b * 0.5 + 120)
+        );
+        
+        // Couleur de base pour la bulle, légèrement teintée de la couleur personnalisée
+        const bubbleBaseColor = d3.rgb(
+            Math.min(255, 220 + baseColor.r * 0.1),
+            Math.min(255, 220 + baseColor.g * 0.1),
+            Math.min(255, 230 + baseColor.b * 0.1)
+        );
+        
+        // Créer un gradient unique pour chaque bulle
+        const uniqueBubbleGradientId = `bubble-gradient-${i}-${Date.now()}`;
+        const uniqueBubbleGradient = defs.append("radialGradient")
+            .attr("id", uniqueBubbleGradientId)
+            .attr("cx", "35%")
+            .attr("cy", "35%")
+            .attr("r", "60%")
+            .attr("fx", "35%")
+            .attr("fy", "35%");
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(255, 255, 255, 0.9)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "40%")
+            .attr("stop-color", `rgba(${bubbleBaseColor.r}, ${bubbleBaseColor.g}, ${bubbleBaseColor.b}, 0.8)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(${Math.max(200, bubbleBaseColor.r - 20)}, ${Math.max(200, bubbleBaseColor.g - 20)}, ${Math.max(220, bubbleBaseColor.b - 10)}, 0.7)`);
+        
+        // Gradient d'ombre plus doux et intégré
+        const bubbleShadowGradientId = `bubble-shadow-${i}-${Date.now()}`;
+        const bubbleShadowGradient = defs.append("radialGradient")
+            .attr("id", bubbleShadowGradientId)
+            .attr("cx", "50%")
+            .attr("cy", "50%")
+            .attr("r", "70%")
+            .attr("fx", "50%")
+            .attr("fy", "50%");
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(0, 0, 0, 0)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "75%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.03)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.08)`);
+        
+        // Créer la bulle avec le gradient et un contour très léger
+        const bubble = bgGroup.append("circle")
+            .attr("cx", data.x)
+            .attr("cy", data.y)
+            .attr("r", data.r)
+            .attr("fill", `url(#${uniqueBubbleGradientId})`)
+            .attr("stroke", `rgba(${strokeColorBase.r}, ${strokeColorBase.g}, ${strokeColorBase.b}, 0.25)`)
+            .attr("stroke-width", 0.5);
+        
+        // Ajouter un petit reflet pour l'effet de brillance (opaque)
+        const highlightSize = data.r * 0.15;
+        const highlightX = data.x - data.r * 0.15;
+        const highlightY = data.y - data.r * 0.15;
+        
+        // Effet d'ombre plus subtil et mieux intégré
+        const shadow = bgGroup.append("circle")
+            .attr("cx", data.x + data.r * 0.03)
+            .attr("cy", data.y + data.r * 0.03)
+            .attr("r", data.r)
+            .attr("fill", `url(#${bubbleShadowGradientId})`)
+            .attr("stroke", "none")
+            .attr("filter", "blur(1px)");
+            
+        // Reflet plus naturel avec effet de flou pour l'intégrer à la bulle
+        const highlight = bgGroup.append("circle")
+            .attr("cx", highlightX)
+            .attr("cy", highlightY)
+            .attr("r", highlightSize)
+            .attr("fill", "rgba(255, 255, 255, 0.6)")
+            .attr("filter", "url(#soft-blur)")
+            .attr("stroke", "none");
+        
+        // Stocker les informations pour l'animation
+        bubbles.push({
+            mainElement: bubble,
+            shadowElement: shadow,
+            highlightElement: highlight,
+            x: data.x,
+            y: data.y,
+            r: data.r,
+            shadowX: data.x + data.r * 0.03,
+            shadowY: data.y + data.r * 0.03,
+            shadowR: data.r,
+            highlightX: highlightX,
+            highlightY: highlightY,
+            highlightR: highlightSize
+        });
+    });
+    
+    // Ajouter des animations si activées
+    if (animation) {
+        bubbles.forEach((bubble, i) => {
+            // Délai pour éviter que toutes les bulles ne bougent en même temps
+            const delay = i * 0.02;
+            // Durée variable selon la taille (les grandes bulles bougent plus lentement)
+            const sizeFactor = Math.max(0.5, Math.min(2, bubble.r / 50));
+            const duration = (10 + sizeFactor * 5) / animationSpeed;
+            
+            // Animation de mouvement flottant
+            // Pour les bulles plus grandes, mouvement plus complexe
+            if (bubble.r > 30 && i % 3 === 0) {
+                // Amplitudes proportionnelles à la taille mais limitées
+                const ampX = Math.min(width * 0.05, bubble.r * 2) * patternVisibility;
+                const ampY = Math.min(height * 0.05, bubble.r * 2) * patternVisibility;
+                
+                // Animation de la bulle principale
+                const mainAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimX.setAttribute("attributeName", "cx");
+                mainAnimX.setAttribute("values", `${bubble.x};${bubble.x + ampX};${bubble.x};${bubble.x - ampX};${bubble.x}`);
+                mainAnimX.setAttribute("dur", `${duration}s`);
+                mainAnimX.setAttribute("repeatCount", "indefinite");
+                mainAnimX.setAttribute("begin", `${delay}s`);
+                
+                const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimY.setAttribute("attributeName", "cy");
+                mainAnimY.setAttribute("values", `${bubble.y};${bubble.y - ampY};${bubble.y};${bubble.y + ampY};${bubble.y}`);
+                mainAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                mainAnimY.setAttribute("repeatCount", "indefinite");
+                mainAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimX);
+                bubble.mainElement.node().appendChild(mainAnimY);
+                
+                // Animation de l'ombre (doit suivre la bulle)
+                const shadowAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimX.setAttribute("attributeName", "cx");
+                shadowAnimX.setAttribute("values", `${bubble.shadowX};${bubble.shadowX + ampX};${bubble.shadowX};${bubble.shadowX - ampX};${bubble.shadowX}`);
+                shadowAnimX.setAttribute("dur", `${duration}s`);
+                shadowAnimX.setAttribute("repeatCount", "indefinite");
+                shadowAnimX.setAttribute("begin", `${delay}s`);
+                
+                const shadowAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimY.setAttribute("attributeName", "cy");
+                shadowAnimY.setAttribute("values", `${bubble.shadowY};${bubble.shadowY - ampY};${bubble.shadowY};${bubble.shadowY + ampY};${bubble.shadowY}`);
+                shadowAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                shadowAnimY.setAttribute("repeatCount", "indefinite");
+                shadowAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimX);
+                bubble.shadowElement.node().appendChild(shadowAnimY);
+                
+                // Animation du reflet (doit suivre la bulle)
+                const highlightAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimX.setAttribute("attributeName", "cx");
+                highlightAnimX.setAttribute("values", `${bubble.highlightX};${bubble.highlightX + ampX};${bubble.highlightX};${bubble.highlightX - ampX};${bubble.highlightX}`);
+                highlightAnimX.setAttribute("dur", `${duration}s`);
+                highlightAnimX.setAttribute("repeatCount", "indefinite");
+                highlightAnimX.setAttribute("begin", `${delay}s`);
+                
+                const highlightAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimY.setAttribute("attributeName", "cy");
+                highlightAnimY.setAttribute("values", `${bubble.highlightY};${bubble.highlightY - ampY};${bubble.highlightY};${bubble.highlightY + ampY};${bubble.highlightY}`);
+                highlightAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                highlightAnimY.setAttribute("repeatCount", "indefinite");
+                highlightAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimX);
+                bubble.highlightElement.node().appendChild(highlightAnimY);
+            }
+            // Pour les bulles moyennes, flottement vertical plus simple
+            else if (bubble.r > 15 && i % 2 === 0) {
+                const floatHeight = Math.min(50, bubble.r) * patternVisibility;
+                
+                const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimY.setAttribute("attributeName", "cy");
+                mainAnimY.setAttribute("values", `${bubble.y};${bubble.y - floatHeight};${bubble.y};${bubble.y + floatHeight/3};${bubble.y}`);
+                mainAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                mainAnimY.setAttribute("repeatCount", "indefinite");
+                mainAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimY);
+                
+                const shadowAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimY.setAttribute("attributeName", "cy");
+                shadowAnimY.setAttribute("values", `${bubble.shadowY};${bubble.shadowY - floatHeight};${bubble.shadowY};${bubble.shadowY + floatHeight/3};${bubble.shadowY}`);
+                shadowAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                shadowAnimY.setAttribute("repeatCount", "indefinite");
+                shadowAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimY);
+                
+                const highlightAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimY.setAttribute("attributeName", "cy");
+                highlightAnimY.setAttribute("values", `${bubble.highlightY};${bubble.highlightY - floatHeight};${bubble.highlightY};${bubble.highlightY + floatHeight/3};${bubble.highlightY}`);
+                highlightAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                highlightAnimY.setAttribute("repeatCount", "indefinite");
+                highlightAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimY);
+            }
+            
+            // Légère pulsation pour certaines bulles
+            if (i % 3 === 0) {
+                const pulseAmp = Math.min(0.15, 5 / bubble.r) * patternVisibility;
+                
+                const mainAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimR.setAttribute("attributeName", "r");
+                mainAnimR.setAttribute("values", `${bubble.r};${bubble.r * (1 + pulseAmp)};${bubble.r};${bubble.r * (1 - pulseAmp/2)};${bubble.r}`);
+                mainAnimR.setAttribute("dur", `${duration * 2}s`);
+                mainAnimR.setAttribute("repeatCount", "indefinite");
+                mainAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimR);
+                
+                const shadowAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimR.setAttribute("attributeName", "r");
+                shadowAnimR.setAttribute("values", `${bubble.shadowR};${bubble.shadowR * (1 + pulseAmp)};${bubble.shadowR};${bubble.shadowR * (1 - pulseAmp/2)};${bubble.shadowR}`);
+                shadowAnimR.setAttribute("dur", `${duration * 2}s`);
+                shadowAnimR.setAttribute("repeatCount", "indefinite");
+                shadowAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimR);
+                
+                const highlightAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimR.setAttribute("attributeName", "r");
+                highlightAnimR.setAttribute("values", `${bubble.highlightR};${bubble.highlightR * (1 + pulseAmp)};${bubble.highlightR};${bubble.highlightR * (1 - pulseAmp/2)};${bubble.highlightR}`);
+                highlightAnimR.setAttribute("dur", `${duration * 2}s`);
+                highlightAnimR.setAttribute("repeatCount", "indefinite");
+                highlightAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimR);
+            }
+        });
+    }
+    
+    console.log("Génération du fond bulles opaques terminée.");
+}
+
+
+
+// Fond avec bulles semi-transparentes qui éclatent
+function setupPoppingBubblesBackground(svg) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const defs = svg.append("defs");
+    
+    // Récupérer tous les paramètres
+    const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
+    const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
+    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
+    const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
+    
+    console.log("PARAMÈTRES BULLES ÉCLATANTES:", {
+        opacity,
+        patternVisibility,
+        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
+        animationSpeed,
+        customColor
+    });
+    
+    // Nettoyer tout fond existant
+    svg.selectAll(".background-element").remove();
+    
+    // Créer un groupe pour le fond
+    const bgGroup = svg.append("g")
+        .attr("class", "background-element")
+        .style("opacity", opacity)
+        .attr("pointer-events", "all")
+        .lower();
+        
+        // Fond de base avec gradient subtil
+    const baseColor = d3.rgb(customColor);
+    
+    // Créer un dégradé radial du centre vers l'extérieur
+    const gradientId = `bubbles-bg-gradient-${Date.now()}`;
+    const bgGradient = defs.append("radialGradient")
+        .attr("id", gradientId)
+        .attr("cx", "50%")
+        .attr("cy", "50%")
+        .attr("r", "70%")
+        .attr("fx", "50%")
+        .attr("fy", "50%");
+    
+    // Couleur centrale légèrement plus claire
+    const centerColor = d3.rgb(
+        Math.min(255, baseColor.r * 0.2 + 220),
+        Math.min(255, baseColor.g * 0.2 + 220),
+        Math.min(255, baseColor.b * 0.2 + 230)
+    );
+    
+    // Couleur extérieure légèrement plus foncée
+    const outerColor = d3.rgb(
+        Math.min(255, baseColor.r * 0.2 + 210),
+        Math.min(255, baseColor.g * 0.2 + 210),
+        Math.min(255, baseColor.b * 0.2 + 220)
+    );
+    
+    bgGradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", centerColor.toString());
+    
+    bgGradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", outerColor.toString());
+    
+    bgGroup.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", `url(#${gradientId})`)
+        .attr("pointer-events", "none");
+    
+    // Créer un filtre de flou pour adoucir les ombres
+    const blurFilter = defs.append("filter")
+        .attr("id", "soft-blur")
+        .attr("x", "-50%")
+        .attr("y", "-50%")
+        .attr("width", "200%")
+        .attr("height", "200%");
+        
+    blurFilter.append("feGaussianBlur")
+        .attr("in", "SourceGraphic")
+        .attr("stdDeviation", "1");
+        
+    // Tableau pour stocker toutes les informations des bulles
+    const bubbles = [];
+    
+    // Fonction pour éclater une bulle
+    function popBubble(bubble) {
+        if (bubble.popped) return;
+        
+        bubble.popped = true;
+        
+        // Créer des fragments d'éclatement (petites bulles qui s'éloignent)
+        const numFragments = Math.floor(5 + Math.random() * 8);
+        const fragments = [];
+        
+        for (let i = 0; i < numFragments; i++) {
+            const angle = (i / numFragments) * Math.PI * 2;
+            const distance = bubble.r * 0.8;
+            
+            // Position initiale autour de la bulle
+            const fragX = bubble.x + Math.cos(angle) * (bubble.r * 0.5);
+            const fragY = bubble.y + Math.sin(angle) * (bubble.r * 0.5);
+            
+            // Taille du fragment (plus petit que la bulle)
+            const fragSize = bubble.r * (0.1 + Math.random() * 0.2);
+            
+            // Créer un fragment d'éclatement
+            const fragment = bubble.group.append("circle")
+                .attr("cx", fragX)
+                .attr("cy", fragY)
+                .attr("r", fragSize)
+                .attr("fill", "rgba(255, 255, 255, 0.8)")
+                .attr("stroke", "rgba(200, 200, 255, 0.5)")
+                .attr("stroke-width", 0.5);
+                
+            fragments.push({
+                element: fragment,
+                x: fragX,
+                y: fragY,
+                targetX: fragX + Math.cos(angle) * distance * (1 + Math.random()),
+                targetY: fragY + Math.sin(angle) * distance * (1 + Math.random()),
+                size: fragSize,
+                angle: angle
+            });
+        }
+        
+        // Animation d'éclatement de la bulle principale
+        bubble.mainElement
+            .transition()
+            .duration(150)
+            .attr("r", bubble.r * 1.2)
+            .style("opacity", 0)
+            .remove();
+            
+        bubble.shadowElement
+            .transition()
+            .duration(100)
+            .style("opacity", 0)
+            .remove();
+            
+        bubble.highlightElement
+            .transition()
+            .duration(100)
+            .style("opacity", 0)
+            .remove();
+        
+        // Animation des fragments
+        fragments.forEach(fragment => {
+            fragment.element
+                .transition()
+                .duration(500 + Math.random() * 500)
+                .attr("cx", fragment.targetX)
+                .attr("cy", fragment.targetY)
+                .attr("r", 0)
+                .style("opacity", 0)
+                .remove();
+        });
+        
+        // Créer un effet de gouttelette au centre (trace d'eau résiduelle)
+        const waterDrop = bubble.group.append("circle")
+            .attr("cx", bubble.x)
+            .attr("cy", bubble.y)
+            .attr("r", bubble.r * 0.5)
+            .attr("fill", "rgba(220, 240, 255, 0.3)")
+            .attr("stroke", "rgba(200, 230, 255, 0.2)")
+            .attr("stroke-width", 0.3);
+            
+        waterDrop.transition()
+            .duration(1000)
+            .attr("r", bubble.r * 0.05)
+            .style("opacity", 0)
+            .remove();
+            
+        // Créer une nouvelle bulle après un délai pour remplacer celle éclatée
+        setTimeout(() => {
+            // Si l'animation est toujours active
+            if (animation) {
+                // Créer une nouvelle bulle à une position aléatoire
+                createNewBubble(bgGroup, defs, baseColor, bubbles);
+            }
+        }, 2000 + Math.random() * 3000);
+    }
+    
+    
+    // Fonction pour créer une nouvelle bulle
+    function createNewBubble(group, defs, baseColor, bubbles) {
+        const x = Math.random() * width;
+        const y = height + 50; // Commencer en-dessous de l'écran
+        const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        const lifespan = Math.random() * 20000 + 5000;
+        
+        // Couleur du contour
+        const strokeColorBase = d3.rgb(
+            Math.min(255, baseColor.r * 0.5 + 100),
+            Math.min(255, baseColor.g * 0.5 + 100),
+            Math.min(255, baseColor.b * 0.5 + 120)
+        );
+        
+        // Couleur de base pour la bulle
+        const bubbleBaseColor = d3.rgb(
+            Math.min(255, 220 + baseColor.r * 0.1),
+            Math.min(255, 220 + baseColor.g * 0.1),
+            Math.min(255, 230 + baseColor.b * 0.1)
+        );
+        
+        // Créer un gradient unique pour la nouvelle bulle
+        const uniqueBubbleGradientId = `bubble-gradient-new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const uniqueBubbleGradient = defs.append("radialGradient")
+            .attr("id", uniqueBubbleGradientId)
+            .attr("cx", "35%")
+            .attr("cy", "35%")
+            .attr("r", "60%")
+            .attr("fx", "35%")
+            .attr("fy", "35%");
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(255, 255, 255, 0.9)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "40%")
+            .attr("stop-color", `rgba(${bubbleBaseColor.r}, ${bubbleBaseColor.g}, ${bubbleBaseColor.b}, 0.8)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(${Math.max(200, bubbleBaseColor.r - 20)}, ${Math.max(200, bubbleBaseColor.g - 20)}, ${Math.max(220, bubbleBaseColor.b - 10)}, 0.7)`);
+        
+        // Gradient d'ombre
+        const bubbleShadowGradientId = `bubble-shadow-new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const bubbleShadowGradient = defs.append("radialGradient")
+            .attr("id", bubbleShadowGradientId)
+            .attr("cx", "50%")
+            .attr("cy", "50%")
+            .attr("r", "70%")
+            .attr("fx", "50%")
+            .attr("fy", "50%");
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(0, 0, 0, 0)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "75%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.03)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.08)`);
+            
+        // Créer un groupe pour la bulle
+        const bubbleGroup = group.append("g")
+            .attr("class", "bubble-group");
+        
+        // Effet d'ombre
+        const shadow = bubbleGroup.append("circle")
+            .attr("cx", x + size * 0.03)
+            .attr("cy", y + size * 0.03)
+            .attr("r", size)
+            .attr("fill", `url(#${bubbleShadowGradientId})`)
+            .attr("stroke", "none")
+            .attr("filter", "blur(1px)")
+            .style("opacity", 0);
+            
+        // Bulle principale
+        const bubble = bubbleGroup.append("circle")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", size)
+            .attr("fill", `url(#${uniqueBubbleGradientId})`)
+            .attr("stroke", `rgba(${strokeColorBase.r}, ${strokeColorBase.g}, ${strokeColorBase.b}, 0.25)`)
+            .attr("stroke-width", 0.5)
+            .style("opacity", 0);
+            
+        // Position du reflet
+        const highlightSize = size * 0.15;
+        const highlightX = x - size * 0.15;
+        const highlightY = y - size * 0.15;
+        
+        // Reflet
+        const highlight = bubbleGroup.append("circle")
+            .attr("cx", highlightX)
+            .attr("cy", highlightY)
+            .attr("r", highlightSize)
+            .attr("fill", "rgba(255, 255, 255, 0.6)")
+            .attr("filter", "url(#soft-blur)")
+            .attr("stroke", "none")
+            .style("opacity", 0);
+        
+        // Position finale (dans l'écran)
+        const finalY = Math.random() * (height - 100) + 50;
+            
+        // Animation d'apparition de la bulle
+        shadow.transition()
+            .duration(2000)
+            .attr("cy", finalY + size * 0.03)
+            .style("opacity", 1);
+            
+        bubble.transition()
+            .duration(2000)
+            .attr("cy", finalY)
+            .style("opacity", 1);
+            
+        highlight.transition()
+            .duration(2000)
+            .attr("cy", finalY - size * 0.15)
+            .style("opacity", 1);
+            
+        // Ajouter au tableau des bulles
+        const newBubble = {
+            group: bubbleGroup,
+            mainElement: bubble,
+            shadowElement: shadow,
+            highlightElement: highlight,
+            x: x,
+            y: finalY,
+            r: size,
+            shadowX: x + size * 0.03,
+            shadowY: finalY + size * 0.03,
+            shadowR: size,
+            highlightX: highlightX,
+            highlightY: finalY - size * 0.15,
+            highlightR: highlightSize,
+            birthTime: Date.now(),
+            lifespan: lifespan,
+            popped: false
+        };
+        
+        bubbles.push(newBubble);
+        
+        // Ajouter un événement pour faire éclater la bulle au survol ou au clic
+        bubble.on("mouseover", () => {
+            if (!newBubble.popped) popBubble(newBubble);
+        });
+        
+        bubble.on("click", () => {
+            if (!newBubble.popped) popBubble(newBubble);
+        });
+        
+        // Ajouter des animations flottantes à la nouvelle bulle
+        if (animation) {
+            const delay = Math.random() * 0.5;
+            const sizeFactor = Math.max(0.5, Math.min(2, size / 50));
+            const duration = (10 + sizeFactor * 5) / animationSpeed;
+            
+            // Animation de flottement vertical simple
+            const floatHeight = Math.min(50, size) * patternVisibility;
+            
+            const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            mainAnimY.setAttribute("attributeName", "cy");
+            mainAnimY.setAttribute("values", `${finalY};${finalY - floatHeight};${finalY};${finalY + floatHeight/3};${finalY}`);
+            mainAnimY.setAttribute("dur", `${duration * 1.5}s`);
+            mainAnimY.setAttribute("repeatCount", "indefinite");
+            mainAnimY.setAttribute("begin", `${delay}s`);
+            
+            bubble.node().appendChild(mainAnimY);
+            
+            const shadowAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            shadowAnimY.setAttribute("attributeName", "cy");
+            shadowAnimY.setAttribute("values", `${finalY + size * 0.03};${finalY + size * 0.03 - floatHeight};${finalY + size * 0.03};${finalY + size * 0.03 + floatHeight/3};${finalY + size * 0.03}`);
+            shadowAnimY.setAttribute("dur", `${duration * 1.5}s`);
+            shadowAnimY.setAttribute("repeatCount", "indefinite");
+            shadowAnimY.setAttribute("begin", `${delay}s`);
+            
+            shadow.node().appendChild(shadowAnimY);
+            
+            const highlightAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            highlightAnimY.setAttribute("attributeName", "cy");
+            highlightAnimY.setAttribute("values", `${finalY - size * 0.15};${finalY - size * 0.15 - floatHeight};${finalY - size * 0.15};${finalY - size * 0.15 + floatHeight/3};${finalY - size * 0.15}`);
+            highlightAnimY.setAttribute("dur", `${duration * 1.5}s`);
+            highlightAnimY.setAttribute("repeatCount", "indefinite");
+            highlightAnimY.setAttribute("begin", `${delay}s`);
+            
+            highlight.node().appendChild(highlightAnimY);
+        }
+    }
+    
+    // Créer les bulles en ordre de profondeur pour une superposition correcte
+    // 1. Générer toutes les bulles d'abord
+    const bubbleData = [];
+    const numBubbles = Math.floor(20 + patternVisibility * 80);
+    
+    for (let i = 0; i < numBubbles; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        
+        // Attribuer un z-index pour la profondeur (les petites bulles en arrière-plan)
+        // Les grandes bulles auront tendance à être au premier plan
+        const zIndex = size * (0.8 + Math.random() * 0.4); // Un peu de hasard mais favorise les grandes bulles
+        
+        bubbleData.push({
+            x: x,
+            y: y,
+            r: size,
+            zIndex: zIndex,
+            // Durée de vie aléatoire pour l'éclatement
+            lifespan: Math.random() * 20000 + 5000,
+            birthTime: Date.now() + Math.random() * 10000 // Décaler la naissance pour éviter éclatements simultanés
+        });
+    }
+    
+    // 2. Trier les bulles par z-index (profondeur) - d'abord les plus petites (arrière-plan)
+    bubbleData.sort((a, b) => a.zIndex - b.zIndex);
+    
+    // 3. Dessiner les bulles dans l'ordre de profondeur
+    bubbleData.forEach((data, i) => {
+        // Couleur du contour légèrement teintée de la couleur personnalisée
+        const strokeColorBase = d3.rgb(
+            Math.min(255, baseColor.r * 0.5 + 100),
+            Math.min(255, baseColor.g * 0.5 + 100),
+            Math.min(255, baseColor.b * 0.5 + 120)
+        );
+        
+        // Couleur de base pour la bulle, légèrement teintée de la couleur personnalisée
+        const bubbleBaseColor = d3.rgb(
+            Math.min(255, 220 + baseColor.r * 0.1),
+            Math.min(255, 220 + baseColor.g * 0.1),
+            Math.min(255, 230 + baseColor.b * 0.1)
+        );
+        
+        // Créer un gradient unique pour chaque bulle
+        const uniqueBubbleGradientId = `bubble-gradient-${i}-${Date.now()}`;
+        const uniqueBubbleGradient = defs.append("radialGradient")
+            .attr("id", uniqueBubbleGradientId)
+            .attr("cx", "35%")
+            .attr("cy", "35%")
+            .attr("r", "60%")
+            .attr("fx", "35%")
+            .attr("fy", "35%");
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(255, 255, 255, 0.9)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "40%")
+            .attr("stop-color", `rgba(${bubbleBaseColor.r}, ${bubbleBaseColor.g}, ${bubbleBaseColor.b}, 0.8)`);
+        
+        uniqueBubbleGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(${Math.max(200, bubbleBaseColor.r - 20)}, ${Math.max(200, bubbleBaseColor.g - 20)}, ${Math.max(220, bubbleBaseColor.b - 10)}, 0.7)`);
+        
+        // Gradient d'ombre plus doux et intégré
+        const bubbleShadowGradientId = `bubble-shadow-${i}-${Date.now()}`;
+        const bubbleShadowGradient = defs.append("radialGradient")
+            .attr("id", bubbleShadowGradientId)
+            .attr("cx", "50%")
+            .attr("cy", "50%")
+            .attr("r", "70%")
+            .attr("fx", "50%")
+            .attr("fy", "50%");
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", `rgba(0, 0, 0, 0)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "75%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.03)`);
+            
+        bubbleShadowGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", `rgba(0, 0, 0, 0.08)`);
+        
+        // Créer un groupe pour la bulle et ses éléments
+        const bubbleGroup = bgGroup.append("g")
+            .attr("class", "bubble-group");
+        
+        // Effet d'ombre plus subtil et mieux intégré
+        const shadow = bubbleGroup.append("circle")
+            .attr("cx", data.x + data.r * 0.03)
+            .attr("cy", data.y + data.r * 0.03)
+            .attr("r", data.r)
+            .attr("fill", `url(#${bubbleShadowGradientId})`)
+            .attr("stroke", "none")
+            .attr("filter", "blur(1px)");
+            
+        // Créer la bulle avec le gradient et un contour très léger
+        const bubble = bubbleGroup.append("circle")
+            .attr("cx", data.x)
+            .attr("cy", data.y)
+            .attr("r", data.r)
+            .attr("fill", `url(#${uniqueBubbleGradientId})`)
+            .attr("stroke", `rgba(${strokeColorBase.r}, ${strokeColorBase.g}, ${strokeColorBase.b}, 0.25)`)
+            .attr("stroke-width", 0.5);
+        
+        // Position du reflet
+        const highlightSize = data.r * 0.15;
+        const highlightX = data.x - data.r * 0.15;
+        const highlightY = data.y - data.r * 0.15;
+        
+        // Reflet plus naturel avec effet de flou pour l'intégrer à la bulle
+        const highlight = bubbleGroup.append("circle")
+            .attr("cx", highlightX)
+            .attr("cy", highlightY)
+            .attr("r", highlightSize)
+            .attr("fill", "rgba(255, 255, 255, 0.6)")
+            .attr("filter", "url(#soft-blur)")
+            .attr("stroke", "none");
+        
+        // Stocker les informations pour l'animation et l'éclatement
+        bubbles.push({
+            group: bubbleGroup,
+            mainElement: bubble,
+            shadowElement: shadow,
+            highlightElement: highlight,
+            x: data.x,
+            y: data.y,
+            r: data.r,
+            shadowX: data.x + data.r * 0.03,
+            shadowY: data.y + data.r * 0.03,
+            shadowR: data.r,
+            highlightX: highlightX,
+            highlightY: highlightY,
+            highlightR: highlightSize,
+            birthTime: data.birthTime,
+            lifespan: data.lifespan,
+            popped: false
+        });
+    });
+    
+    // Ajouter des animations si activées
+    if (animation) {
+        bubbles.forEach((bubble, i) => {
+            // Délai pour éviter que toutes les bulles ne bougent en même temps
+            const delay = i * 0.02;
+            // Durée variable selon la taille (les grandes bulles bougent plus lentement)
+            const sizeFactor = Math.max(0.5, Math.min(2, bubble.r / 50));
+            const duration = (10 + sizeFactor * 5) / animationSpeed;
+            
+            // Animation de mouvement flottant
+            // Pour les bulles plus grandes, mouvement plus complexe
+            if (bubble.r > 30 && i % 3 === 0) {
+                // Amplitudes proportionnelles à la taille mais limitées
+                const ampX = Math.min(width * 0.05, bubble.r * 2) * patternVisibility;
+                const ampY = Math.min(height * 0.05, bubble.r * 2) * patternVisibility;
+                
+                // Animation de la bulle principale
+                const mainAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimX.setAttribute("attributeName", "cx");
+                mainAnimX.setAttribute("values", `${bubble.x};${bubble.x + ampX};${bubble.x};${bubble.x - ampX};${bubble.x}`);
+                mainAnimX.setAttribute("dur", `${duration}s`);
+                mainAnimX.setAttribute("repeatCount", "indefinite");
+                mainAnimX.setAttribute("begin", `${delay}s`);
+                
+                const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimY.setAttribute("attributeName", "cy");
+                mainAnimY.setAttribute("values", `${bubble.y};${bubble.y - ampY};${bubble.y};${bubble.y + ampY};${bubble.y}`);
+                mainAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                mainAnimY.setAttribute("repeatCount", "indefinite");
+                mainAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimX);
+                bubble.mainElement.node().appendChild(mainAnimY);
+                
+                // Animation de l'ombre (doit suivre la bulle)
+                const shadowAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimX.setAttribute("attributeName", "cx");
+                shadowAnimX.setAttribute("values", `${bubble.shadowX};${bubble.shadowX + ampX};${bubble.shadowX};${bubble.shadowX - ampX};${bubble.shadowX}`);
+                shadowAnimX.setAttribute("dur", `${duration}s`);
+                shadowAnimX.setAttribute("repeatCount", "indefinite");
+                shadowAnimX.setAttribute("begin", `${delay}s`);
+                
+                const shadowAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimY.setAttribute("attributeName", "cy");
+                shadowAnimY.setAttribute("values", `${bubble.shadowY};${bubble.shadowY - ampY};${bubble.shadowY};${bubble.shadowY + ampY};${bubble.shadowY}`);
+                shadowAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                shadowAnimY.setAttribute("repeatCount", "indefinite");
+                shadowAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimX);
+                bubble.shadowElement.node().appendChild(shadowAnimY);
+                
+                // Animation du reflet (doit suivre la bulle)
+                const highlightAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimX.setAttribute("attributeName", "cx");
+                highlightAnimX.setAttribute("values", `${bubble.highlightX};${bubble.highlightX + ampX};${bubble.highlightX};${bubble.highlightX - ampX};${bubble.highlightX}`);
+                highlightAnimX.setAttribute("dur", `${duration}s`);
+                highlightAnimX.setAttribute("repeatCount", "indefinite");
+                highlightAnimX.setAttribute("begin", `${delay}s`);
+                
+                const highlightAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimY.setAttribute("attributeName", "cy");
+                highlightAnimY.setAttribute("values", `${bubble.highlightY};${bubble.highlightY - ampY};${bubble.highlightY};${bubble.highlightY + ampY};${bubble.highlightY}`);
+                highlightAnimY.setAttribute("dur", `${duration * 1.3}s`);
+                highlightAnimY.setAttribute("repeatCount", "indefinite");
+                highlightAnimY.setAttribute("begin", `${delay * 1.1}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimX);
+                bubble.highlightElement.node().appendChild(highlightAnimY);
+            }
+            // Pour les bulles moyennes, flottement vertical plus simple
+            else if (bubble.r > 15 && i % 2 === 0) {
+                const floatHeight = Math.min(50, bubble.r) * patternVisibility;
+                
+
+                const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimY.setAttribute("attributeName", "cy");
+                mainAnimY.setAttribute("values", `${bubble.y};${bubble.y - floatHeight};${bubble.y};${bubble.y + floatHeight/3};${bubble.y}`);
+                mainAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                mainAnimY.setAttribute("repeatCount", "indefinite");
+                mainAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimY);
+                
+                const shadowAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimY.setAttribute("attributeName", "cy");
+                shadowAnimY.setAttribute("values", `${bubble.shadowY};${bubble.shadowY - floatHeight};${bubble.shadowY};${bubble.shadowY + floatHeight/3};${bubble.shadowY}`);
+                shadowAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                shadowAnimY.setAttribute("repeatCount", "indefinite");
+                shadowAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimY);
+                
+                const highlightAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimY.setAttribute("attributeName", "cy");
+                highlightAnimY.setAttribute("values", `${bubble.highlightY};${bubble.highlightY - floatHeight};${bubble.highlightY};${bubble.highlightY + floatHeight/3};${bubble.highlightY}`);
+                highlightAnimY.setAttribute("dur", `${duration * 1.5}s`);
+                highlightAnimY.setAttribute("repeatCount", "indefinite");
+                highlightAnimY.setAttribute("begin", `${delay}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimY);
+            }
+            
+            // Légère pulsation pour certaines bulles
+            if (i % 3 === 0) {
+                const pulseAmp = Math.min(0.15, 5 / bubble.r) * patternVisibility;
+                
+                const mainAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                mainAnimR.setAttribute("attributeName", "r");
+                mainAnimR.setAttribute("values", `${bubble.r};${bubble.r * (1 + pulseAmp)};${bubble.r};${bubble.r * (1 - pulseAmp/2)};${bubble.r}`);
+                mainAnimR.setAttribute("dur", `${duration * 2}s`);
+                mainAnimR.setAttribute("repeatCount", "indefinite");
+                mainAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.mainElement.node().appendChild(mainAnimR);
+                
+                const shadowAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                shadowAnimR.setAttribute("attributeName", "r");
+                shadowAnimR.setAttribute("values", `${bubble.shadowR};${bubble.shadowR * (1 + pulseAmp)};${bubble.shadowR};${bubble.shadowR * (1 - pulseAmp/2)};${bubble.shadowR}`);
+                shadowAnimR.setAttribute("dur", `${duration * 2}s`);
+                shadowAnimR.setAttribute("repeatCount", "indefinite");
+                shadowAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.shadowElement.node().appendChild(shadowAnimR);
+                
+                const highlightAnimR = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                highlightAnimR.setAttribute("attributeName", "r");
+                highlightAnimR.setAttribute("values", `${bubble.highlightR};${bubble.highlightR * (1 + pulseAmp)};${bubble.highlightR};${bubble.highlightR * (1 - pulseAmp/2)};${bubble.highlightR}`);
+                highlightAnimR.setAttribute("dur", `${duration * 2}s`);
+                highlightAnimR.setAttribute("repeatCount", "indefinite");
+                highlightAnimR.setAttribute("begin", `${delay * 2}s`);
+                
+                bubble.highlightElement.node().appendChild(highlightAnimR);
+            }
+            
+            // Ajouter un événement pour faire éclater la bulle au survol ou au clic
+            bubble.mainElement.on("mouseover", () => {
+                if (!bubble.popped) popBubble(bubble);
+            });
+            
+            bubble.mainElement.on("click", () => {
+                if (!bubble.popped) popBubble(bubble);
+            });
+        });
+    }
+    
+    // Système d'éclatement automatique des bulles selon leur durée de vie
+    if (animation) {
+        // Vérifier l'état des bulles périodiquement
+        const checkInterval = setInterval(() => {
+            const now = Date.now();
+            
+            // Vérifier chaque bulle
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                const bubble = bubbles[i];
+                
+                // Si la bulle n'a pas encore éclaté et a dépassé sa durée de vie
+                if (!bubble.popped && now > bubble.birthTime + bubble.lifespan) {
+                    // Faire éclater la bulle
+                    popBubble(bubble);
+                    
+                    // Retirer la bulle du tableau
+                    bubbles.splice(i, 1);
+                }
+            }
+            
+            // Si toutes les bulles ont éclaté et que l'animation est terminée, arrêter l'intervalle
+            if (bubbles.length === 0) {
+                clearInterval(checkInterval);
+            }
+        }, 1000); // Vérifier toutes les secondes
+    }
+    
+    // Pour les écrans tactiles, on permet l'éclatement au toucher
+    svg.on("touchstart", function(event) {
+        // Obtenir les coordonnées du toucher
+        const touch = event.touches[0];
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
+        
+        // Vérifier si le toucher est sur une bulle
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+            const bubble = bubbles[i];
+            
+            // Calculer la distance entre le toucher et le centre de la bulle
+            const distance = Math.sqrt(Math.pow(touchX - bubble.x, 2) + Math.pow(touchY - bubble.y, 2));
+            
+            // Si le toucher est à l'intérieur de la bulle et que la bulle n'a pas encore éclaté
+            if (distance <= bubble.r && !bubble.popped) {
+                popBubble(bubble);
+                bubbles.splice(i, 1);
+                break; // Ne faire éclater qu'une seule bulle par toucher
+            }
+        }
+    });
+    
+    console.log("Génération du fond bulles éclatantes terminée.");
+}
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
 // Mettre à jour la fonction setupElegantBackground pour inclure les nouveaux fonds
 export function setupElegantBackground(svg) {
   // Vérifier si une préférence est sauvegardée
@@ -5136,6 +6262,12 @@ export function setupElegantBackground(svg) {
         break;
       case 'artDeco':
         setupArtDecoBackground(svg);
+        break;
+      case 'bubbles':
+        setupBubblesBackground(svg);
+        break;
+      case 'poppingBubbles':
+        setupPoppingBubblesBackground(svg);
         break;
       case 'none':
         // Ne rien faire, pas de fond
@@ -5287,5 +6419,7 @@ export {
     setupPollockBackground,
     setupKandinskyBackground,
     setupMiroBackground,
-    setupMondrianBackground
+    setupMondrianBackground,
+    setupBubblesBackground,
+    setupPoppingBubblesBackground
 };

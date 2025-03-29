@@ -15,6 +15,8 @@ import { setupElegantBackground,
          setupPollockBackground,
          setupKandinskyBackground,
          setupMiroBackground,
+         setupBubblesBackground,
+         setupPoppingBubblesBackground,
          setupCustomImageBackground } from './backgroundManager.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { nameCloudState } from './nameCloud.js';
@@ -94,9 +96,9 @@ function createModalContainer() {
 
 function createTypeSelect(config) {
     // Définir les options et les valeurs correspondantes - Version compacte
-    const typeOptions = ['Aucun', 'Image', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple'];
-    const typeOptionsExpanded = ['Aucun fond', 'Image personnalisée', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Dégradé simple'];
-    const typeValues = ['none', 'customImage', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground' ];
+    const typeOptions = ['Aucun', 'Image', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple', 'Bubbles', 'Popping Bubbles'];
+    const typeOptionsExpanded = ['Aucun fond', 'Image personnalisée', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Dégradé simple', 'Bubbles', 'Popping the Bubbles'];
+    const typeValues = ['none', 'customImage', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground', 'bubbles', 'poppingBubbles' ];
     
     // Utiliser createOptionsFromLists au lieu de créer manuellement la liste
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -1518,6 +1520,20 @@ function applyBackground(backgroundType) {
                     module.setupArtDecoBackground(svg);
                 } else {
                     throw new Error("Fonction setupArtDecoBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'bubbles') {
+                if (typeof module.setupBubblesBackground === 'function') {
+                    module.setupBubblesBackground(svg);
+                } else {
+                    throw new Error("Fonction setupBubblesBackground non disponible");
+                }
+            }
+            else if (backgroundType === 'poppingBubbles') {
+                if (typeof module.setupPoppingBubblesBackground === 'function') {
+                    module.setupPoppingBubblesBackground(svg);
+                } else {
+                    throw new Error("Fonction setupPoppingBubblesBackground non disponible");
                 }
             }
             else {
