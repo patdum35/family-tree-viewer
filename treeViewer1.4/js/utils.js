@@ -84,6 +84,39 @@ export function findYoungestPerson() {
     return youngest;
 }
 
+/**
+ * Trouve toutes les personnes dont le nom contient une chaîne spécifique
+ * @param {string} nameToFind - La chaîne de caractères à rechercher dans les noms
+ * @returns {Array} - Tableau des personnes trouvées ou tableau vide si aucune personne ne correspond
+ */
+export function findPersonsByName(nameToFind) {
+    if (!state.gedcomData || !state.gedcomData.individuals) {
+        return [];
+    }
+    
+    // Convertir en minuscules pour une recherche insensible à la casse
+    const searchStr = nameToFind.toLowerCase();
+    
+    // Rechercher parmi tous les individus
+    return Object.values(state.gedcomData.individuals)
+        .filter(person => {
+            const fullName = person.name.toLowerCase().replace(/\//g, '');
+            return fullName.includes(searchStr);
+        });
+}
+
+/**
+ * Trouve une personne dont le nom contient une chaîne spécifique
+ * @param {string} nameToFind - La chaîne de caractères à rechercher dans les noms
+ * @returns {Object|null} - La première personne trouvée ou null si aucune personne ne correspond
+ */
+export function findPersonByName(nameToFind) {
+    // Utiliser findPersonsByName et retourner le premier résultat ou null
+    const results = findPersonsByName(nameToFind);
+    return results.length > 0 ? results[0] : null;
+}
+
+
 
 // /**
 //  * Vérifie si une personne a des descendants

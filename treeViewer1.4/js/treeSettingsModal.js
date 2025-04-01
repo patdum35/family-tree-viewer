@@ -24,14 +24,25 @@ import { nameCloudState } from './nameCloud.js';
 
 // État des paramètres de fond d'écran avec vérification stricte des valeurs
 const backgroundSettings = {
-    type: localStorage.getItem('preferredBackground') || 'growingTree',
-    opacity: getNumericValue('backgroundOpacity', 0.5),
-    patternVisibility: getNumericValue('patternVisibility', 1.0),
-    animation: localStorage.getItem('backgroundAnimation') === 'true' || false,
-    animationSpeed: getNumericValue('animationSpeed', 0.3),
-    customColor: localStorage.getItem('backgroundCustomColor') || '#F5F0E6'
+    // type: localStorage.getItem('preferredBackground') || 'growingTree',
+    // opacity: getNumericValue('backgroundOpacity', 0.5),
+    // patternVisibility: getNumericValue('patternVisibility', 1.0),
+    // animation: localStorage.getItem('backgroundAnimation') === 'true' || false,
+    // animationSpeed: getNumericValue('animationSpeed', 0.3),
+    // customColor: localStorage.getItem('backgroundCustomColor') || '#F5F0E6'
+    
+    
+    type: localStorage.getItem('preferredBackground') || 'poppingBubbles', //'growingTree',
+    opacity: getNumericValue('backgroundOpacity', 1.0) || 1.0, //0.5),
+    patternVisibility: getNumericValue('patternVisibility', 1.0) || 1.0 ,
+    animation: localStorage.getItem('backgroundAnimation') === null ? true : localStorage.getItem('backgroundAnimation') === 'true',
+    
+    animationSpeed: getNumericValue('animationSpeed', 2.0) || 2.0, //0.3),
+    customColor: localStorage.getItem('backgroundCustomColor') || '#B5D9A7' //'#F5F0E6'
 };
 
+
+    
 // Fonction d'aide pour obtenir une valeur numérique valide depuis localStorage
 // Version corrigée de la fonction getNumericValue
 function getNumericValue(key, defaultValue) {
@@ -96,9 +107,9 @@ function createModalContainer() {
 
 function createTypeSelect(config) {
     // Définir les options et les valeurs correspondantes - Version compacte
-    const typeOptions = ['Aucun', 'Image', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple', 'Bubbles', 'Popping Bubbles'];
-    const typeOptionsExpanded = ['Aucun fond', 'Image personnalisée', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Dégradé simple', 'Bubbles', 'Popping the Bubbles'];
-    const typeValues = ['none', 'customImage', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground', 'bubbles', 'poppingBubbles' ];
+    const typeOptions = ['Aucun', 'Image', 'Bubbles', 'Popping Bubbles', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple'];
+    const typeOptionsExpanded = ['Aucun fond', 'Image personnalisée', 'Bubbles', 'Popping the Bubbles', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Simple'];
+    const typeValues = ['none', 'customImage', 'bubbles', 'poppingBubbles', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground' ];
     
     // Utiliser createOptionsFromLists au lieu de créer manuellement la liste
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
@@ -112,6 +123,14 @@ function createTypeSelect(config) {
     };
     
     // Utiliser le sélecteur personnalisé avec style nameCloudUI
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '200px';
+    } else {
+      dropdownHeight = '345px';
+    }
+    
+    
     return createCustomSelector({
         options: options,
         selectedValue: config.type,
@@ -121,7 +140,7 @@ function createTypeSelect(config) {
             width: '120px', // Plus compact
             height: '25px',  // Plus compact
             dropdownWidth: '170px',
-            dropdownMaxHeight: '345px'
+            dropdownMaxHeight: dropdownHeight,
         },
         padding: {
             display: { x: 4, y: 1 },    // Padding minimal comme nameCloudUI
@@ -346,76 +365,6 @@ function createAnimationControls() {
     return container;
 }
 
-
-
-
-
-
-// function createModalContent() {
-//     const content = document.createElement('div');
-//     content.className = 'enhanced-modal-content';
-//     content.style.backgroundColor = 'rgba(240, 245, 255, 0.85)'; // Semi-transparent
-//     content.style.borderRadius = '10px';
-//     content.style.padding = '15px'; // Réduire le padding
-//     content.style.width = '90%';
-//     content.style.maxWidth = '500px';
-//     content.style.maxHeight = '70vh'; // Réduire la hauteur maximale
-//     content.style.overflow = 'auto';
-//     content.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-//     content.style.position = 'relative';
-    
-//     // Créer l'en-tête de la modal avec style nameCloudUI
-//     const header = document.createElement('div');
-//     header.className = 'modal-header';
-//     header.style.display = 'flex';
-//     header.style.justifyContent = 'space-between';
-//     header.style.alignItems = 'center';
-//     header.style.marginBottom = '10px'; // Réduire la marge
-//     header.style.borderBottom = '1px solid #e0e0e0';
-//     header.style.paddingBottom = '8px'; // Réduire le padding
-//     header.style.backgroundColor = 'white'; // Fond opaque pour la bande titre
-//     header.style.padding = '12px';          // Réduire le padding
-//     header.style.borderRadius = '10px 10px 0 0'; // Arrondir les coins supérieurs
-//     header.style.marginLeft = '-15px';      // Ajuster pour le nouveau padding
-//     header.style.marginRight = '-15px';     // Ajuster pour le nouveau padding
-//     header.style.marginTop = '-15px';       // Ajuster pour le nouveau padding
-//     header.style.width = 'calc(100% + 30px)'; // Ajuster pour le nouveau padding
-    
-//     const title = document.createElement('h2');
-//     title.textContent = 'Paramètres Avancés';
-//     title.style.margin = '0';
-//     title.style.fontSize = '18px'; // Réduire la taille du titre
-//     title.style.color = '#333';
-    
-//     const closeButton = document.createElement('button');
-//     closeButton.innerHTML = '&times;';
-//     closeButton.className = 'modal-close-btn';
-//     closeButton.style.border = 'none';
-//     closeButton.style.background = 'none';
-//     closeButton.style.fontSize = '22px'; // Réduire la taille
-//     closeButton.style.cursor = 'pointer';
-//     closeButton.style.color = '#999';
-//     closeButton.style.padding = '0';
-//     closeButton.style.lineHeight = '1';
-    
-//     // Effet de survol
-//     closeButton.addEventListener('mouseover', () => {
-//         closeButton.style.color = '#333';
-//     });
-//     closeButton.addEventListener('mouseout', () => {
-//         closeButton.style.color = '#999';
-//     });
-    
-//     closeButton.addEventListener('click', () => {
-//         document.body.removeChild(document.getElementById('enhanced-settings-modal'));
-//     });
-    
-//     header.appendChild(title);
-//     header.appendChild(closeButton);
-//     content.appendChild(header);
-    
-//     return content;
-// }
 
 function createModalContent() {
     const content = document.createElement('div');
@@ -1035,8 +984,6 @@ function initializeControls(modalContent) {
 
 
 
-
-
 function createTargetAncestorControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -1301,7 +1248,6 @@ function updateBackgroundProperty(property, value) {
 
 
 // Fonction pour créer le contenu de l'onglet géolocalisation
-
 function createGeolocationControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -1363,9 +1309,10 @@ function applyBackground(backgroundType) {
     // Stocker le dernier fond utilisé
     const previousBackground = localStorage.getItem('lastAppliedBackground');
     
+    
     // Feedback immédiat
     if (window.showToast) {
-        window.showToast(`Application du fond: ${backgroundType}`, 1000);
+        window.showToast(`Application du fond: ${backgroundType}`, 2000);
     }
     
     // Importer le module de gestion de fond d'écran
@@ -1539,9 +1486,34 @@ function applyBackground(backgroundType) {
             else {
                 throw new Error(`Type de fond inconnu: ${backgroundType}`);
             }
-            
+           
             // Si on arrive ici, c'est que tout s'est bien passé
             localStorage.setItem('lastAppliedBackground', backgroundType);
+  
+            //   // Correction spécifique pour l'opacité
+            // setTimeout(() => {
+            //     // Vérifier si l'opacité est définie et l'appliquer explicitement
+            //     const opacity = backgroundSettings.opacity;
+            //     if (opacity === 0 || opacity === null || opacity === undefined) {
+            //         // Si l'opacité est 0 ou non définie, on force à 1.0
+            //         backgroundSettings.opacity = 1.0;
+            //         localStorage.setItem('backgroundOpacity', '1.0');
+            //     }
+                
+            //     // Appliquer l'opacité de manière forcée
+            //     const container = document.querySelector('.background-container');
+            //     if (container) {
+            //         const elements = container.querySelectorAll('*');
+            //         elements.forEach(el => {
+            //             // Ne pas modifier l'opacité du conteneur lui-même
+            //             if (el !== container) {
+            //                 el.style.opacity = backgroundSettings.opacity;
+            //             }
+            //         });
+            //     }
+            // }, 200);
+  
+  
             
         } catch (error) {
             console.error(`Erreur lors de l'application du fond ${backgroundType}:`, error);

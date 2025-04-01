@@ -3,7 +3,7 @@
 // ====================================
 import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
-import { findYoungestPerson } from './utils.js';
+import { findYoungestPerson, findPersonByName } from './utils.js';
 import { initBackgroundContainer } from './backgroundManager.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { startAncestorAnimation, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
@@ -30,6 +30,7 @@ import {
     searchTree
 } from './eventHandlers.js';
 
+
 export const state = {
     gedcomData: null,
     rootPersonId: null,
@@ -52,6 +53,7 @@ export const state = {
     animationTargetAncestorId: "@I739@",
     animationRootPersonId: '@I1@',
     isTouchDevice: false,
+    initialTreeDisplay: true,
 
     treeOwner: 1
 };
@@ -166,7 +168,9 @@ export async function loadData() {
   
     // Utilisation
     const device = detectDeviceType();
-    showToast("isMobile= " + device.isMobile + " , hasTouchScreen=" + device.hasTouchScreen + ", inputType=" + device.inputType + ", Width="+ device.viewportWidth + ", Height="+ device.viewportHeight, 2000);
+    // showToast("isMobile= " + device.isMobile + " , hasTouchScreen=" + device.hasTouchScreen + ", inputType=" + device.inputType + ", Width="+ device.viewportWidth + ", Height="+ device.viewportHeight, 2000);
+    
+    
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
   
     const fileInput = document.getElementById('gedFile');
@@ -217,6 +221,7 @@ export async function loadData() {
 
         hideMap();
 
+        state.initialTreeDisplay = true;
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
 
         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
@@ -579,9 +584,11 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     resetAnimationState();
 
     // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
-    let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
+    // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
 
 
+    let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+    
 
     // Important : toujours sauvegarder l'ID de la personne courante
     if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
@@ -956,6 +963,9 @@ export {
     resetZoom,
     searchTree
 };
+
+
+
 
 window.addEventListener('load', initialize);
 

@@ -5003,7 +5003,6 @@ function setupParchmentBackgroundFixed(svg) {
 }
 
 
-
 // Fonction pour créer une grille améliorée qui fonctionne
 function setupGridBackgroundFixed(svg) {
     const width = window.innerWidth;
@@ -5473,6 +5472,9 @@ function setupPoppingBubblesBackground(svg) {
     const height = window.innerHeight;
     const defs = svg.append("defs");
     
+    const scaleFactor = Math.min(width, height) / 1000; // Ajustez ce facteur selon vos besoins
+
+    
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
@@ -5657,7 +5659,11 @@ function setupPoppingBubblesBackground(svg) {
     function createNewBubble(group, defs, baseColor, bubbles) {
         const x = Math.random() * width;
         const y = height + 50; // Commencer en-dessous de l'écran
-        const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        // const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        
+        const size = Math.random() * Math.random() * 100 * scaleFactor + 10 * scaleFactor + patternVisibility * 40 * scaleFactor;
+
+        
         const lifespan = Math.random() * 20000 + 5000;
         
         // Couleur du contour
@@ -5853,7 +5859,10 @@ function setupPoppingBubblesBackground(svg) {
     for (let i = 0; i < numBubbles; i++) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        // const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
+        
+        const size = Math.random() * Math.random() * 100 * scaleFactor + 10 * scaleFactor + patternVisibility * 40 * scaleFactor;
+
         
         // Attribuer un z-index pour la profondeur (les petites bulles en arrière-plan)
         // Les grandes bulles auront tendance à être au premier plan
@@ -6188,29 +6197,43 @@ function setupPoppingBubblesBackground(svg) {
     
     console.log("Génération du fond bulles éclatantes terminée.");
 }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
+ 
 // Mettre à jour la fonction setupElegantBackground pour inclure les nouveaux fonds
 export function setupElegantBackground(svg) {
+
+  // const debugInfo = 
+  // `Type: ${localStorage.getItem('preferredBackground')} | 
+  //   Opacité: ${localStorage.getItem('backgroundOpacity')} |
+  //   visibility: ${localStorage.getItem('patternVisibility')} |
+  //   Color: ${localStorage.getItem('backgroundCustomColor')} | 
+  //   Animation: ${localStorage.getItem('backgroundAnimation')} | 
+  //   speed: ${localStorage.getItem('animationSpeed')}`;
+  // window.showToast(debugInfo, 10000)
+  
+        
+  if ((localStorage.getItem('preferredBackground') === null) || 
+  (localStorage.getItem('backgroundOpacity') === null) ||
+  (localStorage.getItem('patternVisibility') === null) ||
+  (localStorage.getItem('backgroundCustomColor') === null) ||
+  (localStorage.getItem('backgroundAnimation') === null) ||
+  (localStorage.getItem('animationSpeed') === null))
+  { 
+    localStorage.setItem('preferredBackground', 'poppingBubbles'); 
+    localStorage.setItem('backgroundOpacity', 1.0);
+    localStorage.setItem('patternVisibility', 1.0);
+    localStorage.setItem('backgroundAnimation',true);
+    localStorage.setItem('animationSpeed', 2.0);
+    localStorage.setItem('backgroundCustomColor', '#B5D9A7');
+  }
+  
+  
+
+
   // Vérifier si une préférence est sauvegardée
   const savedBackground = localStorage.getItem('preferredBackground');
-  
-  if (savedBackground) {
+ 
+   if (savedBackground) {
     // Appliquer le fond sauvegardé
     switch (savedBackground) {
       case 'pollock':
@@ -6337,64 +6360,6 @@ function setupCustomImageBackground(svg, imagePath) {
     // Démarrer le chargement de l'image
     image.src = imagePath;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Fonction commune pour appliquer les paramètres à tous les fonds
-function applyBackgroundSettings(bgGroup, defs) {
-    // Récupérer les paramètres depuis le localStorage
-    const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
-    const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
-    const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
-    const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
-    
-    // Appliquer l'opacité globale au groupe
-    bgGroup.attr("opacity", opacity);
-    
-    // Configurer les animations si activées
-    if (animation) {
-        // Créer une définition d'animation
-        const animationDef = defs.append("animateTransform")
-            .attr("attributeName", "transform")
-            .attr("type", "rotate")
-            .attr("from", "0 0 0")
-            .attr("to", "360 0 0")
-            .attr("dur", `${10 / animationSpeed}s`)
-            .attr("repeatCount", "indefinite");
-        
-        // Retourner les informations pour une utilisation dans les fonctions spécifiques
-        return {
-            opacity,
-            patternVisibility,
-            animation,
-            animationSpeed,
-            customColor,
-            animationDef
-        };
-    }
-    
-    return {
-        opacity,
-        patternVisibility,
-        animation,
-        animationSpeed,
-        customColor
-    };
-}
-
-
 
 
 
