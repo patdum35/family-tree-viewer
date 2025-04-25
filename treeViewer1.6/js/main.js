@@ -4,7 +4,6 @@
 import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
-import { initBackgroundContainer } from './backgroundManager.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { startAncestorAnimation, prepareAnimationDemo, validateTilesCoverage, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
@@ -13,8 +12,6 @@ import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTrunca
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
-import { enableBackground } from './backgroundManager.js';
-import { monitorFunction } from './performanceMonitor.js';
 
 import { 
     displayPersonDetails, 
