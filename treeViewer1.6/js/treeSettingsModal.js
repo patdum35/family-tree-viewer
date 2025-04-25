@@ -19,7 +19,8 @@ const backgroundSettings = {
     type: localStorage.getItem('preferredBackground') || 'poppingBubbles', //'growingTree',
     opacity: getNumericValue('backgroundOpacity', 1.0) || 1.0, //0.5),
     patternVisibility: getNumericValue('patternVisibility', 1.0) || 1.0 ,
-    animation: localStorage.getItem('backgroundAnimation') === null ? true : localStorage.getItem('backgroundAnimation') === 'true',
+    // animation: localStorage.getItem('backgroundAnimation') === null ? true : localStorage.getItem('backgroundAnimation') === 'true',
+    animation: localStorage.getItem('backgroundAnimation') === null ? false : localStorage.getItem('backgroundAnimation') === 'true',
     
     animationSpeed: getNumericValue('animationSpeed', 2.0) || 2.0, //0.3),
     customColor: localStorage.getItem('backgroundCustomColor') || '#B5D9A7' //'#F5F0E6'

@@ -6405,7 +6405,7 @@ export function setupElegantBackground(svg) {
             localStorage.setItem('preferredBackground', 'poppingBubbles'); 
             localStorage.setItem('backgroundOpacity', 1.0);
             localStorage.setItem('patternVisibility', 1.0);
-            localStorage.setItem('backgroundAnimation',true);
+            localStorage.setItem('backgroundAnimation',false);
             localStorage.setItem('animationSpeed', 2.0);
             localStorage.setItem('backgroundCustomColor', '#B5D9A7');
         }
@@ -6483,7 +6483,8 @@ export function setupElegantBackground(svg) {
                 break;
             default:
                 // Fallback sur un fond par défaut
-                setupPoppingBubblesBackground(svg);
+                // setupPoppingBubblesBackground(svg);
+                setupGrowingTreeBackground(svg);
             }
         } else {
             // Comportement par défaut si aucune préférence n'est sauvegardée

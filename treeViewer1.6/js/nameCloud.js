@@ -29,7 +29,7 @@ export const nameCloudState = {
     isShapeBorder: false,
     isThreeZones: true,
     wordRotation: false,
-    wordMovement: 'simple',   // Can be 'none', 'simple', 'bounce', or 'float'
+    wordMovement: 'none', //'simple',   // Can be 'none', 'simple', 'bounce', or 'float'
     movingRotation: false,
     autoShapeScale: 1,
     autoZoomScale: 1,
