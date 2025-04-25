@@ -8,6 +8,7 @@ import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.j
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu } from './hamburgerMenu.js';
+import { initializeAnimationMapPosition} from './treeAnimation.js';
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -45,6 +46,7 @@ export function handleWindowResize() {
         
     const svg = d3.select("#tree-svg");
     setupElegantBackground(svg);
+    initializeAnimationMapPosition();
 }
 
 /**

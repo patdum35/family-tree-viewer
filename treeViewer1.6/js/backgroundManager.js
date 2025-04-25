@@ -6390,11 +6390,11 @@ function setupPoppingBubblesBackground(svg) {
 // Mettre à jour la fonction setupElegantBackground pour inclure les nouveaux fonds
 export function setupElegantBackground(svg) {
 
-    console.log("\n\n #### Configuration du fond élégant... appel de  setupElegantBackground ######### : state.backgroundEnabled =", state.backgroundEnabled, "\n\n", );
+    console.log("#### Configuration du fond élégant... appel de  setupElegantBackground ######### : state.backgroundEnabled =", state.backgroundEnable );
 
     if (state.backgroundEnabled) {  
         
-        console.log("\n\n #### Configuration du fond élégant... #########\n\n");
+        // console.log("\n\n #### Configuration du fond élégant... #########\n\n");
         if ((localStorage.getItem('preferredBackground') === null) || 
         (localStorage.getItem('backgroundOpacity') === null) ||
         (localStorage.getItem('patternVisibility') === null) ||

@@ -5,7 +5,7 @@ import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { startAncestorAnimation, prepareAnimationDemo, validateTilesCoverage, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+import { initNetworkListeners, startAncestorAnimation, prepareAnimationDemo, validateTilesCoverage, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions } from './mainUI.js'; 
@@ -259,6 +259,8 @@ function initializeGenerationSelect() {
     }
 }
 
+
+
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
@@ -280,6 +282,9 @@ export async function loadData() {
     const device = detectDeviceType();
     // showToast("isMobile= " + device.isMobile + " , hasTouchScreen=" + device.hasTouchScreen + ", inputType=" + device.inputType + ", Width="+ device.viewportWidth + ", Height="+ device.viewportHeight, 2000);
     
+    // console.log("🌐 État initial du réseau:", navigator.onLine);
+    // initNetworkListeners();
+
     // Initialiser la position de la carte d'animation
     if (!state.isAnimationMapInitialized) {
         initializeAnimationMapPosition();
@@ -988,6 +993,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    console.log("🌐 État initial du réseau:", navigator.onLine);
+    initNetworkListeners();
 });
 
 

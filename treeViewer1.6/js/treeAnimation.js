@@ -12,11 +12,110 @@ import { extractYear } from './utils.js';
 import { initAnimationMap as initMap, updateAnimationMapMarkers, collectPersonLocations, locationSymbols} from './mapUtils.js';
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
 
+
+
 let animationTimeouts = [];
 let optimalSpeechRate = 1.1;
 let animationMap = null;
 let animationMarker = null;
 
+let frenchVoice = null;
+
+// Au début du fichier, après les imports
+let isOnline = false; // Variable pour suivre l'état de la connexion Internet
+let previousOnlineState = false;
+
+async function testRealConnectivity() {
+    try {
+        const response = await fetch('https://www.google.com/favicon.ico', {
+            mode: 'no-cors',
+            cache: 'no-store',
+            // Ajouter un timeout court pour éviter d'attendre trop longtemps
+            signal: AbortSignal.timeout(2000)
+        });
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = true;
+        // console.log("✅ Connexion Internet établie", isOnline);
+
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("✅ Connexion Internet rétablie");
+            showNetworkStatus("Connexion réseau rétablie");
+            selectVoice();
+        }
+        return true;
+    } catch (error) {
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = false;
+        // console.log("⚠️ Connexion Internet perdue", isOnline);
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Connexion Internet perdue");
+            showNetworkStatus("Mode hors-ligne");
+            selectVoice();
+        }
+        return false;
+    }
+}
+
+export function initNetworkListeners() {
+    console.log("🌐 Initialisation des écouteurs réseau...");
+    
+    // Test initial
+    testRealConnectivity().then(online => {
+        showNetworkStatus(online ? "Connexion réseau active" : "Mode hors-ligne");
+    });
+
+    // Écouteurs d'événements standard
+    window.addEventListener('online', () => testRealConnectivity());
+    window.addEventListener('offline', () => {
+        previousOnlineState = isOnline;
+        isOnline = false;
+        // console.log("⚠️ Connexion Internet perdue", isOnline);
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Mode hors-ligne détecté");
+            showNetworkStatus("Mode hors-ligne");
+            selectVoice();
+        }
+    });
+
+    // Test périodique de connectivité (optionnel)
+    setInterval(() => {
+        testRealConnectivity();
+    }, 15000); // Test toutes les 30 secondes
+
+    console.log("✅ Écouteurs réseau initialisés");
+
+}
+
+
+// Fonction pour afficher visuellement le statut réseau (optionnel)
+function showNetworkStatus(message) {
+    // Créer ou mettre à jour un élément de notification
+    let notification = document.getElementById('network-status');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'network-status';
+        notification.style.position = 'fixed';
+        notification.style.top = '10px';
+        notification.style.right = '10px';
+        notification.style.padding = '10px';
+        notification.style.borderRadius = '5px';
+        notification.style.zIndex = '9999';
+        document.body.appendChild(notification);
+    }
+    
+    notification.textContent = message;
+    notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
+    notification.style.color = 'white';
+    
+    // Faire disparaître la notification après 3 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
 
 
 
@@ -24,20 +123,44 @@ let animationMarker = null;
 export function initializeAnimationMapPosition() 
 {
 
-    if (window.innerWidth < 400) {
+    // if (window.innerWidth < 400) {
+    //     animationMapPosition.width = window.innerWidth - 20;
+    //     animationMapPosition.left = 10;
+    // }
+    // else {
+    //     animationMapPosition.width = window.innerWidth/2 ;
+    //     animationMapPosition.left = window.innerWidth/4;
+    // }
+
+
+
+    if ((window.innerWidth < 400) && (window.innerHeight < 800)) {
+    // format smartphone portrait
         animationMapPosition.width = window.innerWidth - 20;
         animationMapPosition.left = 10;
+        animationMapPosition.height = window.innerHeight/3;
+        animationMapPosition.top = window.innerHeight - animationMapPosition.height - 15;
     }
-    else {
+    else if ((window.innerWidth < 800) && (window.innerHeight < 400)) { 
+    // format smartphone landscape
+        animationMapPosition.width = window.innerWidth/2 ;
+        animationMapPosition.left = 10;
+        animationMapPosition.height = (window.innerHeight/2)*0.8;
+        animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
+    } else {
+    // larguer screens: PC ou tablette
         animationMapPosition.width = window.innerWidth/2 ;
         animationMapPosition.left = window.innerWidth/4;
+        animationMapPosition.height = window.innerHeight/3;
+        animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
     }
 
 
-    // animationMapPosition.top = window.innerHeight*3/4 -10 ;
-    animationMapPosition.height = window.innerHeight/3;
 
-    animationMapPosition.top = 80
+    // // animationMapPosition.top = window.innerHeight*3/4 -10 ;
+    // animationMapPosition.height = window.innerHeight/3;
+
+    // animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
 
     console.log("\n \n Position de la carte d'animation initialisée:", window.innerWidth, window.innerHeight, animationMapPosition, "\n\n");
 
@@ -851,7 +974,120 @@ async function testSpeechSynthesisHealth(timeout = 1000) {
       }, timeout);
     });
 }
-  
+
+
+
+
+function selectVoice() {
+    // Sélectionner une voix française si possible
+    let voices = window.speechSynthesis.getVoices();
+    console.log("Voix disponibles:",voices);
+
+    // Trouver les voix françaises disponibles
+    let frenchVoices = voices.filter(voice => 
+        voice.lang.startsWith('fr-FR') && 
+        !voice.name.includes('ulti'));
+
+    console.log("Voix françaises France disponibles:", frenchVoices, frenchVoices.map(v => v.name));
+
+    if (frenchVoices.length === 0) {
+        frenchVoices = voices.filter(voice => 
+            voice.lang.startsWith('fr-') || 
+            voice.name.toLowerCase().includes('french')
+        );
+        console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
+    } 
+    if (frenchVoices.length === 0) {
+        frenchVoices = voices.filter(voice => 
+            voice.lang.startsWith('en-') );
+
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice =>
+                voice.localService);
+            }
+        console.log("Voix anglaise ou locales disponibles:", frenchVoices.map(v => v.name));
+    }
+
+    
+    console.log("✅ or ⚠️ Connexion Internet ?", isOnline);
+    
+    
+    if (!isOnline) {
+        frenchVoices = voices.filter(voice =>
+            voice.lang.startsWith('fr-') && voice.localService);
+        console.log("Voix disponibles locales fr-:", frenchVoices);
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice =>
+                voice.lang.startsWith('en-') && voice.localService);
+            console.log("Voix disponibles locales en-:", frenchVoices);
+        }
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice =>
+                voice.localService);
+            console.log("Voix disponibles locales:", frenchVoices);
+        }   
+
+        console.log("Voix françaises ou autres locales disponibles hors lignes :", frenchVoices.map(v => v.name));
+    }
+
+
+
+
+
+
+
+    
+    // Choisir la meilleure voix française  
+    // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
+    if (isOnline) {
+        // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
+        frenchVoice = frenchVoices.find(voice => 
+            voice.name.includes('Google') || 
+            voice.name.includes('Microsoft')
+        );
+        
+        if (frenchVoice) {
+            console.log("✅ Utilisation de la voix réseau haute qualité:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        } else if (frenchVoices.length != 0) {
+            // Sélectionner la première voix française disponible
+            frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix  ?:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        }
+
+    } else {
+        if (frenchVoices.length != 0) {
+            // Sélectionner la première voix française disponible
+            frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        } else {
+            console.log("⚠️ Aucune voix disponible hors ligne ");
+        }
+    }
+
+
+    
+    // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
+    // if (!frenchVoice) {
+    //     // Sélectionner la première voix française disponible
+    //     frenchVoice = frenchVoices[0];
+        
+    //     if (frenchVoice) {
+    //         console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+    //     } else {
+    //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
+    //     }
+    // }
+    
+
+
+
+
+
+
+
+
+}
+
 
 /* */
 function speakPersonName(personName) {
@@ -988,24 +1224,27 @@ function speakPersonName(personName) {
         if (animationState.currentIndex === 0) {
             console.log("🔄 Premier nom - forçage taux initial à 1.4");
             optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
-            timeOutDuration = 2500;
+            if (isSpeechInGoodHealth) timeOutDuration = 3500;
+            else timeOutDuration = 2500;
         }
         if (animationState.currentIndex === 1) {
             console.log("🔄 Premier nom - forçage taux initial à 1.0");
             optimalSpeechRate = 1.2; //
-            timeOutDuration = 1800; 
+            if (isSpeechInGoodHealth) timeOutDuration = 2500; 
+            else timeOutDuration = 1800;
+
         }
 
         // contournement pour Chrome qui ne fonctionne pas bien avec la synthèse vocale
         let safetyTimeout;
-        if (!isSpeechInGoodHealth) {
-            //Ajouter un timeout de sécurité qui résoudra la promesse après 3 secondes quoi qu'il arrive
-            safetyTimeout = setTimeout(() => {
-                console.log("⚠️ TIMEOUT: Timeout de sécurité de la synthèse vocale déclenché");
-                window.speechSynthesis.cancel(); // Annuler toute synthèse en cours
-                resolve(); // Résoudre la promesse pour continuer l'animation
-            }, timeOutDuration);
-        }
+
+        //Ajouter un timeout de sécurité qui résoudra la promesse après 3 secondes quoi qu'il arrive
+        safetyTimeout = setTimeout(() => {
+            console.log("⚠️ TIMEOUT: Timeout de sécurité de la synthèse vocale déclenché");
+            window.speechSynthesis.cancel(); // Annuler toute synthèse en cours
+            resolve(); // Résoudre la promesse pour continuer l'animation
+        }, timeOutDuration);
+
 
         // Paramètres initiaux
         const targetDuration = 1500; // 1.5 seconde pour lire le nom
@@ -1022,60 +1261,75 @@ function speakPersonName(personName) {
 
 
 
-        // Obtenir toutes les voix disponibles
-        const voices = window.speechSynthesis.getVoices();
+        // // Obtenir toutes les voix disponibles
+        // const voices = window.speechSynthesis.getVoices();
 
-        // Trouver les voix françaises disponibles
-        const frenchVoices = voices.filter(voice => 
-            voice.lang.startsWith('fr-') || 
-            voice.name.toLowerCase().includes('french')
-        );
+        // console.log("Voix disponibles:",voices);
+
+        // // Trouver les voix françaises disponibles
+        // let frenchVoices = voices.filter(voice => 
+        //     voice.lang.startsWith('fr-FR') && 
+        //     !voice.name.includes('ulti'));
+
+        // console.log("Voix disponibles:", frenchVoices);
         
-        console.log("Voix françaises disponibles:", frenchVoices.map(v => v.name));
+        // console.log("Voix françaises France disponibles:", frenchVoices.map(v => v.name));
+
+        // if (!frenchVoices) {
+        //     frenchVoices = voices.filter(voice => 
+        //         voice.lang.startsWith('fr-') || 
+        //         voice.name.toLowerCase().includes('french')
+        //     );
+        //     console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
+        // }
+
+
         
-        // Choisir la meilleure voix française
-        let selectedVoice = null;
+        // // Choisir la meilleure voix française
+        // let selectedVoice = null;
         
-        // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
-        if (navigator.onLine) {
-            // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
-            selectedVoice = frenchVoices.find(voice => 
-                voice.name.includes('Google') || 
-                voice.name.includes('Microsoft')
-            );
+        // // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
+        // // if (navigator.onLine) {
+        // //     // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
+        // //     selectedVoice = frenchVoices.find(voice => 
+        // //         voice.name.includes('Google') || 
+        // //         voice.name.includes('Microsoft')
+        // //     );
             
-            if (selectedVoice) {
-                console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
-            }
-        }
-        // if (navigator.onLine) {
-        //     // Chercher d'abord la voix Google français
-        //     selectedVoice = frenchVoices.find(voice => voice.name === 'Google français');
+        // //     if (selectedVoice) {
+        // //         console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
+        // //     }
+        // // }
+
+
+        // // if (navigator.onLine) {
+        // //     // Chercher d'abord la voix Google français
+        // //     selectedVoice = frenchVoices.find(voice => voice.name === 'Google français');
             
-        //     // Si pas trouvée, chercher d'autres voix Google ou Microsoft
-        //     if (!selectedVoice) {
-        //         selectedVoice = frenchVoices.find(voice => 
-        //             voice.name.includes('Google') || 
-        //             voice.name.includes('Microsoft')
-        //         );
-        //     }
+        // //     // Si pas trouvée, chercher d'autres voix Google ou Microsoft
+        // //     if (!selectedVoice) {
+        // //         selectedVoice = frenchVoices.find(voice => 
+        // //             voice.name.includes('Google') || 
+        // //             voice.name.includes('Microsoft')
+        // //         );
+        // //     }
+            
+        // //     if (selectedVoice) {
+        // //         console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
+        // //     }
+        // // }
+        
+        // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
+        // if (!selectedVoice) {
+        //     // Sélectionner la première voix française disponible
+        //     selectedVoice = frenchVoices[0];
             
         //     if (selectedVoice) {
-        //         console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
+        //         console.log("ℹ️ Utilisation de la voix locale:", selectedVoice.name);
+        //     } else {
+        //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
         //     }
         // }
-        
-        // Si pas de voix réseau ou hors ligne, utiliser une voix locale
-        if (!selectedVoice) {
-            // Sélectionner la première voix française disponible
-            selectedVoice = frenchVoices[0];
-            
-            if (selectedVoice) {
-                console.log("ℹ️ Utilisation de la voix locale:", selectedVoice.name);
-            } else {
-                console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
-            }
-        }
         
 
 
@@ -1139,10 +1393,10 @@ function speakPersonName(personName) {
                 //     voice.name.toLowerCase().includes('french')
                 // );
 
-                // if (frenchVoice) {
-                //     console.log(`🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
-                //     utterance.voice = frenchVoice;
-                // }
+                if (frenchVoice) {
+                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
+                    utterance.voice = frenchVoice;
+                }
 
 
                 console.log(`🔊 Début synthèse pour ${simplifiedName} avec taux ${rate}`);
@@ -1448,6 +1702,11 @@ export async function startAncestorAnimation() {
         animationState.isPaused = false;
     }
 
+    let deltaXRatio = 2.0; // Ratio de décalage horizontal
+    if (window.innerWidth < 400) { deltaXRatio = 3.0; } // Pour les petits écrans, on
+
+
+    selectVoice();
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -1494,6 +1753,38 @@ export async function startAncestorAnimation() {
 
                     await new Promise(resolve => setTimeout(resolve, 100));
 
+                    const zoom = getZoom();
+
+                    let initialOffsetY = 0;
+
+                    if (zoom && (animationState.currentIndex === 0 )) {
+                        const svg = d3.select("#tree-svg");
+                        const lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                    
+                        // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
+                        offsetX = 0;
+                        if (window.innerHeight > 1000) {
+                            offsetY = -450;
+                       } else if (window.innerHeight > 800) {
+                             offsetY = -300;
+                        } else {
+                             offsetY = -100;
+                        }
+
+                        initialOffsetY = -offsetY;
+                        const horizontalShift = 0 ;
+                        const verticalShift = -offsetY ;
+
+                        svg.transition()
+                            .duration(750)
+                            .call(zoom.transform, 
+                                lastTransform.translate(-horizontalShift, -verticalShift)
+                            );
+                        state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                        state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+                    }
+
+
 
                     if (animationState.currentIndex === 0) {
                         // Créer une promesse qui simule la lecture vocale si le son est coupé
@@ -1517,6 +1808,13 @@ export async function startAncestorAnimation() {
 
 
 
+
+
+
+
+
+
+
                     // Actions sur le nœud
                     if (!node.data.children || node.data.children.length === 0) {
                         const event = new Event('click');
@@ -1528,22 +1826,26 @@ export async function startAncestorAnimation() {
                             handleAncestorsClick(event, node);
                         }
 
-
                         drawTree();
                     }
 
-                    const zoom = getZoom();
+
                     if (zoom) {
                         const svg = d3.select("#tree-svg");
-                        const lastTransform = getLastTransform() || d3.zoomIdentity;
+                        const lastTransform = getLastTransform() || d3.zoomIdentity;                        
                         
+                        console.log("\n\n DEBUG *******", node.y, window.innerWidth, state.boxWidth, deltaXRatio, state.boxWidth*deltaXRatio, (node.y + state.boxWidth - state.lastHorizontalPosition) > (state.boxWidth*0.2),(node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) );
+
+
                         // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
-                        if(((node.y > window.innerWidth - 300) || (node.x > window.innerHeight - 400)) && ( ((node.y - state.lastHorizontalPosition) > (state.boxWidth*0.2) ) || ((node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) )) ) {
+                        if  (((node.y > window.innerWidth - (state.boxWidth*deltaXRatio)) || (node.x + initialOffsetY > window.innerHeight - (state.boxHeight*1.2))) && ( ((node.y + state.boxWidth - state.lastHorizontalPosition) > (state.boxWidth*0.2) ) || ((node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) )) )  {                                       
+
                             if (firstTimeShift) {
                                 offsetX = (node.y - state.lastHorizontalPosition)
-                                offsetY = (node.x - state.lastVerticalPosition)
+                                offsetY = (node.x - state.lastVerticalPosition);
                             }
                             firstTimeShift = false;
+
                             const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
                             const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
 
@@ -1555,6 +1857,10 @@ export async function startAncestorAnimation() {
 
                             state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
                             state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+
+                            console.log("\n\n DEBUG  SHIFT *******", node.data.name, -horizontalShift, -verticalShift );
+
+
                         }
                     }
                 } 
