@@ -1,0 +1,965 @@
+import { state, showToast } from './main.js';
+import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
+import { hasDateInRange, cleanProfession, cleanLocation  } from './nameCloudUtils.js';
+import { createStatsModal, createFrequencyStatsModal }  from './nameCloudStatModal.js';
+import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
+
+
+// Variables globales pour stocker la position de la StatsModal
+let globalStatsPosition = {
+    x: 0,
+    y: 0,
+    width: 140,
+    height: 60,
+    userModified: false
+};
+
+let globalResizeListener = null;
+
+export const statsConfig = {
+    'prenoms': {
+        labelId: 'firstname-frequency-label',
+        buttonId: 'firstname-frequency-button',
+        buttonClass: 'firstname-frequency-button',
+        containerClass: 'firstname-frequency-container',
+        title: 'Prénom le plus fréquent',
+        modalTitle: 'prénoms',
+        modalArticle: 'des',
+        labelText: 'Prénom le plus fréquent',
+        type: 'frequency'
+    },
+    'noms': {
+        labelId: 'lastname-frequency-label',
+        buttonId: 'lastname-frequency-button',
+        buttonClass: 'lastname-frequency-button',
+        containerClass: 'lastname-frequency-container',
+        title: 'Nom le plus fréquent',
+        modalTitle: 'Noms',
+        modalArticle: 'des',
+        labelText: 'Nom le plus fréquent',
+        type: 'frequency'
+    },
+    'professions': {
+        labelId: 'profession-frequency-label',
+        buttonId: 'profession-frequency-button',
+        buttonClass: 'profession-frequency-button',
+        containerClass: 'profession-frequency-container',
+        title: 'Métier le plus fréquent',
+        modalTitle: 'métiers',
+        modalArticle: 'des',
+        labelText: 'Métier le plus fréquent',
+        type: 'frequency'
+    },
+    'lieux': {
+        labelId: 'location-frequency-label',
+        buttonId: 'location-frequency-button',
+        buttonClass: 'location-frequency-button',
+        containerClass: 'location-frequency-container',
+        title: 'Lieu le plus fréquent',
+        modalTitle: 'Lieux',
+        modalArticle: 'des',
+        labelText: 'Lieu le plus fréquent',
+        type: 'frequency'
+    },
+    'duree_vie': {
+        labelId: 'average-age-label',
+        buttonId: 'average-age-stats-button',
+        buttonClass: 'average-age-stats-button',
+        containerClass: 'average-container',
+        title: 'Durée de vie moyenne',
+        modalTitle: 'Durée de vie',
+        modalArticle: '',
+        labelText: 'Durée de vie moyenne',
+        modalStatsPrefix: 'Durée de vie ',
+        chartId: 'average-age-chart-container',
+        type: 'age'
+    },
+    'age_procreation': {
+        labelId: 'procreation-age-label',
+        buttonId: 'procreation-age-stats-button',
+        buttonClass: 'procreation-age-stats-button',
+        containerClass: 'procreation-average-container',
+        title: 'Âge moy. de procréation',
+        modalTitle: 'Âge de procréat.',
+        modalArticle: '',
+        labelText: 'Âge moy. de procréation',
+        modalStatsPrefix: 'Âge de procréation ',
+        chartId: 'procreation-age-chart-container',
+        type: 'age'
+    },
+    'age_marriage': {
+        labelId: 'marriage-age-label',
+        buttonId: 'marriage-age-stats-button',
+        buttonClass: 'marriage-age-stats-button',
+        containerClass: 'marriage-average-container',
+        title: 'Âge moy. de mariage',
+        modalTitle: 'Âge de mariage',
+        modalArticle: '',
+        labelText: 'Âge moy. de mariage',
+        modalStatsPrefix: 'Âge de mariage ',
+        chartId: 'marriage-age-chart-container',
+        type: 'age'
+    },
+    'age_first_child': {
+        labelId: 'first-child-age-label',
+        buttonId: 'first-child-age-stats-button',
+        buttonClass: 'first-child-age-stats-button',
+        containerClass: 'first-child-average-container',
+        title: 'Âge moy. au 1er enfant',
+        modalTitle: 'Âge au 1er enfant',
+        modalArticle: '',
+        labelText: 'Âge moy. au 1er enfant',
+        modalStatsPrefix: 'Âge au 1er enfant ',
+        chartId: 'first-child-age-chart-container',
+        type: 'age'
+    },
+    'nombre_enfants': {
+        labelId: 'children-count-label',
+        buttonId: 'children-count-stats-button',
+        buttonClass: 'children-count-stats-button',
+        containerClass: 'children-count-container',
+        title: 'Nb. moyen d\'enfants',
+        modalTitle: 'Nbre d\'enfants',
+        modalArticle: 'du',
+        labelText: 'Nb. moyen d\'enfants',
+        modalStatsPrefix: 'Nombre d\'enfants ',
+        chartId: 'children-count-chart-container',
+        type: 'age'  // Utiliser le même type 'age' pour profiter des mêmes graphiques de distribution
+    }
+};
+
+export function removeAllStatsElements() {
+    // Supprimer toutes les stats modals HTML
+    document.querySelectorAll('.html-stats-label').forEach(element => {
+        element.remove();
+    });
+    
+    // Supprimer tous les boutons de statistiques
+    Object.values(statsConfig).forEach(config => {
+        const button = document.getElementById(config.buttonId);
+        if (button) {
+            button.remove();
+        }
+
+        // Supprimer aussi les boutons de statistiques par siècle
+        const centuryButton = document.getElementById(`century-stats-button-${config.type}`);
+        if (centuryButton) {
+            centuryButton.remove();
+        }
+    });
+}
+
+/**
+ * Vérifie si les statistiques existent, sinon les calcule
+ * @param {Object} nameData - Les données à vérifier
+ * @returns {Object} - Les données avec statistiques
+ */
+export function ensureStatsExist(nameData) {
+    if (!nameData || !nameData.stats) {
+        const ages = nameData
+            .filter(d => !isNaN(parseInt(d.text)))
+            .map(d => ({
+                age: parseInt(d.text),
+                count: d.size
+            }));
+                
+        if (ages.length > 0) {
+            const totalCount = ages.reduce((sum, item) => sum + item.count, 0);
+            const minAge = Math.min(...ages.map(d => d.age));
+            const maxAge = Math.max(...ages.map(d => d.age));
+            
+            nameData.stats = {
+                average: nameData.averageData || 0,
+                count: totalCount,
+                min: minAge,
+                max: maxAge
+            };
+        }
+    }
+    
+    return nameData;
+}
+
+/**
+ * Trouve l'élément le plus fréquent dans les données
+ * @param {Array} nameData - Les données du nuage
+ * @returns {Object} - L'élément le plus fréquent avec son nombre d'occurrences
+ */
+function findMostFrequent(nameData) {
+    if (!nameData || nameData.length === 0) {
+        return { text: 'N/A', size: 0 };
+    }
+    
+    return nameData.reduce((prev, current) => {
+        return (prev.size > current.size) ? prev : current;
+    });
+}
+
+/**
+ * Ajoute l'étiquette (moyenne d'âge ou élément le plus fréquent)
+ * @param {Object} svg - L'élément SVG
+ * @param {Object} textGroup - Le groupe de texte
+ * @param {Object} config - La configuration
+ */
+export function addStatsLabel(svg, textGroup, config) {
+    // Ne rien faire si le type n'est pas supporté
+    if (!statsConfig[config.type]) {
+        return;
+    }
+    
+    // Récupérer la configuration pour ce type
+    const cfg = statsConfig[config.type];
+    
+    // Supprimer l'ancienne étiquette si elle existe
+    svg.selectAll(`.${cfg.containerClass}`).remove();
+    
+    // Variables pour le texte à afficher
+    let valueText = '';
+    let subtitleText = '';
+    let genderText = '';
+    let units = ' ans';
+    if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
+    
+    if (cfg.type === 'age') {
+        // Pour les types d'âge (durée de vie, procréation)
+        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageData) {
+            return;
+        }
+        
+        valueText = `${parseFloat(nameCloudState.currentNameData.averageData).toFixed(1)}${units}`;
+
+        // Ajouter les moyennes par sexe si disponibles
+        if (nameCloudState.currentNameData.maleAverageData && 
+            nameCloudState.currentNameData.femaleAverageData) {
+            genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${nits}`;
+        }
+
+    } else {
+        // Pour les types de fréquence (noms, prénoms, métiers, lieux)
+        if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
+            return;
+        }
+        
+        const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
+        valueText = mostFrequent.text;
+        subtitleText = `(${mostFrequent.size} occurrences)`;
+    }
+
+    // Calculer la position
+    const labelWidth = 140;
+    const labelHeight = 60;
+    // const labelHeight = genderText ? 75 : 60; // Augmenter la hauteur si on a le texte de genre
+    
+    const xPos = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
+    const yPos = 85; // position fixe en haut
+
+    // Stocker les coordonnées
+    statsPositionsMap[config.type] = {
+        x: xPos,
+        y: yPos,
+        width: labelWidth,
+        height: labelHeight
+    };
+    
+
+    // Créer un élément pour afficher l'information
+    const container = svg.append('g')
+        .attr('class', cfg.containerClass)
+        .attr('id', cfg.labelId)
+        .attr('transform', `translate(${xPos}, ${yPos})`);
+        
+    // Ajouter une classe pour indiquer qu'on peut déplacer l'élément
+    container.style('cursor', 'move');
+    
+    // Fond semi-transparent
+    container.append('rect')
+        .attr('width', labelWidth)
+        .attr('height', labelHeight)
+        .attr('fill', 'rgba(255, 255, 255, 0.8)')
+        .attr('rx', 5)
+        .attr('stroke', '#ccc')
+        .attr('stroke-width', 1);
+    
+
+    
+    // Titre
+    container.append('text')
+        .attr('x', labelWidth / 2)
+        .attr('y', 20)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Arial, sans-serif')
+        .style('font-size', '12px')
+        .text(cfg.labelText);
+    
+    // Valeur principale
+    container.append('text')
+        .attr('x', labelWidth / 2)
+        .attr('y', 40)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Arial, sans-serif')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .style('fill', '#e53e3e')
+        .text(valueText);
+    
+    // Ajouter les moyennes par sexe
+    if (genderText) {
+        container.append('text')
+            .attr('x', labelWidth / 2)
+            .attr('y', 60)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Arial, sans-serif')
+            .style('font-size', '12px')
+            .text(genderText);
+    }
+
+    
+    // Ajouter la fonctionnalité de glisser-déposer
+    makeDraggable(container, config.type);
+    
+
+
+    // Sous-titre (pour les fréquences)
+    if (subtitleText) {
+        container.append('text')
+            .attr('x', labelWidth / 2)
+            .attr('y', 55)
+            .attr('text-anchor', 'middle')
+            .style('font-family', 'Arial, sans-serif')
+            .style('font-size', '12px')
+            .text(subtitleText);
+    }
+        
+    // Repositionner le bouton si nécessaire
+    setTimeout(() => forceRepositionButton(config.type), 50);
+}
+
+/**
+ * Ajoute le bouton des statistiques détaillées
+ * @param {HTMLElement} container - Le conteneur parent
+ * @param {Object} nameData - Les données à afficher
+ * @param {string} type - Le type de statistiques
+ */
+export function addStatsButton(container, nameData, type) {
+    if (!container || !nameData) return;
+    
+    // Vérifier que le type est valide
+    if (!statsConfig[type]) {
+        console.error(`Type de statistiques invalide: ${type}`);
+        return;
+    }
+    
+    // Récupérer la configuration pour ce type
+    const cfg = statsConfig[type];
+    
+    
+    // Supprimer TOUS les boutons de statistiques (pour tous les types)
+    Object.values(statsConfig).forEach(config => {
+        const buttons = document.getElementsByClassName(config.buttonClass);
+        Array.from(buttons).forEach(button => button.remove());
+    });
+    
+    // Supprimer l'écouteur global de redimensionnement s'il existe
+    if (globalResizeListener) {
+        window.removeEventListener('resize', globalResizeListener);
+        globalResizeListener = null;
+    }
+    
+    // Créer le bouton avec un ID fixe
+    const button = document.createElement('button');
+    button.textContent = 'Statistiques détaillées';
+    button.id = cfg.buttonId;
+    button.className = cfg.buttonClass;
+    button.style.position = 'absolute';
+    
+    // Fixer la largeur du bouton à la même que l'étiquette
+    button.style.width = `${globalStatsPosition.width}px`;
+    button.style.whiteSpace = 'nowrap';
+    button.style.overflow = 'hidden';
+    button.style.textOverflow = 'ellipsis';
+    
+    // Positionner directement le bouton - via getBoundingClientRect
+    positionButtonRelativeToLabel(button, type);
+    
+    // Styles du bouton
+    button.style.padding = '6px 8px';
+    button.style.height = '30px';
+    button.style.backgroundColor = '#4299e1';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '4px';
+    button.style.cursor = 'pointer';
+    button.style.fontFamily = 'Arial, sans-serif';
+    button.style.fontSize = '14px';
+    button.style.zIndex = '1000';
+    button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    
+    // Centrer le texte
+    button.style.textAlign = 'center';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    
+    button.onclick = () => {
+        if (cfg.type === 'age') {
+            createStatsModal(nameData, type);
+        } else {
+            createFrequencyStatsModal(nameData, type);
+        }
+    };
+    
+    // Effets de survol
+    button.onmouseover = () => {
+        button.style.backgroundColor = '#3182ce';
+        button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    };
+    
+    button.onmouseout = () => {
+        button.style.backgroundColor = '#4299e1';
+        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    };
+    
+    container.appendChild(button);
+    
+    return button;
+}
+
+/**
+ * Positionne le bouton par rapport à l'étiquette
+ * @param {HTMLElement} button - Le bouton à positionner
+ * @param {string} type - Le type de statistiques
+ */
+function positionButtonRelativeToLabel(button, type) {
+    // Récupérer la configuration pour ce type
+    const cfg = statsConfig[type];
+    
+    // Trouver la position réelle de l'étiquette dans le DOM
+    const labelContainer = document.getElementById(cfg.labelId);
+    
+    if (labelContainer) {
+        // Obtenir la position exacte de l'étiquette
+        const labelRect = labelContainer.getBoundingClientRect();
+        
+        // Positionner le bouton directement sous l'étiquette
+        button.style.left = `${labelRect.left}px`;
+        button.style.top = `${labelRect.bottom}px`;
+        button.style.width = `${labelRect.width}px`;
+    } else {
+        // Fallback à l'ancienne méthode si l'élément n'est pas trouvé
+        const buttonX = globalStatsPosition.x;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
+        
+        button.style.left = `${buttonX}px`;
+        button.style.top = `${buttonY}px`;
+    }
+}
+
+/**
+ * Trouve les personnes ayant un nom/prénom/métier/lieu spécifique
+ * @param {string} name - Le nom à rechercher
+ * @param {Object} config - La configuration
+ * @returns {Array} - Liste des personnes correspondantes
+ */
+export function findPeopleWithName(name, config) {
+    if (!state.gedcomData) return [];
+    
+    const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+    
+    const people = Object.values(state.gedcomData.individuals)
+        .filter(p => {
+            let matches = false;
+            
+            if (config.type === 'prenoms') {
+                const firstName = p.name.split('/')[0].trim();
+                matches = firstName.split(' ').some(n => 
+                    n.toLowerCase() === name.toLowerCase() || 
+                    n.toLowerCase().startsWith(name.toLowerCase() + ' ')
+                );
+            } else if (config.type === 'noms') {
+                matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === name.toLowerCase());
+            } else if (config.type === 'professions') {
+                const cleanedProfessions = cleanProfession(p.occupation);
+                matches = cleanedProfessions.includes(name.toLowerCase());
+            } else if (config.type === 'lieux') {
+                const personLocations = [
+                    p.birthPlace, 
+                    p.deathPlace, 
+                    p.marriagePlace, 
+                    p.residPlace1, 
+                    p.residPlace2, 
+                    p.residPlace3
+                ];
+                
+                matches = personLocations.some(location => {
+                    const cleanedLocation = cleanLocation(location);
+                    return cleanedLocation === name;
+                });
+            }   
+
+            // Vérifier si la personne est dans l'arbre approprié selon le scope
+            const isInTree = 
+                config.scope === 'all' || 
+                ((config.scope === 'descendants' || config.scope === 'directDescendants') && persons.some(descendant => descendant.id === p.id)) ||
+                ((config.scope === 'ancestors' || config.scope === 'directAncestors') && persons.some(ancestor => ancestor.id === p.id));
+
+            return matches && isInTree && hasDateInRange(p, config).inRange;
+        })
+        .map(p => ({
+            name: p.name.replace(/\//g, ''),
+            id: p.id,
+            occupation: p.occupation || 'Non spécifiée'
+        }));
+    
+    return people;
+}
+
+export function addStatisticsLabel(svg, textGroup, config) {
+    // Ne rien faire si le type n'est pas supporté
+    if (!statsConfig[config.type]) {
+        return;
+    }
+    
+    // Récupérer la configuration pour ce type
+    const cfg = statsConfig[config.type];
+    
+    // Supprimer TOUTES les étiquettes HTML existantes
+    document.querySelectorAll('.html-stats-label').forEach(element => {
+        element.remove();
+    });
+    
+
+    // Supprimer l'ancienne étiquette SVG si elle existe
+    svg.selectAll(`.${cfg.containerClass}`).remove();
+    
+    // Supprimer aussi l'élément HTML existant s'il existe
+    const existingHTMLLabel = document.getElementById(`html-${cfg.labelId}`);
+    if (existingHTMLLabel) {
+        existingHTMLLabel.remove();
+    }
+    
+    // Variables pour le texte à afficher
+    let valueText = '';
+    let subtitleText = '';
+    let genderText = '';
+    let units = ' ans';
+    if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
+    
+    if (cfg.type === 'age') {
+        // Pour les types d'âge
+        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageData) {
+            return;
+        }
+        valueText = `${parseFloat(nameCloudState.currentNameData.averageData).toFixed(1)}${units}`;
+        
+        // Ajouter les moyennes par sexe si disponibles
+        if (nameCloudState.currentNameData.maleAverageData && 
+            nameCloudState.currentNameData.femaleAverageData) {
+            genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
+        }
+    } else {
+        // Pour les types de fréquence
+        if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
+            return;
+        }
+        const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
+        valueText = mostFrequent.text;
+        subtitleText = `(${mostFrequent.size} occurrences)`;
+    }
+
+    // Position initiale ou récupérée
+    let initialX, initialY;
+    
+    // Utiliser la position globale sauvegardée si elle existe et a été modifiée par l'utilisateur
+    if (globalStatsPosition.userModified && globalStatsPosition.x !== 0) {
+        initialX = globalStatsPosition.x;
+        initialY = globalStatsPosition.y;
+    } else {
+        // Position par défaut basée sur la position du SVG
+        initialX = window.innerWidth - 165; // 170px depuis le bord droit
+        initialY = 85;  // 110px depuis le haut
+    }
+
+    // Créer un élément HTML pour les statistiques
+    const container = document.createElement('div');
+    container.id = `html-${cfg.labelId}`;
+    container.className = `html-stats-label ${cfg.containerClass}`;
+    container.style.position = 'absolute';
+    container.style.left = `${initialX}px`;
+    container.style.top = `${initialY}px`;
+    container.style.width = '140px';
+    container.style.height = '60px';
+
+
+    container.style.padding = '5px';
+    container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    container.style.zIndex = '1000';
+    container.style.cursor = 'move';
+    container.style.fontFamily = 'Arial, sans-serif';
+    
+    // Ajouter le titre
+    const title = document.createElement('div');
+    title.textContent = cfg.labelText;
+    title.style.fontSize = '12px';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '5px';
+    container.appendChild(title);
+    
+    // Ajouter la valeur principale
+    const value = document.createElement('div');
+    value.textContent = valueText;
+    value.style.fontSize = '16px';
+    value.style.fontWeight = 'bold';
+    value.style.color = '#e53e3e';
+    value.style.textAlign = 'center';
+    container.appendChild(value);
+
+    // Ajouter les moyennes par sexe
+    if (genderText) {
+        const gender = document.createElement('div');
+        gender.textContent = genderText;
+        gender.style.fontSize = '12px';
+        gender.style.textAlign = 'center';
+        gender.style.marginTop = '2px';
+        container.appendChild(gender);
+    }
+
+    
+    // Ajouter le sous-titre si nécessaire
+    if (subtitleText) {
+        const subtitle = document.createElement('div');
+        subtitle.textContent = subtitleText;
+        subtitle.style.fontSize = '12px';
+        subtitle.style.textAlign = 'center';
+        subtitle.style.marginTop = '2px';
+        container.appendChild(subtitle);
+    }
+    
+    // Ajouter au document
+    document.body.appendChild(container);
+    
+    
+    // Rendre l'élément déplaçablef
+    makeElementDraggable(container, config.type);
+    
+    // Repositionner le bouton associé
+    setTimeout(() => forceRepositionButton(config.type), 50);
+
+    // Mise à jour de globalStatsPosition pour tenir compte de la nouvelle hauteur
+    // globalStatsPosition.height = genderText ? 75 : 60; 
+
+    // Ajouter un événement de redimensionnement
+    if (globalResizeListener) {
+        window.removeEventListener('resize', globalResizeListener);
+    }
+    
+    // Créer un nouvel écouteur de redimensionnement
+    globalResizeListener = function() {
+        // Récupérer tous les éléments HTML de statistiques
+        const statsLabels = document.querySelectorAll('.html-stats-label');
+        
+        // Si aucun élément n'existe, ne rien faire
+        if (statsLabels.length === 0) return;
+        
+        // Lors du redimensionnement, si la position n'a pas été modifiée manuellement,
+        // repositionner selon les nouvelles dimensions
+        if (!globalStatsPosition.userModified) {
+            const newX = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
+            const newY = 85;
+            
+            // Mettre à jour la position de tous les éléments
+            statsLabels.forEach(element => {
+                element.style.left = `${newX}px`;
+                element.style.top = `${newY}px`;
+            });
+            
+            // Mettre à jour la position globale
+            globalStatsPosition.x = newX;
+            globalStatsPosition.y = newY;
+            
+            // Repositionner tous les boutons
+            Object.keys(statsConfig).forEach(type => {
+                const button = document.getElementById(statsConfig[type].buttonId);
+                if (button) forceRepositionButton(type);
+            });
+        }
+    };
+    
+    // Ajouter le nouvel écouteur
+    window.addEventListener('resize', globalResizeListener);
+
+    
+}
+
+// Fonction pour rendre un élément HTML déplaçable
+function makeElementDraggable(element, type) {
+    let isDragging = false;
+    let startX, startY;
+    let initialLeft, initialTop;
+    
+    // Gestionnaire mousedown (PC)
+    element.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = parseInt(element.style.left) || 0;
+        initialTop = parseInt(element.style.top) || 0;
+        e.preventDefault();
+    });
+    
+    // Gestionnaire touchstart (Mobile)
+    element.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        initialLeft = parseInt(element.style.left) || 0;
+        initialTop = parseInt(element.style.top) || 0;
+    }, { passive: true });
+    
+    // Gestionnaire mousemove (PC)
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const newLeft = initialLeft + (e.clientX - startX);
+        const newTop = initialTop + (e.clientY - startY);
+        
+        element.style.left = `${newLeft}px`;
+        element.style.top = `${newTop}px`;
+        
+        // Mettre à jour la position globale
+        globalStatsPosition.x = newLeft;
+        globalStatsPosition.y = newTop;
+        
+        // Repositionner les boutons
+        Object.keys(statsConfig).forEach(type => {
+            // D'abord le bouton principal
+            const button = document.getElementById(statsConfig[type].buttonId);
+            if (button) forceRepositionButton(type);
+            
+            // Puis le bouton de statistiques par siècle
+            const centuryButton = document.getElementById(`century-stats-button-${type}`);
+            if (centuryButton) {
+                const mainButton = document.getElementById(statsConfig[type].buttonId);
+                if (mainButton) {
+                    const rect = mainButton.getBoundingClientRect();
+                    centuryButton.style.left = `${rect.left}px`;
+                    centuryButton.style.top = `${rect.bottom + 5}px`;
+                }
+            }
+        });
+    });
+    
+    // Gestionnaire touchmove (Mobile)
+    document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault(); // Empêcher le scroll
+        
+        const newLeft = initialLeft + (e.touches[0].clientX - startX);
+        const newTop = initialTop + (e.touches[0].clientY - startY);
+        
+        element.style.left = `${newLeft}px`;
+        element.style.top = `${newTop}px`;
+        
+        // Mettre à jour la position globale
+        globalStatsPosition.x = newLeft;
+        globalStatsPosition.y = newTop;
+        
+        // Repositionner les boutons
+        Object.keys(statsConfig).forEach(type => {
+            // D'abord le bouton principal
+            const button = document.getElementById(statsConfig[type].buttonId);
+            if (button) forceRepositionButton(type);
+            
+            // Puis le bouton de statistiques par siècle
+            const centuryButton = document.getElementById(`century-stats-button-${type}`);
+            if (centuryButton) {
+                const mainButton = document.getElementById(statsConfig[type].buttonId);
+                if (mainButton) {
+                    const rect = mainButton.getBoundingClientRect();
+                    centuryButton.style.left = `${rect.left}px`;
+                    centuryButton.style.top = `${rect.bottom + 5}px`;
+                }
+            }
+        });
+    }, { passive: false });
+    
+    // Gestionnaires pour la fin du déplacement
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            // Marquer comme modifié par l'utilisateur
+            globalStatsPosition.userModified = true;
+        }
+    });
+    
+    document.addEventListener('touchend', function() {
+        if (isDragging) {
+            isDragging = false;
+            // Marquer comme modifié par l'utilisateur
+            globalStatsPosition.userModified = true;
+        }
+    });
+    
+    document.addEventListener('touchcancel', function() {
+        isDragging = false;
+    });
+}
+
+export function addCenturyStatsButton(container, type) {
+    // Récupérer la configuration pour le type actuel
+    const cfg = statsConfig[type];
+    if (!cfg) return;
+    
+    // Vérifier si le bouton statistiques détaillées existe
+    const detailedStatsButton = document.getElementById(cfg.buttonId);
+    if (!detailedStatsButton) return;
+    
+    // Créer l'ID et la classe pour le bouton des statistiques par siècle
+    const centuryButtonId = `century-stats-button-${type}`;
+    const centuryButtonClass = `century-stats-button-${type}`;
+    
+    // Supprimer les anciens bouton s'ils existent
+    // const oldButton = document.getElementById(centuryButtonId);
+    // if (oldButton) {
+    //     oldButton.remove();
+    // }
+
+    // Supprimer tous les anciens bouton s'ils existent
+    const existingButtons = document.querySelectorAll(`.${centuryButtonClass}`);
+    existingButtons.forEach(button => {
+        button.remove();
+    });
+    
+    // Créer le bouton des statistiques par siècle
+    const button = document.createElement('button');
+    button.textContent = 'Stat. par siècles';
+    button.id = centuryButtonId;
+    button.className = centuryButtonClass;
+    
+    // Appliquer les styles du bouton de statistiques détaillées
+    button.style.position = 'absolute';
+    button.style.padding = '6px 8px';
+    button.style.height = '30px';
+    button.style.backgroundColor = '#7B68EE'; // Couleur violette pour distinguer du bouton principal
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '4px';
+    button.style.cursor = 'pointer';
+    button.style.fontFamily = 'Arial, sans-serif';
+    button.style.fontSize = '14px';
+    button.style.zIndex = '1000';
+    button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    button.style.textAlign = 'center';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.width = detailedStatsButton.offsetWidth + 'px';
+    
+    // Positionner le bouton sous le bouton des statistiques détaillées
+    const detailedStatsRect = detailedStatsButton.getBoundingClientRect();
+    button.style.left = `${detailedStatsRect.left}px`;
+    button.style.top = `${detailedStatsRect.bottom + 5}px`; // 5px de marge
+    
+    // Ajouter l'événement de clic pour ouvrir le modal des statistiques par siècle
+    button.onclick = () => {
+        showCenturyStatsModal(type);
+    };
+    
+    // Effets de survol
+    button.onmouseover = () => {
+        button.style.backgroundColor = '#6A5ACD';
+        button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    };
+    
+    button.onmouseout = () => {
+        button.style.backgroundColor = '#7B68EE';
+        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    };
+    
+    container.appendChild(button);
+    
+    // Assurer que le bouton de statistiques par siècle se déplace avec le bouton principal
+    // Observateur de mutation pour surveiller les changements de position du bouton principal
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                // Repositionner le bouton de statistiques par siècle
+                const rect = detailedStatsButton.getBoundingClientRect();
+                button.style.left = `${rect.left}px`;
+                button.style.top = `${rect.bottom + 5}px`;
+            }
+        });
+    });
+    
+    // Observer les attributs 'style' et 'class' du bouton principal
+    observer.observe(detailedStatsButton, { attributes: true });
+    
+    return button;
+}
+
+// Mettre à jour forceRepositionButton pour inclure le positionnement du bouton de statistiques par siècle
+function forceRepositionButton(type) {
+    const cfg = statsConfig[type];
+    const button = document.getElementById(cfg.buttonId);
+    
+    if (!button) return;
+    
+    // Essayer d'abord de trouver l'élément HTML correspondant
+    const labelElement = document.getElementById(`html-${cfg.labelId}`);
+    
+    if (labelElement) {
+        // Obtenir la position exacte de l'étiquette
+        const labelRect = labelElement.getBoundingClientRect();
+        
+        // Positionner le bouton directement sous l'étiquette
+        button.style.left = `${labelRect.left}px`;
+        button.style.top = `${labelRect.bottom + 2}px`; // +2px pour un petit espace
+        button.style.width = `${labelRect.width}px`;
+        
+        // Repositionner également le bouton de statistiques par siècle
+        const centuryButton = document.getElementById(`century-stats-button-${type}`);
+        if (centuryButton) {
+            // Obtenir la position exacte du bouton principal
+            const buttonRect = button.getBoundingClientRect();
+            centuryButton.style.left = `${buttonRect.left}px`;
+            centuryButton.style.top = `${buttonRect.bottom + 5}px`;
+            centuryButton.style.width = `${buttonRect.width}px`;
+        }
+    } else {
+        // Fallback si aucun élément n'est trouvé
+        const buttonX = globalStatsPosition.x;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
+        
+        button.style.left = `${buttonX}px`;
+        button.style.top = `${buttonY}px`;
+        
+        // Repositionner également le bouton de statistiques par siècle
+        const centuryButton = document.getElementById(`century-stats-button-${type}`);
+        if (centuryButton) {
+            centuryButton.style.left = `${buttonX}px`;
+            centuryButton.style.top = `${buttonY + button.offsetHeight + 5}px`;
+            centuryButton.style.width = `${button.offsetWidth}px`;
+        }
+    }
+}
+
+// Fonction auxiliaire pour mettre à jour la fonction updateStatsButtons
+export function updateStatsButtons(container, nameData, type) {
+
+    // Supprimer tous les boutons de statistiques par siècle existants avant d'en créer de nouveaux
+    document.querySelectorAll('[id^="century-stats-button-"]').forEach(button => {
+        button.remove();
+    });
+    
+    // D'abord ajouter le bouton des statistiques détaillées
+    addStatsButton(container, nameData, type);
+    
+    // Puis ajouter le bouton des statistiques par siècle avec un petit délai
+    // pour permettre au premier bouton d'être positionné correctement
+    setTimeout(() => {
+        addCenturyStatsButton(container, type);
+    }, 50);
+}
