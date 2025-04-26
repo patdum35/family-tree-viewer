@@ -3073,16 +3073,16 @@ function addParentToChildren(parentId, parentType, d) {
     });
 }
 
-/**
- * Initialise les gestionnaires d'événements globaux
- */
-export function initializeEventHandlers() {
-    window.addEventListener('resize', handleWindowResize);
-    window.addEventListener('click', handleModalClick);
+// /**
+//  * Initialise les gestionnaires d'événements globaux
+//  */
+// export function initializeEventHandlers() {
+//     window.addEventListener('resize', handleWindowResize);
+//     window.addEventListener('click', handleModalClick);
     
-    document.getElementById("root-person-search")
-        .addEventListener("keydown", handleSearchKeydown);
+//     document.getElementById("root-person-search")
+//         .addEventListener("keydown", handleSearchKeydown);
     
-    document.getElementById('root-person-results')
-        .addEventListener('change', selectRootPerson);
-}
+//     document.getElementById('root-person-results')
+//         .addEventListener('change', selectRootPerson);
+// }

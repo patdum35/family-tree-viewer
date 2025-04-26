@@ -8,10 +8,13 @@ import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './tre
 import { initNetworkListeners, startAncestorAnimation, prepareAnimationDemo, validateTilesCoverage, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions, updateGenerationSelectorValue } from './mainUI.js'; 
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
+import { initTilePreloading } from './mapTilesPreloader.js';
+
+
 
 import { 
     displayPersonDetails, 
@@ -61,13 +64,28 @@ export const state = {
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
     backgroundEnabled: true,
-
+    previousWindowInnerWidth: 0,
+    previousWindowInnerHeight: 0,
+    lastWindowInnerWidth: 0,
+    lastWindowInnerHeight: 0,
+    screenResizeHasOccured: false,
+    previousWindowInnerWidthInMap: 0,
+    previousWindowInnerHeightInMap: 0,
+    prevPrevWindowInnerWidthInMap: 0,
+    prevPrevWindowInnerHeightInMap: 0,
     treeOwner: 1
 };
 
 export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
+
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Lancer le préchargement des tuiles en tâche de fond
+    initTilePreloading();
+});
 
 
 function openGedcomModal() {
@@ -266,8 +284,13 @@ function initializeGenerationSelect() {
  */
 export async function loadData() {
   
+    state.lastWindowInnerWidth = window.innerWidth;
+    state.lastWindowInnerHeight = window.innerHeight;
+    state.previousWindowInnerWidth = state.lastWindowInnerWidth;
+    state.previousWindowInnerHeight = state.lastWindowInnerHeight;
 
-
+    state.nombre_generation = 6;
+    updateGenerationSelectorValue(state.nombre_generation);
 
     // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
     // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);

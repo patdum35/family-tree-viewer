@@ -5,7 +5,7 @@ const resources = [
     id: "leaflet-css",
     type: "css",
     urls: [
-      "libs/leaflet.css",
+      "./libs/leaflet.css",
       "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css",
       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css",
       "https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css"
@@ -15,7 +15,7 @@ const resources = [
     id: "d3-js",
     type: "script",
     urls: [
-      "libs/d3.v7.min.js",
+      "./libs/d3.v7.min.js",
       "https://d3js.org/d3.v7.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/d3/7.0.0/d3.min.js",
       "https://cdn.jsdelivr.net/npm/d3@7.0.0/dist/d3.min.js"
@@ -25,7 +25,7 @@ const resources = [
     id: "pako-js",
     type: "script",
     urls: [
-      "libs/pako.min.js",
+      "./libs/pako.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js",
       "https://cdn.jsdelivr.net/npm/pako@2.0.3/dist/pako.min.js",
       "https://unpkg.com/pako@2.0.3/dist/pako.min.js"
@@ -35,7 +35,7 @@ const resources = [
     id: "lodash-js",
     type: "script",
     urls: [
-      "libs/lodash.min.js",
+      "./libs/lodash.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js",
       "https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js",
       "https://unpkg.com/lodash@4.17.21/lodash.min.js"
@@ -45,7 +45,7 @@ const resources = [
     id: "leaflet-js",
     type: "script",
     urls: [
-      "libs/leaflet.js",
+      "./libs/leaflet.js",
       "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js",
       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js",
       "https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"
@@ -56,7 +56,7 @@ const resources = [
     id: "leaflet-heat-js",
     type: "script",
     urls: [
-      "libs/leaflet-heat.js",
+      "./libs/leaflet-heat.js",
       "https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js",
       "https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js",
       "https://rawcdn.githack.com/Leaflet/Leaflet.heat/gh-pages/dist/leaflet-heat.js"
@@ -67,7 +67,7 @@ const resources = [
     id: "react-js",
     type: "script",
     urls: [
-      "libs/react.production.min.js", 
+      "./libs/react.production.min.js", 
       "https://unpkg.com/react@18/umd/react.production.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js",
       "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"
@@ -77,7 +77,7 @@ const resources = [
     id: "react-dom-js",
     type: "script",
     urls: [
-      "libs/react-dom.production.min.js",
+      "./libs/react-dom.production.min.js",
       "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js",
       "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"
@@ -88,7 +88,7 @@ const resources = [
     id: "d3-cloud-js",
     type: "script",
     urls: [
-      "libs/d3.layout.cloud.min.js",
+      "./libs/d3.layout.cloud.min.js",
       "https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js",
       "https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.min.js",
       "https://rawcdn.githack.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"

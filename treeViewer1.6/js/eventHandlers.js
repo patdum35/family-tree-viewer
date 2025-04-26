@@ -3,12 +3,11 @@
 // ====================================
 import { getZoom } from './treeRenderer.js';
 import { state, displayGenealogicTree, hideMap } from './main.js';
-import { stopAnimation } from './treeAnimation.js';
 import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu } from './hamburgerMenu.js';
-import { initializeAnimationMapPosition} from './treeAnimation.js';
+import { stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -47,6 +46,35 @@ export function handleWindowResize() {
     const svg = d3.select("#tree-svg");
     setupElegantBackground(svg);
     initializeAnimationMapPosition();
+    updateAnimationMapSize();
+
+    // state.lastVerticalPosition = state.lastVerticalPosition - 300;
+
+    state.screenResizeHasOccured = true;
+    state.previousWindowInnerWidth = state.lastWindowInnerWidth;
+    state.previousWindowInnerHeight = state.lastWindowInnerHeight;
+    state.lastWindowInnerWidth = window.innerWidth;
+    state.lastWindowInnerHeight = window.innerHeight;
+    console.log("\n\n\n ##### Redimensionnement de la fenêtre, sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
+
+    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight > 0  ) { state.lastVerticalPosition = state.lastVerticalPosition + 100};
+    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight < 0 ) { state.lastVerticalPosition = state.lastVerticalPosition - 100};
+
+    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth > 0  ) { 
+    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
+    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
+    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
+
+    // };
+    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth < 0  ) { 
+    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
+    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
+    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
+    //  };
+
+
+
+
 }
 
 /**

@@ -9,8 +9,9 @@ import { buildDescendantTree } from './treeOperations.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { initBackgroundContainer, updateBackgroundImage } from './backgroundManager.js';
 import { extractYear } from './utils.js';
-import { initAnimationMap as initMap, updateAnimationMapMarkers, collectPersonLocations, locationSymbols} from './mapUtils.js';
+import { initAnimationMap as initMap, updateAnimationMapMarkers, updateAnimationMapMarkersWithLabels, collectPersonLocations, locationSymbols} from './mapUtils.js';
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
+import { fetchTileWithCache } from './mapTilesPreloader.js';
 
 
 
@@ -90,7 +91,6 @@ export function initNetworkListeners() {
 
 }
 
-
 // Fonction pour afficher visuellement le statut réseau (optionnel)
 function showNetworkStatus(message) {
     // Créer ou mettre à jour un élément de notification
@@ -116,9 +116,6 @@ function showNetworkStatus(message) {
         notification.style.display = 'none';
     }, 3000);
 }
-
-
-
 
 export function initializeAnimationMapPosition() 
 {
@@ -167,7 +164,6 @@ export function initializeAnimationMapPosition()
     state.isAnimationMapInitialized = true;
 }
 
-
 // État pour la position de la carte d'animation
 let animationMapPosition = {
     top: 60,
@@ -200,7 +196,6 @@ function saveAnimationMapPosition() {
     
     console.log("Position de la carte d'animation sauvegardée:", animationMapPosition);
 }
-
 
 function initAnimationMap() {
     // Supprimer proprement toute carte existante
@@ -461,47 +456,110 @@ function initAnimationMap() {
         });
         
         // Créer une classe de tuiles personnalisée
+        // const CustomTileLayer = L.TileLayer.extend({
+        //     createTile: function(coords, done) {
+        //         const tile = document.createElement('img');
+                
+        //         // Essayer d'abord la tuile locale
+        //         const localUrl = `maps/tile_${coords.z}_${coords.x}_${coords.y}.png`;
+        //         tile.src = localUrl;
+                
+        //         // En cas d'erreur, utiliser OSM
+        //         tile.onerror = () => {
+        //             // Choisir un serveur OSM aléatoire
+        //             const servers = ['a', 'b', 'c'];
+        //             const server = servers[Math.floor(Math.random() * servers.length)];
+        //             const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
+                    
+        //             console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
+        //             tile.src = osmUrl;
+                    
+        //             // Mettre à jour les statistiques
+        //             tileStats.osmLoaded++;
+        //             console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
+                    
+        //             // Supprimer le gestionnaire d'erreur précédent pour éviter les boucles
+        //             tile.onerror = (e) => {
+        //                 console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
+        //                 done(e, tile);
+        //             };
+        //         };
+                
+        //         tile.onload = function() {
+        //             // Si la source est une URL locale, incrémenter le compteur local
+        //             if (tile.src.includes('maps/tile_')) {
+        //                 tileStats.localLoaded++;
+        //                 console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
+        //             }
+        //             done(null, tile);
+        //         };
+                
+        //         return tile;
+        //     }
+        // });
+
+
+
+
+
+
         const CustomTileLayer = L.TileLayer.extend({
             createTile: function(coords, done) {
                 const tile = document.createElement('img');
                 
-                // Essayer d'abord la tuile locale
+                // Essayer d'abord la tuile locale avec le cache
                 const localUrl = `maps/tile_${coords.z}_${coords.x}_${coords.y}.png`;
-                tile.src = localUrl;
                 
-                // En cas d'erreur, utiliser OSM
-                tile.onerror = () => {
-                    // Choisir un serveur OSM aléatoire
-                    const servers = ['a', 'b', 'c'];
-                    const server = servers[Math.floor(Math.random() * servers.length)];
-                    const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
-                    
-                    console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
-                    tile.src = osmUrl;
-                    
-                    // Mettre à jour les statistiques
-                    tileStats.osmLoaded++;
-                    console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-                    
-                    // Supprimer le gestionnaire d'erreur précédent pour éviter les boucles
-                    tile.onerror = (e) => {
-                        console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
-                        done(e, tile);
-                    };
-                };
-                
-                tile.onload = function() {
-                    // Si la source est une URL locale, incrémenter le compteur local
-                    if (tile.src.includes('maps/tile_')) {
+                // Utiliser fetchTileWithCache au lieu de l'assignation directe
+                fetchTileWithCache(localUrl)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.blob();
+                        } else {
+                            throw new Error('Tuile locale non disponible');
+                        }
+                    })
+                    .then(blob => {
+                        // Créer une URL pour le blob
+                        const objectURL = URL.createObjectURL(blob);
+                        tile.src = objectURL;
+                        
+                        // Mettre à jour les statistiques
                         tileStats.localLoaded++;
-                        console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-                    }
-                    done(null, tile);
-                };
+                        
+                        // Libérer l'URL du blob quand la tuile est chargée
+                        tile.onload = function() {
+                            URL.revokeObjectURL(objectURL);
+                            done(null, tile);
+                        };
+                    })
+                    .catch(error => {
+                        // Fallback vers OSM si la tuile locale n'est pas disponible
+                        const servers = ['a', 'b', 'c'];
+                        const server = servers[Math.floor(Math.random() * servers.length)];
+                        const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
+                        
+                        console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
+                        tile.src = osmUrl;
+                        
+                        // Mettre à jour les statistiques
+                        tileStats.osmLoaded++;
+                        
+                        tile.onload = function() {
+                            done(null, tile);
+                        };
+                        
+                        tile.onerror = function(e) {
+                            console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
+                            done(e, tile);
+                        };
+                    });
                 
                 return tile;
             }
         });
+
+
         
         // Ajouter la couche à la carte
         new CustomTileLayer("", {
@@ -525,6 +583,28 @@ function initAnimationMap() {
     window.animationMapMarkers = [];
 
     return animationMap;
+}
+
+export function updateAnimationMapSize() {
+    const mapContainer = document.getElementById('animation-map-container');
+    if (!mapContainer) return;
+    
+    // Appliquer les nouvelles dimensions et position
+    mapContainer.style.top = `${animationMapPosition.top}px`;
+    mapContainer.style.left = `${animationMapPosition.left}px`;
+    mapContainer.style.width = `${animationMapPosition.width}px`;
+    mapContainer.style.height = `${animationMapPosition.height}px`;
+    
+    // Forcer la mise à jour de la carte Leaflet
+    if (animationMap) {
+        // Notifier Leaflet que la taille du conteneur a changé
+        animationMap.invalidateSize();
+        
+        // Optionnel : sauvegarder la nouvelle position
+        saveAnimationMapPosition();
+    }
+    
+    console.log("Carte d'animation redimensionnée:", animationMapPosition);
 }
 
 // Gérer le redimensionnement tactile
@@ -616,158 +696,6 @@ function setupMapResizeHandlers(resizeHandle, container) {
     }
 }
 
-// Modifier la fonction resetMap pour nettoyer le conteneur
-// Fonction resetMap corrigée
-// export function resetMap() {
-//     // Supprimer les marqueurs existants
-//     if (window.animationMapMarkers) {
-//         window.animationMapMarkers.forEach(marker => {
-//             if (animationMap) animationMap.removeLayer(marker);
-//         });
-//         window.animationMapMarkers = [];
-//     }
-    
-//     // Supprimer la carte Leaflet
-//     if (animationMap) {
-//         animationMap.remove();
-//         animationMap = null;
-//     }
-
-//     // Supprimer le conteneur
-//     const mapContainer = document.getElementById('animation-map-container');
-//     if (mapContainer) {
-//         // Annuler l'observateur de redimensionnement s'il existe
-//         if (mapContainer.resizeObserver) {
-//             mapContainer.resizeObserver.disconnect();
-//         }
-//         document.body.removeChild(mapContainer);
-//     }
-    
-    
-//     // // Supprimer le conteneur de façon sécurisée
-//     // const mapContainer = document.getElementById('animation-map-container');
-//     // if (mapContainer) {
-//     //     // Nettoyer l'observateur de redimensionnement s'il existe
-//     //     if (mapContainer.resizeObserver) {
-//     //         mapContainer.resizeObserver.disconnect();
-//     //     }
-        
-//     //     // Vérifier si l'élément est bien un enfant du document
-//     //     if (mapContainer.parentNode) {
-//     //         mapContainer.parentNode.removeChild(mapContainer);
-//     //     }
-//     // }
-// }
-
-
-
-
-// function initAnimationMap() {
-//     animationMap = initMap('animation-map', {
-//         center: [46.2276, 2.2137], 
-//         zoom: 5,
-//         zoomControl: false,
-//         attributionControl: false
-//     });
-    
-//     // Remplacer le fournisseur de tuiles standard
-//     if (useLocalTiles) {
-//         // Supprimer la couche de tuiles par défaut si elle existe
-//         animationMap.eachLayer(layer => {
-//             if (layer instanceof L.TileLayer) {
-//                 animationMap.removeLayer(layer);
-//             }
-//         });
-        
-//         // Créer une classe de tuiles personnalisée
-//         const CustomTileLayer = L.TileLayer.extend({
-//             createTile: function(coords, done) {
-//                 const tile = document.createElement('img');
-                
-//                 // Essayer d'abord la tuile locale
-//                 const localUrl = `maps/tile_${coords.z}_${coords.x}_${coords.y}.png`;
-//                 tile.src = localUrl;
-                
-//                 // En cas d'erreur, utiliser OSM
-//                 tile.onerror = () => {
-//                     // Choisir un serveur OSM aléatoire
-//                     const servers = ['a', 'b', 'c'];
-//                     const server = servers[Math.floor(Math.random() * servers.length)];
-//                     const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
-                    
-//                     console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
-//                     tile.src = osmUrl;
-                    
-//                     // Mettre à jour les statistiques
-//                     tileStats.osmLoaded++;
-//                     console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-                    
-//                     // Supprimer le gestionnaire d'erreur précédent pour éviter les boucles
-//                     tile.onerror = (e) => {
-//                         console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
-//                         done(e, tile);
-//                     };
-//                 };
-                
-//                 tile.onload = function() {
-//                     // Si la source est une URL locale, incrémenter le compteur local
-//                     if (tile.src.includes('maps/tile_')) {
-//                         tileStats.localLoaded++;
-//                         console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-//                     }
-//                     done(null, tile);
-//                 };
-                
-//                 return tile;
-//             }
-//         });
-        
-//         // Ajouter la couche à la carte
-//         new CustomTileLayer("", {
-//             maxZoom: 19, // Assurez-vous que cette valeur est assez élevée
-//             minZoom: 1,  // Permettre un zoom arrière jusqu'au niveau mondial
-//             attribution: '© OpenStreetMap contributors'
-//         }).addTo(animationMap);
-        
-//         console.log("✅ Couche de tuiles locales/OSM initialisée");
-//     } else {
-//         // Utiliser OSM standard
-//         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//             maxZoom: 19,
-//             attribution: '© OpenStreetMap contributors'
-//         }).addTo(animationMap);
-        
-//         console.log("ℹ️ Utilisation standard d'OpenStreetMap");
-//     }
-    
-//     // Initialiser la liste des marqueurs
-//     window.animationMapMarkers = [];
-
-//     return animationMap;
-// }
-
-
-
-/* */
-
-// export function resetMap() {
-//     // Supprimer le marqueur et réinitialiser la carte
-//     if (window.animationMapMarkers) {
-//         window.animationMapMarkers.forEach(marker => {
-//             if (animationMap) animationMap.removeLayer(marker);
-//         });
-//         window.animationMapMarkers = [];
-//     }
-    
-//     if (animationMap) {
-//         animationMap.remove();
-//         animationMap = null;
-//     }
-// }
-
-
-
-
 
 export function setTargetAncestorId(newId) {
     state.targetAncestorId = newId;
@@ -776,7 +704,6 @@ export function setTargetAncestorId(newId) {
 export function getTargetAncestorId() {
     return state.targetAncestorId;
 }
-
 
 const useLocalTiles = true; // Activer l'utilisation des tuiles locales
 let localTilesDirectory = "maps"; // Le dossier où les tuiles locales sont stockées
@@ -787,11 +714,32 @@ let tileStats = {
 };
 
 
-
-
+function addTooltipTransparencyFix() {
+    if (!document.getElementById('tooltip-transparency-fix')) {
+        const style = document.createElement('style');
+        style.id = 'tooltip-transparency-fix';
+        style.textContent = `
+            .leaflet-tooltip {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
 
 
 async function updateAnimationMapLocations(locations, locationSymbols) {
+
+    // Appliquer le correctif de transparence
+    addTooltipTransparencyFix();
+
+    // Réinitialiser l'ensemble des noms de lieux déjà affichés
+    window.displayedLocationNames = new Set();
+    
+    // Réinitialiser le compteur de labels par marqueur
+    window.markerLabelCount = new Map();
     // Nettoyer les marqueurs existants
     if (window.animationMapMarkers) {
         window.animationMapMarkers.forEach(marker => animationMap.removeLayer(marker));
@@ -806,11 +754,12 @@ async function updateAnimationMapLocations(locations, locationSymbols) {
         return;
     }
 
-    // Utiliser la fonction centralisée pour mettre à jour les marqueurs
-    window.animationMapMarkers = await updateAnimationMapMarkers(animationMap, validLocations, {
-        enhanced: true,  // Utiliser les marqueurs améliorés avec cercle // i false :Utiliser les marqueurs simples
+    // Utiliser la fonction avec labels temporaires
+    window.animationMapMarkers = await updateAnimationMapMarkersWithLabels(animationMap, validLocations, {
+        enhanced: true,  // Utiliser les marqueurs améliorés avec cercle
         fitToMarkers: true,
-        duration: 1.5
+        duration: 1.5,
+        labelDuration: 2000  // Durée d'affichage des labels en millisecondes
     });
 }
 
@@ -908,9 +857,6 @@ function simplifyName(fullName) {
     return `${firstFirstName} ${lastName}`;
 }
 
-
-
-
 /*  NOUVEAU CODE BON pour nouveau Chrome */
 // Variable globale pour suivre si la synthèse vocale a été initialisée
 let speechSynthesisInitialized = false;
@@ -940,7 +886,6 @@ function initSpeechSynthesis() {
     }
 }
 /* */
-
 
 async function testSpeechSynthesisHealth(timeout = 1000) {
     console.log("🔍 Test de la santé de la synthèse vocale...");
@@ -974,8 +919,6 @@ async function testSpeechSynthesisHealth(timeout = 1000) {
       }, timeout);
     });
 }
-
-
 
 
 function selectVoice() {
@@ -1114,94 +1057,6 @@ function speakPersonName(personName) {
         return new Promise(resolve => setTimeout(resolve, 1600));
     }
     
-    // Vérifier si l'API native est disponible et en bon état
-    const useNativeAPI = 'speechSynthesis' in window && (navigator.onLine || isSpeechInGoodHealth);
-    
-    // Si API native non disponible ou hors ligne, utiliser meSpeak
-    // if (!useNativeAPI && window.meSpeak) {
-    // if (window.meSpeak) {
-    //     return new Promise((resolve) => {
-    //         const simplifiedName = simplifyName(personName);
-    //         console.log(`🔊 Utilisation de meSpeak pour: ${simplifiedName}`);
-            
-    //         // Configurer meSpeak
-    //         const options = {
-    //             amplitude: 100,
-    //             pitch: 50,
-    //             speed: 160,
-    //             voice: 'fr'
-    //         };
-            
-    //         // Lire le texte
-    //         window.meSpeak.speak(simplifiedName, options, () => {
-    //             console.log(`✅ Lecture terminée par meSpeak: ${simplifiedName}`);
-    //             resolve();
-    //         });
-    //     });
-    // }
-    // if (window.meSpeak) {
-    // if (false) {
-    //     const simplifiedName = simplifyName(personName);
-    //     console.log(`🔊 Utilisation de meSpeak pour: ${simplifiedName}`);
-    //     try {
-    //       // Vérifier si la voix française est disponible
-    //       const voices = meSpeak.getVoices ? meSpeak.getVoices() : [];
-    //       const options = { 
-    //         speed: 150, 
-    //         pitch: 60,
-    //         voice: voices.includes('fr') ? 'fr' : undefined
-    //       };
-          
-    //       // Lire le texte
-    //       meSpeak.speak(simplifiedName, options);
-          
-    //       // Résoudre après la durée estimée
-    //       setTimeout(resolve, estimatedDuration);
-    //       return;
-    //     } catch (e) {
-    //       console.warn("⚠️ Erreur avec meSpeak:", e);
-    //     }
-    // }
-    
-
-
-
-
-
-
-
-
-    
-    // Sinon, utiliser l'API native de synthèse vocale
-    // return new Promise((resolve, reject) => {
-//         // Votre code existant pour l'API native...
-//         // ...
-//     });
-// }
-// function speakPersonName(personName) {
-//     console.log(`⏱️ DÉBUT: speakPersonName pour ${personName}, vitesse initiale: ${optimalSpeechRate}`);
-
-
-//     // Initialiser la synthèse vocale si ce n'est pas déjà fait
-//     if (!speechSynthesisInitialized) {
-//         console.log("🔄 Premier appel à la synthèse vocale - initialisation...");
-//         initSpeechSynthesis();
-//         // Ajouter un petit délai pour laisser le temps à l'initialisation
-//         return new Promise(resolve => {
-//             setTimeout(() => {
-//                 // Réappeler la fonction après initialisation
-//                 speakPersonName(personName).then(resolve);
-//             }, 200);
-//         });
-//     }
-//     console.log( "index animation =", animationState.currentIndex);
-
-//     // initSpeechSynthesis();
-
-
-
-
-
 
 
     return new Promise((resolve, reject) => {
@@ -1257,82 +1112,6 @@ function speakPersonName(personName) {
         // Simplifier le nom avant lecture
         const simplifiedName = simplifyName(personName);
         console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
-
-
-
-
-        // // Obtenir toutes les voix disponibles
-        // const voices = window.speechSynthesis.getVoices();
-
-        // console.log("Voix disponibles:",voices);
-
-        // // Trouver les voix françaises disponibles
-        // let frenchVoices = voices.filter(voice => 
-        //     voice.lang.startsWith('fr-FR') && 
-        //     !voice.name.includes('ulti'));
-
-        // console.log("Voix disponibles:", frenchVoices);
-        
-        // console.log("Voix françaises France disponibles:", frenchVoices.map(v => v.name));
-
-        // if (!frenchVoices) {
-        //     frenchVoices = voices.filter(voice => 
-        //         voice.lang.startsWith('fr-') || 
-        //         voice.name.toLowerCase().includes('french')
-        //     );
-        //     console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
-        // }
-
-
-        
-        // // Choisir la meilleure voix française
-        // let selectedVoice = null;
-        
-        // // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
-        // // if (navigator.onLine) {
-        // //     // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
-        // //     selectedVoice = frenchVoices.find(voice => 
-        // //         voice.name.includes('Google') || 
-        // //         voice.name.includes('Microsoft')
-        // //     );
-            
-        // //     if (selectedVoice) {
-        // //         console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
-        // //     }
-        // // }
-
-
-        // // if (navigator.onLine) {
-        // //     // Chercher d'abord la voix Google français
-        // //     selectedVoice = frenchVoices.find(voice => voice.name === 'Google français');
-            
-        // //     // Si pas trouvée, chercher d'autres voix Google ou Microsoft
-        // //     if (!selectedVoice) {
-        // //         selectedVoice = frenchVoices.find(voice => 
-        // //             voice.name.includes('Google') || 
-        // //             voice.name.includes('Microsoft')
-        // //         );
-        // //     }
-            
-        // //     if (selectedVoice) {
-        // //         console.log("✅ Utilisation de la voix réseau haute qualité:", selectedVoice.name);
-        // //     }
-        // // }
-        
-        // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
-        // if (!selectedVoice) {
-        //     // Sélectionner la première voix française disponible
-        //     selectedVoice = frenchVoices[0];
-            
-        //     if (selectedVoice) {
-        //         console.log("ℹ️ Utilisation de la voix locale:", selectedVoice.name);
-        //     } else {
-        //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
-        //     }
-        // }
-        
-
-
 
 
 
@@ -1443,115 +1222,6 @@ function speakPersonName(personName) {
 
 
 
-
-    // return new Promise((resolve) => {
-    //     // Vérifier si le son est activé
-    //     if (!state.isSpeechEnabled) {
-    //         console.log("🔇 Son désactivé - résolution immédiate");
-    //         resolve();
-    //         return;
-    //     }
-
-    //     if (!('speechSynthesis' in window)) {
-    //         console.log("❌ API SpeechSynthesis non disponible - résolution immédiate");
-    //         resolve();
-    //         return;
-    //     }
-
-
-
-
-    //     // Simplifier le nom avant lecture
-    //     const simplifiedName = simplifyName(personName);
-    //     console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
-        
-    //     // Mode hors ligne: utiliser speak-js
-    //     console.log(`🔊 Mode hors ligne - utilisation de speak-js pour: ${simplifiedName}`);
-        
-    //     // Vérifier si speak est disponible (d'après vos logs, c'est window.speak)
-    //     if (window.speak) {
-    //       try {
-    //         // Configurer le chemin du worker si nécessaire
-    //         if (window.speak.setWorkerPath) {
-    //           window.speak.setWorkerPath('./libs/speak-js/speakWorker.js');
-    //         }
-            
-    //         console.log("Tentative de lecture avec speak-js...");
-            
-    //         // Essayer d'appeler la fonction speak (peut varier selon l'API)
-    //         // Tentative 1: méthode speak.speak
-    //         if (typeof window.speak.speak === 'function') {
-    //         console.log("Tentative 1: méthode speak.speak");
-    //           window.speak.speak(simplifiedName, {
-    //             amplitude: 100,
-    //             wordgap: 3,
-    //             pitch: 50,
-    //             speed: 150,
-    //             voice: 'fr' // Essayer la voix française
-    //           });
-    //         } 
-    //         // Tentative 2: méthode speak directement
-    //         else if (typeof window.speak === 'function') {
-    //             console.log("Tentative 2: méthode speak directement");
-    //           window.speak(simplifiedName, {
-    //             amplitude: 100,
-    //             wordgap: 3,
-    //             pitch: 50,
-    //             speed: 150,
-    //             voice: 'fr'
-    //           });
-    //         }
-    //         // Tentative 3: méthode speak.play
-    //         else if (typeof window.speak.play === 'function') {
-    //             console.log("Tentative 3: méthode speak.play");
-    //           window.speak.play(simplifiedName, {
-    //             amplitude: 100,
-    //             wordgap: 3,
-    //             pitch: 50,
-    //             speed: 150,
-    //             voice: 'fr'
-    //           });
-    //         }
-    //         else {
-    //           throw new Error("Aucune méthode de synthèse vocale trouvée dans l'objet speak");
-    //         }
-            
-    //         // Estimer la durée de la parole
-    //         const estimatedDuration = Math.max(1800, simplifiedName.length * 150);
-    //         setTimeout(resolve, estimatedDuration);
-            
-    //       } catch (e) {
-    //         console.error("❌ Erreur avec speak-js:", e);
-    //         // Fallback au mode visuel
-    //         showVisualSpeechIndication(simplifiedName);
-    //         setTimeout(resolve, 1600);
-    //       }
-    //     } else {
-    //       // speak non disponible, utiliser le mode visuel
-    //       console.warn("⚠️ speak non disponible, utilisation du mode visuel");
-    //       showVisualSpeechIndication(simplifiedName);
-    //       setTimeout(resolve, 1600);
-    //     }
-    // });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 /* */
 
@@ -1640,13 +1310,8 @@ function speakPersonName(personName) {
 //     });
 // }
 
-
-
 let isSpeechInGoodHealth = false;
-
-
 let animationController = null;
-
 let animationState = {
     path: [],          // Le chemin complet de l'animation
     descendpath: [],   // Le chemin complet descendant
@@ -1702,11 +1367,18 @@ export async function startAncestorAnimation() {
         animationState.isPaused = false;
     }
 
-    let deltaXRatio = 2.0; // Ratio de décalage horizontal
-    if (window.innerWidth < 400) { deltaXRatio = 3.0; } // Pour les petits écrans, on
+    let deltaXRatio = 1.5; // Ratio de décalage horizontal
+    if (window.innerWidth < 400) { deltaXRatio = 1.0; } // Pour les petits écrans, on
 
 
     selectVoice();
+
+    let horizontalShift = 0;
+    let verticalShift = 0;
+    let svg = d3.select("#tree-svg");
+    let lastTransform = getLastTransform() || d3.zoomIdentity;  
+    state.previousWindowInnerWidthInMap = window.innerWidth;
+    state.previousWindowInnerHeightInMap = window.innerHeight;
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -1755,11 +1427,12 @@ export async function startAncestorAnimation() {
 
                     const zoom = getZoom();
 
+                    console.log("\n\n\n #############   debug zomm", zoom, getLastTransform(), d3.zoomIdentity);
+
                     let initialOffsetY = 0;
 
                     if (zoom && (animationState.currentIndex === 0 )) {
-                        const svg = d3.select("#tree-svg");
-                        const lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
                     
                         // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
                         offsetX = 0;
@@ -1783,6 +1456,49 @@ export async function startAncestorAnimation() {
                         state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
                         state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
                     }
+                    let shiftAterRescale = false
+
+                    if (zoom && state.screenResizeHasOccured && (animationState.currentIndex > 2) ) {
+
+                        state.screenResizeHasOccured = false;
+
+                        // console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### new: ", window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,"\n\n\n\n\n");
+    
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                    
+
+                        let horizontalShift1 = 0;
+                        if (window.innerWidth - state.prevPrevWindowInnerWidthInMap < -30) {
+                            horizontalShift1 =   -(window.innerWidth - state.prevPrevWindowInnerWidthInMap)  + (state.boxWidth*2);
+                        } else if (window.innerWidth - state.prevPrevWindowInnerWidthInMap > 30) {    
+                            horizontalShift1 =  -(window.innerWidth - state.prevPrevWindowInnerWidthInMap) - (state.boxWidth*2);
+                        }
+
+                        let verticalShift1 = 0;
+                        if (window.innerHeight - state.prevPrevWindowInnerHeightInMap < -30) {
+                            verticalShift1 =  -(window.innerHeight - state.prevPrevWindowInnerHeightInMap); //  + (state.boxHeight*2);
+                        } else  if (window.innerHeight - state.prevPrevWindowInnerHeightInMap > 30) {    
+                            verticalShift1 = -(window.innerHeight - state.prevPrevWindowInnerHeightInMap); // - (state.boxHeight*2);
+                        }
+
+                        if (horizontalShift1 != 0 || verticalShift1 != 0) {
+                            svg.transition()
+                                .duration(750)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(-horizontalShift1, -verticalShift1)
+                                );
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift1;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift1;    
+
+                            shiftAterRescale = true;
+                        }
+
+                            
+                        console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### new: ", window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,", offset X=", -horizontalShift1 ,", offset Y=", -verticalShift1 , "\n\n\n\n\n");
+   
+
+    
+                    }
 
 
 
@@ -1797,6 +1513,63 @@ export async function startAncestorAnimation() {
                     }
 
 
+                    let shiftTree =  false;
+
+
+                    // Mettre à jour l'élément de la carte
+                    if (zoom) {
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                                                
+                        console.log("\n\n DEBUG 0 *******", node.y, window.innerWidth, state.boxWidth, deltaXRatio, 
+                            (node.y > window.innerWidth - state.boxWidth*deltaXRatio),
+                            (node.x + initialOffsetY > window.innerHeight - state.boxHeight*1.2),
+                            (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ),
+                            (node.x - state.lastVerticalPosition > state.boxHeight*0.2 ));
+                        // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
+                        if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x + initialOffsetY > window.innerHeight - state.boxHeight*1.2))  
+                             && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
+
+                            if (firstTimeShift) {
+                                offsetX = (node.y - state.lastHorizontalPosition)
+                                offsetY = (node.x - state.lastVerticalPosition);
+                            }
+                            firstTimeShift = false;
+              
+                            horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
+                            verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2                             
+
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+                            // console.log("\n\n DEBUG  SHIFT BEFORE  *******", node.data.name, -horizontalShift, -verticalShift, state.lastHorizontalPosition, state.lastVerticalPosition );
+                            console.log("\n\n DEBUG  SHIFT compute offset   *******", node.data.name, -horizontalShift, -verticalShift );
+                            shiftTree = true;
+                        }
+                    }
+
+
+
+
+                    if (shiftTree && !shiftAterRescale) { 
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                                                               
+                        const horizontalShift2 = state.boxWidth ;
+                        const verticalShift2 = verticalShift; //0; 
+                        await new Promise(resolve => {
+                            svg.transition()
+                                .duration(800)  // Durée plus longue pour être visible
+                                .ease(d3.easeCubicOut) 
+                                // d3.easeCubicOut - Démarre rapidement puis ralentit (recommandé pour les translations)
+                                // d3.easeCubicInOut - Accélère puis ralentit
+                                // d3.easeElasticOut - Effet avec un léger rebond à la fin
+                                // d3.easeQuadInOut - Accélération et décélération douces
+                                .call(zoom.transform, 
+                                    lastTransform.translate(-horizontalShift2 , -verticalShift2)
+                                )
+                                .on("end", resolve);
+                        });
+                        console.log("\n\n DEBUG  SHIFT BEFORE drawTree  *******", node.data.name, -horizontalShift2, -verticalShift2 );
+                    }
+
+
+
 
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
                     const voicePromise = state.isSpeechEnabled 
@@ -1805,13 +1578,6 @@ export async function startAncestorAnimation() {
                     
                     // Attendre la lecture ou le délai
                     await voicePromise;
-
-
-
-
-
-
-
 
 
 
@@ -1825,44 +1591,27 @@ export async function startAncestorAnimation() {
                         } else {
                             handleAncestorsClick(event, node);
                         }
-
                         drawTree();
                     }
 
 
-                    if (zoom) {
-                        const svg = d3.select("#tree-svg");
-                        const lastTransform = getLastTransform() || d3.zoomIdentity;                        
-                        
-                        console.log("\n\n DEBUG *******", node.y, window.innerWidth, state.boxWidth, deltaXRatio, state.boxWidth*deltaXRatio, (node.y + state.boxWidth - state.lastHorizontalPosition) > (state.boxWidth*0.2),(node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) );
 
 
-                        // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
-                        if  (((node.y > window.innerWidth - (state.boxWidth*deltaXRatio)) || (node.x + initialOffsetY > window.innerHeight - (state.boxHeight*1.2))) && ( ((node.y + state.boxWidth - state.lastHorizontalPosition) > (state.boxWidth*0.2) ) || ((node.x - state.lastVerticalPosition) > (state.boxHeight*0.2) )) )  {                                       
-
-                            if (firstTimeShift) {
-                                offsetX = (node.y - state.lastHorizontalPosition)
-                                offsetY = (node.x - state.lastVerticalPosition);
-                            }
-                            firstTimeShift = false;
-
-                            const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
-                            const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
-
-                            svg.transition()
-                                .duration(750)
-                                .call(zoom.transform, 
-                                    lastTransform.translate(-horizontalShift, -verticalShift)
-                                );
-
-                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
-                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
-
-                            console.log("\n\n DEBUG  SHIFT *******", node.data.name, -horizontalShift, -verticalShift );
-
-
-                        }
+                    if (shiftTree) {
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                                         
+                        svg.transition()
+                            .call(zoom.transform, 
+                                lastTransform.translate(-horizontalShift, -verticalShift)
+                            );
+                        console.log("\n\n DEBUG  SHIFT AFTER  drawTree  *******", node.data.name, -horizontalShift, -verticalShift );
                     }
+
+                    state.prevPrevWindowInnerWidthInMap = state.previousWindowInnerWidthInMap;
+                    state.prevPrevWindowInnerHeightInMap =  state.previousWindowInnerHeightInMap;
+                    state.previousWindowInnerWidthInMap = window.innerWidth;
+                    state.previousWindowInnerHeightInMap = window.innerHeight;
+
+
                 } 
             }
 
@@ -1879,7 +1628,6 @@ export async function startAncestorAnimation() {
         }
     });
 }
-
 
 export async function prepareAnimationDemo() {
     console.log("🔄 Préparation de la démo d'animation...");
@@ -2137,7 +1885,6 @@ export async function prepareAnimationDemo() {
     }
 }
 
-
 export async function validateTilesCoverage() {
     // Reproduire le même chemin que startAncestorAnimation
     const [path, descendPath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
@@ -2261,7 +2008,6 @@ export function stopAnimation() {
     animationTimeouts.forEach(timeout => clearTimeout(timeout));
     animationTimeouts = [];
 }
-
 
 export function resetAnimationState() {
     animationState = {

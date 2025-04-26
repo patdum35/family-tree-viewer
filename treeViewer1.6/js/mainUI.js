@@ -328,6 +328,27 @@ export function updateSelectorDisplayText(selector, text) {
 }
 
 
+/**
+ * Met à jour la valeur du sélecteur de générations
+ * @param {number} value - Le nouveau nombre de générations
+ */
+export function updateGenerationSelectorValue(value) {
+    // Mettre à jour l'état global
+    state.nombre_generation = value;
+    
+    // Mettre à jour le sélecteur
+    const generationSelector = document.getElementById('generations');
+    if (generationSelector) {
+      generationSelector.setAttribute('data-value', value.toString());
+      
+      // Mettre à jour l'affichage
+      const displayElement = generationSelector.querySelector('div span');
+      if (displayElement) {
+        displayElement.textContent = value.toString();
+      }
+    }
+  }
+
 // Ajout d'un état global pour suivre le mode du sélecteur
 let selectorMode = 'history'; // Valeurs possibles: 'history', 'search'
 

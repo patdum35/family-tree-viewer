@@ -343,6 +343,321 @@ export async function updateAnimationMapMarkers(map, locations, options = {}) {
     return markers;
 }
 
+
+/**
+ * Détermine si un marqueur est trop proche du bord supérieur de la carte
+ * @param {L.Marker} marker - Le marqueur à vérifier
+ * @param {number} threshold - Distance minimale (en pixels) du bord supérieur
+ * @returns {boolean} - True si le marqueur est trop proche du bord supérieur
+ */
+function isMarkerNearTopEdge(marker, threshold = 50) {
+    if (!marker || !marker._map) return false;
+    
+    // Obtenir la position du marqueur en pixels sur la carte
+    const markerPoint = marker._map.latLngToContainerPoint(marker.getLatLng());
+    
+    // Vérifier si le marqueur est trop proche du bord supérieur
+    return markerPoint.y < threshold;
+}
+
+/**
+ * Crée un label temporaire au-dessus d'un marqueur
+ * @param {L.Marker} marker - Le marqueur Leaflet
+ * @param {string} text - Le texte à afficher
+ * @param {number} duration - Durée d'affichage en millisecondes
+ * @param {Object} options - Options supplémentaires
+ */
+export function showTemporaryLabel(marker, text, duration = 1000, options = {}) {
+    if (!marker || !text) return;
+    
+    // Initialiser le compteur de labels pour ce marqueur
+    if (!window.markerLabelCount) {
+        window.markerLabelCount = new Map();
+    }
+    
+    const markerKey = marker.getLatLng().toString();
+    const labelIndex = window.markerLabelCount.get(markerKey) || 0;
+    window.markerLabelCount.set(markerKey, labelIndex + 1);
+    
+    // Vérifier si le marqueur est proche du bord supérieur
+    const nearTopEdge = isMarkerNearTopEdge(marker, 80);
+    
+    // Calculer les décalages en fonction du nombre de labels et de la position
+    const offsetCalc = calculateLabelOffset(labelIndex, nearTopEdge);
+    
+    // Options par défaut
+    const defaultOptions = {
+        className: 'temporary-marker-label',
+        offset: offsetCalc.offset,
+        direction: nearTopEdge ? 'bottom' : 'top', // Changer la direction du tooltip
+        permanent: true,
+        interactive: false,
+        opacity: 0.9
+    };
+    
+    const mergedOptions = { ...defaultOptions, ...options };
+    
+    // Créer le label avec un fond semi-transparent
+    const label = L.tooltip(mergedOptions)
+        .setContent(`<div style="
+            font-weight: bold; 
+            text-align: center;
+            font-size: 12px;
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            padding: 3px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            border: 1px solid rgba(200, 200, 200, 0.4);
+            white-space: nowrap;
+            color: rgba(0, 0, 0, 0.9);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: ${1000 + labelIndex}; /* Plus haut index pour apparaître au-dessus */
+        ">${text}</div>`)
+        .setLatLng(offsetCalc.adjustedLatLng || marker.getLatLng());
+    
+    // Ajouter le label à la carte du marqueur
+    label.addTo(marker._map);
+    
+    // Animation d'apparition
+    const labelElement = label.getElement();
+    if (labelElement) {
+        labelElement.style.opacity = '0';
+        labelElement.style.transform = `translate(${offsetCalc.initialTransform.x}px, ${offsetCalc.initialTransform.y}px)`;
+        labelElement.style.transition = 'opacity 0.25s ease-out, transform 0.3s ease-out';
+        
+        // Forcer un reflow pour que la transition fonctionne
+        setTimeout(() => {
+            labelElement.style.opacity = '1';
+            labelElement.style.transform = 'translate(0, 0)';
+        }, 10 + labelIndex * 50); // Léger décalage entre les apparitions
+    }
+    
+    // Supprimer le label après la durée spécifiée
+    setTimeout(() => {
+        if (labelElement) {
+            // Animation de disparition
+            labelElement.style.opacity = '0';
+            labelElement.style.transform = `translate(${offsetCalc.exitTransform.x}px, ${offsetCalc.exitTransform.y}px)`;
+            
+            // Supprimer l'élément après l'animation
+            setTimeout(() => {
+                if (marker._map) {
+                    marker._map.removeLayer(label);
+                    
+                    // Décrémenter le compteur de labels
+                    const currentCount = window.markerLabelCount.get(markerKey) || 0;
+                    if (currentCount > 0) {
+                        window.markerLabelCount.set(markerKey, currentCount - 1);
+                    }
+                }
+            }, 300); // Attendre que l'animation de disparition soit terminée
+        } else {
+            // Fallback si l'élément n'existe plus
+            if (marker._map) {
+                marker._map.removeLayer(label);
+            }
+        }
+    }, duration + labelIndex * 150); // Décalage de la durée d'affichage
+    
+    // Retourner le label au cas où on voudrait le manipuler
+    return label;
+}
+
+/**
+ * Calcule la position optimale d'un label en fonction de son index
+ * @param {number} index - Index du label (0, 1, 2, ...)
+ * @returns {Object} - Configuration de position pour le label
+ */
+
+
+// Modifier la fonction calculateLabelOffset pour prendre en compte la proximité du bord
+function calculateLabelOffset(index, nearTopEdge = false) {
+    // Positions pour les marqueurs LOIN du bord supérieur (standard)
+    const standardPositions = [
+        { offset: [0, -25], initialTransform: {x: 0, y: 2}, exitTransform: {x: 0, y: -2} }, // Position 0: Dessus (plus proche)
+        { offset: [30, -15], initialTransform: {x: 10, y: 2}, exitTransform: {x: 10, y: -2} }, // Position 1: Dessus droite
+        { offset: [-30, -15], initialTransform: {x: -10, y: 2}, exitTransform: {x: -10, y: -2} }, // Position 2: Dessus gauche
+        { offset: [40, 0], initialTransform: {x: 10, y: 0}, exitTransform: {x: 10, y: 0} }, // Position 3: Droite
+        { offset: [-40, 0], initialTransform: {x: -10, y: 0}, exitTransform: {x: -10, y: 0} }, // Position 4: Gauche
+        { offset: [30, 15], initialTransform: {x: 10, y: -2}, exitTransform: {x: 10, y: 2} }, // Position 5: Dessous droite
+        { offset: [-30, 15], initialTransform: {x: -10, y: -2}, exitTransform: {x: -10, y: 2} }, // Position 6: Dessous gauche
+        { offset: [0, 25], initialTransform: {x: 0, y: -2}, exitTransform: {x: 0, y: 2} } // Position 7: Dessous
+    ];
+    
+    // Positions pour les marqueurs PROCHES du bord supérieur (inversées)
+    const edgePositions = [
+        { offset: [0, 25], initialTransform: {x: 0, y: -5}, exitTransform: {x: 0, y: 5} }, // Dessous (premier choix)
+        { offset: [30, 15], initialTransform: {x: 10, y: -5}, exitTransform: {x: 10, y: 5} }, // Dessous droite
+        { offset: [-30, 15], initialTransform: {x: -10, y: -5}, exitTransform: {x: -10, y: 5} }, // Dessous gauche
+        { offset: [40, 0], initialTransform: {x: 10, y: 0}, exitTransform: {x: 10, y: 0} }, // Droite
+        { offset: [-40, 0], initialTransform: {x: -10, y: 0}, exitTransform: {x: -10, y: 0} }, // Gauche
+        { offset: [30, 30], initialTransform: {x: 10, y: -10}, exitTransform: {x: 10, y: 10} }, // Plus bas droite
+        { offset: [-30, 30], initialTransform: {x: -10, y: -10}, exitTransform: {x: -10, y: 10} }, // Plus bas gauche
+        { offset: [0, 45], initialTransform: {x: 0, y: -10}, exitTransform: {x: 0, y: 10} } // Encore plus bas
+    ];
+    
+    // Choisir l'ensemble de positions approprié
+    const positions = nearTopEdge ? edgePositions : standardPositions;
+    
+    // Utiliser l'index modulo le nombre de positions
+    const positionIndex = index % positions.length;
+    
+    return positions[positionIndex];
+}
+
+/**
+ * Met à jour les marqueurs d'une carte d'animation avec des labels temporaires
+ * @param {L.Map} map - Carte à mettre à jour
+ * @param {Array} locations - Lieux à afficher
+ * @param {Object} options - Options supplémentaires
+ * @returns {Promise<Array>} - Les marqueurs créés
+ */
+/**
+ * Nettoie un nom de lieu pour l'affichage
+ * @param {string} locationName - Nom de lieu brut
+ * @returns {string} - Nom de lieu nettoyé
+ */
+function cleanLocationName(locationName) {
+    if (!locationName) return '';
+    
+    // 1. Supprimer tout ce qui est entre parenthèses (et les parenthèses)
+    let cleanedName = locationName.replace(/\([^)]*\)/g, '').trim();
+    
+    // 2. Supprimer les chiffres isolés (avec un espace avant/après)
+    cleanedName = cleanedName.replace(/\s\d+\s/g, ' ').trim();
+    
+    // 3. Supprimer les chiffres en début de chaîne
+    cleanedName = cleanedName.replace(/^\d+\s/, '').trim();
+    
+    // 4. Supprimer les chiffres en fin de chaîne
+    cleanedName = cleanedName.replace(/\s\d+$/, '').trim();
+    
+
+    // 5. Prendre seulement la première partie avant une virgule
+    if (cleanedName.includes(',')) {
+        cleanedName = cleanedName.split(',')[0].trim();
+    }
+    
+    // 6. Limiter la longueur du texte affiché
+    if (cleanedName.length > 20) {
+        cleanedName = cleanedName.substring(0, 18) + '.';
+    }
+    
+    // 7. Supprimer les espaces multiples
+    cleanedName = cleanedName.replace(/\s+/g, ' ');
+
+    
+    return cleanedName;
+}
+
+export async function updateAnimationMapMarkersWithLabels(map, locations, options = {}) {
+    if (!map) return [];
+    
+    // Supprimer les marqueurs existants si spécifié
+    if (options.clearExisting && options.existingMarkers) {
+        options.existingMarkers.forEach(marker => map.removeLayer(marker));
+    }
+    
+    // Tableau des nouveaux marqueurs
+    const markers = [];
+    
+    // Filtrer les lieux non vides
+    const validLocations = locations.filter(loc => loc.place && loc.place.trim() !== '');
+    
+    if (validLocations.length === 0) {
+        return markers;
+    }
+    
+    // Géocoder et créer les marqueurs
+    const locationPromises = validLocations.map(location => 
+        geocodeLocation(location.place)
+            .then(coords => {
+                if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+                    // Créer l'icône en fonction du type de marqueur requis
+                    const markerIcon = options.enhanced === true 
+                        ? createEnhancedMarkerIcon(location.type)
+                        : options.enhanced === 'medium'
+                            ? createMediumMarkerIcon(location.type)
+                            : createSimpleMarkerIcon(location.type);
+
+                    // Créer et ajouter le marqueur
+                    const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
+                        .addTo(map)
+                        .bindPopup(`${location.type}: ${location.place}`);
+                    
+                    markers.push(marker);
+                    
+                    // Afficher le label temporaire au-dessus du marqueur
+                    // Nettoyer et simplifier le nom du lieu
+                    let displayName = cleanLocationName(location.place);
+                    
+                    // Vérifier si ce lieu a déjà été affiché pour cette personne
+                    if (!window.displayedLocationNames) {
+                        window.displayedLocationNames = new Set();
+                    }
+                    
+                    // Si le lieu n'a pas déjà été affiché, l'afficher maintenant
+                    if (!window.displayedLocationNames.has(displayName)) {
+                        window.displayedLocationNames.add(displayName);
+                        showTemporaryLabel(marker, displayName, options.labelDuration || 1000);
+                    }
+                    
+                    return marker;
+                }
+                return null;
+            })
+            .catch(error => {
+                console.error(`Erreur lors du géocodage de ${location.place}:`, error);
+                return null;
+            })
+    );
+    
+    // Attendre que tous les marqueurs soient créés
+    await Promise.all(locationPromises);
+    
+    // Ajuster la vue pour montrer tous les marqueurs
+    if (markers.length > 0 && options.fitToMarkers !== false) {
+        fitMapToMarkers(map, markers, {
+            maxZoom: options.maxZoom || 9,
+            animate: true,
+            duration: options.duration || 1.5
+        });
+    }
+    
+    return markers;
+}
+
+// Définition de createMediumMarkerIcon si elle n'existe pas encore
+export function createMediumMarkerIcon(type) {
+    const symbolInfo = {
+        emoji: locationSymbols[type] || '📍',
+        color: getColorForLocationType(type),
+        bgColor: getBgColorForLocationType(type)
+    };
+
+    return L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="
+            font-size: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+            background-color: ${symbolInfo.bgColor};
+            border: 2px solid ${symbolInfo.color};
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 0 0 1px white;
+        ">${symbolInfo.emoji}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+}
+
+
 /**
  * Nettoie une carte en supprimant toutes les couches sauf les tuiles de base
  * @param {L.Map} map - Instance de la carte Leaflet
