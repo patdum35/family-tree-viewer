@@ -6,102 +6,248 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
   let hamburgerMenu, sideMenu, menuOverlay;
 
   
-  // Créer les éléments du menu
-  function createMenuElements() {
-    // Injecter les styles nécessaires
-    injectStyles();
+// Dans votre fonction d'initialisation existante ou là où vous définissez vos gestionnaires d'événements
+export function resizeHamburger() {
+    // Mettre à jour la classe de hauteur
+    updateHeightClass();
     
-    // Créer le bouton hamburger
-    hamburgerMenu = document.createElement('button');
-    hamburgerMenu.id = 'hamburger-menu';
-    hamburgerMenu.className = 'hamburger-menu';
-    hamburgerMenu.title = 'Menu principal';
-    hamburgerMenu.style.display = 'none'; // Caché par défaut
+    //   // Masquer le menu s'il est ouvert
+    //   if (sideMenu && sideMenu.classList.contains('open')) {
+    //     toggleMenu(false);
+    //   }
+      
+    //   // Supprimer le menu actuel s'il existe
+    //   if (state.menuHamburgerInitialized) {
+    //     hideHamburgerMenu();
+    //     state.menuHamburgerInitialized = false;
+    //     state.isHamburgerMenuInitialized = false;
+    //   }
+      
+    //   // Recréer le menu
+    //   setTimeout(() => {
+    //     createMenuElements();
+        
+    //     // Veiller à ce que le menu soit visible si nécessaire
+    //     if (document.getElementById('tree-container') && 
+    //         document.getElementById('tree-container').style.display !== 'none') {
+    //       showHamburgerMenu();
+    //     }
+    //   }, 200);
     
-    // Créer les trois barres du hamburger
-    for (let i = 0; i < 3; i++) {
-      const span = document.createElement('span');
-      hamburgerMenu.appendChild(span);
-    }
-    
-    // Créer l'overlay
-    menuOverlay = document.createElement('div');
-    menuOverlay.id = 'menu-overlay';
-    menuOverlay.className = 'menu-overlay';
-    
-    // Créer le menu latéral
-    sideMenu = document.createElement('div');
-    sideMenu.id = 'side-menu';
-    sideMenu.className = 'side-menu';
-    sideMenu.style.display = 'block'; // Modifié pour être visible initialement
-    
-    // Ajouter le titre du menu
-    const menuTitle = document.createElement('div');
-    menuTitle.className = 'menu-title';
-    menuTitle.textContent = 'Menu de l\'arbre';
-    sideMenu.appendChild(menuTitle);
-    
-    // Créer les sections du menu
-    createDisplaySection();
-    createRootSection();
-    createModeSection();
-    createNameCloudSection();
-    createAudioSection();
-    createSettingsSection();
-    createSearchSection();
-    
-    // Ajouter les éléments au DOM
-    document.body.appendChild(hamburgerMenu);
-    document.body.appendChild(menuOverlay);
-    document.body.appendChild(sideMenu);
-    
-    // Ajouter les gestionnaires d'événements
-    hamburgerMenu.addEventListener('click', function(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleMenu();
-    });
-    
-    menuOverlay.addEventListener('click', function() {
-      toggleMenu(false);
-    });
-    
-    // Configurer la fermeture du menu sur mobile
-    setupMobileMenuClosing();
-    
-    // Observer les changements de boutons
-    setupButtonSync();
-    
-    state.menuHamburgerInitialized = true;
-    console.log("Menu hamburger initialisé avec succès");
   }
   
+
+  // Fonction pour vérifier la hauteur de l'écran et appliquer les classes correspondantes
+  function updateHeightClass() {
+    const height = window.innerHeight;
+    document.documentElement.classList.remove('small-screen', 'medium-screen');
+    
+    if (height < 400) {
+      document.documentElement.classList.add('small-screen');
+    } else if (height < 800) {
+      document.documentElement.classList.add('medium-screen');
+    }
+    // Pas de classe pour les grands écrans pour préserver le layout original
+  }
+
+
+ // Créer les éléments du menu
+ function createMenuElements() {
+      // Injecter les styles nécessaires
+      injectStyles();
+      
+      // Mettre à jour la classe de hauteur initiale
+      updateHeightClass();
+      
+      // Ajouter un écouteur d'événement pour les changements de taille
+      window.addEventListener('resize', updateHeightClass);
+      
+      // Créer le bouton hamburger
+      hamburgerMenu = document.createElement('button');
+      hamburgerMenu.id = 'hamburger-menu';
+      hamburgerMenu.className = 'hamburger-menu';
+      hamburgerMenu.title = 'Menu principal';
+      hamburgerMenu.style.display = 'none'; // Caché par défaut
+      
+      // Créer les trois barres du hamburger
+      for (let i = 0; i < 3; i++) {
+        const span = document.createElement('span');
+        hamburgerMenu.appendChild(span);
+      }
+      
+      // Créer l'overlay
+      menuOverlay = document.createElement('div');
+      menuOverlay.id = 'menu-overlay';
+      menuOverlay.className = 'menu-overlay';
+      
+      // Créer le menu latéral
+      sideMenu = document.createElement('div');
+      sideMenu.id = 'side-menu';
+      sideMenu.className = 'side-menu';
+      sideMenu.style.display = 'block'; // Modifié pour être visible initialement
+      
+      // Ajouter le titre du menu
+      const menuTitle = document.createElement('div');
+      menuTitle.className = 'menu-title';
+      menuTitle.textContent = 'Menu de l\'arbre';
+      sideMenu.appendChild(menuTitle);
+      
+      // Créer les sections du menu
+      createAudioSection(); // 0
+      createRootSection();  //1
+      createModeSection();  //3
+      createNameCloudSection(); //0
+      createDisplaySection();  //0
+      createSettingsSection(); //1
+      createSearchSection(); //2
+      
+      // Ajouter les éléments au DOM
+      document.body.appendChild(hamburgerMenu);
+      document.body.appendChild(menuOverlay);
+      document.body.appendChild(sideMenu);
+      
+      // Ajouter les gestionnaires d'événements
+      hamburgerMenu.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleMenu();
+      });
+      
+      menuOverlay.addEventListener('click', function() {
+        toggleMenu(false);
+      });
+      
+      // Configurer la fermeture du menu sur mobile
+      setupMobileMenuClosing();
+      
+      // Observer les changements de boutons
+      setupButtonSync();
+      
+      state.menuHamburgerInitialized = true;
+      console.log("Menu hamburger initialisé avec succès");
+ }
+  
 // tableau de couleurs très pâles pour les sections
-  const sectionBackgroundColors = [
+const sectionBackgroundColors = [
     '#f9f9ff', // Bleu très pâle
     '#f9fff9', // Vert très pâle
     '#fff9f9', // Rouge très pâle
     '#fffaf0', // Jaune très pâle
     '#faf0ff'  // Violet très pâle
-  ];
+];
 
   // Fonction pour créer une section de menu
-  function createSection(title, index = 0) {
+//   function createSection(title, index = 0) {
+//     const container = document.createElement('div');
+//     container.className = 'menu-section';
+  
+//     // Appliquer une couleur de fond pâle différente selon l'index
+//     const colorIndex = index % sectionBackgroundColors.length;
+//     container.style.backgroundColor = sectionBackgroundColors[colorIndex];
+//     container.style.borderRadius = '5px'; // Coins légèrement arrondis
+    
+//     // On ne modifie les marges que pour les petits écrans
+//     // Pour les grands écrans, on laisse les styles CSS de base s'appliquer
+//     const height = window.innerHeight;
+//     if (height < 400) {
+//       container.style.margin = '2px 0';
+//       container.style.padding = '3px';
+//     } else if (height < 800) {
+//       container.style.margin = '3px 0';
+//       container.style.padding = '5px';
+//     }
+//     // Pour height >= 800, on ne définit rien ici pour garder le style original
+    
+//     const heading = document.createElement('h3');
+//     heading.textContent = title;
+    
+//     // Ajuster la taille du titre uniquement pour les petits écrans
+//     if (height < 400) {
+//       heading.style.fontSize = '12px';
+//       heading.style.marginTop = '0';
+//       heading.style.marginBottom = '3px';
+//     } else if (height < 800) {
+//       heading.style.fontSize = '14px';
+//       heading.style.marginTop = '0';
+//       heading.style.marginBottom = '5px';
+//     }
+//     // Pour height >= 800, on ne définit rien ici pour garder le style original
+    
+//     container.appendChild(heading);
+    
+//     const content = document.createElement('div');
+//     content.className = 'menu-section-content';
+    
+//     // Ajuster l'espacement du contenu uniquement pour les petits écrans
+//     if (height < 400) {
+//       content.style.gap = '3px';
+//     } else if (height < 800) {
+//       content.style.gap = '5px';
+//     }
+//     // Pour height >= 800, on ne définit rien ici pour garder le style original
+    
+//     container.appendChild(content);
+    
+//     return { container, content };
+//   }
+
+  // Fonction pour créer une section de menu
+function createSection(title, index = 0) {
     const container = document.createElement('div');
     container.className = 'menu-section';
-
+  
     // Appliquer une couleur de fond pâle différente selon l'index
     const colorIndex = index % sectionBackgroundColors.length;
     container.style.backgroundColor = sectionBackgroundColors[colorIndex];
     container.style.borderRadius = '5px'; // Coins légèrement arrondis
-    container.style.margin = '5px 0';     // Marge entre les sections
+    
+    // On ne modifie les marges que pour les petits écrans
+    const height = window.innerHeight;
+    if (height < 400) {
+      container.style.margin = '2px 0';
+      container.style.padding = '3px';
+    } else if (height < 800) {
+      container.style.margin = '3px 0';
+      container.style.padding = '5px';
+    }
     
     const heading = document.createElement('h3');
     heading.textContent = title;
+    
+    // En mode petit écran, masquer certains titres spécifiques
+    if (height < 400 && (
+        title === 'Racine' //|| 
+        // title === 'Modes' || 
+        // title === 'Affichage' || 
+        // title === 'Nuage de mots' ||
+        // title === 'Fonds d\'écran'
+    )) {
+      heading.style.display = 'none'; // Masquer complètement le titre
+      // Option alternative : heading.style.height = '0';
+      // Option alternative : heading.style.fontSize = '0';
+    } else if (height < 400) {
+      // Pour les autres titres en petit écran
+      heading.style.fontSize = '12px';
+      heading.style.marginTop = '0';
+      heading.style.marginBottom = '3px';
+    } else if (height < 800) {
+      heading.style.fontSize = '14px';
+      heading.style.marginTop = '0';
+      heading.style.marginBottom = '5px';
+    }
+    
     container.appendChild(heading);
     
     const content = document.createElement('div');
     content.className = 'menu-section-content';
+    
+    // Ajuster l'espacement du contenu uniquement pour les petits écrans
+    if (height < 400) {
+      content.style.gap = '3px';
+    } else if (height < 800) {
+      content.style.gap = '5px';
+    }
+    
     container.appendChild(content);
     
     return { container, content };
@@ -109,7 +255,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Navigation
   function createDisplaySection() {
-    const section = createSection('Affichage', 0);  // Index 0
+    const height = window.innerHeight;
+    const section = createSection('Affichage', 3);  // Index 0
     
     const buttons = [
       { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
@@ -125,9 +272,18 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      // span.style.fontSize = '20px'; // Taille encore plus grande pour les symboles
-      button.appendChild(span);
       
+      // Adapter uniquement pour les petits écrans
+      if (height < 400) {
+        span.style.fontSize = '16px';
+        button.style.padding = '1px';
+      } else if (height < 800) {
+        span.style.fontSize = '18px';
+        button.style.padding = '2px';
+      }
+      // Pour les grands écrans, on conserve le style original
+      
+      button.appendChild(span);
       section.content.appendChild(button);
     });
     
@@ -136,20 +292,37 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Root avec des placeholders pour les sélecteurs
   function createRootSection() {
+    const height = window.innerHeight;
     const section = createSection('Racine', 1);  // Index 1
     section.content.style.flexDirection = 'column';
     
     // Créer un div pour contenir le sélecteur de recherche racine
     const rootSearchDiv = document.createElement('div');
     rootSearchDiv.id = 'menu-root-search-container';
-       
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      rootSearchDiv.style.marginBottom = '2px';
+    } else if (height < 800) {
+      rootSearchDiv.style.marginBottom = '3px';
+    }
+    // Pour les grands écrans, on conserve le style original
+         
     // Ajouter un espace pour le champ de texte (sera remplacé)
     const rootSearchPlaceholder = document.createElement('div');
     rootSearchPlaceholder.id = 'menu-root-person-search-placeholder';
     rootSearchPlaceholder.style.width = '100%';
-    rootSearchPlaceholder.style.margin = '5px 0';
-    rootSearchDiv.appendChild(rootSearchPlaceholder);
     
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      rootSearchPlaceholder.style.margin = '2px 0';
+    } else if (height < 800) {
+      rootSearchPlaceholder.style.margin = '3px 0';
+    } else {
+      rootSearchPlaceholder.style.margin = '5px 0'; // Valeur originale
+    }
+    
+    rootSearchDiv.appendChild(rootSearchPlaceholder);
     section.content.appendChild(rootSearchDiv);
     
     // Créer un div pour contenir le sélecteur de résultats
@@ -160,9 +333,17 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
     const rootResultsPlaceholder = document.createElement('div');
     rootResultsPlaceholder.id = 'menu-root-person-results-placeholder';
     rootResultsPlaceholder.style.width = '100%';
-    rootResultsPlaceholder.style.margin = '5px 0';
-    rootResultsDiv.appendChild(rootResultsPlaceholder);
     
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      rootResultsPlaceholder.style.margin = '2px 0';
+    } else if (height < 800) {
+      rootResultsPlaceholder.style.margin = '3px 0';
+    } else {
+      rootResultsPlaceholder.style.margin = '5px 0'; // Valeur originale
+    }
+    
+    rootResultsDiv.appendChild(rootResultsPlaceholder);
     section.content.appendChild(rootResultsDiv);
         
     sideMenu.appendChild(section.container);
@@ -170,13 +351,13 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Recherche a
   function createSearchSection() {
+    const height = window.innerHeight;
     const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
     section.content.style.flexDirection = 'column';
      
     // Champ de recherche dans l'arbre
     const searchDiv = document.createElement('div');
     searchDiv.id = 'menu-search-container';
-    
     
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
@@ -185,9 +366,19 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
     searchInput.setAttribute('oninput', 'searchTree(this.value)');
     searchInput.style.width = '60%';
     searchInput.style.color = '#000';
-    searchInput.style.fontSize = '13px'; // Police plus petite
-    searchDiv.appendChild(searchInput);
     
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      searchInput.style.fontSize = '11px';
+      searchInput.style.padding = '2px';
+    } else if (height < 800) {
+      searchInput.style.fontSize = '12px';
+      searchInput.style.padding = '3px';
+    } else {
+      searchInput.style.fontSize = '13px'; // Valeur originale
+    }
+    
+    searchDiv.appendChild(searchInput);
     section.content.appendChild(searchDiv);
     
     sideMenu.appendChild(section.container);
@@ -195,29 +386,46 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Affichage avec des placeholders pour les sélecteurs personnalisés
   function createModeSection() {
+    const height = window.innerHeight;
     const section = createSection('Modes', 3);  // Index 3
     
+    // Créer un div pour contenir le sélecteur de mode d'arbre
+    const modeDiv = document.createElement('div');
+    modeDiv.id = 'menu-treeMode-container';
+    
+    const modeLabel = document.createElement('label');
+    modeLabel.textContent = 'arbre';
+    modeLabel.style.color = '#000';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      modeLabel.style.fontSize = '11px';
+      modeLabel.style.marginBottom = '1px';
+    } else if (height < 800) {
+      modeLabel.style.fontSize = '12px';
+      modeLabel.style.marginBottom = '2px';
+    }
+    // Pour les grands écrans, on conserve le style original
+    
+    modeDiv.appendChild(modeLabel);
+    
+    // Créer un placeholder pour le sélecteur personnalisé
+    const modePlaceholder = document.createElement('div');
+    modePlaceholder.id = 'menu-treeMode-placeholder';
+    modePlaceholder.style.width = '100%';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      modePlaceholder.style.margin = '2px 0';
+    } else if (height < 800) {
+      modePlaceholder.style.margin = '3px 0';
+    } else {
+      modePlaceholder.style.margin = '5px 0'; // Valeur originale
+    }
   
-      // Créer un div pour contenir le sélecteur de mode d'arbre
-      const modeDiv = document.createElement('div');
-      modeDiv.id = 'menu-treeMode-container';
-      
-      const modeLabel = document.createElement('label');
-      modeLabel.textContent = 'arbre';
-      modeLabel.style.color = '#000';
-      modeDiv.appendChild(modeLabel);
-      
-      // Créer un placeholder pour le sélecteur personnalisé
-      const modePlaceholder = document.createElement('div');
-      modePlaceholder.id = 'menu-treeMode-placeholder';
-      modePlaceholder.style.width = '100%';
-      modePlaceholder.style.margin = '5px 0';
-  
-      modeDiv.style.marginLeft = '-2px';
-      modeDiv.appendChild(modePlaceholder);
-  
-      section.content.appendChild(modeDiv);
-  
+    modeDiv.style.marginLeft = '-2px'; // Conserver la valeur originale pour tous les écrans
+    modeDiv.appendChild(modePlaceholder);
+    section.content.appendChild(modeDiv);
   
     // Créer un div pour contenir le sélecteur de générations
     const genDiv = document.createElement('div');
@@ -226,35 +434,77 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
     const genLabel = document.createElement('label');
     genLabel.textContent = 'nb géné';
     genLabel.style.color = '#000';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      genLabel.style.fontSize = '11px';
+      genLabel.style.marginBottom = '1px';
+    } else if (height < 800) {
+      genLabel.style.fontSize = '12px';
+      genLabel.style.marginBottom = '2px';
+    }
+    // Pour les grands écrans, on conserve le style original
+    
     genDiv.appendChild(genLabel);
     
     // Créer un placeholder pour le sélecteur personnalisé
     const genPlaceholder = document.createElement('div');
     genPlaceholder.id = 'menu-generations-placeholder';
     genPlaceholder.style.width = '100%';
-    genPlaceholder.style.margin = '2px 0';
-    genDiv.style.marginLeft = '10px';
-    genDiv.appendChild(genPlaceholder);
     
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      genPlaceholder.style.margin = '1px 0';
+      genDiv.style.marginLeft = '5px';
+    } else if (height < 800) {
+      genPlaceholder.style.margin = '2px 0';
+      genDiv.style.marginLeft = '8px';
+    } else {
+      genPlaceholder.style.margin = '2px 0'; // Valeur originale
+      genDiv.style.marginLeft = '10px'; // Valeur originale
+    }
+    
+    genDiv.appendChild(genPlaceholder);
     section.content.appendChild(genDiv);
     
     // Créer un div pour contenir le sélecteur du nombre de prénoms
     const prenomsDiv = document.createElement('div');
     prenomsDiv.id = 'menu-prenoms-container';
-
+  
     const prenomsLabel = document.createElement('label');
     prenomsLabel.textContent = 'prénoms';
     prenomsLabel.style.color = '#000';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      prenomsLabel.style.fontSize = '11px';
+      prenomsLabel.style.marginBottom = '1px';
+    } else if (height < 800) {
+      prenomsLabel.style.fontSize = '12px';
+      prenomsLabel.style.marginBottom = '2px';
+    }
+    // Pour les grands écrans, on conserve le style original
+    
     prenomsDiv.appendChild(prenomsLabel);
-
+  
     // Créer un placeholder pour le sélecteur personnalisé
     const prenomsPlaceholder = document.createElement('div');
     prenomsPlaceholder.id = 'menu-prenoms-placeholder';
     prenomsPlaceholder.style.width = '100%';
-    prenomsPlaceholder.style.margin = '5px 0';
-    prenomsDiv.style.marginLeft = '10px';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      prenomsPlaceholder.style.margin = '2px 0';
+      prenomsDiv.style.marginLeft = '5px';
+    } else if (height < 800) {
+      prenomsPlaceholder.style.margin = '3px 0';
+      prenomsDiv.style.marginLeft = '8px';
+    } else {
+      prenomsPlaceholder.style.margin = '5px 0'; // Valeur originale
+      prenomsDiv.style.marginLeft = '10px'; // Valeur originale
+    }
+    
     prenomsDiv.appendChild(prenomsPlaceholder);
-
     section.content.appendChild(prenomsDiv);
     
     sideMenu.appendChild(section.container);
@@ -262,7 +512,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Audio et Animation
   function createAudioSection() {
-    const section = createSection('Animation et audio', 4);  // Index 4
+    const height = window.innerHeight;
+    const section = createSection('Animation et audio', 0);  // Index 4
     
     // Créer un conteneur flex unique pour tous les éléments
     const audioControlsContainer = document.createElement('div');
@@ -272,14 +523,33 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
     audioControlsContainer.style.alignItems = 'center';
     audioControlsContainer.style.justifyContent = 'space-between';
     audioControlsContainer.style.width = '100%';
-    audioControlsContainer.style.gap = '5px';
-    audioControlsContainer.style.marginTop = '5px';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      audioControlsContainer.style.gap = '2px';
+      audioControlsContainer.style.marginTop = '2px';
+    } else if (height < 800) {
+      audioControlsContainer.style.gap = '3px';
+      audioControlsContainer.style.marginTop = '3px';
+    } else {
+      audioControlsContainer.style.gap = '5px'; // Valeur originale
+      audioControlsContainer.style.marginTop = '5px'; // Valeur originale
+    }
     
     // Créer un placeholder pour le sélecteur de démo
     const demoPlaceholder = document.createElement('div');
     demoPlaceholder.id = 'menu-demo-selector-placeholder';
     demoPlaceholder.style.flex = '0 0 auto';
-    demoPlaceholder.style.marginRight = '5px';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      demoPlaceholder.style.marginRight = '2px';
+    } else if (height < 800) {
+      demoPlaceholder.style.marginRight = '3px';
+    } else {
+      demoPlaceholder.style.marginRight = '5px'; // Valeur originale
+    }
+    
     audioControlsContainer.appendChild(demoPlaceholder);
     
     // Définir les boutons
@@ -313,13 +583,31 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      span.style.fontSize = '22px';
+      
+      // Adapter uniquement pour les petits écrans
+      if (height < 400) {
+        span.style.fontSize = '16px';
+      } else if (height < 800) {
+        span.style.fontSize = '18px';
+      } else {
+        span.style.fontSize = '22px'; // Valeur originale
+      }
+      
       button.appendChild(span);
       
       // Styles pour les boutons sans bordure
       button.style.border = 'none';
       button.style.backgroundColor = 'transparent';
-      button.style.padding = '4px';
+      
+      // Adapter uniquement pour les petits écrans
+      if (height < 400) {
+        button.style.padding = '2px';
+      } else if (height < 800) {
+        button.style.padding = '3px';
+      } else {
+        button.style.padding = '4px'; // Valeur originale
+      }
+      
       button.style.margin = '0';
       button.style.borderRadius = '4px';
       button.style.flex = '0 0 auto';
@@ -331,20 +619,6 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
     section.content.appendChild(audioControlsContainer);
     sideMenu.appendChild(section.container);
     
-    // Initialiser le sélecteur de démo avec un délai pour s'assurer que tout est chargé
-    // setTimeout(createDemoSelector, 100);
-    // setTimeout(() => {
-    //   const demoPlaceholder = document.getElementById('menu-demo-selector-placeholder');
-    //   if (demoPlaceholder) {
-    //     createDemoSelector();
-    //   } else {
-    //     console.log("Placeholder de démo pas encore disponible, nouvelle tentative...");
-    //     // Réessayer après un délai plus long
-    //     setTimeout(createDemoSelector, 300);
-    //   }
-    // }, 200);
-
-
     // Initialiser le sélecteur de démo - MAIS NE LE RÉCRÉONS PAS si déjà présent
     if (!document.getElementById('menu-demo-selector')) {
       // Attendre que le DOM soit complètement construit
@@ -352,13 +626,12 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         createDemoSelector();
       }, 100);
     }
-
-
   }
 
 
   // Créer la section Name Cloud
   function createNameCloudSection() {
+    const height = window.innerHeight;
     const section = createSection('Nuage de mots', 0);
     
     const buttons = [
@@ -377,8 +650,18 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      button.appendChild(span);
       
+      // Adapter uniquement pour les petits écrans
+      if (height < 400) {
+        span.style.fontSize = '14px';
+        button.style.padding = '1px';
+      } else if (height < 800) {
+        span.style.fontSize = '16px';
+        button.style.padding = '2px';
+      }
+      // Pour les grands écrans, on conserve le style original
+      
+      button.appendChild(span);
       section.content.appendChild(button);
     });
     
@@ -387,6 +670,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Créer la section Paramètres
   function createSettingsSection() {
+    const height = window.innerHeight;
     const section = createSection('Fonds d\'écran', 1);
     
     const buttons = [
@@ -411,609 +695,709 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      button.appendChild(span);
       
+      // Adapter uniquement pour les petits écrans
+      if (height < 400) {
+        span.style.fontSize = '14px';
+        button.style.padding = '1px';
+      } else if (height < 800) {
+        span.style.fontSize = '16px';
+        button.style.padding = '2px';
+      }
+      // Pour les grands écrans, on conserve le style original
+      
+      button.appendChild(span);
       section.content.appendChild(button);
     });
     
     sideMenu.appendChild(section.container);
   }
-
   
-
-
 
 // Fonction pour créer un sélecteur de démo
 function createDemoSelector() {
+    const height = window.innerHeight;
   
-
-  // Vérifier si le sélecteur existe déjà
-  if (document.getElementById('menu-demo-selector')) {
-    console.log("Le sélecteur de démo existe déjà");
-    return; // Ne pas recréer s'il existe déjà
+    // Vérifier si le sélecteur existe déjà
+    if (document.getElementById('menu-demo-selector')) {
+      console.log("Le sélecteur de démo existe déjà");
+      return; // Ne pas recréer s'il existe déjà
+    }
+  
+    // Vérifier si le placeholder existe
+    let demoPlaceholder = document.getElementById('menu-demo-selector-placeholder');
+    if (!demoPlaceholder) {
+      console.error("Placeholder pour le sélecteur de démo non trouvé");
+      return;
+    }
+    
+    // Définir les options en fonction de l'état
+    let typeOptions = ['démo1', 'démo2'];
+    let typeOptionsExpanded = [];
+    let typeValues = ['demo1', 'demo2'];
+    
+    // Adapter les textes en fonction de l'état
+    if (state.treeOwner === 2) {
+      typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
+    } else {
+      typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10'];
+      typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
+      typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
+    }
+    
+    try {
+      // Créer la liste d'options
+      const options = [];
+      for (let i = 0; i < typeOptions.length; i++) {
+        options.push({
+          value: typeValues[i],
+          label: typeOptions[i],
+          expandedLabel: typeOptionsExpanded[i]
+        });
+      }
+      
+      // Configurer les dimensions du sélecteur selon la hauteur de l'écran
+      // On ne change les valeurs que pour les petits écrans
+      let selectorSettings = {
+        dimensions: {
+          width: '50px', // Valeur originale
+          height: '25px', // Valeur originale
+          dropdownWidth: '190px', // Valeur originale
+          dropdownHeight: '100px' // Valeur originale
+        },
+        padding: {
+          display: { x: 4, y: 1 }, // Valeurs originales
+          options: { x: 1, y: 2 } // Valeurs originales
+        },
+        arrow: {
+          position: 'top-right',
+          size: 5.5, // Valeur originale
+          offset: { x: -5, y: 1} // Valeurs originales
+        }
+      };
+      
+      // Modifier seulement pour les petits écrans
+      if (height < 400) {
+        selectorSettings.dimensions.width = '40px';
+        selectorSettings.dimensions.height = '20px';
+        selectorSettings.dimensions.dropdownWidth = '150px';
+        selectorSettings.dimensions.dropdownHeight = '80px';
+        selectorSettings.padding.display.x = 3;
+        selectorSettings.arrow.size = 4;
+        selectorSettings.arrow.offset.x = -4;
+      } else if (height < 800) {
+        selectorSettings.dimensions.width = '45px';
+        selectorSettings.dimensions.height = '22px';
+        selectorSettings.dimensions.dropdownWidth = '170px';
+        selectorSettings.dimensions.dropdownHeight = '90px';
+        selectorSettings.padding.display.x = 3;
+        selectorSettings.arrow.size = 5;
+        selectorSettings.arrow.offset.x = -4;
+      }
+      
+      // Configurer le sélecteur personnalisé directement avec la fonction importée
+      const customSelector = createCustomSelector({
+        options: options,
+        selectedValue: 'demo1',
+        colors: {
+          main: ' #ff9800',
+          options: ' #ff9800',
+          hover: ' #f57c00',
+          selected: ' #e65100'
+        },
+        dimensions: selectorSettings.dimensions,
+        padding: selectorSettings.padding,
+        arrow: selectorSettings.arrow,
+        customizeOptionElement: (optionElement, option) => {
+          optionElement.textContent = option.expandedLabel;
+          optionElement.style.textAlign = 'center';
+          
+          if (window.innerHeight < 400) {
+            optionElement.style.padding = '1px 2px';
+            optionElement.style.fontSize = '11px';
+          } else if (window.innerHeight < 800) {
+            optionElement.style.padding = '2px 3px';
+            optionElement.style.fontSize = '12px';
+          } else {  
+            // Valeurs originales pour les grands écrans
+            optionElement.style.padding = '10px 8px';
+          }
+        },
+        onChange: (value) => {
+          // Créer un événement pour simuler le clic sur l'option de menu correspondante
+          const fakeEvent = {
+            target: { value: value }
+          };
+          
+          try {
+            window.handleRootPersonChange(fakeEvent);
+  
+            // Fermer le menu hamburger après la sélection
+            setTimeout(() => {
+              if (typeof toggleMenu === 'function') {
+                toggleMenu(false);
+              }
+            }, 100); // Petit délai pour s'assurer que l'action est terminée avant de fermer
+          } catch (error) {
+            console.error("Erreur lors du lancement de la démo:", error);
+          }
+        },
+        onCreated: (selector) => {
+          const displayElement = selector.querySelector('div[style*="border"]');
+          if (displayElement) {
+            // Style de base pour tous les écrans
+            Object.assign(displayElement.style, {
+              border: 'none',
+              backgroundColor: 'rgba(255, 152, 0, 0.85)',
+              color: 'white',
+              boxSizing: 'border-box',
+              fontWeight: 'bold'
+            });
+            
+            // Ajustements uniquement pour les petits écrans
+            if (window.innerHeight < 400) {
+              displayElement.style.fontSize = '11px';
+              displayElement.style.padding = '1px 2px';
+            } else if (window.innerHeight < 800) {
+              displayElement.style.fontSize = '12px';
+              displayElement.style.padding = '2px 3px';
+            }
+            // Pour les grands écrans, on garde le style original (pas de surcharge)
+          }
+          
+          Object.assign(selector.style, {
+            border: 'none',
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            outline: 'none'
+          });
+          
+          selector.offsetHeight;
+        }
+      });
+      
+      // Ajout d'un titre et attributs pour le tooltip
+      customSelector.id = 'menu-demo-selector';
+      customSelector.setAttribute('data-text-key', 'demoSelector');
+      customSelector.setAttribute('data-action', 'Sélectionner une démo à afficher');
+      customSelector.setAttribute('title', 'Sélectionner une démo');
+      
+      // Remplacer le placeholder par le sélecteur personnalisé
+      demoPlaceholder.parentNode.replaceChild(customSelector, demoPlaceholder);
+      console.log("Sélecteur de démo créé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la création du sélecteur de démo:", error);
+      
+      // En cas d'erreur, créer un bouton simple comme fallback
+      const fallbackSelector = document.createElement('select');
+      fallbackSelector.id = 'menu-demo-selector';
+      fallbackSelector.style.width = '100%';
+      
+      // Ajouter les options
+      typeValues.forEach((value, index) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = typeOptionsExpanded[index];
+        fallbackSelector.appendChild(option);
+      });
+      
+      // Ajouter le gestionnaire d'événements
+      fallbackSelector.addEventListener('change', function() {
+        const fakeEvent = {
+          target: { value: this.value }
+        };
+        try {
+          window.handleRootPersonChange(fakeEvent);
+        } catch (error) {
+          console.error("Erreur lors du lancement de la démo:", error);
+        }
+      });
+      
+      // Remplacer le placeholder par le sélecteur de secours
+      demoPlaceholder.parentNode.replaceChild(fallbackSelector, demoPlaceholder);
+      console.log("Sélecteur de démo de secours créé");
+    }
   }
 
-  // Vérifier si le placeholder existe
-  let demoPlaceholder = document.getElementById('menu-demo-selector-placeholder');
-  if (!demoPlaceholder) {
-    console.error("Placeholder pour le sélecteur de démo non trouvé");
-    return;
-  }
-  
-  // Définir les options en fonction de l'état
-  let typeOptions = ['démo1', 'démo2'];
-  let typeOptionsExpanded = [];
-  let typeValues = ['demo1', 'demo2'];
-  
-  // Adapter les textes en fonction de l'état
-  if (state.treeOwner === 2) {
-    typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
-  } else {
-    typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10'];
-    typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
-    typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
-  }
-  
-
-  try {
-    // Créer la liste d'options
+// Fonction pour créer un sélecteur de nombre de prénoms
+function createPrenomsSelector() {
+    const height = window.innerHeight;
+    
+    // Vérifier si le placeholder existe
+    const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
+    if (!prenomsPlaceholder) {
+      console.error("Placeholder pour le sélecteur de prénoms non trouvé");
+      return;
+    }
+    
+    // Récupérer la valeur actuelle du nombre de prénoms
+    const currentValue = localStorage.getItem('nombre_prenoms') || '2';
+    
+    // Créer des options pour le sélecteur
     const options = [];
-    for (let i = 0; i < typeOptions.length; i++) {
+    for (let i = 1; i <= 4; i++) {
       options.push({
-        value: typeValues[i],
-        label: typeOptions[i],
-        expandedLabel: typeOptionsExpanded[i]
+        value: i.toString(),
+        label: i.toString()
       });
     }
     
-    // Configurer le sélecteur personnalisé directement avec la fonction importée
-    const customSelector = createCustomSelector({
-      options: options,
-      selectedValue: 'demo1',
-      colors: {
-        main: ' #ff9800',
-        options: ' #ff9800',
-        hover: ' #f57c00',
-        selected: ' #e65100'
-      },
+    // Configurer les paramètres du sélecteur avec les valeurs originales par défaut
+    let selectorSettings = {
       dimensions: {
-        width: '50px',
-        height: '25px',
-        dropdownWidth: '190px'
+        width: '35px', // Valeur originale
+        height: '25px', // Valeur originale
+        dropdownWidth: '45px', // Valeur originale
+        dropdownHeight: '150px' // Valeur originale
       },
       padding: {
-        display: { x: 4, y: 1 },
-        options: { x: 8, y: 10 }
+        display: { x: 8, y: 1 }, // Valeurs originales
+        options: { x: 1, y: 2 } // Valeurs originales
       },
       arrow: {
         position: 'top-right',
-        size: 5.5,
-        offset: { x: -5, y: 1}
-      },
-      customizeOptionElement: (optionElement, option) => {
-        optionElement.textContent = option.expandedLabel;
-        optionElement.style.textAlign = 'center';
-        optionElement.style.padding = '10px 8px';
-      },
-      onChange: (value) => {
-        // Créer un événement pour simuler le clic sur l'option de menu correspondante
-        const fakeEvent = {
-          target: { value: value }
-        };
-        
-        try {
-          window.handleRootPersonChange(fakeEvent);
-
+        size: 5.5, // Valeur originale
+        offset: { x: -5, y: 1 } // Valeurs originales
+      }
+    };
+    
+    // Modifier uniquement pour les petits écrans
+    if (height < 400) {
+      selectorSettings.dimensions.width = '25px';
+      selectorSettings.dimensions.height = '20px';
+      selectorSettings.dimensions.dropdownWidth = '35px';
+      selectorSettings.dimensions.dropdownHeight = '100px';
+      selectorSettings.padding.display.x = 6;
+      selectorSettings.arrow.size = 4;
+      selectorSettings.arrow.offset.x = -4;
+    } else if (height < 800) {
+      selectorSettings.dimensions.width = '30px';
+      selectorSettings.dimensions.height = '22px';
+      selectorSettings.dimensions.dropdownWidth = '40px';
+      selectorSettings.dimensions.dropdownHeight = '120px';
+      selectorSettings.padding.display.x = 7;
+      selectorSettings.arrow.size = 5;
+      selectorSettings.arrow.offset.x = -4;
+    }
+    
+    try {
+      // Configurer le sélecteur personnalisé
+      const customSelector = createCustomSelector({
+        options: options,
+        selectedValue: currentValue,
+        colors: {
+          main: ' #8e44ad', // Violet pour le sélecteur (différent des autres)
+          options: ' #8e44ad', // Violet pour les options
+          hover: ' #9b59b6', // Violet plus clair au survol
+          selected: ' #6c3483' // Violet plus foncé pour l'option sélectionnée
+        },
+        dimensions: selectorSettings.dimensions,
+        padding: selectorSettings.padding,
+        arrow: selectorSettings.arrow,
+        onChange: (value) => {
+          // Mettre à jour le nombre de prénoms
+          if (typeof window.updatePrenoms === 'function') {
+            window.updatePrenoms(value);
+          } else {
+            // Méthode alternative si la fonction n'est pas disponible
+            localStorage.setItem('nombre_prenoms', value);
+            
+            // Essayer de montrer un feedback
+            if (typeof window.showFeedback === 'function') {
+              window.showFeedback('Nombre de prénoms mis à jour', 'success');
+            } else if (typeof window.showToast === 'function') {
+              window.showToast('Nombre de prénoms mis à jour');
+            }
+          }
+          
           // Fermer le menu hamburger après la sélection
           setTimeout(() => {
             if (typeof toggleMenu === 'function') {
               toggleMenu(false);
             }
           }, 100); // Petit délai pour s'assurer que l'action est terminée avant de fermer
-        } catch (error) {
-          console.error("Erreur lors du lancement de la démo:", error);
-        }
-      },
-      onCreated: (selector) => {
-        const displayElement = selector.querySelector('div[style*="border"]');
-        if (displayElement) {
-          Object.assign(displayElement.style, {
-            border: 'none',
-            backgroundColor: 'rgba(255, 152, 0, 0.85)',
-            color: 'white',
-            boxSizing: 'border-box',
-            fontWeight: 'bold'
-          });
-        }
-        
-        Object.assign(selector.style, {
-          border: 'none',
-          backgroundColor: 'transparent',
-          boxShadow: 'none',
-          outline: 'none'
-        });
-        
-        selector.offsetHeight;
-      }
-    });
-    
-    // Ajout d'un titre et attributs pour le tooltip
-    customSelector.id = 'menu-demo-selector';
-    customSelector.setAttribute('data-text-key', 'demoSelector');
-    customSelector.setAttribute('data-action', 'Sélectionner une démo à afficher');
-    customSelector.setAttribute('title', 'Sélectionner une démo');
-    
-    // Remplacer le placeholder par le sélecteur personnalisé
-    demoPlaceholder.parentNode.replaceChild(customSelector, demoPlaceholder);
-    console.log("Sélecteur de démo créé avec succès");
-  } catch (error) {
-    console.error("Erreur lors de la création du sélecteur de démo:", error);
-    
-    // En cas d'erreur, créer un bouton simple comme fallback
-    const fallbackSelector = document.createElement('select');
-    fallbackSelector.id = 'menu-demo-selector';
-    fallbackSelector.style.width = '100%';
-    
-    // Ajouter les options
-    typeValues.forEach((value, index) => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = typeOptionsExpanded[index];
-      fallbackSelector.appendChild(option);
-    });
-    
-    // Ajouter le gestionnaire d'événements
-    fallbackSelector.addEventListener('change', function() {
-      const fakeEvent = {
-        target: { value: this.value }
-      };
-      try {
-        window.handleRootPersonChange(fakeEvent);
-      } catch (error) {
-        console.error("Erreur lors du lancement de la démo:", error);
-      }
-    });
-    
-    // Remplacer le placeholder par le sélecteur de secours
-    demoPlaceholder.parentNode.replaceChild(fallbackSelector, demoPlaceholder);
-    console.log("Sélecteur de démo de secours créé");
-  }
-}
-
-// Fonction pour créer un sélecteur de nombre de prénoms
-function createPrenomsSelector() {
-  // Vérifier si le placeholder existe
-  const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
-  if (!prenomsPlaceholder) {
-    console.error("Placeholder pour le sélecteur de prénoms non trouvé");
-    return;
-  }
-  
-  // Récupérer la valeur actuelle du nombre de prénoms
-  const currentValue = localStorage.getItem('nombre_prenoms') || '2';
-  
-  // Créer des options pour le sélecteur
-  const options = [];
-  for (let i = 1; i <= 4; i++) {
-    options.push({
-      value: i.toString(),
-      label: i.toString()
-    });
-  }
-  
-  try {
-    // Configurer le sélecteur personnalisé
-    const customSelector = createCustomSelector({
-      options: options,
-      selectedValue: currentValue,
-      colors: {
-        main: ' #8e44ad', // Violet pour le sélecteur (différent des autres)
-        options: ' #8e44ad', // Violet pour les options
-        hover: ' #9b59b6', // Violet plus clair au survol
-        selected: ' #6c3483' // Violet plus foncé pour l'option sélectionnée
-      },
-      dimensions: {
-        width: '35px',
-        height: '25px',
-        dropdownWidth: '45px',
-        dropdownHeight: '150px'
-      },
-      padding: {
-        display: { x: 8, y: 1 },
-        options: { x: 1, y: 2 }
-      },
-      arrow: {
-        position: 'top-right',
-        size: 5.5,
-        offset: { x: -5, y: 1 }
-      },
-      onChange: (value) => {
-        // Mettre à jour le nombre de prénoms
-        if (typeof window.updatePrenoms === 'function') {
-          window.updatePrenoms(value);
-        } else {
-          // Méthode alternative si la fonction n'est pas disponible
-          localStorage.setItem('nombre_prenoms', value);
+        },
+        onCreated: (selector) => {
+          // Enlever les bordures blanches et appliquer le style voulu immédiatement
+          const displayElement = selector.querySelector('div[style*="border"]');
+          if (displayElement) {
+            // Style de base pour tous les écrans
+            Object.assign(displayElement.style, {
+              border: 'none',
+              backgroundColor: 'rgba(142, 68, 173, 0.85)', // Violet semi-transparent
+              color: 'white',
+              boxSizing: 'border-box',
+              fontWeight: 'bold'
+            });
+            
+            // Adapter uniquement pour les petits écrans
+            if (window.innerHeight < 400) {
+              displayElement.style.fontSize = '10px';
+              displayElement.style.padding = '1px 2px';
+            } else if (window.innerHeight < 800) {
+              displayElement.style.fontSize = '11px';
+              displayElement.style.padding = '2px 3px';
+            }
+            // Pour les grands écrans, on garde le style original (pas de surcharge)
+          }
           
-          // Essayer de montrer un feedback
-          if (typeof window.showFeedback === 'function') {
-            window.showFeedback('Nombre de prénoms mis à jour', 'success');
-          } else if (typeof window.showToast === 'function') {
-            window.showToast('Nombre de prénoms mis à jour');
-          }
-        }
-        
-        // Fermer le menu hamburger après la sélection
-        setTimeout(() => {
-          if (typeof toggleMenu === 'function') {
-            toggleMenu(false);
-          }
-        }, 100); // Petit délai pour s'assurer que l'action est terminée avant de fermer
-      },
-      onCreated: (selector) => {
-        // Enlever les bordures blanches et appliquer le style voulu immédiatement
-        const displayElement = selector.querySelector('div[style*="border"]');
-        if (displayElement) {
-          Object.assign(displayElement.style, {
+          Object.assign(selector.style, {
             border: 'none',
-            backgroundColor: 'rgba(142, 68, 173, 0.85)', // Violet semi-transparent
-            color: 'white',
-            boxSizing: 'border-box',
-            fontWeight: 'bold'
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            outline: 'none'
           });
+          
+          selector.offsetHeight;
         }
-        
-        Object.assign(selector.style, {
-          border: 'none',
-          backgroundColor: 'transparent',
-          boxShadow: 'none',
-          outline: 'none'
-        });
-        
-        selector.offsetHeight;
+      });
+      
+      // Ajout d'un titre et attributs pour le tooltip
+      customSelector.id = 'menu-prenoms-selector';
+      customSelector.setAttribute('data-text-key', 'prenoms');
+      customSelector.setAttribute('data-action', 'nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l\'arbre');
+      customSelector.setAttribute('title', 'Nombre de prénoms à afficher');
+      
+      // Remplacer le placeholder par le sélecteur personnalisé
+      prenomsPlaceholder.parentNode.replaceChild(customSelector, prenomsPlaceholder);
+      console.log("Sélecteur de prénoms créé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la création du sélecteur de prénoms:", error);
+      
+      // En cas d'erreur, créer un sélecteur simple comme fallback
+      const fallbackSelector = document.createElement('select');
+      fallbackSelector.id = 'menu-prenoms-selector';
+      fallbackSelector.style.width = '100%';
+      
+      // Ajouter les options
+      for (let i = 1; i <= 4; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString();
+        option.textContent = i.toString();
+        if (i.toString() === currentValue) {
+          option.selected = true;
+        }
+        fallbackSelector.appendChild(option);
       }
-    });
-    
-    // Ajout d'un titre et attributs pour le tooltip
-    customSelector.id = 'menu-prenoms-selector';
-    customSelector.setAttribute('data-text-key', 'prenoms');
-    customSelector.setAttribute('data-action', 'nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l\'arbre');
-    customSelector.setAttribute('title', 'Nombre de prénoms à afficher');
-    
-    // Remplacer le placeholder par le sélecteur personnalisé
-    prenomsPlaceholder.parentNode.replaceChild(customSelector, prenomsPlaceholder);
-    console.log("Sélecteur de prénoms créé avec succès");
-  } catch (error) {
-    console.error("Erreur lors de la création du sélecteur de prénoms:", error);
-    
-    // En cas d'erreur, créer un sélecteur simple comme fallback
-    const fallbackSelector = document.createElement('select');
-    fallbackSelector.id = 'menu-prenoms-selector';
-    fallbackSelector.style.width = '100%';
-    
-    // Ajouter les options
-    for (let i = 1; i <= 4; i++) {
-      const option = document.createElement('option');
-      option.value = i.toString();
-      option.textContent = i.toString();
-      if (i.toString() === currentValue) {
-        option.selected = true;
-      }
-      fallbackSelector.appendChild(option);
+      
+      // Ajouter le gestionnaire d'événements
+      fallbackSelector.addEventListener('change', function() {
+        if (typeof window.updatePrenoms === 'function') {
+          window.updatePrenoms(this.value);
+        } else {
+          localStorage.setItem('nombre_prenoms', this.value);
+        }
+      });
+      
+      // Remplacer le placeholder par le sélecteur de secours
+      prenomsPlaceholder.parentNode.replaceChild(fallbackSelector, prenomsPlaceholder);
+      console.log("Sélecteur de prénoms de secours créé");
     }
-    
-    // Ajouter le gestionnaire d'événements
-    fallbackSelector.addEventListener('change', function() {
-      if (typeof window.updatePrenoms === 'function') {
-        window.updatePrenoms(this.value);
-      } else {
-        localStorage.setItem('nombre_prenoms', this.value);
-      }
-    });
-    
-    // Remplacer le placeholder par le sélecteur de secours
-    prenomsPlaceholder.parentNode.replaceChild(fallbackSelector, prenomsPlaceholder);
-    console.log("Sélecteur de prénoms de secours créé");
   }
-}
-
-
 
 
 
 function syncCustomSelectors() {
-  console.log("Synchronisation des sélecteurs personnalisés avec mainUI.js");
-  
-  // Fonction globale pour fermer tous les menus déroulants
-  function closeAllDropdowns() {
-      const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
-      dropdowns.forEach(dropdown => {
-          if (dropdown) {
-              dropdown.style.display = 'none';
-          }
-      });
-  }
-
-  // Fonction générique pour gérer l'ouverture d'un sélecteur
-  function handleSelectorClick(originalSelector, e) {
-      e.stopPropagation();
-      
-      // Fermer le menu hamburger
-      toggleMenu(false);
-      
-      // Fermer tous les menus déroulants
-      closeAllDropdowns();
-      
-      // Délai pour s'assurer que le menu est fermé
-      setTimeout(() => {
-          const displayElement = originalSelector.querySelector('div.custom-select-display');
-          if (displayElement) {
-              displayElement.click();
-          } else {
-              originalSelector.click();
-          }
-      }, 300);
-  }
-
-  try {
-      const importPromise = import('./mainUI.js');
-      
-      importPromise.then(mainUI => {
-          if (mainUI) {
-              // Synchroniser les sélecteurs de génération
-              const genPlaceholder = document.getElementById('menu-generations-placeholder');
-              const originalGen = document.getElementById('generations');
-              if (genPlaceholder && originalGen) {
-                  const clone = originalGen.cloneNode(true);
-                  clone.id = 'menu-generations';
-                  
-                  genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
-                  
-                  clone.addEventListener('click', (e) => handleSelectorClick(originalGen, e));
-              }
-              
-              // Synchroniser les sélecteurs de mode d'arbre
-              const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
-              const originalMode = document.getElementById('treeMode');
-              if (modePlaceholder && originalMode) {
-                  const clone = originalMode.cloneNode(true);
-                  clone.id = 'menu-treeMode';
-                  
-                  modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
-                  
-                  clone.addEventListener('click', (e) => handleSelectorClick(originalMode, e));
-              }
-
-              // Synchronisation du sélecteur de personne racine
-              const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
-              const originalRootResults = document.getElementById('root-person-results');
-
-              if (rootResultsPlaceholder && originalRootResults) {
-                  // Conteneur principal
-                  const rootPersonContainer = document.createElement('div');
-                  rootPersonContainer.id = 'menu-root-person-results-container'; // Ajouter un ID
-                  rootPersonContainer.style.display = 'flex';
-                  rootPersonContainer.style.alignItems = 'center';
-                  rootPersonContainer.style.gap = '10px';
-
-                  // Label à gauche
-                  const rootPersonLabel = document.createElement('label');
-                  rootPersonLabel.textContent = 'Sélect. personne racine';
-                  rootPersonLabel.style.fontSize = '14px';
-                  rootPersonLabel.style.color = '#000';
-                  rootPersonLabel.style.lineHeight = '1.2';
-                  rootPersonLabel.style.textAlign = 'right';
-                  rootPersonLabel.style.flexShrink = '0';
-                  rootPersonLabel.style.width = '60px'; // Largeur fixe pour le label
-
-                  // Bouton/div style sélecteur personnalisé
-                  const rootPersonLink = document.createElement('div');
-                  
-                  // Copier le style du sélecteur original
-                  rootPersonLink.style.cursor = 'pointer';
-                  rootPersonLink.style.padding = '1px 4px';
-                  rootPersonLink.style.border = 'none';
-                  rootPersonLink.style.borderRadius = '4px';
-                  rootPersonLink.style.backgroundColor = 'rgba(255, 152, 0, 0.85)';
-                  rootPersonLink.style.color = 'white';
-                  rootPersonLink.style.fontSize = '14px';
-                  rootPersonLink.style.fontWeight = 'bold';
-                  rootPersonLink.style.display = 'flex';
-                  rootPersonLink.style.justifyContent = 'space-between';
-                  rootPersonLink.style.alignItems = 'center';
-                  rootPersonLink.style.height = '25px';
-                  rootPersonLink.style.minWidth = '80px';        // Largeur minimale 
-                  rootPersonLink.style.boxSizing = 'border-box';
-                  rootPersonLink.style.position = 'relative';
-                  rootPersonLink.style.zIndex = '99900';
-
-                  // Texte du bouton (nom de la personne racine)
-                  const displayElement = originalRootResults.querySelector('div[style*="border"] span');
-                  // rootPersonLink.textContent = displayElement ? displayElement.textContent : 'Sélectionner';
-
-                  const currentText = displayElement ? displayElement.textContent.trim() : 'Sélectionner';
-                  rootPersonLink.textContent = currentText;
-                  rootPersonLink.addEventListener('click', function(e) {
-                      e.stopPropagation();
-                      
-                      // Récupérer explicitement le sélecteur de root person
-                      const originalRootResults = document.getElementById('root-person-results');                                       
-                      const displayElement = originalRootResults.querySelector('div[style*="border"]');
-                      
-                      if (displayElement) {
-                          const span = displayElement.querySelector('span');
-                          const currentText = span ? (span.getAttribute('data-full-text') || span.textContent) : 'Sélectionner';
-                          rootPersonLink.textContent = currentText;
-                      }
-                      
-                      // Fermer le menu hamburger
-                      toggleMenu(false);
-                      
-                      // Fermer TOUS les menus déroulants avec une logique plus stricte
-                      const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
-                      dropdowns.forEach(dropdown => {
-                          // Stratégie de fermeture plus agressive
-                          dropdown.style.display = 'none';
-                          dropdown.removeAttribute('data-root-person');
-                      });
-                      
-                      // Délai pour s'assurer que le menu est fermé
-                      setTimeout(() => {
-                          const displayElement = originalRootResults.querySelector('div[style*="border"]');
-                          
-                          if (displayElement) {
-                              const clickEvent = new MouseEvent('click', {
-                                  view: window,
-                                  bubbles: true,
-                                  cancelable: true
-                              });
-                              displayElement.dispatchEvent(clickEvent);
-                              
-                              // Après un court délai, repositionner
-                              setTimeout(() => {
-                                  // Sélectionner UNIQUEMENT le dernier dropdown créé
-                                  const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
-                                  const optionsContainerAfterClick = dropdowns[dropdowns.length - 1];
-                                  
-                                  if (optionsContainerAfterClick) {
-                                      // Fermer tous les autres dropdowns
-                                      dropdowns.forEach(dropdown => {
-                                          if (dropdown !== optionsContainerAfterClick) {
-                                              dropdown.style.display = 'none';
-                                          }
-                                      });
-                                      
-                                      // Marquer ce dropdown comme étant celui de la personne racine
-                                      optionsContainerAfterClick.setAttribute('data-root-person', 'true');
-                                      
-                                      // Utiliser le rectangle du sélecteur original
-                                      const displayElement = originalRootResults.querySelector('div[style*="border"]');
-                                      const rect = displayElement.getBoundingClientRect();
-                                      
-                                      optionsContainerAfterClick.style.display = 'block';
-                                      optionsContainerAfterClick.style.top = `${rect.bottom + 5}px`;
-                                      
-                                      if (optionsContainerAfterClick.offsetWidth > rect.width) {
-                                          optionsContainerAfterClick.style.left = `${rect.right - optionsContainerAfterClick.offsetWidth}px`;
-                                      } else {
-                                          optionsContainerAfterClick.style.left = `${rect.left}px`;
-                                      }
-                                      
-                                      optionsContainerAfterClick.style.zIndex = '9999';
-                                  }
-                              }, 100);
-                          }
-                      }, 300);
-                  });
-
-                  // Ajouter le label et le bouton au conteneur
-                  rootPersonContainer.appendChild(rootPersonLabel);
-                  rootPersonContainer.appendChild(rootPersonLink);
-
-                  // Remplacer le placeholder par le nouveau conteneur
-                  rootResultsPlaceholder.parentNode.replaceChild(rootPersonContainer, rootResultsPlaceholder);
-              }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              // Synchronisation du champ de recherche de personne racine
-              const rootSearchPlaceholder = document.getElementById('menu-root-person-search-placeholder');
-              const originalRootSearch = document.getElementById('root-person-search');
-
-              if (rootSearchPlaceholder && originalRootSearch) {
-                  const rootSearchLink = document.createElement('div');
-                  rootSearchLink.textContent = '🔍 personne racine';
-                  rootSearchLink.style.cursor = 'pointer';
-                  rootSearchLink.style.padding = '3px 3px';
-                  rootSearchLink.style.backgroundColor = 'white';
-                  rootSearchLink.style.textAlign = 'left';
-                  rootSearchLink.style.border = '1px solid #333';
-                  rootSearchLink.style.borderRadius = '4px';
-                  rootSearchLink.style.fontSize = '14px';
-                  rootSearchLink.style.display = 'flex';
-                  rootSearchLink.style.alignItems = 'center';
-                  rootSearchLink.style.margin = '3px 0';
-
-                  
-                  rootSearchLink.addEventListener('click', function(e) {
-                      e.stopPropagation();
-                      
-                      // Fermer le menu hamburger
-                      toggleMenu(false);
-                      
-                      // Délai court pour s'assurer que le menu est fermé
-                      setTimeout(() => {
-                          // Donner le focus à la zone de recherche de la page
-                          originalRootSearch.focus();
-                          originalRootSearch.select(); // Optionnel : sélectionner tout le texte
-                      }, 300);
-                  });
-                  
-                  // Remplacer le placeholder par le lien
-                  rootSearchPlaceholder.parentNode.replaceChild(rootSearchLink, rootSearchPlaceholder);
-              }
-
-              // createDemoSelector();
-              // Pour le sélecteur de démo, vérifier s'il existe déjà
-              const existingDemoSelector = document.getElementById('menu-demo-selector');
-              if (!existingDemoSelector) {
-                // Seulement s'il n'existe pas encore
-                createDemoSelector();
-              }
-              
-
-              // createPrenomsSelector();
-              setTimeout(() => {
-                const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
-                if (prenomsPlaceholder) {
-                  createPrenomsSelector();
-                } else {
-                  console.log("Placeholder de prénoms pas encore disponible");
+    console.log("Synchronisation des sélecteurs personnalisés avec mainUI.js");
+    
+    // Mettre à jour la classe de hauteur au cas où
+    updateHeightClass();
+    const height = window.innerHeight;
+    
+    // Fonction globale pour fermer tous les menus déroulants
+    function closeAllDropdowns() {
+        const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
+        dropdowns.forEach(dropdown => {
+            if (dropdown) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+    
+    // Fonction générique pour gérer l'ouverture d'un sélecteur
+    function handleSelectorClick(originalSelector, e) {
+        e.stopPropagation();
+        
+        // Fermer le menu hamburger
+        toggleMenu(false);
+        
+        // Fermer tous les menus déroulants
+        closeAllDropdowns();
+        
+        // Délai pour s'assurer que le menu est fermé
+        setTimeout(() => {
+            const displayElement = originalSelector.querySelector('div.custom-select-display');
+            if (displayElement) {
+                displayElement.click();
+            } else {
+                originalSelector.click();
+            }
+        }, 300);
+    }
+    
+    try {
+        const importPromise = import('./mainUI.js');
+        
+        importPromise.then(mainUI => {
+            if (mainUI) {
+                // Synchroniser les sélecteurs de génération
+                const genPlaceholder = document.getElementById('menu-generations-placeholder');
+                const originalGen = document.getElementById('generations');
+                if (genPlaceholder && originalGen) {
+                    const clone = originalGen.cloneNode(true);
+                    clone.id = 'menu-generations';
+                    
+                    genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
+                    
+                    clone.addEventListener('click', (e) => handleSelectorClick(originalGen, e));
                 }
-              }, 200);
-
-
-
-
-
-
-
-
-              console.log("Synchronisation des sélecteurs réussie avec nouveaux gestionnaires d'événements");
-          }
-      }).catch(error => {
-          console.error("Erreur lors de l'import de mainUI.js:", error);
-      });
-  } catch (error) {
-      console.error("Erreur lors de la synchronisation des sélecteurs:", error);
-  }
+                
+                // Synchroniser les sélecteurs de mode d'arbre
+                const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
+                const originalMode = document.getElementById('treeMode');
+                if (modePlaceholder && originalMode) {
+                    const clone = originalMode.cloneNode(true);
+                    clone.id = 'menu-treeMode';
+                    
+                    modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
+                    
+                    clone.addEventListener('click', (e) => handleSelectorClick(originalMode, e));
+                }
+    
+                // Synchronisation du sélecteur de personne racine
+                const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
+                const originalRootResults = document.getElementById('root-person-results');
+    
+                if (rootResultsPlaceholder && originalRootResults) {
+                    // Conteneur principal
+                    const rootPersonContainer = document.createElement('div');
+                    rootPersonContainer.id = 'menu-root-person-results-container'; // Ajouter un ID
+                    rootPersonContainer.style.display = 'flex';
+                    rootPersonContainer.style.alignItems = 'center';
+                    
+                    // Adapter uniquement pour les petits écrans
+                    if (height < 400) {
+                        rootPersonContainer.style.gap = '5px';
+                    } else if (height < 800) {
+                        rootPersonContainer.style.gap = '8px';
+                    } else {
+                        rootPersonContainer.style.gap = '10px'; // Valeur originale
+                    }
+    
+                    // Label à gauche
+                    const rootPersonLabel = document.createElement('label');
+                    rootPersonLabel.textContent = 'Sélect. personne racine';
+                    rootPersonLabel.style.color = '#000';
+                    rootPersonLabel.style.lineHeight = '1.2';
+                    rootPersonLabel.style.textAlign = 'right';
+                    rootPersonLabel.style.flexShrink = '0';
+                    
+                    // Adapter uniquement pour les petits écrans
+                    if (height < 400) {
+                        rootPersonLabel.style.fontSize = '10px';
+                        rootPersonLabel.style.width = '45px';
+                    } else if (height < 800) {
+                        rootPersonLabel.style.fontSize = '12px';
+                        rootPersonLabel.style.width = '50px';
+                    } else {
+                        rootPersonLabel.style.fontSize = '14px'; // Valeur originale
+                        rootPersonLabel.style.width = '60px'; // Valeur originale
+                    }
+    
+                    // Bouton/div style sélecteur personnalisé
+                    const rootPersonLink = document.createElement('div');
+                    
+                    // Copier le style du sélecteur original
+                    rootPersonLink.style.cursor = 'pointer';
+                    rootPersonLink.style.border = 'none';
+                    rootPersonLink.style.borderRadius = '4px';
+                    rootPersonLink.style.backgroundColor = 'rgba(255, 152, 0, 0.85)';
+                    rootPersonLink.style.color = 'white';
+                    rootPersonLink.style.fontWeight = 'bold';
+                    rootPersonLink.style.display = 'flex';
+                    rootPersonLink.style.justifyContent = 'space-between';
+                    rootPersonLink.style.alignItems = 'center';
+                    rootPersonLink.style.boxSizing = 'border-box';
+                    rootPersonLink.style.position = 'relative';
+                    rootPersonLink.style.zIndex = '99900';
+                    
+                    // Adapter uniquement pour les petits écrans
+                    if (height < 400) {
+                        rootPersonLink.style.fontSize = '11px';
+                        rootPersonLink.style.padding = '1px 3px';
+                        rootPersonLink.style.height = '20px';
+                        rootPersonLink.style.minWidth = '70px';
+                    } else if (height < 800) {
+                        rootPersonLink.style.fontSize = '12px';
+                        rootPersonLink.style.padding = '1px 4px';
+                        rootPersonLink.style.height = '22px';
+                        rootPersonLink.style.minWidth = '75px';
+                    } else {
+                        rootPersonLink.style.fontSize = '14px'; // Valeur originale
+                        rootPersonLink.style.padding = '1px 4px'; // Valeur originale
+                        rootPersonLink.style.height = '25px'; // Valeur originale
+                        rootPersonLink.style.minWidth = '80px'; // Valeur originale
+                    }
+    
+                    // Texte du bouton (nom de la personne racine)
+                    const displayElement = originalRootResults.querySelector('div[style*="border"] span');
+                    const currentText = displayElement ? displayElement.textContent.trim() : 'Sélectionner';
+                    rootPersonLink.textContent = currentText;
+                    rootPersonLink.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        
+                        // Récupérer explicitement le sélecteur de root person
+                        const originalRootResults = document.getElementById('root-person-results');                                       
+                        const displayElement = originalRootResults.querySelector('div[style*="border"]');
+                        
+                        if (displayElement) {
+                            const span = displayElement.querySelector('span');
+                            const currentText = span ? (span.getAttribute('data-full-text') || span.textContent) : 'Sélectionner';
+                            rootPersonLink.textContent = currentText;
+                        }
+                        
+                        // Fermer le menu hamburger
+                        toggleMenu(false);
+                        
+                        // Fermer TOUS les menus déroulants avec une logique plus stricte
+                        const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
+                        dropdowns.forEach(dropdown => {
+                            // Stratégie de fermeture plus agressive
+                            dropdown.style.display = 'none';
+                            dropdown.removeAttribute('data-root-person');
+                        });
+                        
+                        // Délai pour s'assurer que le menu est fermé
+                        setTimeout(() => {
+                            const displayElement = originalRootResults.querySelector('div[style*="border"]');
+                            
+                            if (displayElement) {
+                                const clickEvent = new MouseEvent('click', {
+                                    view: window,
+                                    bubbles: true,
+                                    cancelable: true
+                                });
+                                displayElement.dispatchEvent(clickEvent);
+                                
+                                // Après un court délai, repositionner
+                                setTimeout(() => {
+                                    // Sélectionner UNIQUEMENT le dernier dropdown créé
+                                    const dropdowns = document.querySelectorAll('body > div[style*="position: fixed"][style*="z-index: 999999"]');
+                                    const optionsContainerAfterClick = dropdowns[dropdowns.length - 1];
+                                    
+                                    if (optionsContainerAfterClick) {
+                                        // Fermer tous les autres dropdowns
+                                        dropdowns.forEach(dropdown => {
+                                            if (dropdown !== optionsContainerAfterClick) {
+                                                dropdown.style.display = 'none';
+                                            }
+                                        });
+                                        
+                                        // Marquer ce dropdown comme étant celui de la personne racine
+                                        optionsContainerAfterClick.setAttribute('data-root-person', 'true');
+                                        
+                                        // Utiliser le rectangle du sélecteur original
+                                        const displayElement = originalRootResults.querySelector('div[style*="border"]');
+                                        const rect = displayElement.getBoundingClientRect();
+                                        
+                                        optionsContainerAfterClick.style.display = 'block';
+                                        optionsContainerAfterClick.style.top = `${rect.bottom + 5}px`;
+                                        
+                                        if (optionsContainerAfterClick.offsetWidth > rect.width) {
+                                            optionsContainerAfterClick.style.left = `${rect.right - optionsContainerAfterClick.offsetWidth}px`;
+                                        } else {
+                                            optionsContainerAfterClick.style.left = `${rect.left}px`;
+                                        }
+                                        
+                                        optionsContainerAfterClick.style.zIndex = '9999';
+                                    }
+                                }, 100);
+                            }
+                        }, 300);
+                    });
+    
+                    // Ajouter le label et le bouton au conteneur
+                    rootPersonContainer.appendChild(rootPersonLabel);
+                    rootPersonContainer.appendChild(rootPersonLink);
+    
+                    // Remplacer le placeholder par le nouveau conteneur
+                    rootResultsPlaceholder.parentNode.replaceChild(rootPersonContainer, rootResultsPlaceholder);
+                }
+    
+                // Synchronisation du champ de recherche de personne racine
+                const rootSearchPlaceholder = document.getElementById('menu-root-person-search-placeholder');
+                const originalRootSearch = document.getElementById('root-person-search');
+    
+                if (rootSearchPlaceholder && originalRootSearch) {
+                    const rootSearchLink = document.createElement('div');
+                    rootSearchLink.textContent = '🔍 personne racine';
+                    rootSearchLink.style.cursor = 'pointer';
+                    rootSearchLink.style.backgroundColor = 'white';
+                    rootSearchLink.style.textAlign = 'left';
+                    rootSearchLink.style.border = '1px solid #333';
+                    rootSearchLink.style.borderRadius = '4px';
+                    rootSearchLink.style.display = 'flex';
+                    rootSearchLink.style.alignItems = 'center';
+                    
+                    // Adapter uniquement pour les petits écrans
+                    if (height < 400) {
+                        rootSearchLink.style.fontSize = '11px';
+                        rootSearchLink.style.padding = '2px 3px';
+                        rootSearchLink.style.margin = '2px 0';
+                    } else if (height < 800) {
+                        rootSearchLink.style.fontSize = '12px';
+                        rootSearchLink.style.padding = '2px 3px';
+                        rootSearchLink.style.margin = '2px 0';
+                    } else {
+                        rootSearchLink.style.fontSize = '14px'; // Valeur originale
+                        rootSearchLink.style.padding = '3px 4px'; // Valeur originale
+                        rootSearchLink.style.margin = '3px 0'; // Valeur originale
+                    }
+                    
+                    rootSearchLink.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        
+                        // Fermer le menu hamburger
+                        toggleMenu(false);
+                        
+                        // Délai court pour s'assurer que le menu est fermé
+                        setTimeout(() => {
+                            // Donner le focus à la zone de recherche de la page
+                            originalRootSearch.focus();
+                            originalRootSearch.select(); // Optionnel : sélectionner tout le texte
+                        }, 300);
+                    });
+                    
+                    // Remplacer le placeholder par le lien
+                    rootSearchPlaceholder.parentNode.replaceChild(rootSearchLink, rootSearchPlaceholder);
+                }
+    
+                // Pour le sélecteur de démo, vérifier s'il existe déjà
+                const existingDemoSelector = document.getElementById('menu-demo-selector');
+                if (!existingDemoSelector) {
+                    // Seulement s'il n'existe pas encore
+                    createDemoSelector();
+                }
+                
+                // Créer le sélecteur de prénoms s'il n'existe pas encore
+                setTimeout(() => {
+                    const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
+                    if (prenomsPlaceholder) {
+                    createPrenomsSelector();
+                    } else {
+                    console.log("Placeholder de prénoms pas encore disponible");
+                    }
+                }, 200);
+    
+                console.log("Synchronisation des sélecteurs réussie avec nouveaux gestionnaires d'événements");
+            }
+        }).catch(error => {
+            console.error("Erreur lors de l'import de mainUI.js:", error);
+        });
+    } catch (error) {
+        console.error("Erreur lors de la synchronisation des sélecteurs:", error);
+    }
 }
-
-
-
-
-
-
-
-
-
 
 
   // Injecter les styles CSS
@@ -1022,9 +1406,100 @@ function syncCustomSelectors() {
     styleElement.id = 'hamburger-menu-styles';
     
     styleElement.textContent = `
-     
-      /* Style pour le bouton hamburger */
-      .hamburger-menu {
+        /* Styles pour les petits écrans uniquement */
+        .small-screen .hamburger-menu {
+        width: 30px;
+        height: 30px;
+        }
+        
+        .small-screen .hamburger-menu span {
+        width: 18px;
+        height: 2px;
+        margin: 1px 0;
+        }
+        
+        .small-screen .side-menu {
+        width: 180px;
+        padding: 40px 5px 10px;
+        }
+        
+        .small-screen .menu-title {
+        top: 10px;
+        left: 40px;
+        font-size: 14px;
+        }
+        
+        .small-screen .menu-section {
+        margin-bottom: 6px;
+        padding: 4px;
+        }
+        
+        .small-screen .menu-section h3 {
+        margin-bottom: 4px;
+        font-size: 12px;
+        }
+        
+        .small-screen .menu-section-content {
+        gap: 3px;
+        }
+        
+        .small-screen .side-menu button span {
+        font-size: 16px;
+        }
+        
+        .small-screen .menu-section-content label {
+        margin-bottom: 2px;
+        font-size: 11px;
+        }
+        
+        /* Styles pour les écrans moyens uniquement */
+        .medium-screen .hamburger-menu {
+        width: 35px;
+        height: 35px;
+        }
+        
+        .medium-screen .hamburger-menu span {
+        width: 20px;
+        height: 2.5px;
+        margin: 1.5px 0;
+        }
+        
+        .medium-screen .side-menu {
+        width: 190px;
+        padding: 50px 8px 15px;
+        }
+        
+        .medium-screen .menu-title {
+        top: 12px;
+        left: 50px;
+        font-size: 16px;
+        }
+        
+        .medium-screen .menu-section {
+        margin-bottom: 10px;
+        padding: 6px;
+        }
+        
+        .medium-screen .menu-section h3 {
+        margin-bottom: 6px;
+        font-size: 14px;
+        }
+        
+        .medium-screen .menu-section-content {
+        gap: 5px;
+        }
+        
+        .medium-screen .side-menu button span {
+        font-size: 22px;
+        }
+        
+        .medium-screen .menu-section-content label {
+        margin-bottom: 3px;
+        font-size: 12px;
+        }
+        
+        /* Style pour le bouton hamburger - Styles de base inchangés */
+        .hamburger-menu {
         position: fixed;
         top: 5px;   
         left: 5px; 
@@ -1032,7 +1507,7 @@ function syncCustomSelectors() {
         width: 40px;
         height: 40px;
         background-color: #4CAF50;
-        border-radius: 8px;  /* Changé de 50% (rond) à 8px pour un look plus carré */
+        border-radius: 8px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -1040,9 +1515,9 @@ function syncCustomSelectors() {
         cursor: pointer;
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         border: none;
-      }
-
-      .hamburger-menu span {
+        }
+    
+        .hamburger-menu span {
         display: block;
         width: 24px;
         height: 3px;
@@ -1050,13 +1525,13 @@ function syncCustomSelectors() {
         background-color: white;
         border-radius: 3px;
         transition: all 0.3s ease;
-      }
-
-      /* Menu latéral */
-      .side-menu {
+        }
+    
+        /* Menu latéral - Style de base inchangé */
+        .side-menu {
         position: fixed;
         top: 0;
-        left: -250px; /* Commence hors écran */
+        left: -250px;
         width: 210px;
         height: 100%;
         background-color: white;
@@ -1065,14 +1540,14 @@ function syncCustomSelectors() {
         transition: left 0.3s ease;
         overflow-y: auto;
         padding: 60px 10px 20px;
-      }
-
-      .side-menu.open {
-        left: 0; /* Affiché à l'écran */
-      }
-
-      /* Overlay pour fermer le menu en cliquant ailleurs */
-      .menu-overlay {
+        }
+    
+        .side-menu.open {
+        left: 0;
+        }
+    
+        /* Overlay - Style de base inchangé */
+        .menu-overlay {
         position: fixed;
         top: 0;
         left: 0;
@@ -1081,88 +1556,88 @@ function syncCustomSelectors() {
         background-color: rgba(0,0,0,0.5);
         z-index: 2800;
         display: none;
-      }
-
-      .menu-overlay.open {
+        }
+    
+        .menu-overlay.open {
         display: block;
-      }
-
-      /* Styles pour les sections du menu */
-      .menu-section {
+        }
+    
+        /* Styles pour les sections du menu - Style de base inchangé */
+        .menu-section {
         margin-bottom: 15px;
         padding: 10px;
         border-bottom: 1px solid #eee;
-      }
-
-      .menu-section h3 {
+        }
+    
+        .menu-section h3 {
         margin-top: 0;
         margin-bottom: 10px;
         font-size: 16px;
         color: #333;
-      }
-
-      .menu-section-content {
+        }
+    
+        .menu-section-content {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-      }
-
-      /* Adaptations pour les contrôles dans le menu */
-      .side-menu button {
+        }
+    
+        /* Adaptations pour les contrôles - Style de base inchangé */
+        .side-menu button {
         min-width: auto;
-        padding: 2px; /* Padding réduit */
+        padding: 2px;
         margin: 0;
-        border: none; /* Suppression de la bordure */
-        background-color: transparent; /* Fond transparent */
-        border-radius: 4px; /* Coins arrondis légers */
-      }
-
-      .side-menu button:hover {
-        background-color: rgba(0,0,0,0.05); /* Léger fond au survol */
-      }
-
-      .side-menu button span {
-        font-size: 28px; /* Symboles plus grands */
+        border: none;
+        background-color: transparent;
+        border-radius: 4px;
+        }
+    
+        .side-menu button:hover {
+        background-color: rgba(0,0,0,0.05);
+        }
+    
+        .side-menu button span {
+        font-size: 28px;
         display: block;
-      }
-
-      .side-menu select, .side-menu input {
+        }
+    
+        .side-menu select, .side-menu input {
         min-width: auto;
         max-width: 100%;
-      }
-
-      /* Style pour le titre du menu */
-      .menu-title {
+        }
+    
+        /* Style pour le titre du menu - Style de base inchangé */
+        .menu-title {
         position: absolute;
         top: 15px;
         left: 60px;
         font-size: 18px;
         font-weight: bold;
         color: #4CAF50;
-      }
-      
-      /* Styles pour les labels des contrôles */
-      .menu-section-content label {
+        }
+        
+        /* Styles pour les labels - Style de base inchangé */
+        .menu-section-content label {
         display: block;
         width: 100%;
         margin-bottom: 5px;
         font-size: 14px;
         color: #555;
-      }
-      
-      /* S'assurer que le bouton hamburger est visible quand l'arbre est affiché */
-      body.tree-view .hamburger-menu,
-      #tree-container:not([style*="display: none"]) ~ .hamburger-menu {
+        }
+        
+        /* S'assurer que le bouton hamburger est visible - Style de base inchangé */
+        body.tree-view .hamburger-menu,
+        #tree-container:not([style*="display: none"]) ~ .hamburger-menu {
         display: flex !important;
         z-index: 3000;
-      }
+        }
     `;
     
     // Ajouter la feuille de style si elle n'existe pas déjà
     if (!document.getElementById('hamburger-menu-styles')) {
-      document.head.appendChild(styleElement);
+        document.head.appendChild(styleElement);
     }
-  }
+}
 
   // Basculer l'affichage du menu
   function toggleMenu(open) {
@@ -1170,6 +1645,9 @@ function syncCustomSelectors() {
       console.warn("Éléments du menu non disponibles pour toggleMenu");
       return;
     }
+    
+    // Mettre à jour la classe de hauteur avant d'ouvrir le menu
+    updateHeightClass();
     
     const isOpen = typeof open !== 'undefined' ? open : !sideMenu.classList.contains('open');
     
@@ -1184,6 +1662,7 @@ function syncCustomSelectors() {
       menuOverlay.classList.remove('open');
     }
   }
+  
 
   // Configurer la fermeture automatique sur mobile
   function setupMobileMenuClosing() {
@@ -1323,48 +1802,50 @@ function syncCustomSelectors() {
 }
 
   // Fonction pour afficher le menu
-  export function showHamburgerMenu() {
-    console.log("Affichage du menu hamburger via directHamburgerMenu.js");
-    
-    if (!state.menuHamburgerInitialized) {
-        createMenuElements();
-    }
-    
-    if (hamburgerMenu) {
-        hamburgerMenu.style.display = 'flex';
-    }
-    
-    // S'assurer que le menu latéral est configuré même s'il est fermé
-    if (sideMenu) {
-        sideMenu.style.display = 'block';
-        
-        // NOUVEAU : Mettre à jour le nom de la personne racine
-        const originalRootResults = document.getElementById('root-person-results');
-        const rootPersonLink = document.getElementById('menu-root-person-results-container');
-        
-        if (originalRootResults && rootPersonLink) {
-
-            const displayElement = originalRootResults.querySelector('div[style*="border"]');
-            if (displayElement) {
-                const span = displayElement.querySelector('span');
-                const currentText = span ? (span.getAttribute('data-full-text') || span.textContent) : 'Sélectionner';
-                
-                const rootPersonLinkText = rootPersonLink.querySelector('div');
-                if (rootPersonLinkText) {
-                    rootPersonLinkText.textContent = currentText;
-                }
-            }
-        }
-        
-        // Synchroniser les sélecteurs lors de l'affichage
-        syncCustomSelectors();
-    }
-    
-    // Toaster un message
-    if (typeof window.showToast === 'function') {
-        window.showToast('Menu principal disponible');
-    }
-  }
+ export function showHamburgerMenu() {
+     console.log("Affichage du menu hamburger via directHamburgerMenu.js");
+     
+     // Mettre à jour la classe de hauteur
+     updateHeightClass();
+     
+     if (!state.menuHamburgerInitialized) {
+         createMenuElements();
+     }
+     
+     if (hamburgerMenu) {
+         hamburgerMenu.style.display = 'flex';
+     }
+     
+     // S'assurer que le menu latéral est configuré même s'il est fermé
+     if (sideMenu) {
+         sideMenu.style.display = 'block';
+         
+         // NOUVEAU : Mettre à jour le nom de la personne racine
+         const originalRootResults = document.getElementById('root-person-results');
+         const rootPersonLink = document.getElementById('menu-root-person-results-container');
+         
+         if (originalRootResults && rootPersonLink) {
+             const displayElement = originalRootResults.querySelector('div[style*="border"]');
+             if (displayElement) {
+                 const span = displayElement.querySelector('span');
+                 const currentText = span ? (span.getAttribute('data-full-text') || span.textContent) : 'Sélectionner';
+                 
+                 const rootPersonLinkText = rootPersonLink.querySelector('div');
+                 if (rootPersonLinkText) {
+                     rootPersonLinkText.textContent = currentText;
+                 }
+             }
+         }
+         
+         // Synchroniser les sélecteurs lors de l'affichage
+         syncCustomSelectors();
+     }
+     
+     // Toaster un message
+     if (typeof window.showToast === 'function') {
+         window.showToast('Menu principal disponible');
+     }
+   }
 
 
   // Fonction pour masquer le menu
@@ -1455,47 +1936,51 @@ function syncCustomSelectors() {
     console.log("Affichage forcé appliqué au bouton hamburger");
   }
 
-  // Initialiser le menu au chargement
-  
-  export function initializeHamburgerOnce() {
-    if (!state.isHamburgerMenuInitialized) {
-      console.log("Initialisation directHamburgerMenu.js");
-      createMenuElements();
-      state.isHamburgerMenuInitialized = true;
-      
-      // Attacher un écouteur d'événements pour détecter quand l'arbre est chargé
-      document.addEventListener('gedcomLoaded', function() {
-        console.log("Event gedcomLoaded détecté, préparation du menu hamburger");
-        setTimeout(syncCustomSelectors, 1000); // Synchroniser après un délai pour s'assurer que tout est prêt
-      });
+// Initialiser le menu au chargement
+export function initializeHamburgerOnce() {
+if (!state.isHamburgerMenuInitialized) {
+    console.log("Initialisation directHamburgerMenu.js");
+    createMenuElements();
+    state.isHamburgerMenuInitialized = true;
+    
+    // Attacher un écouteur d'événements pour détecter quand l'arbre est chargé
+    document.addEventListener('gedcomLoaded', function() {
+    console.log("Event gedcomLoaded détecté, préparation du menu hamburger");
+    updateHeightClass(); // Mettre à jour les classes de hauteur
+    setTimeout(syncCustomSelectors, 1000); // Synchroniser après un délai pour s'assurer que tout est prêt
+    });
 
-
-
-      document.addEventListener('change', function(event) {
-        // Vérifier si l'événement provient du sélecteur de personne racine
-        if (event.target && event.target.id === 'root-person-results') {
-          // Petit délai pour s'assurer que l'interface s'est mise à jour
-          setTimeout(updateRootPersonNameInMenu, 100);
-        }
-      });
-
-
-
+    // Ajouter un écouteur pour les changements de taille de fenêtre
+    window.addEventListener('resize', function() {
+    updateHeightClass();
+    // Ajuster les sélecteurs si le menu est ouvert
+    if (sideMenu && sideMenu.classList.contains('open')) {
+        setTimeout(syncCustomSelectors, 300);
     }
-  }
+    });
+
+    document.addEventListener('change', function(event) {
+    // Vérifier si l'événement provient du sélecteur de personne racine
+    if (event.target && event.target.id === 'root-person-results') {
+        // Petit délai pour s'assurer que l'interface s'est mise à jour
+        setTimeout(updateRootPersonNameInMenu, 100);
+    }
+    });
+}
+}
 
 
-  export function updateRootPersonNameInMenu() {
+export function updateRootPersonNameInMenu() {
     const rootPersonLink = document.querySelector('#menu-root-person-results-container div');
     const originalRootResults = document.getElementById('root-person-results');
     
     if (rootPersonLink && originalRootResults) {
-      const displayElement = originalRootResults.querySelector('div[style*="border"] span');
-      if (displayElement) {
+        const displayElement = originalRootResults.querySelector('div[style*="border"] span');
+        if (displayElement) {
         const currentText = displayElement.getAttribute('data-full-text') || displayElement.textContent.trim();
         rootPersonLink.textContent = currentText;
         console.log("Menu hamburger: Mise à jour du nom de la personne racine vers", currentText);
-      }
+        }
     }
-  }
+}
   
