@@ -441,7 +441,7 @@ function createDemoSelector() {
   }
   
   // Définir les options en fonction de l'état
-  const typeOptions = ['démo1', 'démo2'];
+  let typeOptions = ['démo1', 'démo2'];
   let typeOptionsExpanded = [];
   let typeValues = ['demo1', 'demo2'];
   
@@ -449,9 +449,12 @@ function createDemoSelector() {
   if (state.treeOwner === 2) {
     typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
   } else {
-    typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui'];
+    typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10'];
+    typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
+    typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
   }
   
+
   try {
     // Créer la liste d'options
     const options = [];
@@ -476,7 +479,7 @@ function createDemoSelector() {
       dimensions: {
         width: '50px',
         height: '25px',
-        dropdownWidth: '180px'
+        dropdownWidth: '190px'
       },
       padding: {
         display: { x: 4, y: 1 },

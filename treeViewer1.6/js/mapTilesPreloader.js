@@ -10,6 +10,8 @@ const TILE_CACHE_NAME = 'map-tiles-cache-v1';
  * À appeler au chargement de la page
  */
 export async function initTilePreloading() {
+
+
     console.log("🗺️ Initialisation du préchargement des tuiles...");
     
     // Vérifier si le navigateur supporte le Cache API
@@ -67,10 +69,19 @@ async function preloadTilesInBackground(tileUrls) {
                 
                 if (!cachedResponse) {
                     // Charger et mettre en cache la tuile
+                    // const response = await fetch('./maps/' + tileUrl, { 
+                    //     method: 'GET',
+                    //     cache: 'no-cache' // Forcer le rechargement
+                    // });
+
                     const response = await fetch('./maps/' + tileUrl, { 
                         method: 'GET',
-                        cache: 'no-cache' // Forcer le rechargement
-                    });
+                        cache: 'no-cache',
+                        mode: 'no-cors',
+                        headers: {
+                          'X-Requested-With': 'no-sw-intercept'  // Marqueur spécial
+                        }
+                      });
                     
                     if (response.ok) {
                         await cache.put('./maps/' + tileUrl, response.clone());
@@ -105,6 +116,10 @@ async function preloadTilesInBackground(tileUrls) {
         notification.remove();
     }
 }
+
+
+
+
 
 /**
  * Traite des éléments par lot pour éviter de bloquer l'interface
@@ -169,10 +184,15 @@ function updatePreloadNotification(notification, current, total) {
  * @param {string} url - URL de la tuile
  * @returns {Promise<Response>} - Réponse HTTP
  */
+
 export async function fetchTileWithCache(url) {
     // Vérifier si le navigateur supporte le Cache API
     if (!('caches' in window)) {
-        return fetch(url);
+        return fetch(url, {
+            headers: {
+                'X-Requested-With': 'no-sw-intercept'
+            }
+        });
     }
     
     try {
@@ -185,8 +205,12 @@ export async function fetchTileWithCache(url) {
             return cachedResponse;
         }
         
-        // Si pas en cache, faire une requête réseau
-        const networkResponse = await fetch(url);
+        // Si pas en cache, faire une requête réseau AVEC le header spécial
+        const networkResponse = await fetch(url, {
+            headers: {
+                'X-Requested-With': 'no-sw-intercept'
+            }
+        });
         
         // Mettre en cache pour la prochaine fois
         cache.put(url, networkResponse.clone());
@@ -194,8 +218,11 @@ export async function fetchTileWithCache(url) {
         return networkResponse;
     } catch (error) {
         console.warn(`⚠️ Erreur lors de la récupération de ${url}:`, error);
-        return fetch(url); // Fallback vers fetch standard
+        return fetch(url, {
+            headers: {
+                'X-Requested-With': 'no-sw-intercept'
+            }
+        });
     }
 }
-
 

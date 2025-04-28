@@ -5,7 +5,7 @@ import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { initNetworkListeners, startAncestorAnimation, prepareAnimationDemo, validateTilesCoverage, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions, updateGenerationSelectorValue } from './mainUI.js'; 
@@ -35,6 +35,35 @@ import {
 } from './eventHandlers.js';
 
 let stopMonitoring = null;
+
+
+// Enregistrement du Service Worker pour permettre le mode hors ligne
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('✅ Service Worker enregistré avec succès:', registration.scope);
+        
+        // Vérifier si une mise à jour est disponible
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                console.log('Nouveau Service Worker installé, sera activé au prochain chargement');
+              } else {
+                console.log('Service Worker installé pour la première fois');
+              }
+            }
+          };
+        };
+      })
+      .catch(error => {
+        console.error('Échec de l\'enregistrement du Service Worker:', error);
+      });
+  }
+
+  
+
 
 
 export const state = {
@@ -706,12 +735,7 @@ export function handleRootPersonChange(event) {
         // Démarrer l'animation après un court délai
         setTimeout(() => {
             startAncestorAnimation();
-            // prepareAnimationDemo();
-            // validateTilesCoverage();
-            // prepareSoundDemo();
         }, 500);
-
-        //validateTilesCoverage();
         
         // Mettre à jour la valeur du sélecteur si possible
         const customSelector = document.querySelector('[data-text-key="rootPersonResults"]');
@@ -725,6 +749,8 @@ export function handleRootPersonChange(event) {
         return;
     }
 }
+
+
 
 /**
  * Affiche l'arbre généalogique

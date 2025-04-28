@@ -26,19 +26,80 @@ let frenchVoice = null;
 let isOnline = false; // Variable pour suivre l'état de la connexion Internet
 let previousOnlineState = false;
 
+// État pour la position de la carte d'animation
+let animationMapPosition = {
+    top: 60,
+    left: 20,
+    width: 300,
+    height: 250
+};
+
+// État pour la position de la carte d'animation
+let initialAnimationMapPosition = {
+    top: 60,
+    left: 20,
+    width: 300,
+    height: 250
+};
+
+// async function testRealConnectivity() {
+//     try {
+//         const response = await fetch('https://www.google.com/favicon.ico', {
+//             mode: 'no-cors',
+//             cache: 'no-store',
+//             // Ajouter un timeout court pour éviter d'attendre trop longtemps
+//             signal: AbortSignal.timeout(2000)
+//         });
+//         // Sauvegarder l'état précédent
+//         previousOnlineState = isOnline;
+//         isOnline = true;
+//         // console.log("✅ Connexion Internet établie", isOnline);
+
+//         // Détecter le changement d'état
+//         if (previousOnlineState !== isOnline) {
+//             console.log("✅ Connexion Internet rétablie");
+//             showNetworkStatus("Connexion réseau rétablie");
+//             selectVoice();
+//         }
+//         return true;
+//     } catch (error) {
+//         // Sauvegarder l'état précédent
+//         previousOnlineState = isOnline;
+//         isOnline = false;
+//         // console.log("⚠️ Connexion Internet perdue", isOnline);
+//         // Détecter le changement d'état
+//         if (previousOnlineState !== isOnline) {
+//             console.log("⚠️ Connexion Internet perdue");
+//             showNetworkStatus("Mode hors-ligne");
+//             selectVoice();
+//         }
+//         return false;
+//     }
+// }
+
+
 async function testRealConnectivity() {
     try {
+        // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
         const response = await fetch('https://www.google.com/favicon.ico', {
-            mode: 'no-cors',
+            mode: 'no-cors',  // Crucial pour éviter les erreurs CORS
             cache: 'no-store',
-            // Ajouter un timeout court pour éviter d'attendre trop longtemps
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            // Timestamp pour éviter la mise en cache par le navigateur
             signal: AbortSignal.timeout(2000)
         });
+        
+        // Le mode no-cors retourne toujours une réponse "opaque"
+        // On ne peut pas vérifier le status, mais si on arrive ici sans erreur,
+        // c'est qu'une connexion a pu être établie
+        
         // Sauvegarder l'état précédent
         previousOnlineState = isOnline;
         isOnline = true;
-        // console.log("✅ Connexion Internet établie", isOnline);
-
+        
         // Détecter le changement d'état
         if (previousOnlineState !== isOnline) {
             console.log("✅ Connexion Internet rétablie");
@@ -47,10 +108,11 @@ async function testRealConnectivity() {
         }
         return true;
     } catch (error) {
+        // Si on arrive ici, c'est qu'il n'y a pas de connexion
         // Sauvegarder l'état précédent
         previousOnlineState = isOnline;
         isOnline = false;
-        // console.log("⚠️ Connexion Internet perdue", isOnline);
+        
         // Détecter le changement d'état
         if (previousOnlineState !== isOnline) {
             console.log("⚠️ Connexion Internet perdue");
@@ -60,6 +122,17 @@ async function testRealConnectivity() {
         return false;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 export function initNetworkListeners() {
     console.log("🌐 Initialisation des écouteurs réseau...");
@@ -152,6 +225,8 @@ export function initializeAnimationMapPosition()
         animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
     }
 
+    initialAnimationMapPosition = animationMapPosition;
+
 
 
     // // animationMapPosition.top = window.innerHeight*3/4 -10 ;
@@ -164,13 +239,6 @@ export function initializeAnimationMapPosition()
     state.isAnimationMapInitialized = true;
 }
 
-// État pour la position de la carte d'animation
-let animationMapPosition = {
-    top: 60,
-    left: 20,
-    width: 300,
-    height: 250
-};
 
 // Fonction pour sauvegarder la position de la carte d'animation
 function saveAnimationMapPosition() {
@@ -455,52 +523,6 @@ function initAnimationMap() {
             }
         });
         
-        // Créer une classe de tuiles personnalisée
-        // const CustomTileLayer = L.TileLayer.extend({
-        //     createTile: function(coords, done) {
-        //         const tile = document.createElement('img');
-                
-        //         // Essayer d'abord la tuile locale
-        //         const localUrl = `maps/tile_${coords.z}_${coords.x}_${coords.y}.png`;
-        //         tile.src = localUrl;
-                
-        //         // En cas d'erreur, utiliser OSM
-        //         tile.onerror = () => {
-        //             // Choisir un serveur OSM aléatoire
-        //             const servers = ['a', 'b', 'c'];
-        //             const server = servers[Math.floor(Math.random() * servers.length)];
-        //             const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
-                    
-        //             console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
-        //             tile.src = osmUrl;
-                    
-        //             // Mettre à jour les statistiques
-        //             tileStats.osmLoaded++;
-        //             console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-                    
-        //             // Supprimer le gestionnaire d'erreur précédent pour éviter les boucles
-        //             tile.onerror = (e) => {
-        //                 console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
-        //                 done(e, tile);
-        //             };
-        //         };
-                
-        //         tile.onload = function() {
-        //             // Si la source est une URL locale, incrémenter le compteur local
-        //             if (tile.src.includes('maps/tile_')) {
-        //                 tileStats.localLoaded++;
-        //                 console.log(`Stats de tuiles - Locales: ${tileStats.localLoaded}, OSM: ${tileStats.osmLoaded}`);
-        //             }
-        //             done(null, tile);
-        //         };
-                
-        //         return tile;
-        //     }
-        // });
-
-
-
-
 
 
         const CustomTileLayer = L.TileLayer.extend({
@@ -1077,14 +1099,14 @@ function speakPersonName(personName) {
 
         let timeOutDuration = 1800;
         if (animationState.currentIndex === 0) {
-            console.log("🔄 Premier nom - forçage taux initial à 1.4");
+            console.log("🔄 Premier nom - forçage taux initial à 1.2");
             optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
             if (isSpeechInGoodHealth) timeOutDuration = 3500;
             else timeOutDuration = 2500;
         }
         if (animationState.currentIndex === 1) {
             console.log("🔄 Premier nom - forçage taux initial à 1.0");
-            optimalSpeechRate = 1.2; //
+            optimalSpeechRate = 1.0; //
             if (isSpeechInGoodHealth) timeOutDuration = 2500; 
             else timeOutDuration = 1800;
 
@@ -1103,8 +1125,8 @@ function speakPersonName(personName) {
 
         // Paramètres initiaux
         const targetDuration = 1500; // 1.5 seconde pour lire le nom
-        const maxRate = 2.5; // Vitesse maximale
-        const minRate = 1.0; // Vitesse minimale
+        const maxRate = 2.7; // Vitesse maximale
+        const minRate = 0.8; // Vitesse minimale
 
 
 
@@ -1226,89 +1248,6 @@ function speakPersonName(personName) {
 /* */
 
 
-/* solution basée sur les longeur de mots */
-// window.utterances = [];
-// function speakPersonName(personName) {
-//     console.log(`⏱️ DÉBUT: speakPersonName pour ${personName}, vitesse initiale: ${optimalSpeechRate}`);
-
-//     // Initialiser la synthèse vocale si ce n'est pas déjà fait
-//     if (!speechSynthesisInitialized) {
-//         console.log("🔄 Premier appel à la synthèse vocale - initialisation...");
-//         initSpeechSynthesis();
-//         // Ajouter un petit délai pour laisser le temps à l'initialisation
-//         return new Promise(resolve => {
-//             setTimeout(() => {
-//                 speakPersonName(personName).then(resolve);
-//             }, 500);
-//         });
-//     }
-
-//     return new Promise((resolve) => {
-//         // Vérifier si le son est activé
-//         if (!state.isSpeechEnabled) {
-//             resolve();
-//             return;
-//         }
-
-//         // Simplifier le nom
-//         const simplifiedName = simplifyName(personName);
-//         console.log(`📝 Nom simplifié: ${simplifiedName}, index: ${animationState.currentIndex}`);
-        
-//         // Ajuster la vitesse selon le mot
-//         if (animationState.currentIndex === 0) {
-//             optimalSpeechRate = 1.1;
-//             console.log("🔄 Premier nom - taux initial: 1.1");
-//         }
-        
-//         // Annuler les synthèses précédentes
-//         window.speechSynthesis.cancel();
-        
-//         // Créer l'utterance
-//         const utterance = new SpeechSynthesisUtterance(simplifiedName);
-//         utterance.rate = optimalSpeechRate;
-//         utterance.lang = 'fr-FR';
-        
-//         // Sélectionner une voix française si possible
-//         const voices = window.speechSynthesis.getVoices();
-//         const frenchVoice = voices.find(voice => 
-//             voice.lang.startsWith('fr-') || 
-//             voice.name.toLowerCase().includes('french')
-//         );
-        
-//         if (frenchVoice) {
-//             utterance.voice = frenchVoice;
-//         }
-        
-//         // IMPORTANT: Conserver la référence pour éviter le garbage collection
-//         window.utterances.push(utterance);
-        
-//         // Calculer la durée estimée en fonction de la longueur et du taux
-//         const baseTime = 1200;
-//         const charTime = 90;
-//         const duration = baseTime + (simplifiedName.length * charTime / optimalSpeechRate);
-        
-//         console.log(`🔊 Lancement synthèse avec taux ${optimalSpeechRate}, durée estimée: ${Math.round(duration)}ms`);
-//         window.speechSynthesis.speak(utterance);
-        
-//         // Ajustement de la vitesse basé sur le mot
-//         const shouldIncrease = simplifiedName.length > 14;
-//         const shouldDecrease = simplifiedName.length < 6;
-        
-//         if (shouldIncrease && optimalSpeechRate < 1.7) {
-//             optimalSpeechRate = Math.min(optimalSpeechRate + 0.1, 1.7);
-//             console.log(`📏 Nom LONG (${simplifiedName.length} chars) - Augmentation taux à ${optimalSpeechRate}`);
-//         } else if (shouldDecrease && optimalSpeechRate > 1.0) {
-//             optimalSpeechRate = Math.max(optimalSpeechRate - 0.1, 1.0);
-//             console.log(`📏 Nom COURT (${simplifiedName.length} chars) - Diminution taux à ${optimalSpeechRate}`);
-//         }
-        
-//         // Attendre la fin estimée
-//         setTimeout(() => {
-//             console.log(`✅ FIN: speakPersonName - délai estimé écoulé`);
-//             resolve();
-//         }, duration);
-//     });
-// }
 
 let isSpeechInGoodHealth = false;
 let animationController = null;
@@ -1320,7 +1259,10 @@ let animationState = {
 };
 
 
+
+
 export async function startAncestorAnimation() {
+
     isSpeechInGoodHealth = await testSpeechSynthesisHealth();
     if (isSpeechInGoodHealth) {
         // Chrome ou Edge est coopératif
@@ -1330,12 +1272,7 @@ export async function startAncestorAnimation() {
           console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
           window.speechSynthesis.cancel();
     }
-
-    // resetMap();
-
-    // Initialiser la carte au début de l'animation
     initAnimationMap();
-    
     initBackgroundContainer(); // Initialiser le conteneur de fond
 
     state.lastHorizontalPosition = 0;
@@ -1355,20 +1292,21 @@ export async function startAncestorAnimation() {
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
         [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
-        console.log("Chemin trouvé:", animationState.path);
-        console.log("Chemin trouvé descendant:", animationState.descendpath);
+        // console.log("Chemin trouvé:", animationState.path);
+        // console.log("Chemin trouvé descendant:", animationState.descendpath);
         
         if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
             animationState.path = animationState.descendpath;
         }
 
-
         animationState.currentIndex = 0;
         animationState.isPaused = false;
     }
 
-    let deltaXRatio = 1.5; // Ratio de décalage horizontal
-    if (window.innerWidth < 400) { deltaXRatio = 1.0; } // Pour les petits écrans, on
+    // Initialiser la carte au début de l'animation
+    // initAnimationMap();
+    let deltaXRatio = 2; // Ratio de décalage horizontal
+    if (window.innerWidth < 400) { deltaXRatio = 2; } // Pour les petits écrans, on
 
 
     selectVoice();
@@ -1380,6 +1318,7 @@ export async function startAncestorAnimation() {
     state.previousWindowInnerWidthInMap = window.innerWidth;
     state.previousWindowInnerHeightInMap = window.innerHeight;
 
+
     return new Promise(async (resolve, reject) => {
         try {
             // Nettoyer les timeouts existants
@@ -1388,11 +1327,11 @@ export async function startAncestorAnimation() {
 
             // Reprendre à partir de l'index actuel
             for (let i = animationState.currentIndex; i < animationState.path.length; i++) {
-
+                
                 animationState.currentIndex = i;
                 // Vérifier si l'animation a été annulée ou mise en pause
                 if (animationController.isCancelled || animationState.isPaused) {
-                    animationState.currentIndex = i;
+                    // animationState.currentIndex = i;
                     break;
                 }
 
@@ -1423,87 +1362,70 @@ export async function startAncestorAnimation() {
                     }
 
 
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    // const zoom = getZoom();
 
-                    const zoom = getZoom();
+                    let zoom = getZoom();
+                    // let initialOffsetY = 0;
 
-                    console.log("\n\n\n #############   debug zomm", zoom, getLastTransform(), d3.zoomIdentity);
 
-                    let initialOffsetY = 0;
+                    let shiftAterRescale = false
 
-                    if (zoom && (animationState.currentIndex === 0 )) {
-                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
-                    
-                        // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
-                        offsetX = 0;
-                        if (window.innerHeight > 1000) {
-                            offsetY = -450;
-                       } else if (window.innerHeight > 800) {
-                             offsetY = -300;
-                        } else {
-                             offsetY = -100;
+                    let horizontalShiftAfterScreenRescale = 0;
+                    let verticalShiftAfterScreenRescale = 0;
+
+                    // si resize de l'écran il faut appliquer des offset sur la position de l'arbre
+                    if (zoom && state.screenResizeHasOccured && (animationState.currentIndex > 2) ) {
+                        state.screenResizeHasOccured = false;
+
+                        if (window.innerWidth - state.prevPrevWindowInnerWidthInMap < -30) {
+                            horizontalShiftAfterScreenRescale =   -(window.innerWidth - state.prevPrevWindowInnerWidthInMap)  + (state.boxWidth*1);
+                        } else if (window.innerWidth - state.prevPrevWindowInnerWidthInMap > 30) {    
+                            horizontalShiftAfterScreenRescale =  -(window.innerWidth - state.prevPrevWindowInnerWidthInMap) ; 
                         }
 
-                        initialOffsetY = -offsetY;
-                        const horizontalShift = 0 ;
-                        const verticalShift = -offsetY ;
+                        if (window.innerHeight - state.prevPrevWindowInnerHeightInMap < -30) {
+                            verticalShiftAfterScreenRescale  =  -(window.innerHeight - state.prevPrevWindowInnerHeightInMap)/2; 
+                        } else  if (window.innerHeight - state.prevPrevWindowInnerHeightInMap > 30) {    
+                            verticalShiftAfterScreenRescale  = -(window.innerHeight - state.prevPrevWindowInnerHeightInMap)/2; 
+                        }
+
+                        if (horizontalShiftAfterScreenRescale != 0 || verticalShiftAfterScreenRescale != 0) { 
+                            shiftAterRescale = true; 
+                        }                            
+                        console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### ", shiftAterRescale, ', new:', window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,", offset X=", -horizontalShiftAfterScreenRescale ,", offset Y=", -verticalShiftAfterScreenRescale, "\n\n\n\n\n");   
+                    }
+
+
+                    // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
+                    if (zoom && ( (animationState.currentIndex === 0 ) || shiftAterRescale ) ) {
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                    
+                        offsetY = 0;
+                        if (animationState.currentIndex === 0) {
+                            if (window.innerHeight > 1000) {
+                                offsetY = -450;
+                            } else if (window.innerHeight > 800) {
+                                offsetY = -300;
+                            } else {
+                                offsetY = -100;
+                            }
+                        }
+
+                        const horizontalShift = 0; 
+                        const verticalShift = - offsetY; 
 
                         svg.transition()
                             .duration(750)
                             .call(zoom.transform, 
-                                lastTransform.translate(-horizontalShift, -verticalShift)
+                                lastTransform.translate(- horizontalShift - horizontalShiftAfterScreenRescale, - verticalShift - verticalShiftAfterScreenRescale)
                             );
                         state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
                         state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
                     }
-                    let shiftAterRescale = false
-
-                    if (zoom && state.screenResizeHasOccured && (animationState.currentIndex > 2) ) {
-
-                        state.screenResizeHasOccured = false;
-
-                        // console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### new: ", window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,"\n\n\n\n\n");
-    
-                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
-                    
-
-                        let horizontalShift1 = 0;
-                        if (window.innerWidth - state.prevPrevWindowInnerWidthInMap < -30) {
-                            horizontalShift1 =   -(window.innerWidth - state.prevPrevWindowInnerWidthInMap)  + (state.boxWidth*2);
-                        } else if (window.innerWidth - state.prevPrevWindowInnerWidthInMap > 30) {    
-                            horizontalShift1 =  -(window.innerWidth - state.prevPrevWindowInnerWidthInMap) - (state.boxWidth*2);
-                        }
-
-                        let verticalShift1 = 0;
-                        if (window.innerHeight - state.prevPrevWindowInnerHeightInMap < -30) {
-                            verticalShift1 =  -(window.innerHeight - state.prevPrevWindowInnerHeightInMap); //  + (state.boxHeight*2);
-                        } else  if (window.innerHeight - state.prevPrevWindowInnerHeightInMap > 30) {    
-                            verticalShift1 = -(window.innerHeight - state.prevPrevWindowInnerHeightInMap); // - (state.boxHeight*2);
-                        }
-
-                        if (horizontalShift1 != 0 || verticalShift1 != 0) {
-                            svg.transition()
-                                .duration(750)
-                                .call(zoom.transform, 
-                                    lastTransform.translate(-horizontalShift1, -verticalShift1)
-                                );
-                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift1;
-                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift1;    
-
-                            shiftAterRescale = true;
-                        }
-
-                            
-                        console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### new: ", window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,", offset X=", -horizontalShift1 ,", offset Y=", -verticalShift1 , "\n\n\n\n\n");
-   
-
-    
-                    }
 
 
-
+                    // Avant le 1ier affichage créer une promesse qui simule la lecture vocale pour un message de démarrage : en voiture Simone
                     if (animationState.currentIndex === 0) {
-                        // Créer une promesse qui simule la lecture vocale si le son est coupé
                         const voicePromiseStart = state.isSpeechEnabled 
                             ? speakPersonName('en /voiture Simone')
                             : new Promise(resolve => setTimeout(resolve, 1600));
@@ -1512,76 +1434,15 @@ export async function startAncestorAnimation() {
                         await voicePromiseStart;
                     }
 
-
-                    let shiftTree =  false;
-
-
-                    // Mettre à jour l'élément de la carte
-                    if (zoom) {
-                        lastTransform = getLastTransform() || d3.zoomIdentity;                                                
-                        console.log("\n\n DEBUG 0 *******", node.y, window.innerWidth, state.boxWidth, deltaXRatio, 
-                            (node.y > window.innerWidth - state.boxWidth*deltaXRatio),
-                            (node.x + initialOffsetY > window.innerHeight - state.boxHeight*1.2),
-                            (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ),
-                            (node.x - state.lastVerticalPosition > state.boxHeight*0.2 ));
-                        // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
-                        if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x + initialOffsetY > window.innerHeight - state.boxHeight*1.2))  
-                             && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
-
-                            if (firstTimeShift) {
-                                offsetX = (node.y - state.lastHorizontalPosition)
-                                offsetY = (node.x - state.lastVerticalPosition);
-                            }
-                            firstTimeShift = false;
-              
-                            horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
-                            verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2                             
-
-                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
-                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
-                            // console.log("\n\n DEBUG  SHIFT BEFORE  *******", node.data.name, -horizontalShift, -verticalShift, state.lastHorizontalPosition, state.lastVerticalPosition );
-                            console.log("\n\n DEBUG  SHIFT compute offset   *******", node.data.name, -horizontalShift, -verticalShift );
-                            shiftTree = true;
-                        }
-                    }
-
-
-
-
-                    if (shiftTree && !shiftAterRescale) { 
-                        lastTransform = getLastTransform() || d3.zoomIdentity;                                                               
-                        const horizontalShift2 = state.boxWidth ;
-                        const verticalShift2 = verticalShift; //0; 
-                        await new Promise(resolve => {
-                            svg.transition()
-                                .duration(800)  // Durée plus longue pour être visible
-                                .ease(d3.easeCubicOut) 
-                                // d3.easeCubicOut - Démarre rapidement puis ralentit (recommandé pour les translations)
-                                // d3.easeCubicInOut - Accélère puis ralentit
-                                // d3.easeElasticOut - Effet avec un léger rebond à la fin
-                                // d3.easeQuadInOut - Accélération et décélération douces
-                                .call(zoom.transform, 
-                                    lastTransform.translate(-horizontalShift2 , -verticalShift2)
-                                )
-                                .on("end", resolve);
-                        });
-                        console.log("\n\n DEBUG  SHIFT BEFORE drawTree  *******", node.data.name, -horizontalShift2, -verticalShift2 );
-                    }
-
-
-
-
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
                     const voicePromise = state.isSpeechEnabled 
                         ? speakPersonName(node.data.name)
-                        : new Promise(resolve => setTimeout(resolve, 1600));
+                        : new Promise(resolve => setTimeout(resolve, 1500));
                     
                     // Attendre la lecture ou le délai
                     await voicePromise;
-
-
-
-                    // Actions sur le nœud
+                    
+                    // Actions sur le nœud pour faire apparaitre le nouvel ascendant puis redessine l'arbre avec drawTree
                     if (!node.data.children || node.data.children.length === 0) {
                         const event = new Event('click');
                         if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
@@ -1594,27 +1455,96 @@ export async function startAncestorAnimation() {
                         drawTree();
                     }
 
+                    let recalageX = 0;
+                    let recalageY = 0;
+                    zoom = getZoom();
 
 
+                    // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
+                    if (zoom) {
+                        const svg = d3.select("#tree-svg");
+                        const lastTransform = getLastTransform() || d3.zoomIdentity;
+                        
+                        // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
+                        if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x  > window.innerHeight - state.boxHeight*1.2))  
+                                && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
+   
+                            if (firstTimeShift) {
+                                offsetX = (node.y - state.lastHorizontalPosition)
+                                offsetY = (node.x - state.lastVerticalPosition)
+                            }
+                            firstTimeShift = false;
+                            const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
+                            const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
 
-                    if (shiftTree) {
-                        lastTransform = getLastTransform() || d3.zoomIdentity;                                         
-                        svg.transition()
-                            .call(zoom.transform, 
-                                lastTransform.translate(-horizontalShift, -verticalShift)
-                            );
-                        console.log("\n\n DEBUG  SHIFT AFTER  drawTree  *******", node.data.name, -horizontalShift, -verticalShift );
+                            svg.transition()
+                                .duration(750)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(-horizontalShift, -verticalShift)
+                                );
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+
+                            const nodeScreenPos = getNodeScreenPosition(node);
+                            const marginX = state.boxWidth/2;
+                            const marginY = state.boxHeight/2;
+                            console.log('\n\n ****** Le nœud est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
+                            console.log("initialAnimationMapPosition.left=", initialAnimationMapPosition.left, "initialAnimationMapPosition.top=", initialAnimationMapPosition.top, "initialAnimationMapPosition.width=", initialAnimationMapPosition.width, "initialAnimationMapPosition.height=", initialAnimationMapPosition.height);
+
+                            // vérifier si le noeud est bien visible dans la fenêtre
+                            if ( nodeScreenPos.x < marginX || nodeScreenPos.y < marginY || nodeScreenPos.x > (window.innerWidth - marginX) ||  nodeScreenPos.y > (window.innerHeight-marginY) ) {
+                                if ( nodeScreenPos.x < marginX) {
+                                    recalageX = - nodeScreenPos.x + window.innerWidth - state.boxWidth*2;
+                                } else if (nodeScreenPos.x > (window.innerWidth - marginX)) {
+                                    recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
+                                }
+                                if ( nodeScreenPos.y < marginY) {
+                                    recalageY = - nodeScreenPos.y + window.innerHeight/2 - state.boxHeight*2;
+                                } else if (nodeScreenPos.y > (window.innerHeight - marginY)) {
+                                    recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
+                                }
+                                console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de l'écran, recalage de l'arbre avec shift :", recalageX, recalageY );
+
+                                //vérifier si le noeud n'est pascaché derrière la carte
+                                zoom = getZoom();
+                                svg.transition()
+                                .duration(250)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(recalageX, recalageY)
+                                );
+                            }
+
+
+                            //vérifier si le noeud n'est pas caché derrière la carte
+                            else if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width) &&
+                                (nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
+
+                                if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width)) {
+                                    recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
+                                } 
+
+                                if ((nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
+                                    recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
+                                }
+                                console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est derrière la map, recalage de l'arbre avec shift :", recalageX, recalageY );
+
+                                zoom = getZoom();
+                                svg.transition()
+                                .duration(250)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(recalageX, recalageY)
+                                );
+                            }
+
+                        }
                     }
 
                     state.prevPrevWindowInnerWidthInMap = state.previousWindowInnerWidthInMap;
                     state.prevPrevWindowInnerHeightInMap =  state.previousWindowInnerHeightInMap;
                     state.previousWindowInnerWidthInMap = window.innerWidth;
                     state.previousWindowInnerHeightInMap = window.innerHeight;
-
-
                 } 
             }
-
             // Réinitialiser l'état si l'animation est terminée
             if (animationState.currentIndex >= animationState.path.length) {
                 animationState.path = [];
@@ -1627,6 +1557,21 @@ export async function startAncestorAnimation() {
             reject(error); // Rejeter en cas d'erreur
         }
     });
+}
+
+
+function getNodeScreenPosition(node) {
+    const lastTransform = getLastTransform() || d3.zoomIdentity;
+    
+    // Appliquer la transformation actuelle aux coordonnées du nœud
+    // Note: dans d3.tree, y est horizontal et x est vertical
+    const screenX = lastTransform.applyX(node.y);
+    const screenY = lastTransform.applyY(node.x);
+    
+    return {
+        x: screenX,
+        y: screenY
+    };
 }
 
 export async function prepareAnimationDemo() {
@@ -1884,6 +1829,35 @@ export async function prepareAnimationDemo() {
         alert("Une erreur est survenue: " + error.message);
     }
 }
+
+
+export function generateLocalMaps() {
+    let demoMode = 'demo1';
+    if ((demoMode === 'demo1') || (demoMode === 'demo2')) {        
+        if (state.treeOwner ===2 ) {
+            if (demoMode === 'demo1'){ state.targetAncestorId = "@I1152@"} //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I2179@"}
+        } else {
+            if (demoMode === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
+            else { state.targetAncestorId = "@I1322@"}
+        }
+        
+        // Réinitialiser l'état de l'animation avant de démarrer
+        resetAnimationState();
+        state.isAnimationLaunched = true;     
+              
+        // Démarrer l'animation après un court délai
+        setTimeout(() => {
+            prepareAnimationDemo();
+        }, 500);
+        return;
+    }
+}
+
+// Rendre la fonction accessible globalement
+window.generateLocalMaps = generateLocalMaps;
+
+
 
 export async function validateTilesCoverage() {
     // Reproduire le même chemin que startAncestorAnimation
