@@ -1,4 +1,5 @@
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
+import { getResourceUrl }  from './audioPlayer.js';
 import { state } from './main.js';
 
 /**
@@ -226,6 +227,7 @@ function closeAnimationPhoto() {
 export function showEndAnimationPhoto() {
     // Chemin vers l'image que vous souhaitez afficher
     const imagePath = '/background_images/thomas.jpg';
+    const imageUrl = getResourceUrl(imagePath);
     
     // Options de positionnement et dimensions
     const options = {
@@ -236,7 +238,7 @@ export function showEndAnimationPhoto() {
     };
     
     // Afficher la photo
-    displayEndAnimationPhoto(imagePath, options);
+    displayEndAnimationPhoto(imageUrl, options);
 }
 
 
