@@ -120,7 +120,7 @@ export function addDescendantsControls(nodeGroups) {
         
         // Ajout d'un diagnostic après que tous les boutons sont créés
         // Cette ligne ne modifie pas le comportement, elle affiche juste un message dans la console
-        console.log("Boutons descendants ajoutés en mode ascendant");
+        // console.log("Boutons descendants ajoutés en mode ascendant");
     }
 }
 
@@ -219,33 +219,29 @@ function createPersonNode(personId, generation, options = {}) {
  * @param {Event} event - L'événement de clic
  * @param {Object} d - Les données du nœud cliqué
  */
-function handleDescendantsClick(event, d) {
+export function handleDescendantsClick(event, d, isAnimation = false) {
     event.stopPropagation();
 
-    // Ajouter un log pour le diagnostic
-    console.log("Clic sur bouton descendant pour:", d.data.id, d.data.name, 
-        "isLeftDescendant:", !!d.data.isLeftDescendant,
-        "depth:", d.depth,
-        "isSibling:", !!d.data.isSibling,
-        "hasChildren:", !!(d.data.children && d.data.children.length > 0));
+    // // Ajouter un log pour le diagnostic
+    // console.log("Clic sur bouton descendant pour:", d.data.id, d.data.name, 
+    //     "isLeftDescendant:", !!d.data.isLeftDescendant,
+    //     "depth:", d.depth,
+    //     "isSibling:", !!d.data.isSibling,
+    //     "hasChildren:", !!(d.data.children && d.data.children.length > 0));
     
     if (state.treeModeReal  === 'descendants' || state.treeModeReal === 'directDescendants') {
         handleDescendants(d)
     } else {
         // Mode ascendant : comportement original
-        handleDescendantsOnLeft(d);
-        
-        // if ((d.depth === 0) || (d.data.isSibling)) {
-        //     // handleRootDescendants(d);
-        // }
+        handleDescendantsOnLeft(d, isAnimation);
     }
 
-    console.log("Après traitement pour :" , d.data.id, d.data.name, 
-        "isLeftDescendant:", !!d.data.isLeftDescendant,
-        "depth:", d.depth,
-        "isSibling:", !!d.data.isSibling,
-        "hasChildren:", !!(d.data.children && d.data.children.length > 0),
-        "hasHiddenDescendants:", !!d.data._hiddenDescendants);
+    // console.log("Après traitement pour :" , d.data.id, d.data.name, 
+    //     "isLeftDescendant:", !!d.data.isLeftDescendant,
+    //     "depth:", d.depth,
+    //     "isSibling:", !!d.data.isSibling,
+    //     "hasChildren:", !!(d.data.children && d.data.children.length > 0),
+    //     "hasHiddenDescendants:", !!d.data._hiddenDescendants);
 }
 
 
@@ -256,11 +252,11 @@ function handleDescendantsClick(event, d) {
  * En restructurant l'arbre pour permettre des générations antérieures
  * @param {Object} d - Le nœud D3 cliqué
  */
-function handleDescendantsOnLeft(d) {
+function handleDescendantsOnLeft(d, isAnimation = false) {
     
     // Vérifier si le nœud a des descendants généalogiques
     const siblingId = d.data.id;
-    console.log("Nœud sibling cliqué:", siblingId, d.data.name);
+    // console.log("Nœud sibling cliqué:", siblingId, d.data.name);
     
     // Vérifier si nous affichons ou cachons les descendants
     if (!d.data._showingLeftDescendants) {
@@ -268,13 +264,13 @@ function handleDescendantsOnLeft(d) {
         const descendantsInfo = findDescendantsForSibling(siblingId);
         
         if (descendantsInfo.childrenIds.length === 0) {
-            console.log("Pas de descendants généalogiques trouvés");
+            // console.log("Pas de descendants généalogiques trouvés");
             return;
         }
 
-        for (let i = 0; i < descendantsInfo.childrenData.length; i++) {
-            console.log("Descendants trouvés pour", siblingId, d.data.name , " : ", descendantsInfo.childrenData[i].id, descendantsInfo.childrenData[i].name);
-        }
+        // for (let i = 0; i < descendantsInfo.childrenData.length; i++) {
+        //     console.log("Descendants trouvés pour", siblingId, d.data.name , " : ", descendantsInfo.childrenData[i].id, descendantsInfo.childrenData[i].name);
+        // }
         
         
         // Sauvegarder l'état actuel pour pouvoir revenir en arrière
@@ -301,8 +297,7 @@ function handleDescendantsOnLeft(d) {
     }
     
     // Redessiner l'arbre
-    drawTree();
-    
+    drawTree(false, isAnimation);
 }
 
 /**
@@ -336,7 +331,7 @@ function findDescendantsForSibling(siblingId) {
         });
     }
     
-    console.log("Descendants trouvés pour", siblingId, ":", childrenIds);
+    // console.log("Descendants trouvés pour", siblingId, ":", childrenIds);
     return {
         childrenIds: childrenIds,
         childrenData: childrenData
@@ -418,8 +413,8 @@ function insertSpouseAfterPartner(tree, partnerId, spouse) {
 
 
 function findNodePositionInSiblingsList(tree, nodeId) {
-    console.log("\n=== RECHERCHE POSITION DANS GEN N ===");
-    console.log("Recherche du nœud:", nodeId, state.gedcomData.individuals[nodeId]?.name);
+    // console.log("\n=== RECHERCHE POSITION DANS GEN N ===");
+    // console.log("Recherche du nœud:", nodeId, state.gedcomData.individuals[nodeId]?.name);
     
     // Chercher récursivement le conteneur qui contient la gen N
     function findContainerWithNode(node) {
@@ -427,15 +422,15 @@ function findNodePositionInSiblingsList(tree, nodeId) {
         
         // Vérifier si les children de ce nœud contiennent notre nodeId
         if (node.children?.some(n => n.id === nodeId || (n.siblingReferenceId && n.id === nodeId))) {
-            console.log("Container trouvé dans:", {
-                containerName: node.name,
-                containerGen: node.generation,
-                children: node.children.map(c => ({
-                    name: c.name,
-                    id: c.id,
-                    gen: c.generation
-                }))
-            });
+            // console.log("Container trouvé dans:", {
+            //     containerName: node.name,
+            //     containerGen: node.generation,
+            //     children: node.children.map(c => ({
+            //         name: c.name,
+            //         id: c.id,
+            //         gen: c.generation
+            //     }))
+            // });
             return node;
         }
         
@@ -452,42 +447,42 @@ function findNodePositionInSiblingsList(tree, nodeId) {
     let genNContainer = findContainerWithNode(tree);
 
     if (!genNContainer) {
-        console.log("❌ Pas de container trouvé pour:", state.gedcomData.individuals[nodeId]?.name);
+        // console.log("❌ Pas de container trouvé pour:", state.gedcomData.individuals[nodeId]?.name);
         return -1;
     }
 
     // Lister les noeuds de la gen N pour debug
-    console.log("Noeuds trouvés dans le container:");
-    genNContainer.children.forEach((node, idx) => {
-        console.log(`${idx}. ${node.name} (id: ${node.id}, gen: ${node.generation})`);
-    });
+    // console.log("Noeuds trouvés dans le container:");
+    // genNContainer.children.forEach((node, idx) => {
+    //     console.log(`${idx}. ${node.name} (id: ${node.id}, gen: ${node.generation})`);
+    // });
 
     // Trouver la position du noeud
     const position = genNContainer.children.findIndex(node => node.id === nodeId);
     
-    console.log(`Position finale pour ${state.gedcomData.individuals[nodeId]?.name}: ${position}`);
+    // console.log(`Position finale pour ${state.gedcomData.individuals[nodeId]?.name}: ${position}`);
     return position;
 }
 
 
 function findInsertionPointForDescendant(tree, descendantNode) {
-    console.log("\n=== RECHERCHE POINT D'INSERTION ===");
-    console.log("Descendant à insérer:", {
-        name: descendantNode.name,
-        generation: descendantNode.generation,
-        parentId: descendantNode.genealogicalParentId,
-        parent: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name
-    });
+    // console.log("\n=== RECHERCHE POINT D'INSERTION ===");
+    // console.log("Descendant à insérer:", {
+    //     name: descendantNode.name,
+    //     generation: descendantNode.generation,
+    //     parentId: descendantNode.genealogicalParentId,
+    //     parent: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name
+    // });
 
     // 1. Trouver toutes les branches contenant des gen 1
     let possibleBranches = tree.children.filter(branch => 
         branch.children?.some(n => n.generation === descendantNode.generation)
     );
 
-    console.log("Branches possibles:", possibleBranches.map(b => ({
-        name: b.name,
-        children: b.children.map(c => c.name)
-    })));
+    // console.log("Branches possibles:", possibleBranches.map(b => ({
+    //     name: b.name,
+    //     children: b.children.map(c => c.name)
+    // })));
 
     // 2. Choisir la branche appropriée (celle qui contient déjà des descendants du même parent)
     let targetBranch = possibleBranches.find(branch => 
@@ -500,14 +495,14 @@ function findInsertionPointForDescendant(tree, descendantNode) {
     }
 
     if (!targetBranch) {
-        console.log("❌ Pas de branche trouvée avec la génération", descendantNode.generation);
+        // console.log("❌ Pas de branche trouvée avec la génération", descendantNode.generation);
         return 0;
     }
 
-    console.log("✅ Branche cible choisie:", {
-        name: targetBranch.name,
-        children: targetBranch.children.map(c => c.name)
-    });
+    // console.log("✅ Branche cible choisie:", {
+    //     name: targetBranch.name,
+    //     children: targetBranch.children.map(c => c.name)
+    // });
 
     // Comparer les positions des parents dans gen N 
     const existingDescendants = targetBranch.children;
@@ -515,19 +510,19 @@ function findInsertionPointForDescendant(tree, descendantNode) {
 
     for (let i = 0; i < existingDescendants.length; i++) {
         const existingParentPos = findNodePositionInSiblingsList(tree, existingDescendants[i].genealogicalParentId);
-        console.log("Comparaison positions:", {
-            newParent: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name,
-            newPos: newParentPos,
-            existingParent: state.gedcomData.individuals[existingDescendants[i].genealogicalParentId]?.name, 
-            existingPos: existingParentPos
-        });
+        // console.log("Comparaison positions:", {
+        //     newParent: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name,
+        //     newPos: newParentPos,
+        //     existingParent: state.gedcomData.individuals[existingDescendants[i].genealogicalParentId]?.name, 
+        //     existingPos: existingParentPos
+        // });
 
         if (newParentPos < existingParentPos) {
-            console.log(`=> Insertion à la position ${i} dans la branche ${targetBranch.name}`);
+            // console.log(`=> Insertion à la position ${i} dans la branche ${targetBranch.name}`);
             return i;
         }
     }
-    console.log(`=> Insertion à la fin de la branche ${targetBranch.name}`);
+    // console.log(`=> Insertion à la fin de la branche ${targetBranch.name}`);
     return existingDescendants.length;
 
 }
@@ -570,7 +565,7 @@ function nodeExistsInTree(tree, nodeId) {
 
 
 function removeNodesFromTree(originalTree, descendantNode) {
-    console.log("Suppression des nœuds doublons entre originalTree et descendantNode");
+    // console.log("Suppression des nœuds doublons entre originalTree et descendantNode");
     
     // Récupérer tous les IDs présents dans descendantNode
     function collectIds(node, ids = new Set()) {
@@ -594,10 +589,10 @@ function removeNodesFromTree(originalTree, descendantNode) {
     // IDs à supprimer
     const idsToRemove = collectIds(descendantNode);
     // console.log("IDs à supprimer:", Array.from(idsToRemove));
-    console.log("IDs à supprimer:", Array.from(idsToRemove).map(id => ({
-        id: id,
-        name: state.gedcomData.individuals[id]?.name || 'inconnu'
-    })));
+    // console.log("IDs à supprimer:", Array.from(idsToRemove).map(id => ({
+    //     id: id,
+    //     name: state.gedcomData.individuals[id]?.name || 'inconnu'
+    // })));
 
     // Fonction récursive pour filtrer l'arbre
     function filterTree(node) {
@@ -631,11 +626,11 @@ function removeNodesFromTree(originalTree, descendantNode) {
  * @returns {Object} - L'arbre converti avec virtual root
  */
 function convertToVirtualRootTree(inputTree) {
-    console.log("\n=== CONVERSION EN VIRTUAL ROOT ===");
+    // console.log("\n=== CONVERSION EN VIRTUAL ROOT ===");
     // console.log("⭐ Structure avant conversion:", JSON.stringify(inputTree, null, 2));
 
     if (inputTree.isVirtualRoot) {
-        console.log("Arbre déjà en virtual root");
+        // console.log("Arbre déjà en virtual root");
         return inputTree;
     }
 
@@ -650,7 +645,7 @@ function convertToVirtualRootTree(inputTree) {
 
     // Ajouter d'abord les siblings triés par date de naissance
     if (inputTree.siblings) {
-        console.log("Ajout des siblings triés par date de naissance");
+        // console.log("Ajout des siblings triés par date de naissance");
         let siblings = Array.isArray(inputTree.siblings) ? 
             inputTree.siblings : [inputTree.siblings];
 
@@ -683,7 +678,7 @@ function convertToVirtualRootTree(inputTree) {
 
     // Ajouter les spouses après la racine
     if (inputTree.spouses) {
-        console.log("Ajout des spouses après la racine");
+        // console.log("Ajout des spouses après la racine");
         let spouses = Array.isArray(inputTree.spouses) ? 
             inputTree.spouses : [inputTree.spouses];
         
@@ -713,24 +708,24 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     let allDescendantsExist = true;
     let existingDescendants = [];
     
-    console.log("\n=== VÉRIFICATION DES DESCENDANTS EXISTANTS ===");
+    // console.log("\n=== VÉRIFICATION DES DESCENDANTS EXISTANTS ===");
     for (let i = 0; i < descendantData_all.length; i++) {
         const descendant = descendantData_all[i];
-        console.log("Vérification du descendant:", descendant.id, descendant.name);
+        // console.log("Vérification du descendant:", descendant.id, descendant.name);
         
         const exists = nodeExistsInTree(state.currentTree, descendant.id);
         if (exists) {
-            console.log(`⚠️ Le descendant ${descendant.name} existe déjà dans l'arbre`);
+            // console.log(`⚠️ Le descendant ${descendant.name} existe déjà dans l'arbre`);
             existingDescendants.push(descendant);
         } else {
-            console.log(`✅ Le descendant ${descendant.name} peut être ajouté`);
+            // console.log(`✅ Le descendant ${descendant.name} peut être ajouté`);
             allDescendantsExist = false;
         }
     }
 
     // Si tous les descendants existent déjà, ne rien faire
     if (allDescendantsExist) {
-        console.log("❌ Tous les descendants existent déjà dans l'arbre - Annulation de la restructuration");
+        // console.log("❌ Tous les descendants existent déjà dans l'arbre - Annulation de la restructuration");
 
 
         // ATTENTION   : dans ce cas il faut mettre à jour les lien du descendant et du parent pour être sur que la liaison apparait  : cas de Raould GOYON et Mathilde GOUYON 
@@ -744,10 +739,10 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     descendantData_all = descendantData_all.filter(d => !existingDescendants.some(ed => ed.id === d.id));
     // let descendantData = descendantData_all[0];
 
-    console.log("=== DÉBUT RESTRUCTURATION ===");
-    for (let i = 0; i < descendantData_all.length; i++) {
-        console.log("Restructuration avec descendant:", descendantData_all[i].id, descendantData_all[i].name, " parent:", parentSiblingId, parentName);
-    }
+    // console.log("=== DÉBUT RESTRUCTURATION ===");
+    // for (let i = 0; i < descendantData_all.length; i++) {
+    //     console.log("Restructuration avec descendant:", descendantData_all[i].id, descendantData_all[i].name, " parent:", parentSiblingId, parentName);
+    // }
 
 
 
@@ -764,14 +759,14 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     }
    
     let originalTree = JSON.parse(JSON.stringify(state.currentTree));
-    console.log("⭐ Structure avant l'insertion :", JSON.stringify(state.currentTree, null, 2));
+    // console.log("⭐ Structure avant l'insertion :", JSON.stringify(state.currentTree, null, 2));
 
 
     // Trouver le sibling parent dans l'arbre : fonctionne aussi avec virtual root
     let parentSiblingNode = findNodeInTree(originalTree, parentSiblingId);
 
     if (!parentSiblingNode) {
-        console.error("Parent sibling non trouvé dans l'arbre");
+        // console.error("Parent sibling non trouvé dans l'arbre");
         // Vérifier si le parentSiblingNode est dans les spouses
         const isInSpouses = function(tree, parentSiblingId) {
             if (!tree.spouses) return false;
@@ -786,16 +781,16 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
 
         // En virtual root il n'a pas d'attribut spouse au niveau -1
         if (isInSpouses(originalTree, parentSiblingId)) {
-            console.log("Le parentSiblingId est un spouse, donc on remplace le parentSiblingId par la racine de l'arbre ");
-            console.log(originalTree.id, originalTree)
+            // console.log("Le parentSiblingId est un spouse, donc on remplace le parentSiblingId par la racine de l'arbre ");
+            // console.log(originalTree.id, originalTree)
             parentSiblingId = originalTree.id;
             parentSiblingNode = findNodeInTree(originalTree, parentSiblingId);
             if (!parentSiblingNode) {
-                console.error("Parent sibling non trouvé dans l'arbre");
+                // console.error("Parent sibling non trouvé dans l'arbre");
                 return;
             }
         } else {
-            console.log("Le parentSiblingId n'est pas un spouse");
+            // console.log("Le parentSiblingId n'est pas un spouse");
             return;
         }
     }
@@ -807,9 +802,9 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     const descendantGeneration = parentGeneration - 1; // Génération plus jeune
     const targetGenerationToAnchorTheDescendant = parentGeneration - 2; // Génération plus jeune
 
-    console.log("Génération du parent sibling:", parentGeneration);
-    console.log("Génération assignée au descendant:", descendantGeneration);
-    console.log("Génération à laquelle rattacher le descendant:", targetGenerationToAnchorTheDescendant);
+    // console.log("Génération du parent sibling:", parentGeneration);
+    // console.log("Génération assignée au descendant:", descendantGeneration);
+    // console.log("Génération à laquelle rattacher le descendant:", targetGenerationToAnchorTheDescendant);
     
    
     
@@ -877,7 +872,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
         offset_generation = state.currentTree.generation + 1;
 
         updateGenerationCount();
-        console.log("⭐ Cas spécial: le parent du descendant est la racine (gen 0) : 1 seule racine");
+        // console.log("⭐ Cas spécial: le parent du descendant est la racine (gen 0) : 1 seule racine");
 
         // rechercher les 2 parents du descendantData_all[0]
         const person = state.gedcomData.individuals[descendantData_all[0].id];
@@ -949,20 +944,20 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 return !newTree[0].children.some(child => child.id === spouse.id);
             });
         
-            console.log("Spouses à ajouter:", {
-                total: parentSpousesNodes.length,
-                nouvelles: newSpouses.length,
-                déjàPresentes: parentSpousesNodes.length - newSpouses.length
-            });
+            // console.log("Spouses à ajouter:", {
+            //     total: parentSpousesNodes.length,
+            //     nouvelles: newSpouses.length,
+            //     déjàPresentes: parentSpousesNodes.length - newSpouses.length
+            // });
         
             // N'ajouter que les nouvelles spouses
             if (newSpouses.length > 0 && parentIndex !== -1) {
                 if (Array.isArray(newSpouses)) {
                     newTree[0].children.splice(parentIndex + 1, 0, ...newSpouses);
-                    console.log(`${newSpouses.length} nouvelles spouses ajoutées après ${state.gedcomData.individuals[parentSiblingId].name}`);
+                    // console.log(`${newSpouses.length} nouvelles spouses ajoutées après ${state.gedcomData.individuals[parentSiblingId].name}`);
                 } else {
                     newTree[0].children.splice(parentIndex + 1, 0, newSpouses);
-                    console.log(`1 nouvelle spouse ajoutée après ${state.gedcomData.individuals[parentSiblingId].name}`);
+                    // console.log(`1 nouvelle spouse ajoutée après ${state.gedcomData.individuals[parentSiblingId].name}`);
                 }
             }
         }
@@ -985,7 +980,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     // on peut passer par là en virtual root
     else if (descendantGeneration < 1 ) {
 
-        console.log("⭐ Cas spécial: descendantGeneration < 1 :  out virtual root , gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
+        // console.log("⭐ Cas spécial: descendantGeneration < 1 :  out virtual root , gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
         if (descendantGeneration - offset_generation < 0)
         {
             updateGenerationCount();
@@ -1058,7 +1053,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 
                 if (!isndParentInStructure) { 
                     // Recherche et insertion du 2ème parent
-                    console.log(`Tentative Insertion du 2ème parent ${parentNode[0].name} après ${state.gedcomData.individuals[parentSiblingId].name}`);              
+                    // console.log(`Tentative Insertion du 2ème parent ${parentNode[0].name} après ${state.gedcomData.individuals[parentSiblingId].name}`);              
 
                     let parentBranchIndex = -1;
                     let parentIndexInBranch = -1;
@@ -1085,7 +1080,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     }
 
                 } else {
-                    console.log(`2ème parent already in structure ${parentNode[0].name} après ${state.gedcomData.individuals[parentSiblingId].name}`);              
+                    // console.log(`2ème parent already in structure ${parentNode[0].name} après ${state.gedcomData.individuals[parentSiblingId].name}`);              
                 }
 
 
@@ -1097,7 +1092,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
 
 
             // Insérer le descendant au début des enfants
-            console.log("Ajout du descendant à la racine virtuelle", descendantData.name);
+            // console.log("Ajout du descendant à la racine virtuelle", descendantData.name);
                          
             // Trouver où insérer la nouvelle branche
             // let parentsAnalysis = analyzeGenEnfantVsGenParents(newTree,[descendantNode], 0, 1); //gen enfant =0, gen Parent = 1
@@ -1113,24 +1108,24 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
             if (!parentInfo && spouseToParentMap && spouseToParentMap.has(parentId)) {
                 parentId = spouseToParentMap.get(parentId);
                 parentInfo = parentsMap.get(parentId);
-                console.log("Parent trouvé via spouseToParentMap:", {
-                    originalId: descendantNode.genealogicalParentId,
-                    spouseName: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name,
-                    parentId: parentId,
-                    parentName: state.gedcomData.individuals[parentId]?.name
-                });
+                // console.log("Parent trouvé via spouseToParentMap:", {
+                //     originalId: descendantNode.genealogicalParentId,
+                //     spouseName: state.gedcomData.individuals[descendantNode.genealogicalParentId]?.name,
+                //     parentId: parentId,
+                //     parentName: state.gedcomData.individuals[parentId]?.name
+                // });
             }
 
             if (!parentInfo) {
-                console.log("---- parentInfo n'existe pas ----------", {
-                    tentativeParentId: parentId,
-                    parentName: state.gedcomData.individuals[parentId]?.name
-                });
+                // console.log("---- parentInfo n'existe pas ----------", {
+                //     tentativeParentId: parentId,
+                //     parentName: state.gedcomData.individuals[parentId]?.name
+                // });
             }
             
             if (parentInfo) {
 
-                console.log( "---- parentInfo existe ----------", insertionPoints, insertionPoints.length)
+                // console.log( "---- parentInfo existe ----------", insertionPoints, insertionPoints.length)
 
                 // Si on a des points d'insertion calculés
                 if (insertionPoints && insertionPoints.length > 0) {
@@ -1143,14 +1138,14 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     // const offset =  lastInsertionState.spouseCount;
                     // insertPosition += offset;
                     
-                    console.log("Insertion avec offset:", {
-                        basePosition: insertionPoints[0].insertAfter,
-                        offset: 0,
-                        finalPosition: insertPosition,
-                    });
+                    // console.log("Insertion avec offset:", {
+                    //     basePosition: insertionPoints[0].insertAfter,
+                    //     offset: 0,
+                    //     finalPosition: insertPosition,
+                    // });
 
 
-                    console.log("Insertion de", descendantNode.name, "en position", insertPosition);
+                    // console.log("Insertion de", descendantNode.name, "en position", insertPosition);
                     newTree.children.splice(insertPosition, 0, descendantNode);
 
 
@@ -1170,18 +1165,18 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                         if (descendantIndex !== -1) {
                             // Insérer les spouses juste après
                             newTree.children.splice(descendantIndex + 1, 0, ...childSpouseNodes[i]);
-                            console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
+                            // console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
                         }
                     }
 
 
                     // Après l'insertion
-                    console.log("État des branches APRÈS insertion:", newTree.children.map(c => ({
-                        nom: c.name,
-                        position: newTree.children.indexOf(c),
-                        parentId: c.genealogicalParentId,
-                        parentName: state.gedcomData.individuals[c.genealogicalParentId]?.name
-                    })));
+                    // console.log("État des branches APRÈS insertion:", newTree.children.map(c => ({
+                    //     nom: c.name,
+                    //     position: newTree.children.indexOf(c),
+                    //     parentId: c.genealogicalParentId,
+                    //     parentName: state.gedcomData.individuals[c.genealogicalParentId]?.name
+                    // })));
 
 
 
@@ -1190,7 +1185,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     let insertPosition = parentInfo.children.length > 0 
                         ? Math.max(...parentInfo.children.map(c => c.position)) + 1 
                         : 0;
-                    console.log("Insertion par défaut à la position:", insertPosition, "pour", descendantNode.name);
+                    // console.log("Insertion par défaut à la position:", insertPosition, "pour", descendantNode.name);
                     newTree.children.splice(insertPosition, 0, descendantNode);
 
                     // if (childSpouseNodes[i]) {newTree.children.splice(insertPosition + 1, 0, ...childSpouseNodes[i]); }
@@ -1199,7 +1194,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                         const descendantIndex = newTree.children.findIndex(node => node.id === descendantNode.id);
                         if (descendantIndex !== -1) {
                             newTree.children.splice(descendantIndex + 1, 0, ...childSpouseNodes[i]);
-                            console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
+                            // console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
                         }
                     }
 
@@ -1224,13 +1219,13 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     // cas ou on ajoute des branches descendante mais pas encore besoin de virtual root car descendantGeneration >=1
     // mais après on peut passer par là aussi en virtual root
     else if (descendantGeneration >= 1) {
-        console.log("⭐ Cas spécial: descendantGeneration >= 1, gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
+        // console.log("⭐ Cas spécial: descendantGeneration >= 1, gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
         let descendantNodes = [];
 
         let descendantNode0;
 
         for (let i = 0; i < descendantData_all.length; i++) {
-            console.log("insertion du  descendant:", descendantData_all[i].id, descendantData_all[i].name, " parent:", parentSiblingId, parentName );
+            // console.log("insertion du  descendant:", descendantData_all[i].id, descendantData_all[i].name, " parent:", parentSiblingId, parentName );
 
             const person = state.gedcomData.individuals[descendantData_all[i].id];
             const familiesWithChildren = person.families.filter(famId => {
@@ -1277,7 +1272,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
 
                 descendantInfo.parentArray[descendantInfo.index].appearedOnLeftClick = true;
 
-                console.log(`\n\n#######  ATTENTION ############# Ce descendant existe déjà  ${descendantData_all[i].name}   sexe: ${state.gedcomData.individuals[parentSiblingId].sex} \n\n`);
+                // console.log(`\n\n#######  ATTENTION ############# Ce descendant existe déjà  ${descendantData_all[i].name}   sexe: ${state.gedcomData.individuals[parentSiblingId].sex} \n\n`);
             }
 
 
@@ -1288,7 +1283,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 if (parentInfo) {
                     // Modifier directement dans le tableau parent
                     parentInfo.parentArray[parentInfo.index].isLeftDescendant = true;
-                    console.log(`Flag isLeftDescendant mis à true pour ${parentInfo.node.name}`);
+                    // console.log(`Flag isLeftDescendant mis à true pour ${parentInfo.node.name}`);
                 }
                 if (parentSpousesNodes.length > 0) {
                     parentSpousesNodes.forEach(spouse => {
@@ -1319,7 +1314,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     branch.children?.some(n => n.generation === descendantNode.generation)
                 );
         
-                console.log("Branches possibles trouvées:", possibleBranches.map(b => b.name));
+                // console.log("Branches possibles trouvées:", possibleBranches.map(b => b.name));
         
                 // 2. Choisir la bonne branche (celle avec des descendants du même parent)
                 targetBranchIndex = originalTree.children.findIndex(branch => 
@@ -1366,10 +1361,10 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     }
 
                 }  else if (descendantGeneration > 1 ){
-                    console.log("Cas descendant gen", descendantGeneration, "racine gen", originalTree.generation, originalTree.isVirtualRoot, originalTree);
+                    // console.log("Cas descendant gen", descendantGeneration, "racine gen", originalTree.generation, originalTree.isVirtualRoot, originalTree);
 
                     const parentAnchorNode = findParentNodeInTreeByGeneration(originalTree, targetGenerationToAnchorTheDescendant);
-                    console.log("Parent Anchor :", parentAnchorNode );
+                    // console.log("Parent Anchor :", parentAnchorNode );
                     if (!parentAnchorNode.children) {
                         parentAnchorNode.children = [];
                     }
@@ -1394,7 +1389,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                                 childSpouseNodes[i][j].generation = descendantGeneration;
                             }
                             parentAnchorNode.children.splice(descendantIndex + 1, 0, ...childSpouseNodes[i]);
-                            console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
+                            // console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
                         }
 
                     }
@@ -1413,7 +1408,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     
 
     // console.log("⭐ Structure finale:", JSON.stringify(state.currentTree, null, 2));
-    console.log("Arbre restructuré avec descendant:", state.currentTree);
+    // console.log("Arbre restructuré avec descendant:", state.currentTree);
 }
 
 
@@ -1457,7 +1452,7 @@ function countPreviousParentSpouses(tree, currentParentId) {
         }
     });
 
-    console.log(`Nombre de spouses trouvés pour les descendants du parent précédent: ${spouseCount}`);
+    // console.log(`Nombre de spouses trouvés pour les descendants du parent précédent: ${spouseCount}`);
     return spouseCount;
 }
 
@@ -1467,9 +1462,9 @@ function countPreviousParentSpouses(tree, currentParentId) {
 // Fonction auxiliaire pour trouver les positions des parent en gen N et des enfants en gen N-1
 function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent) {
 
-    console.log("\n=== analyzeGenEnfantVsGenParents : ANALYSE DES PARENTS GEN ", genParent , " ===");
+    // console.log("\n=== analyzeGenEnfantVsGenParents : ANALYSE DES PARENTS GEN ", genParent , " ===");
     // console.log("⭐ Structure tree:", JSON.stringify(tree, null, 2));
-    console.log(" @@@@@ DEBUG @@@@ newDescendant =", newDescendant[0])
+    // console.log(" @@@@@ DEBUG @@@@ newDescendant =", newDescendant[0])
 
     let parentsMap = new Map();
     let spouseToParentMap = new Map();
@@ -1480,14 +1475,14 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
         branch.children?.forEach((node, nodeIndex) => {
             // console.log(" - node=", nodeIndex, node);
             if ((node.generation === genParent) || (node.isSpouse && node.spouseOf)) {
-                console.log(`Node trouvé:`, {
-                    name: node.name,
-                    id: node.id,
-                    isSpouse: node.isSpouse,
-                    spouseOf: node.spouseOf,
-                    generation: node.generation,
-                    position: nodeIndex
-                });
+                // console.log(`Node trouvé:`, {
+                //     name: node.name,
+                //     id: node.id,
+                //     isSpouse: node.isSpouse,
+                //     spouseOf: node.spouseOf,
+                //     generation: node.generation,
+                //     position: nodeIndex
+                // });
 
                 parentsMap.set(node.id, {
                     branchIndex: branchIndex,
@@ -1505,7 +1500,7 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
     });
 
     // 2. Analyse des enfants existants en gen enfant
-    console.log("\nMAP DES ENFANTS EXISTANTS (GEN enfant):");
+    // console.log("\nMAP DES ENFANTS EXISTANTS (GEN enfant):");
     let lastPositionByParent = new Map();
     tree.children.forEach((branch, branchIndex) => {
         if (branch.generation === genEnfant) {
@@ -1515,13 +1510,13 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
                 parentId = spouseToParentMap.get(parentId);
             }
             
-            console.log(`Enfant existant: ${branch.name}`, {
-                position: branchIndex,
-                parentId: parentId,
-                parentName: state.gedcomData.individuals[parentId]?.name,
-                isSpouse: branch.isSpouse,
-                spouseOf: branch.spouseOf
-            });
+            // console.log(`Enfant existant: ${branch.name}`, {
+            //     position: branchIndex,
+            //     parentId: parentId,
+            //     parentName: state.gedcomData.individuals[parentId]?.name,
+            //     isSpouse: branch.isSpouse,
+            //     spouseOf: branch.spouseOf
+            // });
 
             let parentEntry = parentsMap.get(parentId);
             if (parentEntry) {
@@ -1557,7 +1552,7 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
         // Trouver le dernier sibling et considérer ses spouses, et les spouses des autres de la même generation
         // boucle sur toutes les branches : tous les descendants en generation enfant
         tree.children.forEach((branch, index) => {
-            console.log("--------- DEBUG ---- branch index= ", index, "name=" , branch.name, "-------- descendant", newDescendant[0].name, "parentId=", parentId, ",  index ", index, ", spouse ?", branch.isSpouse,  "branch.genealogicalParentId=" ,branch.genealogicalParentId,",  parentInfo.positionInBranch=" , parentInfo.positionInBranch,)
+            // console.log("--------- DEBUG ---- branch index= ", index, "name=" , branch.name, "-------- descendant", newDescendant[0].name, "parentId=", parentId, ",  index ", index, ", spouse ?", branch.isSpouse,  "branch.genealogicalParentId=" ,branch.genealogicalParentId,",  parentInfo.positionInBranch=" , parentInfo.positionInBranch,)
             // console.log("--------- debug ----------- descendant", newDescendant[0].name, "parentId=", parentId, ",  index ", index, ", spouse ?", branch.isSpouse,  "branch.genealogicalParentId=" ,branch.genealogicalParentId,",  parentInfo.positionInBranch="  ,parentInfo.positionInBranch, " parentsMap.get(branch.genealogicalParentId)=", parentsMap.get(branch.genealogicalParentId), ", branch ", branch )
 
             let genealogicalParentId;
@@ -1570,7 +1565,7 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
                 if (branch.spouseOf)
                 {
                     let descendant = findNodeInTree(tree, branch.spouseOf)
-                    console.log(' -------------- debug  SPOUSE of descendant ---------- ', branch.name,  descendant.genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(descendant.genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(descendant.genealogicalMotherId)?.positionInBranch,", descendant.name=" , descendant.name, descendant )
+                    // console.log(' -------------- debug  SPOUSE of descendant ---------- ', branch.name,  descendant.genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(descendant.genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(descendant.genealogicalMotherId)?.positionInBranch,", descendant.name=" , descendant.name, descendant )
                     genealogicalParentId = descendant.genealogicalParentId;
                     genealogicalMotherId = descendant.genealogicalMotherId;
                 }
@@ -1580,14 +1575,14 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
                 lastSiblingPosition = index;
                 // donc on pourra insérer ce descendant juste en dessous de ce sibling : (index)
                 // le spouse de ce sibling est déjà inséré
-                console.log(' -------------- debug  descendant same parent  ----- index=', index, 
-                    ',----- ', branch.name,  genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(genealogicalMotherId)?.positionInBranch, ", lastSiblingPosition=", lastSiblingPosition )
+                // console.log(' -------------- debug  descendant same parent  ----- index=', index, 
+                //     ',----- ', branch.name,  genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(genealogicalMotherId)?.positionInBranch, ", lastSiblingPosition=", lastSiblingPosition )
             } else if (genealogicalParentId &&  parentInfo.positionInBranch > parentsMap.get(genealogicalParentId)?.positionInBranch) {
                 // il s'agit d'un descendant d'un autre parent que celui du descendant courant . Et ce parent se trouve avant le parent du descendant courant
                 previousParentLastChild = index;
                 // donc on pourra insérer ce descendant juste en dessous de ce descendant : (index )
-                console.log(' -------------- debug  descendant  from parent branch < parent branch of this  ------ index=', index, 
-                    ',----- ', branch.name,  branch.genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(genealogicalMotherId)?.positionInBranch, ", previousParentLastChild=", previousParentLastChild )
+                // console.log(' -------------- debug  descendant  from parent branch < parent branch of this  ------ index=', index, 
+                //     ',----- ', branch.name,  branch.genealogicalParentId, parentInfo.positionInBranch, "fatherId branch=", parentsMap.get(genealogicalParentId)?.positionInBranch, "motherId branch=", parentsMap.get(genealogicalMotherId)?.positionInBranch, ", previousParentLastChild=", previousParentLastChild )
             }
             
         });
@@ -1601,7 +1596,7 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
             previousParentLastChild + 1;
 
 
-        console.log("--------- debug ----------- descendant", newDescendant[0].name, "parentId=", parentId, ",  insertPosition ", insertPosition)
+        // console.log("--------- debug ----------- descendant", newDescendant[0].name, "parentId=", parentId, ",  insertPosition ", insertPosition)
 
 
         insertionPoints.push({
@@ -1618,212 +1613,11 @@ function analyzeGenEnfantVsGenParents(tree, newDescendant, genEnfant, genParent)
 
 
 
-
-// Fonction générique pour trouver les positions des parents en gen N et des enfants en gen N-1
-// function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genParent) {
-//     console.log(`\n=== analyzeGenEnfantVsGenParents : ANALYSE DES PARENTS GEN ${genParent} et ENFANTS GEN ${genEnfant} ===`);
-//     console.log("⭐ Analyse du descendant:", JSON.stringify(newDescendant[0], null, 2));
-
-//     // Structures pour stocker les informations
-//     let parentsMap = new Map();
-//     let spouseToParentMap = new Map();
-//     let nodesOfGenN = [];
-//     let nodesOfGenNMinus1 = [];
-//     let branchPositions = new Map(); // Pour stocker la position absolue des branches
-
-//     // Fonction récursive pour trouver tous les nœuds d'une génération spécifique
-//     function findNodesOfGeneration(node, path = [], branch = null, branchIndex = -1, nodeIndex = -1) {
-//         // Stocker la position pour chaque nœud
-//         const position = { 
-//             path: [...path], 
-//             branchIndex, 
-//             nodeIndex,
-//             parentBranch: branch
-//         };
-
-//         // Vérifier si ce nœud est de la génération que nous cherchons
-//         if (node.generation === genParent || (node.isSpouse && node.spouseOf)) {
-//             nodesOfGenN.push({
-//                 node,
-//                 position
-//             });
-
-//             // Ajouter à parentsMap
-//             parentsMap.set(node.id, {
-//                 path: [...path],
-//                 branchIndex,
-//                 nodeIndex,
-//                 positionInBranch: nodeIndex,
-//                 children: [],
-//                 isSpouse: node.isSpouse,
-//                 spouseOf: node.spouseOf
-//             });
-
-//             // Si c'est un conjoint, enregistrer la relation
-//             if (node.isSpouse && node.spouseOf) {
-//                 spouseToParentMap.set(node.id, node.spouseOf);
-//             }
-//         }
-
-//         // Vérifier si ce nœud est de la génération N-1
-//         if (node.generation === genEnfant) {
-//             nodesOfGenNMinus1.push({
-//                 node,
-//                 position
-//             });
-
-//             // Stocker la position de la branche
-//             if (branchIndex !== -1) {
-//                 branchPositions.set(node.id, branchIndex);
-//             }
-//         }
-
-//         // Récursivement parcourir les enfants de ce nœud
-//         if (node.children && node.children.length > 0) {
-//             node.children.forEach((child, childIndex) => {
-//                 const newPath = [...path, { node, index: childIndex }];
-//                 findNodesOfGeneration(child, newPath, node, branchIndex, childIndex);
-//             });
-//         }
-//     }
-
-//     // Parcourir les branches principales de l'arbre
-//     tree.children.forEach((branch, branchIndex) => {
-//         // Stocker la position de la branche
-//         branchPositions.set(branch.id, branchIndex);
-        
-//         // Vérifier si cette branche est de génération N-1
-//         if (branch.generation === genEnfant) {
-//             nodesOfGenNMinus1.push({
-//                 node: branch,
-//                 position: { 
-//                     path: [], 
-//                     branchIndex, 
-//                     nodeIndex: -1,
-//                     parentBranch: tree
-//                 }
-//             });
-//         }
-        
-//         // Parcourir les nœuds de cette branche
-//         if (branch.children) {
-//             branch.children.forEach((node, nodeIndex) => {
-//                 const path = [{ node: branch, index: branchIndex }];
-//                 findNodesOfGeneration(node, path, branch, branchIndex, nodeIndex);
-//             });
-//         }
-//     });
-
-//     console.log(`Nombre de nœuds trouvés en génération ${genParent}:`, nodesOfGenN.length);
-//     console.log(`Nombre de nœuds trouvés en génération ${genEnfant}:`, nodesOfGenNMinus1.length);
-
-//     // Analyser les relations parent-enfant
-//     nodesOfGenNMinus1.forEach(({ node }) => {
-//         if (!node.isSpouse) { // Ignorer les conjoints pour cette analyse
-//             let parentId = node.genealogicalParentId;
-            
-//             // Si le parent est un conjoint, utiliser l'ID du parent principal
-//             if (spouseToParentMap.has(parentId)) {
-//                 parentId = spouseToParentMap.get(parentId);
-//             }
-            
-//             console.log(`Enfant existant: ${node.name}`, {
-//                 position: branchPositions.get(node.id),
-//                 parentId: parentId,
-//                 parentName: state.gedcomData.individuals[parentId]?.name
-//             });
-
-//             let parentEntry = parentsMap.get(parentId);
-//             if (parentEntry) {
-//                 parentEntry.children.push({
-//                     branch: node,
-//                     position: branchPositions.get(node.id)
-//                 });
-//             }
-//         }
-//     });
-
-//     // Déterminer les positions d'insertion
-//     let insertionPoints = [];
-//     let parentId = newDescendant[0].genealogicalParentId;
-    
-//     // Si le parent est un conjoint, utiliser l'ID du parent principal
-//     if (spouseToParentMap.has(parentId)) {
-//         parentId = spouseToParentMap.get(parentId);
-//     }
-    
-//     const parentInfo = parentsMap.get(parentId);
-//     if (parentInfo) {
-//         let lastSiblingPosition = -1;
-//         let previousParentLastChild = -1;
-
-//         // Parcourir toutes les branches pour trouver les positions
-//         nodesOfGenNMinus1.forEach(({ node }) => {
-//             if (branchPositions.has(node.id)) {
-//                 const index = branchPositions.get(node.id);
-//                 let genealogicalParentId = node.genealogicalParentId;
-//                 let genealogicalMotherId = node.genealogicalMotherId;
-                
-//                 // Gestion du cas où le nœud est un conjoint
-//                 if (node.isSpouse && node.spouseOf) {
-//                     const spouse = findNodeInTree(tree, node.spouseOf);
-//                     if (spouse) {
-//                         genealogicalParentId = spouse.genealogicalParentId;
-//                         genealogicalMotherId = spouse.genealogicalMotherId;
-//                     }
-//                 }
-                
-//                 // Si le nœud a le même parent que le nouveau descendant
-//                 if (genealogicalParentId === parentId || genealogicalMotherId === parentId) {
-//                     lastSiblingPosition = index;
-//                     console.log(`Frère/sœur trouvé: ${node.name} à la position ${index}`);
-//                 } 
-//                 // Si le parent du nœud se trouve avant le parent du nouveau descendant
-//                 else if (genealogicalParentId && 
-//                          parentsMap.get(genealogicalParentId) && 
-//                          parentInfo.positionInBranch > parentsMap.get(genealogicalParentId).positionInBranch) {
-//                     previousParentLastChild = index;
-//                     console.log(`Enfant d'un parent précédent trouvé: ${node.name} à la position ${index}`);
-//                 }
-//             }
-//         });
-
-//         // Détermination de la position d'insertion
-//         let insertPosition = lastSiblingPosition !== -1 ? 
-//             lastSiblingPosition + 1 : 
-//             previousParentLastChild + 1;
-
-//         console.log(`Position d'insertion pour ${newDescendant[0].name}: ${insertPosition}`);
-
-//         // Obtenir le nom du nœud à la position lastSiblingPosition, s'il existe
-//         let siblingName = "";
-//         if (lastSiblingPosition !== -1) {
-//             nodesOfGenNMinus1.forEach(({ node }) => {
-//                 if (branchPositions.get(node.id) === lastSiblingPosition) {
-//                     siblingName = node.name;
-//                 }
-//             });
-//         }
-
-//         insertionPoints.push({
-//             descendant: newDescendant[0],
-//             insertAfter: insertPosition,
-//             reason: lastSiblingPosition !== -1 ? 
-//                 `Après frère/sœur ${siblingName}` :
-//                 `Après les enfants du parent précédent`
-//         });
-//     }
-
-//     return { parentsMap, insertionPoints, spouseToParentMap };
-// }
-
-
-// Fonction générique pour trouver les positions des parents en gen N et des enfants en gen N-1
 function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genParent) {
 
-    console.log(`\n=== analyzeGenEnfantVsGenParentsNew : ANALYSE DES PARENTS GEN ${genParent} et ENFANTS GEN ${genEnfant} ===`);
+    // console.log(`\n=== analyzeGenEnfantVsGenParentsNew : ANALYSE DES PARENTS GEN ${genParent} et ENFANTS GEN ${genEnfant} ===`);
     // console.log("⭐ Structure tree:", JSON.stringify(tree, null, 2));
-    console.log(" @@@@@ DEBUG @@@@ newDescendant =", newDescendant[0])
+    // console.log(" @@@@@ DEBUG @@@@ newDescendant =", newDescendant[0])
 
     let parentsMap = new Map();
     let spouseToParentMap = new Map();
@@ -1887,18 +1681,18 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
     });
     
     // Log pour vérifier la map des parents
-    console.log("\nRÉSULTAT - PARENT en génération ", genParent ,":");
+    // console.log("\nRÉSULTAT - PARENT en génération ", genParent ,":");
     parentsMap.forEach((info, id) => {
         const personName = info.name || "Nom inconnu";
         const spouseStatus = info.isSpouse ? `(conjoint de ${info.spouseOf})` : "";
-        console.log(`Parent ID: ${id}, Nom: ${personName}  Branche: ${info.branchIndex}, Position: ${info.positionInBranch} displayIndex: ${info.displayIndex} ${spouseStatus} `);
+        // console.log(`Parent ID: ${id}, Nom: ${personName}  Branche: ${info.branchIndex}, Position: ${info.positionInBranch} displayIndex: ${info.displayIndex} ${spouseStatus} `);
     });
     
-    console.log("\nAssociations conjoint → parent principal:");
+    // console.log("\nAssociations conjoint → parent principal:");
     spouseToParentMap.forEach((parentId, spouseId) => {
         const spouseInfo = parentsMap.get(spouseId);
         const parentInfo = parentsMap.get(parentId);
-        console.log(`Conjoint ${spouseId} (${spouseInfo?.name || "Nom inconnu"}) → Parent ${parentId} (${parentInfo?.name || "Nom inconnu"})`);
+        // console.log(`Conjoint ${spouseId} (${spouseInfo?.name || "Nom inconnu"}) → Parent ${parentId} (${parentInfo?.name || "Nom inconnu"})`);
     });
 
 
@@ -1907,7 +1701,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
 
 
     // 2. Analyse des enfants existants en gen N-1
-    console.log(`\nMAP DES ENFANTS EXISTANTS (GEN ${genEnfant}):`);
+    // console.log(`\nMAP DES ENFANTS EXISTANTS (GEN ${genEnfant}):`);
     let lastPositionByParent = new Map();
     let childrenByParent = new Map(); // Nouvelle map pour stocker les enfants par parent
     let globalPositionIndex = 0; 
@@ -2009,14 +1803,14 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
     });
 
     // Log pour vérifier la map des enfants par parent
-    console.log("\nRÉSULTAT - ENFANTS PAR PARENT:");
+    // console.log("\nRÉSULTAT - ENFANTS PAR PARENT:");
     childrenByParent.forEach((children, parentId) => {
         const parentInfo = parentsMap.get(parentId);
         const parentName = parentInfo ? parentInfo.name : "Nom inconnu";
-        console.log(`Parent ${parentId} (${parentName}): ${children.length} enfant(s)/conjoint(s)`);
+        // console.log(`Parent ${parentId} (${parentName}): ${children.length} enfant(s)/conjoint(s)`);
         children.forEach(child => {
             const spouseInfo = child.isSpouse ? ` (conjoint de ${child.spouseOf})` : "";
-            console.log(`  - ${child.name} (gen ${child.generation}, branche ${child.branchIndex},  genealogicalMotherId ${child.genealogicalMotherId})${spouseInfo}`);
+            // console.log(`  - ${child.name} (gen ${child.generation}, branche ${child.branchIndex},  genealogicalMotherId ${child.genealogicalMotherId})${spouseInfo}`);
         });
     });
 
@@ -2039,7 +1833,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
 
     const parentInfo = parentsMap.get(parentId);
     if (parentInfo) {
-        console.log(`Analyse du placement pour le descendant ${newDescendant[0].name} (parent: ${parentId})`);
+        // console.log(`Analyse du placement pour le descendant ${newDescendant[0].name} (parent: ${parentId})`);
         
         // Position d'insertion par défaut (au début)
         let insertPosition = 0;
@@ -2054,7 +1848,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
             
             // Pour chaque enfant, vérifier si c'est un frère/sœur ou un enfant d'un parent antérieur
             children.forEach(child => {
-                console.log(`Examen de l'enfant: ${child.name}, genealogicalParentId: ${child.genealogicalParentId}, genealogicalMotherId: ${child.genealogicalMotherId}`);
+                // console.log(`Examen de l'enfant: ${child.name}, genealogicalParentId: ${child.genealogicalParentId}, genealogicalMotherId: ${child.genealogicalMotherId}`);
                 
                 // Vérifier si cet enfant a le même père ou la même mère que notre descendant
                 if (child.genealogicalParentId === parentId || child.genealogicalMotherId === parentId) {
@@ -2063,7 +1857,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                     if (childPosition > lastSiblingPosition) {
                         lastSiblingPosition = childPosition;
                         lastSiblingBranch = child.branchIndex;
-                        console.log(`  Frère/sœur trouvé(e): ${child.name} à la position ${childPosition}`);
+                        // console.log(`  Frère/sœur trouvé(e): ${child.name} à la position ${childPosition}`);
                     }
                 }
                 // Si l'enfant a un parent antérieur dans l'arbre
@@ -2072,7 +1866,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                         parentInfo.displayIndex > parentsMap.get(child.genealogicalParentId).displayIndex) {
                     if (child.position > previousParentLastChild) { 
                         previousParentLastChild = child.position;
-                        console.log(`  Enfant d'un parent antérieur: ${child.name} à la position ${child.position}`);
+                        // console.log(`  Enfant d'un parent antérieur: ${child.name} à la position ${child.position}`);
                     }
                 }
             });
@@ -2087,7 +1881,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
             lastSiblingPosition + 1 : 
             previousParentLastChild + 1;
         
-        console.log(`Position d'insertion finale pour ${newDescendant[0].name}: ${insertPosition}`);
+        // console.log(`Position d'insertion finale pour ${newDescendant[0].name}: ${insertPosition}`);
         
         insertionPoints.push({
             descendant: newDescendant[0],
@@ -2291,18 +2085,18 @@ function findParentNodeInTreeByGeneration(tree, generation) {
 
 
 function findRootNode(tree) {
-    console.log("Recherche du nœud racine dans:", tree);
+    // console.log("Recherche du nœud racine dans:", tree);
     
     // Si l'arbre est déjà la racine
     if (tree.generation === 0) {
-        console.log("Arbre déjà au niveau racine");
+        // console.log("Arbre déjà au niveau racine");
         return tree;
     }
     
     // Recherche récursive
     function findRoot(node) {
         if (node.generation === 0) {
-            console.log("Nœud racine trouvé:", node.id, node.name);
+            // console.log("Nœud racine trouvé:", node.id, node.name);
             return node;
         }
         
@@ -2317,7 +2111,7 @@ function findRootNode(tree) {
     }
     
     const rootNode = findRoot(tree);
-    console.log("Résultat de la recherche racine:", rootNode ? rootNode.id : "non trouvé");
+    // console.log("Résultat de la recherche racine:", rootNode ? rootNode.id : "non trouvé");
     return rootNode;
 }
 
@@ -2410,11 +2204,11 @@ function applyTreeLeftShift() {
 
     if (leftmostNode) {
         const margin = 100;
-        console.log("Position gauche:", leftmostNode.left, "Marge:", margin);
+        // console.log("Position gauche:", leftmostNode.left, "Marge:", margin);
         
         if (leftmostNode.left < margin) {
             const shiftAmount = state.boxWidth * 1.3;
-            console.log("Décalage vers la droite de:", shiftAmount);
+            // console.log("Décalage vers la droite de:", shiftAmount);
             
             if (zoom) {
                 svg.transition()
@@ -2885,19 +2679,19 @@ function handleNormalAncestors(node) {
  */
 export function handleAncestorsClick(event, d) {
     event.stopPropagation();
-    console.log("Clicked node data:", d.data);
+    // console.log("Clicked node data:", d.data);
     let newAncestorsAdded = false;
 
     if (d.data.isSibling) {
         const siblingsReference = d.parent.data.children.filter(child => 
             child.id == d.data.siblingReferenceId && child !== d.data
         );
-        console.log("Before handling normal ancestors:", d.data.children);
+        // console.log("Before handling normal ancestors:", d.data.children);
         newAncestorsAdded = handleSiblingAncestors(siblingsReference);
     } else {
-        console.log("Before handling normal ancestors:", d.data.children);
+        // console.log("Before handling normal ancestors:", d.data.children);
         newAncestorsAdded = handleNormalAncestors(d.data);
-        console.log("After handling normal ancestors:", d.data.children);
+        // console.log("After handling normal ancestors:", d.data.children);
     }
 
     drawTree();

@@ -63,7 +63,51 @@ if ('serviceWorker' in navigator) {
   }
 
   
+// Ajouter cette fonction à main.js
 
+// Fonction pour vider le cache storage
+export function clearCacheStorage() {
+    const cacheStatusElement = document.getElementById('cache-status');
+    cacheStatusElement.style.display = 'block';
+    cacheStatusElement.textContent = 'Vidage du cache en cours...';
+    cacheStatusElement.style.color = '#ff9800';
+
+    // Vérifier si le service worker est enregistré
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        // Ajouter un écouteur d'événements pour recevoir la réponse du service worker
+        navigator.serviceWorker.addEventListener('message', function onMessage(event) {
+            if (event.data && event.data.action === 'cacheCleared') {
+                cacheStatusElement.textContent = 'Cache vidé avec succès ! Rechargement...';
+                cacheStatusElement.style.color = '#4CAF50';
+                
+                // Supprimer l'écouteur d'événements après traitement
+                navigator.serviceWorker.removeEventListener('message', onMessage);
+                
+                // Attendre un peu pour que l'utilisateur voit le message
+                setTimeout(() => {
+                    // Recharger la page pour que les changements prennent effet
+                    window.location.reload(true);
+                }, 1500);
+            }
+        });
+
+        // Envoyer un message au service worker pour vider le cache
+        navigator.serviceWorker.controller.postMessage({
+            action: 'clearCache'
+        });
+    } else {
+        cacheStatusElement.textContent = 'Service Worker non actif. Rechargement...';
+        cacheStatusElement.style.color = '#f44336';
+        
+        // Tenter de recharger la page de toute façon
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 1500);
+    }
+}
+
+// Exportez et exposez la fonction pour qu'elle soit accessible globalement
+window.clearCacheStorage = clearCacheStorage;
 
 
 export const state = {
@@ -86,6 +130,7 @@ export const state = {
     isAnimationLaunched: false,
     isAnimationMapInitialized: false,
     targetAncestorId: "@I739@",
+    targetCousinId: null,
     animationTargetAncestorId: "@I739@",
     animationRootPersonId: '@I1@',
     isTouchDevice: false,
@@ -108,7 +153,6 @@ export const state = {
 export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
-
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -169,18 +213,6 @@ export function toggleSpeech() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // Pour arrêter le monitoring
 function stopBackgroundMonitoring() {
     if (window._monitoringStopFunction) {
@@ -216,24 +248,6 @@ function stopBackgroundMonitoring() {
       console.log("Impossible de redémarrer, fonction originale non trouvée");
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 export function toggleFullScreen() {
@@ -306,8 +320,6 @@ function initializeGenerationSelect() {
     }
 }
 
-
-
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
@@ -346,7 +358,7 @@ export async function loadData() {
   
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
-    toggleFullScreen();
+    // toggleFullScreen();
 
     // for mobile phone
     nameCloudState.mobilePhone = false;
@@ -404,6 +416,9 @@ export async function loadData() {
             
         initializeHamburgerOnce();
         showHamburgerMenu();
+
+
+        toggleFullScreen();
         
         
     } catch (error) {
@@ -440,12 +455,6 @@ function injectCustomStyle() {
 
 // Appelez cette fonction au chargement de la page
 window.addEventListener('load', injectCustomStyle);
-
-
-
-
-
-
 
 
 /**
@@ -520,13 +529,6 @@ async function loadEncryptedContent(password, filename) {
     return pako.inflate(decrypted.slice(8), {to: 'string'});
 }
 
-
-
-
-
-
-
-
 /**
  * Valide le mot de passe
  * @private
@@ -542,15 +544,6 @@ async function validatePassword(password, decrypted) {
         throw new Error('Mot de passe incorrect');
     }
 }
-
-
-
-
-
-
-
-
-
 
 /**
  * Charge le contenu du fichier
@@ -656,9 +649,6 @@ function fallbackUpdateRootPersonSelector(person) {
     rootPersonResults.value = person.id;
 }
 
-
-
-
 /**
  * Gère le changement de sélection dans le sélecteur de personnes racines
  * @param {Event} event - L'événement de changement
@@ -686,15 +676,78 @@ export function handleRootPersonChange(event) {
         return;
     }
 
-    if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
-        
+    
+    console.log('\ndebug handleRootPersonChange =', selectedValue)
+    
+    // if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
+    if (selectedValue.includes('demo')) {
+        let ancestor;
+        let cousin;
         if (state.treeOwner ===2 ) {
             if (selectedValue === 'demo1'){ state.targetAncestorId = "@I1152@"} //"@I74@" } // "@I739@" } //"@I6@" } //
             else { state.targetAncestorId = "@I2179@"}
         } else {
-            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
-            else { state.targetAncestorId = "@I1322@"}
+            if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
+                // state.targetAncestorId = "@I739@" 
+                ancestor = searchRootPersonId('alain ii goyon de matignon');  
+                cousin = null;       
+            } else if (selectedValue === 'demo2'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;  
+            } else if (selectedValue === 'demo3'){ // 'comme un ouragan'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('bertrand gouyon');
+                cousin = searchRootPersonId('stephanie marie elisabeth grimaldi');
+            } else if (selectedValue === 'demo4'){  //'Espace'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('charles lebon');
+                cousin = searchRootPersonId('thomas pesquet');
+            } else if (selectedValue === 'demo5'){ // 'Arabe du futur'
+                ancestor = searchRootPersonId('anthoine sicot');  
+                cousin = searchRootPersonId('riad satouf');          
+            } else if (selectedValue === 'demo6'){ // 'Loup du Canada'
+                ancestor = searchRootPersonId('andré du matz'); 
+                cousin = searchRootPersonId('pierre garand');            
+            } else if (selectedValue === 'demo7'){ // "c'est normal"
+                ancestor = searchRootPersonId('jan demaure');
+                cousin = searchRootPersonId('brigitte fontaine');             
+            } else if (selectedValue === 'demo8'){ // 'avant JC'
+                ancestor = searchRootPersonId('kamber de cambrie'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo9'){ // 'Francs'
+                ancestor = searchRootPersonId('pharabert des francs'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo10'){ // 'Capet'
+                ancestor = searchRootPersonId('huges capet'); 
+                cousin = null;           
+            } else {
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
+            }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {
+                state.targetCousinId = null;
+            }   
+
+
+
+
         }
+
+
+        // typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10'];
+        // typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
+        // typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
+  
+
+
+
+
 
         
         // showMap();
@@ -1048,10 +1101,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
-
-
-
 function detectInputType() {
   // Vérifie si l'appareil utilise principalement une souris
   const prefersMouse = window.matchMedia('(pointer: fine)').matches;
@@ -1117,7 +1166,6 @@ function detectDeviceType() {
 }
 
 
-
 // export function returnToLogin() {
 //     // Masquer l'arbre
 //     document.getElementById('tree-container').style.display = 'none';
@@ -1172,11 +1220,6 @@ function detectDeviceType() {
 
 
 
-
-
-
-
-
 // Exposer la fonction et le compteur globalement
 window.showToast = showToast;
 window.actionCounters = actionCounters;
@@ -1203,7 +1246,39 @@ export {
 
 
 
-
 window.addEventListener('load', initialize);
 
 
+
+
+
+//  fonction searchRootPerson pour utiliser findPersonsByName :
+function searchRootPersonId(searchStr) {
+
+    // searchStr = searchStr.value.toLowerCase();
+
+    if (!searchStr) return;
+
+    // Utiliser la nouvelle fonction findPersonsByName
+
+    
+    const matchedPerson = findPersonByName(searchStr);
+
+
+
+    if (matchedPerson) {
+        // Convertir les personnes trouvées au format d'options pour le sélecteur personnalisé
+        // const options = matchedPersons.map(person => ({
+        //     value: person.id,
+        //     label: person.name.replace(/\//g, '').trim()
+        // }));
+
+        console.log('\n\n DEBUG search persone for demo ***********',matchedPerson)
+        return matchedPerson;
+        
+
+    } else {
+        alert('Aucune personne trouvée');
+        return null;
+    }
+}

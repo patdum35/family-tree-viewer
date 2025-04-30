@@ -1,4 +1,5 @@
 import { geocodeLocation } from './geoLocalisation.js';
+import { fetchTileWithCache } from './mapTilesPreloader.js';
 
 /**
  * Symboles pour chaque type de lieu
@@ -177,7 +178,8 @@ export function createLocationMap(containerId, locations, options = {}) {
         initialCenter: [46.2276, 2.2137], // Centre de la France
         attribution: false,           // Masquer l'attribution
         zoomControl: false,           // Masquer les contrôles de zoom
-        maxZoom: 9                    // Zoom maximum
+        maxZoom: 9,                    // Zoom maximum
+        useLocalTiles: true 
     };
 
     const mergedOptions = { ...defaultOptions, ...options };
@@ -189,9 +191,24 @@ export function createLocationMap(containerId, locations, options = {}) {
     }).setView(mergedOptions.initialCenter, mergedOptions.initialZoom);
 
     // Ajouter la couche de tuiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: mergedOptions.attribution ? '© OpenStreetMap contributors' : ''
-    }).addTo(map);
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     attribution: mergedOptions.attribution ? '© OpenStreetMap contributors' : ''
+    // }).addTo(map);
+
+
+    if (mergedOptions.useLocalTiles) {
+        createCachedTileLayer({
+            attribution: mergedOptions.attribution ? '© OpenStreetMap contributors' : ''
+        }).addTo(map);
+    } else {
+        // Conserver l'ancien comportement comme fallback
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: mergedOptions.attribution ? '© OpenStreetMap contributors' : ''
+        }).addTo(map);
+    }
+
+
+
 
     // Tableau pour stocker les marqueurs
     const markers = [];
@@ -238,7 +255,8 @@ export function initAnimationMap(containerId, options = {}) {
         center: [46.2276, 2.2137], // Centre de la France
         zoom: 5,
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        useLocalTiles: true 
     };
 
     const mergedOptions = { ...defaultOptions, ...options };
@@ -250,7 +268,18 @@ export function initAnimationMap(containerId, options = {}) {
     const map = L.map(containerId, mergedOptions);
 
     // Ajouter la couche de tuiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+
+    if (mergedOptions.useLocalTiles) {
+        createCachedTileLayer({
+            attribution: mergedOptions.attributionControl ? '© OpenStreetMap contributors' : ''
+        }).addTo(map);
+    } else {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: mergedOptions.attributionControl ? '© OpenStreetMap contributors' : ''
+        }).addTo(map);
+    }
 
     return map;
 }
@@ -795,4 +824,75 @@ export function setupCustomPopupStyle() {
         `;
         document.head.appendChild(style);
     }
+}
+
+
+
+
+/**
+ * Crée une couche de tuiles personnalisée qui utilise le cache local
+ * @param {Object} options - Options pour la couche de tuiles
+ * @returns {L.TileLayer} - Une couche de tuiles personnalisée
+ */
+export function createCachedTileLayer(options = {}) {
+    const defaultOptions = {
+        maxZoom: 19,
+        minZoom: 1,
+        attribution: '© OpenStreetMap contributors'
+    };
+    
+    const mergedOptions = { ...defaultOptions, ...options };
+    
+    // Créer une couche de tuiles personnalisée qui utilise le cache
+    const CustomTileLayer = L.TileLayer.extend({
+        createTile: function(coords, done) {
+            const tile = document.createElement('img');
+            
+            // Essayer d'abord la tuile locale avec le cache
+            const localUrl = `maps/tile_${coords.z}_${coords.x}_${coords.y}.png`;
+            
+            // Utiliser fetchTileWithCache pour récupérer la tuile
+            fetchTileWithCache(localUrl)
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    } else {
+                        throw new Error('Tuile locale non disponible');
+                    }
+                })
+                .then(blob => {
+                    // Créer une URL pour le blob
+                    const objectURL = URL.createObjectURL(blob);
+                    tile.src = objectURL;
+                    
+                    // Libérer l'URL du blob quand la tuile est chargée
+                    tile.onload = function() {
+                        URL.revokeObjectURL(objectURL);
+                        done(null, tile);
+                    };
+                })
+                .catch(error => {
+                    // Fallback vers OSM si la tuile locale n'est pas disponible
+                    const servers = ['a', 'b', 'c'];
+                    const server = servers[Math.floor(Math.random() * servers.length)];
+                    const osmUrl = `https://${server}.tile.openstreetmap.org/${coords.z}/${coords.x}/${coords.y}.png`;
+                    
+                    console.log(`Tuile locale non trouvée: ${localUrl}, utilisation de ${osmUrl}`);
+                    tile.src = osmUrl;
+                    
+                    tile.onload = function() {
+                        done(null, tile);
+                    };
+                    
+                    tile.onerror = function(e) {
+                        console.error(`Impossible de charger la tuile OSM: ${osmUrl}`);
+                        done(e, tile);
+                    };
+                });
+            
+            return tile;
+        }
+    });
+    
+    return new CustomTileLayer("", mergedOptions);
 }

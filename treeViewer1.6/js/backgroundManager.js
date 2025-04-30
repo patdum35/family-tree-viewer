@@ -159,7 +159,7 @@ export function initBackgroundContainer() {
         const container = document.createElement('div');
         container.className = 'background-container';
         document.body.insertBefore(container, document.body.firstChild);
-        console.log("debug0, initBackgroundContainer")    
+        // console.log("debug0, initBackgroundContainer")    
 
     }
 }
@@ -1178,7 +1178,7 @@ function setupGrowingTreeBackground(svg) {
     
     bgGroup.attr("filter", "url(#growing-tree-blur)");
     
-    console.log(`Éléments SVG générés pour le fond: ${svgElementCount} (max: ${TUNING.MAX_SVG_ELEMENTS})`);
+    // console.log(`Éléments SVG générés pour le fond: ${svgElementCount} (max: ${TUNING.MAX_SVG_ELEMENTS})`);
 }
 
 // Fond avec motifs divers pour arbre généalogique 
@@ -5531,13 +5531,13 @@ function setupPoppingBubblesBackground(svg) {
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES BULLES:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    // console.log("PARAMÈTRES BULLES:", {
+    //     opacity,
+    //     patternVisibility,
+    //     animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
+    //     animationSpeed,
+    //     customColor
+    // });
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -6383,14 +6383,14 @@ function setupPoppingBubblesBackground(svg) {
         }
     });
     
-    console.log(`Génération du fond bulles terminée avec ${bubbles.length} bulles. Animation: ${animation ? "ACTIVÉE" : "DÉSACTIVÉE"}`);
+    // console.log(`Génération du fond bulles terminée avec ${bubbles.length} bulles. Animation: ${animation ? "ACTIVÉE" : "DÉSACTIVÉE"}`);
 }
 
  
 // Mettre à jour la fonction setupElegantBackground pour inclure les nouveaux fonds
 export function setupElegantBackground(svg) {
 
-    console.log("#### Configuration du fond élégant... appel de  setupElegantBackground ######### : state.backgroundEnabled =", state.backgroundEnable );
+    // console.log("#### Configuration du fond élégant... appel de  setupElegantBackground ######### : state.backgroundEnabled =", state.backgroundEnable );
 
     if (state.backgroundEnabled) {  
         

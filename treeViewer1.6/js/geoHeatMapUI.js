@@ -1,6 +1,7 @@
 import { nameCloudState } from './nameCloud.js';
 import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
+import { createCachedTileLayer } from './mapUtils.js';
 
 /**
  * Crée et affiche la heatmap avec son interface utilisateur
@@ -347,9 +348,20 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         // Maintenant, créer la carte
         const map = L.map('ancestors-heatmap').setView([46.2276, 2.2137], 6); // Vue centrée sur la France
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+
+        // Utiliser la couche de tuiles en cache si l'option est activée
+        const useLocalTiles = true; // Vous pouvez rendre cela configurable si nécessaire
+        if (useLocalTiles) {
+            createCachedTileLayer({
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        } else {
+            // Fallback au comportement d'origine
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
 
         // Vérifier que nous avons des données valides
         if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {

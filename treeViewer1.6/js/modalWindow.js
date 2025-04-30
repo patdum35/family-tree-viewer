@@ -1361,6 +1361,7 @@ function createEnhancedLocationMap(locations) {
     createLocationMap('multi-location-map', locations, {
         maxZoom: 9,
         zoomControl: false,
-        attribution: false
+        attribution: false,
+        useLocalTiles: true 
     });
 }

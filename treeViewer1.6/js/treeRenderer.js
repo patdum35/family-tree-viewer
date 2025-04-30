@@ -13,14 +13,11 @@ let lastTransform = null;
 /**
  * Initialise et dessine l'arbre
  */
-export function drawTree(isZoomRefresh = false) {
+export function drawTree(isZoomRefresh = false, isAnimation = false) {
     if (!state.currentTree) return;
     
     // Extraire l'arbre réel (ignorer le super-root)
     let treeToRender = state.currentTree;
-    // if (treeToRender.isVirtualRoot && treeToRender.children && treeToRender.children.length > 0) {
-    //     treeToRender = treeToRender.children[0];
-    // }
     
     // Mode both : on crée deux arbres distincts
     if (state.treeModeReal === 'both') {
@@ -35,10 +32,6 @@ export function drawTree(isZoomRefresh = false) {
     processSpouses(rootHierarchy);
 
     const svg = setupSVG();
-    
-    // // Ajouter le fond élégant de votre choix
-    // setupElegantBackground(svg);  // Ou l'une des autres options
-    
     
     
     const mainGroup = createMainGroup(svg);
@@ -96,79 +89,15 @@ export function drawTree(isZoomRefresh = false) {
         }
     });
 
-
-
-
-    // // Optimiser les positions si nous ne sommes pas en mode descendants
-    // if (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants') {
-    //     // optimizeTreeLayout(layoutResult);
-    //     optimizeFamilyLayout(layoutResult);
-    //     // centerChildrenManually(layoutResult);
-    // }
-
-
-
-
-
-
     drawNodes(mainGroup, layoutResult, isZoomRefresh);
-
-    // Ajuster la position des spouses dans le DOM SVG
-    // Réorganiser tous les conjoints pour qu'ils apparaissent sous leur partenaire
-    // mainGroup.selectAll(".node")
-    //     .filter(d => d.data && d.data.isSpouse && d.data.spouseOf)
-    //     .each(function(spouseData) {
-    //         // Trouver l'élément du conjoint
-    //         let conjointElement = null;
-            
-    //         mainGroup.selectAll(".node")
-    //             .filter(d => d.data && d.data.id === spouseData.data.spouseOf)
-    //             .each(function() {
-    //                 conjointElement = this;
-    //             });
-            
-    //         if (conjointElement) {
-    //             const spouse = d3.select(this);
-    //             const conjoint = d3.select(conjointElement);
-                
-    //             // Obtenir les transformations
-    //             const conjointTransform = conjoint.attr("transform");
-                
-    //             if (conjointTransform) {
-    //                 const match = conjointTransform.match(/translate\((.*?),(.*?)\)/);
-                    
-    //                 if (match) {
-    //                     const conjointX = parseFloat(match[1]);
-    //                     const conjointY = parseFloat(match[2]);
-                        
-    //                     // Positionner juste en dessous du conjoint
-    //                     const newY = conjointY + state.boxHeight * 1.2;
-    //                     spouse.attr("transform", `translate(${conjointX},${newY})`);
-                        
-    //                     console.log(`Repositionné ${spouseData.data.name} sous ${spouseData.data.spouseOf}`);
-    //                 }
-    //             }
-    //         }
-    //     });
-
-    
-    
-    
-    // debug
-    // console.log("------------debug drawLinks --------------", mainGroup, layoutResult )
     
     // Dessiner les liens selon le mode
     drawLinks(mainGroup, layoutResult);
-    
     
     if (state.treeModeReal  !== 'descendants' && state.treeModeReal  !== 'directDescendants') {
         adjustLevel0SiblingsPosition(mainGroup);
     }
 
-
-
-
-    
     if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
         drawSpouseLinks(mainGroup, layoutResult);
     } else {
@@ -176,26 +105,17 @@ export function drawTree(isZoomRefresh = false) {
         drawLevel0SiblingLinks(mainGroup, layoutResult);
     }
 
-
-
-
-    // Puis plus loin, lors de l'appel à setupZoom, transmettre cet offset
-
     setupZoom(svg, mainGroup);
 
-    // Détecter si nous avons une racine virtuelle masquée
-    if (treeToRender.isVirtualRoot && treeToRender.children && treeToRender.children.length > 0) {
-        let rootOffsetX = -state.boxWidth*1.1; // On décale l'affichage vers la gauche pour gagner la place de la virtual root masquée
-        console.log( "\n\n   VIRTUAL ROOT detected offset = ", rootOffsetX, "  \n\n")
-        resetViewVirtualRoot(svg, mainGroup, rootOffsetX);
-    } 
+    // Détecter si nous avons une racine virtuelle masquée, mais ne pas appliquer en mode animation
+    if (!isAnimation) {
+        if (treeToRender.isVirtualRoot && treeToRender.children && treeToRender.children.length > 0) {
+            let rootOffsetX = -state.boxWidth*1.1; // On décale l'affichage vers la gauche pour gagner la place de la virtual root masquée
+            // console.log( "\n\n   VIRTUAL ROOT detected offset = ", rootOffsetX, "  \n\n")
+            resetViewVirtualRoot(svg, mainGroup, rootOffsetX);
+        } 
+    }
 
-
-
-
-    
-    // Ajouter le fond élégant de votre choix
-    // setupElegantBackground(svg);  // Ou l'une des autres options
     
     if (state.initialTreeDisplay) {
         // Premier affichage de l'arbre - appliquer le fond avec délai
@@ -206,527 +126,10 @@ export function drawTree(isZoomRefresh = false) {
     } else {
         // Ce n'est pas le premier affichage - appliquer le fond immédiatement
         setupElegantBackground(svg);
-    }
-    
-    
+    }  
     
 }
     
-
-
-
-
-
-
-// /**
-//  * Optimise manuellement la position des enfants par rapport à leurs parents
-//  * @param {Object} layoutResult - Le résultat du layout D3.js
-//  */
-// function centerChildrenManually(layoutResult) {
-//     console.log("Centrage manuel des enfants entre leurs parents");
-    
-//     const allNodes = layoutResult.descendants();
-    
-//     // Parcourir tous les nœuds pour trouver les enfants
-//     allNodes.forEach(childNode => {
-//         // Ignorer les spouses et siblings
-//         if (childNode.data.isSpouse || childNode.data.isSibling) return;
-        
-//         // Récupérer les IDs des parents
-//         const fatherId = childNode.data.genealogicalFatherId;
-//         const motherId = childNode.data.genealogicalMotherId;
-        
-//         // Si l'enfant a deux parents identifiés
-//         if (fatherId && motherId) {
-//             // Trouver les nœuds des parents dans l'arbre
-//             const fatherNode = allNodes.find(node => node.data.id === fatherId);
-//             const motherNode = allNodes.find(node => node.data.id === motherId);
-            
-//             // Si les deux parents sont présents dans l'arbre
-//             if (fatherNode && motherNode) {
-//                 // Calculer le centre entre les parents
-//                 const centerX = (fatherNode.x + motherNode.x) / 2;
-                
-//                 // Calculer l'écart actuel entre le centre et la position de l'enfant
-//                 const currentOffset = childNode.x - centerX;
-                
-//                 console.log(`Enfant: ${childNode.data.name}, Parents: ${fatherNode.data.name} et ${motherNode.data.name}`);
-//                 console.log(`  Positions - Père: ${fatherNode.x}, Mère: ${motherNode.x}, Centre: ${centerX}, Enfant: ${childNode.x}`);
-//                 console.log(`  Écart actuel: ${currentOffset}`);
-                
-//                 // Si l'écart est significatif, centrer l'enfant
-//                 if (Math.abs(currentOffset) > 5) {
-//                     // Déplacer l'enfant au centre
-//                     const originalX = childNode.x;
-//                     childNode.x = centerX;
-                    
-//                     console.log(`  DÉPLACEMENT de ${childNode.data.name}: ${originalX} → ${centerX}`);
-                    
-//                     // Si cet enfant a des enfants, les déplacer aussi du même écart
-//                     if (childNode.children) {
-//                         const childOffset = centerX - originalX;
-//                         childNode.children.forEach(grandchild => {
-//                             const oldX = grandchild.x;
-//                             grandchild.x += childOffset;
-//                             console.log(`    Déplacement du descendant ${grandchild.data.name}: ${oldX} → ${grandchild.x}`);
-//                         });
-//                     }
-//                 }
-//             }
-//         }
-//     });
-// }
-
-
-
-
-// /* groupe 0 */
-
-
-// /**
-//  * Optimise le placement des nœuds en centrant les enfants entre leurs parents
-//  * @param {Object} layoutResult - Le résultat du layout D3.js
-//  */
-// function optimizeFamilyLayout(layoutResult) {
-//     console.log("Optimisation du layout familial");
-    
-//     // 1. Collecter tous les nœuds et les organiser par famille
-//     const allNodes = layoutResult.descendants();
-//     const familyGroups = identifyFamilyGroups(allNodes);
-    
-//     // 2. Pour chaque famille, centrer les enfants entre leurs parents
-//     Object.keys(familyGroups).forEach(familyKey => {
-//         const family = familyGroups[familyKey];
-//         centerChildrenBetweenParents(family);
-//     });
-// }
-
-// /**
-//  * Identifie les groupes familiaux (parents + enfants)
-//  * @param {Array} nodes - Tous les nœuds de l'arbre
-//  * @returns {Object} - Groupes familiaux organisés par paires de parents
-//  */
-// function identifyFamilyGroups(nodes) {
-//     const families = {};
-    
-//     // 1. D'abord, identifier tous les couples (personne + conjoint)
-//     const couples = [];
-//     nodes.forEach(node => {
-//         if (!node.data.isSpouse && node.data.spouses && node.data.spouses.length > 0) {
-//             // Trouver les spouses dans les nœuds
-//             const spouseNodes = nodes.filter(n => 
-//                 n.data.isSpouse && n.data.spouseOf === node.data.id
-//             );
-            
-//             if (spouseNodes.length > 0) {
-//                 couples.push({
-//                     person: node,
-//                     spouses: spouseNodes
-//                 });
-//             }
-//         }
-//     });
-    
-//     // 2. Pour chaque couple, identifier leurs enfants communs
-//     couples.forEach(couple => {
-//         const person = couple.person;
-        
-//         couple.spouses.forEach(spouse => {
-//             // Créer une clé unique pour ce couple
-//             const familyKey = `${person.data.id}_${spouse.data.id}`;
-            
-//             // Trouver leurs enfants communs
-//             const children = nodes.filter(node => 
-//                 !node.data.isSpouse &&
-//                 ((node.data.genealogicalFatherId === person.data.id && 
-//                   node.data.genealogicalMotherId === spouse.data.id) ||
-//                  (node.data.genealogicalFatherId === spouse.data.id && 
-//                   node.data.genealogicalMotherId === person.data.id))
-//             );
-            
-//             // Ajouter cette famille au dictionnaire
-//             if (children.length > 0) {
-//                 families[familyKey] = {
-//                     parents: [person, spouse],
-//                     children: children
-//                 };
-                
-//                 console.log(`Famille identifiée: ${person.data.name} + ${spouse.data.name} avec ${children.length} enfant(s)`);
-//             }
-//         });
-//     });
-    
-//     return families;
-// }
-
-// /**
-//  * Centre les enfants entre leurs parents
-//  * @param {Object} family - Groupe familial (parents + enfants)
-//  */
-// function centerChildrenBetweenParents(family) {
-//     const [parent1, parent2] = family.parents;
-//     const children = family.children;
-    
-//     // 1. Calculer le centre entre les deux parents
-//     const centerX = (parent1.x + parent2.x) / 2;
-    
-//     // 2. Calculer le centre actuel des enfants
-//     const childrenXValues = children.map(child => child.x);
-//     const minChildX = Math.min(...childrenXValues);
-//     const maxChildX = Math.max(...childrenXValues);
-//     const currentCenter = (minChildX + maxChildX) / 2;
-    
-//     // 3. Calculer le décalage nécessaire
-//     const offset = centerX - currentCenter;
-    
-//     // 4. Ne déplacer que si le décalage est significatif
-//     if (Math.abs(offset) > 5) {
-//         console.log(`Centrage des enfants de ${parent1.data.name} et ${parent2.data.name}: décalage de ${offset}`);
-        
-//         // 5. Appliquer le décalage à tous les enfants
-//         children.forEach(child => {
-//             // Vérifier si ce n'est pas un nœud de niveau 0 (racine ou sibling)
-//             if (child.depth > 0) {
-//                 child.x += offset;
-                
-//                 // Si cet enfant a un conjoint, le déplacer aussi
-//                 const spouses = child.children?.filter(n => n.data.isSpouse && n.data.spouseOf === child.data.id) || [];
-//                 spouses.forEach(spouse => {
-//                     spouse.x += offset;
-//                 });
-//             }
-//         });
-//     }
-// }
-
-// /* */
-
-
-
-
-
-
-
-
-
-
-// /* groupe 1 */
-
-// /**
-//  * Ajuste les positions des nœuds pour améliorer l'affichage généalogique
-//  * @param {Object} layoutResult - Le résultat du layout D3.js
-//  */
-// // function optimizeTreeLayout(layoutResult) {
-// //     console.log("Optimisation du layout de l'arbre");
-    
-// //     // 1. Grouper les nœuds par génération
-// //     const nodesByGeneration = {};
-// //     layoutResult.descendants().forEach(node => {
-// //         const generation = node.data.generation;
-// //         if (!nodesByGeneration[generation]) {
-// //             nodesByGeneration[generation] = [];
-// //         }
-// //         nodesByGeneration[generation].push(node);
-// //     });
-    
-// //     // 2. Trier les générations de la plus ancienne à la plus récente
-// //     const generations = Object.keys(nodesByGeneration)
-// //         .map(Number)
-// //         .sort((a, b) => b - a);
-    
-// //     console.log("Générations identifiées:", generations);
-    
-// //     // Pour chaque génération sauf la plus ancienne
-// //     for (let i = 1; i < generations.length; i++) {
-// //         const currentGen = generations[i];
-// //         const parentGen = generations[i-1];
-        
-// //         // Récupérer les nœuds des deux générations
-// //         const parentNodes = nodesByGeneration[parentGen];
-// //         const childNodes = nodesByGeneration[currentGen];
-        
-// //         // Optimiser la position des enfants par rapport à leurs parents
-// //         adjustChildrenPositions(parentNodes, childNodes);
-// //     }
-    
-// //     console.log("Optimisation terminée");
-// // }
-
-// /**
-//  * Ajuste la position des enfants par rapport à leurs parents
-//  * @param {Array} parentNodes - Nœuds de la génération parente
-//  * @param {Array} childNodes - Nœuds de la génération enfant
-//  */
-// function adjustChildrenPositions(parentNodes, childNodes) {
-//     // Étape 1: Trier les nœuds par position Y pour préserver l'ordre vertical
-//     parentNodes.sort((a, b) => a.x - b.x);
-//     childNodes.sort((a, b) => a.x - b.x);
-    
-//     // Stocker les positions initiales pour déterminer les déplacements maximaux
-//     const initialPositions = childNodes.map(node => node.x);
-    
-//     // Calculer la distance minimale entre les nœuds
-//     const minDistance = calculateMinDistance(childNodes);
-    
-//     // Pour chaque enfant ayant deux parents identifiés
-//     childNodes.forEach((child, childIndex) => {
-//         // Ignorer les nœuds siblings et spouses (ils seront gérés par d'autres fonctions)
-//         if (child.data.isSibling || child.data.isSpouse) return;
-        
-//         // Récupérer l'ID des parents généalogiques
-//         const fatherId = child.data.genealogicalFatherId;
-//         const motherId = child.data.genealogicalMotherId;
-        
-//         // Trouver les parents dans l'arbre
-//         const father = parentNodes.find(n => n.data.id === fatherId);
-//         const mother = parentNodes.find(n => n.data.id === motherId);
-        
-//         // Si les deux parents sont présents et identifiés
-//         if (father && mother) {
-//             // Calculer la position idéale (centre entre les parents)
-//             const idealPosition = (father.x + mother.x) / 2;
-            
-//             // Limiter le déplacement pour éviter les chevauchements
-//             const maxLeft = (childIndex > 0) ? 
-//                 childNodes[childIndex-1].x + minDistance : -Infinity;
-                
-//             const maxRight = (childIndex < childNodes.length - 1) ? 
-//                 childNodes[childIndex+1].x - minDistance : Infinity;
-            
-//             // Limiter le déplacement à 25% de la distance vers la position idéale
-//             // pour un changement plus subtil
-//             const currentPos = child.x;
-//             const displacement = (idealPosition - currentPos) * 0.25;
-            
-//             // Calculer la nouvelle position en respectant les contraintes
-//             let newPosition = currentPos + displacement;
-//             newPosition = Math.max(newPosition, maxLeft);
-//             newPosition = Math.min(newPosition, maxRight);
-            
-//             // Appliquer la nouvelle position
-//             child.x = newPosition;
-            
-//             console.log(`Ajustement de ${child.data.name}: ${currentPos} -> ${newPosition} (idéal: ${idealPosition})`);
-//         }
-//     });
-    
-//     // Vérifier si des nœuds se chevauchent après ajustement et corriger si nécessaire
-//     ensureNoOverlap(childNodes, minDistance);
-// }
-
-// /**
-//  * Calcule la distance minimale entre les nœuds
-//  * @param {Array} nodes - Liste de nœuds
-//  * @returns {number} - Distance minimale
-//  */
-// function calculateMinDistance(nodes) {
-//     // Par défaut, utiliser une valeur basée sur la taille des boîtes
-//     const defaultDistance = state.boxHeight * 1.2;
-    
-//     if (nodes.length < 2) return defaultDistance;
-    
-//     // Calculer les distances réelles
-//     let minDist = Infinity;
-//     for (let i = 1; i < nodes.length; i++) {
-//         const dist = nodes[i].x - nodes[i-1].x;
-//         if (dist > 0 && dist < minDist) {
-//             minDist = dist;
-//         }
-//     }
-    
-//     return minDist === Infinity ? defaultDistance : minDist;
-// }
-
-// /**
-//  * S'assure qu'aucun nœud ne se chevauche après ajustement
-//  * @param {Array} nodes - Liste de nœuds triés par position X
-//  * @param {number} minDistance - Distance minimale à maintenir
-//  */
-// function ensureNoOverlap(nodes, minDistance) {
-//     for (let i = 1; i < nodes.length; i++) {
-//         const prev = nodes[i-1];
-//         const curr = nodes[i];
-        
-//         const distance = curr.x - prev.x;
-        
-//         // Si la distance est trop petite, déplacer le nœud courant
-//         if (distance < minDistance) {
-//             const offset = minDistance - distance;
-//             curr.x += offset;
-            
-//             console.log(`Correction de chevauchement: ${curr.data.name} déplacé de ${offset}`);
-//         }
-//     }
-// }
-// /* */
-
-
-
-/* groupe 2 */
-
-// /**
-//  * Ajuste les positions des nœuds pour améliorer l'affichage généalogique
-//  * @param {Object} layoutResult - Le résultat du layout D3.js
-//  */
-// function optimizeTreeLayout(layoutResult) {
-//     console.log("Optimisation du layout de l'arbre");
-    
-//     // 1. Grouper les nœuds par génération
-//     const nodesByGeneration = {};
-//     layoutResult.descendants().forEach(node => {
-//         const generation = node.data.generation;
-//         if (!nodesByGeneration[generation]) {
-//             nodesByGeneration[generation] = [];
-//         }
-//         nodesByGeneration[generation].push(node);
-//     });
-    
-//     // 2. Trier les générations de la plus ancienne à la plus récente
-//     const generations = Object.keys(nodesByGeneration)
-//         .map(Number)
-//         .sort((a, b) => b - a); // Trier dans l'ordre décroissant (plus ancien en premier)
-    
-//     console.log("Générations identifiées:", generations);
-    
-//     // 3. Optimiser chaque génération en commençant par la plus ancienne
-//     for (let i = 0; i < generations.length; i++) {
-//         const currentGen = generations[i];
-//         const currentNodes = nodesByGeneration[currentGen];
-        
-//         // Optimisation de la disposition des nœuds de cette génération
-//         optimizeGenerationLayout(currentNodes);
-        
-//         // Si ce n'est pas la génération la plus récente, centrer les enfants
-//         if (i < generations.length - 1) {
-//             const nextGen = generations[i + 1];
-//             const nextNodes = nodesByGeneration[nextGen];
-            
-//             // Centrer les enfants par rapport à leurs parents
-//             centerChildrenBetweenParents(currentNodes, nextNodes);
-//         }
-//     }
-    
-//     console.log("Optimisation terminée");
-// }
-
-// /**
-//  * Optimise la disposition des nœuds d'une même génération
-//  * @param {Array} nodes - Les nœuds de la génération
-//  */
-// function optimizeGenerationLayout(nodes) {
-//     // Identifier et rapprocher les couples
-//     const couples = identifyCouples(nodes);
-    
-//     // Rapprocher les conjoints
-//     couples.forEach(couple => {
-//         const [person, spouse] = couple;
-        
-//         // Calculer la position moyenne
-//         const avgX = (person.x + spouse.x) / 2;
-        
-//         // Placer le couple côte à côte avec un petit espacement
-//         const spacing = state.boxHeight * 0.5;
-//         person.x = avgX - spacing/2;
-//         spouse.x = avgX + spacing/2;
-        
-//         console.log(`Rapprochement du couple: ${person.data.name} et ${spouse.data.name}`);
-//     });
-// }
-
-// /**
-//  * Identifie les couples dans une liste de nœuds
-//  * @param {Array} nodes - Liste de nœuds
-//  * @returns {Array} - Liste de couples [personne, conjoint]
-//  */
-// function identifyCouples(nodes) {
-//     const couples = [];
-//     const processedIds = new Set();
-    
-//     nodes.forEach(node => {
-//         // Si ce nœud a déjà été traité, passer
-//         if (processedIds.has(node.data.id)) return;
-        
-//         // Si c'est un conjoint, passer (sera traité avec son partenaire)
-//         if (node.data.isSpouse) return;
-        
-//         // Chercher le conjoint de ce nœud
-//         const spouse = nodes.find(n => 
-//             n.data.isSpouse && n.data.spouseOf === node.data.id
-//         );
-        
-//         if (spouse) {
-//             couples.push([node, spouse]);
-//             processedIds.add(node.data.id);
-//             processedIds.add(spouse.data.id);
-//         }
-//     });
-    
-//     return couples;
-// }
-
-// /**
-//  * Centre les enfants entre leurs parents lorsque c'est possible
-//  * @param {Array} parentNodes - Nœuds de la génération parente
-//  * @param {Array} childNodes - Nœuds de la génération enfant
-//  */
-// function centerChildrenBetweenParents(parentNodes, childNodes) {
-//     // Pour chaque enfant, identifier ses parents
-//     childNodes.forEach(child => {
-//         // Trouver les deux parents (s'ils existent)
-//         const father = parentNodes.find(n => n.data.id === child.data.genealogicalFatherId);
-//         const mother = parentNodes.find(n => n.data.id === child.data.genealogicalMotherId);
-        
-//         // Si les deux parents sont présents, centrer l'enfant entre eux
-//         if (father && mother) {
-//             const avgX = (father.x + mother.x) / 2;
-//             console.log(`Centrage de ${child.data.name} entre ${father.data.name} et ${mother.data.name}`);
-            
-//             // Si l'enfant a des frères/sœurs, les déplacer ensemble
-//             const siblings = childNodes.filter(n => 
-//                 (n.data.genealogicalFatherId === child.data.genealogicalFatherId && 
-//                  n.data.genealogicalMotherId === child.data.genealogicalMotherId) ||
-//                 (n.data.isSpouse && n.data.spouseOf && 
-//                  childNodes.some(sibling => 
-//                     sibling.data.id === n.data.spouseOf && 
-//                     sibling.data.genealogicalFatherId === child.data.genealogicalFatherId &&
-//                     sibling.data.genealogicalMotherId === child.data.genealogicalMotherId
-//                  ))
-//             );
-            
-//             if (siblings.length > 1) {
-//                 // Calculer le décalage pour centrer le groupe de frères/sœurs
-//                 const minX = Math.min(...siblings.map(s => s.x));
-//                 const maxX = Math.max(...siblings.map(s => s.x));
-//                 const center = (minX + maxX) / 2;
-//                 const offset = avgX - center;
-                
-//                 // Appliquer le décalage à tous les frères/sœurs
-//                 siblings.forEach(sibling => {
-//                     sibling.x += offset;
-//                 });
-                
-//                 console.log(`Groupe de ${siblings.length} frères/sœurs centré`);
-//             } else {
-//                 // Cas simple: un seul enfant
-//                 child.x = avgX;
-//             }
-//         }
-//         // Sinon, si un seul parent est présent, aligner l'enfant avec ce parent
-//         else if (father || mother) {
-//             const parent = father || mother;
-//             console.log(`Alignement de ${child.data.name} avec ${parent.data.name}`);
-//             child.x = parent.x;
-//         }
-//     });
-// }    
-/*  */
-
-
-
-
-
-
-
 function drawBothModeTree(isZoomRefresh = false) {
     const rootPerson = state.currentTree;
     const descendants = rootPerson.descendants || [];
@@ -964,7 +367,7 @@ function adjustLevel0SiblingsPosition(mainGroup) {
         const newY = rootY - (initialSpacing + spacing * index);
         
         node.attr("transform", `translate(${currentX},${newY})`);
-        console.log(`Positionnement de ${sibling.d.data.name} (index ${sibling.originalIndex}) à Y=${newY}`);
+        // console.log(`Positionnement de ${sibling.d.data.name} (index ${sibling.originalIndex}) à Y=${newY}`);
     });
 }
 
@@ -1185,22 +588,13 @@ function drawLinks(group, layout) {
             if ((state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants')){
                 return "link";
             }
-
-            // pour (state.treeModeReal === 'ancestors' || state.treeModeReal === 'directAncestors')
-
-            // const sourceData = d.source.data;
-            // const targetData = d.target.data;
             
             // Lien normal parent → enfant
             const isNormalParentChildLink = (d.source.data.genealogicalFatherId === d.target.data.id) || 
                                            (d.source.data.genealogicalMotherId === d.target.data.id);
             
             // Lien descendant → sibling
-            // const isLeftDescendant = !!sourceData.isLeftDescendant;
             const isLeftDescendant = !!d.target.data.isLeftDescendant;
-            // const appearedOnLeftClick = !!d.source.data.appearedOnLeftClick;
-            // const isSibling = !!d.target.data.isSibling;
-            // const isSiblingSpouse = !!d.target.data.isSiblingSpouse;
             const isCorrectFather = d.target.data.id === d.source.data.genealogicalFatherId;
             const isCorrectMother = d.target.data.id === d.source.data.genealogicalMotherId;
 
@@ -1217,23 +611,6 @@ function drawLinks(group, layout) {
         .attr("d", createLinkPath);
 }
 
-
-
-
-
-// function drawLinks(group, layout) {
-//     group.selectAll(".link")
-//         .data(layout.links())
-//         .join("path")
-//         .attr("class", d => {
-//             if (!d.source?.data || !d.target?.data) return "link hidden";
-//             if (d.source.data._isDescendantLink) return "link hidden";
-//             if ((state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') && d.target.data.isSpouse) return "link hidden";
-//             if (d.target.data.isSibling) return "link hidden";
-//             return "link";
-//         })
-//         .attr("d", createLinkPath);
-// }
 
 
 /**
@@ -1365,8 +742,8 @@ function createLinkPath(d) {
 
     // Log sécurisé pour les liens descendant→sibling
     if (targetData.isLeftDescendant && targetData.isSibling) {
-        console.log(`Création du chemin pour ${sourceData.id || 'unknown'} → ${targetData.id || 'unknown'}`);
-        console.log(`  isDescendantToSibling: ${isDescendantToSibling}`);
+        // console.log(`Création du chemin pour ${sourceData.id || 'unknown'} → ${targetData.id || 'unknown'}`);
+        // console.log(`  isDescendantToSibling: ${isDescendantToSibling}`);
     }
     
     if (isDescendantToSibling) {
@@ -1579,11 +956,6 @@ function resetViewVirtualRoot(svg, mainGroup, offsetX = 0) {
             const currentScale = currentTransform.k;
             const currentY = currentTransform.y;
             
-            // if (offsetX != 0) {
-            //     console.log("\n\n   VIRTUAL ROOT detected in resetViewVirtualRoot,  offset = ", offsetX);
-            //     console.log("   Current transform: scale =", currentScale, ", y =", currentY, "\n\n");
-            // }
-            
             // Créer une nouvelle transformation qui conserve le scale et la position Y actuels
             // mais qui modifie la position X
             const newTransform = d3.zoomIdentity
@@ -1597,8 +969,6 @@ function resetViewVirtualRoot(svg, mainGroup, offsetX = 0) {
         }
     }
 }
-
-
 
 
 

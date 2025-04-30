@@ -6,36 +6,370 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
   let hamburgerMenu, sideMenu, menuOverlay;
 
   
-// Dans votre fonction d'initialisation existante ou là où vous définissez vos gestionnaires d'événements
-export function resizeHamburger() {
+
+  export function resizeHamburger() {
     // Mettre à jour la classe de hauteur
     updateHeightClass();
     
-    //   // Masquer le menu s'il est ouvert
-    //   if (sideMenu && sideMenu.classList.contains('open')) {
-    //     toggleMenu(false);
-    //   }
-      
-    //   // Supprimer le menu actuel s'il existe
-    //   if (state.menuHamburgerInitialized) {
-    //     hideHamburgerMenu();
-    //     state.menuHamburgerInitialized = false;
-    //     state.isHamburgerMenuInitialized = false;
-    //   }
-      
-    //   // Recréer le menu
-    //   setTimeout(() => {
-    //     createMenuElements();
-        
-    //     // Veiller à ce que le menu soit visible si nécessaire
-    //     if (document.getElementById('tree-container') && 
-    //         document.getElementById('tree-container').style.display !== 'none') {
-    //       showHamburgerMenu();
-    //     }
-    //   }, 200);
+    // Si le menu n'est pas initialisé, rien à faire
+    if (!state.menuHamburgerInitialized) {
+      return;
+    }
     
+    // Référencer les éléments du menu
+    const sideMenu = document.getElementById('side-menu');
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    
+    // Masquer le menu s'il est ouvert
+    if (sideMenu && sideMenu.classList.contains('open')) {
+      toggleMenu(false);
+    }
+    
+    // Attendre que le toggle soit terminé
+    setTimeout(() => {
+      // Mettre à jour les styles en fonction de la nouvelle hauteur
+      updateMenuStyles();
+      
+      // Synchroniser les sélecteurs si nécessaire
+      syncCustomSelectors();
+      
+      console.log("Menu hamburger redimensionné avec succès");
+    }, 200);
   }
   
+  // Nouvelle fonction pour mettre à jour les styles sans recréer le menu
+  function updateMenuStyles() {
+    const height = window.innerHeight;
+    
+    // Adapter les sections
+    document.querySelectorAll('.menu-section').forEach((section, index) => {
+      // Réinitialiser d'abord les styles
+      section.style.margin = '';
+      section.style.padding = '';
+      
+      // Appliquer les styles appropriés selon la taille d'écran
+      if (height < 400) {
+        section.style.margin = '2px 0';
+        section.style.padding = '3px';
+      } else if (height < 800) {
+        section.style.margin = '3px 0';
+        section.style.padding = '5px';
+      }
+      
+      // Adapter les titres des sections
+      const heading = section.querySelector('h3');
+      if (heading) {
+        heading.style.fontSize = '';
+        heading.style.marginTop = '';
+        heading.style.marginBottom = '';
+        heading.style.display = '';
+        
+        // Masquer certains titres sur petits écrans
+        const title = heading.textContent;
+        if (height < 400 && (
+            title === 'Animation et audio' || 
+            title === 'Racine' || 
+            title === 'Modes' || 
+            title === 'Nuage de mots' || 
+            title === 'Fonds d\'écran' ||
+            title === 'Affichage'
+        )) {
+          heading.style.display = 'none';
+        } else if (height < 400) {
+          heading.style.fontSize = '12px';
+          heading.style.marginTop = '0';
+          heading.style.marginBottom = '3px';
+        } else if (height < 800) {
+          heading.style.fontSize = '14px';
+          heading.style.marginTop = '0';
+          heading.style.marginBottom = '5px';
+        }
+      }
+      
+      // Adapter le contenu des sections
+      const content = section.querySelector('.menu-section-content');
+      if (content) {
+        content.style.gap = '';
+        
+        if (height < 400) {
+          content.style.gap = '3px';
+        } else if (height < 800) {
+          content.style.gap = '5px';
+        }
+      }
+    });
+    
+    // Adapter les boutons et les spans
+    document.querySelectorAll('.side-menu button span').forEach(span => {
+      span.style.fontSize = '';
+      
+      if (height < 400) {
+        span.style.fontSize = '16px';
+      } else if (height < 800) {
+        span.style.fontSize = '18px';
+      }
+    });
+    
+    // Adapter les labels
+    document.querySelectorAll('.menu-section-content label').forEach(label => {
+      label.style.fontSize = '';
+      label.style.marginBottom = '';
+      
+      if (height < 400) {
+        label.style.fontSize = '11px';
+        label.style.marginBottom = '1px';
+      } else if (height < 800) {
+        label.style.fontSize = '12px';
+        label.style.marginBottom = '2px';
+      }
+    });
+    
+    // Mise à jour des éléments spécifiques pour chaque section
+    updateAudioSectionStyles();
+    updateRootSectionStyles();
+    updateModeSectionStyles();
+    updateSearchSectionStyles();
+
+
+    // Gérer  spécifiquement les labels à côté des boutons dans les sections de paramètres et affichage
+    if (height < 400) {
+        // Gestion du label pour le bouton paramètres
+        let settingsBtn = document.getElementById('menu-settingsBtn');
+        if (settingsBtn) {
+            // Vérifier si le label existe déjà
+            let labelExists = false;
+            let parent = settingsBtn.parentElement;
+            
+            // Vérifier si le parent est un SPAN (label)
+            if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
+                labelExists = true;
+            }
+            
+            // Créer le label s'il n'existe pas
+            if (!labelExists) {
+                const section = settingsBtn.closest('.menu-section-content');
+                if (section) {
+                  section.removeChild(settingsBtn);
+                  
+                  const labelContainer = document.createElement('span');
+                  labelContainer.textContent = 'Fond d\'écran';
+                  labelContainer.style.fontSize = '11px';
+                  labelContainer.appendChild(settingsBtn);
+                  section.appendChild(labelContainer);
+                  
+                  // Ajuster la taille et l'espacement
+                  settingsBtn.style.marginRight = '10px';
+                  const span = settingsBtn.querySelector('span');
+                  if (span) span.style.fontSize = '18px';
+                }
+            }
+        }
+
+
+        settingsBtn = document.getElementById('menu-nameCloudBtn');
+        if (settingsBtn) {
+            // Vérifier si le label existe déjà
+            let labelExists = false;
+            let parent = settingsBtn.parentElement;
+            
+            // Vérifier si le parent est un SPAN (label)
+            if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
+                labelExists = true;
+            }
+            
+            // Créer le label s'il n'existe pas
+            if (!labelExists) {
+                const section = settingsBtn.closest('.menu-section-content');
+                if (section) {
+                  section.removeChild(settingsBtn);
+                  
+                  const labelContainer = document.createElement('span');
+                  labelContainer.textContent = "Nuage de mots";
+                  labelContainer.style.fontSize = '11px';
+                  labelContainer.appendChild(settingsBtn);
+                  section.appendChild(labelContainer);
+                  
+                  // Ajuster la taille et l'espacement
+                  settingsBtn.style.marginRight = '10px';
+                  const span = settingsBtn.querySelector('span');
+                  if (span) span.style.fontSize = '18px';
+                }
+            }
+        }
+        
+        // Ajuster les boutons d'affichage
+        document.querySelectorAll('.menu-section h3').forEach(heading => {
+            if (heading.textContent === 'Affichage') {
+                const section = heading.closest('.menu-section');
+                if (section) {
+                  const buttons = section.querySelectorAll('button');
+                  buttons.forEach(button => {
+                      button.style.marginRight = '8px';
+                      const span = button.querySelector('span');
+                      if (span) span.style.fontSize = '20px';
+                  });
+                }
+            }
+        });
+
+
+
+
+    } else {
+        // Si l'écran est plus grand, retirer les labels
+        document.querySelectorAll('.menu-section-content > span').forEach(span => {
+            if (span.childNodes[0].nodeType === Node.TEXT_NODE && (span.textContent.startsWith('Fond d\'écran') || span.textContent.startsWith('Nuage de mots'))) {
+                const section = span.parentElement;
+                const button = span.querySelector('button');
+                if (section && button) {
+                section.removeChild(span);
+                section.appendChild(button);
+                }
+            }
+        });
+    }
+
+
+
+
+
+
+  }
+  
+
+
+  // Fonctions auxiliaires pour mettre à jour les styles spécifiques
+  function updateAudioSectionStyles() {
+    const height = window.innerHeight;
+    const container = document.getElementById('audio-controls-container');
+    
+    if (container) {
+      container.style.gap = '';
+      container.style.marginTop = '';
+      
+      if (height < 400) {
+        container.style.gap = '2px';
+        container.style.marginTop = '2px';
+      } else if (height < 800) {
+        container.style.gap = '3px';
+        container.style.marginTop = '3px';
+      }
+    }
+  }
+  
+  function updateRootSectionStyles() {
+    const height = window.innerHeight;
+    const rootSearchPlaceholder = document.getElementById('menu-root-person-search-placeholder');
+    const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
+    
+    if (rootSearchPlaceholder) {
+      rootSearchPlaceholder.style.margin = '';
+      
+      if (height < 400) {
+        rootSearchPlaceholder.style.margin = '2px 0';
+      } else if (height < 800) {
+        rootSearchPlaceholder.style.margin = '3px 0';
+      } else {
+        rootSearchPlaceholder.style.margin = '5px 0';
+      }
+    }
+    
+    if (rootResultsPlaceholder) {
+      rootResultsPlaceholder.style.margin = '';
+      
+      if (height < 400) {
+        rootResultsPlaceholder.style.margin = '2px 0';
+      } else if (height < 800) {
+        rootResultsPlaceholder.style.margin = '3px 0';
+      } else {
+        rootResultsPlaceholder.style.margin = '5px 0';
+      }
+    }
+  }
+  
+  function updateModeSectionStyles() {
+    const height = window.innerHeight;
+    const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
+    const genPlaceholder = document.getElementById('menu-generations-placeholder');
+    const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
+    
+    if (modePlaceholder) {
+      modePlaceholder.style.margin = '';
+      
+      if (height < 400) {
+        modePlaceholder.style.margin = '2px 0';
+      } else if (height < 800) {
+        modePlaceholder.style.margin = '3px 0';
+      } else {
+        modePlaceholder.style.margin = '5px 0';
+      }
+    }
+    
+    if (genPlaceholder) {
+      genPlaceholder.style.margin = '';
+      const genDiv = document.getElementById('menu-generations-container');
+      
+      if (genDiv) {
+        genDiv.style.marginLeft = '';
+        
+        if (height < 400) {
+          genPlaceholder.style.margin = '1px 0';
+          genDiv.style.marginLeft = '5px';
+        } else if (height < 800) {
+          genPlaceholder.style.margin = '2px 0';
+          genDiv.style.marginLeft = '8px';
+        } else {
+          genPlaceholder.style.margin = '2px 0';
+          genDiv.style.marginLeft = '10px';
+        }
+      }
+    }
+    
+    if (prenomsPlaceholder) {
+      prenomsPlaceholder.style.margin = '';
+      const prenomsDiv = document.getElementById('menu-prenoms-container');
+      
+      if (prenomsDiv) {
+        prenomsDiv.style.marginLeft = '';
+        
+        if (height < 400) {
+          prenomsPlaceholder.style.margin = '2px 0';
+          prenomsDiv.style.marginLeft = '5px';
+        } else if (height < 800) {
+          prenomsPlaceholder.style.margin = '3px 0';
+          prenomsDiv.style.marginLeft = '8px';
+        } else {
+          prenomsPlaceholder.style.margin = '5px 0';
+          prenomsDiv.style.marginLeft = '10px';
+        }
+      }
+    }
+  }
+  
+  function updateSearchSectionStyles() {
+    const height = window.innerHeight;
+    const searchInput = document.getElementById('menu-search');
+    
+    if (searchInput) {
+      searchInput.style.fontSize = '';
+      searchInput.style.padding = '';
+      
+      if (height < 400) {
+        searchInput.style.fontSize = '11px';
+        searchInput.style.padding = '2px';
+      } else if (height < 800) {
+        searchInput.style.fontSize = '12px';
+        searchInput.style.padding = '3px';
+      } else {
+        searchInput.style.fontSize = '13px';
+      }
+    }
+  }
+  
+
+  
+
+
 
   // Fonction pour vérifier la hauteur de l'écran et appliquer les classes correspondantes
   function updateHeightClass() {
@@ -128,68 +462,23 @@ export function resizeHamburger() {
  }
   
 // tableau de couleurs très pâles pour les sections
+// const sectionBackgroundColors = [
+//     '#f9f9ff', // Bleu très pâle
+//     '#f9fff9', // Vert très pâle
+//     '#fff9f9', // Rouge très pâle
+//     '#fffaf0', // Jaune très pâle
+//     '#faf0ff'  // Violet très pâle
+// ];
+
 const sectionBackgroundColors = [
-    '#f9f9ff', // Bleu très pâle
-    '#f9fff9', // Vert très pâle
-    '#fff9f9', // Rouge très pâle
-    '#fffaf0', // Jaune très pâle
-    '#faf0ff'  // Violet très pâle
+  '#f0f0ff', // Bleu pâle
+  '#f0fff0', // Vert pâle
+  '#fff0f0', // Rouge pâle
+  '#fff5e6', // Jaune pâle
+  '#f5e6ff'  // Violet pâle
 ];
 
-  // Fonction pour créer une section de menu
-//   function createSection(title, index = 0) {
-//     const container = document.createElement('div');
-//     container.className = 'menu-section';
-  
-//     // Appliquer une couleur de fond pâle différente selon l'index
-//     const colorIndex = index % sectionBackgroundColors.length;
-//     container.style.backgroundColor = sectionBackgroundColors[colorIndex];
-//     container.style.borderRadius = '5px'; // Coins légèrement arrondis
-    
-//     // On ne modifie les marges que pour les petits écrans
-//     // Pour les grands écrans, on laisse les styles CSS de base s'appliquer
-//     const height = window.innerHeight;
-//     if (height < 400) {
-//       container.style.margin = '2px 0';
-//       container.style.padding = '3px';
-//     } else if (height < 800) {
-//       container.style.margin = '3px 0';
-//       container.style.padding = '5px';
-//     }
-//     // Pour height >= 800, on ne définit rien ici pour garder le style original
-    
-//     const heading = document.createElement('h3');
-//     heading.textContent = title;
-    
-//     // Ajuster la taille du titre uniquement pour les petits écrans
-//     if (height < 400) {
-//       heading.style.fontSize = '12px';
-//       heading.style.marginTop = '0';
-//       heading.style.marginBottom = '3px';
-//     } else if (height < 800) {
-//       heading.style.fontSize = '14px';
-//       heading.style.marginTop = '0';
-//       heading.style.marginBottom = '5px';
-//     }
-//     // Pour height >= 800, on ne définit rien ici pour garder le style original
-    
-//     container.appendChild(heading);
-    
-//     const content = document.createElement('div');
-//     content.className = 'menu-section-content';
-    
-//     // Ajuster l'espacement du contenu uniquement pour les petits écrans
-//     if (height < 400) {
-//       content.style.gap = '3px';
-//     } else if (height < 800) {
-//       content.style.gap = '5px';
-//     }
-//     // Pour height >= 800, on ne définit rien ici pour garder le style original
-    
-//     container.appendChild(content);
-    
-//     return { container, content };
-//   }
+
 
   // Fonction pour créer une section de menu
 function createSection(title, index = 0) {
@@ -216,11 +505,12 @@ function createSection(title, index = 0) {
     
     // En mode petit écran, masquer certains titres spécifiques
     if (height < 400 && (
-        title === 'Racine' //|| 
-        // title === 'Modes' || 
-        // title === 'Affichage' || 
-        // title === 'Nuage de mots' ||
-        // title === 'Fonds d\'écran'
+        title === 'Animation et audio' || 
+        title === 'Racine' || 
+        title === 'Modes' || 
+        title === 'Affichage' || // || 
+        title === 'Nuage de mots' ||
+        title === 'Fonds d\'écran'
     )) {
       heading.style.display = 'none'; // Masquer complètement le titre
       // Option alternative : heading.style.height = '0';
@@ -275,10 +565,11 @@ function createSection(title, index = 0) {
       
       // Adapter uniquement pour les petits écrans
       if (height < 400) {
-        span.style.fontSize = '16px';
+        span.style.fontSize = '20px';
         button.style.padding = '1px';
+        button.style.marginRight = '8px';
       } else if (height < 800) {
-        span.style.fontSize = '18px';
+        span.style.fontSize = '20px';
         button.style.padding = '2px';
       }
       // Pour les grands écrans, on conserve le style original
@@ -586,9 +877,9 @@ function createSection(title, index = 0) {
       
       // Adapter uniquement pour les petits écrans
       if (height < 400) {
-        span.style.fontSize = '16px';
+        span.style.fontSize = '22px';
       } else if (height < 800) {
-        span.style.fontSize = '18px';
+        span.style.fontSize = '22px';
       } else {
         span.style.fontSize = '22px'; // Valeur originale
       }
@@ -636,6 +927,7 @@ function createSection(title, index = 0) {
     
     const buttons = [
       { 
+        id: 'menu-nameCloudBtn',
         onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })', 
         title: 'Nuage de noms', 
         text: '💖🔠💗' // '👥'
@@ -653,7 +945,7 @@ function createSection(title, index = 0) {
       
       // Adapter uniquement pour les petits écrans
       if (height < 400) {
-        span.style.fontSize = '14px';
+        span.style.fontSize = '16px';
         button.style.padding = '1px';
       } else if (height < 800) {
         span.style.fontSize = '16px';
@@ -662,7 +954,17 @@ function createSection(title, index = 0) {
       // Pour les grands écrans, on conserve le style original
       
       button.appendChild(span);
-      section.content.appendChild(button);
+      if (height < 400) {
+        // Créer un conteneur pour le label + bouton
+        const container = document.createElement('span');
+        container.textContent = "Nuage de mots";
+        container.style.fontSize = '13px';
+        container.appendChild(button);
+        section.content.appendChild(container);
+      } else {
+            section.content.appendChild(button);
+      }
+    //   section.content.appendChild(button);
     });
     
     sideMenu.appendChild(section.container);
@@ -698,16 +1000,28 @@ function createSection(title, index = 0) {
       
       // Adapter uniquement pour les petits écrans
       if (height < 400) {
-        span.style.fontSize = '14px';
+        span.style.fontSize = '20px';
         button.style.padding = '1px';
+        button.style.marginRight = '10px';
       } else if (height < 800) {
-        span.style.fontSize = '16px';
+        span.style.fontSize = '20px';
         button.style.padding = '2px';
       }
       // Pour les grands écrans, on conserve le style original
       
       button.appendChild(span);
-      section.content.appendChild(button);
+    //   section.content.appendChild(button);
+      // À ajouter juste après la création du bouton ⚙️ et avant de l'ajouter au conteneur
+        if (buttonData.text === '⚙️' && height < 400) {
+            // Créer un conteneur pour le label + bouton
+            const container = document.createElement('span');
+            container.textContent = 'Fond d\'écran';
+            container.style.fontSize = '13px';
+            container.appendChild(button);
+            section.content.appendChild(container);
+        } else {
+            section.content.appendChild(button);
+        }
     });
     
     sideMenu.appendChild(section.container);
@@ -778,18 +1092,18 @@ function createDemoSelector() {
       
       // Modifier seulement pour les petits écrans
       if (height < 400) {
-        selectorSettings.dimensions.width = '40px';
+        selectorSettings.dimensions.width = '45px';
         selectorSettings.dimensions.height = '20px';
-        selectorSettings.dimensions.dropdownWidth = '150px';
-        selectorSettings.dimensions.dropdownHeight = '80px';
+        selectorSettings.dimensions.dropdownWidth = '180px';
+        selectorSettings.dimensions.dropdownHeight = '160px';
         selectorSettings.padding.display.x = 3;
         selectorSettings.arrow.size = 4;
         selectorSettings.arrow.offset.x = -4;
       } else if (height < 800) {
         selectorSettings.dimensions.width = '45px';
         selectorSettings.dimensions.height = '22px';
-        selectorSettings.dimensions.dropdownWidth = '170px';
-        selectorSettings.dimensions.dropdownHeight = '90px';
+        selectorSettings.dimensions.dropdownWidth = '180px';
+        selectorSettings.dimensions.dropdownHeight = '240px';
         selectorSettings.padding.display.x = 3;
         selectorSettings.arrow.size = 5;
         selectorSettings.arrow.offset.x = -4;
@@ -813,11 +1127,11 @@ function createDemoSelector() {
           optionElement.style.textAlign = 'center';
           
           if (window.innerHeight < 400) {
-            optionElement.style.padding = '1px 2px';
-            optionElement.style.fontSize = '11px';
-          } else if (window.innerHeight < 800) {
-            optionElement.style.padding = '2px 3px';
+            optionElement.style.padding = '6px 8px';
             optionElement.style.fontSize = '12px';
+          } else if (window.innerHeight < 800) {
+            optionElement.style.padding = '7px 8px';
+            optionElement.style.fontSize = '13px';
           } else {  
             // Valeurs originales pour les grands écrans
             optionElement.style.padding = '10px 8px';
@@ -856,8 +1170,8 @@ function createDemoSelector() {
             
             // Ajustements uniquement pour les petits écrans
             if (window.innerHeight < 400) {
-              displayElement.style.fontSize = '11px';
-              displayElement.style.padding = '1px 2px';
+              displayElement.style.fontSize = '12px';
+              displayElement.style.padding = '2px 3px';
             } else if (window.innerHeight < 800) {
               displayElement.style.fontSize = '12px';
               displayElement.style.padding = '2px 3px';
@@ -961,24 +1275,24 @@ function createPrenomsSelector() {
       }
     };
     
-    // Modifier uniquement pour les petits écrans
-    if (height < 400) {
-      selectorSettings.dimensions.width = '25px';
-      selectorSettings.dimensions.height = '20px';
-      selectorSettings.dimensions.dropdownWidth = '35px';
-      selectorSettings.dimensions.dropdownHeight = '100px';
-      selectorSettings.padding.display.x = 6;
-      selectorSettings.arrow.size = 4;
-      selectorSettings.arrow.offset.x = -4;
-    } else if (height < 800) {
-      selectorSettings.dimensions.width = '30px';
-      selectorSettings.dimensions.height = '22px';
-      selectorSettings.dimensions.dropdownWidth = '40px';
-      selectorSettings.dimensions.dropdownHeight = '120px';
-      selectorSettings.padding.display.x = 7;
-      selectorSettings.arrow.size = 5;
-      selectorSettings.arrow.offset.x = -4;
-    }
+    // // Modifier uniquement pour les petits écrans
+    // if (height < 400) {
+    //   selectorSettings.dimensions.width = '25px';
+    //   selectorSettings.dimensions.height = '20px';
+    //   selectorSettings.dimensions.dropdownWidth = '35px';
+    //   selectorSettings.dimensions.dropdownHeight = '100px';
+    //   selectorSettings.padding.display.x = 6;
+    //   selectorSettings.arrow.size = 4;
+    //   selectorSettings.arrow.offset.x = -4;
+    // } else if (height < 800) {
+    //   selectorSettings.dimensions.width = '30px';
+    //   selectorSettings.dimensions.height = '22px';
+    //   selectorSettings.dimensions.dropdownWidth = '40px';
+    //   selectorSettings.dimensions.dropdownHeight = '120px';
+    //   selectorSettings.padding.display.x = 7;
+    //   selectorSettings.arrow.size = 5;
+    //   selectorSettings.arrow.offset.x = -4;
+    // }
     
     try {
       // Configurer le sélecteur personnalisé

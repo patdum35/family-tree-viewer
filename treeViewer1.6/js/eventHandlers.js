@@ -6,8 +6,9 @@ import { state, displayGenealogicTree, hideMap } from './main.js';
 import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
-import { hideHamburgerMenu } from './hamburgerMenu.js';
+import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
+import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -47,6 +48,9 @@ export function handleWindowResize() {
     setupElegantBackground(svg);
     initializeAnimationMapPosition();
     updateAnimationMapSize();
+    resizeHamburger();
+    repositionAudioPlayerOnResize();
+
 
     // state.lastVerticalPosition = state.lastVerticalPosition - 300;
 
@@ -466,7 +470,7 @@ export function returnToLogin() {
         const newLoginBackground = document.createElement('div');
         newLoginBackground.className = 'login-background';
         const backgroundImage = document.createElement('img');
-        backgroundImage.src = 'background_images/contemporain.jpg';
+        backgroundImage.src = 'background_images/fort_lalatte.jpg';
         backgroundImage.className = 'login-background-image';
         backgroundImage.alt = 'Fond d\'écran';
         newLoginBackground.appendChild(backgroundImage);
