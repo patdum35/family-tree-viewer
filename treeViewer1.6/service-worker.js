@@ -1,5 +1,5 @@
 // Nom du cache pour l'application
-const CACHE_NAME = 'treeViewer-app-v1';
+const CACHE_NAME = 'treeViewer-app-v2';
 
 // Liste des ressources à mettre en cache immédiatement
 const RESOURCES_TO_CACHE = [
@@ -9,6 +9,7 @@ const RESOURCES_TO_CACHE = [
 
   // Ajoutez ici vos fichiers JS principaux
     './js/appInitializer.js',
+    './js/audioPlayer.js',
     './js/backgroundManager.js',
     './js/dateUI.js',
     './js/directHamburgerMenu.js',
@@ -39,6 +40,7 @@ const RESOURCES_TO_CACHE = [
     './js/nameCloudUtils.js',
     './js/nodeControls.js',
     './js/nodeRenderer.js',
+    './js/photoPlayer.js',
     './js/resizableModalUtils.js',
     './js/treeAnimation.js',
     './js/treeOperations.js',
@@ -61,7 +63,31 @@ const RESOURCES_TO_CACHE = [
   // Autres ressources
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+
+  // Ressources génealogiques
+  './arbre.enc',
+  './arbreX.enc',
+  './geolocalisation.json',
+  './geolocalisationX.json',
+
+  //Images
+  './background_images/contemporain.jpg',
+  './background_images/republique.jpg',
+  './background_images/fort_lalatte.jpg',
+  './background_images/thomas.jpg',
+  './background_images/steph.jpg',
+  './background_images/garand.jpg',
+  './background_images/charlemagne.jpg',
+  './background_images/hughes.jpg',
+  './background_images/brigitte.jpg',
+  './background_images/kamber.jpg',
+  './background_images/pharabert.jpg',
+
+  //Sounds
+  './sounds/lalatte_remix.mp3'
+
+
 ];
 
 
@@ -170,6 +196,37 @@ self.addEventListener('fetch', (event) => {
       );
     } catch(e) {
       console.error('Service Worker fetch handler error:', e);
+    }
+  });
+
+
+  // Ajoutez ceci à la fin de service-worker.js
+
+// Fonction pour vider les caches de l'application
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'clearCache') {
+      console.log('Service Worker: Demande de vidage du cache reçue');
+      
+      event.waitUntil(
+        caches.keys().then(cacheNames => {
+          return Promise.all(
+            cacheNames.map(cacheName => {
+              console.log(`Service Worker: Suppression du cache ${cacheName}`);
+              return caches.delete(cacheName);
+            })
+          ).then(() => {
+            // Envoi d'un message pour confirmer que le cache a été vidé
+            self.clients.matchAll().then(clients => {
+              clients.forEach(client => {
+                client.postMessage({
+                  action: 'cacheCleared',
+                  status: 'success'
+                });
+              });
+            });
+          });
+        })
+      );
     }
   });
 
