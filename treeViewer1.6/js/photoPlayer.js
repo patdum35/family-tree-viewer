@@ -1,5 +1,5 @@
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { getResourceUrl }  from './audioPlayer.js';
+// import { getResourceUrl }  from './audioPlayer.js';
 import { state } from './main.js';
 
 /**
@@ -96,6 +96,41 @@ import { state } from './main.js';
     
 //     return photoContainer;
 // }
+
+/**
+ * Obtient simplement le chemin du répertoire du HTML actuel
+ * @returns {string} Le chemin du répertoire
+ */
+function getCurrentDirectory() {
+    // Obtient l'URL complète de la page actuelle
+    const currentUrl = window.location.href;
+    
+    // Trouver la dernière barre oblique avant un éventuel nom de fichier ou paramètres
+    const lastSlashIndex = currentUrl.lastIndexOf('/');
+    
+    // Extraire tout ce qui est avant cette barre (le répertoire)
+    if (lastSlashIndex > 0) {
+        return currentUrl.substring(0, lastSlashIndex);
+    }
+    
+    // Si pas de barre, retourner l'URL complète (cas rare)
+    return currentUrl;
+}
+
+/**
+ * Résout simplement un chemin relatif par rapport au répertoire actuel
+ * @param {string} relativePath - Chemin relatif (avec ou sans /)
+ * @returns {string} Chemin complet
+ */
+function getResourceUrl(relativePath) {
+    // S'assurer que le chemin relatif commence par /
+    const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+    
+    // Combiner avec le répertoire courant
+    return `${getCurrentDirectory()}${normalizedPath}`;
+}
+
+
 
 function displayEndAnimationPhoto(imagePath, options = {}) {
     // Configuration par défaut
@@ -226,8 +261,8 @@ function closeAnimationPhoto() {
  */
 export function showEndAnimationPhoto() {
     // Chemin vers l'image que vous souhaitez afficher
-    const imagePath = '/background_images/thomas.jpg';
-    const imageUrl = getResourceUrl(imagePath);
+    // const imagePath = '/background_images/thomas.jpg';
+    const imageUrl = getResourceUrl('/background_images/thomas.jpg');
     
     // Options de positionnement et dimensions
     const options = {
