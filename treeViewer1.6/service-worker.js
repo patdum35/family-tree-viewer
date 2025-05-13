@@ -83,6 +83,7 @@ const RESOURCES_TO_CACHE = [
   './background_images/brigitte.jpg',
   './background_images/kamber.jpg',
   './background_images/pharabert.jpg',
+  './background_images/dominique.jpg',
 
   //Sounds
   './sounds/lalatte_remix.mp3'
