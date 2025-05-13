@@ -11,6 +11,7 @@ import {
     zoomOut, 
     resetZoom,
     toggleSpeech,
+    toggleSpeech2,
     searchTree,
     displayPersonDetails,
     closePersonDetails,
@@ -44,6 +45,7 @@ function initializeAppFunctions() {
     window.zoomOut = zoomOut;
     window.resetZoom = resetZoom;
     window.toggleSpeech = toggleSpeech;
+    window.toggleSpeech2 = toggleSpeech2;
     window.toggleAnimationPause = toggleAnimationPause;
     window.searchTree = searchTree;
     window.displayPersonDetails = displayPersonDetails;

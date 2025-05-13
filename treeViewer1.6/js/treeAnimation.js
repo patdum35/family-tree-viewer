@@ -1550,6 +1550,9 @@ export async function startAncestorAnimation() {
         animationState.visitedDescendantNodeIds = new Set(oldValues);
     }
     
+    let step_duration = 1;
+    if (!state.isSpeechEnabled2) { step_duration = 0.2; }
+    else { step_duration = 1; }
 
     animationState.direction = 'ancestor';
     addHighlightStyle();
@@ -1781,18 +1784,18 @@ export async function startAncestorAnimation() {
 
                     // Avant le 1ier affichage créer une promesse qui simule la lecture vocale pour un message de démarrage : en voiture Simone
                     if (animationState.currentIndex === 0) {
-                        const voicePromiseStart = state.isSpeechEnabled 
+                        const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                             ? speakPersonName('en /voiture Simone')
-                            : new Promise(resolve => setTimeout(resolve, 1600));
+                            : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
                         
                         // Attendre la lecture ou le délai
                         await voicePromiseStart;
                     }
 
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
-                    const voicePromise = state.isSpeechEnabled 
+                    const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                         ? speakPersonName(node.data.name)
-                        : new Promise(resolve => setTimeout(resolve, 1500));
+                        : new Promise(resolve => setTimeout(resolve, 1500*step_duration));
                     
                     // Attendre la lecture ou le délai
                     await voicePromise;
@@ -1915,9 +1918,9 @@ export async function startAncestorAnimation() {
 
 
 
-            const voicePromiseStart = state.isSpeechEnabled 
+            const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                 ? speakPersonName('et /voila !')
-                : new Promise(resolve => setTimeout(resolve, 1600));
+                : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
             // Attendre la lecture ou le délai
             await voicePromiseStart;
 
@@ -1935,9 +1938,9 @@ export async function startAncestorAnimation() {
             if (state.targetCousinId!=null && i >= (animationState.path.length) ) {
 
                 animationState.direction = 'descendant';
-                const voicePromiseEnd = state.isSpeechEnabled 
+                const voicePromiseEnd = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                 ? speakPersonName('attention / la descente c\'est reparti !')
-                : new Promise(resolve => setTimeout(resolve, 3500));
+                : new Promise(resolve => setTimeout(resolve, 3500*step_duration));
                 // Attendre la lecture ou le délai
                 await voicePromiseEnd;
 
@@ -2051,9 +2054,9 @@ export async function startAncestorAnimation() {
 
 
                         // Créer une promesse qui simule la lecture vocale si le son est coupé
-                        const voicePromise = state.isSpeechEnabled 
+                        const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                             ? speakPersonName(node.data.name)
-                            : new Promise(resolve => setTimeout(resolve, 1500));
+                            : new Promise(resolve => setTimeout(resolve, 1500*step_duration));
                         
                         // Attendre la lecture ou le délai
                         await voicePromise;
@@ -2180,9 +2183,9 @@ export async function startAncestorAnimation() {
                 }
 
 
-                const voicePromiseStart = state.isSpeechEnabled 
+                const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
                     ? speakPersonName('et /voila !')
-                    : new Promise(resolve => setTimeout(resolve, 1600));
+                    : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
                 // Attendre la lecture ou le délai
                 await voicePromiseStart;
             }
@@ -2697,6 +2700,67 @@ export function generateLocalMaps() {
         } else {
             if (demoMode === 'demo1'){ state.targetAncestorId = "@I739@" } //"@I6@" } //
             else { state.targetAncestorId = "@I1322@"}
+
+
+
+            // if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
+            //     // state.targetAncestorId = "@I739@" 
+            //     ancestor = searchRootPersonId('alain ii goyon de matignon');  
+            //     cousin = null;       
+            // } else if (selectedValue === 'demo2'){  //'On descend tous de lui'
+            //     // state.targetAncestorId = "@I1322@"
+            //     ancestor = searchRootPersonId('charlemagne');
+            //     cousin = null;  
+            // } else if (selectedValue === 'demo3'){ // 'comme un ouragan'
+            //     // state.targetAncestorId = "@I1322@"
+            //     ancestor = searchRootPersonId('bertrand gouyon');
+            //     cousin = searchRootPersonId('stephanie marie elisabeth grimaldi');
+            // } else if (selectedValue === 'demo4'){  //'Espace'
+            //     // state.targetAncestorId = "@I1322@"
+            //     ancestor = searchRootPersonId('charles lebon');
+            //     cousin = searchRootPersonId('thomas pesquet');
+            // } else if (selectedValue === 'demo5'){ // 'Arabe du futur'
+            //     ancestor = searchRootPersonId('anthoine sicot');  
+            //     cousin = searchRootPersonId('riad sattouf');          
+            // } else if (selectedValue === 'demo6'){ // 'Loup du Canada'
+            //     ancestor = searchRootPersonId('andré du matz'); 
+            //     cousin = searchRootPersonId('pierre garand');            
+            // } else if (selectedValue === 'demo7'){ // "c'est normal"
+            //     ancestor = searchRootPersonId('jan demaure');
+            //     cousin = searchRootPersonId('brigitte fontaine');             
+            // } else if (selectedValue === 'demo8'){ // "les bronzés"
+            //     ancestor = searchRootPersonId('jean mathurin monvoisin');
+            //     cousin = searchRootPersonId('dominique lavanant');             
+            // } else if (selectedValue === 'demo9'){ // 'avant JC'
+            //     ancestor = searchRootPersonId('kamber de cambrie'); 
+            //     cousin = null;            
+            // } else if (selectedValue === 'demo10'){ // 'Francs'
+            //     ancestor = searchRootPersonId('pharabert des francs'); 
+            //     cousin = null;            
+            // } else if (selectedValue === 'demo11'){ // 'Capet'
+            //     ancestor = searchRootPersonId('hugues capet'); 
+            //     cousin = null;           
+            // } else {
+            //     ancestor = searchRootPersonId('charlemagne');
+            //     cousin = null;
+            // }
+
+  
+
+
+            let ancestor;
+            let cousin;
+            ancestor = searchRootPersonId('andré du matz'); 
+            cousin = searchRootPersonId('pierre garand');
+            state.rootPersonId = cousin.id 
+            state.targetAncestorId = ancestor.id;
+
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+
+
+
+
         }
         
         // Réinitialiser l'état de l'animation avant de démarrer

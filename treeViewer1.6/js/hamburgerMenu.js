@@ -847,7 +847,7 @@ function createSection(title, index = 0) {
     const buttons = [
       { 
         id: 'menu-speechToggleBtn',
-        onclick: 'toggleSpeech()', 
+        onclick: 'toggleSpeech2()', 
         title: 'Activer/désactiver le son', 
         text: '🔇' 
       },
@@ -1997,24 +1997,24 @@ function syncCustomSelectors() {
   function setupButtonSync() {
     setTimeout(() => {
         // Synchronisation existante pour les boutons de son et pause
-        const originalSpeechBtn = document.getElementById('speechToggleBtn');
-        const menuSpeechBtn = document.getElementById('menu-speechToggleBtn');
+        // const originalSpeechBtn = document.getElementById('speechToggleBtn');
+        // const menuSpeechBtn = document.getElementById('menu-speechToggleBtn');
         
-        if (originalSpeechBtn && menuSpeechBtn) {
-            const speechObserver = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        menuSpeechBtn.innerHTML = originalSpeechBtn.innerHTML;
-                    }
-                });
-            });
+        // if (originalSpeechBtn && menuSpeechBtn) {
+        //     const speechObserver = new MutationObserver(function(mutations) {
+        //         mutations.forEach(function(mutation) {
+        //             if (mutation.type === 'childList' || mutation.type === 'attributes') {
+        //                 menuSpeechBtn.innerHTML = originalSpeechBtn.innerHTML;
+        //             }
+        //         });
+        //     });
             
-            speechObserver.observe(originalSpeechBtn, { 
-                childList: true,
-                attributes: true,
-                subtree: true
-            });
-        }
+        //     speechObserver.observe(originalSpeechBtn, { 
+        //         childList: true,
+        //         attributes: true,
+        //         subtree: true
+        //     });
+        // }
         
         const originalPauseBtn = document.getElementById('animationPauseBtn');
         const menuPauseBtn = document.getElementById('menu-animationPauseBtn');

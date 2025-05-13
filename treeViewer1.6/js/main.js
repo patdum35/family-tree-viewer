@@ -126,6 +126,7 @@ export const state = {
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
+    isSpeechEnabled2: true,
     isAnimationPaused: false,
     isAnimationLaunched: false,
     isAnimationMapInitialized: false,
@@ -211,6 +212,43 @@ export function toggleSpeech() {
     // }
 
 }
+
+
+
+// Fonction pour desactiver complètement le son dans l'animation
+export function toggleSpeech2() {
+    const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
+    
+    // Basculer l'état du son
+    state.isSpeechEnabled2 = !state.isSpeechEnabled2;
+
+
+
+
+    
+    // Mettre à jour le bouton
+    menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🔇' : '🔊';
+
+
+    // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
+    // state.backgroundEnabled = !state.backgroundEnabled;
+    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
+    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
+    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
+
+    // if (state.backgroundEnabled) {
+    //     // enableBackground(true);
+    //     // Pour monitorer setupElegantBackground
+    //     restartBackgroundMonitoring();
+    // }
+    // else {
+    //     // enableBackground(false);
+    //     stopBackgroundMonitoring();
+    // }
+
+}
+
+
 
 
 // Pour arrêter le monitoring
