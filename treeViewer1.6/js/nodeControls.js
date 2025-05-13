@@ -219,7 +219,7 @@ function createPersonNode(personId, generation, options = {}) {
  * @param {Event} event - L'événement de clic
  * @param {Object} d - Les données du nœud cliqué
  */
-export function handleDescendantsClick(event, d, isAnimation = false) {
+export function handleDescendantsClick(event, d, isAnimation = false, nextNodeId) {
     event.stopPropagation();
 
     // // Ajouter un log pour le diagnostic
@@ -233,7 +233,7 @@ export function handleDescendantsClick(event, d, isAnimation = false) {
         handleDescendants(d)
     } else {
         // Mode ascendant : comportement original
-        handleDescendantsOnLeft(d, isAnimation);
+        handleDescendantsOnLeft(d, isAnimation, nextNodeId);
     }
 
     // console.log("Après traitement pour :" , d.data.id, d.data.name, 
@@ -252,7 +252,7 @@ export function handleDescendantsClick(event, d, isAnimation = false) {
  * En restructurant l'arbre pour permettre des générations antérieures
  * @param {Object} d - Le nœud D3 cliqué
  */
-function handleDescendantsOnLeft(d, isAnimation = false) {
+function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
     
     // Vérifier si le nœud a des descendants généalogiques
     const siblingId = d.data.id;
@@ -261,7 +261,7 @@ function handleDescendantsOnLeft(d, isAnimation = false) {
     // Vérifier si nous affichons ou cachons les descendants
     if (!d.data._showingLeftDescendants) {
         // Trouver les descendants généalogiques
-        const descendantsInfo = findDescendantsForSibling(siblingId);
+        const descendantsInfo = findDescendantsForSibling(siblingId, isAnimation, nextNodeId);
         
         if (descendantsInfo.childrenIds.length === 0) {
             // console.log("Pas de descendants généalogiques trouvés");
@@ -305,7 +305,7 @@ function handleDescendantsOnLeft(d, isAnimation = false) {
  * @param {string} siblingId - ID du sibling
  * @returns {Object} - Informations sur les descendants
  */
-function findDescendantsForSibling(siblingId) {
+function findDescendantsForSibling(siblingId, isAnimation, nextNodeId) {
     const person = state.gedcomData.individuals[siblingId];
     let childrenIds = [];
     let childrenData = [];
@@ -318,20 +318,23 @@ function findDescendantsForSibling(siblingId) {
                 family.children.forEach(childId => {
                     const childPerson = state.gedcomData.individuals[childId];
                     if (childPerson) {
-                        childrenIds.push(childId);
-                        childrenData.push({
-                            id: childId,
-                            name: childPerson.name,
-                            birthDate: childPerson.birthDate,
-                            deathDate: childPerson.deathDate
-                        });
+                      // Ne filtrer que si on est en mode animation: e, mode animation n'ajouter que si c'est le nextNodeId ou si nextNodeId n'est pas défini
+                      if (!isAnimation || (isAnimation && (!nextNodeId || childId === nextNodeId))) { 
+                            childrenIds.push(childId);
+                            childrenData.push({
+                                id: childId,
+                                name: childPerson.name,
+                                birthDate: childPerson.birthDate,
+                                deathDate: childPerson.deathDate
+                            });
+                        }
                     }
                 });
             }
         });
     }
     
-    // console.log("Descendants trouvés pour", siblingId, ":", childrenIds);
+    console.log("\n\n\n *** DEBUG in findDescendantsForSibling   *** Descendants trouvés pour", siblingId, ":", childrenIds, childrenData, isAnimation, nextNodeId);
     return {
         childrenIds: childrenIds,
         childrenData: childrenData

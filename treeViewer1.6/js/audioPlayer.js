@@ -52,8 +52,6 @@ function createAudioElement() {
     if (animationAudio) return animationAudio;
 
 
-
-
     // Chemin complet vers le fichier audio
     const audioUrl = getResourceUrl('/sounds/lalatte_remix.mp3');
     console.log("\n\n Chargement audio depuis:", audioUrl);
@@ -115,17 +113,39 @@ function createAudioPlayerGUI() {
     title.style.fontWeight = 'bold';
     title.style.fontSize = '10px';
     
+
+
+    // Créer le bouton de fermeture amélioré pour mobile
     const closeButton = document.createElement('button');
-    closeButton.innerHTML = '×';
-    closeButton.style.background = 'none';
-    closeButton.style.border = 'none';
+    closeButton.innerHTML = '&times;';  // Symbole X
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '5px';
+    closeButton.style.right = '5px';
+    closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; //'rgba(255, 0, 0, 0.7)';
     closeButton.style.color = 'white';
-    closeButton.style.fontSize = '14px';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '50%';
+
+    // Augmenter la taille pour smartphone
+    closeButton.style.width = '14px';  // Plus grand (était 24px)
+    closeButton.style.height = '14px'; // Plus grand (était 24px)
+    closeButton.style.fontSize = '20px'; // Plus grand (était 16px)
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '0 2px';
-    closeButton.style.marginLeft = '2px';
+    closeButton.style.display = 'flex';
+    closeButton.style.justifyContent = 'center';
+    closeButton.style.alignItems = 'center';
+    closeButton.style.padding = '0';
+    closeButton.style.zIndex = '1100';  // S'assurer qu'il est au-dessus
+
+    // Ajouter une zone de toucher plus grande (padding invisible)
+    closeButton.style.boxSizing = 'content-box';
+    closeButton.style.padding = '2px';
+    closeButton.style.margin = '-5px';
+
     closeButton.title = 'Fermer';
-    
+
+
+
     titleBar.appendChild(title);
     titleBar.appendChild(closeButton);
     
@@ -199,9 +219,35 @@ function createAudioPlayerGUI() {
     makeElementDraggable(playerContainer, titleBar);
     
     // Événements
+
+    // Ajouter des écouteurs d'événements pour souris ET tactile
+    // Événement de clic (souris)
     closeButton.addEventListener('click', () => {
         closeAudioPlayer();
     });
+
+    // Événement tactile
+    closeButton.addEventListener('touchend', (e) => {
+        e.preventDefault();  // Empêcher le clic simulé qui suivrait
+        closeAudioPlayer();
+    });
+
+    // Effet visuel au survol et au toucher
+    closeButton.addEventListener('mouseover', () => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        closeButton.style.transform = 'scale(1.1)';
+    });
+
+    closeButton.addEventListener('mouseout', () => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+        closeButton.style.transform = 'scale(1)';
+    });
+
+    closeButton.addEventListener('touchstart', (e) => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        closeButton.style.transform = 'scale(1.1)';
+    });
+
     
     playPauseButton.addEventListener('click', () => {
         toggleAudioPlayback();
@@ -265,7 +311,7 @@ function restoreAudioVolume() {
     } catch (e) {
         console.warn("Impossible de récupérer le volume:", e);
     }
-    return 0.3; // Valeur par défaut
+    return 0.4; // Valeur par défaut
 }
 
 
@@ -633,7 +679,7 @@ function hideAudioPlayer() {
 /**
  * Arrête la lecture et réinitialise le lecteur
  */
-function stopAnimationAudio() {
+export function stopAnimationAudio() {
     if (animationAudio) {
         animationAudio.pause();
         animationAudio.currentTime = 0;
@@ -726,4 +772,221 @@ window.addEventListener('load', () => {
     }
 });
 
+
+
+
+
+
+
+
+/**
+ * Variables globales pour l'analyse audio
+ */
+let audioContext = null;
+let audioSource = null;
+let audioAnalyser = null;
+let isAudioContextInitialized = false;
+
+/**
+ * Initialise le contexte audio et connecte l'analyseur
+ * @returns {boolean} Succès de l'initialisation
+ */
+function initAudioAnalysis() {
+    if (isAudioContextInitialized || !animationAudio) return true;
+    
+    try {
+        console.log("Initialisation de l'analyse audio...");
+        
+        // Créer le contexte audio
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Créer la source à partir de l'élément audio
+        audioSource = audioContext.createMediaElementSource(animationAudio);
+        
+        // Créer l'analyseur
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 32; // Petite taille pour l'efficacité
+        
+        // Connecter les nœuds
+        audioSource.connect(audioAnalyser);
+        audioAnalyser.connect(audioContext.destination);
+        
+        isAudioContextInitialized = true;
+        console.log("Analyse audio initialisée avec succès");
+        return true;
+    } catch (error) {
+        console.error("Erreur lors de l'initialisation de l'analyse audio:", error);
+        return false;
+    }
+}
+
+/**
+ * Analyse le volume et l'ajuste si nécessaire
+ */
+function checkAndAdjustVolume() {
+    if (!isAudioContextInitialized || !audioAnalyser || animationAudio.paused) return;
+    
+    try {
+        // Créer un tableau pour les données
+        const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+        
+        // Obtenir les données de fréquence
+        audioAnalyser.getByteFrequencyData(dataArray);
+        
+        // Calculer le niveau moyen
+        const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+        
+        console.log(`Niveau audio moyen: ${average.toFixed(2)}`);
+        
+        // Ajuster le volume si le niveau est trop bas
+        if (average < 20) { // Seuil à ajuster selon vos tests
+            // Augmenter progressivement le volume
+            const newVolume = Math.min(0.8, animationAudio.volume + 0.1);
+            console.log(`Volume trop bas (${average.toFixed(2)}), augmentation à ${newVolume.toFixed(2)}`);
+            animationAudio.volume = newVolume;
+            
+            // Mettre à jour le slider de volume s'il existe
+            const volumeSlider = document.querySelector('#animation-audio-player input[type="range"]');
+            if (volumeSlider) {
+                volumeSlider.value = newVolume.toString();
+                
+                // Mettre à jour l'icône de volume
+                const volumeIcon = volumeSlider.previousElementSibling;
+                if (volumeIcon) {
+                    updateVolumeIcon(newVolume, volumeIcon);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Erreur lors de l'analyse du volume:", error);
+    }
+}
+
+/**
+ * Version modifiée de playEndOfAnimationSound avec analyse du volume
+ */
+// export function playEndOfAnimationSound() {
+//     try {
+//         // Créer l'élément audio s'il n'existe pas
+//         const audio = createAudioElement();
+        
+//         // Créer et afficher le lecteur
+//         animationAudioPlayer = createAudioPlayerGUI();
+//         showAudioPlayer();
+        
+//         // Réinitialiser l'audio
+//         audio.currentTime = 0;
+        
+//         // *** Point critique pour les mobiles ***
+//         // Sur Chrome et Safari pour iOS/Android, 
+//         // l'API Web Audio (AudioContext) ne peut être initialisée 
+//         // qu'après une interaction utilisateur
+        
+//         // Sur mobile, on essaie de démarrer la lecture directement,
+//         // mais si l'API Web Audio échoue, on continuera sans analyse
+
+//         enableAudioContext();
+
+//         const playPromise = audio.play();
+        
+//         if (playPromise !== undefined) {
+//             playPromise.then(() => {
+//                 console.log("Audio démarré avec succès");
+                
+//                 // Mise à jour du bouton
+//                 updatePlayPauseButton(true);
+                
+//                 // Maintenant qu'on a l'autorisation de lecture audio,
+//                 // on peut tenter d'initialiser l'API Web Audio pour l'analyse
+//                 if (initAudioAnalysis()) {
+//                     // Programmer l'analyse et l'ajustement du volume après un court délai
+//                     // pour laisser le temps à l'audio de produire des données
+//                     setTimeout(() => {
+//                         checkAndAdjustVolume();
+                        
+//                         // Vérifier périodiquement le volume pendant la lecture
+//                         const volumeCheckInterval = setInterval(() => {
+//                             if (animationAudio.paused) {
+//                                 clearInterval(volumeCheckInterval);
+//                                 return;
+//                             }
+//                             checkAndAdjustVolume();
+//                         }, 3000); // Vérifier toutes les 3 secondes
+//                     }, 1000);
+//                 }
+//             }).catch(error => {
+//                 console.error("Erreur lors du démarrage de l'audio:", error);
+                
+//                 // Si la lecture automatique est bloquée, on continue
+//                 // sans analyse de volume
+//                 console.log("Lecture automatique probablement bloquée, mise à jour de l'interface sans analyse audio");
+                
+//                 // Mettre en évidence le bouton de lecture pour inciter l'utilisateur à cliquer
+//                 const playButton = document.getElementById('audio-play-pause');
+//                 if (playButton) {
+//                     playButton.style.animation = 'pulse 1.5s infinite';
+//                 }
+//             });
+//         }
+//     } catch (error) {
+//         console.error("Erreur lors de la lecture audio:", error);
+//     }
+// }
+
+// /**
+//  * Version plus robuste de toggleAudioPlayback
+//  */
+// function toggleAudioPlayback() {
+//     if (!animationAudio) return;
+    
+//     if (animationAudio.paused) {
+//         // L'utilisateur démarre manuellement la lecture
+//         const playPromise = animationAudio.play();
+        
+//         if (playPromise !== undefined) {
+//             playPromise.then(() => {
+//                 // Mise à jour de l'interface
+//                 updatePlayPauseButton(true);
+                
+//                 // Profiter de l'interaction utilisateur pour initialiser l'analyse
+//                 // si ce n'est pas déjà fait
+//                 if (!isAudioContextInitialized) {
+//                     if (initAudioAnalysis()) {
+//                         setTimeout(checkAndAdjustVolume, 1000);
+//                     }
+//                 }
+//             }).catch(error => {
+//                 console.error("Impossible de démarrer la lecture:", error);
+//             });
+//         }
+//     } else {
+//         // Mettre en pause
+//         animationAudio.pause();
+//         updatePlayPauseButton(false);
+//     }
+// }
+
+// /**
+//  * Mise à jour de l'interface du lecteur
+//  */
+// function updatePlayPauseButton(isPlaying) {
+//     const button = document.getElementById('audio-play-pause');
+//     if (button) {
+//         button.innerHTML = isPlaying ? '⏸️' : '▶️';
+//         button.title = isPlaying ? 'Pause' : 'Lecture';
+        
+//         // Supprimer l'animation pulse si elle était active
+//         button.style.animation = 'none';
+//     }
+// }
+
+/**
+ * Cette fonction doit être appelée si l'utilisateur interagit avec la page
+ * avant que l'audio ne démarre automatiquement
+ */
+function enableAudioContext() {
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}
 

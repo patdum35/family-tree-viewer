@@ -1,10 +1,10 @@
 // ====================================
 // Animation de l'arbre
 // ====================================
-import { state } from './main.js';
+import { state, searchRootPersonId } from './main.js';
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
 import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
-import { buildDescendantTree } from './treeOperations.js';
+import { buildDescendantTree, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
 // import { geocodeLocation } from './modalWindow.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { initBackgroundContainer, updateBackgroundImage } from './backgroundManager.js';
@@ -12,8 +12,8 @@ import { extractYear } from './utils.js';
 import { initAnimationMap as initMap, updateAnimationMapMarkers, createCachedTileLayer, updateAnimationMapMarkersWithLabels, collectPersonLocations, locationSymbols} from './mapUtils.js';
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
 import { fetchTileWithCache } from './mapTilesPreloader.js';
-import { playEndOfAnimationSound } from './audioPlayer.js';
-import { showEndAnimationPhoto } from './photoPlayer.js';
+import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
+import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
 
 
 let animationTimeouts = [];
@@ -22,6 +22,7 @@ let animationMap = null;
 let animationMarker = null;
 
 let frenchVoice = null;
+let localVoice = null;
 
 // Au début du fichier, après les imports
 let isOnline = false; // Variable pour suivre l'état de la connexion Internet
@@ -55,57 +56,308 @@ let animationState = {
     cousinDescendantPath: [], // Le chemin complet descendant de l'ancetre vers le cousin
     currentIndex: 0,   // L'index du nœud actuel
     isPaused: false,
-    currentHighlightedNodeId: null  // Ajout de cette propriété pour suivre le nœud actuellement mis en évidence
+    currentHighlightedNodeId: null,  // Ajout de cette propriété pour suivre le nœud actuellement mis en évidence
+    visitedAncestorNodeIds: null, //: new Set(), // Ensemble pour conserver l'historique des nœuds ancestors visités
+    visitedDescendantNodeIds: null, //: new Set() // Ensemble pour conserver l'historique des nœuds descendants visités
+    direction: 'ancestor'
 };
 
-// Ajouter cette fonction pour marquer et démarquer les nœuds
+// // Ajouter cette fonction pour marquer et démarquer les nœuds
+// function highlightAnimationNode(nodeId, highlight = true) {
+//     // Si nodeId n'est pas fourni, ne rien faire
+//     if (!nodeId) return;
+    
+//     // Marquer le nœud dans notre état local
+//     if (highlight) {
+//         // Si un autre nœud était déjà en surbrillance, le démarquer
+//         if (animationState.currentHighlightedNodeId && 
+//             animationState.currentHighlightedNodeId !== nodeId) {
+//             // Démarquer l'ancien nœud
+//             d3.selectAll('.node')
+//                 .filter(d => d.data.id === animationState.currentHighlightedNodeId)
+//                 .select('rect')  // ou '.node-box' selon votre structure HTML
+//                 .classed('highlight-animation-node', false);
+//         }
+        
+//         // Mémoriser le nœud actuellement en surbrillance
+//         animationState.currentHighlightedNodeId = nodeId;
+//     } else if (animationState.currentHighlightedNodeId === nodeId) {
+//         // Réinitialiser si on démarque le nœud actuellement en surbrillance
+//         animationState.currentHighlightedNodeId = null;
+//     }
+    
+//     // Appliquer ou supprimer la classe de surbrillance
+//     d3.selectAll('.node')
+//         .filter(d => d.data.id === nodeId)
+//         .select('rect')  // ou '.node-box' selon votre structure HTML
+//         .classed('highlight-animation-node', highlight);
+// }
+
+// // Ajouter un style CSS pour la classe de surbrillance
+// function addHighlightStyle() {
+//     // Vérifier si le style a déjà été ajouté
+//     if (document.getElementById('animation-highlight-style')) return;
+    
+//     // Créer et ajouter le style
+//     const style = document.createElement('style');
+//     style.id = 'animation-highlight-style';
+//     style.textContent = `
+//         .highlight-animation-node {
+//             fill: #FFEB3B !important;  /* Jaune */
+//             stroke: #FFC107 !important;  /* Bordure plus foncée */
+//             stroke-width: 2px !important;
+//         }
+//     `;
+//     document.head.appendChild(style);
+// }
+
+
+
+
+
+// Fonction modifiée pour marquer et démarquer les nœuds
 function highlightAnimationNode(nodeId, highlight = true) {
     // Si nodeId n'est pas fourni, ne rien faire
     if (!nodeId) return;
     
-    // Marquer le nœud dans notre état local
-    if (highlight) {
-        // Si un autre nœud était déjà en surbrillance, le démarquer
-        if (animationState.currentHighlightedNodeId && 
-            animationState.currentHighlightedNodeId !== nodeId) {
-            // Démarquer l'ancien nœud
+    
+    // // Pour déboguer
+    // console.log("État avant highlight:", {
+    //     nodeId: nodeId,
+    //     highlight: highlight,
+    //     currentHighlighted: animationState.currentHighlightedNodeId,
+    //     visitedNodes: Array.from(animationState.visitedAncestorNodeIds)
+    // });
+    
+    try {
+        if (highlight) {
+            // Si un autre nœud était déjà en surbrillance, l'ajouter à l'historique
+            if (animationState.currentHighlightedNodeId && 
+                animationState.currentHighlightedNodeId !== nodeId) {
+                
+                // Ajouter l'ancien nœud à l'historique (avec vérification)
+                try {
+                    if (animationState.direction == 'ancestor') {
+                        animationState.visitedAncestorNodeIds.add(animationState.currentHighlightedNodeId);
+                        console.log(`Nœud ${animationState.currentHighlightedNodeId} ajouté à l'historique ancestor`);
+
+                        // Démarquer l'ancien nœud comme actif et le marquer comme historique
+                        d3.selectAll('.node')
+                        .filter(d => d.data.id === animationState.currentHighlightedNodeId)
+                        .select('rect')
+                        .classed('highlight-animation-node-active', false)
+                        .classed('highlight-animation-AncestorNode-history ', true);
+
+                    } else {
+                        animationState.visitedDescendantNodeIds.add(animationState.currentHighlightedNodeId);
+                        console.log(`Nœud ${animationState.currentHighlightedNodeId} ajouté à l'historique descendant`); 
+
+                        // Démarquer l'ancien nœud comme actif et le marquer comme historique
+                        d3.selectAll('.node')
+                        .filter(d => d.data.id === animationState.currentHighlightedNodeId)
+                        .select('rect')
+                        .classed('highlight-animation-node-active', false)
+                        .classed('highlight-animation-DescendantNode-history ', true);                                               
+                    }
+                } catch (e) {
+                    console.error("Erreur lors de l'ajout à visitedAncestorNodeIds:", e);
+                    animationState.visitedAncestorNodeIds = new Set([animationState.currentHighlightedNodeId]);
+                }
+                
+                // // Démarquer l'ancien nœud comme actif et le marquer comme historique
+                // d3.selectAll('.node')
+                //     .filter(d => d.data.id === animationState.currentHighlightedNodeId)
+                //     .select('rect')
+                //     .classed('highlight-animation-node-active', false)
+                //     .classed('highlight-animation-AncestorNode-history ', true);
+
+                
+            }
+            
+            // Mémoriser le nœud actuellement en surbrillance
+            animationState.currentHighlightedNodeId = nodeId;
+            
+            // Marquer le nœud actuel comme actif
             d3.selectAll('.node')
-                .filter(d => d.data.id === animationState.currentHighlightedNodeId)
-                .select('rect')  // ou '.node-box' selon votre structure HTML
-                .classed('highlight-animation-node', false);
+                .filter(d => d.data.id === nodeId)
+                .select('rect')
+                .classed('highlight-animation-node-active', true)
+                .classed('highlight-animation-AncestorNode-history ', false)
+                .classed('highlight-animation-DescendantNode-history ', false);
+                
+            // IMPORTANT: Appliquer la classe d'historique à TOUS les nœuds visités précédemment
+            animationState.visitedAncestorNodeIds.forEach(visitedId => {
+                if (visitedId !== nodeId) { // Ne pas marquer le nœud actuel comme historique
+                    d3.selectAll('.node')
+                        .filter(d => d.data.id === visitedId)
+                        .select('rect')
+                        .classed('highlight-animation-AncestorNode-history ', true);
+                }
+            });
+            animationState.visitedDescendantNodeIds.forEach(visitedId => {
+                if (visitedId !== nodeId) { // Ne pas marquer le nœud actuel comme historique
+                    d3.selectAll('.node')
+                        .filter(d => d.data.id === visitedId)
+                        .select('rect')
+                        .classed('highlight-animation-DescendantNode-history ', true);
+                }
+            });
+
+
+
+
+        } else if (animationState.currentHighlightedNodeId === nodeId) {
+            // Si on démarque le nœud actif, l'ajouter à l'historique
+            try {
+                if (animationState.direction == 'ancestor') {
+                    animationState.visitedAncestorNodeIds.add(nodeId);
+                    d3.selectAll('.node')
+                    .filter(d => d.data.id === nodeId)
+                    .select('rect')
+                    .classed('highlight-animation-node-active', false)
+                    .classed('highlight-animation-AncestorNode-history ', true);
+                    console.log(`Nœud ${nodeId} ajouté à l'historique ancestor (désactivation)`);
+                } else { 
+                    animationState.visitedDescendantNodeIds.add(nodeId); 
+                    d3.selectAll('.node')
+                    .filter(d => d.data.id === nodeId)
+                    .select('rect')
+                    .classed('highlight-animation-node-active', false)
+                    .classed('highlight-animation-DescendantNode-history ', true);
+                    console.log(`Nœud ${nodeId} ajouté à l'historique descendant (désactivation)`);
+                }
+                
+            } catch (e) {
+                console.error("Erreur lors de l'ajout à visitedAncestorNodeIds:", e);
+                animationState.visitedAncestorNodeIds = new Set([nodeId]);
+            }
+            
+            // d3.selectAll('.node')
+            //     .filter(d => d.data.id === nodeId)
+            //     .select('rect')
+            //     .classed('highlight-animation-node-active', false)
+            //     .classed('highlight-animation-AncestorNode-history ', true);
+            
+            // Réinitialiser le nœud actif
+            animationState.currentHighlightedNodeId = null;
         }
         
-        // Mémoriser le nœud actuellement en surbrillance
-        animationState.currentHighlightedNodeId = nodeId;
-    } else if (animationState.currentHighlightedNodeId === nodeId) {
-        // Réinitialiser si on démarque le nœud actuellement en surbrillance
-        animationState.currentHighlightedNodeId = null;
+        // Pour déboguer
+        console.log("État après highlight:", {
+            currentHighlighted: animationState.currentHighlightedNodeId,
+            visitedNodes: Array.from(animationState.visitedAncestorNodeIds)
+        });
+    } catch (e) {
+        console.error("Erreur dans highlightAnimationNode:", e);
     }
-    
-    // Appliquer ou supprimer la classe de surbrillance
-    d3.selectAll('.node')
-        .filter(d => d.data.id === nodeId)
-        .select('rect')  // ou '.node-box' selon votre structure HTML
-        .classed('highlight-animation-node', highlight);
 }
 
-// Ajouter un style CSS pour la classe de surbrillance
-function addHighlightStyle() {
-    // Vérifier si le style a déjà été ajouté
-    if (document.getElementById('animation-highlight-style')) return;
-    
-    // Créer et ajouter le style
-    const style = document.createElement('style');
-    style.id = 'animation-highlight-style';
-    style.textContent = `
-        .highlight-animation-node {
-            fill: #FFEB3B !important;  /* Jaune */
-            stroke: #FFC107 !important;  /* Bordure plus foncée */
-            stroke-width: 2px !important;
-        }
-    `;
-    document.head.appendChild(style);
+// Fonction pour réinitialiser complètement l'animation
+function resetAnimationHighlights() {
+    try {
+        // Retirer toutes les classes de surbrillance
+        d3.selectAll('.node rect')
+            .classed('highlight-animation-node-active', false)
+            .classed('highlight-animation-AncestorNode-history ', false);
+        
+        // Réinitialiser l'état
+        animationState.currentHighlightedNodeId = null;
+        
+        // Réinitialiser visitedAncestorNodeIds avec vérification
+        animationState.visitedAncestorNodeIds.clear();
+
+    } catch (e) {
+        console.error("Erreur lors de la réinitialisation des surlignages:", e);
+    }
 }
+
+// Fonction pour restaurer l'état visuel après un rechargement ou une mise à jour
+function restoreAnimationState() {
+    try {
+        
+        // Appliquer la surbrillance d'historique à tous les nœuds visités
+        animationState.visitedAncestorNodeIds.forEach(nodeId => {
+            try {
+                d3.selectAll('.node')
+                    .filter(d => d.data.id === nodeId)
+                    .select('rect')
+                    .classed('highlight-animation-AncestorNode-history ', true);
+            } catch (e) {
+                console.error(`Erreur lors de la restauration du nœud ${nodeId}:`, e);
+            }
+        });
+        
+        // Appliquer la surbrillance active au nœud actuel s'il y en a un
+        if (animationState.currentHighlightedNodeId) {
+            d3.selectAll('.node')
+                .filter(d => d.data.id === animationState.currentHighlightedNodeId)
+                .select('rect')
+                .classed('highlight-animation-node-active', true);
+        }
+    } catch (e) {
+        console.error("Erreur lors de la restauration de l'état:", e);
+    }
+}
+
+// Ajouter un style CSS pour les classes de surbrillance
+function addHighlightStyle() {
+    try {
+        // Vérifier si le style a déjà été ajouté
+        if (document.getElementById('animation-highlight-style')) return;
+        
+        // Créer et ajouter le style
+        const style = document.createElement('style');
+        style.id = 'animation-highlight-style';
+
+        // fill: #4285F4 !important;  /* Bleu Google */
+        // stroke: #1A73E8 !important;  /* Bordure plus foncée */
+        style.textContent = `
+            .highlight-animation-node-active {
+                fill: #FFEB3B !important;  /* Jaune */
+                stroke: #FFC107 !important;  /* Bordure plus foncée */
+                stroke-width: 2px !important;
+            }
+
+            .highlight-animation-AncestorNode-history {
+                fill: #BBDEFB !important;  /* Bleu clair */
+                stroke: #90CAF9 !important;  /* Bordure légèrement plus foncée */
+                stroke-width: 1.5px !important;
+            }
+
+            .highlight-animation-DescendantNode-history {
+                fill:rgb(187, 251, 207) !important;  /* Bleu clair */
+                stroke:rgb(144, 249, 209) !important;  /* Bordure légèrement plus foncée */
+                stroke-width: 1.5px !important;
+            }
+        `;
+        document.head.appendChild(style);
+    } catch (e) {
+        console.error("Erreur lors de l'ajout du style:", e);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -176,8 +428,9 @@ export function initNetworkListeners() {
 
     // Test périodique de connectivité (optionnel)
     setInterval(() => {
+        console.log('lancement du test de connectivité internet')
         testRealConnectivity();
-    }, 15000); // Test toutes les 30 secondes
+    }, 15000); // Test toutes les 15 secondes
 
     // console.log("✅ Écouteurs réseau initialisés");
 
@@ -783,12 +1036,18 @@ function findAncestorPath(startId, targetAncestorId) {
     
     // Trouver le chemin depuis l'ancêtre jusqu'à la racine actuelle
     const path = findNodeAndPath(descendantTree, startId);
-    const descendPath = [...path]; // Crée une copie du tableau
+    if (path)
+    {
+        const descendPath = [...path]; // Crée une copie du tableau
 
-    // Inverser le chemin pour aller de la racine vers l'ancêtre
-    const finalPath = path ? path.reverse() : [];
-   
-    return [finalPath, descendPath];
+        // Inverser le chemin pour aller de la racine vers l'ancêtre
+        const finalPath = path ? path.reverse() : [];
+    
+        return [finalPath, descendPath];
+    }
+    else {
+        return [ null, null];
+    }
 }
 
 /**
@@ -835,26 +1094,29 @@ function simplifyName(fullName) {
 /*  NOUVEAU CODE BON pour nouveau Chrome */
 // Variable globale pour suivre si la synthèse vocale a été initialisée
 let speechSynthesisInitialized = false;
+let errorInSpeechInit = false;
 
 // Fonction d'initialisation de la synthèse vocale à exécuter au chargement
-function initSpeechSynthesis() {
+function initSpeechSynthesis(voice) {
     if ('speechSynthesis' in window && !speechSynthesisInitialized) {
-        // console.log("🎤 Initialisation de la synthèse vocale...");
+        console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
         // Créer et jouer une utterance silencieuse pour initialiser le moteur
         const initUtterance = new SpeechSynthesisUtterance("");
         initUtterance.volume = 0.00; // Muet
         initUtterance.rate = 1.8; // 
+        initUtterance.voice = voice; // 
         initUtterance.onend = () => {
-            // console.log("🎤 Synthèse vocale initialisée avec succès");
+            console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
             speechSynthesisInitialized = true;
         };
         initUtterance.onerror = (err) => {
-            console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err);
+            console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
             speechSynthesisInitialized = true; // Considérer comme initialisé quand même
+            errorInSpeechInit = true;
         };
         
         // Forcer le chargement des voix
-        window.speechSynthesis.getVoices();
+        // window.speechSynthesis.getVoices();
         
         // Jouer l'utterance silencieuse
         window.speechSynthesis.speak(initUtterance);
@@ -905,6 +1167,18 @@ function selectVoice() {
     let frenchVoices = voices.filter(voice => 
         voice.lang.startsWith('fr-FR') && 
         !voice.name.includes('ulti'));
+
+
+
+    let localVoices = voices.filter(voice => 
+        voice.localService);
+
+    if (localVoices.length != 0) {
+        console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
+        localVoice = localVoices[0];
+    } 
+
+
 
     // console.log("Voix françaises France disponibles:", frenchVoices, frenchVoices.map(v => v.name));
 
@@ -1021,15 +1295,26 @@ function speakPersonName(personName) {
     
     // Initialiser la synthèse vocale si ce n'est pas déjà fait
     if (!speechSynthesisInitialized) {
-        console.log("🔄 Premier appel à la synthèse vocale - initialisation...");
-        initSpeechSynthesis();
-        // Ajouter un petit délai pour laisser le temps à l'initialisation
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Réappeler la fonction après initialisation
-                speakPersonName(personName).then(resolve);
-            }, 200);
-        });
+        console.log("🔄 Premier appel à la synthèse vocale - initialisation... avec french voice");
+        if (frenchVoice) {
+            initSpeechSynthesis(frenchVoice);
+
+            // if (!speechSynthesisInitialized) {
+            //     console.log("🔄 2ième appel à la synthèse vocale - initialisation.. avec local voice");
+            //     if (localVoice) {
+            //         initSpeechSynthesis(localVoice);
+            //         frenchVoice = localVoice;
+            //         speechSynthesisInitialized = true;
+            //     }   
+            // }
+            // Ajouter un petit délai pour laisser le temps à l'initialisation
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // Réappeler la fonction après initialisation
+                    speakPersonName(personName).then(resolve);
+                }, 200);
+            });
+        }
     }
     
     // console.log("index animation =", animationState.currentIndex);
@@ -1058,20 +1343,43 @@ function speakPersonName(personName) {
         }
 
 
-        let timeOutDuration = 1800;
+
+        // Simplifier le nom avant lecture
+        const simplifiedName = simplifyName(personName);
+        console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
+
+
+
+        // let timeOutDuration = 1800;
+        // if (animationState.currentIndex === 0) {
+        //     console.log("🔄 Premier nom - forçage taux initial à 1.2");
+        //     optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
+        //     if (isSpeechInGoodHealth) timeOutDuration = 3500;
+        //     else timeOutDuration = 2500;
+        // }
+        // if (animationState.currentIndex === 1) {
+        //     console.log("🔄 Premier nom - forçage taux initial à 1.0");
+        //     optimalSpeechRate = 1.2; //
+        //     if (isSpeechInGoodHealth) timeOutDuration = 2500; 
+        //     else timeOutDuration = 1600;
+        // }
+
+
+
+
+        // Ajustement dynamique du timeout en fonction de la longueur du nom
+        let timeOutDuration = Math.max(1800, simplifiedName.length * 150); // Base de 150ms par lettre, minimum 1800ms
         if (animationState.currentIndex === 0) {
             console.log("🔄 Premier nom - forçage taux initial à 1.2");
-            optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
-            if (isSpeechInGoodHealth) timeOutDuration = 3500;
-            else timeOutDuration = 2500;
+            optimalSpeechRate = 1.2;
+            timeOutDuration = Math.max(isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
         }
         if (animationState.currentIndex === 1) {
-            console.log("🔄 Premier nom - forçage taux initial à 1.0");
-            optimalSpeechRate = 1.2; //
-            if (isSpeechInGoodHealth) timeOutDuration = 2500; 
-            else timeOutDuration = 1600;
-
+            console.log("🔄 Deuxième nom - ajustement taux");
+            optimalSpeechRate = 1.2;
+            timeOutDuration = Math.max(isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
         }
+
 
         // contournement pour Chrome qui ne fonctionne pas bien avec la synthèse vocale
         let safetyTimeout;
@@ -1092,9 +1400,6 @@ function speakPersonName(personName) {
 
 
 
-        // Simplifier le nom avant lecture
-        const simplifiedName = simplifyName(personName);
-        console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
 
 
 
@@ -1107,13 +1412,14 @@ function speakPersonName(personName) {
                 const utterance = new SpeechSynthesisUtterance(simplifiedName);
                 utterance.rate = rate;
                 utterance.lang = 'fr-FR';
+                utterance.volume = 1.0;
 
                 const startTime = Date.now();
                 // console.log(`⏱️ Démarrage mesure à: ${startTime}`);
 
                 utterance.onend = () => {
                     const duration = Date.now() - startTime;
-                    // console.log(`✅ Fin utterance après ${duration}ms`);
+                    console.log(`✅ Fin utterance après ${duration}ms`);
                     
                     innerResolve({ 
                         rate: rate, 
@@ -1127,7 +1433,7 @@ function speakPersonName(personName) {
                     // Si l'erreur est 'interrupted', utiliser une durée estimée plutôt que Infinity
                     if (event.error === 'interrupted') {
                         const elapsedTime = Date.now() - startTime;
-                        // console.log(`⏱️ Temps écoulé avant interruption: ${elapsedTime}ms`);
+                        console.log(`⏱️ Temps écoulé avant interruption: ${elapsedTime}ms`);
                 
                         // Utiliser le temps écoulé comme approximation
                         const estimatedDuration = Math.min(1500, elapsedTime * 1.5);
@@ -1156,7 +1462,7 @@ function speakPersonName(personName) {
                 // );
 
                 if (frenchVoice) {
-                    // console.log(`✅  🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
+                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
                     utterance.voice = frenchVoice;
                 }
 
@@ -1180,20 +1486,27 @@ function speakPersonName(personName) {
 
                 // console.log(`📊 Résultat mesure:`, result);
                 
-                // Ajuster la vitesse globale avec une approche plus symétrique
-                if (result.duration > targetDuration + 200) {
-                    // Si trop lent, augmenter progressivement
-                    const oldRate = optimalSpeechRate;
-                    optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
-                    console.log(`🐢 Trop LENT (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                } else if (result.duration < targetDuration - 200) {
-                    // Si trop rapide, diminuer progressivement
-                    const oldRate = optimalSpeechRate;
-                    optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
-                    // console.log(`🐇 Trop RAPIDE (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                } else {
-                    // console.log(`✅ Durée OPTIMALE (${result.duration}ms) - Maintien taux: ${optimalSpeechRate}`);
-                }
+
+
+
+                // // Ajuster la vitesse globale avec une approche plus symétrique
+                // if (result.duration > targetDuration + 200) {
+                //     // Si trop lent, augmenter progressivement
+                //     const oldRate = optimalSpeechRate;
+                //     optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
+                //     console.log(`🐢 Trop LENT (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
+                // } else if (result.duration < targetDuration - 200) {
+                //     // Si trop rapide, diminuer progressivement
+                //     const oldRate = optimalSpeechRate;
+                //     optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
+                //     // console.log(`🐇 Trop RAPIDE (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
+                // } else {
+                //     // console.log(`✅ Durée OPTIMALE (${result.duration}ms) - Maintien taux: ${optimalSpeechRate}`);
+                // }
+
+
+
+
                 
                 clearTimeout(safetyTimeout); // Annuler le timeout si tout s'est bien passé
                 // console.log(`✅ FIN: speakPersonName - promesse résolue`);
@@ -1217,9 +1530,28 @@ function speakPersonName(personName) {
 
 
 
-
+//#####################################################
 export async function startAncestorAnimation() {
 
+    
+    // Vérifier que visitedNodeIds est bien un Set
+    if (!(animationState.visitedAncestorNodeIds instanceof Set)) {
+        console.warn("visitedNodeIds n'est pas un Set, conversion...");
+        const oldValues = Array.isArray(animationState.visitedAncestorNodeIds) 
+            ? animationState.visitedAncestorNodeIds 
+            : [];
+        animationState.visitedAncestorNodeIds = new Set(oldValues);
+    }
+    if (!(animationState.visitedDescendantNodeIds instanceof Set)) {
+        console.warn("visitedNodeIds n'est pas un Set, conversion...");
+        const oldValues = Array.isArray(animationState.visitedDescendantNodeIds) 
+            ? animationState.visitedDescendantNodeIds 
+            : [];
+        animationState.visitedDescendantNodeIds = new Set(oldValues);
+    }
+    
+
+    animationState.direction = 'ancestor';
     addHighlightStyle();
 
     isSpeechInGoodHealth = await testSpeechSynthesisHealth();
@@ -1248,8 +1580,6 @@ export async function startAncestorAnimation() {
         }
     };
 
-    playEndOfAnimationSound();
-    showEndAnimationPhoto();
 
    let treeModeBackup =  state.treeModeReal;
 
@@ -1257,19 +1587,64 @@ export async function startAncestorAnimation() {
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
         [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
-        if (state.targetCousinId != null) {
-            [animationState.cousinPath, animationState.cousinDescendantPath] = findAncestorPath(state.targetCousinId, state.targetAncestorId);
-            state.treeModeReal = 'directAncestors';
-        }
+
         
-        // console.log("Chemin trouvé:", animationState.path);
-        // console.log("Chemin trouvé descendant:", animationState.descendpath);
-        console.log("Chemin trouvé:", animationState.cousinPath);
-        console.log("Chemin trouvé descendant:", animationState.cousinDescendantPath);
+        console.log("\n\n\n DEBUG animationState.path ", animationState.path)
         
-        if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
-            animationState.path = animationState.descendpath;
+        // si la personne root ne permet pas de faire la démo, on change avec la personne root de base
+        if (!animationState.path) {
+
+            if (state.treeOwner ===2 ) {
+                state.rootPersonId = searchRootPersonId('faustine d');
+
+            } else {
+                state.rootPersonId = searchRootPersonId('emma a');
+            }
+            
+            console.log("\n\n\n DEBUG state.rootPersonId", state.rootPersonId)
+            if (state.rootPersonId) {
+
+                if (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants')  {
+                    const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
+                    state.currentTree =  buildDescendantTree(tempPerson.id);
+                }
+                else {
+                    state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
+                        ? buildDescendantTree(state.rootPersonId)
+                        : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
+                        ? buildAncestorTree(state.rootPersonId.id)
+                        : buildCombinedTree(state.rootPersonId.id); // Pour le mode 'both'
+                }
+                drawTree(); 
+                console.log("\n\n\n DEBUG findAncestorPath with ", state.rootPersonId , state.targetAncestorId, findAncestorPath(state.rootPersonId.id, state.targetAncestorId))
+                animationState.path =[];
+                animationState.descendpath =[];
+                [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId.id, state.targetAncestorId);
+                console.log("\n\n\n DEBUG animationState.path  after  ", animationState.path)
+
+            }
         }
+
+        if (animationState.path) {
+        
+            console.log("Chemin trouvé:", animationState.path);
+            // console.log("Chemin trouvé descendant:", animationState.descendpath);
+            if (state.targetCousinId != null) {
+                [animationState.cousinPath, animationState.cousinDescendantPath] = findAncestorPath(state.targetCousinId, state.targetAncestorId);
+                state.treeModeReal = 'directAncestors';
+                console.log("Chemin cousin trouvé:", animationState.cousinPath);
+                console.log("Chemin cousin trouvé descendant:", animationState.cousinDescendantPath);
+            }
+            
+            
+            if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+                animationState.path = animationState.descendpath;
+            }
+        }
+        else {
+            return;
+        }  
+
 
         animationState.currentIndex = 0;
         animationState.isPaused = false;
@@ -1295,13 +1670,17 @@ export async function startAncestorAnimation() {
             // Nettoyer les timeouts existants
             animationTimeouts.forEach(timeout => clearTimeout(timeout));
             animationTimeouts = [];
+            let i;
+            let nodeId;
+            let node
 
             // Reprendre à partir de l'index actuel
-            for (let i = animationState.currentIndex; i < animationState.path.length; i++) {
+            for (i = animationState.currentIndex; i < animationState.path.length; i++) {
                 
                 animationState.currentIndex = i;
 
-                if (animationState.currentIndex > animationState.path.length - 4 ) 
+                // pour le mode 'cousin', 4 avant la fin on passe en mode Ancestors pour laisser apparaitre les siclings qui vont permettre la descente
+                if ((animationState.currentIndex > animationState.path.length - 4 ) && (state.targetCousinId != null) )
                 { 
                     state.treeModeReal = 'ancestors';
                     console.log("\n\n debug -- passage en mode state.treeModeReal = 'Ancestors'")
@@ -1312,8 +1691,8 @@ export async function startAncestorAnimation() {
                     break;
                 }
 
-                const nodeId = animationState.path[i];
-                const node = findNodeInTree(nodeId);
+                nodeId = animationState.path[i];
+                node = findNodeInTree(nodeId);
                 // console.log("Noeud trouvé ? :",i,  nodeId, node);
 
                 if (node) {
@@ -1324,12 +1703,12 @@ export async function startAncestorAnimation() {
                     // Chercher un lieu à afficher
                     const person = state.gedcomData.individuals[node.data.id];
                     // Mettre à jour l'image de fond en fonction de la date de naissance de la personne
-                    if (person && person.birthDate) {
-                        const year = extractYear(person.birthDate);
-                        if (year) {
-                            updateBackgroundImage(year);
-                        }
-                    }
+                    // if (person && person.birthDate) {
+                    //     const year = extractYear(person.birthDate);
+                    //     if (year) {
+                    //         updateBackgroundImage(year);
+                    //     }
+                    // }
 
                     // Utiliser la fonction centralisée pour collecter les lieux
                     const validLocations = collectPersonLocations(person, state.gedcomData.families);
@@ -1525,11 +1904,23 @@ export async function startAncestorAnimation() {
 
             // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
 
+
+            if (state.targetCousinId==null && i >= (animationState.path.length) )
+            {
+                playEndOfAnimationSound();
+                showEndAnimationPhoto(node.data.name);
+            }
+
+
+
+
+
             const voicePromiseStart = state.isSpeechEnabled 
                 ? speakPersonName('et /voila !')
                 : new Promise(resolve => setTimeout(resolve, 1600));
             // Attendre la lecture ou le délai
             await voicePromiseStart;
+
 
 
             
@@ -1541,15 +1932,19 @@ export async function startAncestorAnimation() {
             //####################################################################################################//
             //#############################   descente vers le cousin ############################################//
             
-            if (state.targetCousinId!=null) {
+            if (state.targetCousinId!=null && i >= (animationState.path.length) ) {
+
+                animationState.direction = 'descendant';
                 const voicePromiseEnd = state.isSpeechEnabled 
                 ? speakPersonName('attention / la descente c\'est reparti !')
-                : new Promise(resolve => setTimeout(resolve, 2500));
+                : new Promise(resolve => setTimeout(resolve, 3500));
                 // Attendre la lecture ou le délai
                 await voicePromiseEnd;
 
 
                 // Reprendre à partir de l'index actuel
+                let j =0;
+                let lastName;
                 for (let i = animationState.currentIndex; i < animationState.path.length + animationState.cousinDescendantPath.length; i++) {
                     
                     animationState.currentIndex = i;
@@ -1565,8 +1960,8 @@ export async function startAncestorAnimation() {
                         break;
                     }
 
-                    const nodeId = animationState.cousinDescendantPath[i-animationState.cousinDescendantPath.length];
-                    const node = findNodeInTree(nodeId);
+                    nodeId = animationState.cousinDescendantPath[j]; //i-animationState.cousinDescendantPath.length];
+                    node = findNodeInTree(nodeId);
                     // console.log("Noeud trouvé ? :",i,  nodeId, node);
 
                     if (node) {
@@ -1576,13 +1971,15 @@ export async function startAncestorAnimation() {
 
                         // Chercher un lieu à afficher
                         const person = state.gedcomData.individuals[node.data.id];
+
+                        // console.log("\\Noeud descendant cousin trouvé ? :",i, j, nodeId, node, person.name);
                         // Mettre à jour l'image de fond en fonction de la date de naissance de la personne
-                        if (person && person.birthDate) {
-                            const year = extractYear(person.birthDate);
-                            if (year) {
-                                updateBackgroundImage(year);
-                            }
-                        }
+                        // if (person && person.birthDate) {
+                        //     const year = extractYear(person.birthDate);
+                        //     if (year) {
+                        //         updateBackgroundImage(year);
+                        //     }
+                        // }
 
                         // Utiliser la fonction centralisée pour collecter les lieux
                         const validLocations = collectPersonLocations(person, state.gedcomData.families);
@@ -1670,7 +2067,8 @@ export async function startAncestorAnimation() {
                                 handleDescendants(node);
                             } else {
                                 // handleAncestorsClick(event, node);
-                                handleDescendantsClick(event, node, true)
+                                const nextNodeId = animationState.cousinDescendantPath[Math.min(j+1, animationState.cousinDescendantPath.length-1)];
+                                handleDescendantsClick(event, node, true, nextNodeId);
                             }
                             // drawTree(true);
                         }
@@ -1763,11 +2161,24 @@ export async function startAncestorAnimation() {
                         state.prevPrevWindowInnerHeightInMap =  state.previousWindowInnerHeightInMap;
                         state.previousWindowInnerWidthInMap = window.innerWidth;
                         state.previousWindowInnerHeightInMap = window.innerHeight;
-                    } 
+
+                        lastName = node.data.name
+                    } else {
+                        console.log("\\  !!!! Noeud descendant cousin NON trouvé ? :",i,  nodeId, node);
+                    }
+                    j++;
+
                 }
 
 
                 // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
+
+                if (j >= (animationState.cousinDescendantPath.length) )
+                {
+                    playEndOfAnimationSound();
+                    showEndAnimationPhoto(lastName);
+                }
+
 
                 const voicePromiseStart = state.isSpeechEnabled 
                     ? speakPersonName('et /voila !')
@@ -1806,6 +2217,10 @@ export async function startAncestorAnimation() {
 
 
 }
+//######################################################
+
+
+
 
 function getNodeScreenPosition(node) {
     const lastTransform = getLastTransform() || d3.zoomIdentity;
@@ -2353,6 +2768,8 @@ export function stopAnimation() {
     // Réinitialiser les timeouts
     animationTimeouts.forEach(timeout => clearTimeout(timeout));
     animationTimeouts = [];
+    closeAnimationPhoto();
+    stopAnimationAudio();
 }
 
 

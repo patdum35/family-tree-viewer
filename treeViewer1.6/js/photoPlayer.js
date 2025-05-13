@@ -165,9 +165,34 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     image.style.display = 'block';
     image.draggable = false; // Empêcher le drag de l'image elle-même
 
-    // Créer le bouton de fermeture
+    // // Créer le bouton de fermeture
+    // const closeButton = document.createElement('button');
+    // closeButton.innerHTML = '&times;';
+    // closeButton.style.position = 'absolute';
+    // closeButton.style.top = '5px';
+    // closeButton.style.right = '5px';
+    // closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    // closeButton.style.color = 'white';
+    // closeButton.style.border = 'none';
+    // closeButton.style.borderRadius = '50%';
+    // closeButton.style.width = '24px';
+    // closeButton.style.height = '24px';
+    // closeButton.style.fontSize = '16px';
+    // closeButton.style.cursor = 'pointer';
+    // closeButton.style.display = 'flex';
+    // closeButton.style.justifyContent = 'center';
+    // closeButton.style.alignItems = 'center';
+    // closeButton.style.padding = '2';
+    // closeButton.style.opacity = '0.7';
+    // closeButton.style.transition = 'opacity 0.2s';
+    // closeButton.title = 'Fermer';
+
+
+
+
+    // Créer le bouton de fermeture amélioré pour mobile
     const closeButton = document.createElement('button');
-    closeButton.innerHTML = '&times;';
+    closeButton.innerHTML = '&times;';  // Symbole X
     closeButton.style.position = 'absolute';
     closeButton.style.top = '5px';
     closeButton.style.right = '5px';
@@ -175,17 +200,29 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     closeButton.style.color = 'white';
     closeButton.style.border = 'none';
     closeButton.style.borderRadius = '50%';
-    closeButton.style.width = '24px';
-    closeButton.style.height = '24px';
-    closeButton.style.fontSize = '16px';
+
+    // Augmenter la taille pour smartphone
+    closeButton.style.width = '18px';  // Plus grand (était 24px)
+    closeButton.style.height = '18px'; // Plus grand (était 24px)
+    closeButton.style.fontSize = '22px'; // Plus grand (était 16px)
     closeButton.style.cursor = 'pointer';
     closeButton.style.display = 'flex';
     closeButton.style.justifyContent = 'center';
     closeButton.style.alignItems = 'center';
     closeButton.style.padding = '0';
-    closeButton.style.opacity = '0.7';
-    closeButton.style.transition = 'opacity 0.2s';
+    closeButton.style.zIndex = '1100';  // S'assurer qu'il est au-dessus
+
+    // Ajouter une zone de toucher plus grande (padding invisible)
+    closeButton.style.boxSizing = 'content-box';
+    closeButton.style.padding = '2px';
+    closeButton.style.margin = '-5px';
+
     closeButton.title = 'Fermer';
+
+
+
+
+
 
     // Effet de survol sur le bouton de fermeture
     closeButton.addEventListener('mouseover', () => {
@@ -193,6 +230,22 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     });
     closeButton.addEventListener('mouseout', () => {
         closeButton.style.opacity = '0.7';
+    });
+
+    // Effet visuel au survol et au toucher
+    closeButton.addEventListener('mouseover', () => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        closeButton.style.transform = 'scale(1.1)';
+    });
+
+    closeButton.addEventListener('mouseout', () => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+        closeButton.style.transform = 'scale(1)';
+    });
+
+    closeButton.addEventListener('touchstart', (e) => {
+        closeButton.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        closeButton.style.transform = 'scale(1.1)';
     });
     
     //Poignée de redimensionnement personnalisée
@@ -233,6 +286,11 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     closeButton.addEventListener('click', () => {
         closeAnimationPhoto();
     });
+    // Événement tactile
+    closeButton.addEventListener('touchend', (e) => {
+        e.preventDefault();  // Empêcher le clic simulé qui suivrait
+        closeAnimationPhoto();
+    });
     
     return photoContainer;
 }
@@ -241,7 +299,7 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
 /**
  * Ferme la photo d'animationk
  */
-function closeAnimationPhoto() {
+export function closeAnimationPhoto() {
     const photoContainer = document.getElementById('animation-photo-container');
     if (!photoContainer) return;
     
@@ -259,11 +317,37 @@ function closeAnimationPhoto() {
 /**
  * Appeler cette fonction à la fin de startAncestorAnimation pour afficher la photo
  */
-export function showEndAnimationPhoto() {
+export function showEndAnimationPhoto(nodeName) {
     // Chemin vers l'image que vous souhaitez afficher
     // const imagePath = '/background_images/thomas.jpg';
-    const imageUrl = getResourceUrl('/background_images/thomas.jpg');
-    
+    console.log("\n\n\n   **** DEBUG photo ***", nodeName)
+
+    let imageUrl;
+    let name = nodeName.toLowerCase();
+    if (name.includes('thomas')) { 
+        imageUrl = getResourceUrl('/background_images/thomas.jpg');
+    } else if (name.includes('alain')) {
+        imageUrl = getResourceUrl('/background_images/fort_lalatte.jpg');
+    } else if (name.includes('brigitte')) {
+        imageUrl = getResourceUrl('/background_images/brigitte.jpg');
+    } else if (name.includes('dominique')) {
+        imageUrl = getResourceUrl('/background_images/dominique.jpg');
+    } else if (name.includes('garand')) {
+        imageUrl = getResourceUrl('/background_images/garand.jpg');
+    } else if (name.includes('stephanie')) {
+        imageUrl = getResourceUrl('/background_images/steph.jpg');
+    } else if (name.includes('sattouf')) {
+        imageUrl = getResourceUrl('/background_images/sattouf.jpg');
+    } else if (name.includes('charlemagne')) {
+        imageUrl = getResourceUrl('/background_images/charlemagne.jpg');
+    } else if (name.includes('hugues')) {
+        imageUrl = getResourceUrl('/background_images/hugues.jpg');
+    } else if (name.includes('kamber')) {
+        imageUrl = getResourceUrl('/background_images/kamber.jpg');
+    } else if (name.includes('pharabert')) {
+        imageUrl = getResourceUrl('/background_images/pharabert.jpg');
+    } 
+        
     // Options de positionnement et dimensions
     const options = {
         width: 400,

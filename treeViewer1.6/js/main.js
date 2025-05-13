@@ -684,8 +684,15 @@ export function handleRootPersonChange(event) {
         let ancestor;
         let cousin;
         if (state.treeOwner ===2 ) {
-            if (selectedValue === 'demo1'){ state.targetAncestorId = "@I1152@"} //"@I74@" } // "@I739@" } //"@I6@" } //
-            else { state.targetAncestorId = "@I2179@"}
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('guillaume du');
+            } //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('alonso de ');
+            }
+            state.targetAncestorId = ancestor.id;
         } else {
             if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
                 // state.targetAncestorId = "@I739@" 
@@ -705,21 +712,24 @@ export function handleRootPersonChange(event) {
                 cousin = searchRootPersonId('thomas pesquet');
             } else if (selectedValue === 'demo5'){ // 'Arabe du futur'
                 ancestor = searchRootPersonId('anthoine sicot');  
-                cousin = searchRootPersonId('riad satouf');          
+                cousin = searchRootPersonId('riad sattouf');          
             } else if (selectedValue === 'demo6'){ // 'Loup du Canada'
                 ancestor = searchRootPersonId('andré du matz'); 
                 cousin = searchRootPersonId('pierre garand');            
             } else if (selectedValue === 'demo7'){ // "c'est normal"
                 ancestor = searchRootPersonId('jan demaure');
                 cousin = searchRootPersonId('brigitte fontaine');             
-            } else if (selectedValue === 'demo8'){ // 'avant JC'
+            } else if (selectedValue === 'demo8'){ // "les bronzés"
+                ancestor = searchRootPersonId('jean mathurin monvoisin');
+                cousin = searchRootPersonId('dominique lavanant');             
+            } else if (selectedValue === 'demo9'){ // 'avant JC'
                 ancestor = searchRootPersonId('kamber de cambrie'); 
                 cousin = null;            
-            } else if (selectedValue === 'demo9'){ // 'Francs'
+            } else if (selectedValue === 'demo10'){ // 'Francs'
                 ancestor = searchRootPersonId('pharabert des francs'); 
                 cousin = null;            
-            } else if (selectedValue === 'demo10'){ // 'Capet'
-                ancestor = searchRootPersonId('huges capet'); 
+            } else if (selectedValue === 'demo11'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues capet'); 
                 cousin = null;           
             } else {
                 ancestor = searchRootPersonId('charlemagne');
@@ -771,9 +781,10 @@ export function handleRootPersonChange(event) {
         if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
             animationPauseBtn.querySelector('span').textContent = '⏸️';
         }
+               
         
         // Redessiner l'arbre d'abord
-        displayGenealogicTree(null, true, false);
+        displayGenealogicTree(null, true, false, true);
         
         // Nettoyer tous les conteneurs de fond d'écran existants
         const loginBackground = document.querySelector('.login-background');
@@ -810,7 +821,7 @@ export function handleRootPersonChange(event) {
  * @param {string} rootPersonId - ID optionnel de la personne racine
  * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
  */
-export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false) {
+export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false) {
 
     // Réinitialiser l'état de l'animation avant de changer l'arbre
     resetAnimationState();
@@ -851,6 +862,10 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
     // Construire l'arbre selon le mode
     state.treeModeReal = state.treeMode;
+
+    if (isInitDemo && state.targetCousinId != null  && state.treeModeReal === 'ancestors' ) {
+        state.treeModeReal = 'directAncestors';
+    }
 
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
@@ -1253,7 +1268,7 @@ window.addEventListener('load', initialize);
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
-function searchRootPersonId(searchStr) {
+export function searchRootPersonId(searchStr) {
 
     // searchStr = searchStr.value.toLowerCase();
 
