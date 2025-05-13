@@ -48,7 +48,7 @@ export async function initTilePreloading() {
  */
 async function preloadTilesInBackground(tileUrls) {
     // Limiter le nombre de tuiles à précharger pour éviter de surcharger le navigateur
-    const tilesToPreload = tileUrls.slice(0, 500); // Limiter à 500 tuiles
+    const tilesToPreload = tileUrls.slice(0, 2000); // Limiter à 500 tuiles
     
     console.log(`🔄 Préchargement de ${tilesToPreload.length} tuiles en tâche de fond...`);
     
