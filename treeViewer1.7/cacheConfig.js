@@ -8,4 +8,4 @@
 // }
 
 
-const CACHE_NAME = 'treeViewer-app-v2';
+const CACHE_NAME = 'treeViewer-app-v3';
