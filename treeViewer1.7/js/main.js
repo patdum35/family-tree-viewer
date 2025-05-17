@@ -1315,6 +1315,11 @@ async function loadGedcomContent(fileInput, passwordInput) {
 
 
 
+
+
+
+
+
 /**
  * Fonction améliorée de débogage avec vérification des bibliothèques
  * Affiche les messages dans un panneau persistant et lisible
@@ -1634,6 +1639,187 @@ async function checkCache() {
     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
 }
 
+
+
+/**
+ * Modification ciblée: ajout d'une fonction pour rendre le debug panel déplaçable et réductible
+ */
+function enhanceDebugPanel() {
+    // Trouver le panel existant ou sortir si non trouvé
+    const panel = document.getElementById('debug-panel');
+    if (!panel) return;
+    
+    // 1. Créer une barre d'en-tête pour le déplacement
+    const header = document.createElement('div');
+    header.style.padding = '5px';
+    header.style.marginBottom = '5px';
+    header.style.cursor = 'move';
+    header.style.backgroundColor = '#333';
+    header.style.borderRadius = '3px';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    
+    // 2. Ajouter titre
+    const title = document.createElement('span');
+    title.textContent = 'Debug';
+    title.style.fontWeight = 'bold';
+    
+    // 3. Ajouter boutons de contrôle
+    const buttons = document.createElement('div');
+    
+    // Bouton pour déplacer droite/gauche
+    const moveBtn = document.createElement('button');
+    moveBtn.innerHTML = '⇄';
+    moveBtn.style.marginRight = '5px';
+    moveBtn.style.backgroundColor = '#555';
+    moveBtn.style.border = 'none';
+    moveBtn.style.borderRadius = '3px';
+    moveBtn.style.width = '24px';
+    moveBtn.style.height = '24px';
+    
+    // 4. Bouton réduire/agrandir
+    const collapseBtn = document.createElement('button');
+    collapseBtn.innerHTML = '−';
+    collapseBtn.style.marginRight = '5px';
+    collapseBtn.style.backgroundColor = '#555';
+    collapseBtn.style.border = 'none';
+    collapseBtn.style.borderRadius = '3px';
+    collapseBtn.style.width = '24px';
+    collapseBtn.style.height = '24px';
+    
+    // 5. Bouton fermer
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.style.backgroundColor = '#F44336';
+    closeBtn.style.border = 'none';
+    closeBtn.style.borderRadius = '3px';
+    closeBtn.style.width = '24px';
+    closeBtn.style.height = '24px';
+    
+    // 6. Sauvegarder et déplacer le contenu existant
+    const content = document.createElement('div');
+    content.id = 'debug-panel-content';
+    while (panel.firstChild) {
+        content.appendChild(panel.firstChild);
+    }
+    
+    // 7. Assembler les éléments
+    buttons.appendChild(moveBtn);
+    buttons.appendChild(collapseBtn);
+    buttons.appendChild(closeBtn);
+    header.appendChild(title);
+    header.appendChild(buttons);
+    panel.appendChild(header);
+    panel.appendChild(content);
+    
+    // 8. Ajouter les fonctionnalités
+    // Déplacer
+    let isOnRight = true;
+    moveBtn.addEventListener('click', () => {
+        isOnRight = !isOnRight;
+        if (isOnRight) {
+            panel.style.right = '10px';
+            panel.style.left = 'auto';
+        } else {
+            panel.style.left = '10px';
+            panel.style.right = 'auto';
+        }
+    });
+    
+    // Réduire/agrandir
+    let isCollapsed = false;
+    collapseBtn.addEventListener('click', () => {
+        isCollapsed = !isCollapsed;
+        content.style.display = isCollapsed ? 'none' : 'block';
+        collapseBtn.innerHTML = isCollapsed ? '+' : '−';
+    });
+    
+    // Fermer
+    closeBtn.addEventListener('click', () => {
+        panel.style.display = 'none';
+    });
+    
+    // 9. Rendre déplaçable
+    makePanelDraggable(panel, header);
+    
+    // Ajouter des styles supplémentaires
+    panel.style.resize = 'both';
+    panel.style.overflow = 'auto';
+    panel.style.zIndex = '9999';
+}
+
+/**
+ * Fonction pour rendre le panneau déplaçable
+ */
+function makePanelDraggable(panel, header) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    header.onmousedown = dragMouseDown;
+    
+    function dragMouseDown(e) {
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+    
+    function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        panel.style.top = (panel.offsetTop - pos2) + "px";
+        panel.style.left = (panel.offsetLeft - pos1) + "px";
+        panel.style.right = 'auto'; // Important: annuler le right quand on déplace
+    }
+    
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+
+
+
+// Vérification au chargement pour déboguer rapidement
+document.addEventListener('DOMContentLoaded', () => {
+    // Créer le panneau même si loadEncryptedContent n'est pas appelé
+    createDebugPanel();
+    
+
+    // Appeler cette fonction après la création du panel de debug
+    enhanceDebugPanel();
+
+    // Afficher des informations de base
+    debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
+    debugLog(`User Agent: ${navigator.userAgent}`, 'info');
+    debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
+    debugLog(`URL: ${window.location.href}`, 'info');
+    
+    // Vérifier l'état de chargement des bibliothèques
+    document.addEventListener('libraries-loaded', () => {
+        debugLog("Événement 'libraries-loaded' déclenché", 'success');
+        checkLibraries();
+    });
+    
+    // Vérifier le cache après un court délai
+    setTimeout(() => {
+        checkCache();
+    }, 1000);
+});
+
+
+
+
+
+
+
+
+
 /**
  * Charge le contenu crypté avec logs améliorés
  * @private
@@ -1642,6 +1828,16 @@ async function loadEncryptedContent(password, filename) {
     // Créer le panneau de débogage
     createDebugPanel();
     
+
+
+
+
+
+
+
+
+
+
     debugLog(`Tentative de chargement: ${filename}`, 'info');
     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
     
@@ -1925,28 +2121,6 @@ async function loadEncryptedContent(password, filename) {
     }
 }
 
-// Vérification au chargement pour déboguer rapidement
-document.addEventListener('DOMContentLoaded', () => {
-    // Créer le panneau même si loadEncryptedContent n'est pas appelé
-    createDebugPanel();
-    
-    // Afficher des informations de base
-    debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
-    debugLog(`User Agent: ${navigator.userAgent}`, 'info');
-    debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
-    debugLog(`URL: ${window.location.href}`, 'info');
-    
-    // Vérifier l'état de chargement des bibliothèques
-    document.addEventListener('libraries-loaded', () => {
-        debugLog("Événement 'libraries-loaded' déclenché", 'success');
-        checkLibraries();
-    });
-    
-    // Vérifier le cache après un court délai
-    setTimeout(() => {
-        checkCache();
-    }, 1000);
-});
 
 
 
