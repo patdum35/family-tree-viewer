@@ -559,23 +559,156 @@ async function loadEncryptedContent(password, filename) {
     console.log("Tentative de chargement du fichier: ", filename, "Cache: ", CACHE_NAME, ", réseau:", state.isOnLine);
 
 
+    // let response;
+    // if (!state.isOnLine && 'caches' in window) {
+    //     console.log(`Mode hors ligne détecté, recherche de ${filename} dans le cache... ${CACHE_NAME} `);
+    //     const cache = await caches.open(CACHE_NAME); // Utiliser le même nom que dans service-worker.js
+    //     response = await cache.match(filename);
+        
+    //     if (response) {
+    //         console.log(`${filename} trouvé dans le cache!`);
+    //     } else {
+    //         console.error(`${filename} non trouvé dans le cache en mode hors ligne!`);
+    //         throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache ${CACHE_NAME} )`);
+    //     }
+    // } else {
+    //     // Sinon, faire une requête réseau normale
+    //     console.log(`Chargement de ${filename} via réseau...`);
+    //     response = await fetch(filename);
+    // }
+
+
+
+
+
+
+    console.log("Tentative de chargement du fichier: ", filename, "Cache: ", CACHE_NAME, ", réseau:", state.isOnLine);
+    
+    // Débogage: Afficher l'URL complète et le chemin recherché
+    console.log("URL complète de la page:", window.location.href);
+    const absoluteUrl = new URL(filename, window.location.href).href;
+    console.log("URL absolue du fichier:", absoluteUrl);
+    
+    // Tentatives avec différentes variations de chemin
+    const pathVariations = [
+        filename,                      // Chemin original
+        filename.replace('./', '/'),   // Remplacer ./ par /
+        filename.replace('./', ''),    // Supprimer ./
+        '/' + filename.replace('./', '') // Ajouter un / au début
+    ];
+    
+    // Debogage: Afficher toutes les variations
+    console.log("Variations de chemin à tester:", pathVariations);
+    
     let response;
     if (!state.isOnLine && 'caches' in window) {
         console.log(`Mode hors ligne détecté, recherche de ${filename} dans le cache... ${CACHE_NAME} `);
-        const cache = await caches.open(CACHE_NAME); // Utiliser le même nom que dans service-worker.js
-        response = await cache.match(filename);
         
-        if (response) {
-            console.log(`${filename} trouvé dans le cache!`);
-        } else {
-            console.error(`${filename} non trouvé dans le cache en mode hors ligne!`);
-            throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache ${CACHE_NAME} )`);
+        try {
+            const cache = await caches.open(CACHE_NAME);
+            
+            // Afficher toutes les URLs dans le cache pour debugger
+            const cacheKeys = await cache.keys();
+            console.log("Contenu du cache:", cacheKeys.map(req => req.url));
+            
+            // Essayer toutes les variations de chemin
+            for (const path of pathVariations) {
+                console.log(`Tentative avec chemin: ${path}`);
+                response = await cache.match(path);
+                
+                if (response) {
+                    console.log(`Fichier trouvé dans le cache avec chemin: ${path}`);
+                    break; // Sortir de la boucle si trouvé
+                }
+            }
+            
+            // Si toujours pas trouvé, essayer avec l'URL absolue
+            if (!response) {
+                console.log(`Tentative avec URL absolue: ${absoluteUrl}`);
+                response = await cache.match(absoluteUrl);
+                if (response) {
+                    console.log(`Fichier trouvé dans le cache avec URL absolue!`);
+                }
+            }
+            
+            // Si toujours pas trouvé, rechercher des URL partielles
+            if (!response) {
+                console.log("Recherche plus large dans le cache...");
+                for (const req of cacheKeys) {
+                    if (req.url.includes('arbre.enc') || req.url.endsWith('arbre.enc')) {
+                        console.log(`Match potentiel trouvé: ${req.url}`);
+                        response = await cache.match(req);
+                        if (response) {
+                            console.log(`Fichier trouvé avec URL: ${req.url}`);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (response) {
+                console.log(`${filename} trouvé dans le cache!`);
+                
+                // Vérifier la taille du fichier
+                try {
+                    const clone = response.clone();
+                    const text = await clone.text();
+                    console.log(`Taille du fichier: ${text.length} caractères`);
+                } catch (e) {
+                    console.error("Erreur lors de la lecture du contenu:", e);
+                }
+            } else {
+                console.error(`${filename} non trouvé dans le cache en mode hors ligne!`);
+                throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache ${CACHE_NAME})`);
+            }
+        } catch (error) {
+            console.error("Erreur lors de l'accès au cache:", error);
+            throw error;
         }
     } else {
-        // Sinon, faire une requête réseau normale
+        // Code pour le mode en ligne - votre code existant
         console.log(`Chargement de ${filename} via réseau...`);
         response = await fetch(filename);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     if (!response.ok) {
         throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response.statusText}`);
