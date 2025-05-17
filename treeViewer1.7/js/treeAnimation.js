@@ -62,57 +62,6 @@ let animationState = {
     direction: 'ancestor'
 };
 
-// // Ajouter cette fonction pour marquer et démarquer les nœuds
-// function highlightAnimationNode(nodeId, highlight = true) {
-//     // Si nodeId n'est pas fourni, ne rien faire
-//     if (!nodeId) return;
-    
-//     // Marquer le nœud dans notre état local
-//     if (highlight) {
-//         // Si un autre nœud était déjà en surbrillance, le démarquer
-//         if (animationState.currentHighlightedNodeId && 
-//             animationState.currentHighlightedNodeId !== nodeId) {
-//             // Démarquer l'ancien nœud
-//             d3.selectAll('.node')
-//                 .filter(d => d.data.id === animationState.currentHighlightedNodeId)
-//                 .select('rect')  // ou '.node-box' selon votre structure HTML
-//                 .classed('highlight-animation-node', false);
-//         }
-        
-//         // Mémoriser le nœud actuellement en surbrillance
-//         animationState.currentHighlightedNodeId = nodeId;
-//     } else if (animationState.currentHighlightedNodeId === nodeId) {
-//         // Réinitialiser si on démarque le nœud actuellement en surbrillance
-//         animationState.currentHighlightedNodeId = null;
-//     }
-    
-//     // Appliquer ou supprimer la classe de surbrillance
-//     d3.selectAll('.node')
-//         .filter(d => d.data.id === nodeId)
-//         .select('rect')  // ou '.node-box' selon votre structure HTML
-//         .classed('highlight-animation-node', highlight);
-// }
-
-// // Ajouter un style CSS pour la classe de surbrillance
-// function addHighlightStyle() {
-//     // Vérifier si le style a déjà été ajouté
-//     if (document.getElementById('animation-highlight-style')) return;
-    
-//     // Créer et ajouter le style
-//     const style = document.createElement('style');
-//     style.id = 'animation-highlight-style';
-//     style.textContent = `
-//         .highlight-animation-node {
-//             fill: #FFEB3B !important;  /* Jaune */
-//             stroke: #FFC107 !important;  /* Bordure plus foncée */
-//             stroke-width: 2px !important;
-//         }
-//     `;
-//     document.head.appendChild(style);
-// }
-
-
-
 
 
 // Fonction modifiée pour marquer et démarquer les nœuds
@@ -120,15 +69,7 @@ function highlightAnimationNode(nodeId, highlight = true) {
     // Si nodeId n'est pas fourni, ne rien faire
     if (!nodeId) return;
     
-    
-    // // Pour déboguer
-    // console.log("État avant highlight:", {
-    //     nodeId: nodeId,
-    //     highlight: highlight,
-    //     currentHighlighted: animationState.currentHighlightedNodeId,
-    //     visitedNodes: Array.from(animationState.visitedAncestorNodeIds)
-    // });
-    
+       
     try {
         if (highlight) {
             // Si un autre nœud était déjà en surbrillance, l'ajouter à l'historique
@@ -163,14 +104,6 @@ function highlightAnimationNode(nodeId, highlight = true) {
                     console.error("Erreur lors de l'ajout à visitedAncestorNodeIds:", e);
                     animationState.visitedAncestorNodeIds = new Set([animationState.currentHighlightedNodeId]);
                 }
-                
-                // // Démarquer l'ancien nœud comme actif et le marquer comme historique
-                // d3.selectAll('.node')
-                //     .filter(d => d.data.id === animationState.currentHighlightedNodeId)
-                //     .select('rect')
-                //     .classed('highlight-animation-node-active', false)
-                //     .classed('highlight-animation-AncestorNode-history ', true);
-
                 
             }
             
@@ -231,13 +164,7 @@ function highlightAnimationNode(nodeId, highlight = true) {
                 console.error("Erreur lors de l'ajout à visitedAncestorNodeIds:", e);
                 animationState.visitedAncestorNodeIds = new Set([nodeId]);
             }
-            
-            // d3.selectAll('.node')
-            //     .filter(d => d.data.id === nodeId)
-            //     .select('rect')
-            //     .classed('highlight-animation-node-active', false)
-            //     .classed('highlight-animation-AncestorNode-history ', true);
-            
+                       
             // Réinitialiser le nœud actif
             animationState.currentHighlightedNodeId = null;
         }
@@ -361,7 +288,7 @@ function addHighlightStyle() {
 
 
 
-async function testRealConnectivity() {
+export async function testRealConnectivity() {
     try {
         // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
         const response = await fetch('https://www.google.com/favicon.ico', {
@@ -387,7 +314,7 @@ async function testRealConnectivity() {
         if (previousOnlineState !== isOnline) {
             console.log("✅ Connexion Internet rétablie");
             showNetworkStatus("Connexion réseau rétablie");
-            selectVoice();
+            // selectVoice();
         }
         state.isOnLine = true;
         return true;
@@ -401,7 +328,7 @@ async function testRealConnectivity() {
         if (previousOnlineState !== isOnline) {
             console.log("⚠️ Connexion Internet perdue");
             showNetworkStatus("Mode hors-ligne");
-            selectVoice();
+            // selectVoice();
         }
         state.isOnLine = false;
         return false;
@@ -1567,15 +1494,23 @@ export async function startAncestorAnimation() {
     animationState.direction = 'ancestor';
     addHighlightStyle();
 
-    isSpeechInGoodHealth = await testSpeechSynthesisHealth();
-    if (isSpeechInGoodHealth) {
-        // Chrome ou Edge est coopératif
-        console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
-    } else {
-        // Chrome est grognon il faut utiliser une méthode de secours
-          console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
-          window.speechSynthesis.cancel();
+
+
+    if (state.isSpeechEnabled2)
+    {
+        isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
     }
+
+
+
     initAnimationMap();
     initBackgroundContainer(); // Initialiser le conteneur de fond
 
@@ -1668,7 +1603,9 @@ export async function startAncestorAnimation() {
     if (window.innerWidth < 400) { deltaXRatio = 2; } // Pour les petits écrans, on
 
 
-    selectVoice();
+    if (state.isSpeechEnabled2) {
+        selectVoice();
+    }
 
     let horizontalShift = 0;
     let verticalShift = 0;
@@ -2072,18 +2009,15 @@ export async function startAncestorAnimation() {
                         await voicePromise;
                         
                         // Actions sur le nœud pour faire apparaitre le nouvel ascendant puis redessine l'arbre avec drawTree
-                        if (!node.data.children || node.data.children.length === 0) {
-                            const event = new Event('click');
-                            if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
-                                // handleNonRootDescendants(event, node);
-                                console.log("debug handleDescendants", node);
-                                handleDescendants(node);
-                            } else {
-                                // handleAncestorsClick(event, node);
-                                const nextNodeId = animationState.cousinDescendantPath[Math.min(j+1, animationState.cousinDescendantPath.length-1)];
-                                handleDescendantsClick(event, node, true, nextNodeId);
-                            }
-                            // drawTree(true);
+                        const event = new Event('click');
+                        if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+                            // handleNonRootDescendants(event, node);
+                            console.log("debug handleDescendants", node);
+                            handleDescendants(node);
+                        } else {
+                            // handleAncestorsClick(event, node);
+                            const nextNodeId = animationState.cousinDescendantPath[Math.min(j+1, animationState.cousinDescendantPath.length-1)];
+                            handleDescendantsClick(event, node, true, nextNodeId);
                         }
 
                         let recalageX = 0;
@@ -2100,10 +2034,7 @@ export async function startAncestorAnimation() {
                             if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x  > window.innerHeight - state.boxHeight*1.2))  
                                     && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
     
-                                // if (firstTimeShift) {
-                                //     offsetX = (node.y - state.lastHorizontalPosition)
-                                //     offsetY = (node.x - state.lastVerticalPosition)
-                                // }
+
                                 firstTimeShift = false;
                                 const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  - (state.boxWidth*2) ;
                                 const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
@@ -2121,51 +2052,6 @@ export async function startAncestorAnimation() {
                                 const marginY = state.boxHeight/2;
                                 console.log('\n\n ****** Le nœud est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
                                 console.log("initialAnimationMapPosition.left=", initialAnimationMapPosition.left, "initialAnimationMapPosition.top=", initialAnimationMapPosition.top, "initialAnimationMapPosition.width=", initialAnimationMapPosition.width, "initialAnimationMapPosition.height=", initialAnimationMapPosition.height);
-
-                                // // vérifier si le noeud est bien visible dans la fenêtre
-                                // if ( nodeScreenPos.x < marginX || nodeScreenPos.y < marginY || nodeScreenPos.x > (window.innerWidth - marginX) ||  nodeScreenPos.y > (window.innerHeight-marginY) ) {
-                                //     if ( nodeScreenPos.x < marginX) {
-                                //         recalageX = - nodeScreenPos.x + window.innerWidth - state.boxWidth*2;
-                                //     } else if (nodeScreenPos.x > (window.innerWidth - marginX)) {
-                                //         recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
-                                //     }
-                                //     if ( nodeScreenPos.y < marginY) {
-                                //         recalageY = - nodeScreenPos.y + window.innerHeight/2 - state.boxHeight*2;
-                                //     } else if (nodeScreenPos.y > (window.innerHeight - marginY)) {
-                                //         recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
-                                //     }
-                                //     console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de l'écran, recalage de l'arbre avec shift :", recalageX, recalageY );
-
-                                //     //vérifier si le noeud n'est pascaché derrière la carte
-                                //     zoom = getZoom();
-                                //     svg.transition()
-                                //     .duration(250)
-                                //     .call(zoom.transform, 
-                                //         lastTransform.translate(recalageX, recalageY)
-                                //     );
-                                // }
-
-
-                                // //vérifier si le noeud n'est pas caché derrière la carte
-                                // else if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width) &&
-                                //     (nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
-
-                                //     if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width)) {
-                                //         recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
-                                //     } 
-
-                                //     if ((nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
-                                //         recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
-                                //     }
-                                //     console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est derrière la map, recalage de l'arbre avec shift :", recalageX, recalageY );
-
-                                //     zoom = getZoom();
-                                //     svg.transition()
-                                //     .duration(250)
-                                //     .call(zoom.transform, 
-                                //         lastTransform.translate(recalageX, recalageY)
-                                //     );
-                                // }
 
                             }
                         }
