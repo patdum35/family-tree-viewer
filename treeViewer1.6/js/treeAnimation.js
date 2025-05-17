@@ -389,6 +389,7 @@ async function testRealConnectivity() {
             showNetworkStatus("Connexion réseau rétablie");
             selectVoice();
         }
+        state.isOnLine = true;
         return true;
     } catch (error) {
         // Si on arrive ici, c'est qu'il n'y a pas de connexion
@@ -402,6 +403,7 @@ async function testRealConnectivity() {
             showNetworkStatus("Mode hors-ligne");
             selectVoice();
         }
+        state.isOnLine = false;
         return false;
     }
 }

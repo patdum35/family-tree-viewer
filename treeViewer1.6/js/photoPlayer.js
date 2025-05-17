@@ -2,100 +2,8 @@ import { makeElementDraggable } from './geoHeatMapInteractions.js';
 // import { getResourceUrl }  from './audioPlayer.js';
 import { state } from './main.js';
 
-/**
- * Affiche une image dans un conteneur déplaçable et redimensionnable
- * @param {string} imagePath - Chemin vers l'image
- * @param {Object} options - Options d'affichage (position initiale, dimensions)
- */
-// function displayEndAnimationPhoto(imagePath, options = {}) {
-//     // Configuration par défaut
-//     const config = {
-//         top: options.top || window.innerHeight / 4,
-//         left: options.left || window.innerWidth / 4,
-//         width: options.width || 300,
-//         height: options.height || 'auto',
-//         zIndex: options.zIndex || 1600
-//     };
-    
-//     // Créer le conteneur
-//     const photoContainer = document.createElement('div');
-//     photoContainer.id = 'animation-photo-container';
-//     photoContainer.style.position = 'fixed';
-//     photoContainer.style.top = `${config.top}px`;
-//     photoContainer.style.left = `${config.left}px`;
-//     photoContainer.style.width = `${config.width}px`;
-//     photoContainer.style.height = config.height === 'auto' ? 'auto' : `${config.height}px`;
-//     photoContainer.style.zIndex = config.zIndex;
-//     photoContainer.style.resize = 'both';
-//     photoContainer.style.overflow = 'hidden';
-//     photoContainer.style.backgroundColor = 'transparent';
-//     photoContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-    
-//     // Ajouter l'image
-//     const image = document.createElement('img');
-//     image.src = imagePath;
-//     image.style.width = '100%';
-//     image.style.height = 'auto';
-//     image.style.display = 'block';
-//     image.draggable = false; // Empêcher le drag de l'image elle-même
-    
-//     // Créer le bouton de fermeture
-//     const closeButton = document.createElement('button');
-//     closeButton.innerHTML = '&times;';
-//     closeButton.style.position = 'absolute';
-//     closeButton.style.top = '5px';
-//     closeButton.style.right = '5px';
-//     closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-//     closeButton.style.color = 'white';
-//     closeButton.style.border = 'none';
-//     closeButton.style.borderRadius = '50%';
-//     closeButton.style.width = '24px';
-//     closeButton.style.height = '24px';
-//     closeButton.style.fontSize = '16px';
-//     closeButton.style.cursor = 'pointer';
-//     closeButton.style.display = 'flex';
-//     closeButton.style.justifyContent = 'center';
-//     closeButton.style.alignItems = 'center';
-//     closeButton.style.padding = '0';
-//     closeButton.style.opacity = '0.7';
-//     closeButton.style.transition = 'opacity 0.2s';
-//     closeButton.title = 'Fermer';
-    
-//     // Effet de survol sur le bouton de fermeture
-//     closeButton.addEventListener('mouseover', () => {
-//         closeButton.style.opacity = '1';
-//     });
-//     closeButton.addEventListener('mouseout', () => {
-//         closeButton.style.opacity = '0.7';
-//     });
-    
-//     // Ajouter les éléments au conteneur
-//     photoContainer.appendChild(image);
-//     photoContainer.appendChild(closeButton);
-    
-//     // Ajouter au DOM
-//     document.body.appendChild(photoContainer);
-    
-//     // Rendre le conteneur déplaçable
-//     makeElementDraggable(photoContainer, photoContainer);
-    
-//     // Gérer le clic sur le bouton de fermeture
-//     closeButton.addEventListener('click', () => {
-//         closeAnimationPhoto();
-//     });
-    
-//     // Ajouter un écouteur de redimensionnement pour ajuster l'image
-//     const resizeObserver = new ResizeObserver(() => {
-//         // Assurer que l'image s'adapte au conteneur
-//         image.style.width = '100%';
-//     });
-//     resizeObserver.observe(photoContainer);
-    
-//     // Garder une référence à l'observateur pour le nettoyage
-//     photoContainer.resizeObserver = resizeObserver;
-    
-//     return photoContainer;
-// }
+
+
 
 /**
  * Obtient simplement le chemin du répertoire du HTML actuel
@@ -131,7 +39,11 @@ function getResourceUrl(relativePath) {
 }
 
 
-
+/**
+ * Affiche une image dans un conteneur déplaçable et redimensionnable
+ * @param {string} imagePath - Chemin vers l'image
+ * @param {Object} options - Options d'affichage (position initiale, dimensions)
+ */
 function displayEndAnimationPhoto(imagePath, options = {}) {
     // Configuration par défaut
     const config = {
@@ -337,7 +249,7 @@ export function showEndAnimationPhoto(nodeName) {
     } else if (name.includes('stephanie')) {
         imageUrl = getResourceUrl('/background_images/steph.jpg');
     } else if (name.includes('sattouf')) {
-        imageUrl = getResourceUrl('/background_images/sattouf.jpg');
+        imageUrl = getResourceUrl('/background_images/riad.jpg');
     } else if (name.includes('charlemagne')) {
         imageUrl = getResourceUrl('/background_images/charlemagne.jpg');
     } else if (name.includes('hugues')) {

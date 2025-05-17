@@ -148,7 +148,8 @@ export const state = {
     previousWindowInnerHeightInMap: 0,
     prevPrevWindowInnerWidthInMap: 0,
     prevPrevWindowInnerHeightInMap: 0,
-    treeOwner: 1
+    treeOwner: 1,
+    isOnLine: false
 };
 
 export { geocodeLocation };
@@ -544,11 +545,43 @@ async function loadGedcomContent(fileInput, passwordInput) {
  * @private
  */
 async function loadEncryptedContent(password, filename) {
-    const response = await fetch(filename);
+    // const response = await fetch(filename);
+    
+    // if (!response.ok) {
+    //     throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response.statusText}`);
+    // }
+    
+
+    // Essayer d'abord de récupérer depuis le cache si nous sommes hors ligne
+    // if (!navigator.onLine && 'caches' in window) {
+    // Vérifier si la constante CACHE_NAME existe déjà (chargée par le script externe)
+
+    console.log("Tentative de chargement du fichier: ", filename, "Cache: ", CACHE_NAME, ", réseau:", state.isOnLine);
+
+
+    let response;
+    if (!state.isOnLine && 'caches' in window) {
+        console.log(`Mode hors ligne détecté, recherche de ${filename} dans le cache... ${CACHE_NAME} `);
+        const cache = await caches.open(CACHE_NAME); // Utiliser le même nom que dans service-worker.js
+        response = await cache.match(filename);
+        
+        if (response) {
+            console.log(`${filename} trouvé dans le cache!`);
+        } else {
+            console.error(`${filename} non trouvé dans le cache en mode hors ligne!`);
+            throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache)`);
+        }
+    } else {
+        // Sinon, faire une requête réseau normale
+        console.log(`Chargement de ${filename} via réseau...`);
+        response = await fetch(filename);
+    }
     
     if (!response.ok) {
         throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response.statusText}`);
     }
+
+
     
     const encryptedData = await response.text();
     const decoded = atob(encryptedData);
@@ -1149,9 +1182,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    console.log("🌐 État initial du réseau:", navigator.onLine);
+
     initNetworkListeners();
+    console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
 });
+
 
 
 function detectInputType() {
