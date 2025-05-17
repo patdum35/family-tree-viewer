@@ -83,7 +83,7 @@ const RESOURCES_TO_CACHE = [
   './background_images/steph.jpg',
   './background_images/garand.jpg',
   './background_images/charlemagne.jpg',
-  './background_images/hughes.jpg',
+  './background_images/hugues.jpg',
   './background_images/brigitte.jpg',
   './background_images/kamber.jpg',
   './background_images/pharabert.jpg',
