@@ -599,7 +599,8 @@ async function loadEncryptedContent(password, filename) {
     
     // Debogage: Afficher toutes les variations
     console.log("Variations de chemin à tester:", pathVariations);
-    
+    // showToast(`Mode hors ligne détecté, recherche de ${filename} dans le cache... ${CACHE_NAME} `,3000);
+
     let response;
     if (!state.isOnLine && 'caches' in window) {
         console.log(`Mode hors ligne détecté, recherche de ${filename} dans le cache... ${CACHE_NAME} `);
@@ -610,6 +611,10 @@ async function loadEncryptedContent(password, filename) {
             // Afficher toutes les URLs dans le cache pour debugger
             const cacheKeys = await cache.keys();
             console.log("Contenu du cache:", cacheKeys.map(req => req.url));
+
+            // showToast(`Contenu du cache:  ${cacheKeys.map(req => req.url)} `,3000);
+
+
             
             // Essayer toutes les variations de chemin
             for (const path of pathVariations) {
