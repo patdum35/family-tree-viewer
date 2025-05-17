@@ -1,28 +1,56 @@
+/**
+ * debugLogUtils.js - Module de débogage unifié pour souris et tactile
+ * Fournit un panneau de débogage entièrement fonctionnel et propre
+ */
+
 import { state } from './main.js';
 
 
-// Fonction pour vider le cache storage
+
+
+/**
+ * Gère l'affichage du panneau de débogage (ouverture/fermeture)
+ * @param {boolean} show - True pour afficher, false pour masquer
+ */
+ function toggleDebugPanel(show) {
+    // Récupérer le panneau existant
+    let panel = document.getElementById('debug-panel');
+    
+    // Si le panneau n'existe pas et qu'on veut l'afficher, le créer
+    if (!panel && show) {
+        createDebugPanel();
+        return;
+    }
+    
+    // Si le panneau existe, changer sa visibilité
+    if (panel) {
+        panel.style.display = show ? 'block' : 'none';
+    }
+}
+
+
+/**
+ * Active le panneau de débogage et affiche les informations initiales
+ */
 export function activateDebugLogs() {
     state.isDebugLog = true;
-    // Créer le panneau même si loadEncryptedContent n'est pas appelé
-    createDebugPanel();
     
 
-    // Appeler cette fonction après la création du panel de debug
-    enhanceDebugPanel();
-    // Appeler cette fonction pour améliorer le panneau
-    enhanceDebugPanelForTouch();
+    // Afficher le panneau
+    toggleDebugPanel(true);
 
+    // Créer le panneau
+    createDebugPanel();
+    
     // Afficher des informations de base
     debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
     debugLog(`User Agent: ${navigator.userAgent}`, 'info');
     debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
     debugLog(`URL: ${window.location.href}`, 'info');
-    let screenInfo = addScreenInfoToDebug();
-
-    // Ajouter l'information dans le panneau de débogage
+    
+    // Ajouter les informations sur l'écran
     debugLog(`=== INFORMATIONS ÉCRAN ===`, 'info');
-    screenInfo.split('\n').forEach(line => {
+    getScreenInfo().split('\n').forEach(line => {
         debugLog(line.trim(), 'info');
     });
     
@@ -36,229 +64,478 @@ export function activateDebugLogs() {
     setTimeout(() => {
         checkCache();
     }, 1000);
-
-
-
-
 }
 
-// Exportez et exposez la fonction pour qu'elle soit accessible globalement
+// Exposer la fonction pour qu'elle soit accessible globalement
 window.activateDebugLogs = activateDebugLogs;
 
 
 
 
 
-
-// /**
-//  * Fonction simple de toast pour le débogage mobile
-//  * @param {string} message Message à afficher
-//  * @param {string} type Type de message ('info', 'error', 'warning')
-//  * @param {number} duration Durée d'affichage en ms
-//  */
-function showToastNew(message, type = 'info', duration = 3000) {
-    // Créer l'élément toast
-    const toast = document.createElement('div');
-    
-    // Appliquer le style selon le type
-    toast.style.position = 'fixed';
-    toast.style.bottom = '10px';
-    toast.style.left = '10px';
-    toast.style.right = '10px';
-    toast.style.padding = '10px';
-    toast.style.borderRadius = '4px';
-    toast.style.color = 'white';
-    toast.style.fontFamily = 'sans-serif';
-    toast.style.zIndex = '10000';
-    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-    toast.style.wordBreak = 'break-word';
-    
-    // Couleur selon le type
-    if (type === 'error') {
-        toast.style.backgroundColor = '#F44336';
-    } else if (type === 'warning') {
-        toast.style.backgroundColor = '#FF9800';
-    } else {
-        toast.style.backgroundColor = '#2196F3';
-    }
-    
-    // Ajouter le message
-    toast.textContent = message;
-    
-    // Ajouter au document
-    document.body.appendChild(toast);
-    
-    // Supprimer après la durée spécifiée
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s';
-        setTimeout(() => document.body.removeChild(toast), 500);
-    }, duration);
-    
-    // Aussi l'afficher dans la console
-    if (type === 'error') {
-        console.error(message);
-    } else if (type === 'warning') {
-        console.warn(message);
-    } else {
-        console.log(message);
-    }
-}
-
-
-
 /**
- * Fonction améliorée de débogage avec vérification des bibliothèques
- * Affiche les messages dans un panneau persistant et lisible
+ * Crée et configure le panneau de débogage
+ * @returns {HTMLElement} Le panneau créé
  */
 function createDebugPanel() {
     // Ne créer le panneau qu'une seule fois
-    if (document.getElementById('debug-panel')) return;
+    if (document.getElementById('debug-panel')) {
+        return document.getElementById('debug-panel');
+    }
     
-    // Créer le panneau de débogage
+    // 1. Créer le panneau principal
     const panel = document.createElement('div');
     panel.id = 'debug-panel';
-    panel.style.position = 'fixed';
-    panel.style.top = '10px';
-    panel.style.right = '10px';
-    panel.style.width = '80%';
-    panel.style.maxHeight = '80%';
-    panel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    panel.style.color = 'white';
-    panel.style.padding = '10px';
-    panel.style.borderRadius = '5px';
-    panel.style.fontFamily = 'monospace';
-    panel.style.fontSize = '12px';
-    panel.style.zIndex = '9999';
-    panel.style.overflowY = 'auto';
-    panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
     
-    // Ajouter un titre
+    // Styles de base du panneau
+    Object.assign(panel.style, {
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        width: '80%',
+        maxHeight: '70%',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        zIndex: '9999',
+        boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+        resize: 'both',
+        overflow: 'auto'
+    });
+    
+    // 2. Créer la barre d'en-tête pour le déplacement
+    const header = document.createElement('div');
+    Object.assign(header.style, {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#333',
+        padding: '5px',
+        marginBottom: '10px',
+        borderRadius: '3px',
+        cursor: 'move'
+    });
+    
+    // 3. Ajouter le titre
     const title = document.createElement('div');
     title.textContent = 'Debug Cache et Bibliothèques';
     title.style.fontWeight = 'bold';
-    title.style.marginBottom = '5px';
-    title.style.borderBottom = '1px solid #666';
-    title.style.paddingBottom = '5px';
     
-    // Ajouter un conteneur pour les messages
-    const messagesContainer = document.createElement('div');
-    messagesContainer.id = 'debug-messages';
-    
-    // Ajouter des boutons
+    // 4. Créer le conteneur de boutons (horizontal)
     const buttonContainer = document.createElement('div');
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.marginBottom = '10px';
-    
-    // Bouton pour effacer les logs
-    const clearButton = document.createElement('button');
-    clearButton.textContent = 'Effacer logs';
-    clearButton.style.padding = '5px 10px';
-    clearButton.style.marginRight = '5px';
-    clearButton.style.backgroundColor = '#F44336';
-    clearButton.style.color = 'white';
-    clearButton.style.border = 'none';
-    clearButton.style.borderRadius = '3px';
-    clearButton.style.fontSize = '12px';
-    
-    clearButton.addEventListener('click', () => {
-        document.getElementById('debug-messages').innerHTML = '';
+    Object.assign(buttonContainer.style, {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
     });
     
-    // Bouton pour vérifier les bibliothèques
-    const checkLibsButton = document.createElement('button');
-    checkLibsButton.textContent = 'Vérifier bibliothèques';
-    checkLibsButton.style.padding = '5px 10px';
-    checkLibsButton.style.marginRight = '5px';
-    checkLibsButton.style.backgroundColor = '#4CAF50';
-    checkLibsButton.style.color = 'white';
-    checkLibsButton.style.border = 'none';
-    checkLibsButton.style.borderRadius = '3px';
-    checkLibsButton.style.fontSize = '12px';
+    // 5. Créer les boutons de contrôle
+    // Bouton de déplacement
+    const moveButton = createButton('⇄', '#555');
     
-    checkLibsButton.addEventListener('click', checkLibraries);
+    // Bouton de réduction
+    const toggleButton = createButton('−', '#555');
     
-    // Bouton pour vérifier le cache
-    const checkCacheButton = document.createElement('button');
-    checkCacheButton.textContent = 'Vérifier cache';
-    checkCacheButton.style.padding = '5px 10px';
-    checkCacheButton.style.backgroundColor = '#2196F3';
-    checkCacheButton.style.color = 'white';
-    checkCacheButton.style.border = 'none';
-    checkCacheButton.style.borderRadius = '3px';
-    checkCacheButton.style.fontSize = '12px';
+    // Bouton de fermeture
+    const closeButton = createButton('×', '#F44336');
     
-    checkCacheButton.addEventListener('click', checkCache);
+    // 6. Ajouter les boutons au conteneur (dans l'ordre)
+    buttonContainer.appendChild(moveButton);
+    buttonContainer.appendChild(toggleButton);
+    buttonContainer.appendChild(closeButton);
     
-    // Assembler les boutons
-    buttonContainer.appendChild(clearButton);
-    buttonContainer.appendChild(checkLibsButton);
-    buttonContainer.appendChild(checkCacheButton);
+    // 7. Ajouter le titre et les boutons à l'en-tête
+    header.appendChild(title);
+    header.appendChild(buttonContainer);
     
-    // Assembler le panneau
-    panel.appendChild(title);
-    panel.appendChild(buttonContainer);
-    panel.appendChild(messagesContainer);
+    // 8. Créer le conteneur de contenu (pour pouvoir le masquer/afficher)
+    const content = document.createElement('div');
+    content.id = 'debug-panel-content';
     
-    // Ajouter au document
+    // 9. Créer la barre de boutons d'action
+    const actionBar = document.createElement('div');
+    Object.assign(actionBar.style, {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '5px',
+        marginBottom: '10px',
+        flexWrap: 'wrap'
+    });
+    
+    // 10. Créer les boutons d'action
+    const clearButton = createButton('Effacer logs', '#F44336', true);
+    const checkLibsButton = createButton('Vérifier bibliothèques', '#4CAF50', true);
+    const checkCacheButton = createButton('Vérifier cache', '#2196F3', true);
+    
+    // 11. Ajouter les boutons à la barre d'action
+    actionBar.appendChild(clearButton);
+    actionBar.appendChild(checkLibsButton);
+    actionBar.appendChild(checkCacheButton);
+    
+    // 12. Créer le conteneur de messages
+    const messagesContainer = document.createElement('div');
+    messagesContainer.id = 'debug-messages';
+    messagesContainer.style.overflowY = 'auto';
+    
+    // 13. Assembler tous les éléments
+    content.appendChild(actionBar);
+    content.appendChild(messagesContainer);
+    panel.appendChild(header);
+    panel.appendChild(content);
+    
+    // 14. Ajouter au document
     document.body.appendChild(panel);
+    
+    // 15. Ajouter les fonctionnalités interactives
+    
+    // Déplacement (souris et tactile)
+    makeElementDraggable(panel, header);
+    
+    // Redimensionnement tactile
+    addResizeHandle(panel);
+    
+    // Fonctionnalités des boutons
+    
+    // Déplacer le panneau (droite/gauche)
+    let isOnRight = true;
+    const togglePosition = () => {
+        isOnRight = !isOnRight;
+        if (isOnRight) {
+            panel.style.right = '10px';
+            panel.style.left = 'auto';
+        } else {
+            panel.style.left = '10px';
+            panel.style.right = 'auto';
+        }
+    };
+    
+    // Réduire/étendre le panneau
+    let isCollapsed = false;
+    const toggleCollapse = () => {
+        isCollapsed = !isCollapsed;
+        content.style.display = isCollapsed ? 'none' : 'block';
+        toggleButton.textContent = isCollapsed ? '+' : '−';
+        panel.style.height = isCollapsed ? 'auto' : '50%';
+        panel.style.resize = isCollapsed ? 'none' : 'both';
+    };
+    
+    // Fermer le panneau
+    const closePanel = () => {
+        // panel.style.display = 'none';
+        toggleDebugPanel(false);
+    };
+    
+    // Effacer les logs
+    const clearLogs = () => {
+        messagesContainer.innerHTML = '';
+    };
+    
+    // Associer les fonctions aux boutons (souris et tactile)
+    addButtonListeners(moveButton, togglePosition);
+    addButtonListeners(toggleButton, toggleCollapse);
+    addButtonListeners(closeButton, closePanel);
+    addButtonListeners(clearButton, clearLogs);
+    addButtonListeners(checkLibsButton, checkLibraries);
+    addButtonListeners(checkCacheButton, checkCache);
     
     return panel;
 }
 
 /**
+ * Crée un bouton stylisé
+ * @param {string} text - Texte du bouton
+ * @param {string} bgColor - Couleur de fond
+ * @param {boolean} isTextButton - True si c'est un bouton avec texte
+ * @returns {HTMLButtonElement} Bouton créé
+ */
+function createButton(text, bgColor, isTextButton = false) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    
+    // Styles communs
+    Object.assign(button.style, {
+        backgroundColor: bgColor,
+        color: 'white',
+        border: 'none',
+        borderRadius: '3px',
+        cursor: 'pointer',
+        margin: '0 2px'
+    });
+    
+    // Styles spécifiques selon le type de bouton
+    if (isTextButton) {
+        // Bouton avec texte
+        Object.assign(button.style, {
+            padding: '5px 10px',
+            fontSize: '12px'
+        });
+    } else {
+        // Bouton icône (pour contrôles)
+        Object.assign(button.style, {
+            width: '24px',
+            height: '24px',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+        });
+    }
+    
+    return button;
+}
+
+/**
+ * Ajoute des écouteurs d'événements (souris et tactile) à un bouton
+ * @param {HTMLButtonElement} button - Le bouton
+ * @param {Function} action - La fonction à exécuter
+ */
+function addButtonListeners(button, action) {
+    // Événement de clic (souris)
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        action();
+    });
+    
+    // Événement tactile
+    button.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        action();
+    }, { passive: false });
+}
+
+/**
+ * Rend un élément déplaçable (souris et tactile)
+ * @param {HTMLElement} element - L'élément à rendre déplaçable
+ * @param {HTMLElement} handle - L'élément qui sert de poignée
+ */
+function makeElementDraggable(element, handle) {
+    // Variables pour le déplacement
+    let startX, startY, initialLeft, initialTop;
+    
+    // === SUPPORT TACTILE ===
+    handle.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        e.preventDefault();
+        
+        // Initialiser les positions
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        initialLeft = element.offsetLeft;
+        initialTop = element.offsetTop;
+        
+        // Forcer le positionnement left/top
+        element.style.right = 'auto';
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches.length !== 1) return;
+        
+        // Vérifier si nous sommes en train de déplacer cet élément
+        if (startX === undefined || startY === undefined) return;
+        
+        e.preventDefault();
+        
+        // Calculer le déplacement
+        const deltaX = e.touches[0].clientX - startX;
+        const deltaY = e.touches[0].clientY - startY;
+        
+        // Appliquer le déplacement
+        element.style.left = (initialLeft + deltaX) + 'px';
+        element.style.top = (initialTop + deltaY) + 'px';
+    }, { passive: false });
+    
+    document.addEventListener('touchend', () => {
+        // Réinitialiser les positions
+        startX = undefined;
+        startY = undefined;
+    });
+    
+    // === SUPPORT SOURIS ===
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        
+        // Initialiser les positions
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = element.offsetLeft;
+        initialTop = element.offsetTop;
+        
+        // Forcer le positionnement left/top
+        element.style.right = 'auto';
+        
+        // Ajouter les écouteurs temporaires
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+    
+    function onMouseMove(e) {
+        e.preventDefault();
+        
+        // Calculer le déplacement
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        // Appliquer le déplacement
+        element.style.left = (initialLeft + deltaX) + 'px';
+        element.style.top = (initialTop + deltaY) + 'px';
+    }
+    
+    function onMouseUp() {
+        // Supprimer les écouteurs temporaires
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+}
+
+/**
+ * Ajoute une poignée de redimensionnement tactile à un élément
+ * @param {HTMLElement} element - L'élément à rendre redimensionnable
+ */
+function addResizeHandle(element) {
+    // Créer la poignée
+    const handle = document.createElement('div');
+    handle.className = 'debug-panel-resize-handle';
+    
+    // Styles de la poignée
+    Object.assign(handle.style, {
+        position: 'absolute',
+        right: '0',
+        bottom: '0',
+        width: '20px',
+        height: '20px',
+        cursor: 'nwse-resize',
+        background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.5) 50%)',
+        zIndex: '10000'
+    });
+    
+    // Variables pour le redimensionnement
+    let startX, startY, startWidth, startHeight;
+    
+    // === SUPPORT TACTILE ===
+    handle.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        e.preventDefault();
+        
+        // Initialiser les dimensions
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startWidth = element.offsetWidth;
+        startHeight = element.offsetHeight;
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches.length !== 1 || startX === undefined) return;
+        e.preventDefault();
+        
+        // Calculer les nouvelles dimensions
+        const width = startWidth + (e.touches[0].clientX - startX);
+        const height = startHeight + (e.touches[0].clientY - startY);
+        
+        // Appliquer avec limites min
+        element.style.width = Math.max(200, width) + 'px';
+        element.style.height = Math.max(100, height) + 'px';
+    }, { passive: false });
+    
+    document.addEventListener('touchend', () => {
+        // Réinitialiser
+        startX = undefined;
+    });
+    
+    // === SUPPORT SOURIS ===
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        
+        // Initialiser les dimensions
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = element.offsetWidth;
+        startHeight = element.offsetHeight;
+        
+        // Ajouter les écouteurs temporaires
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+    
+    function onMouseMove(e) {
+        e.preventDefault();
+        
+        // Calculer les nouvelles dimensions
+        const width = startWidth + (e.clientX - startX);
+        const height = startHeight + (e.clientY - startY);
+        
+        // Appliquer avec limites min
+        element.style.width = Math.max(200, width) + 'px';
+        element.style.height = Math.max(100, height) + 'px';
+    }
+    
+    function onMouseUp() {
+        // Supprimer les écouteurs temporaires
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+    
+    // Ajouter la poignée à l'élément
+    element.appendChild(handle);
+}
+
+/**
  * Ajoute un message au panneau de débogage
- * @param {string} message Message à afficher
- * @param {string} type Type de message ('info', 'error', 'warning', 'success')
+ * @param {string} message - Message à afficher
+ * @param {string} type - Type de message ('info', 'error', 'warning', 'success')
  */
 export function debugLog(message, type = 'info') {
-
-    if (state.isDebugLog) {
-
-        // S'assurer que le panneau existe
-        createDebugPanel();
-        
-        // Référence au conteneur de messages
-        const messagesContainer = document.getElementById('debug-messages');
-        
-        // Créer un nouvel élément de message
-        const messageElement = document.createElement('div');
-        
-        // Couleur selon le type
-        let borderColor = '#2196F3'; // info (bleu)
-        if (type === 'error') {
-            borderColor = '#F44336'; // rouge
-        } else if (type === 'warning') {
-            borderColor = '#FF9800'; // orange
-        } else if (type === 'success') {
-            borderColor = '#4CAF50'; // vert
-        }
-        
-        messageElement.style.borderLeft = `3px solid ${borderColor}`;
-        messageElement.style.padding = '3px 5px';
-        messageElement.style.marginBottom = '3px';
-        messageElement.style.wordBreak = 'break-word';
-        
-        // Ajouter l'horodatage
-        const time = new Date().toLocaleTimeString();
-        
-        // Formater le message
-        messageElement.innerHTML = `<span style="color: #aaa; font-size: 10px;">${time}</span> ${message}`;
-        
-        // Ajouter au conteneur
-        messagesContainer.appendChild(messageElement);
-        
-        // Faire défiler vers le bas
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Aussi envoyer à la console
-        if (type === 'error') {
-            console.error(message);
-        } else if (type === 'warning') {
-            console.warn(message);
-        } else {
-            console.log(message);
-        }
+    if (!state.isDebugLog) {
+        console.log(message);
+        return;
+    }
+    
+    // S'assurer que le panneau existe
+    const panel = createDebugPanel();
+    
+    // Référence au conteneur de messages
+    const messagesContainer = document.getElementById('debug-messages');
+    
+    // Créer un nouvel élément de message
+    const messageElement = document.createElement('div');
+    
+    // Couleur selon le type
+    let borderColor = '#2196F3'; // info (bleu)
+    if (type === 'error') {
+        borderColor = '#F44336'; // rouge
+    } else if (type === 'warning') {
+        borderColor = '#FF9800'; // orange
+    } else if (type === 'success') {
+        borderColor = '#4CAF50'; // vert
+    }
+    
+    // Appliquer les styles
+    Object.assign(messageElement.style, {
+        borderLeft: `3px solid ${borderColor}`,
+        padding: '3px 5px',
+        marginBottom: '3px',
+        wordBreak: 'break-word'
+    });
+    
+    // Ajouter l'horodatage
+    const time = new Date().toLocaleTimeString();
+    
+    // Formater le message
+    messageElement.innerHTML = `<span style="color: #aaa; font-size: 10px;">${time}</span> ${message}`;
+    
+    // Ajouter au conteneur
+    messagesContainer.appendChild(messageElement);
+    
+    // Faire défiler vers le bas
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Aussi envoyer à la console
+    if (type === 'error') {
+        console.error(message);
+    } else if (type === 'warning') {
+        console.warn(message);
     } else {
         console.log(message);
     }
@@ -310,11 +587,6 @@ function checkLibraries() {
         debugLog("Chargeur de bibliothèques (loadAllResources) disponible", 'success');
     } else {
         debugLog("Chargeur de bibliothèques (loadAllResources) NON disponible", 'error');
-    }
-    
-    // Vérifier la configuration des ressources (si disponible)
-    if (typeof resources !== 'undefined' && Array.isArray(resources)) {
-        debugLog(`${resources.length} ressources configurées dans le chargeur`, 'info');
     }
     
     debugLog("=== FIN VÉRIFICATION DES BIBLIOTHÈQUES ===", 'info');
@@ -400,8 +672,10 @@ async function checkCache() {
         }
         
         // Résumé
-        debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
-        debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
+        if (totalItems > 0) {
+            debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
+            debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
+        }
         
         if (foundArbreEnc) {
             debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
@@ -432,420 +706,72 @@ async function checkCache() {
     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
 }
 
-
-
 /**
- * Modification ciblée: ajout d'une fonction pour rendre le debug panel déplaçable et réductible
+ * Récupère les informations sur l'écran
+ * @returns {string} Informations formatées sur l'écran
  */
-function enhanceDebugPanel() {
-    // Trouver le panel existant ou sortir si non trouvé
-    const panel = document.getElementById('debug-panel');
-    if (!panel) return;
-    
-    // 1. Créer une barre d'en-tête pour le déplacement
-    const header = document.createElement('div');
-    header.style.padding = '5px';
-    header.style.marginBottom = '5px';
-    header.style.cursor = 'move';
-    header.style.backgroundColor = '#333';
-    header.style.borderRadius = '3px';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    
-    // 2. Ajouter titre
-    const title = document.createElement('span');
-    title.textContent = 'Debug';
-    title.style.fontWeight = 'bold';
-    
-    // 3. Ajouter boutons de contrôle
-    const buttons = document.createElement('div');
-    
-    // Bouton pour déplacer droite/gauche
-    const moveBtn = document.createElement('button');
-    moveBtn.innerHTML = '⇄';
-    moveBtn.style.marginRight = '5px';
-    moveBtn.style.backgroundColor = '#555';
-    moveBtn.style.border = 'none';
-    moveBtn.style.borderRadius = '3px';
-    moveBtn.style.width = '24px';
-    moveBtn.style.height = '24px';
-    
-    // 4. Bouton réduire/agrandir
-    const collapseBtn = document.createElement('button');
-    collapseBtn.innerHTML = '−';
-    collapseBtn.style.marginRight = '5px';
-    collapseBtn.style.backgroundColor = '#555';
-    collapseBtn.style.border = 'none';
-    collapseBtn.style.borderRadius = '3px';
-    collapseBtn.style.width = '24px';
-    collapseBtn.style.height = '24px';
-    
-    // 5. Bouton fermer
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
-    closeBtn.style.backgroundColor = '#F44336';
-    closeBtn.style.border = 'none';
-    closeBtn.style.borderRadius = '3px';
-    closeBtn.style.width = '24px';
-    closeBtn.style.height = '24px';
-    
-    // 6. Sauvegarder et déplacer le contenu existant
-    const content = document.createElement('div');
-    content.id = 'debug-panel-content';
-    while (panel.firstChild) {
-        content.appendChild(panel.firstChild);
-    }
-    
-    // 7. Assembler les éléments
-    buttons.appendChild(moveBtn);
-    buttons.appendChild(collapseBtn);
-    buttons.appendChild(closeBtn);
-    header.appendChild(title);
-    header.appendChild(buttons);
-    panel.appendChild(header);
-    panel.appendChild(content);
-    
-    // 8. Ajouter les fonctionnalités
-    // Déplacer
-    let isOnRight = true;
-    moveBtn.addEventListener('click', () => {
-        isOnRight = !isOnRight;
-        if (isOnRight) {
-            panel.style.right = '10px';
-            panel.style.left = 'auto';
-        } else {
-            panel.style.left = '10px';
-            panel.style.right = 'auto';
-        }
-    });
-    
-    // Réduire/agrandir
-    let isCollapsed = false;
-    collapseBtn.addEventListener('click', () => {
-        isCollapsed = !isCollapsed;
-        content.style.display = isCollapsed ? 'none' : 'block';
-        collapseBtn.innerHTML = isCollapsed ? '+' : '−';
-    });
-    
-    // Fermer
-    closeBtn.addEventListener('click', () => {
-        panel.style.display = 'none';
-    });
-    
-    // 9. Rendre déplaçable
-    makePanelDraggable(panel, header);
-    
-    // Ajouter des styles supplémentaires
-    panel.style.resize = 'both';
-    panel.style.overflow = 'auto';
-    panel.style.zIndex = '9999';
-}
-
-/**
- * Fonction pour rendre le panneau déplaçable
- */
-function makePanelDraggable(panel, header) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    
-    header.onmousedown = dragMouseDown;
-    
-    function dragMouseDown(e) {
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-    
-    function elementDrag(e) {
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        panel.style.top = (panel.offsetTop - pos2) + "px";
-        panel.style.left = (panel.offsetLeft - pos1) + "px";
-        panel.style.right = 'auto'; // Important: annuler le right quand on déplace
-    }
-    
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-}
-
-
-
-/**
- * Modification ciblée: rendre le debug panel compatible tactile
- */
-function enhanceDebugPanelForTouch() {
-    const panel = document.getElementById('debug-panel');
-    if (!panel) return;
-    
-    // Trouver ou créer l'en-tête
-    let header = panel.querySelector('div[style*="cursor: move"]');
-    if (!header) {
-        // Si l'en-tête n'existe pas, le créer comme dans enhanceDebugPanel()
-        // [code pour créer l'en-tête omis pour brièveté]
-    }
-    
-    // Ajouter support tactile pour le déplacement
-    makeTouchDraggable(panel, header);
-    
-    // Ajouter un coin de redimensionnement pour tactile
-    addResizeHandle(panel);
-}
-
-/**
- * Rend un élément déplaçable par toucher
- */
-function makeTouchDraggable(element, handle) {
-    // Variables pour stocker les positions
-    let startX, startY, initialLeft, initialTop;
-    let isDragging = false;
-    
-    // Gestionnaire pour le début du toucher
-    handle.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 1) {
-            e.preventDefault(); // Empêcher le défilement de la page
-            
-            isDragging = true;
-            
-            // Position initiale du toucher
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            
-            // Position initiale de l'élément
-            initialLeft = element.offsetLeft;
-            initialTop = element.offsetTop;
-            
-            // Styles pour le déplacement
-            element.style.right = 'auto'; // Important pour le positionnement
-        }
-    }, { passive: false });
-    
-    // Gestionnaire pour le déplacement du toucher
-    document.addEventListener('touchmove', function(e) {
-        if (isDragging && e.touches.length === 1) {
-            e.preventDefault(); // Empêcher le défilement de la page
-            
-            // Calculer le déplacement
-            const deltaX = e.touches[0].clientX - startX;
-            const deltaY = e.touches[0].clientY - startY;
-            
-            // Déplacer l'élément
-            element.style.left = (initialLeft + deltaX) + 'px';
-            element.style.top = (initialTop + deltaY) + 'px';
-        }
-    }, { passive: false });
-    
-    // Gestionnaire pour la fin du toucher
-    document.addEventListener('touchend', function() {
-        isDragging = false;
-    });
-    
-    // Conserver aussi le support souris
-    handle.onmousedown = function(e) {
-        e.preventDefault();
-        
-        // Position initiale de la souris
-        startX = e.clientX;
-        startY = e.clientY;
-        
-        // Position initiale de l'élément
-        initialLeft = element.offsetLeft;
-        initialTop = element.offsetTop;
-        
-        // Styles pour le déplacement
-        element.style.right = 'auto';
-        
-        // Gestionnaires pour le déplacement et la fin
-        document.onmousemove = mouseDrag;
-        document.onmouseup = stopDrag;
-    };
-    
-    function mouseDrag(e) {
-        e.preventDefault();
-        
-        // Calculer le déplacement
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-        
-        // Déplacer l'élément
-        element.style.left = (initialLeft + deltaX) + 'px';
-        element.style.top = (initialTop + deltaY) + 'px';
-    }
-    
-    function stopDrag() {
-        document.onmousemove = null;
-        document.onmouseup = null;
-    }
-}
-
-/**
- * Ajoute une poignée de redimensionnement tactile
- */
-function addResizeHandle(element) {
-    // Créer la poignée de redimensionnement
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'debug-panel-resize-handle';
-    resizeHandle.style.position = 'absolute';
-    resizeHandle.style.right = '0';
-    resizeHandle.style.bottom = '0';
-    resizeHandle.style.width = '20px';
-    resizeHandle.style.height = '20px';
-    resizeHandle.style.cursor = 'nwse-resize';
-    resizeHandle.style.background = 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.5) 50%)';
-    resizeHandle.style.zIndex = '10000';
-    
-    // Variables pour le redimensionnement
-    let startX, startY, startWidth, startHeight;
-    let isResizing = false;
-    
-    // Gestionnaire pour le début du toucher
-    resizeHandle.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 1) {
-            e.preventDefault();
-            isResizing = true;
-            
-            // Position initiale du toucher
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            
-            // Taille initiale de l'élément
-            startWidth = element.offsetWidth;
-            startHeight = element.offsetHeight;
-        }
-    }, { passive: false });
-    
-    // Gestionnaire pour le déplacement du toucher
-    document.addEventListener('touchmove', function(e) {
-        if (isResizing && e.touches.length === 1) {
-            e.preventDefault();
-            
-            // Calculer les nouvelles dimensions
-            const width = startWidth + (e.touches[0].clientX - startX);
-            const height = startHeight + (e.touches[0].clientY - startY);
-            
-            // Appliquer les nouvelles dimensions (avec limites)
-            element.style.width = Math.max(200, width) + 'px';
-            element.style.height = Math.max(100, height) + 'px';
-        }
-    }, { passive: false });
-    
-    // Gestionnaire pour la fin du toucher
-    document.addEventListener('touchend', function() {
-        isResizing = false;
-    });
-    
-    // Support souris pour redimensionnement
-    resizeHandle.onmousedown = function(e) {
-        e.preventDefault();
-        
-        isResizing = true;
-        
-        // Position initiale de la souris
-        startX = e.clientX;
-        startY = e.clientY;
-        
-        // Taille initiale de l'élément
-        startWidth = element.offsetWidth;
-        startHeight = element.offsetHeight;
-        
-        // Gestionnaires pour le déplacement et la fin
-        document.onmousemove = mouseResize;
-        document.onmouseup = stopResize;
-    };
-    
-    function mouseResize(e) {
-        if (isResizing) {
-            e.preventDefault();
-            
-            // Calculer les nouvelles dimensions
-            const width = startWidth + (e.clientX - startX);
-            const height = startHeight + (e.clientY - startY);
-            
-            // Appliquer les nouvelles dimensions (avec limites)
-            element.style.width = Math.max(200, width) + 'px';
-            element.style.height = Math.max(100, height) + 'px';
-        }
-    }
-    
-    function stopResize() {
-        isResizing = false;
-        document.onmousemove = null;
-        document.onmouseup = null;
-    }
-    
-    // Ajouter la poignée à l'élément
-    element.appendChild(resizeHandle);
-    
-    // S'assurer que l'élément est correctement positionné
-    if (element.style.position !== 'fixed' && element.style.position !== 'absolute') {
-        element.style.position = 'fixed';
-    }
-}
-
-
-/**
- * Ajout des informations sur la taille réelle de l'écran
- */
-function addScreenInfoToDebug() {
-    // Informations sur l'écran à afficher
-    const screenInfo = `
+function getScreenInfo() {
+    return `
         Écran: ${window.screen.width}x${window.screen.height}
         Fenêtre: ${window.innerWidth}x${window.innerHeight}
         Ratio pixel: ${window.devicePixelRatio}
         Orientation: ${screen.orientation ? screen.orientation.type : 'Non disponible'}
     `.trim();
-    
-    
-    return screenInfo; // Retourner les informations au cas où elles seraient utiles ailleurs
 }
 
-// Si vous utilisez déjà un événement DOMContentLoaded pour initialiser le debug panel,
-// ajoutez cette ligne à l'intérieur de cette fonction:
-// addScreenInfoToDebug();
-
-// Ou bien, si vous préférez, vous pouvez l'appeler à tout moment:
-// addScreenInfoToDebug();
 
 
-// // Vérification au chargement pour déboguer rapidement
-// document.addEventListener('DOMContentLoaded', () => {
-//     // Créer le panneau même si loadEncryptedContent n'est pas appelé
-//     createDebugPanel();
+/**
+ * Fonction simple de toast pour le débogage mobile
+ * @param {string} message Message à afficher
+ * @param {string} type Type de message ('info', 'error', 'warning')
+ * @param {number} duration Durée d'affichage en ms
+ */
+function showToastNew(message, type = 'info', duration = 3000) {
+    // Créer l'élément toast
+    const toast = document.createElement('div');
     
-
-//     // Appeler cette fonction après la création du panel de debug
-//     enhanceDebugPanel();
-//     // Appeler cette fonction pour améliorer le panneau
-//     enhanceDebugPanelForTouch();
-
-//     // Afficher des informations de base
-//     debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
-//     debugLog(`User Agent: ${navigator.userAgent}`, 'info');
-//     debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
-//     debugLog(`URL: ${window.location.href}`, 'info');
-//     let screenInfo = addScreenInfoToDebug();
-
-//     // Ajouter l'information dans le panneau de débogage
-//     debugLog(`=== INFORMATIONS ÉCRAN ===`, 'info');
-//     screenInfo.split('\n').forEach(line => {
-//         debugLog(line.trim(), 'info');
-//     });
+    // Appliquer le style selon le type
+    toast.style.position = 'fixed';
+    toast.style.bottom = '10px';
+    toast.style.left = '10px';
+    toast.style.right = '10px';
+    toast.style.padding = '10px';
+    toast.style.borderRadius = '4px';
+    toast.style.color = 'white';
+    toast.style.fontFamily = 'sans-serif';
+    toast.style.zIndex = '10000';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    toast.style.wordBreak = 'break-word';
     
-//     // Vérifier l'état de chargement des bibliothèques
-//     document.addEventListener('libraries-loaded', () => {
-//         debugLog("Événement 'libraries-loaded' déclenché", 'success');
-//         checkLibraries();
-//     });
+    // Couleur selon le type
+    if (type === 'error') {
+        toast.style.backgroundColor = '#F44336';
+    } else if (type === 'warning') {
+        toast.style.backgroundColor = '#FF9800';
+    } else {
+        toast.style.backgroundColor = '#2196F3';
+    }
     
-//     // Vérifier le cache après un court délai
-//     setTimeout(() => {
-//         checkCache();
-//     }, 1000);
-// });
-
+    // Ajouter le message
+    toast.textContent = message;
+    
+    // Ajouter au document
+    document.body.appendChild(toast);
+    
+    // Supprimer après la durée spécifiée
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+        setTimeout(() => document.body.removeChild(toast), 500);
+    }, duration);
+    
+    // Aussi l'afficher dans la console
+    if (type === 'error') {
+        console.error(message);
+    } else if (type === 'warning') {
+        console.warn(message);
+    } else {
+        console.log(message);
+    }
+}
