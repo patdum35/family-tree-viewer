@@ -428,11 +428,19 @@ export function initNetworkListeners() {
         }
     });
 
-    // Test périodique de connectivité (optionnel)
-    setInterval(() => {
-        console.log('lancement du test de connectivité internet')
-        testRealConnectivity();
-    }, 15000); // Test toutes les 15 secondes
+
+
+
+
+
+    // // Test périodique de connectivité (optionnel)
+    // setInterval(() => {
+    //     console.log('lancement du test de connectivité internet')
+    //     testRealConnectivity();
+    // }, 15000); // Test toutes les 15 secondes
+
+
+
 
     // console.log("✅ Écouteurs réseau initialisés");
 
