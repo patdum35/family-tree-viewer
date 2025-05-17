@@ -995,8 +995,328 @@ async function loadGedcomContent(fileInput, passwordInput) {
 
 
 
+// /**
+//  * Fonction améliorée de débogage pour remplacer showToast
+//  * Affiche les messages dans un panneau persistant et lisible
+//  */
+// function createDebugPanel() {
+//     // Ne créer le panneau qu'une seule fois
+//     if (document.getElementById('debug-panel')) return;
+    
+//     // Créer le panneau de débogage
+//     const panel = document.createElement('div');
+//     panel.id = 'debug-panel';
+//     panel.style.position = 'fixed';
+//     panel.style.top = '10px';
+//     panel.style.right = '10px';
+//     panel.style.width = '80%';
+//     panel.style.maxHeight = '50%';
+//     panel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+//     panel.style.color = 'white';
+//     panel.style.padding = '10px';
+//     panel.style.borderRadius = '5px';
+//     panel.style.fontFamily = 'monospace';
+//     panel.style.fontSize = '12px';
+//     panel.style.zIndex = '9999';
+//     panel.style.overflowY = 'auto';
+//     panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+    
+//     // Ajouter un titre
+//     const title = document.createElement('div');
+//     title.textContent = 'Debug Cache';
+//     title.style.fontWeight = 'bold';
+//     title.style.marginBottom = '5px';
+//     title.style.borderBottom = '1px solid #666';
+//     title.style.paddingBottom = '5px';
+    
+//     // Ajouter un conteneur pour les messages
+//     const messagesContainer = document.createElement('div');
+//     messagesContainer.id = 'debug-messages';
+    
+//     // Ajouter un bouton pour effacer
+//     const clearButton = document.createElement('button');
+//     clearButton.textContent = 'Effacer';
+//     clearButton.style.position = 'absolute';
+//     clearButton.style.top = '5px';
+//     clearButton.style.right = '5px';
+//     clearButton.style.padding = '2px 5px';
+//     clearButton.style.backgroundColor = '#F44336';
+//     clearButton.style.color = 'white';
+//     clearButton.style.border = 'none';
+//     clearButton.style.borderRadius = '3px';
+//     clearButton.style.fontSize = '10px';
+    
+//     clearButton.addEventListener('click', () => {
+//         document.getElementById('debug-messages').innerHTML = '';
+//     });
+    
+//     // Assembler le panneau
+//     panel.appendChild(title);
+//     panel.appendChild(clearButton);
+//     panel.appendChild(messagesContainer);
+    
+//     // Ajouter au document
+//     document.body.appendChild(panel);
+    
+//     return panel;
+// }
+
+// /**
+//  * Ajoute un message au panneau de débogage
+//  * @param {string} message Message à afficher
+//  * @param {string} type Type de message ('info', 'error', 'warning')
+//  */
+// function debugLog(message, type = 'info') {
+//     // S'assurer que le panneau existe
+//     createDebugPanel();
+    
+//     // Référence au conteneur de messages
+//     const messagesContainer = document.getElementById('debug-messages');
+    
+//     // Créer un nouvel élément de message
+//     const messageElement = document.createElement('div');
+//     messageElement.style.borderLeft = `3px solid ${type === 'error' ? 'red' : type === 'warning' ? 'orange' : '#2196F3'}`;
+//     messageElement.style.padding = '3px 5px';
+//     messageElement.style.marginBottom = '3px';
+//     messageElement.style.wordBreak = 'break-word';
+    
+//     // Ajouter l'horodatage
+//     const time = new Date().toLocaleTimeString();
+    
+//     // Formater le message
+//     messageElement.innerHTML = `<span style="color: #aaa; font-size: 10px;">${time}</span> ${message}`;
+    
+//     // Ajouter au conteneur
+//     messagesContainer.appendChild(messageElement);
+    
+//     // Faire défiler vers le bas
+//     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+//     // Aussi envoyer à la console
+//     if (type === 'error') {
+//         console.error(message);
+//     } else if (type === 'warning') {
+//         console.warn(message);
+//     } else {
+//         console.log(message);
+//     }
+// }
+
+// /**
+//  * Charge le contenu crypté avec logs améliorés
+//  * @private
+//  */
+// async function loadEncryptedContent(password, filename) {
+//     // Créer le panneau de débogage
+//     createDebugPanel();
+    
+//     debugLog(`Tentative de chargement: ${filename}`, 'info');
+    
+//     let response;
+//     if (!state.isOnLine && 'caches' in window) {
+//         debugLog(`Mode hors ligne, recherche dans cache: ${CACHE_NAME}`, 'info');
+        
+//         try {
+//             // Vérifier si l'API cache est disponible
+//             if (!('caches' in window)) {
+//                 debugLog("API Cache non disponible!", 'error');
+//                 throw new Error("API Cache non disponible!");
+//             }
+            
+//             // Lister tous les caches disponibles
+//             const allCacheNames = await caches.keys();
+//             debugLog(`Caches disponibles (${allCacheNames.length}): ${allCacheNames.join(", ")}`, 'info');
+            
+//             // Vérifier si notre cache existe
+//             if (!allCacheNames.includes(CACHE_NAME)) {
+//                 debugLog(`Cache "${CACHE_NAME}" n'existe pas!`, 'error');
+                
+//                 // Chercher dans tous les caches
+//                 debugLog("Recherche dans tous les caches disponibles...", 'info');
+//                 let fileFound = false;
+                
+//                 for (const cacheName of allCacheNames) {
+//                     const otherCache = await caches.open(cacheName);
+//                     const cacheRequests = await otherCache.keys();
+                    
+//                     debugLog(`Cache "${cacheName}": ${cacheRequests.length} fichiers`, 'info');
+                    
+//                     // Chercher arbre.enc dans ce cache
+//                     for (const req of cacheRequests) {
+//                         if (req.url.includes(filename)) {
+//                             debugLog(`Possible match: ${req.url.split('/').pop()}`, 'info');
+//                             response = await otherCache.match(req);
+//                             if (response) {
+//                                 debugLog(`Fichier trouvé dans cache: ${cacheName}!`, 'info');
+//                                 fileFound = true;
+//                                 break;
+//                             }
+//                         }
+//                     }
+                    
+//                     if (fileFound) break;
+//                 }
+                
+//                 if (!fileFound) {
+//                     debugLog(`Fichier non trouvé dans aucun cache!`, 'error');
+//                     throw new Error(`Fichier non trouvé dans les caches`);
+//                 }
+//             } else {
+//                 // Ouvrir notre cache
+//                 const cache = await caches.open(CACHE_NAME);
+                
+//                 // Lister le contenu du cache
+//                 const requests = await cache.keys();
+//                 debugLog(`Cache ${CACHE_NAME}: ${requests.length} fichiers`, 'info');
+                
+//                 // Afficher quelques fichiers pour voir ce qu'il contient
+//                 if (requests.length > 0) {
+//                     debugLog("Exemples de fichiers dans le cache:", 'info');
+//                     for (let i = 0; i < Math.min(5, requests.length); i++) {
+//                         const url = requests[i].url;
+//                         const fileName = url.split('/').pop();
+//                         debugLog(`- ${fileName}`, 'info');
+//                     }
+//                 } else {
+//                     debugLog("Le cache est vide!", 'warning');
+//                 }
+                
+//                 // Essayer de trouver arbre.enc avec le chemin exact
+//                 debugLog(`Recherche avec chemin exact: "${filename}"`, 'info');
+//                 response = await cache.match(filename);
+                
+//                 if (!response) {
+//                     debugLog(`Non trouvé avec chemin exact`, 'warning');
+                    
+//                     // Essayer des variations de chemin
+//                     const variations = [
+//                         filename.replace('./', '/'),
+//                         filename.replace('./', ''),
+//                         '/' + filename.replace('./', '')
+//                     ];
+                    
+//                     debugLog(`Essai avec ${variations.length} variations de chemin:`, 'info');
+//                     for (const path of variations) {
+//                         debugLog(`- "${path}"`, 'info');
+//                         response = await cache.match(path);
+//                         if (response) {
+//                             debugLog(`Trouvé avec: "${path}"!`, 'info');
+//                             break;
+//                         }
+//                     }
+                    
+//                     // Si toujours pas trouvé, chercher par nom de fichier
+//                     if (!response) {
+//                         const fileNameToFind = filename.split('/').pop();
+//                         debugLog(`Recherche par nom de fichier: "${fileNameToFind}"`, 'info');
+                        
+//                         for (const req of requests) {
+//                             const reqFileName = req.url.split('/').pop();
+                            
+//                             if (reqFileName === fileNameToFind) {
+//                                 debugLog(`Match possible: ${req.url}`, 'info');
+//                                 response = await cache.match(req);
+//                                 if (response) {
+//                                     debugLog(`Trouvé par nom: ${reqFileName}!`, 'info');
+//                                     break;
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 } else {
+//                     debugLog(`Fichier trouvé directement!`, 'info');
+//                 }
+//             }
+            
+//             if (!response) {
+//                 debugLog(`${filename} non trouvé dans aucun cache!`, 'error');
+//                 throw new Error(`${filename} non trouvé dans aucun cache!`);
+//             }
+            
+//             // Vérifier le contenu de la réponse
+//             try {
+//                 const clone = response.clone();
+//                 const text = await clone.text();
+//                 debugLog(`Contenu récupéré: ${text.length} caractères`, 'info');
+                
+//                 // Vérifier si ça ressemble à du base64
+//                 const sampleStart = text.substring(0, 20);
+//                 const isLikelyBase64 = /^[A-Za-z0-9+/=]+$/.test(sampleStart);
+//                 debugLog(`Format base64: ${isLikelyBase64 ? 'OUI' : 'NON'}`, isLikelyBase64 ? 'info' : 'warning');
+//             } catch (textError) {
+//                 debugLog(`Erreur lecture contenu: ${textError.message}`, 'error');
+//             }
+            
+//         } catch (error) {
+//             debugLog(`Erreur cache: ${error.message}`, 'error');
+//             throw error;
+//         }
+//     } else {
+//         // Mode en ligne
+//         debugLog(`Chargement via réseau...`, 'info');
+//         response = await fetch(filename);
+//     }
+    
+//     if (!response || !response.ok) {
+//         debugLog(`Erreur HTTP: ${response ? response.status : 'Aucune réponse'}`, 'error');
+//         throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response ? response.statusText : 'Aucune réponse'}`);
+//     }
+    
+//     try {
+//         const encryptedData = await response.text();
+//         debugLog(`Données reçues: ${encryptedData.length} caractères`, 'info');
+        
+//         try {
+//             debugLog("Décodage base64...", 'info');
+//             const decoded = atob(encryptedData);
+//             debugLog(`Décodé: ${decoded.length} bytes`, 'info');
+            
+//             debugLog("Déchiffrement...", 'info');
+//             const key = password.repeat(decoded.length);
+//             const decrypted = new Uint8Array(decoded.length);
+            
+//             for(let i = 0; i < decoded.length; i++) {
+//                 decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+//             }
+//             debugLog("Déchiffrement terminé", 'info');
+            
+//             debugLog("Validation mot de passe...", 'info');
+//             await validatePassword(password, decrypted);
+//             debugLog("Mot de passe valide", 'info');
+            
+//             debugLog("Décompression...", 'info');
+//             const result = pako.inflate(decrypted.slice(8), {to: 'string'});
+            
+//             debugLog(`Chargement réussi: ${result.length} caractères`, 'info');
+//             return result;
+//         } catch (processError) {
+//             debugLog(`Erreur traitement: ${processError.message}`, 'error');
+            
+//             if (processError.message && processError.message.includes('mot de passe')) {
+//                 throw new Error('Mot de passe incorrect');
+//             } else {
+//                 throw processError;
+//             }
+//         }
+//     } catch (error) {
+//         debugLog(`Erreur finale: ${error.message}`, 'error');
+//         throw error;
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 /**
- * Fonction améliorée de débogage pour remplacer showToast
+ * Fonction améliorée de débogage avec vérification des bibliothèques
  * Affiche les messages dans un panneau persistant et lisible
  */
 function createDebugPanel() {
@@ -1010,7 +1330,7 @@ function createDebugPanel() {
     panel.style.top = '10px';
     panel.style.right = '10px';
     panel.style.width = '80%';
-    panel.style.maxHeight = '50%';
+    panel.style.maxHeight = '80%';
     panel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
     panel.style.color = 'white';
     panel.style.padding = '10px';
@@ -1023,7 +1343,7 @@ function createDebugPanel() {
     
     // Ajouter un titre
     const title = document.createElement('div');
-    title.textContent = 'Debug Cache';
+    title.textContent = 'Debug Cache et Bibliothèques';
     title.style.fontWeight = 'bold';
     title.style.marginBottom = '5px';
     title.style.borderBottom = '1px solid #666';
@@ -1033,26 +1353,59 @@ function createDebugPanel() {
     const messagesContainer = document.createElement('div');
     messagesContainer.id = 'debug-messages';
     
-    // Ajouter un bouton pour effacer
+    // Ajouter des boutons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.marginBottom = '10px';
+    
+    // Bouton pour effacer les logs
     const clearButton = document.createElement('button');
-    clearButton.textContent = 'Effacer';
-    clearButton.style.position = 'absolute';
-    clearButton.style.top = '5px';
-    clearButton.style.right = '5px';
-    clearButton.style.padding = '2px 5px';
+    clearButton.textContent = 'Effacer logs';
+    clearButton.style.padding = '5px 10px';
+    clearButton.style.marginRight = '5px';
     clearButton.style.backgroundColor = '#F44336';
     clearButton.style.color = 'white';
     clearButton.style.border = 'none';
     clearButton.style.borderRadius = '3px';
-    clearButton.style.fontSize = '10px';
+    clearButton.style.fontSize = '12px';
     
     clearButton.addEventListener('click', () => {
         document.getElementById('debug-messages').innerHTML = '';
     });
     
+    // Bouton pour vérifier les bibliothèques
+    const checkLibsButton = document.createElement('button');
+    checkLibsButton.textContent = 'Vérifier bibliothèques';
+    checkLibsButton.style.padding = '5px 10px';
+    checkLibsButton.style.marginRight = '5px';
+    checkLibsButton.style.backgroundColor = '#4CAF50';
+    checkLibsButton.style.color = 'white';
+    checkLibsButton.style.border = 'none';
+    checkLibsButton.style.borderRadius = '3px';
+    checkLibsButton.style.fontSize = '12px';
+    
+    checkLibsButton.addEventListener('click', checkLibraries);
+    
+    // Bouton pour vérifier le cache
+    const checkCacheButton = document.createElement('button');
+    checkCacheButton.textContent = 'Vérifier cache';
+    checkCacheButton.style.padding = '5px 10px';
+    checkCacheButton.style.backgroundColor = '#2196F3';
+    checkCacheButton.style.color = 'white';
+    checkCacheButton.style.border = 'none';
+    checkCacheButton.style.borderRadius = '3px';
+    checkCacheButton.style.fontSize = '12px';
+    
+    checkCacheButton.addEventListener('click', checkCache);
+    
+    // Assembler les boutons
+    buttonContainer.appendChild(clearButton);
+    buttonContainer.appendChild(checkLibsButton);
+    buttonContainer.appendChild(checkCacheButton);
+    
     // Assembler le panneau
     panel.appendChild(title);
-    panel.appendChild(clearButton);
+    panel.appendChild(buttonContainer);
     panel.appendChild(messagesContainer);
     
     // Ajouter au document
@@ -1064,7 +1417,7 @@ function createDebugPanel() {
 /**
  * Ajoute un message au panneau de débogage
  * @param {string} message Message à afficher
- * @param {string} type Type de message ('info', 'error', 'warning')
+ * @param {string} type Type de message ('info', 'error', 'warning', 'success')
  */
 function debugLog(message, type = 'info') {
     // S'assurer que le panneau existe
@@ -1075,7 +1428,18 @@ function debugLog(message, type = 'info') {
     
     // Créer un nouvel élément de message
     const messageElement = document.createElement('div');
-    messageElement.style.borderLeft = `3px solid ${type === 'error' ? 'red' : type === 'warning' ? 'orange' : '#2196F3'}`;
+    
+    // Couleur selon le type
+    let borderColor = '#2196F3'; // info (bleu)
+    if (type === 'error') {
+        borderColor = '#F44336'; // rouge
+    } else if (type === 'warning') {
+        borderColor = '#FF9800'; // orange
+    } else if (type === 'success') {
+        borderColor = '#4CAF50'; // vert
+    }
+    
+    messageElement.style.borderLeft = `3px solid ${borderColor}`;
     messageElement.style.padding = '3px 5px';
     messageElement.style.marginBottom = '3px';
     messageElement.style.wordBreak = 'break-word';
@@ -1103,6 +1467,174 @@ function debugLog(message, type = 'info') {
 }
 
 /**
+ * Vérification des bibliothèques JavaScript
+ */
+function checkLibraries() {
+    debugLog("=== VÉRIFICATION DES BIBLIOTHÈQUES ===", 'info');
+    
+    const libraries = [
+        { name: "pako", check: () => typeof pako !== 'undefined' && typeof pako.inflate === 'function' },
+        { name: "d3", check: () => typeof d3 !== 'undefined' && typeof d3.select === 'function' },
+        { name: "leaflet", check: () => typeof L !== 'undefined' && typeof L.map === 'function' },
+        { name: "lodash", check: () => typeof _ !== 'undefined' && typeof _.map === 'function' },
+        { name: "react", check: () => typeof React !== 'undefined' && typeof React.createElement === 'function' },
+        { name: "reactDOM", check: () => typeof ReactDOM !== 'undefined' && typeof ReactDOM.render === 'function' },
+        { name: "d3.layout.cloud", check: () => typeof d3 !== 'undefined' && typeof d3.layout !== 'undefined' && typeof d3.layout.cloud === 'function' }
+    ];
+    
+    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`);
+    
+    let allLoaded = true;
+    libraries.forEach(lib => {
+        try {
+            const isLoaded = lib.check();
+            const status = isLoaded ? 'CHARGÉE' : 'NON CHARGÉE';
+            const type = isLoaded ? 'success' : 'error';
+            debugLog(`${lib.name}: ${status}`, type);
+            
+            if (!isLoaded) {
+                allLoaded = false;
+            }
+        } catch (error) {
+            debugLog(`${lib.name}: ERREUR - ${error.message}`, 'error');
+            allLoaded = false;
+        }
+    });
+    
+    if (allLoaded) {
+        debugLog("✅ Toutes les bibliothèques sont chargées correctement!", 'success');
+    } else {
+        debugLog("❌ Certaines bibliothèques ne sont pas chargées!", 'error');
+    }
+    
+    // Vérifier aussi si le chargeur de bibliothèques est disponible
+    if (typeof loadAllResources === 'function') {
+        debugLog("Chargeur de bibliothèques (loadAllResources) disponible", 'success');
+    } else {
+        debugLog("Chargeur de bibliothèques (loadAllResources) NON disponible", 'error');
+    }
+    
+    // Vérifier la configuration des ressources (si disponible)
+    if (typeof resources !== 'undefined' && Array.isArray(resources)) {
+        debugLog(`${resources.length} ressources configurées dans le chargeur`, 'info');
+    }
+    
+    debugLog("=== FIN VÉRIFICATION DES BIBLIOTHÈQUES ===", 'info');
+}
+
+/**
+ * Vérification du cache
+ */
+async function checkCache() {
+    debugLog("=== VÉRIFICATION DU CACHE ===", 'info');
+    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`);
+    
+    // Vérifier si l'API Cache est disponible
+    if (!('caches' in window)) {
+        debugLog("API Cache non disponible dans ce navigateur!", 'error');
+        return;
+    }
+    
+    try {
+        // Obtenir la liste des caches disponibles
+        const cacheNames = await caches.keys();
+        debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
+        
+        let totalItems = 0;
+        let treeViewerItems = 0;
+        let foundArbreEnc = false;
+        
+        // Explorer chaque cache
+        for (const cacheName of cacheNames) {
+            const cache = await caches.open(cacheName);
+            const requests = await cache.keys();
+            
+            totalItems += requests.length;
+            
+            // Vérifier s'il s'agit de notre cache principal
+            if (cacheName === CACHE_NAME) {
+                treeViewerItems = requests.length;
+                debugLog(`Cache principal (${CACHE_NAME}): ${requests.length} fichiers`, 'info');
+                
+                // Vérifier la présence de fichiers importants
+                const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js'];
+                
+                for (const file of criticalFiles) {
+                    const found = requests.some(req => req.url.includes(file));
+                    const status = found ? 'Présent' : 'ABSENT';
+                    const type = found ? 'success' : 'error';
+                    
+                    debugLog(`- ${file}: ${status}`, type);
+                    
+                    if (file === 'arbre.enc' && found) {
+                        foundArbreEnc = true;
+                    }
+                }
+                
+                // Afficher les 5 premiers éléments
+                if (requests.length > 0) {
+                    debugLog("Exemples de fichiers dans le cache:", 'info');
+                    const samplesToShow = Math.min(5, requests.length);
+                    
+                    for (let i = 0; i < samplesToShow; i++) {
+                        const url = requests[i].url;
+                        const fileName = url.split('/').pop();
+                        debugLog(`- ${fileName} (${url})`, 'info');
+                    }
+                    
+                    if (requests.length > samplesToShow) {
+                        debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
+                    }
+                } else {
+                    debugLog("Le cache principal est vide!", 'warning');
+                }
+            } else {
+                // Cache auxiliaire
+                debugLog(`Cache "${cacheName}": ${requests.length} fichiers`, 'info');
+                
+                // Vérifier si arbre.enc pourrait être dans ce cache
+                const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
+                if (arbreEncInCache) {
+                    debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${CACHE_NAME}"!`, 'warning');
+                    foundArbreEnc = true;
+                }
+            }
+        }
+        
+        // Résumé
+        debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
+        debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
+        
+        if (foundArbreEnc) {
+            debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
+        } else {
+            debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
+        }
+        
+    } catch (error) {
+        debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
+    }
+    
+    // Vérifier si le service worker est actif
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration && registration.active) {
+                debugLog(`Service Worker actif: Oui (scope: ${registration.scope})`, 'success');
+            } else {
+                debugLog("Service Worker actif: Non", 'warning');
+            }
+        } catch (error) {
+            debugLog(`Erreur Service Worker: ${error.message}`, 'error');
+        }
+    } else {
+        debugLog("API Service Worker non supportée", 'error');
+    }
+    
+    debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
+}
+
+/**
  * Charge le contenu crypté avec logs améliorés
  * @private
  */
@@ -1111,18 +1643,24 @@ async function loadEncryptedContent(password, filename) {
     createDebugPanel();
     
     debugLog(`Tentative de chargement: ${filename}`, 'info');
+    debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
+    
+    // Vérifier les bibliothèques essentielles avant de continuer
+    try {
+        if (typeof pako === 'undefined' || typeof pako.inflate !== 'function') {
+            debugLog("❌ Bibliothèque 'pako' non chargée!", 'error');
+        } else {
+            debugLog("✓ Bibliothèque 'pako' disponible", 'success');
+        }
+    } catch (e) {
+        debugLog("❌ Erreur lors de la vérification de pako: " + e.message, 'error');
+    }
     
     let response;
     if (!state.isOnLine && 'caches' in window) {
         debugLog(`Mode hors ligne, recherche dans cache: ${CACHE_NAME}`, 'info');
         
         try {
-            // Vérifier si l'API cache est disponible
-            if (!('caches' in window)) {
-                debugLog("API Cache non disponible!", 'error');
-                throw new Error("API Cache non disponible!");
-            }
-            
             // Lister tous les caches disponibles
             const allCacheNames = await caches.keys();
             debugLog(`Caches disponibles (${allCacheNames.length}): ${allCacheNames.join(", ")}`, 'info');
@@ -1147,7 +1685,7 @@ async function loadEncryptedContent(password, filename) {
                             debugLog(`Possible match: ${req.url.split('/').pop()}`, 'info');
                             response = await otherCache.match(req);
                             if (response) {
-                                debugLog(`Fichier trouvé dans cache: ${cacheName}!`, 'info');
+                                debugLog(`Fichier trouvé dans cache "${cacheName}"!`, 'success');
                                 fileFound = true;
                                 break;
                             }
@@ -1159,6 +1697,10 @@ async function loadEncryptedContent(password, filename) {
                 
                 if (!fileFound) {
                     debugLog(`Fichier non trouvé dans aucun cache!`, 'error');
+                    
+                    // Vérifier si les bibliothèques sont chargées
+                    checkLibraries();
+                    
                     throw new Error(`Fichier non trouvé dans les caches`);
                 }
             } else {
@@ -1169,6 +1711,24 @@ async function loadEncryptedContent(password, filename) {
                 const requests = await cache.keys();
                 debugLog(`Cache ${CACHE_NAME}: ${requests.length} fichiers`, 'info');
                 
+                if (requests.length === 0) {
+                    debugLog("⚠️ Le cache est VIDE!", 'warning');
+                    
+                    // Vérifier si le service worker a été correctement installé
+                    if ('serviceWorker' in navigator) {
+                        const registration = await navigator.serviceWorker.getRegistration();
+                        if (registration && registration.active) {
+                            debugLog("Service Worker est actif mais le cache est vide", 'warning');
+                            debugLog("Possible problème lors de l'installation du service worker", 'warning');
+                        } else {
+                            debugLog("Service Worker n'est pas actif!", 'error');
+                        }
+                    }
+                    
+                    // Vérifier les bibliothèques
+                    checkLibraries();
+                }
+                
                 // Afficher quelques fichiers pour voir ce qu'il contient
                 if (requests.length > 0) {
                     debugLog("Exemples de fichiers dans le cache:", 'info');
@@ -1177,8 +1737,6 @@ async function loadEncryptedContent(password, filename) {
                         const fileName = url.split('/').pop();
                         debugLog(`- ${fileName}`, 'info');
                     }
-                } else {
-                    debugLog("Le cache est vide!", 'warning');
                 }
                 
                 // Essayer de trouver arbre.enc avec le chemin exact
@@ -1200,7 +1758,7 @@ async function loadEncryptedContent(password, filename) {
                         debugLog(`- "${path}"`, 'info');
                         response = await cache.match(path);
                         if (response) {
-                            debugLog(`Trouvé avec: "${path}"!`, 'info');
+                            debugLog(`Trouvé avec: "${path}"!`, 'success');
                             break;
                         }
                     }
@@ -1217,19 +1775,53 @@ async function loadEncryptedContent(password, filename) {
                                 debugLog(`Match possible: ${req.url}`, 'info');
                                 response = await cache.match(req);
                                 if (response) {
-                                    debugLog(`Trouvé par nom: ${reqFileName}!`, 'info');
+                                    debugLog(`Trouvé par nom: ${reqFileName}!`, 'success');
                                     break;
                                 }
                             }
                         }
                     }
                 } else {
-                    debugLog(`Fichier trouvé directement!`, 'info');
+                    debugLog(`Fichier trouvé directement!`, 'success');
                 }
             }
             
             if (!response) {
                 debugLog(`${filename} non trouvé dans aucun cache!`, 'error');
+                
+                // Vérifier si ressources sont dans le tableau RESOURCES_TO_CACHE
+                debugLog("Vérification des fichiers critiques dans la configuration:", 'info');
+                
+                let arbreInConfig = false;
+                
+                try {
+                    // Accéder à la configuration du service worker (si possible)
+                    if (typeof RESOURCES_TO_CACHE !== 'undefined') {
+                        const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js'];
+                        
+                        for (const file of criticalFiles) {
+                            const isConfigured = RESOURCES_TO_CACHE.some(resource => 
+                                resource.includes(file)
+                            );
+                            
+                            debugLog(`- ${file} dans RESOURCES_TO_CACHE: ${isConfigured ? 'OUI' : 'NON'}`, 
+                                   isConfigured ? 'success' : 'warning');
+                            
+                            if (file === 'arbre.enc' && isConfigured) {
+                                arbreInConfig = true;
+                            }
+                        }
+                    } else {
+                        debugLog("Configuration de ressources non accessible", 'warning');
+                    }
+                } catch (e) {
+                    debugLog("Erreur lors de l'accès à la configuration: " + e.message, 'error');
+                }
+                
+                if (!arbreInConfig) {
+                    debugLog("arbre.enc pourrait ne pas être configuré pour la mise en cache!", 'error');
+                }
+                
                 throw new Error(`${filename} non trouvé dans aucun cache!`);
             }
             
@@ -1254,7 +1846,36 @@ async function loadEncryptedContent(password, filename) {
     } else {
         // Mode en ligne
         debugLog(`Chargement via réseau...`, 'info');
-        response = await fetch(filename);
+        
+        try {
+            response = await fetch(filename);
+            debugLog(`Réponse réseau: ${response.status} ${response.statusText}`, 
+                   response.ok ? 'success' : 'error');
+            
+            // Vérifier si on met en cache ce fichier
+            if (response.ok) {
+                try {
+                    if ('caches' in window) {
+                        const cache = await caches.open(CACHE_NAME);
+                        await cache.put(filename, response.clone());
+                        debugLog(`Fichier mis en cache pour usage futur`, 'success');
+                        
+                        // Vérifier que le cache contient désormais le fichier
+                        const inCache = await cache.match(filename);
+                        if (inCache) {
+                            debugLog("Vérification ok: fichier trouvé dans le cache après ajout", 'success');
+                        } else {
+                            debugLog("⚠️ Vérification échouée: fichier non trouvé dans le cache après ajout!", 'warning');
+                        }
+                    }
+                } catch (cacheError) {
+                    debugLog(`Erreur lors de la mise en cache: ${cacheError.message}`, 'error');
+                }
+            }
+        } catch (fetchError) {
+            debugLog(`Erreur réseau: ${fetchError.message}`, 'error');
+            throw fetchError;
+        }
     }
     
     if (!response || !response.ok) {
@@ -1287,7 +1908,7 @@ async function loadEncryptedContent(password, filename) {
             debugLog("Décompression...", 'info');
             const result = pako.inflate(decrypted.slice(8), {to: 'string'});
             
-            debugLog(`Chargement réussi: ${result.length} caractères`, 'info');
+            debugLog(`Chargement réussi: ${result.length} caractères`, 'success');
             return result;
         } catch (processError) {
             debugLog(`Erreur traitement: ${processError.message}`, 'error');
@@ -1304,10 +1925,28 @@ async function loadEncryptedContent(password, filename) {
     }
 }
 
-
-
-
-
+// Vérification au chargement pour déboguer rapidement
+document.addEventListener('DOMContentLoaded', () => {
+    // Créer le panneau même si loadEncryptedContent n'est pas appelé
+    createDebugPanel();
+    
+    // Afficher des informations de base
+    debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
+    debugLog(`User Agent: ${navigator.userAgent}`, 'info');
+    debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
+    debugLog(`URL: ${window.location.href}`, 'info');
+    
+    // Vérifier l'état de chargement des bibliothèques
+    document.addEventListener('libraries-loaded', () => {
+        debugLog("Événement 'libraries-loaded' déclenché", 'success');
+        checkLibraries();
+    });
+    
+    // Vérifier le cache après un court délai
+    setTimeout(() => {
+        checkCache();
+    }, 1000);
+});
 
 
 
