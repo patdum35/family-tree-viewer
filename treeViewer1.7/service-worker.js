@@ -13,6 +13,7 @@ const RESOURCES_TO_CACHE = [
 
   // Ajoutez ici vos fichiers JS principaux
     './js/appInitializer.js',
+    './js/debugLogUtils.js',
     './js/audioPlayer.js',
     './js/backgroundManager.js',
     './js/dateUI.js',
