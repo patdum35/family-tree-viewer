@@ -1,11 +1,15 @@
-// Nom du cache pour l'application
-const CACHE_NAME = 'treeViewer-app-v2';
+// // Nom du cache pour l'application
+// const CACHE_NAME = 'treeViewer-app-v2';
+
+// Importer la configuration de cache
+importScripts('./cacheConfig.js');
 
 // Liste des ressources à mettre en cache immédiatement
 const RESOURCES_TO_CACHE = [
   './',
   './treeViewer1.6.html',
   './css/styles.css',
+  './cacheConfig.js', 
 
   // Ajoutez ici vos fichiers JS principaux
     './js/appInitializer.js',
@@ -84,6 +88,7 @@ const RESOURCES_TO_CACHE = [
   './background_images/kamber.jpg',
   './background_images/pharabert.jpg',
   './background_images/dominique.jpg',
+  './background_images/riad.jpg',
 
   //Sounds
   './sounds/lalatte_remix.mp3'
