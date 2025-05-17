@@ -569,7 +569,7 @@ async function loadEncryptedContent(password, filename) {
             console.log(`${filename} trouvé dans le cache!`);
         } else {
             console.error(`${filename} non trouvé dans le cache en mode hors ligne!`);
-            throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache)`);
+            throw new Error(`Impossible de charger ${filename} en mode hors ligne (fichier non trouvé dans le cache ${CACHE_NAME} )`);
         }
     } else {
         // Sinon, faire une requête réseau normale
