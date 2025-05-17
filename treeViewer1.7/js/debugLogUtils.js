@@ -592,23 +592,166 @@ function checkLibraries() {
     debugLog("=== FIN VÉRIFICATION DES BIBLIOTHÈQUES ===", 'info');
 }
 
+// /**
+//  * Vérification du cache
+//  */
+// async function checkCache() {
+//     debugLog("=== VÉRIFICATION DU CACHE ===", 'info');
+//     debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`);
+    
+//     // Vérifier si l'API Cache est disponible
+//     if (!('caches' in window)) {
+//         debugLog("API Cache non disponible dans ce navigateur!", 'error');
+//         return;
+//     }
+    
+//     try {
+//         // Obtenir la liste des caches disponibles
+//         const cacheNames = await caches.keys();
+//         debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
+        
+//         let totalItems = 0;
+//         let treeViewerItems = 0;
+//         let foundArbreEnc = false;
+        
+//         // Explorer chaque cache
+//         for (const cacheName of cacheNames) {
+//             const cache = await caches.open(cacheName);
+//             const requests = await cache.keys();
+            
+//             totalItems += requests.length;
+            
+//             // Vérifier s'il s'agit de notre cache principal
+//             if (cacheName === CACHE_NAME) {
+//                 treeViewerItems = requests.length;
+//                 debugLog(`Cache principal (${CACHE_NAME}): ${requests.length} fichiers`, 'info');
+                
+//                 // Vérifier la présence de fichiers importants
+//                 const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js'];
+                
+//                 for (const file of criticalFiles) {
+//                     const found = requests.some(req => req.url.includes(file));
+//                     const status = found ? 'Présent' : 'ABSENT';
+//                     const type = found ? 'success' : 'error';
+                    
+//                     debugLog(`- ${file}: ${status}`, type);
+                    
+//                     if (file === 'arbre.enc' && found) {
+//                         foundArbreEnc = true;
+//                     }
+//                 }
+                
+//                 // Afficher les 5 premiers éléments
+//                 if (requests.length > 0) {
+//                     debugLog("Exemples de fichiers dans le cache:", 'info');
+//                     const samplesToShow = Math.min(5, requests.length);
+                    
+//                     for (let i = 0; i < samplesToShow; i++) {
+//                         const url = requests[i].url;
+//                         const fileName = url.split('/').pop();
+//                         debugLog(`- ${fileName} (${url})`, 'info');
+//                     }
+                    
+//                     if (requests.length > samplesToShow) {
+//                         debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
+//                     }
+//                 } else {
+//                     debugLog("Le cache principal est vide!", 'warning');
+//                 }
+//             } else {
+//                 // Cache auxiliaire
+//                 debugLog(`Cache "${cacheName}": ${requests.length} fichiers`, 'info');
+                
+//                 // Vérifier si arbre.enc pourrait être dans ce cache
+//                 const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
+//                 if (arbreEncInCache) {
+//                     debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${CACHE_NAME}"!`, 'warning');
+//                     foundArbreEnc = true;
+//                 }
+//             }
+//         }
+        
+//         // Résumé
+//         if (totalItems > 0) {
+//             debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
+//             debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
+//         }
+        
+//         if (foundArbreEnc) {
+//             debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
+//         } else {
+//             debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
+//         }
+        
+//     } catch (error) {
+//         debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
+//     }
+    
+//     // Vérifier si le service worker est actif
+//     if ('serviceWorker' in navigator) {
+//         try {
+//             const registration = await navigator.serviceWorker.getRegistration();
+//             if (registration && registration.active) {
+//                 debugLog(`Service Worker actif: Oui (scope: ${registration.scope})`, 'success');
+//             } else {
+//                 debugLog("Service Worker actif: Non", 'warning');
+//             }
+//         } catch (error) {
+//             debugLog(`Erreur Service Worker: ${error.message}`, 'error');
+//         }
+//     } else {
+//         debugLog("API Service Worker non supportée", 'error');
+//     }
+    
+//     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
+// }
+
+
+
+
+
+
+
 /**
- * Vérification du cache
+ * Modification de la fonction checkCache() pour ajouter plus de traces de débogage
+ * Remplacez simplement votre fonction checkCache() actuelle par celle-ci
  */
 async function checkCache() {
-    debugLog("=== VÉRIFICATION DU CACHE ===", 'info');
-    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`);
+    debugLog("=== VÉRIFICATION DÉTAILLÉE DU CACHE ===", 'info');
+    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`, 'info');
+    debugLog(`Nom du cache principal: ${CACHE_NAME}`, 'info');
     
     // Vérifier si l'API Cache est disponible
     if (!('caches' in window)) {
-        debugLog("API Cache non disponible dans ce navigateur!", 'error');
+        debugLog("API Cache non supportée dans ce navigateur!", 'error');
         return;
     }
     
     try {
-        // Obtenir la liste des caches disponibles
+        // Récupérer la liste des caches
+        debugLog("Récupération de la liste des caches...", 'info');
         const cacheNames = await caches.keys();
         debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
+        
+        // Si aucun cache trouvé
+        if (cacheNames.length === 0) {
+            debugLog("❌ Aucun cache n'existe - Le Service Worker n'a pas fonctionné!", 'error');
+            debugLog("Vérification de l'état du Service Worker...", 'info');
+            checkServiceWorker();
+            return;
+        }
+        
+        // Vérifier si notre cache principal existe
+        if (!cacheNames.includes(CACHE_NAME)) {
+            debugLog(`❌ Cache principal "${CACHE_NAME}" non trouvé!`, 'error');
+            debugLog("Cache existants :", 'info');
+            for (const name of cacheNames) {
+                debugLog(`- ${name}`, 'info');
+            }
+            debugLog("Vérification de l'état du Service Worker...", 'info');
+            checkServiceWorker();
+            return;
+        }
         
         let totalItems = 0;
         let treeViewerItems = 0;
@@ -617,20 +760,58 @@ async function checkCache() {
         // Explorer chaque cache
         for (const cacheName of cacheNames) {
             const cache = await caches.open(cacheName);
-            const requests = await cache.keys();
             
+            // Récupérer toutes les entrées du cache
+            debugLog(`Analyse du contenu du cache "${cacheName}"...`, 'info');
+            const requests = await cache.keys();
             totalItems += requests.length;
             
-            // Vérifier s'il s'agit de notre cache principal
+            // Afficher le nombre d'entrées
+            if (requests.length === 0) {
+                debugLog(`Cache "${cacheName}" est VIDE!`, cacheName === CACHE_NAME ? 'error' : 'warning');
+            } else {
+                debugLog(`Cache "${cacheName}" contient ${requests.length} fichiers`, 'info');
+            }
+            
+            // Si c'est notre cache principal
             if (cacheName === CACHE_NAME) {
                 treeViewerItems = requests.length;
-                debugLog(`Cache principal (${CACHE_NAME}): ${requests.length} fichiers`, 'info');
+                
+                // Si le cache principal est vide, c'est un problème
+                if (requests.length === 0) {
+                    debugLog("❌ Le cache principal est VIDE - Le Service Worker n'a pas mis en cache les ressources!", 'error');
+                    debugLog("Vérification de l'état du Service Worker...", 'info');
+                    checkServiceWorker();
+                    continue;
+                }
                 
                 // Vérifier la présence de fichiers importants
-                const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js'];
+                const criticalFiles = [
+                    'arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js', 
+                    'thomas.jpg', 'fort_lalatte.jpg'
+                ];
                 
+                debugLog("Vérification des fichiers critiques dans le cache principal:", 'info');
                 for (const file of criticalFiles) {
-                    const found = requests.some(req => req.url.includes(file));
+                    // Essayer de trouver le fichier avec différentes variantes de chemin
+                    const variants = [
+                        file,
+                        `./${file}`,
+                        `/${file}`
+                    ];
+                    
+                    let found = false;
+                    for (const variant of variants) {
+                        // Rechercher par nom de fichier (dernière partie du chemin)
+                        found = requests.some(req => {
+                            const url = new URL(req.url);
+                            const path = url.pathname;
+                            return path.endsWith(file) || path.includes(`/${file}`);
+                        });
+                        
+                        if (found) break;
+                    }
+                    
                     const status = found ? 'Présent' : 'ABSENT';
                     const type = found ? 'success' : 'error';
                     
@@ -641,32 +822,99 @@ async function checkCache() {
                     }
                 }
                 
-                // Afficher les 5 premiers éléments
+                // Afficher les entrées du cache (limité aux 10 premières)
                 if (requests.length > 0) {
-                    debugLog("Exemples de fichiers dans le cache:", 'info');
-                    const samplesToShow = Math.min(5, requests.length);
+                    debugLog("Exemples de fichiers dans le cache principal:", 'info');
+                    const samplesToShow = Math.min(10, requests.length);
                     
                     for (let i = 0; i < samplesToShow; i++) {
+                        // Récupérer l'URL complète
                         const url = requests[i].url;
-                        const fileName = url.split('/').pop();
+                        // Extraire le nom du fichier (dernière partie du chemin)
+                        const urlObj = new URL(url);
+                        const path = urlObj.pathname;
+                        const fileName = path.split('/').pop();
+                        
+                        // Afficher avec format: nom_fichier (chemin_complet)
                         debugLog(`- ${fileName} (${url})`, 'info');
+                        
+                        // Vérifier si c'est arbre.enc (recherche partielle)
+                        if (path.includes('arbre.enc')) {
+                            debugLog(`  ↳ DÉTECTÉ: arbre.enc avec chemin: ${path}`, 'success');
+                        }
                     }
                     
                     if (requests.length > samplesToShow) {
                         debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
                     }
+                }
+                
+                // Tester l'accès à arbre.enc
+                debugLog("Test d'accès direct à arbre.enc dans le cache principal...", 'info');
+                let arbreResponse = null;
+                
+                // Essayer différentes variantes de chemin
+                const arbreVariants = [
+                    'arbre.enc',
+                    './arbre.enc',
+                    '/arbre.enc',
+                    `${window.location.origin}/arbre.enc`
+                ];
+                
+                for (const variant of arbreVariants) {
+                    debugLog(`- Tentative avec chemin: "${variant}"`, 'info');
+                    arbreResponse = await cache.match(variant);
+                    if (arbreResponse) {
+                        debugLog(`✅ arbre.enc trouvé avec chemin: "${variant}"`, 'success');
+                        break;
+                    }
+                }
+                
+                if (!arbreResponse) {
+                    debugLog("❌ Tous les chemins ont échoué, recherche par correspondance partielle...", 'warning');
+                    
+                    // Recherche par correspondance partielle d'URL
+                    for (const request of requests) {
+                        if (request.url.includes('arbre.enc')) {
+                            debugLog(`- Essai avec URL correspondante: ${request.url}`, 'info');
+                            arbreResponse = await cache.match(request);
+                            if (arbreResponse) {
+                                debugLog(`✅ arbre.enc trouvé avec URL: ${request.url}`, 'success');
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (arbreResponse) {
+                    try {
+                        // Vérifier le contenu réel
+                        const contentClone = arbreResponse.clone();
+                        const contentText = await contentClone.text();
+                        debugLog(`Contenu de arbre.enc récupéré: ${contentText.length} caractères`, 'success');
+                        debugLog(`Début du contenu: ${contentText.substring(0, 50)}...`, 'info');
+                    } catch (contentError) {
+                        debugLog(`❌ Erreur lors de la lecture du contenu: ${contentError.message}`, 'error');
+                    }
                 } else {
-                    debugLog("Le cache principal est vide!", 'warning');
+                    debugLog("❌ Impossible d'accéder à arbre.enc dans le cache", 'error');
                 }
             } else {
                 // Cache auxiliaire
-                debugLog(`Cache "${cacheName}": ${requests.length} fichiers`, 'info');
+                debugLog(`Vérification de arbre.enc dans cache "${cacheName}"...`, 'info');
                 
                 // Vérifier si arbre.enc pourrait être dans ce cache
                 const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
                 if (arbreEncInCache) {
                     debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${CACHE_NAME}"!`, 'warning');
                     foundArbreEnc = true;
+                    
+                    // Afficher les chemins détectés
+                    for (const req of requests) {
+                        if (req.url.includes('arbre.enc')) {
+                            debugLog(`  ↳ Chemin dans cache ${cacheName}: ${req.url}`, 'info');
+                        }
+                    }
                 }
             }
         }
@@ -674,7 +922,10 @@ async function checkCache() {
         // Résumé
         if (totalItems > 0) {
             debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
-            debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
+            if (treeViewerItems > 0) {
+                const percent = Math.round((treeViewerItems / totalItems) * 100);
+                debugLog(`Cache principal: ${treeViewerItems} fichiers (${percent}% du total)`, 'info');
+            }
         }
         
         if (foundArbreEnc) {
@@ -683,27 +934,102 @@ async function checkCache() {
             debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
         }
         
+        // Test d'écriture dans le cache
+        debugLog("=== TEST D'ÉCRITURE DANS LE CACHE ===", 'info');
+        await testCacheWriting();
+        
     } catch (error) {
         debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
+        debugLog(`Stack trace: ${error.stack}`, 'error');
     }
     
-    // Vérifier si le service worker est actif
-    if ('serviceWorker' in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.getRegistration();
-            if (registration && registration.active) {
-                debugLog(`Service Worker actif: Oui (scope: ${registration.scope})`, 'success');
-            } else {
-                debugLog("Service Worker actif: Non", 'warning');
-            }
-        } catch (error) {
-            debugLog(`Erreur Service Worker: ${error.message}`, 'error');
-        }
-    } else {
-        debugLog("API Service Worker non supportée", 'error');
-    }
+    // Vérifier le Service Worker à la fin
+    await checkServiceWorker();
     
     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
+}
+
+/**
+ * Vérifier l'état du Service Worker
+ */
+async function checkServiceWorker() {
+    debugLog("=== VÉRIFICATION DU SERVICE WORKER ===", 'info');
+    
+    if (!('serviceWorker' in navigator)) {
+        debugLog("❌ API Service Worker non supportée par ce navigateur", 'error');
+        return;
+    }
+    
+    try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        
+        if (!registration) {
+            debugLog("❌ Aucun Service Worker n'est enregistré", 'error');
+            return;
+        }
+        
+        // Afficher l'état du service worker
+        debugLog(`Service Worker enregistré avec scope: ${registration.scope}`, 'success');
+        
+        // Vérifier l'état du service worker
+        if (registration.installing) {
+            debugLog("État: En cours d'installation", 'warning');
+        } else if (registration.waiting) {
+            debugLog("État: En attente d'activation", 'warning');
+        } else if (registration.active) {
+            debugLog("État: Actif", 'success');
+            
+            // Vérifier depuis combien de temps il est actif
+            if (registration.active.state) {
+                debugLog(`État interne: ${registration.active.state}`, 'info');
+            }
+        } else {
+            debugLog("État: Inconnu", 'warning');
+        }
+        
+        // Vérifier les événements de mise à jour
+        registration.addEventListener('updatefound', () => {
+            debugLog("Mise à jour du Service Worker détectée", 'info');
+        });
+        
+    } catch (error) {
+        debugLog(`Erreur Service Worker: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Tester l'écriture dans le cache
+ */
+async function testCacheWriting() {
+    try {
+        const testCacheName = 'test-cache-' + Date.now();
+        debugLog(`Création d'un cache de test: ${testCacheName}`, 'info');
+        
+        const cache = await caches.open(testCacheName);
+        const testUrl = '/test-item-' + Date.now();
+        const testResponse = new Response('Test content');
+        
+        debugLog(`Tentative d'écriture dans le cache...`, 'info');
+        await cache.put(testUrl, testResponse);
+        
+        // Vérifier si l'écriture a fonctionné
+        const cachedResponse = await cache.match(testUrl);
+        
+        if (cachedResponse) {
+            const content = await cachedResponse.text();
+            debugLog(`✅ Écriture réussie dans le cache! Contenu: "${content}"`, 'success');
+        } else {
+            debugLog("❌ Échec de l'écriture dans le cache", 'error');
+        }
+        
+        // Supprimer le cache de test
+        debugLog(`Suppression du cache de test...`, 'info');
+        const deleted = await caches.delete(testCacheName);
+        debugLog(`Cache de test ${deleted ? 'supprimé' : 'non supprimé'}`, deleted ? 'success' : 'warning');
+        
+    } catch (error) {
+        debugLog(`❌ Erreur lors du test d'écriture: ${error.message}`, 'error');
+    }
 }
 
 /**
@@ -718,6 +1044,8 @@ function getScreenInfo() {
         Orientation: ${screen.orientation ? screen.orientation.type : 'Non disponible'}
     `.trim();
 }
+
+
 
 
 
