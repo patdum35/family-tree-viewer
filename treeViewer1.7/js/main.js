@@ -13,6 +13,8 @@ import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
+import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
+
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -162,6 +164,7 @@ window.toggleAnimationPause = toggleAnimationPause;
 document.addEventListener('DOMContentLoaded', async () => {
     // Lancer le préchargement des tuiles en tâche de fond
     initTilePreloading();
+    initResourcePreloading();
 });
 
 
@@ -742,13 +745,13 @@ async function loadGedcomContent(fileInput, passwordInput) {
 
 
 
-/**
- * Charge le contenu crypté avec logs améliorés
- * @private
- */
-async function loadEncryptedContent(password, filename) {
-    // Créer le panneau de débogage
-    // createDebugPanel();
+// /**
+//  * Charge le contenu crypté avec logs améliorés
+//  * @private
+//  */
+// async function loadEncryptedContent(password, filename) {
+//     // Créer le panneau de débogage
+//     // createDebugPanel();
     
 
 
@@ -760,6 +763,297 @@ async function loadEncryptedContent(password, filename) {
 
 
 
+//     debugLog(`Tentative de chargement: ${filename}`, 'info');
+//     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
+    
+//     // Vérifier les bibliothèques essentielles avant de continuer
+//     try {
+//         if (typeof pako === 'undefined' || typeof pako.inflate !== 'function') {
+//             debugLog("❌ Bibliothèque 'pako' non chargée!", 'error');
+//         } else {
+//             debugLog("✓ Bibliothèque 'pako' disponible", 'success');
+//         }
+//     } catch (e) {
+//         debugLog("❌ Erreur lors de la vérification de pako: " + e.message, 'error');
+//     }
+    
+//     let response;
+//     if (!state.isOnLine && 'caches' in window) {
+//         debugLog(`Mode hors ligne, recherche dans cache: ${CACHE_NAME}`, 'info');
+        
+//         try {
+//             // Lister tous les caches disponibles
+//             const allCacheNames = await caches.keys();
+//             debugLog(`Caches disponibles (${allCacheNames.length}): ${allCacheNames.join(", ")}`, 'info');
+            
+//             // Vérifier si notre cache existe
+//             if (!allCacheNames.includes(CACHE_NAME)) {
+//                 debugLog(`Cache "${CACHE_NAME}" n'existe pas!`, 'error');
+                
+//                 // Chercher dans tous les caches
+//                 debugLog("Recherche dans tous les caches disponibles...", 'info');
+//                 let fileFound = false;
+                
+//                 for (const cacheName of allCacheNames) {
+//                     const otherCache = await caches.open(cacheName);
+//                     const cacheRequests = await otherCache.keys();
+                    
+//                     debugLog(`Cache "${cacheName}": ${cacheRequests.length} fichiers`, 'info');
+                    
+//                     // Chercher arbre.enc dans ce cache
+//                     for (const req of cacheRequests) {
+//                         if (req.url.includes(filename)) {
+//                             debugLog(`Possible match: ${req.url.split('/').pop()}`, 'info');
+//                             response = await otherCache.match(req);
+//                             if (response) {
+//                                 debugLog(`Fichier trouvé dans cache "${cacheName}"!`, 'success');
+//                                 fileFound = true;
+//                                 break;
+//                             }
+//                         }
+//                     }
+                    
+//                     if (fileFound) break;
+//                 }
+                
+//                 if (!fileFound) {
+//                     debugLog(`Fichier non trouvé dans aucun cache!`, 'error');
+                    
+//                     // Vérifier si les bibliothèques sont chargées
+//                     checkLibraries();
+                    
+//                     throw new Error(`Fichier non trouvé dans les caches`);
+//                 }
+//             } else {
+//                 // Ouvrir notre cache
+//                 const cache = await caches.open(CACHE_NAME);
+                
+//                 // Lister le contenu du cache
+//                 const requests = await cache.keys();
+//                 debugLog(`Cache ${CACHE_NAME}: ${requests.length} fichiers`, 'info');
+                
+//                 if (requests.length === 0) {
+//                     debugLog("⚠️ Le cache est VIDE!", 'warning');
+                    
+//                     // Vérifier si le service worker a été correctement installé
+//                     if ('serviceWorker' in navigator) {
+//                         const registration = await navigator.serviceWorker.getRegistration();
+//                         if (registration && registration.active) {
+//                             debugLog("Service Worker est actif mais le cache est vide", 'warning');
+//                             debugLog("Possible problème lors de l'installation du service worker", 'warning');
+//                         } else {
+//                             debugLog("Service Worker n'est pas actif!", 'error');
+//                         }
+//                     }
+                    
+//                     // Vérifier les bibliothèques
+//                     checkLibraries();
+//                 }
+                
+//                 // Afficher quelques fichiers pour voir ce qu'il contient
+//                 if (requests.length > 0) {
+//                     debugLog("Exemples de fichiers dans le cache:", 'info');
+//                     for (let i = 0; i < Math.min(5, requests.length); i++) {
+//                         const url = requests[i].url;
+//                         const fileName = url.split('/').pop();
+//                         debugLog(`- ${fileName}`, 'info');
+//                     }
+//                 }
+                
+//                 // Essayer de trouver arbre.enc avec le chemin exact
+//                 debugLog(`Recherche avec chemin exact: "${filename}"`, 'info');
+//                 response = await cache.match(filename);
+                
+//                 if (!response) {
+//                     debugLog(`Non trouvé avec chemin exact`, 'warning');
+                    
+//                     // Essayer des variations de chemin
+//                     const variations = [
+//                         filename.replace('./', '/'),
+//                         filename.replace('./', ''),
+//                         '/' + filename.replace('./', '')
+//                     ];
+                    
+//                     debugLog(`Essai avec ${variations.length} variations de chemin:`, 'info');
+//                     for (const path of variations) {
+//                         debugLog(`- "${path}"`, 'info');
+//                         response = await cache.match(path);
+//                         if (response) {
+//                             debugLog(`Trouvé avec: "${path}"!`, 'success');
+//                             break;
+//                         }
+//                     }
+                    
+//                     // Si toujours pas trouvé, chercher par nom de fichier
+//                     if (!response) {
+//                         const fileNameToFind = filename.split('/').pop();
+//                         debugLog(`Recherche par nom de fichier: "${fileNameToFind}"`, 'info');
+                        
+//                         for (const req of requests) {
+//                             const reqFileName = req.url.split('/').pop();
+                            
+//                             if (reqFileName === fileNameToFind) {
+//                                 debugLog(`Match possible: ${req.url}`, 'info');
+//                                 response = await cache.match(req);
+//                                 if (response) {
+//                                     debugLog(`Trouvé par nom: ${reqFileName}!`, 'success');
+//                                     break;
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 } else {
+//                     debugLog(`Fichier trouvé directement!`, 'success');
+//                 }
+//             }
+            
+//             if (!response) {
+//                 debugLog(`${filename} non trouvé dans aucun cache!`, 'error');
+                
+//                 // Vérifier si ressources sont dans le tableau RESOURCES_TO_CACHE
+//                 debugLog("Vérification des fichiers critiques dans la configuration:", 'info');
+                
+//                 let arbreInConfig = false;
+                
+//                 try {
+//                     // Accéder à la configuration du service worker (si possible)
+//                     if (typeof RESOURCES_TO_CACHE !== 'undefined') {
+//                         const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js'];
+                        
+//                         for (const file of criticalFiles) {
+//                             const isConfigured = RESOURCES_TO_CACHE.some(resource => 
+//                                 resource.includes(file)
+//                             );
+                            
+//                             debugLog(`- ${file} dans RESOURCES_TO_CACHE: ${isConfigured ? 'OUI' : 'NON'}`, 
+//                                    isConfigured ? 'success' : 'warning');
+                            
+//                             if (file === 'arbre.enc' && isConfigured) {
+//                                 arbreInConfig = true;
+//                             }
+//                         }
+//                     } else {
+//                         debugLog("Configuration de ressources non accessible", 'warning');
+//                     }
+//                 } catch (e) {
+//                     debugLog("Erreur lors de l'accès à la configuration: " + e.message, 'error');
+//                 }
+                
+//                 if (!arbreInConfig) {
+//                     debugLog("arbre.enc pourrait ne pas être configuré pour la mise en cache!", 'error');
+//                 }
+                
+//                 throw new Error(`${filename} non trouvé dans aucun cache!`);
+//             }
+            
+//             // Vérifier le contenu de la réponse
+//             try {
+//                 const clone = response.clone();
+//                 const text = await clone.text();
+//                 debugLog(`Contenu récupéré: ${text.length} caractères`, 'info');
+                
+//                 // Vérifier si ça ressemble à du base64
+//                 const sampleStart = text.substring(0, 20);
+//                 const isLikelyBase64 = /^[A-Za-z0-9+/=]+$/.test(sampleStart);
+//                 debugLog(`Format base64: ${isLikelyBase64 ? 'OUI' : 'NON'}`, isLikelyBase64 ? 'info' : 'warning');
+//             } catch (textError) {
+//                 debugLog(`Erreur lecture contenu: ${textError.message}`, 'error');
+//             }
+            
+//         } catch (error) {
+//             debugLog(`Erreur cache: ${error.message}`, 'error');
+//             throw error;
+//         }
+//     } else {
+//         // Mode en ligne
+//         debugLog(`Chargement via réseau...`, 'info');
+        
+//         try {
+//             response = await fetch(filename);
+//             debugLog(`Réponse réseau: ${response.status} ${response.statusText}`, 
+//                    response.ok ? 'success' : 'error');
+            
+//             // Vérifier si on met en cache ce fichier
+//             if (response.ok) {
+//                 try {
+//                     if ('caches' in window) {
+//                         const cache = await caches.open(CACHE_NAME);
+//                         await cache.put(filename, response.clone());
+//                         debugLog(`Fichier mis en cache pour usage futur`, 'success');
+                        
+//                         // Vérifier que le cache contient désormais le fichier
+//                         const inCache = await cache.match(filename);
+//                         if (inCache) {
+//                             debugLog("Vérification ok: fichier trouvé dans le cache après ajout", 'success');
+//                         } else {
+//                             debugLog("⚠️ Vérification échouée: fichier non trouvé dans le cache après ajout!", 'warning');
+//                         }
+//                     }
+//                 } catch (cacheError) {
+//                     debugLog(`Erreur lors de la mise en cache: ${cacheError.message}`, 'error');
+//                 }
+//             }
+//         } catch (fetchError) {
+//             debugLog(`Erreur réseau: ${fetchError.message}`, 'error');
+//             throw fetchError;
+//         }
+//     }
+    
+//     if (!response || !response.ok) {
+//         debugLog(`Erreur HTTP: ${response ? response.status : 'Aucune réponse'}`, 'error');
+//         throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response ? response.statusText : 'Aucune réponse'}`);
+//     }
+    
+//     try {
+//         const encryptedData = await response.text();
+//         debugLog(`Données reçues: ${encryptedData.length} caractères`, 'info');
+        
+//         try {
+//             debugLog("Décodage base64...", 'info');
+//             const decoded = atob(encryptedData);
+//             debugLog(`Décodé: ${decoded.length} bytes`, 'info');
+            
+//             debugLog("Déchiffrement...", 'info');
+//             const key = password.repeat(decoded.length);
+//             const decrypted = new Uint8Array(decoded.length);
+            
+//             for(let i = 0; i < decoded.length; i++) {
+//                 decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+//             }
+//             debugLog("Déchiffrement terminé", 'info');
+            
+//             debugLog("Validation mot de passe...", 'info');
+//             await validatePassword(password, decrypted);
+//             debugLog("Mot de passe valide", 'info');
+            
+//             debugLog("Décompression...", 'info');
+//             const result = pako.inflate(decrypted.slice(8), {to: 'string'});
+            
+//             debugLog(`Chargement réussi: ${result.length} caractères`, 'success');
+//             return result;
+//         } catch (processError) {
+//             debugLog(`Erreur traitement: ${processError.message}`, 'error');
+            
+//             if (processError.message && processError.message.includes('mot de passe')) {
+//                 throw new Error('Mot de passe incorrect');
+//             } else {
+//                 throw processError;
+//             }
+//         }
+//     } catch (error) {
+//         debugLog(`Erreur finale: ${error.message}`, 'error');
+//         throw error;
+//     }
+// }
+
+
+
+/**
+ * Charge le contenu crypté avec logs améliorés
+ * @private
+ */
+
+async function loadEncryptedContent(password, filename) {
     debugLog(`Tentative de chargement: ${filename}`, 'info');
     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
     
@@ -775,225 +1069,15 @@ async function loadEncryptedContent(password, filename) {
     }
     
     let response;
-    if (!state.isOnLine && 'caches' in window) {
-        debugLog(`Mode hors ligne, recherche dans cache: ${CACHE_NAME}`, 'info');
-        
-        try {
-            // Lister tous les caches disponibles
-            const allCacheNames = await caches.keys();
-            debugLog(`Caches disponibles (${allCacheNames.length}): ${allCacheNames.join(", ")}`, 'info');
-            
-            // Vérifier si notre cache existe
-            if (!allCacheNames.includes(CACHE_NAME)) {
-                debugLog(`Cache "${CACHE_NAME}" n'existe pas!`, 'error');
-                
-                // Chercher dans tous les caches
-                debugLog("Recherche dans tous les caches disponibles...", 'info');
-                let fileFound = false;
-                
-                for (const cacheName of allCacheNames) {
-                    const otherCache = await caches.open(cacheName);
-                    const cacheRequests = await otherCache.keys();
-                    
-                    debugLog(`Cache "${cacheName}": ${cacheRequests.length} fichiers`, 'info');
-                    
-                    // Chercher arbre.enc dans ce cache
-                    for (const req of cacheRequests) {
-                        if (req.url.includes(filename)) {
-                            debugLog(`Possible match: ${req.url.split('/').pop()}`, 'info');
-                            response = await otherCache.match(req);
-                            if (response) {
-                                debugLog(`Fichier trouvé dans cache "${cacheName}"!`, 'success');
-                                fileFound = true;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (fileFound) break;
-                }
-                
-                if (!fileFound) {
-                    debugLog(`Fichier non trouvé dans aucun cache!`, 'error');
-                    
-                    // Vérifier si les bibliothèques sont chargées
-                    checkLibraries();
-                    
-                    throw new Error(`Fichier non trouvé dans les caches`);
-                }
-            } else {
-                // Ouvrir notre cache
-                const cache = await caches.open(CACHE_NAME);
-                
-                // Lister le contenu du cache
-                const requests = await cache.keys();
-                debugLog(`Cache ${CACHE_NAME}: ${requests.length} fichiers`, 'info');
-                
-                if (requests.length === 0) {
-                    debugLog("⚠️ Le cache est VIDE!", 'warning');
-                    
-                    // Vérifier si le service worker a été correctement installé
-                    if ('serviceWorker' in navigator) {
-                        const registration = await navigator.serviceWorker.getRegistration();
-                        if (registration && registration.active) {
-                            debugLog("Service Worker est actif mais le cache est vide", 'warning');
-                            debugLog("Possible problème lors de l'installation du service worker", 'warning');
-                        } else {
-                            debugLog("Service Worker n'est pas actif!", 'error');
-                        }
-                    }
-                    
-                    // Vérifier les bibliothèques
-                    checkLibraries();
-                }
-                
-                // Afficher quelques fichiers pour voir ce qu'il contient
-                if (requests.length > 0) {
-                    debugLog("Exemples de fichiers dans le cache:", 'info');
-                    for (let i = 0; i < Math.min(5, requests.length); i++) {
-                        const url = requests[i].url;
-                        const fileName = url.split('/').pop();
-                        debugLog(`- ${fileName}`, 'info');
-                    }
-                }
-                
-                // Essayer de trouver arbre.enc avec le chemin exact
-                debugLog(`Recherche avec chemin exact: "${filename}"`, 'info');
-                response = await cache.match(filename);
-                
-                if (!response) {
-                    debugLog(`Non trouvé avec chemin exact`, 'warning');
-                    
-                    // Essayer des variations de chemin
-                    const variations = [
-                        filename.replace('./', '/'),
-                        filename.replace('./', ''),
-                        '/' + filename.replace('./', '')
-                    ];
-                    
-                    debugLog(`Essai avec ${variations.length} variations de chemin:`, 'info');
-                    for (const path of variations) {
-                        debugLog(`- "${path}"`, 'info');
-                        response = await cache.match(path);
-                        if (response) {
-                            debugLog(`Trouvé avec: "${path}"!`, 'success');
-                            break;
-                        }
-                    }
-                    
-                    // Si toujours pas trouvé, chercher par nom de fichier
-                    if (!response) {
-                        const fileNameToFind = filename.split('/').pop();
-                        debugLog(`Recherche par nom de fichier: "${fileNameToFind}"`, 'info');
-                        
-                        for (const req of requests) {
-                            const reqFileName = req.url.split('/').pop();
-                            
-                            if (reqFileName === fileNameToFind) {
-                                debugLog(`Match possible: ${req.url}`, 'info');
-                                response = await cache.match(req);
-                                if (response) {
-                                    debugLog(`Trouvé par nom: ${reqFileName}!`, 'success');
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    debugLog(`Fichier trouvé directement!`, 'success');
-                }
-            }
-            
-            if (!response) {
-                debugLog(`${filename} non trouvé dans aucun cache!`, 'error');
-                
-                // Vérifier si ressources sont dans le tableau RESOURCES_TO_CACHE
-                debugLog("Vérification des fichiers critiques dans la configuration:", 'info');
-                
-                let arbreInConfig = false;
-                
-                try {
-                    // Accéder à la configuration du service worker (si possible)
-                    if (typeof RESOURCES_TO_CACHE !== 'undefined') {
-                        const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js'];
-                        
-                        for (const file of criticalFiles) {
-                            const isConfigured = RESOURCES_TO_CACHE.some(resource => 
-                                resource.includes(file)
-                            );
-                            
-                            debugLog(`- ${file} dans RESOURCES_TO_CACHE: ${isConfigured ? 'OUI' : 'NON'}`, 
-                                   isConfigured ? 'success' : 'warning');
-                            
-                            if (file === 'arbre.enc' && isConfigured) {
-                                arbreInConfig = true;
-                            }
-                        }
-                    } else {
-                        debugLog("Configuration de ressources non accessible", 'warning');
-                    }
-                } catch (e) {
-                    debugLog("Erreur lors de l'accès à la configuration: " + e.message, 'error');
-                }
-                
-                if (!arbreInConfig) {
-                    debugLog("arbre.enc pourrait ne pas être configuré pour la mise en cache!", 'error');
-                }
-                
-                throw new Error(`${filename} non trouvé dans aucun cache!`);
-            }
-            
-            // Vérifier le contenu de la réponse
-            try {
-                const clone = response.clone();
-                const text = await clone.text();
-                debugLog(`Contenu récupéré: ${text.length} caractères`, 'info');
-                
-                // Vérifier si ça ressemble à du base64
-                const sampleStart = text.substring(0, 20);
-                const isLikelyBase64 = /^[A-Za-z0-9+/=]+$/.test(sampleStart);
-                debugLog(`Format base64: ${isLikelyBase64 ? 'OUI' : 'NON'}`, isLikelyBase64 ? 'info' : 'warning');
-            } catch (textError) {
-                debugLog(`Erreur lecture contenu: ${textError.message}`, 'error');
-            }
-            
-        } catch (error) {
-            debugLog(`Erreur cache: ${error.message}`, 'error');
-            throw error;
-        }
-    } else {
-        // Mode en ligne
-        debugLog(`Chargement via réseau...`, 'info');
-        
-        try {
-            response = await fetch(filename);
-            debugLog(`Réponse réseau: ${response.status} ${response.statusText}`, 
-                   response.ok ? 'success' : 'error');
-            
-            // Vérifier si on met en cache ce fichier
-            if (response.ok) {
-                try {
-                    if ('caches' in window) {
-                        const cache = await caches.open(CACHE_NAME);
-                        await cache.put(filename, response.clone());
-                        debugLog(`Fichier mis en cache pour usage futur`, 'success');
-                        
-                        // Vérifier que le cache contient désormais le fichier
-                        const inCache = await cache.match(filename);
-                        if (inCache) {
-                            debugLog("Vérification ok: fichier trouvé dans le cache après ajout", 'success');
-                        } else {
-                            debugLog("⚠️ Vérification échouée: fichier non trouvé dans le cache après ajout!", 'warning');
-                        }
-                    }
-                } catch (cacheError) {
-                    debugLog(`Erreur lors de la mise en cache: ${cacheError.message}`, 'error');
-                }
-            }
-        } catch (fetchError) {
-            debugLog(`Erreur réseau: ${fetchError.message}`, 'error');
-            throw fetchError;
-        }
+    
+    try {
+        // Utiliser fetchResourceWithCache au lieu de fetch ou cache.match
+        debugLog(`Chargement via fetchResourceWithCache...`, 'info');
+        response = await fetchResourceWithCache(filename);
+        debugLog(`Réponse: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+    } catch (fetchError) {
+        debugLog(`Erreur réseau: ${fetchError.message}`, 'error');
+        throw fetchError;
     }
     
     if (!response || !response.ok) {

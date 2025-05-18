@@ -5,6 +5,8 @@
 
 import { state } from './main.js';
 
+import { verifyResourceCache } from './resourcePreloader.js';
+
 
 
 
@@ -169,7 +171,8 @@ function createDebugPanel() {
     const clearButton = createButton('Effacer logs', '#F44336', true);
     const checkLibsButton = createButton('Vérifier bibliothèques', '#4CAF50', true);
     const checkCacheButton = createButton('Vérifier cache', '#2196F3', true);
-    
+    const checkResourcesButton = createButton('Vérifier ressources', '#FF9800', true);
+
 
 
 
@@ -177,6 +180,7 @@ function createDebugPanel() {
     actionBar.appendChild(clearButton);
     actionBar.appendChild(checkLibsButton);
     actionBar.appendChild(checkCacheButton);
+    actionBar.appendChild(checkResourcesButton);
 
 
     // Ajouter le bouton de vérification du service worker
@@ -249,6 +253,7 @@ function createDebugPanel() {
     addButtonListeners(clearButton, clearLogs);
     addButtonListeners(checkLibsButton, checkLibraries);
     addButtonListeners(checkCacheButton, checkCache);
+    addButtonListeners(checkResourcesButton, verifyResourceCache);
     
     return panel;
 }
