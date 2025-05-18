@@ -283,13 +283,13 @@ export function closeAnimationPhoto() {
  * @param {string} relativePath - Chemin relatif de la ressource
  * @returns {Promise<string>} URL de la ressource (depuis le cache ou générée)
  */
-async function getCachedResourceUrl(relativePath) {
+export async function getCachedResourceUrl(relativePath) {
     // Normaliser le chemin
     const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
     
     // URL complète de la ressource
     const resourceUrl = `${getCurrentDirectory()}${normalizedPath}`;
-    debugLog(`Photo  ${resourceUrl} `, "debug");
+    debugLog(`Photo or sound  ${resourceUrl} `, "debug");
 
     testRealConnectivity();
     
