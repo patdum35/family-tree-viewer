@@ -1,6 +1,8 @@
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
+import { debugLog } from './debugLogUtils.js'
 // import { getResourceUrl }  from './audioPlayer.js';
 import { state } from './main.js';
+import { testRealConnectivity } from './treeAnimation.js'
 
 
 
@@ -229,50 +231,248 @@ export function closeAnimationPhoto() {
 /**
  * Appeler cette fonction à la fin de startAncestorAnimation pour afficher la photo
  */
-export function showEndAnimationPhoto(nodeName) {
-    // Chemin vers l'image que vous souhaitez afficher
-    // const imagePath = '/background_images/thomas.jpg';
-    console.log("\n\n\n   **** DEBUG photo ***", nodeName)
+// export function showEndAnimationPhoto(nodeName) {
+//     // Chemin vers l'image que vous souhaitez afficher
+//     // const imagePath = '/background_images/thomas.jpg';
+//     console.log("\n\n\n   **** DEBUG photo ***", nodeName)
 
-    let imageUrl;
-    let name = nodeName.toLowerCase();
-    if (name.includes('thomas')) { 
-        imageUrl = getResourceUrl('/background_images/thomas.jpg');
-    } else if (name.includes('alain')) {
-        imageUrl = getResourceUrl('/background_images/fort_lalatte.jpg');
-    } else if (name.includes('brigitte')) {
-        imageUrl = getResourceUrl('/background_images/brigitte.jpg');
-    } else if (name.includes('dominique')) {
-        imageUrl = getResourceUrl('/background_images/dominique.jpg');
-    } else if (name.includes('garand')) {
-        imageUrl = getResourceUrl('/background_images/garand.jpg');
-    } else if (name.includes('stephanie')) {
-        imageUrl = getResourceUrl('/background_images/steph.jpg');
-    } else if (name.includes('sattouf')) {
-        imageUrl = getResourceUrl('/background_images/riad.jpg');
-    } else if (name.includes('charlemagne')) {
-        imageUrl = getResourceUrl('/background_images/charlemagne.jpg');
-    } else if (name.includes('hugues')) {
-        imageUrl = getResourceUrl('/background_images/hugues.jpg');
-    } else if (name.includes('kamber')) {
-        imageUrl = getResourceUrl('/background_images/kamber.jpg');
-    } else if (name.includes('pharabert')) {
-        imageUrl = getResourceUrl('/background_images/pharabert.jpg');
-    } 
+//     let imageUrl;
+//     let name = nodeName.toLowerCase();
+//     if (name.includes('thomas')) { 
+//         imageUrl = getResourceUrl('/background_images/thomas.jpg');
+//     } else if (name.includes('alain')) {
+//         imageUrl = getResourceUrl('/background_images/fort_lalatte.jpg');
+//     } else if (name.includes('brigitte')) {
+//         imageUrl = getResourceUrl('/background_images/brigitte.jpg');
+//     } else if (name.includes('dominique')) {
+//         imageUrl = getResourceUrl('/background_images/dominique.jpg');
+//     } else if (name.includes('garand')) {
+//         imageUrl = getResourceUrl('/background_images/garand.jpg');
+//     } else if (name.includes('stephanie')) {
+//         imageUrl = getResourceUrl('/background_images/steph.jpg');
+//     } else if (name.includes('sattouf')) {
+//         imageUrl = getResourceUrl('/background_images/riad.jpg');
+//     } else if (name.includes('charlemagne')) {
+//         imageUrl = getResourceUrl('/background_images/charlemagne.jpg');
+//     } else if (name.includes('hugues')) {
+//         imageUrl = getResourceUrl('/background_images/hugues.jpg');
+//     } else if (name.includes('kamber')) {
+//         imageUrl = getResourceUrl('/background_images/kamber.jpg');
+//     } else if (name.includes('pharabert')) {
+//         imageUrl = getResourceUrl('/background_images/pharabert.jpg');
+//     } 
         
-    // Options de positionnement et dimensions
-    const options = {
-        width: 400,
-        height: 'auto',
-        top: window.innerHeight / 4,
-        left: window.innerWidth / 4
-    };
+//     // Options de positionnement et dimensions
+//     const options = {
+//         width: 400,
+//         height: 'auto',
+//         top: window.innerHeight / 4,
+//         left: window.innerWidth / 4
+//     };
     
-    // Afficher la photo
-    displayEndAnimationPhoto(imageUrl, options);
+//     // Afficher la photo
+//     displayEndAnimationPhoto(imageUrl, options);
+// }
+
+
+
+
+
+/**
+ * Récupère une ressource en tenant compte du mode hors connexion
+ * @param {string} relativePath - Chemin relatif de la ressource
+ * @returns {Promise<string>} URL de la ressource (depuis le cache ou générée)
+ */
+export async function getCachedResourceUrl(relativePath) {
+    // Normaliser le chemin
+    const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+    
+    // URL complète de la ressource
+    const resourceUrl = `${getCurrentDirectory()}${normalizedPath}`;
+    debugLog(`Photo or sound  ${resourceUrl} `, "debug");
+
+    testRealConnectivity();
+    
+    // Si nous sommes en ligne, retourner directement l'URL
+    if (state.isOnLine) {
+        return resourceUrl;
+    }
+    
+    // En mode hors ligne, vérifier si la ressource est dans le cache
+    if ('caches' in window) {
+        try {
+            debugLog(`Mode hors ligne: recherche de ${normalizedPath} dans le cache`);
+            
+            // Récupérer tous les caches disponibles
+            const cacheNames = await caches.keys();
+            
+            // Vérifier chaque cache pour la ressource
+            for (const cacheName of cacheNames) {
+                const cache = await caches.open(cacheName);
+                
+                // Essayer plusieurs variantes de chemin pour la ressource
+                const pathVariants = [
+                    resourceUrl,
+                    normalizedPath,
+                    normalizedPath.substring(1), // sans le slash initial
+                    `${getCurrentDirectory()}${normalizedPath.substring(1)}`
+                ];
+                
+                for (const path of pathVariants) {
+                    const response = await cache.match(path);
+                    if (response) {
+                        debugLog(`Ressource ${normalizedPath} trouvée dans le cache: ${cacheName}`);
+                        
+                        // Créer un blob URL pour l'image depuis la réponse en cache
+                        const blob = await response.blob();
+                        return URL.createObjectURL(blob);
+                    }
+                }
+                
+                // Chercher par nom de fichier dans le cache (approche plus flexible)
+                const fileName = normalizedPath.split('/').pop();
+                const allCacheEntries = await cache.keys();
+                
+                for (const request of allCacheEntries) {
+                    if (request.url.includes(fileName)) {
+                        debugLog(`Ressource ${fileName} trouvée avec URL: ${request.url}`);
+                        const response = await cache.match(request);
+                        if (response) {
+                            const blob = await response.blob();
+                            return URL.createObjectURL(blob);
+                        }
+                    }
+                }
+            }
+            
+            (`Ressource ${normalizedPath} non trouvée dans les caches`, 'warning');
+        } catch (error) {
+            debugLog(`Erreur lors de l'accès au cache pour ${normalizedPath}:`, error);
+        }
+    }
+    
+    // Si l'image n'est pas dans le cache, retourner une image de remplacement ou l'URL normale
+    debugLog(`Utilisation de l'URL normale pour ${normalizedPath} (non trouvée dans le cache)`);
+    return resourceUrl;
 }
 
+/**
+ * Appeler cette fonction à la fin de startAncestorAnimation pour afficher la photo
+ */
+export async function showEndAnimationPhoto(nodeName) {
+    console.log("\n\n\n   **** DEBUG photo ***", nodeName);
 
+    // Mapping des noms avec les chemins d'images
+    const imageMapping = {
+        'thomas': '/background_images/thomas.jpg',
+        'alain': '/background_images/fort_lalatte.jpg',
+        'brigitte': '/background_images/brigitte.jpg',
+        'dominique': '/background_images/dominique.jpg',
+        'garand': '/background_images/garand.jpg',
+        'stephanie': '/background_images/steph.jpg',
+        'sattouf': '/background_images/riad.jpg',
+        'charlemagne': '/background_images/charlemagne.jpg',
+        'hugues': '/background_images/hugues.jpg',
+        'kamber': '/background_images/kamber.jpg',
+        'pharabert': '/background_images/pharabert.jpg'
+    };
+    
+    // Trouver la correspondance dans le mapping
+    let imagePath = null;
+    const name = nodeName.toLowerCase();
+    
+    for (const [key, path] of Object.entries(imageMapping)) {
+        if (name.includes(key)) {
+            imagePath = path;
+            break;
+        }
+    }
+    
+    // Si aucune correspondance trouvée, sortir
+    if (!imagePath) {
+        console.log(`Pas d'image associée pour ${nodeName}`);
+        return;
+    }
+    
+    // Récupérer l'URL (depuis le cache si hors ligne)
+    const imageUrl = await getCachedResourceUrl(imagePath);
+    
+    // // Options de positionnement et dimensions
+    // const options = {
+    //     width: 'auto', //400,
+    //     height: 'auto',
+    //     top: 0, //window.innerHeight / 4,
+    //     left: 0 //window.innerWidth / 4
+    // };
+    
+    // // Afficher la photo
+    // displayEndAnimationPhoto(imageUrl, options);
+
+
+
+    // Précharger l'image pour obtenir ses dimensions naturelles
+    const preloadImage = new Image();
+    preloadImage.src = imageUrl;
+    
+    // Attendre que l'image soit chargée avant de calculer les dimensions
+    preloadImage.onload = function() {
+        // Calcul pour que l'image tienne dans l'écran
+        const maxWidth = window.innerWidth * 0.8;  // 80% de la largeur de l'écran
+        const maxHeight = window.innerHeight * 0.8; // 80% de la hauteur de l'écran
+        
+        // Ratio d'aspect de l'image
+        const imageRatio = this.naturalWidth / this.naturalHeight;
+        
+        // Calculer les dimensions pour tenir dans l'écran
+        let finalWidth, finalHeight;
+        if (this.naturalWidth / maxWidth > this.naturalHeight / maxHeight) {
+            // Limité par la largeur
+            finalWidth = maxWidth;
+            finalHeight = maxWidth / imageRatio;
+        } else {
+            // Limité par la hauteur
+            finalHeight = maxHeight;
+            finalWidth = maxHeight * imageRatio;
+        }
+        
+        // Options de positionnement et dimensions
+        const options = {
+            width: finalWidth,
+            height: finalHeight,
+            top: (window.innerHeight - finalHeight) / 2,
+            left: (window.innerWidth - finalWidth) / 2
+        };
+        
+        // Afficher la photo avec les dimensions calculées
+        displayEndAnimationPhoto(imageUrl, options);
+    };
+    
+    // En cas d'erreur de chargement, utiliser des valeurs par défaut
+    preloadImage.onerror = function() {
+        console.error("Erreur de chargement de l'image:", imageUrl);
+        
+        // Options par défaut
+        const options = {
+            width: 400,
+            height: 'auto',
+            top: window.innerHeight / 2 - 200, // Centré approximativement
+            left: window.innerWidth / 2 - 200  // Centré approximativement
+        };
+        
+        // Afficher la photo avec les options par défaut
+        displayEndAnimationPhoto(imageUrl, options);
+    };
+
+
+
+
+
+
+
+
+
+
+}
 
 
 

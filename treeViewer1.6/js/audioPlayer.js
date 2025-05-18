@@ -1,6 +1,7 @@
 
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
 import { state } from './main.js';
+import { getCachedResourceUrl } from './photoPlayer.js';
 // 1. Ajout des variables pour gérer le lecteur audio
 let animationAudio = null;
 let animationAudioPlayer = null;
@@ -48,29 +49,76 @@ function getResourceUrl(relativePath) {
  * Crée et configure l'élément audio
  * @returns {HTMLAudioElement} Élément audio configuré
  */
-function createAudioElement() {
+// function createAudioElement() {
+//     if (animationAudio) return animationAudio;
+
+
+//     // Chemin complet vers le fichier audio
+//     const audioUrl = getResourceUrl('/sounds/lalatte_remix.mp3');
+//     console.log("\n\n Chargement audio depuis:", audioUrl);
+
+
+
+
+    
+//     // Créer l'élément audio
+//     animationAudio = new Audio(audioUrl);
+
+
+
+//     // animationAudio = new Audio('/sounds/lalatte_remix.mp3');
+//     animationAudio.loop = true; // Option pour boucler la lecture
+//     // animationAudio.volume = 0.3; // Volume par défaut
+//     animationAudio.volume = restoreAudioVolume();
+    
+//     // Précharger le son
+//     animationAudio.load();
+    
+//     return animationAudio;
+// }
+
+
+
+/**
+ * Crée et configure l'élément audio avec support du mode hors ligne
+ * @returns {HTMLAudioElement} Élément audio configuré
+ */
+async function createAudioElement() {
     if (animationAudio) return animationAudio;
 
-
-    // Chemin complet vers le fichier audio
-    const audioUrl = getResourceUrl('/sounds/lalatte_remix.mp3');
-    console.log("\n\n Chargement audio depuis:", audioUrl);
+    // Chemin vers le fichier audio
+    const audioPath = '/sounds/lalatte_remix.mp3';
     
-    // Créer l'élément audio
-    animationAudio = new Audio(audioUrl);
-
-
-
-    // animationAudio = new Audio('/sounds/lalatte_remix.mp3');
-    animationAudio.loop = true; // Option pour boucler la lecture
-    // animationAudio.volume = 0.3; // Volume par défaut
-    animationAudio.volume = restoreAudioVolume();
-    
-    // Précharger le son
-    animationAudio.load();
-    
-    return animationAudio;
+    try {
+        // Récupérer l'URL (cache ou directe selon connectivité)
+        const audioUrl = await getCachedResourceUrl(audioPath);
+        console.log("\n\n Chargement audio depuis:", audioUrl);
+        
+        // Créer l'élément audio
+        animationAudio = new Audio(audioUrl);
+        animationAudio.loop = true;
+        animationAudio.volume = restoreAudioVolume();
+        
+        // Précharger le son
+        animationAudio.load();
+        
+        return animationAudio;
+    } catch (error) {
+        console.error("Erreur lors du chargement audio:", error);
+        
+        // Fallback en cas d'erreur
+        const directUrl = getResourceUrl(audioPath);
+        animationAudio = new Audio(directUrl);
+        animationAudio.loop = true;
+        animationAudio.volume = restoreAudioVolume();
+        animationAudio.load();
+        
+        return animationAudio;
+    }
 }
+
+
+
 
 /**
  * Crée l'interface du mini-lecteur audio (version ultra-minimaliste)
@@ -551,10 +599,10 @@ function restoreAudioPlayerPosition() {
 /**
  * Démarre la lecture audio et affiche le lecteur
  */
-export function playEndOfAnimationSound() {
+export async function playEndOfAnimationSound() {
     try {
         // Créer l'élément audio s'il n'existe pas
-        const audio = createAudioElement();
+        const audio = await createAudioElement();
         
         // Créer et afficher le lecteur
         animationAudioPlayer = createAudioPlayerGUI();
@@ -704,7 +752,7 @@ export function cleanupAnimationAudio() {
 }
 
 // Créer un bouton flottant pour montrer/masquer le lecteur
-export function createAudioPlayerToggleButton() {
+export async function createAudioPlayerToggleButton() {
     // Vérifier si le bouton existe déjà
     if (document.getElementById('show-audio-player-btn')) {
         return;
@@ -729,13 +777,21 @@ export function createAudioPlayerToggleButton() {
     toggleButton.title = 'Afficher le lecteur audio';
     
     // Événement clic
-    toggleButton.addEventListener('click', () => {
+    toggleButton.addEventListener('click', async () => {
         if (isAudioPlayerVisible) {
             hideAudioPlayer();
         } else {
             // Créer et afficher le lecteur si ce n'est pas déjà fait
             if (!animationAudio) {
-                createAudioElement();
+                // createAudioElement();
+                try {
+                    await createAudioElement(); // Attendre la création de l'élément audio
+                } catch (error) {
+                    console.error("Erreur lors de la création de l'élément audio:", error);
+                    // Optionnel: afficher un message à l'utilisateur
+                    alert("Impossible de charger l'audio. Vérifiez votre connexion.");
+                    return; // Sortir si l'audio ne peut pas être chargé
+                }
             }
             if (!animationAudioPlayer) {
                 createAudioPlayerGUI();

@@ -9,6 +9,7 @@ import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
+import { getCachedResourceUrl } from './photoPlayer.js';
 
 /**
  * Initialise les gestionnaires d'événements globaux
@@ -431,7 +432,7 @@ function highlightAndZoomToNode(matchedNode) {
 }
 
 
-export function returnToLogin() {
+export async function returnToLogin() {
     // Masquer l'arbre
     document.getElementById('tree-container').style.display = 'none';
     
@@ -461,8 +462,6 @@ export function returnToLogin() {
     // Masquer la carte
     hideMap();
     
-        
-    
     
     // Restaurer le fond d'écran de connexion s'il a été supprimé
     const loginBackground = document.querySelector('.login-background');
@@ -470,11 +469,23 @@ export function returnToLogin() {
         const newLoginBackground = document.createElement('div');
         newLoginBackground.className = 'login-background';
         const backgroundImage = document.createElement('img');
-        backgroundImage.src = 'background_images/fort_lalatte.jpg';
+        // backgroundImage.src = 'background_images/fort_lalatte.jpg';
         backgroundImage.className = 'login-background-image';
         backgroundImage.alt = 'Fond d\'écran';
         newLoginBackground.appendChild(backgroundImage);
         document.body.insertBefore(newLoginBackground, document.body.firstChild);
+
+
+        // Utiliser getCachedResourceUrl pour obtenir l'URL de l'image (si disponible)
+        try {
+            const imagePath = 'background_images/fort_lalatte.jpg';
+            backgroundImage.src = await getCachedResourceUrl(imagePath);
+        } catch (error) {
+            console.error("Erreur lors du chargement de l'image de fond:", error);
+            // Fallback en cas d'erreur
+            backgroundImage.src = 'background_images/fort_lalatte.jpg';
+        }
+
     }
     
     // Quitter le mode plein écran si actif
