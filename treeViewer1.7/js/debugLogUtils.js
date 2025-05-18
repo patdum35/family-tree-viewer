@@ -9,7 +9,6 @@ import { verifyResourceCache } from './resourcePreloader.js';
 
 
 
-
 /**
  * Gère l'affichage du panneau de débogage (ouverture/fermeture)
  * @param {boolean} show - True pour afficher, false pour masquer
@@ -31,47 +30,8 @@ import { verifyResourceCache } from './resourcePreloader.js';
 }
 
 
-/**
- * Active le panneau de débogage et affiche les informations initiales
- */
-// export function activateDebugLogs() {
-//     state.isDebugLog = true;
-    
-
-//     // Afficher le panneau
-//     toggleDebugPanel(true);
-
-//     // Créer le panneau
-//     createDebugPanel();
-    
-//     // Afficher des informations de base
-//     debugLog("=== INFORMATIONS SYSTÈME ===", 'info');
-//     debugLog(`User Agent: ${navigator.userAgent}`, 'info');
-//     debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
-//     debugLog(`URL: ${window.location.href}`, 'info');
-    
-//     // Ajouter les informations sur l'écran
-//     debugLog(`=== INFORMATIONS ÉCRAN ===`, 'info');
-//     getScreenInfo().split('\n').forEach(line => {
-//         debugLog(line.trim(), 'info');
-//     });
-    
-//     // Vérifier l'état de chargement des bibliothèques
-//     document.addEventListener('libraries-loaded', () => {
-//         debugLog("Événement 'libraries-loaded' déclenché", 'success');
-//         checkLibraries();
-//     });
-    
-//     // Vérifier le cache après un court délai
-//     setTimeout(() => {
-//         checkCache();
-//     }, 1000);
-// }
-
 // Exposer la fonction pour qu'elle soit accessible globalement
 window.activateDebugLogs = activateDebugLogs;
-
-
 
 
 
@@ -606,363 +566,6 @@ function checkLibraries() {
     debugLog("=== FIN VÉRIFICATION DES BIBLIOTHÈQUES ===", 'info');
 }
 
-// /**
-//  * Vérification du cache
-//  */
-// async function checkCache() {
-//     debugLog("=== VÉRIFICATION DU CACHE ===", 'info');
-//     debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`);
-    
-//     // Vérifier si l'API Cache est disponible
-//     if (!('caches' in window)) {
-//         debugLog("API Cache non disponible dans ce navigateur!", 'error');
-//         return;
-//     }
-    
-//     try {
-//         // Obtenir la liste des caches disponibles
-//         const cacheNames = await caches.keys();
-//         debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
-        
-//         let totalItems = 0;
-//         let treeViewerItems = 0;
-//         let foundArbreEnc = false;
-        
-//         // Explorer chaque cache
-//         for (const cacheName of cacheNames) {
-//             const cache = await caches.open(cacheName);
-//             const requests = await cache.keys();
-            
-//             totalItems += requests.length;
-            
-//             // Vérifier s'il s'agit de notre cache principal
-//             if (cacheName === CACHE_NAME) {
-//                 treeViewerItems = requests.length;
-//                 debugLog(`Cache principal (${CACHE_NAME}): ${requests.length} fichiers`, 'info');
-                
-//                 // Vérifier la présence de fichiers importants
-//                 const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js'];
-                
-//                 for (const file of criticalFiles) {
-//                     const found = requests.some(req => req.url.includes(file));
-//                     const status = found ? 'Présent' : 'ABSENT';
-//                     const type = found ? 'success' : 'error';
-                    
-//                     debugLog(`- ${file}: ${status}`, type);
-                    
-//                     if (file === 'arbre.enc' && found) {
-//                         foundArbreEnc = true;
-//                     }
-//                 }
-                
-//                 // Afficher les 5 premiers éléments
-//                 if (requests.length > 0) {
-//                     debugLog("Exemples de fichiers dans le cache:", 'info');
-//                     const samplesToShow = Math.min(5, requests.length);
-                    
-//                     for (let i = 0; i < samplesToShow; i++) {
-//                         const url = requests[i].url;
-//                         const fileName = url.split('/').pop();
-//                         debugLog(`- ${fileName} (${url})`, 'info');
-//                     }
-                    
-//                     if (requests.length > samplesToShow) {
-//                         debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
-//                     }
-//                 } else {
-//                     debugLog("Le cache principal est vide!", 'warning');
-//                 }
-//             } else {
-//                 // Cache auxiliaire
-//                 debugLog(`Cache "${cacheName}": ${requests.length} fichiers`, 'info');
-                
-//                 // Vérifier si arbre.enc pourrait être dans ce cache
-//                 const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
-//                 if (arbreEncInCache) {
-//                     debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${CACHE_NAME}"!`, 'warning');
-//                     foundArbreEnc = true;
-//                 }
-//             }
-//         }
-        
-//         // Résumé
-//         if (totalItems > 0) {
-//             debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
-//             debugLog(`Cache principal: ${treeViewerItems} fichiers (${Math.round(treeViewerItems/totalItems*100)}% du total)`, 'info');
-//         }
-        
-//         if (foundArbreEnc) {
-//             debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
-//         } else {
-//             debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
-//         }
-        
-//     } catch (error) {
-//         debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
-//     }
-    
-//     // Vérifier si le service worker est actif
-//     if ('serviceWorker' in navigator) {
-//         try {
-//             const registration = await navigator.serviceWorker.getRegistration();
-//             if (registration && registration.active) {
-//                 debugLog(`Service Worker actif: Oui (scope: ${registration.scope})`, 'success');
-//             } else {
-//                 debugLog("Service Worker actif: Non", 'warning');
-//             }
-//         } catch (error) {
-//             debugLog(`Erreur Service Worker: ${error.message}`, 'error');
-//         }
-//     } else {
-//         debugLog("API Service Worker non supportée", 'error');
-//     }
-    
-//     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
-// }
-
-
-
-
-
-
-
-// /**
-//  * Modification de la fonction checkCache() pour ajouter plus de traces de débogage
-//  * Remplacez simplement votre fonction checkCache() actuelle par celle-ci
-//  */
-// async function checkCache() {
-//     debugLog("=== VÉRIFICATION DÉTAILLÉE DU CACHE ===", 'info');
-//     debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`, 'info');
-//     debugLog(`Nom du cache principal: ${CACHE_NAME}`, 'info');
-    
-//     // Vérifier si l'API Cache est disponible
-//     if (!('caches' in window)) {
-//         debugLog("API Cache non supportée dans ce navigateur!", 'error');
-//         return;
-//     }
-    
-//     try {
-//         // Récupérer la liste des caches
-//         debugLog("Récupération de la liste des caches...", 'info');
-//         const cacheNames = await caches.keys();
-//         debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
-        
-//         // Si aucun cache trouvé
-//         if (cacheNames.length === 0) {
-//             debugLog("❌ Aucun cache n'existe - Le Service Worker n'a pas fonctionné!", 'error');
-//             debugLog("Vérification de l'état du Service Worker...", 'info');
-//             checkServiceWorker();
-//             return;
-//         }
-        
-//         // Vérifier si notre cache principal existe
-//         if (!cacheNames.includes(CACHE_NAME)) {
-//             debugLog(`❌ Cache principal "${CACHE_NAME}" non trouvé!`, 'error');
-//             debugLog("Cache existants :", 'info');
-//             for (const name of cacheNames) {
-//                 debugLog(`- ${name}`, 'info');
-//             }
-//             debugLog("Vérification de l'état du Service Worker...", 'info');
-//             checkServiceWorker();
-//             return;
-//         }
-        
-//         let totalItems = 0;
-//         let treeViewerItems = 0;
-//         let foundArbreEnc = false;
-        
-//         // Explorer chaque cache
-//         for (const cacheName of cacheNames) {
-//             const cache = await caches.open(cacheName);
-            
-//             // Récupérer toutes les entrées du cache
-//             debugLog(`Analyse du contenu du cache "${cacheName}"...`, 'info');
-//             const requests = await cache.keys();
-//             totalItems += requests.length;
-            
-//             // Afficher le nombre d'entrées
-//             if (requests.length === 0) {
-//                 debugLog(`Cache "${cacheName}" est VIDE!`, cacheName === CACHE_NAME ? 'error' : 'warning');
-//             } else {
-//                 debugLog(`Cache "${cacheName}" contient ${requests.length} fichiers`, 'info');
-//             }
-            
-//             // Si c'est notre cache principal
-//             if (cacheName === CACHE_NAME) {
-//                 treeViewerItems = requests.length;
-                
-//                 // Si le cache principal est vide, c'est un problème
-//                 if (requests.length === 0) {
-//                     debugLog("❌ Le cache principal est VIDE - Le Service Worker n'a pas mis en cache les ressources!", 'error');
-//                     debugLog("Vérification de l'état du Service Worker...", 'info');
-//                     checkServiceWorker();
-//                     continue;
-//                 }
-                
-//                 // Vérifier la présence de fichiers importants
-//                 const criticalFiles = [
-//                     'arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js', 
-//                     'thomas.jpg', 'fort_lalatte.jpg'
-//                 ];
-                
-//                 debugLog("Vérification des fichiers critiques dans le cache principal:", 'info');
-//                 for (const file of criticalFiles) {
-//                     // Essayer de trouver le fichier avec différentes variantes de chemin
-//                     const variants = [
-//                         file,
-//                         `./${file}`,
-//                         `/${file}`
-//                     ];
-                    
-//                     let found = false;
-//                     for (const variant of variants) {
-//                         // Rechercher par nom de fichier (dernière partie du chemin)
-//                         found = requests.some(req => {
-//                             const url = new URL(req.url);
-//                             const path = url.pathname;
-//                             return path.endsWith(file) || path.includes(`/${file}`);
-//                         });
-                        
-//                         if (found) break;
-//                     }
-                    
-//                     const status = found ? 'Présent' : 'ABSENT';
-//                     const type = found ? 'success' : 'error';
-                    
-//                     debugLog(`- ${file}: ${status}`, type);
-                    
-//                     if (file === 'arbre.enc' && found) {
-//                         foundArbreEnc = true;
-//                     }
-//                 }
-                
-//                 // Afficher les entrées du cache (limité aux 10 premières)
-//                 if (requests.length > 0) {
-//                     debugLog("Exemples de fichiers dans le cache principal:", 'info');
-//                     const samplesToShow = Math.min(10, requests.length);
-                    
-//                     for (let i = 0; i < samplesToShow; i++) {
-//                         // Récupérer l'URL complète
-//                         const url = requests[i].url;
-//                         // Extraire le nom du fichier (dernière partie du chemin)
-//                         const urlObj = new URL(url);
-//                         const path = urlObj.pathname;
-//                         const fileName = path.split('/').pop();
-                        
-//                         // Afficher avec format: nom_fichier (chemin_complet)
-//                         debugLog(`- ${fileName} (${url})`, 'info');
-                        
-//                         // Vérifier si c'est arbre.enc (recherche partielle)
-//                         if (path.includes('arbre.enc')) {
-//                             debugLog(`  ↳ DÉTECTÉ: arbre.enc avec chemin: ${path}`, 'success');
-//                         }
-//                     }
-                    
-//                     if (requests.length > samplesToShow) {
-//                         debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
-//                     }
-//                 }
-                
-//                 // Tester l'accès à arbre.enc
-//                 debugLog("Test d'accès direct à arbre.enc dans le cache principal...", 'info');
-//                 let arbreResponse = null;
-                
-//                 // Essayer différentes variantes de chemin
-//                 const arbreVariants = [
-//                     'arbre.enc',
-//                     './arbre.enc',
-//                     '/arbre.enc',
-//                     `${window.location.origin}/arbre.enc`
-//                 ];
-                
-//                 for (const variant of arbreVariants) {
-//                     debugLog(`- Tentative avec chemin: "${variant}"`, 'info');
-//                     arbreResponse = await cache.match(variant);
-//                     if (arbreResponse) {
-//                         debugLog(`✅ arbre.enc trouvé avec chemin: "${variant}"`, 'success');
-//                         break;
-//                     }
-//                 }
-                
-//                 if (!arbreResponse) {
-//                     debugLog("❌ Tous les chemins ont échoué, recherche par correspondance partielle...", 'warning');
-                    
-//                     // Recherche par correspondance partielle d'URL
-//                     for (const request of requests) {
-//                         if (request.url.includes('arbre.enc')) {
-//                             debugLog(`- Essai avec URL correspondante: ${request.url}`, 'info');
-//                             arbreResponse = await cache.match(request);
-//                             if (arbreResponse) {
-//                                 debugLog(`✅ arbre.enc trouvé avec URL: ${request.url}`, 'success');
-//                                 break;
-//                             }
-//                         }
-//                     }
-//                 }
-                
-//                 if (arbreResponse) {
-//                     try {
-//                         // Vérifier le contenu réel
-//                         const contentClone = arbreResponse.clone();
-//                         const contentText = await contentClone.text();
-//                         debugLog(`Contenu de arbre.enc récupéré: ${contentText.length} caractères`, 'success');
-//                         debugLog(`Début du contenu: ${contentText.substring(0, 50)}...`, 'info');
-//                     } catch (contentError) {
-//                         debugLog(`❌ Erreur lors de la lecture du contenu: ${contentError.message}`, 'error');
-//                     }
-//                 } else {
-//                     debugLog("❌ Impossible d'accéder à arbre.enc dans le cache", 'error');
-//                 }
-//             } else {
-//                 // Cache auxiliaire
-//                 debugLog(`Vérification de arbre.enc dans cache "${cacheName}"...`, 'info');
-                
-//                 // Vérifier si arbre.enc pourrait être dans ce cache
-//                 const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
-//                 if (arbreEncInCache) {
-//                     debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${CACHE_NAME}"!`, 'warning');
-//                     foundArbreEnc = true;
-                    
-//                     // Afficher les chemins détectés
-//                     for (const req of requests) {
-//                         if (req.url.includes('arbre.enc')) {
-//                             debugLog(`  ↳ Chemin dans cache ${cacheName}: ${req.url}`, 'info');
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-        
-//         // Résumé
-//         if (totalItems > 0) {
-//             debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
-//             if (treeViewerItems > 0) {
-//                 const percent = Math.round((treeViewerItems / totalItems) * 100);
-//                 debugLog(`Cache principal: ${treeViewerItems} fichiers (${percent}% du total)`, 'info');
-//             }
-//         }
-        
-//         if (foundArbreEnc) {
-//             debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
-//         } else {
-//             debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
-//         }
-        
-//         // Test d'écriture dans le cache
-//         debugLog("=== TEST D'ÉCRITURE DANS LE CACHE ===", 'info');
-//         await testCacheWriting();
-        
-//     } catch (error) {
-//         debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
-//         debugLog(`Stack trace: ${error.stack}`, 'error');
-//     }
-    
-//     // Vérifier le Service Worker à la fin
-//     await checkServiceWorker();
-    
-//     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
-// }
-
 /**
  * Vérifier l'état du Service Worker
  */
@@ -1045,24 +648,6 @@ async function testCacheWriting() {
         debugLog(`❌ Erreur lors du test d'écriture: ${error.message}`, 'error');
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Fonction pour recevoir les logs du service worker
@@ -1326,497 +911,232 @@ function addServiceWorkerDebugButton(actionBar) {
 }
 
 
-// /**
-//  * Modification de la fonction checkCache dans debugLogUtils.js
-//  * pour ne pas dépendre de la variable CACHE_NAME
-//  */
-// async function checkCache() {
-//     debugLog("=== VÉRIFICATION DÉTAILLÉE DU CACHE ===", 'info');
-//     debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`, 'info');
-    
-//     // Nom du cache principal attendu - défini localement plutôt qu'en utilisant une variable globale
-//     // const EXPECTED_CACHE_NAME = 'treeViewer-app-v4'; // Doit correspondre à celui dans service-worker.js
-//     // debugLog(`Nom du cache principal attendu: ${EXPECTED_CACHE_NAME}`, 'info');
-
-
-//     // Utiliser la variable CACHE_NAME qui est définie dans cacheConfig.js et attachée à window
-//     const cacheName = window.CACHE_NAME;
-        
-//     if (!cacheName) {
-//         debugLog("⚠️ Variable CACHE_NAME non trouvée, cacheConfig.js n'est peut-être pas chargé correctement", 'warning');
-//         debugLog("Utilisation du nom de cache par défaut: 'treeViewer-app-v4'", 'info');
-//     }
-        
-//     // Fallback si cacheConfig.js n'est pas chargé correctement
-//     const mainCacheName = cacheName || 'treeViewer-app-v4';
-//     debugLog(`Nom du cache principal: ${mainCacheName}`, 'info');
-
-
-
-    
-//     // Vérifier si l'API Cache est disponible
-//     if (!('caches' in window)) {
-//         debugLog("API Cache non supportée dans ce navigateur!", 'error');
-//         return;
-//     }
-    
-//     try {
-//         // Récupérer la liste des caches
-//         debugLog("Récupération de la liste des caches...", 'info');
-//         const cacheNames = await caches.keys();
-//         debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
-        
-//         // Si aucun cache trouvé
-//         if (cacheNames.length === 0) {
-//             debugLog("❌ Aucun cache n'existe - Le Service Worker n'a pas fonctionné!", 'error');
-//             debugLog("Vérification de l'état du Service Worker...", 'info');
-//             checkServiceWorker();
-//             return;
-//         }
-        
-//         // Déterminer le nom du cache principal à utiliser (celui qui contient 'treeViewer-app')
-//         const mainCacheName = cacheNames.find(name => name.includes('treeViewer-app')) || mainCacheName;
-        
-//         // Vérifier si notre cache principal existe
-//         if (!cacheNames.includes(mainCacheName)) {
-//             debugLog(`❌ Cache principal "${mainCacheName}" non trouvé!`, 'error');
-//             debugLog("Caches existants :", 'info');
-//             for (const name of cacheNames) {
-//                 debugLog(`- ${name}`, 'info');
-//             }
-//             debugLog("Vérification de l'état du Service Worker...", 'info');
-//             checkServiceWorker();
-//             return;
-//         } else {
-//             debugLog(`✅ Cache principal identifié: "${mainCacheName}"`, 'success');
-//         }
-        
-//         let totalItems = 0;
-//         let treeViewerItems = 0;
-//         let foundArbreEnc = false;
-        
-//         // Explorer chaque cache
-//         for (const cacheName of cacheNames) {
-//             const cache = await caches.open(cacheName);
-            
-//             // Récupérer toutes les entrées du cache
-//             debugLog(`Analyse du contenu du cache "${cacheName}"...`, 'info');
-//             const requests = await cache.keys();
-//             totalItems += requests.length;
-            
-//             // Afficher le nombre d'entrées
-//             if (requests.length === 0) {
-//                 debugLog(`Cache "${cacheName}" est VIDE!`, cacheName === mainCacheName ? 'error' : 'warning');
-//             } else {
-//                 debugLog(`Cache "${cacheName}" contient ${requests.length} fichiers`, 'info');
-//             }
-            
-//             // Si c'est notre cache principal
-//             if (cacheName === mainCacheName) {
-//                 treeViewerItems = requests.length;
-                
-//                 // Si le cache principal est vide, c'est un problème
-//                 if (requests.length === 0) {
-//                     debugLog("❌ Le cache principal est VIDE - Le Service Worker n'a pas mis en cache les ressources!", 'error');
-//                     debugLog("Vérification de l'état du Service Worker...", 'info');
-//                     checkServiceWorker();
-//                     continue;
-//                 }
-                
-//                 // Vérifier la présence de fichiers importants
-//                 const criticalFiles = [
-//                     'arbre.enc', 'arbreX.enc', 'pako.min.js', 'd3.v7.min.js', 
-//                     'thomas.jpg', 'fort_lalatte.jpg'
-//                 ];
-                
-//                 debugLog("Vérification des fichiers critiques dans le cache principal:", 'info');
-//                 for (const file of criticalFiles) {
-//                     // Essayer de trouver le fichier avec différentes variantes de chemin
-//                     const variants = [
-//                         file,
-//                         `./${file}`,
-//                         `/${file}`
-//                     ];
-                    
-//                     let found = false;
-//                     for (const variant of variants) {
-//                         // Rechercher par nom de fichier (dernière partie du chemin)
-//                         found = requests.some(req => {
-//                             const url = new URL(req.url);
-//                             const path = url.pathname;
-//                             return path.endsWith(file) || path.includes(`/${file}`);
-//                         });
-                        
-//                         if (found) break;
-//                     }
-                    
-//                     const status = found ? 'Présent' : 'ABSENT';
-//                     const type = found ? 'success' : 'error';
-                    
-//                     debugLog(`- ${file}: ${status}`, type);
-                    
-//                     if (file === 'arbre.enc' && found) {
-//                         foundArbreEnc = true;
-//                     }
-//                 }
-                
-//                 // Afficher les entrées du cache (limité aux 10 premières)
-//                 if (requests.length > 0) {
-//                     debugLog("Exemples de fichiers dans le cache principal:", 'info');
-//                     const samplesToShow = Math.min(10, requests.length);
-                    
-//                     for (let i = 0; i < samplesToShow; i++) {
-//                         // Récupérer l'URL complète
-//                         const url = requests[i].url;
-//                         // Extraire le nom du fichier (dernière partie du chemin)
-//                         const urlObj = new URL(url);
-//                         const path = urlObj.pathname;
-//                         const fileName = path.split('/').pop();
-                        
-//                         // Afficher avec format: nom_fichier (chemin_complet)
-//                         debugLog(`- ${fileName} (${url})`, 'info');
-                        
-//                         // Vérifier si c'est arbre.enc (recherche partielle)
-//                         if (path.includes('arbre.enc')) {
-//                             debugLog(`  ↳ DÉTECTÉ: arbre.enc avec chemin: ${path}`, 'success');
-//                         }
-//                     }
-                    
-//                     if (requests.length > samplesToShow) {
-//                         debugLog(`... et ${requests.length - samplesToShow} autres fichiers`, 'info');
-//                     }
-//                 }
-                
-//                 // Tester l'accès à arbre.enc
-//                 debugLog("Test d'accès direct à arbre.enc dans le cache principal...", 'info');
-//                 let arbreResponse = null;
-                
-//                 // Essayer différentes variantes de chemin
-//                 const arbreVariants = [
-//                     'arbre.enc',
-//                     './arbre.enc',
-//                     '/arbre.enc',
-//                     `${window.location.origin}/arbre.enc`
-//                 ];
-                
-//                 for (const variant of arbreVariants) {
-//                     debugLog(`- Tentative avec chemin: "${variant}"`, 'info');
-//                     arbreResponse = await cache.match(variant);
-//                     if (arbreResponse) {
-//                         debugLog(`✅ arbre.enc trouvé avec chemin: "${variant}"`, 'success');
-//                         break;
-//                     }
-//                 }
-                
-//                 if (!arbreResponse) {
-//                     debugLog("❌ Tous les chemins ont échoué, recherche par correspondance partielle...", 'warning');
-                    
-//                     // Recherche par correspondance partielle d'URL
-//                     for (const request of requests) {
-//                         if (request.url.includes('arbre.enc')) {
-//                             debugLog(`- Essai avec URL correspondante: ${request.url}`, 'info');
-//                             arbreResponse = await cache.match(request);
-//                             if (arbreResponse) {
-//                                 debugLog(`✅ arbre.enc trouvé avec URL: ${request.url}`, 'success');
-//                                 break;
-//                             }
-//                         }
-//                     }
-//                 }
-                
-//                 if (arbreResponse) {
-//                     try {
-//                         // Vérifier le contenu réel
-//                         const contentClone = arbreResponse.clone();
-//                         const contentText = await contentClone.text();
-//                         debugLog(`Contenu de arbre.enc récupéré: ${contentText.length} caractères`, 'success');
-//                         debugLog(`Début du contenu: ${contentText.substring(0, 50)}...`, 'info');
-//                     } catch (contentError) {
-//                         debugLog(`❌ Erreur lors de la lecture du contenu: ${contentError.message}`, 'error');
-//                     }
-//                 } else {
-//                     debugLog("❌ Impossible d'accéder à arbre.enc dans le cache", 'error');
-//                 }
-//             } else {
-//                 // Cache auxiliaire
-//                 debugLog(`Vérification de arbre.enc dans cache "${cacheName}"...`, 'info');
-                
-//                 // Vérifier si arbre.enc pourrait être dans ce cache
-//                 const arbreEncInCache = requests.some(req => req.url.includes('arbre.enc'));
-//                 if (arbreEncInCache) {
-//                     debugLog(`⚠️ 'arbre.enc' trouvé dans cache "${cacheName}" au lieu de "${mainCacheName}"!`, 'warning');
-//                     foundArbreEnc = true;
-                    
-//                     // Afficher les chemins détectés
-//                     for (const req of requests) {
-//                         if (req.url.includes('arbre.enc')) {
-//                             debugLog(`  ↳ Chemin dans cache ${cacheName}: ${req.url}`, 'info');
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-        
-//         // Résumé
-//         if (totalItems > 0) {
-//             debugLog(`Total: ${totalItems} fichiers dans tous les caches`, 'info');
-//             if (treeViewerItems > 0) {
-//                 const percent = Math.round((treeViewerItems / totalItems) * 100);
-//                 debugLog(`Cache principal: ${treeViewerItems} fichiers (${percent}% du total)`, 'info');
-//             }
-//         }
-        
-//         if (foundArbreEnc) {
-//             debugLog("✅ 'arbre.enc' est présent dans au moins un cache", 'success');
-//         } else {
-//             debugLog("❌ 'arbre.enc' n'est présent dans AUCUN cache!", 'error');
-//         }
-        
-//         // Test d'écriture dans le cache
-//         debugLog("=== TEST D'ÉCRITURE DANS LE CACHE ===", 'info');
-//         await testCacheWriting();
-        
-//     } catch (error) {
-//         debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
-//         debugLog(`Stack trace: ${error.stack}`, 'error');
-//     }
-    
-//     // Vérifier le Service Worker à la fin
-//     await checkServiceWorker();
-    
-//     debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
-// }
-
 /**
- * Modification de la fonction checkCache dans debugLogUtils.js
- * pour afficher des détails sur les types de fichiers spécifiques
+ * Fonction améliorée pour vérifier les différents caches de manière séparée et organisée
+ * À ajouter à debugLogUtils.js
  */
-async function checkCache() {
-    debugLog("=== VÉRIFICATION DÉTAILLÉE DU CACHE ===", 'info');
-    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`, 'info');
-    
-    // Utiliser la variable CACHE_NAME qui est définie dans cacheConfig.js et attachée à window
-    const cacheName = window.CACHE_NAME;
-    
-    if (!cacheName) {
-        debugLog("⚠️ Variable CACHE_NAME non trouvée, cacheConfig.js n'est peut-être pas chargé correctement", 'warning');
-        debugLog("Utilisation du nom de cache par défaut: 'treeViewer-app-v4'", 'info');
-    }
-    
-    // Fallback si cacheConfig.js n'est pas chargé correctement
-    const mainCacheName = cacheName || 'treeViewer-app-v4';
-    debugLog(`Nom du cache principal: ${mainCacheName}`, 'info');
+async function checkAllCaches() {
+    debugLog("=== ANALYSE COMPLÈTE DES CACHES ===", 'info');
+    debugLog(`Mode: ${navigator.onLine ? 'Connecté' : 'Non connecté'}`, navigator.onLine ? 'success' : 'warning');
     
     // Vérifier si l'API Cache est disponible
     if (!('caches' in window)) {
-        debugLog("API Cache non supportée dans ce navigateur!", 'error');
+        debugLog("API Cache non supportée par ce navigateur!", 'error');
         return;
     }
     
     try {
-        // Récupérer la liste des caches
-        debugLog("Récupération de la liste des caches...", 'info');
-        const cacheNames = await caches.keys();
-        debugLog(`${cacheNames.length} caches trouvés: ${cacheNames.join(", ")}`, 'info');
+        // Récupérer tous les caches
+        const allCacheNames = await caches.keys();
+        debugLog(`${allCacheNames.length} caches trouvés: ${allCacheNames.join(", ")}`, 'info');
         
-        // Si aucun cache trouvé
-        if (cacheNames.length === 0) {
-            debugLog("❌ Aucun cache n'existe - Le Service Worker n'a pas fonctionné!", 'error');
-            debugLog("Vérification de l'état du Service Worker...", 'info');
-            checkServiceWorker();
-            return;
-        }
-        
-        // Vérifier si notre cache principal existe
-        if (!cacheNames.includes(mainCacheName)) {
-            debugLog(`❌ Cache principal "${mainCacheName}" non trouvé!`, 'error');
-            debugLog("Caches existants :", 'info');
-            for (const name of cacheNames) {
-                debugLog(`- ${name}`, 'info');
-            }
-            debugLog("Vérification de l'état du Service Worker...", 'info');
-            checkServiceWorker();
-            return;
-        }
-        
-        // Analyse des statistiques de cache par type de fichier
-        const fileStats = {
-            total: 0,
-            jpg: [],
-            mp3: [],
-            enc: [],
-            json: [],
-            js: [],
-            other: []
+        // Classement des caches par type
+        const knownCaches = {
+            'app': allCacheNames.find(name => name.includes('treeViewer-app')),
+            'tiles': allCacheNames.find(name => name.includes('map-tiles')),
+            'resources': allCacheNames.find(name => name.includes('app-resources'))
         };
         
-        // Explorer chaque cache
-        for (const cacheName of cacheNames) {
-            const cache = await caches.open(cacheName);
-            
-            // Récupérer toutes les entrées du cache
-            debugLog(`Analyse du contenu du cache "${cacheName}"...`, 'info');
-            const requests = await cache.keys();
-            fileStats.total += requests.length;
-            
-            // Afficher le nombre d'entrées
-            if (requests.length === 0) {
-                debugLog(`Cache "${cacheName}" est VIDE!`, cacheName === mainCacheName ? 'error' : 'warning');
+        let otherCaches = allCacheNames.filter(name => 
+            !name.includes('treeViewer-app') && 
+            !name.includes('map-tiles') && 
+            !name.includes('app-resources')
+        );
+        
+        // Analyse globale
+        debugLog("=== RÉSUMÉ DES CACHES ===", 'info');
+        for (const [type, cacheName] of Object.entries(knownCaches)) {
+            if (cacheName) {
+                const cache = await caches.open(cacheName);
+                const entries = await cache.keys();
+                debugLog(`Cache "${type}": ${cacheName} (${entries.length} fichiers)`, 'info');
             } else {
-                debugLog(`Cache "${cacheName}" contient ${requests.length} fichiers`, 'info');
-            }
-            
-            // Si c'est notre cache principal, analyser en détail
-            if (cacheName === mainCacheName) {
-                // Vérifier la présence des fichiers critiques .enc
-                debugLog("=== VÉRIFICATION DES FICHIERS CRITIQUES ===", 'info');
-                
-                // Fichiers .enc (critiques)
-                const encFiles = requests.filter(req => {
-                    const url = new URL(req.url);
-                    return url.pathname.endsWith('.enc');
-                });
-                
-                encFiles.forEach(req => {
-                    const url = new URL(req.url);
-                    const fileName = url.pathname.split('/').pop();
-                    fileStats.enc.push(fileName);
-                    debugLog(`✅ ${fileName}`, 'success');
-                });
-                
-                if (encFiles.length === 0) {
-                    debugLog("❌ AUCUN fichier .enc trouvé dans le cache!", 'error');
-                } else {
-                    debugLog(`Fichiers .enc en cache: ${encFiles.length}`, 'info');
-                }
-                
-                // Vérifier spécifiquement arbre.enc et arbreX.enc
-                const arbreEncPresent = encFiles.some(req => req.url.includes('arbre.enc'));
-                const arbreXEncPresent = encFiles.some(req => req.url.includes('arbreX.enc'));
-                
-                debugLog(`arbre.enc: ${arbreEncPresent ? '✅ Présent' : '❌ ABSENT'}`, arbreEncPresent ? 'success' : 'error');
-                debugLog(`arbreX.enc: ${arbreXEncPresent ? '✅ Présent' : '❌ ABSENT'}`, arbreXEncPresent ? 'success' : 'error');
-                
-                // Fichiers .jpg
-                debugLog("=== FICHIERS IMAGES (.jpg) ===", 'info');
-                const jpgFiles = requests.filter(req => {
-                    const url = new URL(req.url);
-                    return url.pathname.endsWith('.jpg');
-                });
-                
-                if (jpgFiles.length === 0) {
-                    debugLog("❌ Aucun fichier .jpg trouvé dans le cache!", 'error');
-                } else {
-                    debugLog(`${jpgFiles.length} fichiers .jpg en cache:`, 'success');
-                    jpgFiles.forEach(req => {
-                        const url = new URL(req.url);
-                        const fileName = url.pathname.split('/').pop();
-                        fileStats.jpg.push(fileName);
-                        debugLog(`✅ ${fileName}`, 'success');
-                    });
-                }
-                
-                // Fichiers .mp3
-                debugLog("=== FICHIERS AUDIO (.mp3) ===", 'info');
-                const mp3Files = requests.filter(req => {
-                    const url = new URL(req.url);
-                    return url.pathname.endsWith('.mp3');
-                });
-                
-                if (mp3Files.length === 0) {
-                    debugLog("❌ Aucun fichier .mp3 trouvé dans le cache!", 'error');
-                } else {
-                    debugLog(`${mp3Files.length} fichiers .mp3 en cache:`, 'success');
-                    mp3Files.forEach(req => {
-                        const url = new URL(req.url);
-                        const fileName = url.pathname.split('/').pop();
-                        fileStats.mp3.push(fileName);
-                        debugLog(`✅ ${fileName}`, 'success');
-                    });
-                }
-                
-                // Fichiers .json
-                debugLog("=== FICHIERS DONNÉES (.json) ===", 'info');
-                const jsonFiles = requests.filter(req => {
-                    const url = new URL(req.url);
-                    return url.pathname.endsWith('.json');
-                });
-                
-                if (jsonFiles.length === 0) {
-                    debugLog("❌ Aucun fichier .json trouvé dans le cache!", 'error');
-                } else {
-                    debugLog(`${jsonFiles.length} fichiers .json en cache:`, 'success');
-                    jsonFiles.forEach(req => {
-                        const url = new URL(req.url);
-                        const fileName = url.pathname.split('/').pop();
-                        fileStats.json.push(fileName);
-                        debugLog(`✅ ${fileName}`, 'success');
-                    });
-                }
-                
-                // Liste complète pour référence
-                debugLog("=== RÉCAPITULATIF FICHIERS EN CACHE ===", 'info');
-                debugLog(`Total fichiers: ${requests.length}`, 'info');
-                debugLog(`Fichiers .enc: ${encFiles.length}`, 'info');
-                debugLog(`Fichiers .jpg: ${jpgFiles.length}`, 'info');
-                debugLog(`Fichiers .mp3: ${mp3Files.length}`, 'info');
-                debugLog(`Fichiers .json: ${jsonFiles.length}`, 'info');
-                
-                // Vérifier les fichiers js
-                const jsFiles = requests.filter(req => {
-                    const url = new URL(req.url);
-                    return url.pathname.endsWith('.js');
-                });
-                debugLog(`Fichiers .js: ${jsFiles.length}`, 'info');
-                
-                // Autres fichiers
-                const otherFiles = requests.filter(req => {
-                    const url = new URL(req.url);
-                    const path = url.pathname;
-                    return !path.endsWith('.enc') && 
-                           !path.endsWith('.jpg') && 
-                           !path.endsWith('.mp3') && 
-                           !path.endsWith('.json') &&
-                           !path.endsWith('.js');
-                });
-                debugLog(`Autres types de fichiers: ${otherFiles.length}`, 'info');
+                debugLog(`Cache "${type}": Non trouvé`, 'warning');
             }
         }
+        
+        if (otherCaches.length > 0) {
+            debugLog(`Autres caches: ${otherCaches.join(', ')}`, 'info');
+        }
+        
+        // Analyse du cache d'application (Service Worker)
+        if (knownCaches.app) {
+            await analyzeCache(knownCaches.app, "APP (SERVICE WORKER)");
+        }
+        
+        // Analyse du cache de tuiles
+        if (knownCaches.tiles) {
+            await analyzeCache(knownCaches.tiles, "TUILES DE CARTE");
+        }
+        
+        // Analyse du cache de ressources
+        if (knownCaches.resources) {
+            await analyzeCache(knownCaches.resources, "RESSOURCES IMPORTANTES");
+        }
+        
+        // Recherche des doublons
+        debugLog("=== ANALYSE DES DOUBLONS ===", 'info');
+        await findDuplicates(allCacheNames);
         
         // Test d'écriture dans le cache
         debugLog("=== TEST D'ÉCRITURE DANS LE CACHE ===", 'info');
         await testCacheWriting();
         
     } catch (error) {
-        debugLog(`Erreur lors de la vérification du cache: ${error.message}`, 'error');
-        debugLog(`Stack trace: ${error.stack}`, 'error');
+        debugLog(`Erreur lors de l'analyse des caches: ${error.message}`, 'error');
     }
     
-    // Vérifier le Service Worker à la fin
-    await checkServiceWorker();
-    
-    debugLog("=== FIN VÉRIFICATION DU CACHE ===", 'info');
+    debugLog("=== FIN ANALYSE DES CACHES ===", 'info');
 }
 
+/**
+ * Analyse détaillée d'un cache spécifique
+ */
+async function analyzeCache(cacheName, title) {
+    debugLog(`=== ANALYSE CACHE ${title} ===`, 'info');
+    
+    try {
+        const cache = await caches.open(cacheName);
+        const entries = await cache.keys();
+        
+        if (entries.length === 0) {
+            debugLog("❌ Le cache est VIDE!", 'error');
+            return;
+        }
+        
+        // Analyse par type de fichier
+        const fileTypes = {};
+        
+        for (const entry of entries) {
+            const url = entry.url;
+            const extension = url.split('.').pop().toLowerCase();
+            
+            if (!fileTypes[extension]) {
+                fileTypes[extension] = [];
+            }
+            
+            fileTypes[extension].push(url);
+        }
+        
+        // Afficher le résumé
+        debugLog(`Total: ${entries.length} fichiers`, 'info');
+        
+        for (const [ext, files] of Object.entries(fileTypes)) {
+            debugLog(`${ext}: ${files.length} fichiers`, 'info');
+        }
+        
+        // Lister quelques exemples de chaque type
+        for (const [ext, files] of Object.entries(fileTypes)) {
+            if (files.length > 0) {
+                debugLog(`=== FICHIERS .${ext.toUpperCase()} ===`, 'info');
+                
+                // Limiter à 5 exemples maximum
+                const examples = files.slice(0, 5);
+                for (const file of examples) {
+                    const fileName = file.split('/').pop();
+                    debugLog(`✅ ${fileName}`, 'success');
+                }
+                
+                if (files.length > 5) {
+                    debugLog(`... et ${files.length - 5} autres fichiers .${ext}`, 'info');
+                }
+            }
+        }
+        
+        // Vérifier les fichiers critiques
+        if (title.includes("RESSOURCES") || title.includes("APP (SERVICE WORKER)")) {
+            debugLog("=== VÉRIFICATION DES FICHIERS CRITIQUES ===", 'info');
+            
+            const criticalFiles = ['arbre.enc', 'arbreX.enc', 'pako.min.js', 'leaflet.js'];
+            
+            for (const criticalFile of criticalFiles) {
+                const found = entries.some(entry => entry.url.includes(criticalFile));
+                debugLog(`${criticalFile}: ${found ? '✅ Présent' : '❌ Absent'}`, found ? 'success' : 'warning');
+            }
+        }
+        
+    } catch (error) {
+        debugLog(`Erreur lors de l'analyse du cache ${cacheName}: ${error.message}`, 'error');
+    }
+}
 
+/**
+ * Recherche des doublons entre les différents caches
+ */
+async function findDuplicates(cacheNames) {
+    const filesByCache = {};
+    const filesByType = {
+        'enc': new Set(),
+        'jpg': new Set(),
+        'mp3': new Set(),
+        'json': new Set()
+    };
+    
+    // Collecter tous les fichiers par cache
+    for (const cacheName of cacheNames) {
+        const cache = await caches.open(cacheName);
+        const entries = await cache.keys();
+        
+        filesByCache[cacheName] = entries.map(entry => {
+            const url = entry.url;
+            const fileName = url.split('/').pop();
+            return { url, fileName };
+        });
+        
+        // Regrouper par type
+        for (const entry of filesByCache[cacheName]) {
+            const ext = entry.fileName.split('.').pop().toLowerCase();
+            if (filesByType[ext]) {
+                filesByType[ext].add(entry.fileName);
+            }
+        }
+    }
+    
+    // Compter les doublons
+    const duplicates = {};
+    
+    for (const ext of Object.keys(filesByType)) {
+        const fileNames = Array.from(filesByType[ext]);
+        
+        for (const fileName of fileNames) {
+            duplicates[fileName] = {
+                count: 0,
+                caches: []
+            };
+            
+            // Chercher dans chaque cache
+            for (const [cacheName, files] of Object.entries(filesByCache)) {
+                const found = files.some(file => file.fileName === fileName);
+                
+                if (found) {
+                    duplicates[fileName].count++;
+                    duplicates[fileName].caches.push(cacheName);
+                }
+            }
+        }
+    }
+    
+    // Afficher les résultats
+    let hasDuplicates = false;
+    
+    for (const [fileName, info] of Object.entries(duplicates)) {
+        if (info.count > 1) {
+            hasDuplicates = true;
+            debugLog(`⚠️ "${fileName}" présent dans ${info.count} caches: ${info.caches.join(', ')}`, 'warning');
+        }
+    }
+    
+    if (!hasDuplicates) {
+        debugLog("✅ Aucun doublon détecté entre les caches", 'success');
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+ * Remplacer la fonction checkCache existante par celle-ci
+ */
+async function checkCache() {
+    await checkAllCaches();
+}
 
 
 /**
@@ -1831,52 +1151,6 @@ function getScreenInfo() {
         Orientation: ${screen.orientation ? screen.orientation.type : 'Non disponible'}
     `.trim();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
