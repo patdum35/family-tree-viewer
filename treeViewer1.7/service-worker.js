@@ -42,12 +42,8 @@ const RESOURCES_TO_CACHE = [
   './libs/leaflet.js',
   './libs/leaflet.css',
   
-  // Ressources généalogiques critiques
-  // './arbre.enc',
-  // './arbreX.enc',
   
-  // Quelques images de base
-  // './background_images/fort_lalatte.jpg',
+  // icones et manifest
   './icons/icon-192x192.png',
   './manifest.webmanifest'
 ];
@@ -179,9 +175,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Ne pas intercepter les tuiles de carte
+  // Ne pas intercepter les tuiles de carte, les jpg, les enc, les mp3, les json
   if (event.request.url.includes('/maps/') || 
       event.request.url.includes('tile.openstreetmap') ||
+      event.request.url.endsWith('.jpg') ||
+      event.request.url.endsWith('.enc') ||
+      event.request.url.endsWith('.mp3') ||
+      event.request.url.endsWith('.json') ||
       event.request.headers.get('X-Requested-With') === 'no-sw-intercept') {
     return;
   }
@@ -317,21 +317,6 @@ self.addEventListener('activate', (event) => {
         './libs/react.production.min.js',
         './libs/react-dom.production.min.js',
         './libs/d3.layout.cloud.min.js',
-        // './geolocalisation.json',
-        // './geolocalisationX.json',
-        // './background_images/contemporain.jpg',
-        // './background_images/republique.jpg',
-        // './background_images/thomas.jpg',
-        // './background_images/steph.jpg',
-        // './background_images/garand.jpg',
-        // './background_images/charlemagne.jpg',
-        // './background_images/hugues.jpg',
-        // './background_images/brigitte.jpg',
-        // './background_images/kamber.jpg',
-        // './background_images/pharabert.jpg',
-        // './background_images/dominique.jpg',
-        // './background_images/riad.jpg',
-        // './sounds/lalatte_remix.mp3'
       ];
 
       // Attendre un peu pour ne pas interférer avec l'activation
