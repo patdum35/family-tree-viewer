@@ -182,6 +182,8 @@ self.addEventListener('fetch', (event) => {
       event.request.url.endsWith('.enc') ||
       event.request.url.endsWith('.mp3') ||
       event.request.url.endsWith('.json') ||
+      event.request.url.endsWith('.jpx') ||
+      event.request.url.endsWith('.mpx') ||
       event.request.headers.get('X-Requested-With') === 'no-sw-intercept') {
     return;
   }
@@ -278,6 +280,7 @@ self.addEventListener('activate', (event) => {
         './js/audioPlayer.js',
         './js/backgroundManager.js',
         './js/dateUI.js',
+        './js/debugLogUtils.js',
         './js/directHamburgerMenu.js',
         './js/eventHandlers.js',
         './js/gedcomParser.js',

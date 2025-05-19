@@ -1,10 +1,4 @@
-// const CACHE_NAME = 'treeViewer-app-v3';
-// if (typeof CACHE_NAME === 'undefined') {
-//     const CACHE_NAME = 'treeViewer-app-v4';
-//   }
-
-
-  // cacheConfig.js - Seul endroit où le nom du cache est défini
+ // cacheConfig.js - Seul endroit où le nom du cache est défini
 const CACHE_NAME = 'treeViewer-app-v4';
 
 // Exporter pour le contexte de Service Worker
