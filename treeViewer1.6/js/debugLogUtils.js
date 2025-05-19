@@ -1060,76 +1060,136 @@ async function analyzeCache(cacheName, title) {
     }
 }
 
+// /**
+//  * Recherche des doublons entre les différents caches
+//  */
+// async function findDuplicates(cacheNames) {
+//     const filesByCache = {};
+//     const filesByType = {
+//         'enc': new Set(),
+//         'jpg': new Set(),
+//         'mp3': new Set(),
+//         'json': new Set()
+//     };
+    
+//     // Collecter tous les fichiers par cache
+//     for (const cacheName of cacheNames) {
+//         const cache = await caches.open(cacheName);
+//         const entries = await cache.keys();
+        
+//         filesByCache[cacheName] = entries.map(entry => {
+//             const url = entry.url;
+//             const fileName = url.split('/').pop();
+//             return { url, fileName };
+//         });
+        
+//         // Regrouper par type
+//         for (const entry of filesByCache[cacheName]) {
+//             const ext = entry.fileName.split('.').pop().toLowerCase();
+//             if (filesByType[ext]) {
+//                 filesByType[ext].add(entry.fileName);
+//             }
+//         }
+//     }
+    
+//     // Compter les doublons
+//     const duplicates = {};
+    
+//     for (const ext of Object.keys(filesByType)) {
+//         const fileNames = Array.from(filesByType[ext]);
+        
+//         for (const fileName of fileNames) {
+//             duplicates[fileName] = {
+//                 count: 0,
+//                 caches: []
+//             };
+            
+//             // Chercher dans chaque cache
+//             for (const [cacheName, files] of Object.entries(filesByCache)) {
+//                 const found = files.some(file => file.fileName === fileName);
+                
+//                 if (found) {
+//                     duplicates[fileName].count++;
+//                     duplicates[fileName].caches.push(cacheName);
+//                 }
+//             }
+//         }
+//     }
+    
+//     // Afficher les résultats
+//     let hasDuplicates = false;
+    
+//     for (const [fileName, info] of Object.entries(duplicates)) {
+//         if (info.count > 1) {
+//             hasDuplicates = true;
+//             debugLog(`⚠️ "${fileName}" présent dans ${info.count} caches: ${info.caches.join(', ')}`, 'warning');
+//         }
+//     }
+    
+//     if (!hasDuplicates) {
+//         debugLog("✅ Aucun doublon détecté entre les caches", 'success');
+//     }
+// }
+
+
+
 /**
- * Recherche des doublons entre les différents caches
+ * Recherche des doublons entre les différents caches - Version corrigée
  */
 async function findDuplicates(cacheNames) {
-    const filesByCache = {};
-    const filesByType = {
-        'enc': new Set(),
-        'jpg': new Set(),
-        'mp3': new Set(),
-        'json': new Set()
-    };
+    // Créer un dictionnaire pour stocker tous les fichiers par URL complète
+    const fileUrlMap = new Map();
     
-    // Collecter tous les fichiers par cache
+    // Collecter tous les fichiers par URL
     for (const cacheName of cacheNames) {
         const cache = await caches.open(cacheName);
         const entries = await cache.keys();
         
-        filesByCache[cacheName] = entries.map(entry => {
+        for (const entry of entries) {
             const url = entry.url;
-            const fileName = url.split('/').pop();
-            return { url, fileName };
-        });
-        
-        // Regrouper par type
-        for (const entry of filesByCache[cacheName]) {
-            const ext = entry.fileName.split('.').pop().toLowerCase();
-            if (filesByType[ext]) {
-                filesByType[ext].add(entry.fileName);
-            }
-        }
-    }
-    
-    // Compter les doublons
-    const duplicates = {};
-    
-    for (const ext of Object.keys(filesByType)) {
-        const fileNames = Array.from(filesByType[ext]);
-        
-        for (const fileName of fileNames) {
-            duplicates[fileName] = {
-                count: 0,
-                caches: []
-            };
             
-            // Chercher dans chaque cache
-            for (const [cacheName, files] of Object.entries(filesByCache)) {
-                const found = files.some(file => file.fileName === fileName);
-                
-                if (found) {
-                    duplicates[fileName].count++;
-                    duplicates[fileName].caches.push(cacheName);
-                }
+            if (!fileUrlMap.has(url)) {
+                fileUrlMap.set(url, {
+                    count: 0,
+                    caches: []
+                });
             }
+            
+            const info = fileUrlMap.get(url);
+            info.count++;
+            info.caches.push(cacheName);
         }
     }
     
-    // Afficher les résultats
+    // Identifier les vrais doublons (même URL complète dans plusieurs caches)
     let hasDuplicates = false;
+    let duplicateCount = 0;
     
-    for (const [fileName, info] of Object.entries(duplicates)) {
+    for (const [url, info] of fileUrlMap.entries()) {
         if (info.count > 1) {
             hasDuplicates = true;
-            debugLog(`⚠️ "${fileName}" présent dans ${info.count} caches: ${info.caches.join(', ')}`, 'warning');
+            duplicateCount++;
+            
+            // Extraire le nom du fichier pour l'affichage
+            const fileName = url.split('/').pop();
+            debugLog(`⚠️ "${fileName}" (${url}) présent dans ${info.count} caches: ${info.caches.join(', ')}`, 'warning');
+            
+            // Limiter l'affichage si trop de doublons
+            if (duplicateCount >= 10) {
+                debugLog(`... et d'autres doublons (limite d'affichage atteinte)`, 'warning');
+                break;
+            }
         }
     }
     
     if (!hasDuplicates) {
-        debugLog("✅ Aucun doublon détecté entre les caches", 'success');
+        debugLog("✅ Aucun doublon détecté entre les caches (URLs identiques)", 'success');
+    } else {
+        debugLog(`Total: ${duplicateCount} URLs dupliquées entre les caches`, 'warning');
     }
 }
+
+
 
 /**
  * Remplacer la fonction checkCache existante par celle-ci

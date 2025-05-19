@@ -21,21 +21,23 @@ const RESOURCES_TO_CACHE = [
   
   // Images
   './background_images/contemporain.jpg',
-  './background_images/republique.jpg',
   './background_images/fort_lalatte.jpg',
-  './background_images/thomas.jpg',
-  './background_images/steph.jpg',
-  './background_images/garand.jpg',
-  './background_images/charlemagne.jpg',
-  './background_images/hugues.jpg',
-  './background_images/brigitte.jpg',
-  './background_images/kamber.jpg',
-  './background_images/pharabert.jpg',
-  './background_images/dominique.jpg',
-  './background_images/riad.jpg',
+  './background_images/contemporain.jpx',
+  './background_images/republique.jpg',
+  './background_images/fort_lalatte.jpx',
+  './background_images/thomas.jpx',
+  './background_images/steph.jpx',
+  './background_images/garand.jpx',
+  './background_images/charlemagne.jpx',
+  './background_images/hugues.jpx',
+  './background_images/brigitte.jpx',
+  './background_images/kamber.jpx',
+  './background_images/pharabert.jpx',
+  './background_images/dominique.jpx',
+  './background_images/riad.jpx',
   
   // Sons
-  './sounds/lalatte_remix.mp3'
+  './sounds/lalatte.mpx'
 ];
 
 /**

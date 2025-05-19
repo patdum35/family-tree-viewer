@@ -2,7 +2,7 @@
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
 import { state } from './main.js';
 import { getCachedResourceUrl } from './photoPlayer.js';
-// 1. Ajout des variables pour gérer le lecteur audio
+
 let animationAudio = null;
 let animationAudioPlayer = null;
 let isAudioPlayerVisible = false;
@@ -10,84 +10,15 @@ let isAudioPlayerVisible = false;
 
 
 /**
- * Obtient simplement le chemin du répertoire du HTML actuel
- * @returns {string} Le chemin du répertoire
- */
-function getCurrentDirectory() {
-    // Obtient l'URL complète de la page actuelle
-    const currentUrl = window.location.href;
-    
-    // Trouver la dernière barre oblique avant un éventuel nom de fichier ou paramètres
-    const lastSlashIndex = currentUrl.lastIndexOf('/');
-    
-    // Extraire tout ce qui est avant cette barre (le répertoire)
-    if (lastSlashIndex > 0) {
-        return currentUrl.substring(0, lastSlashIndex);
-    }
-    
-    // Si pas de barre, retourner l'URL complète (cas rare)
-    return currentUrl;
-}
-
-/**
- * Résout simplement un chemin relatif par rapport au répertoire actuel
- * @param {string} relativePath - Chemin relatif (avec ou sans /)
- * @returns {string} Chemin complet
- */
-function getResourceUrl(relativePath) {
-    // S'assurer que le chemin relatif commence par /
-    const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-    
-    // Combiner avec le répertoire courant
-    return `${getCurrentDirectory()}${normalizedPath}`;
-}
-
-
-
-
-/**
- * Crée et configure l'élément audio
- * @returns {HTMLAudioElement} Élément audio configuré
- */
-// function createAudioElement() {
-//     if (animationAudio) return animationAudio;
-
-
-//     // Chemin complet vers le fichier audio
-//     const audioUrl = getResourceUrl('/sounds/lalatte_remix.mp3');
-//     console.log("\n\n Chargement audio depuis:", audioUrl);
-
-
-
-
-    
-//     // Créer l'élément audio
-//     animationAudio = new Audio(audioUrl);
-
-
-
-//     // animationAudio = new Audio('/sounds/lalatte_remix.mp3');
-//     animationAudio.loop = true; // Option pour boucler la lecture
-//     // animationAudio.volume = 0.3; // Volume par défaut
-//     animationAudio.volume = restoreAudioVolume();
-    
-//     // Précharger le son
-//     animationAudio.load();
-    
-//     return animationAudio;
-// }
-
-
-
-/**
  * Crée et configure l'élément audio avec support du mode hors ligne
- * @returns {HTMLAudioElement} Élément audio configuré
+ * @returns {Promise<HTMLAudioElement>} Élément audio configuré
  */
-async function createAudioElement() {
+export async function createAudioElement() {
     if (animationAudio) return animationAudio;
 
-    // Chemin vers le fichier audio
-    const audioPath = '/sounds/lalatte_remix.mp3';
+    // Chemin vers le fichier audio chiffré (avec extension .mpx)
+    const audioPath = '/sounds/lalatte.mpx';
+
     
     try {
         // Récupérer l'URL (cache ou directe selon connectivité)
@@ -106,18 +37,27 @@ async function createAudioElement() {
     } catch (error) {
         console.error("Erreur lors du chargement audio:", error);
         
-        // Fallback en cas d'erreur
-        const directUrl = getResourceUrl(audioPath);
-        animationAudio = new Audio(directUrl);
-        animationAudio.loop = true;
-        animationAudio.volume = restoreAudioVolume();
-        animationAudio.load();
-        
-        return animationAudio;
+        // Fallback en cas d'erreur - essayer avec le MP3 normal
+        try {
+            const fallbackPath = '/sounds/lalatte_remix.mp3';
+            const directUrl = await getCachedResourceUrl(fallbackPath);
+            
+            animationAudio = new Audio(directUrl);
+            animationAudio.loop = true;
+            animationAudio.volume = restoreAudioVolume();
+            animationAudio.load();
+            
+            return animationAudio;
+        } catch (fallbackError) {
+            console.error("Erreur avec le fallback audio:", fallbackError);
+            // Créer un élément audio vide en dernier recours
+            animationAudio = new Audio();
+            animationAudio.loop = true;
+            animationAudio.volume = 0.5;
+            return animationAudio;
+        }
     }
 }
-
-
 
 
 /**

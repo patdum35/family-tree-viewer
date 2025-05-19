@@ -163,8 +163,8 @@ window.toggleAnimationPause = toggleAnimationPause;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Lancer le préchargement des tuiles en tâche de fond
-    initTilePreloading();
     initResourcePreloading();
+    initTilePreloading();
 });
 
 
@@ -1781,59 +1781,6 @@ function detectDeviceType() {
   
   return deviceInfo;
 }
-
-
-// export function returnToLogin() {
-//     // Masquer l'arbre
-//     document.getElementById('tree-container').style.display = 'none';
-    
-    
-//     // Masquer le menu hamburger
-//     //hideHamburgerMenu();
-    
-//     // Afficher le formulaire de mot de passe
-//     document.getElementById('password-form').style.display = 'flex';
-    
-//     // Réafficher le bouton des paramètres de la page d'accueil
-//     const settingsButton = document.getElementById('load-gedcom-button');
-//     if (settingsButton) {
-//         settingsButton.style.display = 'block';
-//     }
-    
-//     // Réinitialiser le champ de mot de passe
-//     document.getElementById('password').value = '';
-    
-//     // Réinitialiser rootPersonId dans l'objet state
-//     import('./js/main.js').then(module => {
-//         if (module.state) {
-//             module.state.rootPersonId = null;
-//             module.state.rootPerson = null;
-//             // Réinitialiser d'autres propriétés si nécessaire
-//             module.state.isAnimationLaunched = false;
-//         }
-//     }).catch(err => console.error('Erreur lors de la réinitialisation de state:', err));
-    
-//     // Restaurer le fond d'écran de connexion s'il a été supprimé
-//     const loginBackground = document.querySelector('.login-background');
-//     if (!loginBackground) {
-//         const newLoginBackground = document.createElement('div');
-//         newLoginBackground.className = 'login-background';
-//         const backgroundImage = document.createElement('img');
-//         backgroundImage.src = 'background_images/contemporain.jpg';
-//         backgroundImage.className = 'login-background-image';
-//         backgroundImage.alt = 'Fond d\'écran';
-//         newLoginBackground.appendChild(backgroundImage);
-//         document.body.insertBefore(newLoginBackground, document.body.firstChild);
-//     }
-    
-//     // Quitter le mode plein écran si actif
-//     if (document.fullscreenElement) {
-//         document.exitFullscreen().catch(err => console.error(err));
-//     }
-// }
-
-// window.returnToLogin = returnToLogin;
-
 
 
 

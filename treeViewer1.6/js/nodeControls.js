@@ -875,7 +875,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
         offset_generation = state.currentTree.generation + 1;
 
         updateGenerationCount();
-        // console.log("⭐ Cas spécial: le parent du descendant est la racine (gen 0) : 1 seule racine");
+        console.log("⭐ Cas spécial: le parent du descendant est la racine (gen 0) : 1 seule racine");
 
         // rechercher les 2 parents du descendantData_all[0]
         const person = state.gedcomData.individuals[descendantData_all[0].id];
@@ -983,7 +983,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     // on peut passer par là en virtual root
     else if (descendantGeneration < 1 ) {
 
-        // console.log("⭐ Cas spécial: descendantGeneration < 1 :  out virtual root , gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
+        console.log("⭐ Cas spécial: descendantGeneration < 1 :  out virtual root , gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
         if (descendantGeneration - offset_generation < 0)
         {
             updateGenerationCount();
@@ -1222,7 +1222,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     // cas ou on ajoute des branches descendante mais pas encore besoin de virtual root car descendantGeneration >=1
     // mais après on peut passer par là aussi en virtual root
     else if (descendantGeneration >= 1) {
-        // console.log("⭐ Cas spécial: descendantGeneration >= 1, gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
+        console.log("⭐ Cas spécial: descendantGeneration >= 1, gen=", descendantGeneration, "racine gen", originalTree.generation, ", input virtual root ?", originalTree.isVirtualRoot );
         let descendantNodes = [];
 
         let descendantNode0;
