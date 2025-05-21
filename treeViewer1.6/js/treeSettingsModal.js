@@ -6,6 +6,252 @@ import { setTargetAncestorId } from './treeAnimation.js';
 import { updatePrenoms } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
 
+
+
+// Traductions pour les éléments de l'interface
+const settingsTranslations = {
+    'fr': {
+        'settingsTitle': 'Paramètres Avancés',
+        'backgroundTab': 'Fond d\'écran',
+        'diversTab': 'Divers',
+        'geolocTab': 'Géoloc',
+        'backgroundType': 'Type de fond',
+        'opacity': 'Opacité',
+        'patternDetail': 'Détail motifs',
+        'animation': 'Animation',
+        'speed': 'Vitesse',
+        'color': 'Couleur',
+        'hue': 'Teinte:',
+        'saturation': 'Satur.:',
+        'brightness': 'Lumin.:',
+        'selectImage': 'Sélectionner une image...',
+        'targetAncestorId': 'ID de l\'Ancêtre Cible',
+        'enterAncestorId': 'Entrez l\'ID de l\'ancêtre',
+        'save': 'Enregistrer',
+        'firstNameCount': 'Nombre de Prénoms',
+        'geolocInfo': 'La fonctionnalité de géolocalisation utilise l\'interface existante.',
+        'openGeolocInterface': 'Ouvrir l\'interface de géolocalisation',
+        'settingsApplied': 'Paramètres appliqués avec succès!',
+        'enterValidId': 'Veuillez entrer un ID valide',
+        'ancestorIdSaved': 'ID de l\'ancêtre enregistré avec succès !',
+        'firstNameCountUpdated': 'Nombre de prénoms mis à jour',
+        'applyingBackground': 'Application du fond:',
+        'none': 'Aucun fond',
+        'image': 'Image',
+        'bubbles': 'Bubbles',
+        'bubblesPopup': 'Bubbles pop',
+        'treeBranches': 'Branches d\'arbre',
+        'fallingLeaves': 'Feuilles tombantes',
+        'growingTree': 'Arbre qui pousse',
+        'parchment': 'Parchemin',
+        'grid': 'Grille',
+        'paperTexture': 'Texture papier',
+        'fractal': 'Motif fractal',
+        'art': 'Art',
+        'artDeco': 'Art Déco',
+        'organicPattern': 'Motif organique',
+        'curvedLines': 'Lignes courbes',
+        'simpleBackground': 'Simple',
+        'treeRings': 'Anneaux d\'arbre',
+        
+        // Messages système
+        'errorApplyingBackground': 'Erreur lors de l\'application du fond:',
+        'restoring': 'Tentative de restauration du fond précédent:',
+        'mainSvgNotFound': 'SVG principal non trouvé',
+        
+        // Autres éléments d'interface
+        'close': 'Fermer',
+        'apply': 'Appliquer',
+        'restore': 'Restaurer',
+        'cancel': 'Annuler'
+    },
+    'en': {
+        'settingsTitle': 'Advanced Settings',
+        'backgroundTab': 'Background',
+        'diversTab': 'Miscellaneous',
+        'geolocTab': 'Geoloc',
+        'backgroundType': 'Background type',
+        'opacity': 'Opacity',
+        'patternDetail': 'Pattern detail',
+        'animation': 'Animation',
+        'speed': 'Speed',
+        'color': 'Color',
+        'hue': 'Hue:',
+        'saturation': 'Sat.:',
+        'brightness': 'Light.:',
+        'selectImage': 'Select an image...',
+        'targetAncestorId': 'Target Ancestor ID',
+        'enterAncestorId': 'Enter ancestor ID',
+        'save': 'Save',
+        'firstNameCount': 'First Name Count',
+        'geolocInfo': 'The geolocation feature uses the existing interface.',
+        'openGeolocInterface': 'Open geolocation interface',
+        'settingsApplied': 'Settings applied successfully!',
+        'enterValidId': 'Please enter a valid ID',
+        'ancestorIdSaved': 'Ancestor ID saved successfully!',
+        'firstNameCountUpdated': 'First name count updated',
+        'applyingBackground': 'Applying background:',
+        'none': 'No background',
+        'image': 'Image',
+        'bubbles': 'Bubbles',
+        'bubblesPopup': 'Bubbles popup',
+        'treeBranches': 'Tree branches',
+        'fallingLeaves': 'Falling leaves',
+        'growingTree': 'Growing tree',
+        'parchment': 'Parchment',
+        'grid': 'Grid',
+        'paperTexture': 'Paper texture',
+        'fractal': 'Fractal pattern',
+        'art': 'Art',
+        'artDeco': 'Art Deco',
+        'organicPattern': 'Organic Pattern',
+        'curvedLines': 'Curved Lines',
+        'simpleBackground': 'Simple',
+        'treeRings': 'Tree Rings',
+        
+        // Messages système
+        'errorApplyingBackground': 'Error applying background:',
+        'restoring': 'Attempting to restore previous background:',
+        'mainSvgNotFound': 'Main SVG not found',
+        
+        // Autres éléments d'interface
+        'close': 'Close',
+        'apply': 'Apply',
+        'restore': 'Restore',
+        'cancel': 'Cancel'
+    },
+    'es': {
+        'settingsTitle': 'Configuración Avanzada',
+        'backgroundTab': 'Fondo',
+        'diversTab': 'Varios',
+        'geolocTab': 'Geoloc',
+        'backgroundType': 'Tipo de fondo',
+        'opacity': 'Opacidad',
+        'patternDetail': 'Detalle del patrón',
+        'animation': 'Animación',
+        'speed': 'Velocidad',
+        'color': 'Color',
+        'hue': 'Tono:',
+        'saturation': 'Satur.:',
+        'brightness': 'Lumin.:',
+        'selectImage': 'Seleccionar una imagen...',
+        'targetAncestorId': 'ID del Ancestro Objetivo',
+        'enterAncestorId': 'Introduzca el ID del ancestro',
+        'save': 'Guardar',
+        'firstNameCount': 'Número de Nombres',
+        'geolocInfo': 'La función de geolocalización utiliza la interfaz existente.',
+        'openGeolocInterface': 'Abrir interfaz de geolocalización',
+        'settingsApplied': '¡Configuración aplicada con éxito!',
+        'enterValidId': 'Por favor, introduzca un ID válido',
+        'ancestorIdSaved': '¡ID del ancestro guardado con éxito!',
+        'firstNameCountUpdated': 'Número de nombres actualizado',
+        'applyingBackground': 'Aplicando fondo:',
+        'none': 'Sin fondo',
+        'image': 'Imagen',
+        'bubbles': 'Burbujas',
+        'bubblesPopup': 'Burbujas emergentes',
+        'treeBranches': 'Ramas de árbol',
+        'fallingLeaves': 'Hojas cayendo',
+        'growingTree': 'Árbol creciendo',
+        'parchment': 'Pergamino',
+        'grid': 'Cuadrícula',
+        'paperTexture': 'Textura de papel',
+        'fractal': 'Patrón fractal',
+        'art': 'Arte',
+        'artDeco': 'Art Decó',
+        'organicPattern': 'Patrón orgánico',
+        'curvedLines': 'Líneas curvas',
+        'simpleBackground': 'Simple',
+        'treeRings': 'Anillos de árbol',
+        
+        // Messages système
+        'errorApplyingBackground': 'Error al aplicar el fondo:',
+        'restoring': 'Intentando restaurar el fondo anterior:',
+        'mainSvgNotFound': 'SVG principal no encontrado',
+        
+        // Autres éléments d'interface
+        'close': 'Cerrar',
+        'apply': 'Aplicar',
+        'restore': 'Restaurar',
+        'cancel': 'Cancelar'
+    },
+    'hu': {
+        'settingsTitle': 'Speciális Beállítások',
+        'backgroundTab': 'Háttér',
+        'diversTab': 'Egyéb',
+        'geolocTab': 'Geoloc',
+        'backgroundType': 'Háttér típusa',
+        'opacity': 'Átlátszóság',
+        'patternDetail': 'Minta részletessége',
+        'animation': 'Animáció',
+        'speed': 'Sebesség',
+        'color': 'Szín',
+        'hue': 'Árnyalat:',
+        'saturation': 'Telít.:',
+        'brightness': 'Fény.:',
+        'selectImage': 'Kép kiválasztása...',
+        'targetAncestorId': 'Célős Azonosítója',
+        'enterAncestorId': 'Adja meg az ős azonosítóját',
+        'save': 'Mentés',
+        'firstNameCount': 'Keresztnevek Száma',
+        'geolocInfo': 'A geolokációs funkció a meglévő felületet használja.',
+        'openGeolocInterface': 'Geolokációs felület megnyitása',
+        'settingsApplied': 'Beállítások sikeresen alkalmazva!',
+        'enterValidId': 'Kérjük, adjon meg érvényes azonosítót',
+        'ancestorIdSaved': 'Az ős azonosítója sikeresen mentve!',
+        'firstNameCountUpdated': 'Keresztnevek száma frissítve',
+        'applyingBackground': 'Háttér alkalmazása:',
+        'none': 'Nincs háttér',
+        'image': 'Kép',
+        'bubbles': 'Buborékok',
+        'bubblesPopup': 'Felbukkanó buborékok',
+        'treeBranches': 'Faágak',
+        'fallingLeaves': 'Hulló levelek',
+        'growingTree': 'Növekvő fa',
+        'parchment': 'Pergamen',
+        'grid': 'Rács',
+        'paperTexture': 'Papír textúra',
+        'fractal': 'Fraktál minta',
+        'art': 'Művészet',
+        'artDeco': 'Art Deco',
+        'organicPattern': 'Organikus minta',
+        'curvedLines': 'Görbe vonalak',
+        'simpleBackground': 'Egyszerű',
+        'treeRings': 'Fa gyűrűk',
+        
+        // Messages système
+        'errorApplyingBackground': 'Hiba a háttér alkalmazásakor:',
+        'restoring': 'Kísérlet az előző háttér visszaállítására:',
+        'mainSvgNotFound': 'Fő SVG nem található',
+        
+        // Autres éléments d'interface
+        'close': 'Bezárás',
+        'apply': 'Alkalmazás',
+        'restore': 'Visszaállítás',
+        'cancel': 'Mégse'
+    }
+};
+
+// Fonction pour obtenir le texte traduit selon la langue actuelle
+function translateSettings(key) {
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    return settingsTranslations[currentLang]?.[key] || 
+           settingsTranslations['fr'][key] || 
+           key;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Restaurer la langue précédemment sélectionnée ou utiliser le français par défaut
+  const savedLanguage = localStorage.getItem('preferredLanguage') || 'fr';
+  window.CURRENT_LANGUAGE = savedLanguage;
+  
+  // Si un sélecteur de langue est déjà présent dans la page, le mettre à jour
+  const existingSelector = document.getElementById('language-selector');
+  if (existingSelector) {
+    existingSelector.value = savedLanguage;
+  }
+});
+
 // État des paramètres de fond d'écran avec vérification stricte des valeurs
 const backgroundSettings = {
     // type: localStorage.getItem('preferredBackground') || 'growingTree',
@@ -95,8 +341,47 @@ function createModalContainer() {
 
 function createTypeSelect(config) {
     // Définir les options et les valeurs correspondantes - Version compacte
-    const typeOptions = ['Aucun', 'Image', 'Bubbles', 'Bubbles Pop', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple'];
-    const typeOptionsExpanded = ['Aucun fond', 'Image', 'Bubbles', 'Bubbles pop', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Simple'];
+    // const typeOptions = ['Aucun', 'Image', 'Bubbles', 'Bubbles Pop', 'Branches', 'Feuilles', 'Arbre', 'Parchemin', 'Grille', 'Papier', 'Fractales', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux', 'Art Déco', 'Organique', 'Courbes', 'Simple'];
+    // const typeOptionsExpanded = ['Aucun fond', 'Image', 'Bubbles', 'Bubbles pop', 'Branches d\'arbre', 'Feuilles tombantes', 'Arbre qui pousse', 'Parchemin', 'Grille', 'Texture papier', 'Motif fractal', 'Pollock', 'Kandinsky', 'Miró', 'Mondrian', 'Anneaux d\'arbre', 'Art Déco', 'Motif organique', 'Lignes courbes', 'Simple'];
+
+    const typeOptions = [
+        translateSettings('none'), 
+        translateSettings('image'), 
+        'Bubbles', 
+        'Bubbles Pop', 
+        translateSettings('treeBranches'), 
+        translateSettings('fallingLeaves'), 
+        translateSettings('growingTree'), 
+        translateSettings('parchment'), 
+        translateSettings('grid'), 
+        translateSettings('paperTexture'), 
+        translateSettings('fractal'), 
+        'Pollock', 
+        'Kandinsky', 
+        'Miró', 
+        'Mondrian', 
+        translateSettings('art')
+    ];
+    
+    const typeOptionsExpanded = [
+        translateSettings('none'), 
+        translateSettings('image'), 
+        'Bubbles', 
+        translateSettings('bubblesPopup'), 
+        translateSettings('treeBranches'), 
+        translateSettings('fallingLeaves'), 
+        translateSettings('growingTree'), 
+        translateSettings('parchment'), 
+        translateSettings('grid'), 
+        translateSettings('paperTexture'), 
+        translateSettings('fractal'), 
+        'Pollock', 
+        'Kandinsky', 
+        'Miró', 
+        'Mondrian',
+        translateSettings('art')
+    ];
+
     const typeValues = ['none', 'customImage', 'bubbles', 'poppingBubbles', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground' ];
     
     // Utiliser createOptionsFromLists au lieu de créer manuellement la liste
@@ -206,7 +491,8 @@ function createModalContent() {
     titleContainer.style.alignItems = 'center';
     
     const title = document.createElement('h2');
-    title.textContent = 'Paramètres Avancés';
+    // title.textContent = 'Paramètres Avancés';
+    title.textContent = translateSettings('settingsTitle');
     title.style.margin = '0';
     title.style.fontSize = '16px';
     title.style.color = '#333';
@@ -244,7 +530,9 @@ function createModalContent() {
         applyAllSettings();
         
         // Afficher le feedback
-        showFeedback('Paramètres appliqués avec succès!', 'success');
+        // showFeedback('Paramètres appliqués avec succès!', 'success');
+        showFeedback(translateSettings('settingsApplied'), 'success');
+
         
         // Fermer la modale après un court délai pour voir le feedback
         setTimeout(() => {
@@ -270,7 +558,9 @@ function createTargetAncestorControls() {
     container.style.gap = '15px';
     
     // Section pour l'ID de l'ancêtre cible
-    const targetSection = createControlSection('ID de l\'Ancêtre Cible');
+    // const targetSection = createControlSection('ID de l\'Ancêtre Cible');
+    const targetSection = createControlSection(translateSettings('targetAncestorId'));
+
     
     const targetIdWrapper = document.createElement('div');
     targetIdWrapper.style.display = 'flex';
@@ -280,7 +570,8 @@ function createTargetAncestorControls() {
     targetIdInput.type = 'text';
     targetIdInput.id = 'targetAncestorId';
     targetIdInput.value = localStorage.getItem('targetAncestorId') || '@I741@';
-    targetIdInput.placeholder = 'Entrez l\'ID de l\'ancêtre';
+    // targetIdInput.placeholder = 'Entrez l\'ID de l\'ancêtre';
+    targetIdInput.placeholder = translateSettings('enterAncestorId');
     targetIdInput.style.flexGrow = '1';
     targetIdInput.style.padding = '8px 12px';
     targetIdInput.style.border = '1px solid #ccc';
@@ -288,7 +579,8 @@ function createTargetAncestorControls() {
     targetIdInput.style.fontSize = '14px';
     
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Enregistrer';
+    // saveButton.textContent = 'Enregistrer';
+    saveButton.textContent = translateSettings('save');
     saveButton.style.padding = '8px 15px';
     saveButton.style.backgroundColor = '#4CAF50';
     saveButton.style.color = 'white';
@@ -305,9 +597,11 @@ function createTargetAncestorControls() {
             
             // Utiliser la fonction de mise à jour
             setTargetAncestorId(targetId);
-            showFeedback('ID de l\'ancêtre enregistré avec succès !', 'success');
+            // showFeedback('ID de l\'ancêtre enregistré avec succès !', 'success');
+            showFeedback(translateSettings('ancestorIdSaved'), 'success');
         } else {
-            showFeedback('Veuillez entrer un ID valide', 'error');
+            // showFeedback('Veuillez entrer un ID valide', 'error');
+            showFeedback(translateSettings('enterValidId'), 'error');
         }
     });
     
@@ -317,7 +611,9 @@ function createTargetAncestorControls() {
     targetSection.appendChild(targetIdWrapper);
     
     // Section pour le nombre de prénoms
-    const prenomsSection = createControlSection('Nombre de Prénoms');
+    // const prenomsSection = createControlSection('Nombre de Prénoms');
+    const prenomsSection = createControlSection(translateSettings('firstNameCount'));
+
     
     const prenomsSelector = document.createElement('select');
     prenomsSelector.id = 'prenoms';
@@ -339,7 +635,8 @@ function createTargetAncestorControls() {
     
     prenomsSelector.addEventListener('change', () => {
         updatePrenoms(prenomsSelector.value);
-        showFeedback('Nombre de prénoms mis à jour', 'success');
+        // showFeedback('Nombre de prénoms mis à jour', 'success');
+        showFeedback(translateSettings('firstNameCountUpdated'), 'success');
     });
     
     prenomsSection.appendChild(prenomsSelector);
@@ -486,12 +783,15 @@ function createGeolocationControls() {
     
     // Message d'information
     const infoText = document.createElement('p');
-    infoText.textContent = "La fonctionnalité de géolocalisation utilise l'interface existante.";
+    // infoText.textContent = "La fonctionnalité de géolocalisation utilise l'interface existante.";
+    infoText.textContent = translateSettings('geolocInfo');
     infoText.style.margin = '10px 0';
     
     // Bouton pour ouvrir la modale de géolocalisation existante
     const openGeoModalButton = document.createElement('button');
-    openGeoModalButton.textContent = 'Ouvrir l\'interface de géolocalisation';
+    // openGeoModalButton.textContent = 'Ouvrir l\'interface de géolocalisation';
+    openGeoModalButton.textContent = translateSettings('openGeolocInterface');
+
     openGeoModalButton.style.padding = '12px 20px';
     openGeoModalButton.style.backgroundColor = '#4361ee';
     openGeoModalButton.style.color = 'white';
@@ -540,7 +840,9 @@ function applyBackground(backgroundType) {
     
     // Feedback immédiat
     if (window.showToast) {
-        window.showToast(`Application du fond: ${backgroundType}`, 2000);
+        // window.showToast(`Application du fond: ${backgroundType}`, 2000);
+        window.showToast(`${translateSettings('applyingBackground')} ${backgroundType}`, 2000);
+
     }
     
     // Importer le module de gestion de fond d'écran
@@ -657,7 +959,9 @@ function createBackgroundControls() {
     container.style.gap = '0px';
     
     // Type de fond (en ligne)
-    const typeSection = createControlSection('Type de fond', true);
+    // const typeSection = createControlSection('Type de fond', true);
+    const typeSection = createControlSection(translateSettings('backgroundType'), true);
+
     
     const typeSelector = createTypeSelect({
         type: backgroundSettings.type
@@ -679,7 +983,8 @@ function createBackgroundControls() {
     // Bouton pour image personnalisée
     const customImageButton = document.createElement('button');
     customImageButton.id = 'custom-image-button';
-    customImageButton.textContent = 'Sélectionner une image...';
+    // customImageButton.textContent = 'Sélectionner une image...';
+    customImageButton.textContent = translateSettings('selectImage');
     customImageButton.style.padding = '4px 8px';
     customImageButton.style.backgroundColor = '#4361ee';
     customImageButton.style.color = 'white';
@@ -712,7 +1017,9 @@ function createBackgroundControls() {
 
     
     // Opacité (en ligne avec slider plus petit)
-    const opacitySection = createControlSection('Opacité', true);
+    // const opacitySection = createControlSection('Opacité', true);
+    const opacitySection = createControlSection(translateSettings('opacity'), true);
+
     const opacitySlider = createSlider(backgroundSettings.opacity, 0, 1, 0.05, true);
     
     opacitySection.appendChild(opacitySlider);
@@ -726,7 +1033,9 @@ function createBackgroundControls() {
     });
     
     // Détail des motifs (en ligne avec slider plus petit)
-    const patternSection = createControlSection('Détail motifs', true);
+    // const patternSection = createControlSection('Détail motifs', true);
+    const patternSection = createControlSection(translateSettings('patternDetail'), true);
+
     const patternSlider = createSlider(backgroundSettings.patternVisibility, 0, 2, 0.1, true);
     patternSection.appendChild(patternSlider);
     
@@ -739,7 +1048,9 @@ function createBackgroundControls() {
     });
     
     // Section pour activer/désactiver l'animation (en ligne)
-    const animationSection = createControlSection('Animation', true);
+    // const animationSection = createControlSection('Animation', true);
+    const animationSection = createControlSection(translateSettings('animation'), true);
+
     
     // Créer un conteneur pour la case à cocher et son libellé
     const toggleContainer = document.createElement('div');
@@ -777,7 +1088,9 @@ function createBackgroundControls() {
     animationSection.appendChild(toggleContainer);
     
     // Section pour la vitesse d'animation (en ligne)
-    const speedSection = createControlSection('Vitesse', true);
+    // const speedSection = createControlSection('Vitesse', true);
+    const speedSection = createControlSection(translateSettings('speed'), true);
+
     const speedSlider = createSlider(backgroundSettings.animationSpeed, 0.1, 2, 0.1, true);
     speedSlider.id = 'speed-slider';
     
@@ -807,7 +1120,8 @@ function createBackgroundControls() {
 
     // Label plus court "Couleur"
     const colorTitle = document.createElement('h3');
-    colorTitle.textContent = 'Couleur';
+    // colorTitle.textContent = 'Couleur';
+    colorTitle.textContent = translateSettings('color');
     colorTitle.style.fontSize = '12px';
     colorTitle.style.margin = '0';
     colorTitle.style.marginRight = '5px'; // Réduit l'espace après le titre (de 10px à 5px)
@@ -903,7 +1217,8 @@ function createBackgroundControls() {
 
     
     const hueLabel = document.createElement('label');
-    hueLabel.textContent = 'Teinte:'; // Abréger le libellé
+    // hueLabel.textContent = 'Teinte:'; // Abréger le libellé
+    hueLabel.textContent = translateSettings('hue');
     hueLabel.style.width = '70px'; // Réduire la largeur
     hueLabel.style.fontSize = '12px'; // Plus petit
     hueLabel.style.width = "65px";       // Réduit légèrement la largeur du label
@@ -937,7 +1252,8 @@ function createBackgroundControls() {
     satContainer.style.gap = '5px'; // Réduit l'espacement
     
     const satLabel = document.createElement('label');
-    satLabel.textContent = 'Satur.:'; // Abréger le libellé
+    // satLabel.textContent = 'Satur.:'; // Abréger le libellé
+    satLabel.textContent = translateSettings('saturation');
     satLabel.style.width = '70px'; // Réduire la largeur
     satLabel.style.fontSize = '12px'; // Plus petit
     
@@ -969,7 +1285,8 @@ function createBackgroundControls() {
     valContainer.style.gap = '5px'; // Réduit l'espacement
     
     const valLabel = document.createElement('label');
-    valLabel.textContent = 'Lumin.:'; // Abréger le libellé
+    // valLabel.textContent = 'Lumin.:'; // Abréger le libellé
+    valLabel.textContent = translateSettings('brightness');
     valLabel.style.width = '70px'; // Réduire la largeur
     valLabel.style.fontSize = '12px'; // Plus petit
     
@@ -1154,12 +1471,17 @@ function createTabContainer() {
     tabHeaders.style.borderTopLeftRadius = '10px';
     tabHeaders.style.borderTopRightRadius = '10px';  
     
+    // const tabs = [
+    //     { id: 'background-tab', label: 'Fond d\'écran', active: true },
+    //     // Animation retiré
+    //     { id: 'target-ancestor-tab', label: 'Divers', active: false },
+    //     { id: 'geolocation-tab', label: 'Géoloc', active: false }
+    // ];
     const tabs = [
-        { id: 'background-tab', label: 'Fond d\'écran', active: true },
-        // Animation retiré
-        { id: 'target-ancestor-tab', label: 'Divers', active: false },
-        { id: 'geolocation-tab', label: 'Géoloc', active: false }
-    ];
+    { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
+    { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
+    { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
+];
     
     // Conserver le même code pour la création des onglets
     tabs.forEach(tab => {

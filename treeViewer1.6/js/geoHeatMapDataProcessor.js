@@ -5,82 +5,188 @@ import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
 import { createImprovedHeatmap } from './geoHeatMapUI.js';
 
 
+
+
+
 /**
- * Rafraîchit la heatmap avec les données actuelles
+ * Fonction de traduction spécifique pour geoHeatMapDataProcessor.js
  */
-// export async function refreshHeatmap() {
-//     // Si aucune heatmap n'est affichée, ne rien faire
-//     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-//     if (!heatmapWrapper) return;
-
-//     // Sauvegarder la position et taille actuelles avant de fermer
-//     saveHeatmapPosition();
-    
-//     // Afficher un indicateur de chargement
-//     const loadingOverlay = document.createElement('div');
-//     loadingOverlay.id = 'heatmap-loading-overlay';
-//     loadingOverlay.style.position = 'absolute';
-//     loadingOverlay.style.top = '0';
-//     loadingOverlay.style.left = '0';
-//     loadingOverlay.style.width = '100%';
-//     loadingOverlay.style.height = '100%';
-//     loadingOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-//     loadingOverlay.style.display = 'flex';
-//     loadingOverlay.style.justifyContent = 'center';
-//     loadingOverlay.style.alignItems = 'center';
-//     loadingOverlay.style.zIndex = '9500';
-//     loadingOverlay.innerHTML = '<div style="text-align: center;"><p>Mise à jour de la heatmap...</p><progress style="width: 200px;"></progress></div>';
-    
-//     // Remplacer l'overlay existant s'il y en a un
-//     const existingOverlay = document.getElementById('heatmap-loading-overlay');
-//     if (existingOverlay) existingOverlay.remove();
-    
-//     heatmapWrapper.appendChild(loadingOverlay);
-    
-//     try {
-//         // Fermer la heatmap actuelle
-//         const closeButton = document.getElementById('heatmap-close');
-//         if (closeButton) closeButton.click();
+function getHeatmapTranslation(key) {
+    const translations = {
+      'fr': {
+        // Textes des notifications et loading
+        'updatingHeatmap': 'Mise à jour de la heatmap...',
+        'updatingHeatmapFor': 'Mise à jour de la heatmap pour "{0}"...',
+        'noGeoDataForFilters': 'Aucune donnée géographique disponible pour les filtres actuels',
+        'noGeoDataForSelected': 'Aucune donnée géographique pour les personnes sélectionnées',
+        'heatmapUpdateError': 'Erreur lors de la mise à jour de la heatmap: {0}',
         
-//         // Un petit délai pour laisser la fermeture se terminer
-//         await new Promise(resolve => setTimeout(resolve, 100));
+        // Textes pour les titres de heatmap
+        'placesFor': 'Lieux pour {0}',
+        'heatmapTitle': 'Heatmap - "{0}" ({1} personnes)',
+        'heatmapTitleShort': '{0} ({1})',
         
-//         // Simuler un clic sur le bouton de carte pour générer une nouvelle heatmap
-//         // avec les filtres actuels
-//         const mapButton = document.querySelector('[title="Afficher la heatmap"]');
-//         if (mapButton) mapButton.click();
-
-
-//         // console.log("Tentative de création de l'événement personnalisé refreshPersonList");
-//         // console.log("Configuration actuelle:", nameCloudState.currentConfig);
-//         // Créer et dispatcher un événement personnalisé
-//         const refreshListEvent = new CustomEvent('refreshPersonList', {
-//             detail: {
-//                 config: nameCloudState.currentConfig,
-//                 timestamp: Date.now()
-//             }
-//         });
+        // Types d'événements
+        'birth': 'Naissance',
+        'death': 'Décès',
+        'residence': 'Résidence',
+        'marriage': 'Mariage',
+        'place': 'Lieu',
         
-//         document.dispatchEvent(refreshListEvent);
-//         // console.log("Événement personnalisé dispatché avec succès");
-
+        // Patterns pour l'extraction de texte
+        'patternFirstNameLastName': 'avec le (?:prénom|nom) "([^"]+)"',
+        'patternOccupation': 'avec la profession "([^"]+)"',
+        'patternLifespan': 'ayant vécu (\\d+) ans',
+        'patternProcreationAge': 'ayant eu un enfant à (\\d+) ans',
+        'patternPlace': 'ayant un lien avec le lieu ([^(]+)'
+      },
+      'en': {
+        // Textes des notifications et loading
+        'updatingHeatmap': 'Updating heatmap...',
+        'updatingHeatmapFor': 'Updating heatmap for "{0}"...',
+        'noGeoDataForFilters': 'No geographic data available for current filters',
+        'noGeoDataForSelected': 'No geographic data for selected people',
+        'heatmapUpdateError': 'Error updating heatmap: {0}',
         
-//     } catch (error) {
-//         console.error('Erreur lors du rafraîchissement de la heatmap:', error);
-//         if (document.contains(loadingOverlay)) loadingOverlay.remove();
-//         alert(`Erreur lors de la mise à jour de la heatmap: ${error.message}`);
-//     }
-
-      
+        // Textes pour les titres de heatmap
+        'placesFor': 'Places for {0}',
+        'heatmapTitle': 'Heatmap - "{0}" ({1} people)',
+        'heatmapTitleShort': '{0} ({1})',
+        
+        // Types d'événements
+        'birth': 'Birth',
+        'death': 'Death',
+        'residence': 'Residence',
+        'marriage': 'Marriage',
+        'place': 'Place',
+        
+        // Patterns pour l'extraction de texte
+        'patternFirstNameLastName': 'with (?:first|last) name "([^"]+)"',
+        'patternOccupation': 'with occupation "([^"]+)"',
+        'patternLifespan': 'who lived for (\\d+) years',
+        'patternProcreationAge': 'who had a child at (\\d+) years old',
+        'patternPlace': 'connected to the place ([^(]+)'
+      },
+      'es': {
+        // Textes des notifications et loading
+        'updatingHeatmap': 'Actualizando mapa de calor...',
+        'updatingHeatmapFor': 'Actualizando mapa de calor para "{0}"...',
+        'noGeoDataForFilters': 'No hay datos geográficos disponibles para los filtros actuales',
+        'noGeoDataForSelected': 'No hay datos geográficos para las personas seleccionadas',
+        'heatmapUpdateError': 'Error al actualizar el mapa de calor: {0}',
+        
+        // Textes pour les titres de heatmap
+        'placesFor': 'Lugares para {0}',
+        'heatmapTitle': 'Mapa de calor - "{0}" ({1} personas)',
+        'heatmapTitleShort': '{0} ({1})',
+        
+        // Types d'événements
+        'birth': 'Nacimiento',
+        'death': 'Fallecimiento',
+        'residence': 'Residencia',
+        'marriage': 'Matrimonio',
+        'place': 'Lugar',
+        
+        // Patterns pour l'extraction de texte
+        'patternFirstNameLastName': 'con (?:nombre|apellido) "([^"]+)"',
+        'patternOccupation': 'con profesión "([^"]+)"',
+        'patternLifespan': 'que vivieron (\\d+) años',
+        'patternProcreationAge': 'que tuvieron un hijo a los (\\d+) años',
+        'patternPlace': 'relacionadas con el lugar ([^(]+)'
+      },
+      'hu': {
+        // Textes des notifications et loading
+        'updatingHeatmap': 'Hőtérkép frissítése...',
+        'updatingHeatmapFor': 'Hőtérkép frissítése "{0}"...',
+        'noGeoDataForFilters': 'Nincs földrajzi adat az aktuális szűrőkhöz',
+        'noGeoDataForSelected': 'Nincs földrajzi adat a kiválasztott személyekhez',
+        'heatmapUpdateError': 'Hiba a hőtérkép frissítésekor: {0}',
+        
+        // Textes pour les titres de heatmap
+        'placesFor': 'Helyek ehhez: {0}',
+        'heatmapTitle': 'Hőtérkép - "{0}" ({1} személy)',
+        'heatmapTitleShort': '{0} ({1})',
+        
+        // Types d'événements
+        'birth': 'Születés',
+        'death': 'Halál',
+        'residence': 'Lakóhely',
+        'marriage': 'Házasság',
+        'place': 'Hely',
+        
+        // Patterns pour l'extraction de texte
+        'patternFirstNameLastName': '(?:keresztnév|vezetéknév) "([^"]+)"',
+        'patternOccupation': 'foglalkozás "([^"]+)"',
+        'patternLifespan': '(\\d+) évig éltek',
+        'patternProcreationAge': '(\\d+) évesen gyermeket vállalt',
+        'patternPlace': 'kapcsolódva a helyhez ([^(]+)'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
     
+    // Obtenir la traduction dans la langue actuelle ou en français par défaut
+    const translation = translations[currentLang]?.[key] || translations['fr'][key];
+    
+    // S'il y a des arguments supplémentaires, les insérer dans la chaîne
+    if (arguments.length > 1) {
+      return translation.replace(/\{(\d+)\}/g, (match, index) => {
+        const argIndex = parseInt(index, 10) + 1;
+        return argIndex < arguments.length ? arguments[argIndex] : match;
+      });
+    }
+    
+    return translation;
+  }
+  
+  /**
+   * Fonction utilitaire pour obtenir le type d'événement traduit
+   * @param {string} eventType - Type d'événement en français
+   * @returns {string} - Type d'événement traduit
+   */
+  function getTranslatedEventType(eventType) {
+    const eventTypeMap = {
+      'Naissance': 'birth',
+      'Décès': 'death',
+      'Résidence': 'residence',
+      'Mariage': 'marriage',
+      'Lieu': 'place'
+    };
+    
+    const key = eventTypeMap[eventType] || 'place';
+    return getHeatmapTranslation(key);
+  }
+  
+  /**
+   * Fonction pour extraire le texte de recherche en fonction de la langue courante
+   * @param {string} titleText - Texte du titre
+   * @returns {string|null} - Texte de recherche extrait ou null si aucune correspondance
+   */
+  function extractSearchTextFromTitle(titleText) {
+    // Liste des patterns à essayer, dans l'ordre
+    const patterns = [
+      getHeatmapTranslation('patternFirstNameLastName'),
+      getHeatmapTranslation('patternOccupation'),
+      getHeatmapTranslation('patternLifespan'),
+      getHeatmapTranslation('patternProcreationAge'),
+      getHeatmapTranslation('patternPlace')
+    ];
+    
+    // Essayer chaque pattern jusqu'à trouver une correspondance
+    for (const pattern of patterns) {
+      const regex = new RegExp(pattern);
+      const match = titleText.match(regex);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    
+    return null;
+  }
 
-// }
 
 
-
-
-
-// Dans geoHeatMapDataProcessor.js, remplacez la fonction refreshHeatmap par celle-ci:
 
 /**
  * Rafraîchit la heatmap avec les données actuelles
@@ -342,8 +448,18 @@ export async function createHeatmapDataForPeople(people) {
                 }
                 
                 // Ajouter l'événement
+                // locationDetails[place].events.push({
+                //     type: type,
+                //     name: person.name.replace(/\//g, '').trim(),
+                //     year: year
+                // });
+
+                // Utiliser la traduction pour le type d'événement
+                const translatedType = getTranslatedEventType(type);
+
+                // Ajouter l'événement
                 locationDetails[place].events.push({
-                    type: type,
+                    type: translatedType,
                     name: person.name.replace(/\//g, '').trim(),
                     year: year
                 });
@@ -435,7 +551,7 @@ export async function createHeatmapDataForPeople(people) {
                     } else {
                         // Fallback si pas de détails
                         heatmapData[key].locations.push({
-                            type: 'Lieu',
+                            type: getHeatmapTranslation('place'), //'Lieu',
                             name: place,
                             count: count
                         });
@@ -591,7 +707,8 @@ export async function createDataForHeatMap(config) {
                     } else {
                         // Fallback si pas de détails
                         heatmapData[key].locations.push({
-                            type: 'Lieu',
+                            // type: 'Lieu',
+                            type: getHeatmapTranslation('place'),
                             name: place,
                             count: count
                         });
@@ -763,7 +880,8 @@ export async function updateHeatmapIfVisible(text, people) {
                         } else {
                             // Fallback si pas de détails
                             heatmapData[key].locations.push({
-                                type: 'Lieu',
+                                // type: 'Lieu',
+                                type: getHeatmapTranslation('place'),
                                 name: place,
                                 count: count
                             });
@@ -795,10 +913,15 @@ export async function updateHeatmapIfVisible(text, people) {
             if (result.length > 0) {
                 // Créer un titre pour la heatmap
                 let heatmapTitle;
+                // if (window.innerWidth < 300) {
+                //     heatmapTitle = `${text} (${selectedPersons.length})`;
+                // } else {
+                //     heatmapTitle = `Heatmap - "${text}" (${selectedPersons.length} personnes)`;
+                // }
                 if (window.innerWidth < 300) {
-                    heatmapTitle = `${text} (${selectedPersons.length})`;
+                    heatmapTitle = getHeatmapTranslation('heatmapTitleShort', text, selectedPersons.length);
                 } else {
-                    heatmapTitle = `Heatmap - "${text}" (${selectedPersons.length} personnes)`;
+                    heatmapTitle = getHeatmapTranslation('heatmapTitle', text, selectedPersons.length);
                 }
                 
                 // Créer la nouvelle heatmap
@@ -806,7 +929,9 @@ export async function updateHeatmapIfVisible(text, people) {
             } else {
                 // Afficher un message si aucun lieu n'est disponible
                 const notification = document.createElement('div');
-                notification.textContent = 'Aucune donnée géographique pour les personnes sélectionnées';
+                // notification.textContent = 'Aucune donnée géographique pour les personnes sélectionnées';
+                notification.textContent = getHeatmapTranslation('noGeoDataForSelected');
+
                 notification.style.position = 'fixed';
                 notification.style.top = '20px';
                 notification.style.left = '50%';
@@ -830,7 +955,9 @@ export async function updateHeatmapIfVisible(text, people) {
             if (loadingOverlay.parentNode) {
                 loadingOverlay.remove();
             }
-            alert(`Erreur lors de la mise à jour de la heatmap: ${error.message}`);
+            // alert(`Erreur lors de la mise à jour de la heatmap: ${error.message}`);
+            alert(getHeatmapTranslation('heatmapUpdateError', error.message));
+
         }
     }, 100);
 }

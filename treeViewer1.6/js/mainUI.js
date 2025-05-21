@@ -160,10 +160,27 @@ function replaceTreeModeSelector() {
     const titleValue = originalSelect.getAttribute('title');
     
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Ascd', 'Asc.', 'Desd', 'Desc.', 'A+D']; 
-    const typeOptionsExpanded = ['Ascendants directs', 'Ascendants + fratrie', 'Descendants directs', 'Descendants + conjoints', 'Ascend+Descend'];          
+    let typeOptions = ['Ascd', 'Asc.', 'Desd', 'Desc.', 'A+D']; 
+    let typeOptionsExpanded = ['Ascendants directs', 'Ascendants + fratrie', 'Descendants directs', 'Descendants + conjoints', 'Ascend+Descend'];          
     const typeValues = ['directAncestors', 'ancestors', 'directDescendants', 'descendants', 'both'];
     
+
+    if (window.CURRENT_LANGUAGE === 'en') {  
+        // Traduire les options en anglais
+        typeOptions = ['dAnc', 'Anc.', 'dDes', 'Desc.', 'A+D'];   
+        typeOptionsExpanded = ['Direct Ancestors', 'Ancestors + Siblings', 'Direct Descendants', 'Descendants + Spouses', 'Ancest+Descend'];
+    } else if (window.CURRENT_LANGUAGE === 'es') {
+        // Traduire les options en espagnol
+        typeOptions = ['Antd', 'Ant.', 'Desd', 'Desc.', 'A+D']; 
+        typeOptionsExpanded = ['Antepasados ​​directos', 'Antepasados + hermanos', 'descendientes directos', 'descendientes + cónyuges', 'Ant+Desc'];
+    } else if (window.CURRENT_LANGUAGE === 'hu') {
+        // Traduire les options en hongrois
+        typeOptions = ['k.őse', 'Őse.', 'k.Les', 'Les.', 'Ő+L']; 
+        typeOptionsExpanded = ['Közvetlen őseink', 'Őseink + testvérek', 'Közvetlen leszármazottaink', 'Leszármazottaink + házastársak', 'Ős+Leszármazott'];
+    }
+
+
+
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
 
@@ -389,18 +406,18 @@ export function replaceRootPersonSelector(customOptions = null) {
         
 
 
-        let textDemo1, textDemo2;
-        if (state.treeOwner === 2 ) { 
-            textDemo1 = '--- démo Clou du spectacle ---';
-            textDemo2 = '--- démo Spain ---';
-        } else { 
-            textDemo1 = '--démo Costaud la Planche --';
-            textDemo2 = '--démo on descend tous de lui--'; 
-        }
+        // let textDemo1, textDemo2;
+        // if (state.treeOwner === 2 ) { 
+        //     textDemo1 = '--- démo Clou du spectacle ---';
+        //     textDemo2 = '--- démo Spain ---';
+        // } else { 
+        //     textDemo1 = '--démo Costaud la Planche --';
+        //     textDemo2 = '--démo on descend tous de lui--'; 
+        // }
 
-        // Ajouter les options pour les démos    
-        options.push({ value: 'demo1', label: textDemo1 });
-        options.push({ value: 'demo2', label: textDemo2 });
+        // // Ajouter les options pour les démos    
+        // options.push({ value: 'demo1', label: textDemo1 });
+        // options.push({ value: 'demo2', label: textDemo2 });
 
 
 
@@ -1271,32 +1288,291 @@ export function createImageSelectorDialog(onSelect) {
 
 // Définir les textes pour les attributs title (tooltip) et data-action (toast)
 export const texts = {
-    zoomIn: "Zoom avant",
-    zoomOut: "Zoom arrière",
-    resetZoom: "reset de l'affichage",
-    toggleSpeech: "eteindre/allumer le son",
-    toggleAnimationPause: "pause/Play de l'animation",
-    openSettingsModal: "paramètres",
-    toggleFullScreen: "désactive/active plein écran",
-    processNamesCloudWithDate: "visualisation en nuage \n : prénoms / noms / métiers / durée de vie / age de procréation / lieux",
-    rootPersonSearch: "entrer le prénom ou nom ou les premières lettres \n pour rechercher une personne racine et valider",
-    rootPersonResults: "selectionner la personne racine",
-    updateGenerations: "entrer le nombre maximum de génération à visualiser",
-    treeMode: "choisir le mode de visualisation de l'arbre en ancêtre, descendant ou les 2",
-    treeModeAncestors: "Affiche les ancêtres de la personne racine",
-    treeModeDescendants: "Affiche les descendants de la personne racine",
-    treeModeBoth: "Affiche à la fois les ancêtres et les descendants de la personne racine",
-    search: "recherche d'une personne dans la page courante",
-    prenoms: "nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l'arbre"
-};
+    // Fonction qui retourne le texte selon la langue actuelle
+    // get zoomIn() {
+    //   return getLocalizedText({
+    //     fr: "Zoom avant",
+    //     en: "Zoom in",
+    //     es: "Acercar"
+    //   });
+    // },
+    // get zoomOut() {
+    //   return getLocalizedText({
+    //     fr: "Zoom arrière",
+    //     en: "Zoom out",
+    //     es: "Alejar"
+    //   });
+    // },
+    // get resetZoom() {
+    //   return getLocalizedText({
+    //     fr: "reset de l'affichage",
+    //     en: "Reset view",
+    //     es: "Restablecer vista"
+    //   });
+    // },
+    // get toggleSpeech() {
+    //   return getLocalizedText({
+    //     fr: "eteindre/allumer le son",
+    //     en: "Toggle sound on/off",
+    //     es: "Activar/desactivar sonido"
+    //   });
+    // },
+    // get toggleAnimationPause() {
+    //   return getLocalizedText({
+    //     fr: "pause/Play de l'animation",
+    //     en: "Pause/Play animation",
+    //     es: "Pausar/Reproducir animación"
+    //   });
+    // },
+    // get openSettingsModal() {
+    //   return getLocalizedText({
+    //     fr: "paramètres",
+    //     en: "Settings",
+    //     es: "Configuración"
+    //   });
+    // },
+    // get toggleFullScreen() {
+    //   return getLocalizedText({
+    //     fr: "désactive/active plein écran",
+    //     en: "Toggle fullscreen",
+    //     es: "Activar/desactivar pantalla completa"
+    //   });
+    // },
+    // get processNamesCloudWithDate() {
+    //   return getLocalizedText({
+    //     fr: "visualisation en nuage \n : prénoms / noms / métiers / durée de vie / age de procréation / lieux",
+    //     en: "Cloud visualization: \n first names / surnames / occupations / lifespan / age of procreation / places",
+    //     es: "Visualización en nube: \n nombres / apellidos / ocupaciones / duración de vida / edad de procreación / lugares"
+    //   });
+    // },
+    // get rootPersonSearch() {
+    //   return getLocalizedText({
+    //     fr: "entrer le prénom ou nom ou les premières lettres \n pour rechercher une personne racine et valider",
+    //     en: "enter first or last name or first letters \n to search for a root person and validate",
+    //     es: "introduce nombre o apellido o primeras letras \n para buscar una persona raíz y validar"
+    //   });
+    // },
+    // get rootPersonResults() {
+    //   return getLocalizedText({
+    //     fr: "selectionner la personne racine",
+    //     en: "select root person",
+    //     es: "seleccionar persona raíz"
+    //   });
+    // },
+    // get updateGenerations() {
+    //   return getLocalizedText({
+    //     fr: "entrer le nombre maximum de génération à visualiser",
+    //     en: "enter maximum number of generations to display",
+    //     es: "introducir número máximo de generaciones a visualizar"
+    //   });
+    // },
+    // get treeMode() {
+    //   return getLocalizedText({
+    //     fr: "choisir le mode de visualisation de l'arbre en ancêtre, descendant ou les 2",
+    //     en: "choose tree visualization mode: ancestors, descendants or both",
+    //     es: "elegir modo de visualización del árbol: ancestros, descendientes o ambos"
+    //   });
+    // },
+    // get treeModeAncestors() {
+    //   return getLocalizedText({
+    //     fr: "Affiche les ancêtres de la personne racine",
+    //     en: "Show ancestors of root person",
+    //     es: "Mostrar ancestros de la persona raíz"
+    //   });
+    // },
+    // get treeModeDescendants() {
+    //   return getLocalizedText({
+    //     fr: "Affiche les descendants de la personne racine",
+    //     en: "Show descendants of root person",
+    //     es: "Mostrar descendientes de la persona raíz"
+    //   });
+    // },
+    // get treeModeBoth() {
+    //   return getLocalizedText({
+    //     fr: "Affiche à la fois les ancêtres et les descendants de la personne racine",
+    //     en: "Show both ancestors and descendants of root person",
+    //     es: "Mostrar tanto ancestros como descendientes de la persona raíz"
+    //   });
+    // },
+    // get search() {
+    //   return getLocalizedText({
+    //     fr: "recherche d'une personne dans la page courante",
+    //     en: "search for a person in current page",
+    //     es: "buscar una persona en la página actual"
+    //   });
+    // },
+    // get prenoms() {
+    //   return getLocalizedText({
+    //     fr: "nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l'arbre",
+    //     en: "number of first names between 1 and 4, to optimize the width of tree boxes",
+    //     es: "número de nombres entre 1 y 4, para optimizar el ancho de las casillas del árbol"
+    //   });
+    // }
 
-// Fonction pour appliquer les textes aux éléments
-export function applyTextDefinitions() {
+
+
+    get zoomIn() {
+        return getLocalizedText({
+          fr: "Zoom avant",
+          en: "Zoom in",
+          es: "Acercar",
+          hu: "Nagyítás"
+        });
+      },
+      get zoomOut() {
+        return getLocalizedText({
+          fr: "Zoom arrière",
+          en: "Zoom out",
+          es: "Alejar",
+          hu: "Kicsinyítés"
+        });
+      },
+      get resetZoom() {
+        return getLocalizedText({
+          fr: "reset de l'affichage",
+          en: "Reset view",
+          es: "Restablecer vista",
+          hu: "Nézet visszaállítása"
+        });
+      },
+      get toggleSpeech() {
+        return getLocalizedText({
+          fr: "eteindre/allumer le son",
+          en: "Toggle sound on/off",
+          es: "Activar/desactivar sonido",
+          hu: "Hang be/ki kapcsolása"
+        });
+      },
+      get toggleAnimationPause() {
+        return getLocalizedText({
+          fr: "pause/Play de l'animation",
+          en: "Pause/Play animation",
+          es: "Pausar/Reproducir animación",
+          hu: "Animáció szüneteltetése/lejátszása"
+        });
+      },
+      get openSettingsModal() {
+        return getLocalizedText({
+          fr: "paramètres",
+          en: "Settings",
+          es: "Configuración",
+          hu: "Beállítások"
+        });
+      },
+      get toggleFullScreen() {
+        return getLocalizedText({
+          fr: "désactive/active plein écran",
+          en: "Toggle fullscreen",
+          es: "Activar/desactivar pantalla completa",
+          hu: "Teljes képernyő be/ki"
+        });
+      },
+      get processNamesCloudWithDate() {
+        return getLocalizedText({
+          fr: "visualisation en nuage \n : prénoms / noms / métiers / durée de vie / age de procréation / lieux",
+          en: "Cloud visualization: \n first names / surnames / occupations / lifespan / age of procreation / places",
+          es: "Visualización en nube: \n nombres / apellidos / ocupaciones / duración de vida / edad de procreación / lugares",
+          hu: "Felhő vizualizáció: \n keresztnevek / vezetéknevek / foglalkozások / élettartam / szaporodási kor / helyek"
+        });
+      },
+      get rootPersonSearch() {
+        return getLocalizedText({
+          fr: "entrer le prénom ou nom ou les premières lettres \n pour rechercher une personne racine et valider",
+          en: "enter first or last name or first letters \n to search for a root person and validate",
+          es: "introduce nombre o apellido o primeras letras \n para buscar una persona raíz y validar",
+          hu: "adja meg a keresztnevet vagy vezetéknevet vagy az első betűket \n a gyökérszemély kereséséhez és érvényesítéséhez"
+        });
+      },
+      get rootPersonResults() {
+        return getLocalizedText({
+          fr: "selectionner la personne racine",
+          en: "select root person",
+          es: "seleccionar persona raíz",
+          hu: "gyökérszemély kiválasztása"
+        });
+      },
+      get updateGenerations() {
+        return getLocalizedText({
+          fr: "entrer le nombre maximum de génération à visualiser",
+          en: "enter maximum number of generations to display",
+          es: "introducir número máximo de generaciones a visualizar",
+          hu: "adja meg a megjelenítendő generációk maximális számát"
+        });
+      },
+      get treeMode() {
+        return getLocalizedText({
+          fr: "choisir le mode de visualisation de l'arbre en ancêtre, descendant ou les 2",
+          en: "choose tree visualization mode: ancestors, descendants or both",
+          es: "elegir modo de visualización del árbol: ancestros, descendientes o ambos",
+          hu: "válassza ki a fa megjelenítési módját: ősök, leszármazottak vagy mindkettő"
+        });
+      },
+      get treeModeAncestors() {
+        return getLocalizedText({
+          fr: "Affiche les ancêtres de la personne racine",
+          en: "Show ancestors of root person",
+          es: "Mostrar ancestros de la persona raíz",
+          hu: "A gyökérszemély őseinek megjelenítése"
+        });
+      },
+      get treeModeDescendants() {
+        return getLocalizedText({
+          fr: "Affiche les descendants de la personne racine",
+          en: "Show descendants of root person",
+          es: "Mostrar descendientes de la persona raíz",
+          hu: "A gyökérszemély leszármazottainak megjelenítése"
+        });
+      },
+      get treeModeBoth() {
+        return getLocalizedText({
+          fr: "Affiche à la fois les ancêtres et les descendants de la personne racine",
+          en: "Show both ancestors and descendants of root person",
+          es: "Mostrar tanto ancestros como descendientes de la persona raíz",
+          hu: "A gyökérszemély őseinek és leszármazottainak megjelenítése"
+        });
+      },
+      get search() {
+        return getLocalizedText({
+          fr: "recherche d'une personne dans la page courante",
+          en: "search for a person in current page",
+          es: "buscar una persona en la página actual",
+          hu: "személy keresése az aktuális oldalon"
+        });
+      },
+      get prenoms() {
+        return getLocalizedText({
+          fr: "nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l'arbre",
+          en: "number of first names between 1 and 4, to optimize the width of tree boxes",
+          es: "número de nombres entre 1 y 4, para optimizar el ancho de las casillas del árbol",
+          hu: "keresztnevek száma 1 és 4 között, a fa mezőinek szélességének optimalizálásához"
+        });
+      }
+  };
+
+
+
+  
+  
+  // Ajouter cette fonction d'aide pour récupérer le texte dans la langue actuelle
+  function getLocalizedText(translations) {
+    // Récupérer la langue actuelle depuis la variable globale ou utiliser 'fr' par défaut
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+
+
+    console.log("\n\n\n\n Langue actuelle:", currentLang, "\n\n\n\n");
+    
+    // Retourner la traduction dans la langue actuelle ou en français par défaut
+    return translations[currentLang] || translations['fr'];
+  }
+  
+  // Modifier la fonction applyTextDefinitions pour utiliser les getters dynamiques
+  export function applyTextDefinitions() {
     document.querySelectorAll('[data-text-key]').forEach(element => {
-        const key = element.getAttribute('data-text-key');
-        if (texts[key]) {
-            element.setAttribute('title', texts[key]);
-            element.setAttribute('data-action', texts[key]);
-        }
+      const key = element.getAttribute('data-text-key');
+      if (texts[key]) {
+        // Les propriétés sont maintenant des getters qui retournent le texte dans la langue actuelle
+        element.setAttribute('title', texts[key]);
+        element.setAttribute('data-action', texts[key]);
+      }
     });
-}
+  }

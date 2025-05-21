@@ -14,6 +14,76 @@ window.isIndividualMapMode = false;
 
 
 
+/**
+ * Fonction pour obtenir le titre traduit selon le type de configuration et la langue courante
+ * @param {string} name - Le nom/prénom/métier/âge/lieu à afficher dans le titre
+ * @param {number} count - Le nombre de personnes
+ * @param {Object} config - La configuration avec le type de données
+ * @returns {string} - Le titre traduit
+ */
+function getPersonsListTitle(name, count, config) {
+    const translations = {
+      'fr': {
+        'prenoms': `Personnes avec le prénom "${name}" (${count} personnes)`,
+        'noms': `Personnes avec le nom "${name}" (${count} personnes)`,
+        'professions': `Personnes avec la profession "${name}" (${count} personnes)`,
+        'duree_vie': `Personnes ayant vécu ${name} ans (${count} personnes)`,
+        'age_procreation': `Personnes ayant eu un enfant à ${name} ans (${count} personnes)`,
+        'age_marriage': `Personnes s'étant mariées à ${name} ans (${count} personnes)`,
+        'age_first_child': `Personnes ayant eu leur premier enfant à ${name} ans (${count} personnes)`,
+        'nombre_enfants': `Personnes ayant eu ${name} enfant(s) (${count} personnes)`,
+        'lieux': `Personnes ayant un lien avec le lieu ${name} (${count} personnes)`,
+        'default': `Personnes (${count})`
+      },
+      'en': {
+        'prenoms': `People with first name "${name}" (${count} people)`,
+        'noms': `People with last name "${name}" (${count} people)`,
+        'professions': `People with occupation "${name}" (${count} people)`,
+        'duree_vie': `People who lived for ${name} years (${count} people)`,
+        'age_procreation': `People who had a child at ${name} years old (${count} people)`,
+        'age_marriage': `People who got married at ${name} years old (${count} people)`,
+        'age_first_child': `People who had their first child at ${name} years old (${count} people)`,
+        'nombre_enfants': `People who had ${name} child(ren) (${count} people)`,
+        'lieux': `People connected to the place ${name} (${count} people)`,
+        'default': `People (${count})`
+      },
+      'es': {
+        'prenoms': `Personas con el nombre "${name}" (${count} personas)`,
+        'noms': `Personas con el apellido "${name}" (${count} personas)`,
+        'professions': `Personas con la profesión "${name}" (${count} personas)`,
+        'duree_vie': `Personas que vivieron ${name} años (${count} personas)`,
+        'age_procreation': `Personas que tuvieron un hijo a los ${name} años (${count} personas)`,
+        'age_marriage': `Personas que se casaron a los ${name} años (${count} personas)`,
+        'age_first_child': `Personas que tuvieron su primer hijo a los ${name} años (${count} personas)`,
+        'nombre_enfants': `Personas que tuvieron ${name} hijo(s) (${count} personas)`,
+        'lieux': `Personas relacionadas con el lugar ${name} (${count} personas)`,
+        'default': `Personas (${count})`
+      },
+      'hu': {
+        'prenoms': `Személyek "${name}" keresztnévvel (${count} személy)`,
+        'noms': `Személyek "${name}" vezetéknévvel (${count} személy)`,
+        'professions': `Személyek "${name}" foglalkozással (${count} személy)`,
+        'duree_vie': `Személyek, akik ${name} évig éltek (${count} személy)`,
+        'age_procreation': `Személyek, akik ${name} évesen gyermeket nemzettek (${count} személy)`,
+        'age_marriage': `Személyek, akik ${name} évesen házasodtak (${count} személy)`,
+        'age_first_child': `Személyek, akiknek ${name} évesen született az első gyermekük (${count} személy)`,
+        'nombre_enfants': `Személyek, akiknek ${name} gyermekük volt (${count} személy)`,
+        'lieux': `Személyek kapcsolódva a(z) ${name} helyhez (${count} személy)`,
+        'default': `Személyek (${count})`
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Récupérer les traductions pour la langue actuelle ou fallback vers le français
+    const langTranslations = translations[currentLang] || translations['fr'];
+    
+    // Retourner le titre pour le type de config ou le titre par défaut
+    return langTranslations[config.type] || langTranslations['default'];
+  }
+  
+
 export function showPersonsList(name, people, config) {
     
     
@@ -148,20 +218,21 @@ export function showPersonsList(name, people, config) {
 
     // Titre
     const title = document.createElement('h2');
-    title.textContent = config.type === 'prenoms' ? 
-        `Personnes avec le prénom "${name}" (${people.length} personnes)` :
-        config.type === 'noms' ?
-            `Personnes avec le nom "${name}" (${people.length} personnes)` :
-            config.type === 'professions' ? 
-                `Personnes avec la profession "${name}" (${people.length} personnes)` :
-                config.type === 'duree_vie' ? 
-                    `Personnes ayant vécu ${name} ans (${people.length} personnes)` :
-                    config.type === 'age_procreation' ?
-                    `Personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
-                        config.type === 'lieux' ?
-                        `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
-                        'Personnes';
+    // title.textContent = config.type === 'prenoms' ? 
+    //     `Personnes avec le prénom "${name}" (${people.length} personnes)` :
+    //     config.type === 'noms' ?
+    //         `Personnes avec le nom "${name}" (${people.length} personnes)` :
+    //         config.type === 'professions' ? 
+    //             `Personnes avec la profession "${name}" (${people.length} personnes)` :
+    //             config.type === 'duree_vie' ? 
+    //                 `Personnes ayant vécu ${name} ans (${people.length} personnes)` :
+    //                 config.type === 'age_procreation' ?
+    //                 `Personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
+    //                     config.type === 'lieux' ?
+    //                     `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
+    //                     'Personnes';
 
+    title.textContent = getPersonsListTitle(name, people.length, config);
 
 
     title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle

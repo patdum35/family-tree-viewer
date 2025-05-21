@@ -4,6 +4,8 @@ import { extractYear } from './utils.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPersonLocations, createLocationMap } from './mapUtils.js';
+import { translateOccupation } from './occupations.js';
+import { cleanProfession} from './nameCloudUtils.js';
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne
@@ -28,85 +30,357 @@ import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPers
 */
 
 
-/**
-* Affiche une fenêtre modale détaillée pour une personne
-* Version compacte optimisée pour mobile
-* 
-* @param string/**
-    * Traite un lieu pour supprimer "France" à la fin s'il est présent
-    * @param {string} place - Le lieu à traiter
-    * @returns {string} - Le lieu sans "France" à la fin
-    */
-function cleanupPlace(place) {
-    if (!place) return '';
-    
-    // Supprimer ", France" ou variations à la fin
-    return place.replace(/,\s*(France|FRANCE|france)$/i, '');
-} 
+
+
 
 /**
-* Formate une date GEDCOM en français
-* @param {string} dateStr - Date au format GEDCOM
-* @returns {string} - Date formatée en français
-*/
-function formatGedcomDate(dateStr) {
+ * Système de traduction pour l'application généalogique
+ * Prend en charge le français (fr), l'anglais (en), l'espagnol (es) et le hongrois (hu)
+ */
+export const translations = {
+    'fr': {
+      // Interface modale
+      'notes': 'Notes',
+      'sources': 'Sources',
+      'historicalContext': 'Contexte historique',
+      'setAsRoot': 'Définir comme point de départ de l\'arbre',
+      'atTimeOf': 'Au moment de ',
+      
+      // Modificateurs de dates GEDCOM
+      'vers': 'vers',
+      'avant': 'avant',
+      'après': 'après',
+      'entre': 'entre',
+      'et': 'et',
+      'de': 'de',
+      'à': 'à',
+      'estimé': 'estimé',
+      'calculé': 'calculé',
+      
+      // Mois
+      'janvier': 'janvier',
+      'février': 'février',
+      'mars': 'mars',
+      'avril': 'avril',
+      'mai': 'mai',
+      'juin': 'juin',
+      'juillet': 'juillet',
+      'août': 'août',
+      'septembre': 'septembre',
+      'octobre': 'octobre',
+      'novembre': 'novembre',
+      'décembre': 'décembre'
+    },
+    'en': {
+    // Interface modale
+      'notes': 'Notes',
+      'sources': 'Sources',
+      'historicalContext': 'Historical Context',
+      'setAsRoot': 'Set as tree root',
+      'atTimeOf': 'At time of ',
+      
+      // Modificateurs de dates GEDCOM
+      'vers': 'about',
+      'avant': 'before',
+      'après': 'after',
+      'entre': 'between',
+      'et': 'and',
+      'de': 'from',
+      'à': 'to',
+      'estimé': 'estimated',
+      'calculé': 'calculated',
+      
+      // Mois
+      'janvier': 'January',
+      'février': 'February',
+      'mars': 'March',
+      'avril': 'April',
+      'mai': 'May',
+      'juin': 'June',
+      'juillet': 'July',
+      'août': 'August',
+      'septembre': 'September',
+      'octobre': 'October',
+      'novembre': 'November',
+      'décembre': 'December'
+    },
+    'es': {
+      // Interface modale
+      'notes': 'Notas',
+      'sources': 'Fuentes',
+      'historicalContext': 'Contexto histórico',
+      'setAsRoot': 'Establecer como raíz del árbol',
+      'atTimeOf': 'En el momento del ',
+      
+      // Modificateurs de dates GEDCOM
+      'vers': 'aproximadamente',
+      'avant': 'antes de',
+      'après': 'después de',
+      'entre': 'entre',
+      'et': 'y',
+      'de': 'desde',
+      'à': 'hasta',
+      'estimé': 'estimado',
+      'calculé': 'calculado',
+      
+      // Mois
+      'janvier': 'enero',
+      'février': 'febrero',
+      'mars': 'marzo',
+      'avril': 'abril',
+      'mai': 'mayo',
+      'juin': 'junio',
+      'juillet': 'julio',
+      'août': 'agosto',
+      'septembre': 'septiembre',
+      'octobre': 'octubre',
+      'novembre': 'noviembre',
+      'décembre': 'diciembre'
+    },
+    'hu': {
+      // Interface modale
+      'notes': 'Jegyzetek',
+      'sources': 'Források',
+      'historicalContext': 'Történelmi környezet',
+      'setAsRoot': 'Beállítás a fa gyökereként',
+      'atTimeOf': 'abban az időben ',
+      
+      // Modificateurs de dates GEDCOM
+      'vers': 'körül',
+      'avant': 'előtt',
+      'après': 'után',
+      'entre': 'között',
+      'et': 'és',
+      'de': 'tól',
+      'à': 'ig',
+      'estimé': 'becsült',
+      'calculé': 'számított',
+      
+      // Mois
+      'janvier': 'január',
+      'février': 'február',
+      'mars': 'március',
+      'avril': 'április',
+      'mai': 'május',
+      'juin': 'június',
+      'juillet': 'július',
+      'août': 'augusztus',
+      'septembre': 'szeptember',
+      'octobre': 'október',
+      'novembre': 'november',
+      'décembre': 'december'
+    }
+  };
+  
+  /**
+   * Fonction pour obtenir une traduction
+   * @param {string} key - Clé de traduction
+   * @returns {string} - Texte traduit
+   */
+  export function translate(key) {
+    // Récupérer la langue actuelle (avec français comme fallback)
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou la clé elle-même si non trouvée
+    return translations[currentLang]?.[key] || translations['fr'][key] || key;
+  }
+  
+  /**
+   * Formate une date GEDCOM selon la langue actuelle
+   * @param {string} dateStr - Date au format GEDCOM
+   * @returns {string} - Date formatée selon la langue actuelle
+   */
+  export function formatGedcomDate(dateStr) {
     if (!dateStr) return '';
     
-    // Table de conversion des mois en anglais vers français (5 lettres)
-    const monthsMap = {
-        'JAN': 'janvier',
-        'FEB': 'février',
-        'MAR': 'mars',
-        'APR': 'avril',
-        'MAY': 'mai',
-        'JUN': 'juin',
-        'JUL': 'juillet',
-        'AUG': 'août',
-        'SEP': 'septem',
-        'OCT': 'octob',
-        'NOV': 'novem',
-        'DEC': 'décem'
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Carte de conversion des préfixes GEDCOM selon la langue
+    const prefixMap = {
+      'ABT': translate('vers'),
+      'ABOUT': translate('vers'),
+      'BEF': translate('avant'),
+      'BEFORE': translate('avant'),
+      'AFT': translate('après'),
+      'AFTER': translate('après'),
+      'BET': translate('entre'),
+      'BETWEEN': translate('entre'),
+      'AND': translate('et'),
+      'FROM': translate('de'),
+      'TO': translate('à'),
+      'EST': translate('estimé'),
+      'ESTIMATED': translate('estimé'),
+      'CAL': translate('calculé'),
+      'CALCULATED': translate('calculé')
     };
     
-    // Table de conversion des préfixes et modificateurs GEDCOM
-    const prefixMap = {
-        'ABT': 'vers',
-        'ABOUT': 'vers',
-        'BEF': 'avant',
-        'BEFORE': 'avant',
-        'AFT': 'après',
-        'AFTER': 'après',
-        'BET': 'entre',
-        'BETWEEN': 'entre',
-        'AND': 'et',
-        'FROM': 'de',
-        'TO': 'à',
-        'EST': 'estimé',
-        'ESTIMATED': 'estimé',
-        'CAL': 'calculé',
-        'CALCULATED': 'calculé'
+    // Table de conversion des mois anglais vers la langue courante
+    const monthsMap = {
+      'JAN': translate('janvier'),
+      'FEB': translate('février'),
+      'MAR': translate('mars'),
+      'APR': translate('avril'),
+      'MAY': translate('mai'),
+      'JUN': translate('juin'),
+      'JUL': translate('juillet'),
+      'AUG': translate('août'),
+      'SEP': translate('septembre'),
+      'OCT': translate('octobre'),
+      'NOV': translate('novembre'),
+      'DEC': translate('décembre')
     };
     
     // Remplacer les préfixes
     let formattedDate = dateStr;
     
     // Traiter les préfixes
-    Object.entries(prefixMap).forEach(([gedcomPrefix, frenchPrefix]) => {
-        const regExp = new RegExp(`^${gedcomPrefix}\\s+`, 'i');
-        formattedDate = formattedDate.replace(regExp, `${frenchPrefix} `);
+    Object.entries(prefixMap).forEach(([gedcomPrefix, translatedPrefix]) => {
+      const regExp = new RegExp(`^${gedcomPrefix}\\s+`, 'i');
+      formattedDate = formattedDate.replace(regExp, `${translatedPrefix} `);
     });
     
     // Remplacer "AND" à l'intérieur de la chaîne (pour les périodes "BETWEEN x AND y")
-    formattedDate = formattedDate.replace(/\sAND\s/i, ' et ');
+    formattedDate = formattedDate.replace(/\sAND\s/i, ` ${translate('et')} `);
     
-    // Remplacer les mois en anglais par leurs équivalents français
-    Object.entries(monthsMap).forEach(([englishMonth, frenchMonth]) => {
-        const regExp = new RegExp(`\\b${englishMonth}\\b`, 'gi');
-        formattedDate = formattedDate.replace(regExp, frenchMonth);
+    // Remplacer les mois en anglais par leurs équivalents traduits
+    Object.entries(monthsMap).forEach(([englishMonth, translatedMonth]) => {
+      const regExp = new RegExp(`\\b${englishMonth}\\b`, 'gi');
+      formattedDate = formattedDate.replace(regExp, translatedMonth);
     });
     
     return formattedDate;
-}
+  }
+  
+  /**
+   * Traite un lieu pour supprimer le nom du pays à la fin
+   * @param {string} place - Le lieu à traiter
+   * @returns {string} - Le lieu sans le pays à la fin
+   */
+  export function cleanupPlace(place) {
+    if (!place) return '';
+    
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Pays à supprimer selon la langue
+    const countryNames = {
+      'fr': ['France', 'FRANCE', 'france'],
+      'en': ['United States', 'USA', 'U.S.A.', 'United Kingdom', 'UK', 'U.K.'],
+      'es': ['España', 'ESPAÑA', 'españa'],
+      'hu': ['Magyarország', 'MAGYARORSZÁG', 'magyarország']
+    };
+    
+    // Obtenir la liste des pays pour la langue actuelle
+    const countries = countryNames[currentLang] || countryNames['fr'];
+    
+    // Créer un pattern pour supprimer tous les pays de la liste
+    const pattern = new RegExp(`,\\s*(${countries.join('|')})$`, 'i');
+    
+    // Supprimer le pays à la fin
+    return place.replace(pattern, '');
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /**
+// * Affiche une fenêtre modale détaillée pour une personne
+// * Version compacte optimisée pour mobile
+// * 
+// * @param string/**
+//     * Traite un lieu pour supprimer "France" à la fin s'il est présent
+//     * @param {string} place - Le lieu à traiter
+//     * @returns {string} - Le lieu sans "France" à la fin
+//     */
+// function cleanupPlace(place) {
+//     if (!place) return '';
+    
+//     // Supprimer ", France" ou variations à la fin
+//     return place.replace(/,\s*(France|FRANCE|france)$/i, '');
+// } 
+
+// /**
+// * Formate une date GEDCOM en français
+// * @param {string} dateStr - Date au format GEDCOM
+// * @returns {string} - Date formatée en français
+// */
+// function formatGedcomDate(dateStr) {
+//     if (!dateStr) return '';
+    
+//     // Table de conversion des mois en anglais vers français (5 lettres)
+//     const monthsMap = {
+//         'JAN': 'janvier',
+//         'FEB': 'février',
+//         'MAR': 'mars',
+//         'APR': 'avril',
+//         'MAY': 'mai',
+//         'JUN': 'juin',
+//         'JUL': 'juillet',
+//         'AUG': 'août',
+//         'SEP': 'septem',
+//         'OCT': 'octob',
+//         'NOV': 'novem',
+//         'DEC': 'décem'
+//     };
+    
+//     // Table de conversion des préfixes et modificateurs GEDCOM
+//     const prefixMap = {
+//         'ABT': 'vers',
+//         'ABOUT': 'vers',
+//         'BEF': 'avant',
+//         'BEFORE': 'avant',
+//         'AFT': 'après',
+//         'AFTER': 'après',
+//         'BET': 'entre',
+//         'BETWEEN': 'entre',
+//         'AND': 'et',
+//         'FROM': 'de',
+//         'TO': 'à',
+//         'EST': 'estimé',
+//         'ESTIMATED': 'estimé',
+//         'CAL': 'calculé',
+//         'CALCULATED': 'calculé'
+//     };
+    
+//     // Remplacer les préfixes
+//     let formattedDate = dateStr;
+    
+//     // Traiter les préfixes
+//     Object.entries(prefixMap).forEach(([gedcomPrefix, frenchPrefix]) => {
+//         const regExp = new RegExp(`^${gedcomPrefix}\\s+`, 'i');
+//         formattedDate = formattedDate.replace(regExp, `${frenchPrefix} `);
+//     });
+    
+//     // Remplacer "AND" à l'intérieur de la chaîne (pour les périodes "BETWEEN x AND y")
+//     formattedDate = formattedDate.replace(/\sAND\s/i, ' et ');
+    
+//     // Remplacer les mois en anglais par leurs équivalents français
+//     Object.entries(monthsMap).forEach(([englishMonth, frenchMonth]) => {
+//         const regExp = new RegExp(`\\b${englishMonth}\\b`, 'gi');
+//         formattedDate = formattedDate.replace(regExp, frenchMonth);
+//     });
+    
+//     return formattedDate;
+// }
+
+
+
+
+
+
+
 
 
 export function displayPersonDetails(personId) {
@@ -331,14 +605,38 @@ export function displayPersonDetails(personId) {
     `;
 
     // Profession (si existante)
+    // if (person.occupation) {
+    //     detailsHTML += `
+    //         <div class="details-section">
+    //             <span class="details-icon">💼</span>
+    //             <span class="details-value">${person.occupation}</span>
+    //         </div>
+    //     `;
+    // }
     if (person.occupation) {
-        detailsHTML += `
-            <div class="details-section">
-                <span class="details-icon">💼</span>
-                <span class="details-value">${person.occupation}</span>
-            </div>
-        `;
+
+        const cleanedProfessions = cleanProfession(person.occupation);
+        
+        cleanedProfessions.forEach(prof => {
+            if (prof) {
+                detailsHTML += `
+                <div class="details-section">
+                    <span class="details-icon">💼</span>
+                    <span class="details-value">${translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr')}</span>
+                </div>
+            `;
+            }
+        });
     }
+
+    // if (person.occupation) {
+    // detailsHTML += `
+    //     <div class="details-section">
+    //         <span class="details-icon">💼</span>
+    //         <span class="details-value">${translateOccupation(person.occupation.toLowerCase(), window.CURRENT_LANGUAGE || 'fr')}</span>
+    //     </div>
+    // `;
+    // }
 
     // Naissance (si date ou lieu existants)
     if (person.birthDate || person.birthPlace) {
@@ -430,7 +728,7 @@ export function displayPersonDetails(personId) {
         if (validSources.length > 0) {
             detailsHTML += `
                 <div class="details-section sources">
-                    <span class="details-label">Sources :</span>
+                    <span class="details-label">${translate('sources')} :</span>
                     ${validSources.map(sourceText => `<div class="sources-link">${extractAndLinkUrls(sourceText)}</div>`).join('')}
                 </div>
             `;
@@ -441,7 +739,8 @@ export function displayPersonDetails(personId) {
     const historicalContext = findContextualHistoricalFigures(personId);
     if (historicalContext) {
         let contextHTML = '<div class="details-section context">';
-        contextHTML += '<small>Contexte historique :</small><br>';
+        // contextHTML += '<small>Contexte historique :</small><br>';
+        contextHTML += `<small>${translate('historicalContext')} :</small><br>`;
         
         // Fonction pour formater chaque contexte de manière compacte avec emoji
         const formatContext = (context, eventEmoji) => {
@@ -449,7 +748,7 @@ export function displayPersonDetails(personId) {
             
             let result = '';
             if (context.governmentType || (context.rulers && context.rulers.length > 0)) {
-                result += `<small><b>Au moment de ${eventEmoji}:</b> `;
+                result += `<small><b>${translate('atTimeOf')} ${eventEmoji}:</b> `;
                 
                 // Ajouter les dirigeants
                 if (context.rulers && context.rulers.length > 0) {
@@ -486,7 +785,7 @@ export function displayPersonDetails(personId) {
     detailsHTML += `
         <div class="details-section actions">
             <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
-                Définir comme point de départ de l'arbre
+            ${translate('setAsRoot')}
             </button>
         </div>
     `;

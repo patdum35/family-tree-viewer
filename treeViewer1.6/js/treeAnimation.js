@@ -63,6 +63,40 @@ let animationState = {
 };
 
 
+let voice_language = 'fr-FR';
+let voice_language_short = 'fr-';
+let startMessage = "Début de l'animation";
+let endMessage = "Fin de l'animation";
+let reverseMessage = "Animation inversée";
+
+if (window.CURRENT_LANGUAGE == "fr") {
+    voice_language = 'fr-FR';
+    voice_language_short = 'fr-';
+    startMessage = 'en /voiture Simone';
+    endMessage = 'et /voila !';
+    reverseMessage = 'attention / la descente c\'est reparti !';
+} else if (window.CURRENT_LANGUAGE == "en") {
+    voice_language = 'en-US';
+    voice_language_short = 'en-'; 
+    startMessage = 'let\'s /go';
+    endMessage = 'that\'s /it !';
+    reverseMessage = 'let\'s /go we\'re going back down';
+} else if (window.CURRENT_LANGUAGE == "es") { 
+    voice_language = 'es-ES';
+    voice_language_short = 'es-';
+    startMessage = 'vamos';
+    endMessage = 'eso /es todo !';
+    reverseMessage = 'vamos /volvemos a bajar';
+} else if (window.CURRENT_LANGUAGE == "hu") {  
+    voice_language = 'hu-HU';
+    voice_language_short = 'hu-';
+    startMessage = 'Menjünk';
+    endMessage = 'Ennyi !';
+    reverseMessage = 'menjünk /visszamegyünk lemászni';
+} 
+
+
+
 
 // Fonction modifiée pour marquer et démarquer les nœuds
 function highlightAnimationNode(nodeId, highlight = true) {
@@ -1098,11 +1132,15 @@ async function testSpeechSynthesisHealth(timeout = 1000) {
 function selectVoice() {
     // Sélectionner une voix française si possible
     let voices = window.speechSynthesis.getVoices();
-    // console.log("Voix disponibles:",voices);
+    console.log("Voix disponibles:",voices);
 
     // Trouver les voix françaises disponibles
+
+
+
     let frenchVoices = voices.filter(voice => 
-        voice.lang.startsWith('fr-FR') && 
+        // voice.lang.startsWith('fr-FR') && 
+        voice.lang.startsWith(voice_language) && 
         !voice.name.includes('ulti'));
 
 
@@ -1121,7 +1159,8 @@ function selectVoice() {
 
     if (frenchVoices.length === 0) {
         frenchVoices = voices.filter(voice => 
-            voice.lang.startsWith('fr-') || 
+            // voice.lang.startsWith('fr-') || 
+            voice.lang.startsWith(voice_language_short) || 
             voice.name.toLowerCase().includes('french')
         );
         // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
@@ -1143,7 +1182,8 @@ function selectVoice() {
     
     if (!isOnline) {
         frenchVoices = voices.filter(voice =>
-            voice.lang.startsWith('fr-') && voice.localService);
+            // voice.lang.startsWith('fr-') && voice.localService);
+            voice.lang.startsWith(voice_language_short) && voice.localService);
         console.log("Voix disponibles locales fr-:", frenchVoices);
         if (frenchVoices.length === 0) {
             frenchVoices = voices.filter(voice =>
@@ -1732,7 +1772,7 @@ export async function startAncestorAnimation() {
                     // Avant le 1ier affichage créer une promesse qui simule la lecture vocale pour un message de démarrage : en voiture Simone
                     if (animationState.currentIndex === 0) {
                         const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                            ? speakPersonName('en /voiture Simone')
+                            ? speakPersonName(startMessage)
                             : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
                         
                         // Attendre la lecture ou le délai
@@ -1866,7 +1906,7 @@ export async function startAncestorAnimation() {
 
 
             const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                ? speakPersonName('et /voila !')
+                ? speakPersonName(endMessage)
                 : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
             // Attendre la lecture ou le délai
             await voicePromiseStart;
@@ -1886,7 +1926,7 @@ export async function startAncestorAnimation() {
 
                 animationState.direction = 'descendant';
                 const voicePromiseEnd = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                ? speakPersonName('attention / la descente c\'est reparti !')
+                ? speakPersonName(reverseMessage)
                 : new Promise(resolve => setTimeout(resolve, 3500*step_duration));
                 // Attendre la lecture ou le délai
                 await voicePromiseEnd;
@@ -2080,7 +2120,7 @@ export async function startAncestorAnimation() {
 
 
                 const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                    ? speakPersonName('et /voila !')
+                    ? speakPersonName(endMessage)
                     : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
                 // Attendre la lecture ou le délai
                 await voicePromiseStart;
@@ -2146,6 +2186,7 @@ export async function prepareAnimationDemo() {
         });
         
         // Trouver le chemin d'animation
+        console.log("Recherche du chemin d'animation... avec ", state.rootPersonId, state.targetAncestorId);
         const [path, descendPath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
         const finalPath = state.treeModeReal === 'descendants' ? descendPath : path;
         
@@ -2646,8 +2687,10 @@ export function generateLocalMaps() {
 
             let ancestor;
             let cousin;
-            ancestor = searchRootPersonId('andré du matz'); 
-            cousin = searchRootPersonId('pierre garand');
+            // ancestor = searchRootPersonId('andré du matz'); 
+            // cousin = searchRootPersonId('pierre garand');
+            ancestor = searchRootPersonId('erzsébet keller'); 
+            cousin = searchRootPersonId('angi');
             state.rootPersonId = cousin.id 
             state.targetAncestorId = ancestor.id;
 

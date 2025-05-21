@@ -5,7 +5,151 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
   // Variables pour garder une référence aux éléments
   let hamburgerMenu, sideMenu, menuOverlay;
 
-  
+  // Fonction de traduction pour le menu hamburger
+  function getMenuTranslation(key) {
+    const translations = {
+      'fr': {
+        'menuTitle': 'Menu de l\'arbre',
+        'menuprincipal': 'Menu principal',
+        'treeMode': 'arbre',
+        'generations': 'nb géné',
+        'firstNames': 'prénoms',
+        'searchPlaceholder': '🔍nom',
+        'rootPersonLabel': 'Sélect. personne racine',
+        'rootSearch': '🔍 personne racine',
+        'soundToggle': 'Activer/désactiver le son',
+        'animationPause': 'Pause animation',
+        'animationPlay': 'lecture animation',
+        'settings': 'Paramètres avancés',
+        'section_display': 'Affichage',
+        'section_audio': 'Animation et audio',
+        'section_root': 'Racine',
+        'section_modes': 'Modes',
+        'section_namecloud': 'Nuage de mots',
+        'section_settings': 'Fonds d\'écran',
+        'section_search': 'Recherche dans l\'arbre',
+        'zoomIn': 'Zoom avant',
+        'zoomOut': 'Zoom arrière',
+        'resetView': 'Réinitialiser la vue',
+        'fullscreen': 'Plein écran',
+        'backgroundLabel': 'Fond d\'écran',
+        'nameCloudLabel': 'Nuage de mots',
+        'backToLogin': 'Retour à l\'écran de connexion',
+        'menuAvailable': 'Menu principal disponible',
+        'fistNameUpdated': 'Nombre de prénoms mis à jour',
+        'selectDemo': 'Sélectionner une démo',
+        'selectDemoToDisplay': 'Sélectionner une démo à afficher',
+        'nbFirstNameToDisplay': 'Nombre de prénoms à afficher'
+
+
+      },
+      'en': {
+        'menuTitle': 'Tree Menu',
+        'menuprincipal': 'Main menu',
+        'treeMode': 'tree',
+        'generations': 'gen nb',
+        'firstNames': 'first names',
+        'searchPlaceholder': '🔍name',
+        'rootPersonLabel': 'Select root person',
+        'rootSearch': '🔍 search root person',
+        'soundToggle': 'Toggle sound',
+        'animationPause': 'Pause animation',
+        'animationPlay': 'Play animation',
+        'settings': 'Advanced settings',
+        'section_display': 'Display',
+        'section_audio': 'Animation and audio',
+        'section_root': 'Root',
+        'section_modes': 'Modes',
+        'section_namecloud': 'Word cloud',
+        'section_settings': 'Backgrounds',
+        'section_search': 'Tree search',
+        'zoomIn': 'Zoom in',
+        'zoomOut': 'Zoom out',
+        'resetView': 'Reset view',
+        'fullscreen': 'Fullscreen',
+        'backgroundLabel': 'Background',
+        'nameCloudLabel': 'Word cloud',
+        'backToLogin': 'Back to login screen',
+        'menuAvailable': 'Main menu available',
+        'fistNameUpdated': 'First names updated',
+        'selectDemo': 'Select demo',
+        'selectDemoToDisplay': 'Select demo to display',
+        'nbFirstNameToDisplay': 'Number of first names to display'
+      },
+      'es': {
+        'menuTitle': 'Menú del árbol',
+        'menuprincipal': 'Menú principal',
+        'treeMode': 'árbol',
+        'generations': 'núm gen',
+        'firstNames': 'nombres',
+        'searchPlaceholder': '🔍nombre',
+        'rootPersonLabel': 'Selec. persona raíz',
+        'rootSearch': '🔍 buscar persona raíz',
+        'soundToggle': 'Activar/desactivar sonido',
+        'animationPause': 'Pausar animación',
+        'animationPlay': 'Reproducir animación',
+        'settings': 'Configuración avanzada',
+        'section_display': 'Visualización',
+        'section_audio': 'Animación y audio',
+        'section_root': 'Raíz',
+        'section_modes': 'Modos',
+        'section_namecloud': 'Nube de palabras',
+        'section_settings': 'Fondos de pantalla',
+        'section_search': 'Búsqueda en el árbol',
+        'zoomIn': 'Acercar',
+        'zoomOut': 'Alejar',
+        'resetView': 'Restablecer vista',
+        'fullscreen': 'Pantalla completa',
+        'backgroundLabel': 'Fondo de pantalla',
+        'nameCloudLabel': 'Nube de palabras',
+        'backToLogin': 'Volver a la pantalla de inicio',
+        'menuAvailable': 'Menú principal disponible',
+        'fistNameUpdated': 'Nombres actualizados',
+        'selectDemo': 'Seleccionar demo',
+        'selectDemoToDisplay': 'Seleccionar demo para mostrar',
+        'nbFirstNameToDisplay': 'Número de nombres para mostrar'
+      },
+      'hu': {
+        'menuTitle': 'Fa menü',
+        'menuprincipal': 'Főmenü',
+        'treeMode': 'fa',
+        'generations': 'genSzám',
+        'firstNames': 'keresz.',
+        'searchPlaceholder': '🔍név',
+        'rootPersonLabel': 'Gyökér személy kivála.', //sztása',
+        'rootSearch': '🔍 gyökérszemély keresése',
+        'soundToggle': 'Hang be/ki',
+        'animationPause': 'Animáció szüneteltetése',
+        'animationPlay': 'Animáció lejátszása',
+        'settings': 'Speciális beállítások',
+        'section_display': 'Megjelenítés',
+        'section_audio': 'Animáció és hang',
+        'section_root': 'Gyökér',
+        'section_modes': 'Módok',
+        'section_namecloud': 'Szófelhő',
+        'section_settings': 'Hátterek',
+        'section_search': 'Fa keresés',
+        'zoomIn': 'Nagyítás',
+        'zoomOut': 'Kicsinyítés',
+        'resetView': 'Nézet visszaállítása',
+        'fullscreen': 'Teljes képernyő',
+        'backgroundLabel': 'Háttér',
+        'nameCloudLabel': 'Szófelhő',
+        'backToLogin': 'Vissza a bejelentkezési képernyőre',
+        'menuAvailable': 'Főmenü elérhető',
+        'fistNameUpdated': 'Keresztnevek frissítve',
+        'selectDemo': 'Demó kiválasztása',
+        'selectDemoToDisplay': 'Demó kiválasztása megjelenítéshez',
+        'nbFirstNameToDisplay': 'Megjelenítendő keresztnevek száma'
+      }
+    };
+
+    // Obtenir la langue actuelle depuis CURRENT_LANGUAGE ou l'attribut lang du document
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
 
   export function resizeHamburger() {
     // Mettre à jour la classe de hauteur
@@ -400,7 +544,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       hamburgerMenu = document.createElement('button');
       hamburgerMenu.id = 'hamburger-menu';
       hamburgerMenu.className = 'hamburger-menu';
-      hamburgerMenu.title = 'Menu principal';
+      hamburgerMenu.title = getMenuTranslation('menuprincipal'); //'Menu principal';
       hamburgerMenu.style.display = 'none'; // Caché par défaut
       
       // Créer les trois barres du hamburger
@@ -423,7 +567,12 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
       // Ajouter le titre du menu
       const menuTitle = document.createElement('div');
       menuTitle.className = 'menu-title';
-      menuTitle.textContent = 'Menu de l\'arbre';
+      // menuTitle.textContent = 'Menu de l\'arbre';
+      menuTitle.textContent = window.CURRENT_LANGUAGE === 'hu' ? 'Fa menü' : 
+                              window.CURRENT_LANGUAGE === 'en' ? 'Tree Menu' :
+                              window.CURRENT_LANGUAGE === 'es' ? 'Menú del árbol' : 
+                              'Menu de l\'arbre';
+
       sideMenu.appendChild(menuTitle);
       
       // Créer les sections du menu
@@ -546,13 +695,20 @@ function createSection(title, index = 0) {
   // Créer la section Navigation
   function createDisplaySection() {
     const height = window.innerHeight;
-    const section = createSection('Affichage', 3);  // Index 0
+    // const section = createSection('Affichage', 3);  // Index 3
+    const section = createSection(getMenuTranslation('section_display'), 3);
     
+    // const buttons = [
+    //   { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
+    //   { onclick: 'zoomOut()', title: 'Zoom arrière', text: '➖' },
+    //   { onclick: 'resetZoom()', title: 'Réinitialiser la vue', text: '🏠' },
+    //   { onclick: 'toggleFullScreen()', title: 'Plein écran', text: '⛶' }
+    // ];
     const buttons = [
-      { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
-      { onclick: 'zoomOut()', title: 'Zoom arrière', text: '➖' },
-      { onclick: 'resetZoom()', title: 'Réinitialiser la vue', text: '🏠' },
-      { onclick: 'toggleFullScreen()', title: 'Plein écran', text: '⛶' }
+      { onclick: 'zoomIn()', title: getMenuTranslation('zoomIn'), text: '➕' },
+      { onclick: 'zoomOut()', title: getMenuTranslation('zoomOut'), text: '➖' },
+      { onclick: 'resetZoom()', title: getMenuTranslation('resetView'), text: '🏠' },
+      { onclick: 'toggleFullScreen()', title: getMenuTranslation('fullscreen'), text: '⛶' }
     ];
     
     buttons.forEach(buttonData => {
@@ -584,7 +740,8 @@ function createSection(title, index = 0) {
   // Créer la section Root avec des placeholders pour les sélecteurs
   function createRootSection() {
     const height = window.innerHeight;
-    const section = createSection('Racine', 1);  // Index 1
+    // const section = createSection('Racine', 1);  // Index 1
+    const section = createSection(getMenuTranslation('section_root'), 1);
     section.content.style.flexDirection = 'column';
     
     // Créer un div pour contenir le sélecteur de recherche racine
@@ -643,7 +800,9 @@ function createSection(title, index = 0) {
   // Créer la section Recherche a
   function createSearchSection() {
     const height = window.innerHeight;
-    const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
+    // const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
+    const section = createSection(getMenuTranslation('section_search'), 2);
+    
     section.content.style.flexDirection = 'column';
      
     // Champ de recherche dans l'arbre
@@ -653,7 +812,8 @@ function createSection(title, index = 0) {
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.id = 'menu-search';
-    searchInput.placeholder = '🔍nom';
+    // searchInput.placeholder = '🔍nom';
+    searchInput.placeholder = getMenuTranslation('searchPlaceholder');
     searchInput.setAttribute('oninput', 'searchTree(this.value)');
     searchInput.style.width = '60%';
     searchInput.style.color = '#000';
@@ -678,14 +838,16 @@ function createSection(title, index = 0) {
   // Créer la section Affichage avec des placeholders pour les sélecteurs personnalisés
   function createModeSection() {
     const height = window.innerHeight;
-    const section = createSection('Modes', 3);  // Index 3
+    // const section = createSection('Modes', 3);  // Index 3
+    const section = createSection(getMenuTranslation('section_modes'), 3);
     
     // Créer un div pour contenir le sélecteur de mode d'arbre
     const modeDiv = document.createElement('div');
     modeDiv.id = 'menu-treeMode-container';
     
     const modeLabel = document.createElement('label');
-    modeLabel.textContent = 'arbre';
+    // modeLabel.textContent = 'arbre';
+    modeLabel.textContent = getMenuTranslation('treeMode');
     modeLabel.style.color = '#000';
     
     // Adapter uniquement pour les petits écrans
@@ -723,7 +885,8 @@ function createSection(title, index = 0) {
     genDiv.id = 'menu-generations-container';
     
     const genLabel = document.createElement('label');
-    genLabel.textContent = 'nb géné';
+    // genLabel.textContent = 'nb géné';
+    genLabel.textContent = getMenuTranslation('generations');
     genLabel.style.color = '#000';
     
     // Adapter uniquement pour les petits écrans
@@ -763,7 +926,8 @@ function createSection(title, index = 0) {
     prenomsDiv.id = 'menu-prenoms-container';
   
     const prenomsLabel = document.createElement('label');
-    prenomsLabel.textContent = 'prénoms';
+    // prenomsLabel.textContent = 'prénoms';
+    prenomsLabel.textContent = getMenuTranslation('firstNames');
     prenomsLabel.style.color = '#000';
     
     // Adapter uniquement pour les petits écrans
@@ -804,7 +968,8 @@ function createSection(title, index = 0) {
   // Créer la section Audio et Animation
   function createAudioSection() {
     const height = window.innerHeight;
-    const section = createSection('Animation et audio', 0);  // Index 4
+    // const section = createSection('Animation et audio', 0);  // Index 4
+    const section = createSection(getMenuTranslation('section_audio'), 0);
     
     // Créer un conteneur flex unique pour tous les éléments
     const audioControlsContainer = document.createElement('div');
@@ -848,19 +1013,19 @@ function createSection(title, index = 0) {
       { 
         id: 'menu-speechToggleBtn',
         onclick: 'toggleSpeech2()', 
-        title: 'Activer/désactiver le son', 
+        title: getMenuTranslation('soundToggle'), //'Activer/désactiver le son', 
         text: '🔇' 
       },
       { 
         id: 'menu-animationPauseBtn',
         onclick: 'toggleAnimationPause()', 
-        title: 'Pause animation', 
+        title: getMenuTranslation('animationPause'), //'Pause animation', 
         text: '⏸️' 
       },
       { 
         id: 'menu-animationPlayBtn',
         onclick: 'toggleAnimationPause()',  
-        title: 'lecture animation', 
+        title: getMenuTranslation('animationPlay'), //'lecture animation', 
         text: '▶️' 
       }
     ];
@@ -923,13 +1088,14 @@ function createSection(title, index = 0) {
   // Créer la section Name Cloud
   function createNameCloudSection() {
     const height = window.innerHeight;
-    const section = createSection('Nuage de mots', 0);
+    // const section = createSection('Nuage de mots', 0);
+    const section = createSection(getMenuTranslation('section_namecloud'), 0);
     
     const buttons = [
       { 
         id: 'menu-nameCloudBtn',
         onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })', 
-        title: 'Nuage de noms', 
+        title: getMenuTranslation('section_namecloud'), //'Nuage de noms', 
         text: '💖🔠💗' // '👥'
       }
     ];
@@ -957,7 +1123,8 @@ function createSection(title, index = 0) {
       if (height < 400) {
         // Créer un conteneur pour le label + bouton
         const container = document.createElement('span');
-        container.textContent = "Nuage de mots";
+        // container.textContent = "Nuage de mots";
+        container.textContent = getMenuTranslation('nameCloudLabel');
         container.style.fontSize = '13px';
         container.appendChild(button);
         section.content.appendChild(container);
@@ -973,18 +1140,19 @@ function createSection(title, index = 0) {
   // Créer la section Paramètres
   function createSettingsSection() {
     const height = window.innerHeight;
-    const section = createSection('Fonds d\'écran', 1);
+    // const section = createSection('Fonds d\'écran', 1);
+    const section = createSection(getMenuTranslation('section_settings'), 1);
     
     const buttons = [
       { 
         id: 'menu-settingsBtn',
         onclick: 'openSettingsModal()', 
-        title: 'Paramètres avancés', 
+        title: getMenuTranslation('settings'), //'Paramètres avancés', 
         text: '⚙️' 
       },
       { 
         onclick: 'returnToLogin()', 
-        title: 'Retour à l\'écran de connexion', 
+        title: getMenuTranslation('backToLogin'), //'Retour à l\'écran de connexion', 
         text: '🔙' 
       }
     ];
@@ -1015,7 +1183,8 @@ function createSection(title, index = 0) {
         if (buttonData.text === '⚙️' && height < 400) {
             // Créer un conteneur pour le label + bouton
             const container = document.createElement('span');
-            container.textContent = 'Fond d\'écran';
+            // container.textContent = 'Fond d\'écran';
+            container.textContent = getMenuTranslation('backgroundLabel');
             container.style.fontSize = '13px';
             container.appendChild(button);
             section.content.appendChild(container);
@@ -1056,7 +1225,15 @@ function createDemoSelector() {
     } else {
       typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
       typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
-      typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet'];
+      if (window.CURRENT_LANGUAGE === 'fr') {
+        typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet'];
+      } else if (window.CURRENT_LANGUAGE === 'en') {
+        typeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet'];
+      } else if (window.CURRENT_LANGUAGE === 'es') {
+        typeOptionsExpanded = ['El castillo de Lalatte', '', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
+      } else if (window.CURRENT_LANGUAGE === 'hu') {
+        typeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet'];
+      }
     }
     
     try {
@@ -1193,8 +1370,8 @@ function createDemoSelector() {
       // Ajout d'un titre et attributs pour le tooltip
       customSelector.id = 'menu-demo-selector';
       customSelector.setAttribute('data-text-key', 'demoSelector');
-      customSelector.setAttribute('data-action', 'Sélectionner une démo à afficher');
-      customSelector.setAttribute('title', 'Sélectionner une démo');
+      customSelector.setAttribute('data-action', getMenuTranslation('selectDemoToDisplay')); //'Sélectionner une démo à afficher');
+      customSelector.setAttribute('title', getMenuTranslation('selectDemo')); //'Sélectionner une démo');
       
       // Remplacer le placeholder par le sélecteur personnalisé
       demoPlaceholder.parentNode.replaceChild(customSelector, demoPlaceholder);
@@ -1275,24 +1452,6 @@ function createPrenomsSelector() {
       }
     };
     
-    // // Modifier uniquement pour les petits écrans
-    // if (height < 400) {
-    //   selectorSettings.dimensions.width = '25px';
-    //   selectorSettings.dimensions.height = '20px';
-    //   selectorSettings.dimensions.dropdownWidth = '35px';
-    //   selectorSettings.dimensions.dropdownHeight = '100px';
-    //   selectorSettings.padding.display.x = 6;
-    //   selectorSettings.arrow.size = 4;
-    //   selectorSettings.arrow.offset.x = -4;
-    // } else if (height < 800) {
-    //   selectorSettings.dimensions.width = '30px';
-    //   selectorSettings.dimensions.height = '22px';
-    //   selectorSettings.dimensions.dropdownWidth = '40px';
-    //   selectorSettings.dimensions.dropdownHeight = '120px';
-    //   selectorSettings.padding.display.x = 7;
-    //   selectorSettings.arrow.size = 5;
-    //   selectorSettings.arrow.offset.x = -4;
-    // }
     
     try {
       // Configurer le sélecteur personnalisé
@@ -1318,9 +1477,9 @@ function createPrenomsSelector() {
             
             // Essayer de montrer un feedback
             if (typeof window.showFeedback === 'function') {
-              window.showFeedback('Nombre de prénoms mis à jour', 'success');
+              window.showFeedback(getMenuTranslation(fistNameUpdated), 'success'); //, 'Nombre de prénoms mis à jour', 'success');
             } else if (typeof window.showToast === 'function') {
-              window.showToast('Nombre de prénoms mis à jour');
+              window.showToast(getMenuTranslation(fistNameUpdated)); //'Nombre de prénoms mis à jour');
             }
           }
           
@@ -1370,7 +1529,7 @@ function createPrenomsSelector() {
       customSelector.id = 'menu-prenoms-selector';
       customSelector.setAttribute('data-text-key', 'prenoms');
       customSelector.setAttribute('data-action', 'nombre de prénoms entre 1 et 4, pour optimiser la largueur des cases de l\'arbre');
-      customSelector.setAttribute('title', 'Nombre de prénoms à afficher');
+      customSelector.setAttribute('title', getMenuTranslation('nbFirstNameToDisplay')); //'Nombre de prénoms à afficher');
       
       // Remplacer le placeholder par le sélecteur personnalisé
       prenomsPlaceholder.parentNode.replaceChild(customSelector, prenomsPlaceholder);
@@ -1500,7 +1659,8 @@ function syncCustomSelectors() {
     
                     // Label à gauche
                     const rootPersonLabel = document.createElement('label');
-                    rootPersonLabel.textContent = 'Sélect. personne racine';
+                    // rootPersonLabel.textContent = 'Sélect. personne racine';
+                    rootPersonLabel.textContent = getMenuTranslation('rootPersonLabel');
                     rootPersonLabel.style.color = '#000';
                     rootPersonLabel.style.lineHeight = '1.2';
                     rootPersonLabel.style.textAlign = 'right';
@@ -1644,7 +1804,8 @@ function syncCustomSelectors() {
     
                 if (rootSearchPlaceholder && originalRootSearch) {
                     const rootSearchLink = document.createElement('div');
-                    rootSearchLink.textContent = '🔍 personne racine';
+                    // rootSearchLink.textContent = '🔍 personne racine';
+                    rootSearchLink.textContent = getMenuTranslation('rootSearch');
                     rootSearchLink.style.cursor = 'pointer';
                     rootSearchLink.style.backgroundColor = 'white';
                     rootSearchLink.style.textAlign = 'left';
@@ -2157,7 +2318,8 @@ function syncCustomSelectors() {
      
      // Toaster un message
      if (typeof window.showToast === 'function') {
-         window.showToast('Menu principal disponible');
+        //  window.showToast('Menu principal disponible');
+         window.showToast(getMenuTranslation('menuAvailable'))
      }
    }
 

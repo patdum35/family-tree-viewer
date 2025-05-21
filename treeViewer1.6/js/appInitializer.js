@@ -31,6 +31,8 @@ import {
     initBackgroundContainer
 } from './backgroundManager.js';
 
+// import { changeLanguage } from './i18n.js';
+
 // Fonction d'initialisation qui rend les fonctions disponibles globalement
 function initializeAppFunctions() {
     // Rendre les fonctions disponibles globalement
@@ -58,6 +60,7 @@ function initializeAppFunctions() {
     window.saveTargetAncestorId = saveTargetAncestorId;
     window.initBackgroundContainer = initBackgroundContainer;
     window.toggleFullScreen = toggleFullScreen;
+    // window.changeLanguage = changeLanguage;
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);
     };

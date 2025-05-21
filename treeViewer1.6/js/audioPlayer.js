@@ -714,7 +714,15 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.style.cursor = 'pointer';
     toggleButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
     toggleButton.style.zIndex = '1499';
-    toggleButton.title = 'Afficher le lecteur audio';
+    if (window.CURRENT_LANGUAGE === 'fr') {
+        toggleButton.title = 'Afficher le lecteur audio';
+    } else if (window.CURRENT_LANGUAGE === 'en') { 
+        toggleButton.title = 'Show audio player';
+    } else if (window.CURRENT_LANGUAGE === 'es') { 
+        toggleButton.title = 'Mostrar reproductor de audio'; 
+    } else if (window.CURRENT_LANGUAGE === 'hu') {
+        toggleButton.title = 'Audiolejátszó megjelenítése';
+    }   
     
     // Événement clic
     toggleButton.addEventListener('click', async () => {

@@ -1,11 +1,63 @@
 // dateUI.js - Interface pour la sélection de dates historiques
 import { nameCloudState } from './nameCloud.js';
 
+// Fonction pour obtenir les traductions selon la langue actuelle
+function getTranslation(key) {
+    const translations = {
+      'fr': {
+        'selectCentury': 'Sélectionner un siècle',
+        'selectDecade': 'Sélectionner une décennie ou valider',
+        'selectYear': 'Sélectionner une année ou valider',
+        'defaultDate': 'Date par défaut',
+        'cancel': 'Annuler',
+        'validate': 'Valider',
+        'back': 'Retour',
+        'bc': 'av. J.-C.'
+      },
+      'en': {
+        'selectCentury': 'Select a century',
+        'selectDecade': 'Select a decade or confirm',
+        'selectYear': 'Select a year or confirm',
+        'defaultDate': 'Default date',
+        'cancel': 'Cancel',
+        'validate': 'Confirm',
+        'back': 'Back',
+        'bc': 'BC'
+      },
+      'es': {
+        'selectCentury': 'Seleccionar un siglo',
+        'selectDecade': 'Seleccionar una década o confirmar',
+        'selectYear': 'Seleccionar un año o confirmar',
+        'defaultDate': 'Fecha predeterminada',
+        'cancel': 'Cancelar',
+        'validate': 'Confirmar',
+        'back': 'Volver',
+        'bc': 'a.C.'
+      },
+      'hu': {
+        'selectCentury': 'Válasszon évszázadot',
+        'selectDecade': 'Válasszon évtizedet vagy erősítse meg',
+        'selectYear': 'Válasszon évet vagy erősítse meg',
+        'defaultDate': 'Alapértelmezett dátum',
+        'cancel': 'Mégse',
+        'validate': 'Megerősít',
+        'back': 'Vissza',
+        'bc': 'i.e.'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
 
 // Fonction pour formater l'affichage des années
 function formatYearDisplay(year) {
     if (year < 0) {
-        return `${Math.abs(year)} av. J.-C.`;
+        // return `${Math.abs(year)} av. J.-C.`;
+        return `${Math.abs(year)} ${getTranslation('bc')}`;
     }
     else if (year === 0) {
         return `1`; // L'an 0 n'existe pas historiquement
@@ -121,7 +173,7 @@ export class HistoricDatePicker {
         modalFooter.style.borderTop = '1px solid rgba(224, 224, 224, 0.5)'; // Bordure semi-transparente
         
         const cancelButton = document.createElement('button');
-        cancelButton.textContent = 'Annuler';
+        cancelButton.textContent = getTranslation('cancel'); //'Annuler';
         cancelButton.style.padding = '4px 8px';
         cancelButton.style.border = 'none';
         cancelButton.style.borderRadius = '4px';
@@ -155,7 +207,7 @@ export class HistoricDatePicker {
         
         const validateButton = document.createElement('button');
         validateButton.id = `validate-button-${this.modalId}`;
-        validateButton.textContent = 'Valider';
+        validateButton.textContent = getTranslation('validate'); //'Valider';
         validateButton.style.padding = '4px 8px';
         validateButton.style.border = 'none';
         validateButton.style.borderRadius = '4px';
@@ -255,9 +307,12 @@ export class HistoricDatePicker {
         this.currentView = 'century';
         
         // Mettre à jour le titre et sous-titre
-        document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner un siècle';
-        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.century)}`;
-        
+        // document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner un siècle';
+        // document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.century)}`;
+        document.getElementById(`modal-title-${this.modalId}`).textContent = getTranslation('selectCentury');
+        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `${getTranslation('defaultDate')} : ${formatYearDisplay(this.currentSelected.century)}`;
+
+
         // Configuration du bouton de validation
         const validateBtn = document.getElementById(`validate-button-${this.modalId}`);
         validateBtn.onclick = () => {
@@ -374,9 +429,11 @@ export class HistoricDatePicker {
         this.currentView = 'decade';
         
         // Mettre à jour le titre et sous-titre
-        document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner une décennie ou valider';
-        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.decade)}`;
-        
+        // document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner une décennie ou valider';
+        // document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.decade)}`;
+        document.getElementById(`modal-title-${this.modalId}`).textContent = getTranslation('selectDecade');
+        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `${getTranslation('defaultDate')} : ${formatYearDisplay(this.currentSelected.decade)}`;
+
         // Configuration du bouton de validation
         const validateBtn = document.getElementById(`validate-button-${this.modalId}`);
         validateBtn.onclick = () => {
@@ -401,7 +458,8 @@ export class HistoricDatePicker {
         backButton.style.fontWeight = '500';
         backButton.style.fontSize = '11px';
         backButton.style.color = '#757575';
-        backButton.innerHTML = '<span style="margin-right:4px">←</span> Retour';
+        // backButton.innerHTML = '<span style="margin-right:4px">←</span> Retour';
+        backButton.innerHTML = `<span style="margin-right:4px">←</span> ${getTranslation('back')}`;
         
         backButton.addEventListener('click', () => this.showCenturyView());
         modalBody.appendChild(backButton);
@@ -482,9 +540,11 @@ export class HistoricDatePicker {
         this.currentView = 'year';
         
         // Mettre à jour le titre et sous-titre
-        document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner une année ou valider';
-        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.year)}`;
-        
+        // document.getElementById(`modal-title-${this.modalId}`).textContent = 'Sélectionner une année ou valider';
+        // document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `Date par défaut : ${formatYearDisplay(this.currentSelected.year)}`;
+        document.getElementById(`modal-title-${this.modalId}`).textContent = getTranslation('selectYear');
+        document.getElementById(`modal-subtitle-${this.modalId}`).textContent = `${getTranslation('defaultDate')} : ${formatYearDisplay(this.currentSelected.year)}`;
+
         // Configuration du bouton de validation
         const validateBtn = document.getElementById(`validate-button-${this.modalId}`);
         validateBtn.onclick = () => {

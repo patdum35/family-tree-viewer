@@ -11,7 +11,276 @@ import { attachFilterListeners  } from './geoHeatMapInteractions.js';
 import { showHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 
-            
+
+
+// Fonction pour obtenir les traductions selon la langue actuelle
+function getTranslation(key) {
+    const translations = {
+      'fr': {
+        'titlePrenoms': 'Prénoms',
+        'titleNoms': 'Noms',
+        'titleMetiers': 'Métiers',
+        'titleLieux': 'Lieux',
+        'titleDureeVie': 'Durées de vie',
+        'titleAgeProcreation': 'Ages de procréation',
+        'titleAgeMariage': 'Ages de mariage', 
+        'titleAgePremierEnfant': 'Ages au 1er enfant',
+        'titleNombreEnfants': 'Nombres d\'enfants',
+        'entre': 'entre',
+        'et': 'et',
+        'motPlaces': 'mots placés',
+        'début': 'début',
+        'fin': 'fin',
+
+        'optionPrenom': 'Prénom',
+        'optionNom': 'Nom',
+        'optionMetier': 'Métier',
+        'optionLieux': 'Lieux',
+        'optionVie': 'Vie',
+        'optionProcreat': 'Procréat',
+        'option1erEnf': '1er Enf.',
+        'optionMariage': 'Mariage',
+        'optionNbEnf': 'Nb Enf.',
+
+
+        'optionTout': 'Tout',
+        'optionAscDir': 'Asc dir.',
+        'optionAscend': 'Ascend',
+        'optionDescDir': 'Desc dir',
+        'optionDescend': 'Descend',
+
+        'expandedOptionPrenoms': 'Prénoms',
+        'expandedOptionNoms': 'Noms de famille',
+        'expandedOptionMetiers': 'Métiers',
+        'expandedOptionLieux': 'Lieux',
+        'expandedOptionVie': 'Durée de Vie',
+        'expandedOptionProcreat': 'Ages de procréation',
+        'expandedOption1erEnf': 'Age au 1er enfant',
+        'expandedOptionMariage': 'Age de Mariage',
+        'expandedOptionNbEnf': 'Nombre d\'enfants',
+        'expandedOptionTout': 'Tout le fichier',
+        'expandedOptionAscDir': 'Ascendants directs de la racine',
+        'expandedOptionAscend': 'Ascendants + fratrie de la racine',
+        'expandedOptionDescDir': 'Descendants directs de la racine',
+        'expandedOptionDescend': 'Descendants + conjoints de la racine',
+        'labelPersonneRacine': 'Personne racine',
+        'searchPlaceholder': 'search racine',
+        'searchButtonText': '🔍',
+        'selectDefaultOption': '...    select',
+        'alertNoPerson': 'Aucune personne trouvée',
+        'titleSettings': 'Paramètres',
+        'titleMap': 'Afficher la heatmap',
+        'buttonValidate': 'Valider',
+        'loadingHeatmap': 'Génération de la heatmap...',
+        'noGeoData': 'Aucune donnée géographique disponible pour les personnes sélectionnées.',
+        'errorHeatmap': 'Erreur lors de la génération de la heatmap',
+        'heatmapTitleTous': 'Tous',
+        'heatmapTitleAscend': 'Ancêtres',
+        'heatmapTitleDescend': 'Descendants',
+        'mapGeneration': 'Génération de la heatmap...'
+      },
+      'en': {
+        'titlePrenoms': 'First Names',
+        'titleNoms': 'Last Names',
+        'titleMetiers': 'Occupations',
+        'titleLieux': 'Places',
+        'titleDureeVie': 'Lifespans',
+        'titleAgeProcreation': 'Ages of procreation',
+        'titleAgeMariage': 'Ages at marriage',
+        'titleAgePremierEnfant': 'Ages at first child',
+        'titleNombreEnfants': 'Number of children',
+        'entre': 'between',
+        'et': 'and',
+        'motPlaces': 'words placed',
+        'début': 'start',
+        'fin': 'end',
+
+        'optionPrenom': 'FirstNam',
+        'optionNom': 'Name',
+        'optionMetier': 'Occup.',
+        'optionLieux': 'Places',
+        'optionVie': 'Life',
+        'optionProcreat': 'Procreat.',
+        'option1erEnf': '1stChild',
+        'optionMariage': 'Marriage',
+        'optionNbEnf': 'NbChild',
+
+        'optionTout': 'All',
+        'optionAscDir': 'dir. Anc',
+        'optionAscend': 'Ancest.',
+        'optionDescDir': 'dir Desc',
+        'optionDescend': 'Descend',
+
+
+        'expandedOptionPrenoms': 'First Names',
+        'expandedOptionNoms': 'Last Names',
+        'expandedOptionMetiers': 'Occupations',
+        'expandedOptionLieux': 'Places',
+        'expandedOptionVie': 'Lifespan',
+        'expandedOptionProcreat': 'Ages of procreation',
+        'expandedOption1erEnf': 'Age at first child',
+        'expandedOptionMariage': 'Age at marriage',
+        'expandedOptionNbEnf': 'Number of children',
+        'expandedOptionTout': 'All file',
+        'expandedOptionAscDir': 'Direct ancestors of root',
+        'expandedOptionAscend': 'Ancestors + siblings of root',
+        'expandedOptionDescDir': 'Direct descendants of root',
+        'expandedOptionDescend': 'Descendants + spouses of root',
+        'labelPersonneRacine': 'Root person',
+        'searchPlaceholder': 'search root',
+        'searchButtonText': '🔍',
+        'selectDefaultOption': '...    select',
+        'alertNoPerson': 'No person found',
+        'titleSettings': 'Settings',
+        'titleMap': 'Show heatmap',
+        'buttonValidate': 'Validate',
+        'loadingHeatmap': 'Generating heatmap...',
+        'noGeoData': 'No geographic data available for selected people.',
+        'errorHeatmap': 'Error generating heatmap',
+        'heatmapTitleTous': 'All',
+        'heatmapTitleAscend': 'Ancestors',
+        'heatmapTitleDescend': 'Descendants',
+        'mapGeneration': 'Generating heatmap...'
+      },
+      'es': {
+        'titlePrenoms': 'Nombres',
+        'titleNoms': 'Apellidos',
+        'titleMetiers': 'Profesiones',
+        'titleLieux': 'Lugares',
+        'titleDureeVie': 'Duración de vida',
+        'titleAgeProcreation': 'Edades de procreación',
+        'titleAgeMariage': 'Edades de matrimonio',
+        'titleAgePremierEnfant': 'Edades del primer hijo',
+        'titleNombreEnfants': 'Número de hijos',
+        'entre': 'entre',
+        'et': 'y',
+        'motPlaces': 'palabras colocadas',
+        'début': 'inicio',
+        'fin': 'fin',
+
+        'optionPrenom': 'Nombre',
+        'optionNom': 'Apellido',
+        'optionMetier': 'Profesión',
+        'optionLieux': 'Lugares',
+        'optionVie': 'Vida',
+        'optionProcreat': 'Procreac.',
+        'option1erEnf': '1erHijo',
+        'optionMariage': 'Matrimonio',
+        'optionNbEnf': 'NºHijos',
+
+
+        'optionTout': 'Todo',
+        'optionAscDir': 'Asc. dir',
+        'optionAscend': 'Ascend.',
+        'optionDescDir': 'Desc dir',
+        'optionDescend': 'Descend',
+
+        'expandedOptionPrenoms': 'Nombres',
+        'expandedOptionNoms': 'Apellidos',
+        'expandedOptionMetiers': 'Profesiones',
+        'expandedOptionLieux': 'Lugares',
+        'expandedOptionVie': 'Duración de vida',
+        'expandedOptionProcreat': 'Edades de procreación',
+        'expandedOption1erEnf': 'Edad del primer hijo',
+        'expandedOptionMariage': 'Edad de matrimonio',
+        'expandedOptionNbEnf': 'Número de hijos',
+        'expandedOptionTout': 'Todo el archivo',
+        'expandedOptionAscDir': 'Ascendientes directos de la raíz',
+        'expandedOptionAscend': 'Ascendientes + hermanos de la raíz',
+        'expandedOptionDescDir': 'Descendientes directos de la raíz',
+        'expandedOptionDescend': 'Descendientes + cónyuges de la raíz',
+        'labelPersonneRacine': 'Persona raíz',
+        'searchPlaceholder': 'buscar raíz',
+        'searchButtonText': '🔍',
+        'selectDefaultOption': '...    seleccionar',
+        'alertNoPerson': 'No se encontró ninguna persona',
+        'titleSettings': 'Configuración',
+        'titleMap': 'Mostrar mapa de calor',
+        'buttonValidate': 'Validar',
+        'loadingHeatmap': 'Generando mapa de calor...',
+        'noGeoData': 'No hay datos geográficos disponibles para las personas seleccionadas.',
+        'errorHeatmap': 'Error al generar el mapa de calor',
+        'heatmapTitleTous': 'Todos',
+        'heatmapTitleAscend': 'Ascendientes',
+        'heatmapTitleDescend': 'Descendientes',
+        'mapGeneration': 'Generando mapa de calor...'
+      },
+      'hu': {
+        'titlePrenoms': 'Keresztnevek',
+        'titleNoms': 'Vezetéknevek',
+        'titleMetiers': 'Foglalkozások',
+        'titleLieux': 'Helyek',
+        'titleDureeVie': 'Élettartamok',
+        'titleAgeProcreation': 'Szaporodási életkorok',
+        'titleAgeMariage': 'Házasságkötési életkorok',
+        'titleAgePremierEnfant': 'Első gyermek életkorok',
+        'titleNombreEnfants': 'Gyermekek száma',
+        'entre': 'között',
+        'et': 'és',
+        'motPlaces': 'szó elhelyezve',
+        'début': 'kezdet',
+        'fin': 'vég',
+
+
+        'optionPrenom': 'Keresztnév',
+        'optionNom': 'Név',
+        'optionMetier': 'Foglalk.',
+        'optionLieux': 'Helyek',
+        'optionVie': 'Élet',
+        'optionProcreat': 'Szapor.',
+        'option1erEnf': '1.Gyerm.',
+        'optionMariage': 'Házasság',
+        'optionNbEnf': 'Gyerm.sz',
+
+
+
+
+
+        'optionTout': 'Mind',
+        'optionAscDir': 'Közv. ős',
+        'optionAscend': 'Ősök',
+        'optionDescDir': 'Közv ut',
+        'optionDescend': 'Utód.',
+
+        'expandedOptionPrenoms': 'Keresztnevek',
+        'expandedOptionNoms': 'Vezetéknevek',
+        'expandedOptionMetiers': 'Foglalkozások',
+        'expandedOptionLieux': 'Helyek',
+        'expandedOptionVie': 'Élettartam',
+        'expandedOptionProcreat': 'Szaporodási életkorok',
+        'expandedOption1erEnf': 'Első gyermek életkora',
+        'expandedOptionMariage': 'Házasságkötési életkor',
+        'expandedOptionNbEnf': 'Gyermekek száma',
+        'expandedOptionTout': 'Teljes fájl',
+        'expandedOptionAscDir': 'Gyökér közvetlen ősei',
+        'expandedOptionAscend': 'Gyökér ősei + testvérek',
+        'expandedOptionDescDir': 'Gyökér közvetlen utódai',
+        'expandedOptionDescend': 'Gyökér utódai + házastársak',
+        'labelPersonneRacine': 'Gyökérszemély',
+        'searchPlaceholder': 'gyökér keresése',
+        'searchButtonText': '🔍',
+        'selectDefaultOption': '...    választ',
+        'alertNoPerson': 'Nem található személy',
+        'titleSettings': 'Beállítások',
+        'titleMap': 'Hőtérkép mutatása',
+        'buttonValidate': 'Megerősít',
+        'loadingHeatmap': 'Hőtérkép generálása...',
+        'noGeoData': 'Nincs földrajzi adat a kiválasztott személyekhez.',
+        'errorHeatmap': 'Hiba a hőtérkép generálásánál',
+        'heatmapTitleTous': 'Mind',
+        'heatmapTitleAscend': 'Ősök',
+        'heatmapTitleDescend': 'Utódok',
+        'mapGeneration': 'Hőtérkép generálása...'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
+
 
 function createModalContainer() {
     const modal = document.createElement('div');
@@ -147,8 +416,32 @@ function createStandardTypeSelect(config) {
 
 function createTypeSelect(config) {
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Prénom', 'Nom', 'Métier', 'Lieux', 'Vie', 'Procréat', '1er Enf.', 'Mariage',  'Nb Enf.']; 
-    const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Lieux', 'Durée de Vie', 'Ages de procréation', 'Age au 1er enfant', 'Age de Mariage', 'Nombre d\'enfants'];          
+    // const typeOptions = ['Prénom', 'Nom', 'Métier', 'Lieux', 'Vie', 'Procréat', '1er Enf.', 'Mariage',  'Nb Enf.']; 
+    // const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Lieux', 'Durée de Vie', 'Ages de procréation', 'Age au 1er enfant', 'Age de Mariage', 'Nombre d\'enfants'];   
+    // Définir les options et les valeurs correspondantes
+    const typeOptions = [
+        getTranslation('optionPrenom'), 
+        getTranslation('optionNom'), 
+        getTranslation('optionMetier'), 
+        getTranslation('optionLieux'), 
+        getTranslation('optionVie'), 
+        getTranslation('optionProcreat'), 
+        getTranslation('option1erEnf'), 
+        getTranslation('optionMariage'), 
+        getTranslation('optionNbEnf')
+    ]; 
+    
+    const typeOptionsExpanded = [
+        getTranslation('expandedOptionPrenoms'), 
+        getTranslation('expandedOptionNoms'), 
+        getTranslation('expandedOptionMetiers'), 
+        getTranslation('expandedOptionLieux'), 
+        getTranslation('expandedOptionVie'), 
+        getTranslation('expandedOptionProcreat'), 
+        getTranslation('expandedOption1erEnf'), 
+        getTranslation('expandedOptionMariage'), 
+        getTranslation('expandedOptionNbEnf')
+    ];       
     const typeValues = ['prenoms', 'noms', 'professions', 'lieux', 'duree_vie', 'age_procreation', 'age_first_child', 'age_marriage', 'nombre_enfants'];
     
     
@@ -221,8 +514,26 @@ function createTypeSelect(config) {
 function createScopeSelect(config) {
     // Définir les options et les valeurs correspondantes
     // Définir les options et les valeurs correspondantes
-    const typeOptions = ['Tout', 'Asc dir.','Ascend', 'Desc dir',  'Descend']; 
-    const typeOptionsExpanded = ['Tout le fichier', 'Ascendants directs de la racine', 'Ascendants + fratrie de la racine', 'Desccendants directs de la racine' , 'Desccendants + conjoints de la racine'];       
+    // const typeOptions = ['Tout', 'Asc dir.','Ascend', 'Desc dir',  'Descend']; 
+    // const typeOptionsExpanded = ['Tout le fichier', 'Ascendants directs de la racine', 'Ascendants + fratrie de la racine', 'Desccendants directs de la racine' , 'Desccendants + conjoints de la racine'];       
+    const typeOptions = [
+        getTranslation('optionTout'), 
+        getTranslation('optionAscDir'),
+        getTranslation('optionAscend'), 
+        getTranslation('optionDescDir'),  
+        getTranslation('optionDescend')
+    ]; 
+    
+    const typeOptionsExpanded = [
+        getTranslation('expandedOptionTout'), 
+        getTranslation('expandedOptionAscDir'), 
+        getTranslation('expandedOptionAscend'), 
+        getTranslation('expandedOptionDescDir'), 
+        getTranslation('expandedOptionDescend')
+    ];
+
+    
+    
     const typeValues = ['all', 'directAncestors', 'ancestors', 'directDescendants', 'descendants'];
     
     // Créer la liste d'options
@@ -309,7 +620,8 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     container.style.alignItems = 'flex-start'; // S'assure que tout est aligné à gauche
 
     const label = document.createElement('label');
-    label.textContent = 'Personne racine';
+    // label.textContent = 'Personne racine';
+    label.textContent = getTranslation('labelPersonneRacine');
     label.style.fontSize = '12px';
     label.style.marginBottom = '2px';
     label.style.textAlign = 'left'; // Assurez-vous que le texte est aligné à gauche
@@ -323,14 +635,16 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.placeholder = 'search racine';
+    // searchInput.placeholder = 'search racine';
+    searchInput.placeholder = getTranslation('searchPlaceholder');
     searchInput.style.padding = '2px 3px'; // Padding réduit
     searchInput.style.width = '79px';
     searchInput.style.height = '17px'; // Hauteur réduite
     searchInput.style.marginTop= '2px'
     
     const searchButton = document.createElement('button');
-    searchButton.textContent = '🔍';
+    // searchButton.textContent = '🔍';
+    searchButton.textContent = getTranslation('searchButtonText');
     searchButton.style.padding = '0px 0px'; // Padding réduit
     searchButton.style.height = '24px'; // Hauteur réduite
     searchButton.style.marginLeft = '-3px';
@@ -360,7 +674,9 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
     function searchRootPerson() {
         const searchStr = normalizeString(searchInput.value);
         
-        resultsSelect.innerHTML = '<option value="">...    select</option>';
+        // resultsSelect.innerHTML = '<option value="">...    select</option>';
+        resultsSelect.innerHTML = `<option value="">${getTranslation('selectDefaultOption')}</option>`;
+
         resultsSelect.style.display = 'none';
         
         resultsSelect.style.textAlign = 'left';
@@ -424,7 +740,8 @@ function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
             `;
             document.head.appendChild(blinkStyle);
         } else {
-            alert('Aucune personne trouvée');
+            // alert('Aucune personne trouvée');
+            alert(getTranslation('alertNoPerson'));
         }
     }
 
@@ -485,7 +802,8 @@ function createSettingsButton() {
     settingsButton.style.display = 'flex';
     settingsButton.style.justifyContent = 'center';
     settingsButton.style.alignItems = 'center';
-    settingsButton.title = 'Paramètres';
+    // settingsButton.title = 'Paramètres';
+    settingsButton.title = getTranslation('titleSettings');
     
     // Animation subtile au survol
     settingsButton.addEventListener('mouseover', () => {
@@ -539,38 +857,37 @@ function setupModalEvents(modal, closeButton, generateNameCloud) {
 // Fonction pour mettre à jour le texte du titre
 export function updateTitleText(element, cfg) {
     let titleText = '';
+    
     if (cfg.type === 'prenoms') {
-        titleText = `${nameCloudState.totalWords} Prénoms`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titlePrenoms')}`;
     } else if (cfg.type === 'noms') {
-        titleText = `${nameCloudState.totalWords} Noms`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleNoms')}`;
     } else if (cfg.type === 'professions') {
-        titleText = `${nameCloudState.totalWords} Métiers`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleMetiers')}`;
     } else if (cfg.type === 'lieux'){
-        titleText = `${nameCloudState.totalWords} Lieux entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleLieux')} ${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}`;
     } else if (cfg.type === 'duree_vie') {
-        titleText = `${nameCloudState.totalWords} Durées de vie `;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleDureeVie')}`;
     } else if (cfg.type === 'age_procreation') {
-        titleText = `${nameCloudState.totalWords} Ages de procréation`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleAgeProcreation')}`;
     } else if (cfg.type === 'age_marriage') {
-        titleText = `${nameCloudState.totalWords} Ages de mariage`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleAgeMariage')}`;
     } else if (cfg.type === 'age_first_child') {
-        titleText = `${nameCloudState.totalWords} Ages au 1er enfant`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleAgePremierEnfant')}`;
     } else if (cfg.type === 'nombre_enfants') {
-        titleText = `${nameCloudState.totalWords} Nombres d'enfants`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleNombreEnfants')}`;
     }
 
-    
     if (!nameCloudState.mobilePhone || window.innerWidth > 800) 
-        titleText = titleText + ` entre ${cfg.startDate} et ${cfg.endDate}`;
+        titleText = titleText + ` ${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}`;
     else
-        titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">entre ${cfg.startDate} et ${cfg.endDate}</span>`;
-
+        titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}</span>`;
 
     if (nameCloudState.placedWords < nameCloudState.totalWords) {
         if (!nameCloudState.mobilePhone || window.innerWidth > 800)
-            titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${nameCloudState.placedWords} mots placés)</span>`;
+            titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${nameCloudState.placedWords} ${getTranslation('motPlaces')})</span>`;
         else
-            titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${nameCloudState.placedWords} mots placés)</span>`;
+            titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${nameCloudState.placedWords} ${getTranslation('motPlaces')})</span>`;
     } 
 
     if ((window.innerWidth > 700)) {
@@ -584,8 +901,9 @@ export function updateTitleText(element, cfg) {
     }
 
     element.innerHTML = titleText;
-
 }
+
+
 
 function showNameCloud(nameData, config) {
     const modal = createModalContainer();
@@ -618,12 +936,12 @@ function showNameCloud(nameData, config) {
     // const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear());
 
 
-    const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate || 1500, (value) => {
+    const { container: startDateContainer, input: startDateInput } = createDateInput(getTranslation('début'), config.startDate || 1500, (value) => {
         // Support de callback en option pour réagir directement aux changements
         // sans attendre l'événement 'change'
         console.log('Start date changed to:', value);
     });
-    const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear(), (value) => {
+    const { container: endDateContainer, input: endDateInput } = createDateInput(getTranslation('fin'), config.endDate || new Date().getFullYear(), (value) => {
         console.log('End date changed to:', value);
     });
 
@@ -646,7 +964,8 @@ function showNameCloud(nameData, config) {
     showButton.style.justifyContent = 'center';
     showButton.style.alignItems = 'center';
     showButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    showButton.title = 'Valider';
+    // showButton.title = 'Valider';
+    showButton.title = getTranslation('buttonValidate');
 
 
     const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
@@ -805,7 +1124,9 @@ function showNameCloud(nameData, config) {
         loadingIndicator.style.borderRadius = '8px';
         loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
         loadingIndicator.style.zIndex = '9999';
-        loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+        // loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+        loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
+
         document.body.appendChild(loadingIndicator);
         
         try {
@@ -820,13 +1141,22 @@ function showNameCloud(nameData, config) {
             if (heatmapData && heatmapData.length > 0) {
                 // Créer un titre pour la heatmap basé sur la configuration
                 let heatmapTitle;
+                // if (window.innerWidth < 300) { 
+                //     heatmapTitle = `${currentConfig.scope === 'all' ? 'Tous' : 
+                //         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ascend.' : 'Descend.'} 
+                //         (${currentConfig.startDate}-${currentConfig.endDate})`;
+                // } else {
+                //     heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? 'Tous' : 
+                //         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ancêtres' : 'Descendants'} 
+                //         (${currentConfig.startDate}-${currentConfig.endDate})`;                    
+                // }
                 if (window.innerWidth < 300) { 
-                    heatmapTitle = `${currentConfig.scope === 'all' ? 'Tous' : 
-                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ascend.' : 'Descend.'} 
+                    heatmapTitle = `${currentConfig.scope === 'all' ? getTranslation('heatmapTitleTous') : 
+                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? getTranslation('heatmapTitleAscend') : getTranslation('heatmapTitleDescend')} 
                         (${currentConfig.startDate}-${currentConfig.endDate})`;
                 } else {
-                    heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? 'Tous' : 
-                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ancêtres' : 'Descendants'} 
+                    heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? getTranslation('heatmapTitleTous') : 
+                        (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? getTranslation('heatmapTitleAscend') : getTranslation('heatmapTitleDescend')} 
                         (${currentConfig.startDate}-${currentConfig.endDate})`;                    
                 }
                 
@@ -851,14 +1181,16 @@ function showNameCloud(nameData, config) {
                     showButton.addEventListener('click', refreshHeatmap);
                 }
             } else {
-                alert('Aucune donnée géographique disponible pour les personnes sélectionnées.');
+                // alert('Aucune donnée géographique disponible pour les personnes sélectionnées.');
+                alert(getTranslation('noGeoData'));
             }
         } catch (error) {
             console.error('Erreur lors de la génération de la heatmap:', error);
             if (document.body.contains(loadingIndicator)) {
                 document.body.removeChild(loadingIndicator);
             }
-            alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
+            // alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
+            alert(`${getTranslation('errorHeatmap')}: ${error.message}`);
         }
     });
 
@@ -985,7 +1317,8 @@ function createMapButton() {
     mapButton.style.display = 'flex';
     mapButton.style.justifyContent = 'center';
     mapButton.style.alignItems = 'center';
-    mapButton.title = 'Afficher la heatmap';
+    // mapButton.title = 'Afficher la heatmap';
+    mapButton.title = getTranslation('titleMap');
     mapButton.style.marginTop = '2px';
     
     // Effet de survol avec légère animation

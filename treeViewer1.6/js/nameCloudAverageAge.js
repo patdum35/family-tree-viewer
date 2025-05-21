@@ -5,6 +5,211 @@ import { createStatsModal, createFrequencyStatsModal }  from './nameCloudStatMod
 import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
 
 
+/**
+ * Fonction de traduction spécifique pour nameCloudAverageAge.js
+ * Cette fonction utilise window.CURRENT_LANGUAGE pour déterminer la langue
+ */
+function getCloudTranslation(key) {
+    const translations = {
+      'fr': {
+        // Titres pour les labels et boutons
+        'statsButtonText': 'Statistiques détaillées',
+        'centuryStatsButtonText': 'Stat. par siècles',
+        
+        // Textes pour les statistiques de fréquence
+        'mostFreqFirstName': 'Prénom le plus fréquent',
+        'mostFreqLastName': 'Nom le plus fréquent',
+        'mostFreqJob': 'Métier le plus fréquent',
+        'mostFreqPlace': 'Lieu le plus fréquent',
+        'occurrences': 'occurrences',
+        
+        // Textes pour les statistiques d'âge
+        'avgLifespan': 'Durée de vie moyenne',
+        'avgProcreationAge': 'Âge moy. de procréation',
+        'avgMarriageAge': 'Âge moy. de mariage',
+        'avgFirstChildAge': 'Âge moy. au 1er enfant',
+        'avgChildrenCount': 'Nb. moyen d\'enfants',
+        'years': 'ans',
+        'male': 'H',
+        'female': 'F',
+        
+        // Titres modaux
+        'firstnamesTitle': 'prénoms',
+        'lastnamesTitle': 'Noms',
+        'jobsTitle': 'métiers',
+        'placesTitle': 'Lieux',
+        'lifespanTitle': 'Durée de vie',
+        'procreationAgeTitle': 'Âge de procréat.',
+        'marriageAgeTitle': 'Âge de mariage',
+        'firstChildAgeTitle': 'Âge au 1er enfant',
+        'childrenCountTitle': 'Nbre d\'enfants',
+        
+        // Articles pour les modaux
+        'ofFirstnames': 'des',
+        'ofLastnames': 'des',
+        'ofJobs': 'des',
+        'ofPlaces': 'des',
+        'ofChildrenCount': 'du',
+        
+        // Préfixes pour les stats
+        'lifespanPrefix': 'Durée de vie ',
+        'procreationAgePrefix': 'Âge de procréation ',
+        'marriageAgePrefix': 'Âge de mariage ',
+        'firstChildAgePrefix': 'Âge au 1er enfant ',
+        'childrenCountPrefix': 'Nombre d\'enfants '
+      },
+      'en': {
+        // Titres pour les labels et boutons
+        'statsButtonText': 'Detailed Statistics',
+        'centuryStatsButtonText': 'Stats by Century',
+        
+        // Textes pour les statistiques de fréquence
+        'mostFreqFirstName': 'Most frequent first name',
+        'mostFreqLastName': 'Most frequent last name',
+        'mostFreqJob': 'Most frequent occupation',
+        'mostFreqPlace': 'Most frequent place',
+        'occurrences': 'occurrences',
+        
+        // Textes pour les statistiques d'âge
+        'avgLifespan': 'Average lifespan',
+        'avgProcreationAge': 'Avg. procreation age',
+        'avgMarriageAge': 'Avg. marriage age',
+        'avgFirstChildAge': 'Avg. age at 1st child',
+        'avgChildrenCount': 'Avg. number of children',
+        'years': 'yrs',
+        'male': 'M',
+        'female': 'F',
+        
+        // Titres modaux
+        'firstnamesTitle': 'First Names',
+        'lastnamesTitle': 'Last Names',
+        'jobsTitle': 'Occupations',
+        'placesTitle': 'Places',
+        'lifespanTitle': 'Lifespan',
+        'procreationAgeTitle': 'Procreation Age',
+        'marriageAgeTitle': 'Marriage Age',
+        'firstChildAgeTitle': 'Age at 1st Child',
+        'childrenCountTitle': 'Children Count',
+        
+        // Articles pour les modaux
+        'ofFirstnames': 'of',
+        'ofLastnames': 'of',
+        'ofJobs': 'of',
+        'ofPlaces': 'of',
+        'ofChildrenCount': 'of',
+        
+        // Préfixes pour les stats
+        'lifespanPrefix': 'Lifespan ',
+        'procreationAgePrefix': 'Procreation age ',
+        'marriageAgePrefix': 'Marriage age ',
+        'firstChildAgePrefix': 'Age at first child ',
+        'childrenCountPrefix': 'Number of children '
+      },
+      'es': {
+        // Titres pour les labels et boutons
+        'statsButtonText': 'Estadísticas detalladas',
+        'centuryStatsButtonText': 'Estad. por siglo',
+        
+        // Textes pour les statistiques de fréquence
+        'mostFreqFirstName': 'Nombre más frecuente',
+        'mostFreqLastName': 'Apellido más frecuente',
+        'mostFreqJob': 'Profesión más frecuente',
+        'mostFreqPlace': 'Lugar más frecuente',
+        'occurrences': 'apariciones',
+        
+        // Textes pour les statistiques d'âge
+        'avgLifespan': 'Duración de vida media',
+        'avgProcreationAge': 'Edad media de procreación',
+        'avgMarriageAge': 'Edad media de matrimonio',
+        'avgFirstChildAge': 'Edad media al 1er hijo',
+        'avgChildrenCount': 'N° medio de hijos',
+        'years': 'añ.',
+        'male': 'H',
+        'female': 'M',
+        
+        // Titres modaux
+        'firstnamesTitle': 'Nombres',
+        'lastnamesTitle': 'Apellidos',
+        'jobsTitle': 'Profesiones',
+        'placesTitle': 'Lugares',
+        'lifespanTitle': 'Duración de vida',
+        'procreationAgeTitle': 'Edad de procreación',
+        'marriageAgeTitle': 'Edad de matrimonio',
+        'firstChildAgeTitle': 'Edad al 1er hijo',
+        'childrenCountTitle': 'Número de hijos',
+        
+        // Articles pour les modaux
+        'ofFirstnames': 'de',
+        'ofLastnames': 'de',
+        'ofJobs': 'de',
+        'ofPlaces': 'de',
+        'ofChildrenCount': 'del',
+        
+        // Préfixes pour les stats
+        'lifespanPrefix': 'Duración de vida ',
+        'procreationAgePrefix': 'Edad de procreación ',
+        'marriageAgePrefix': 'Edad de matrimonio ',
+        'firstChildAgePrefix': 'Edad al primer hijo ',
+        'childrenCountPrefix': 'Número de hijos '
+      },
+      'hu': {
+        // Titres pour les labels et boutons
+        'statsButtonText': 'Részletes statisztikák',
+        'centuryStatsButtonText': 'Évszázados stat.',
+        
+        // Textes pour les statistiques de fréquence
+        'mostFreqFirstName': 'Leggyakoribb keresztnév',
+        'mostFreqLastName': 'Leggyakoribb vezetéknév',
+        'mostFreqJob': 'Leggyakoribb foglalkozás',
+        'mostFreqPlace': 'Leggyakoribb hely',
+        'occurrences': 'előfordulás',
+        
+        // Textes pour les statistiques d'âge
+        'avgLifespan': 'Átlagos élettartam',
+        'avgProcreationAge': 'Átl. szaporodási életkor',
+        'avgMarriageAge': 'Átl. házasságkötési kor',
+        'avgFirstChildAge': 'Átl. kor az 1. gyereknél',
+        'avgChildrenCount': 'Átl. gyerekszám',
+        'years': 'év',
+        'male': 'F',
+        'female': 'N',
+        
+        // Titres modaux
+        'firstnamesTitle': 'Keresztnevek',
+        'lastnamesTitle': 'Vezetéknevek',
+        'jobsTitle': 'Foglalkozások',
+        'placesTitle': 'Helyek',
+        'lifespanTitle': 'Élettartam',
+        'procreationAgeTitle': 'Szaporodási kor',
+        'marriageAgeTitle': 'Házasságkötési kor',
+        'firstChildAgeTitle': 'Kor az 1. gyereknél',
+        'childrenCountTitle': 'Gyerekek száma',
+        
+        // Articles pour les modaux
+        'ofFirstnames': '',
+        'ofLastnames': '',
+        'ofJobs': '',
+        'ofPlaces': '',
+        'ofChildrenCount': '',
+        
+        // Préfixes pour les stats
+        'lifespanPrefix': 'Élettartam ',
+        'procreationAgePrefix': 'Szaporodási életkor ',
+        'marriageAgePrefix': 'Házasságkötési életkor ',
+        'firstChildAgePrefix': 'Első gyermek életkora ',
+        'childrenCountPrefix': 'Gyermekek száma '
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
+
+
+
 // Variables globales pour stocker la position de la StatsModal
 let globalStatsPosition = {
     x: 0,
@@ -16,16 +221,129 @@ let globalStatsPosition = {
 
 let globalResizeListener = null;
 
+// export const statsConfig = {
+//     'prenoms': {
+//         labelId: 'firstname-frequency-label',
+//         buttonId: 'firstname-frequency-button',
+//         buttonClass: 'firstname-frequency-button',
+//         containerClass: 'firstname-frequency-container',
+//         title: 'Prénom le plus fréquent',
+//         modalTitle: 'prénoms',
+//         modalArticle: 'des',
+//         labelText: 'Prénom le plus fréquent',
+//         type: 'frequency'
+//     },
+//     'noms': {
+//         labelId: 'lastname-frequency-label',
+//         buttonId: 'lastname-frequency-button',
+//         buttonClass: 'lastname-frequency-button',
+//         containerClass: 'lastname-frequency-container',
+//         title: 'Nom le plus fréquent',
+//         modalTitle: 'Noms',
+//         modalArticle: 'des',
+//         labelText: 'Nom le plus fréquent',
+//         type: 'frequency'
+//     },
+//     'professions': {
+//         labelId: 'profession-frequency-label',
+//         buttonId: 'profession-frequency-button',
+//         buttonClass: 'profession-frequency-button',
+//         containerClass: 'profession-frequency-container',
+//         title: 'Métier le plus fréquent',
+//         modalTitle: 'métiers',
+//         modalArticle: 'des',
+//         labelText: 'Métier le plus fréquent',
+//         type: 'frequency'
+//     },
+//     'lieux': {
+//         labelId: 'location-frequency-label',
+//         buttonId: 'location-frequency-button',
+//         buttonClass: 'location-frequency-button',
+//         containerClass: 'location-frequency-container',
+//         title: 'Lieu le plus fréquent',
+//         modalTitle: 'Lieux',
+//         modalArticle: 'des',
+//         labelText: 'Lieu le plus fréquent',
+//         type: 'frequency'
+//     },
+//     'duree_vie': {
+//         labelId: 'average-age-label',
+//         buttonId: 'average-age-stats-button',
+//         buttonClass: 'average-age-stats-button',
+//         containerClass: 'average-container',
+//         title: 'Durée de vie moyenne',
+//         modalTitle: 'Durée de vie',
+//         modalArticle: '',
+//         labelText: 'Durée de vie moyenne',
+//         modalStatsPrefix: 'Durée de vie ',
+//         chartId: 'average-age-chart-container',
+//         type: 'age'
+//     },
+//     'age_procreation': {
+//         labelId: 'procreation-age-label',
+//         buttonId: 'procreation-age-stats-button',
+//         buttonClass: 'procreation-age-stats-button',
+//         containerClass: 'procreation-average-container',
+//         title: 'Âge moy. de procréation',
+//         modalTitle: 'Âge de procréat.',
+//         modalArticle: '',
+//         labelText: 'Âge moy. de procréation',
+//         modalStatsPrefix: 'Âge de procréation ',
+//         chartId: 'procreation-age-chart-container',
+//         type: 'age'
+//     },
+//     'age_marriage': {
+//         labelId: 'marriage-age-label',
+//         buttonId: 'marriage-age-stats-button',
+//         buttonClass: 'marriage-age-stats-button',
+//         containerClass: 'marriage-average-container',
+//         title: 'Âge moy. de mariage',
+//         modalTitle: 'Âge de mariage',
+//         modalArticle: '',
+//         labelText: 'Âge moy. de mariage',
+//         modalStatsPrefix: 'Âge de mariage ',
+//         chartId: 'marriage-age-chart-container',
+//         type: 'age'
+//     },
+//     'age_first_child': {
+//         labelId: 'first-child-age-label',
+//         buttonId: 'first-child-age-stats-button',
+//         buttonClass: 'first-child-age-stats-button',
+//         containerClass: 'first-child-average-container',
+//         title: 'Âge moy. au 1er enfant',
+//         modalTitle: 'Âge au 1er enfant',
+//         modalArticle: '',
+//         labelText: 'Âge moy. au 1er enfant',
+//         modalStatsPrefix: 'Âge au 1er enfant ',
+//         chartId: 'first-child-age-chart-container',
+//         type: 'age'
+//     },
+//     'nombre_enfants': {
+//         labelId: 'children-count-label',
+//         buttonId: 'children-count-stats-button',
+//         buttonClass: 'children-count-stats-button',
+//         containerClass: 'children-count-container',
+//         title: 'Nb. moyen d\'enfants',
+//         modalTitle: 'Nbre d\'enfants',
+//         modalArticle: 'du',
+//         labelText: 'Nb. moyen d\'enfants',
+//         modalStatsPrefix: 'Nombre d\'enfants ',
+//         chartId: 'children-count-chart-container',
+//         type: 'age'  // Utiliser le même type 'age' pour profiter des mêmes graphiques de distribution
+//     }
+// };
+
+
 export const statsConfig = {
     'prenoms': {
         labelId: 'firstname-frequency-label',
         buttonId: 'firstname-frequency-button',
         buttonClass: 'firstname-frequency-button',
         containerClass: 'firstname-frequency-container',
-        title: 'Prénom le plus fréquent',
-        modalTitle: 'prénoms',
-        modalArticle: 'des',
-        labelText: 'Prénom le plus fréquent',
+        title: getCloudTranslation('mostFreqFirstName'),
+        modalTitle: getCloudTranslation('firstnamesTitle'),
+        modalArticle: getCloudTranslation('ofFirstnames'),
+        labelText: getCloudTranslation('mostFreqFirstName'),
         type: 'frequency'
     },
     'noms': {
@@ -33,10 +351,10 @@ export const statsConfig = {
         buttonId: 'lastname-frequency-button',
         buttonClass: 'lastname-frequency-button',
         containerClass: 'lastname-frequency-container',
-        title: 'Nom le plus fréquent',
-        modalTitle: 'Noms',
-        modalArticle: 'des',
-        labelText: 'Nom le plus fréquent',
+        title: getCloudTranslation('mostFreqLastName'),
+        modalTitle: getCloudTranslation('lastnamesTitle'),
+        modalArticle: getCloudTranslation('ofLastnames'),
+        labelText: getCloudTranslation('mostFreqLastName'),
         type: 'frequency'
     },
     'professions': {
@@ -44,10 +362,10 @@ export const statsConfig = {
         buttonId: 'profession-frequency-button',
         buttonClass: 'profession-frequency-button',
         containerClass: 'profession-frequency-container',
-        title: 'Métier le plus fréquent',
-        modalTitle: 'métiers',
-        modalArticle: 'des',
-        labelText: 'Métier le plus fréquent',
+        title: getCloudTranslation('mostFreqJob'),
+        modalTitle: getCloudTranslation('jobsTitle'),
+        modalArticle: getCloudTranslation('ofJobs'),
+        labelText: getCloudTranslation('mostFreqJob'),
         type: 'frequency'
     },
     'lieux': {
@@ -55,10 +373,10 @@ export const statsConfig = {
         buttonId: 'location-frequency-button',
         buttonClass: 'location-frequency-button',
         containerClass: 'location-frequency-container',
-        title: 'Lieu le plus fréquent',
-        modalTitle: 'Lieux',
-        modalArticle: 'des',
-        labelText: 'Lieu le plus fréquent',
+        title: getCloudTranslation('mostFreqPlace'),
+        modalTitle: getCloudTranslation('placesTitle'),
+        modalArticle: getCloudTranslation('ofPlaces'),
+        labelText: getCloudTranslation('mostFreqPlace'),
         type: 'frequency'
     },
     'duree_vie': {
@@ -66,11 +384,11 @@ export const statsConfig = {
         buttonId: 'average-age-stats-button',
         buttonClass: 'average-age-stats-button',
         containerClass: 'average-container',
-        title: 'Durée de vie moyenne',
-        modalTitle: 'Durée de vie',
+        title: getCloudTranslation('avgLifespan'),
+        modalTitle: getCloudTranslation('lifespanTitle'),
         modalArticle: '',
-        labelText: 'Durée de vie moyenne',
-        modalStatsPrefix: 'Durée de vie ',
+        labelText: getCloudTranslation('avgLifespan'),
+        modalStatsPrefix: getCloudTranslation('lifespanPrefix'),
         chartId: 'average-age-chart-container',
         type: 'age'
     },
@@ -79,11 +397,11 @@ export const statsConfig = {
         buttonId: 'procreation-age-stats-button',
         buttonClass: 'procreation-age-stats-button',
         containerClass: 'procreation-average-container',
-        title: 'Âge moy. de procréation',
-        modalTitle: 'Âge de procréat.',
+        title: getCloudTranslation('avgProcreationAge'),
+        modalTitle: getCloudTranslation('procreationAgeTitle'),
         modalArticle: '',
-        labelText: 'Âge moy. de procréation',
-        modalStatsPrefix: 'Âge de procréation ',
+        labelText: getCloudTranslation('avgProcreationAge'),
+        modalStatsPrefix: getCloudTranslation('procreationAgePrefix'),
         chartId: 'procreation-age-chart-container',
         type: 'age'
     },
@@ -92,11 +410,11 @@ export const statsConfig = {
         buttonId: 'marriage-age-stats-button',
         buttonClass: 'marriage-age-stats-button',
         containerClass: 'marriage-average-container',
-        title: 'Âge moy. de mariage',
-        modalTitle: 'Âge de mariage',
+        title: getCloudTranslation('avgMarriageAge'),
+        modalTitle: getCloudTranslation('marriageAgeTitle'),
         modalArticle: '',
-        labelText: 'Âge moy. de mariage',
-        modalStatsPrefix: 'Âge de mariage ',
+        labelText: getCloudTranslation('avgMarriageAge'),
+        modalStatsPrefix: getCloudTranslation('marriageAgePrefix'),
         chartId: 'marriage-age-chart-container',
         type: 'age'
     },
@@ -105,11 +423,11 @@ export const statsConfig = {
         buttonId: 'first-child-age-stats-button',
         buttonClass: 'first-child-age-stats-button',
         containerClass: 'first-child-average-container',
-        title: 'Âge moy. au 1er enfant',
-        modalTitle: 'Âge au 1er enfant',
+        title: getCloudTranslation('avgFirstChildAge'),
+        modalTitle: getCloudTranslation('firstChildAgeTitle'),
         modalArticle: '',
-        labelText: 'Âge moy. au 1er enfant',
-        modalStatsPrefix: 'Âge au 1er enfant ',
+        labelText: getCloudTranslation('avgFirstChildAge'),
+        modalStatsPrefix: getCloudTranslation('firstChildAgePrefix'),
         chartId: 'first-child-age-chart-container',
         type: 'age'
     },
@@ -118,11 +436,11 @@ export const statsConfig = {
         buttonId: 'children-count-stats-button',
         buttonClass: 'children-count-stats-button',
         containerClass: 'children-count-container',
-        title: 'Nb. moyen d\'enfants',
-        modalTitle: 'Nbre d\'enfants',
-        modalArticle: 'du',
-        labelText: 'Nb. moyen d\'enfants',
-        modalStatsPrefix: 'Nombre d\'enfants ',
+        title: getCloudTranslation('avgChildrenCount'),
+        modalTitle: getCloudTranslation('childrenCountTitle'),
+        modalArticle: getCloudTranslation('ofChildrenCount'),
+        labelText: getCloudTranslation('avgChildrenCount'),
+        modalStatsPrefix: getCloudTranslation('childrenCountPrefix'),
         chartId: 'children-count-chart-container',
         type: 'age'  // Utiliser le même type 'age' pour profiter des mêmes graphiques de distribution
     }
@@ -217,7 +535,7 @@ export function addStatsLabel(svg, textGroup, config) {
     let valueText = '';
     let subtitleText = '';
     let genderText = '';
-    let units = ' ans';
+    let units = ` ${getCloudTranslation('years')}`; //' ans';
     if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
     
     if (cfg.type === 'age') {
@@ -231,7 +549,9 @@ export function addStatsLabel(svg, textGroup, config) {
         // Ajouter les moyennes par sexe si disponibles
         if (nameCloudState.currentNameData.maleAverageData && 
             nameCloudState.currentNameData.femaleAverageData) {
-            genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${nits}`;
+            // genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${nits}`;
+            genderText = `${getCloudTranslation('male')}: ${nameCloudState.currentNameData.maleAverageData}${units} / ${getCloudTranslation('female')}: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
+
         }
 
     } else {
@@ -242,7 +562,8 @@ export function addStatsLabel(svg, textGroup, config) {
         
         const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
         valueText = mostFrequent.text;
-        subtitleText = `(${mostFrequent.size} occurrences)`;
+        // subtitleText = `(${mostFrequent.size} occurrences)`;
+        subtitleText = `(${mostFrequent.size} ${getCloudTranslation('occurrences')})`;
     }
 
     // Calculer la position
@@ -367,7 +688,8 @@ export function addStatsButton(container, nameData, type) {
     
     // Créer le bouton avec un ID fixe
     const button = document.createElement('button');
-    button.textContent = 'Statistiques détaillées';
+    // button.textContent = 'Statistiques détaillées';
+    button.textContent = getCloudTranslation('statsButtonText');
     button.id = cfg.buttonId;
     button.className = cfg.buttonClass;
     button.style.position = 'absolute';
@@ -541,7 +863,7 @@ export function addStatisticsLabel(svg, textGroup, config) {
     let valueText = '';
     let subtitleText = '';
     let genderText = '';
-    let units = ' ans';
+    let units = ` ${getCloudTranslation('years')}`; //' ans';
     if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
     
     if (cfg.type === 'age') {
@@ -554,7 +876,9 @@ export function addStatisticsLabel(svg, textGroup, config) {
         // Ajouter les moyennes par sexe si disponibles
         if (nameCloudState.currentNameData.maleAverageData && 
             nameCloudState.currentNameData.femaleAverageData) {
-            genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
+            // genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
+            genderText = `${getCloudTranslation('male')}: ${nameCloudState.currentNameData.maleAverageData}${units} / ${getCloudTranslation('female')}: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
+
         }
     } else {
         // Pour les types de fréquence
@@ -563,7 +887,7 @@ export function addStatisticsLabel(svg, textGroup, config) {
         }
         const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
         valueText = mostFrequent.text;
-        subtitleText = `(${mostFrequent.size} occurrences)`;
+        subtitleText = `(${mostFrequent.size} ${getCloudTranslation('occurrences')})`;
     }
 
     // Position initiale ou récupérée
@@ -835,7 +1159,8 @@ export function addCenturyStatsButton(container, type) {
     
     // Créer le bouton des statistiques par siècle
     const button = document.createElement('button');
-    button.textContent = 'Stat. par siècles';
+    // button.textContent = 'Stat. par siècles';
+    button.textContent = getCloudTranslation('centuryStatsButtonText');
     button.id = centuryButtonId;
     button.className = centuryButtonClass;
     

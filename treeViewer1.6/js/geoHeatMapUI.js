@@ -3,6 +3,171 @@ import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteracti
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 import { createCachedTileLayer } from './mapUtils.js';
 
+
+
+/**
+ * Fonction de traduction spécifique pour geoHeatMapUI.js
+ */
+function getUITranslation(key) {
+    const translations = {
+      'fr': {
+        // Titres et boutons
+        'moveMap': 'Déplacer la carte',
+        'resizeMap': 'Redimensionner la carte',
+        'refreshHeatmap': 'Rafraîchir la heatmap',
+        'closeHeatmap': 'Fermer la heatmap',
+        
+        // Détails des points
+        'pointDetails': 'Détails du point',
+        'place': 'Lieu',
+        'placeNotSpecified': 'Lieu non spécifié',
+        'totalOccurrences': 'Nombre total d\'occurrences',
+        'familyNames': 'Noms de famille',
+        'people': 'Personnes',
+        'occurrence': 'occurrence',
+        'occurrences': 'occurrences',
+        
+        // Types d'événements
+        'birth': 'Naissance',
+        'death': 'Décès',
+        'residence': 'Résidence',
+        'marriage': 'Mariage',
+        'place': 'Lieu',
+        
+        // Messages d'erreur
+        'mapInitError': 'Erreur lors de la création de la carte. Voir console pour détails.',
+        'noValidCoordinates': 'Aucune coordonnée valide trouvée dans les données',
+        'invalidHeatmapData': 'Données de heatmap invalides:'
+      },
+      'en': {
+        // Titres et boutons
+        'moveMap': 'Move the map',
+        'resizeMap': 'Resize the map',
+        'refreshHeatmap': 'Refresh heatmap',
+        'closeHeatmap': 'Close heatmap',
+        
+        // Détails des points
+        'pointDetails': 'Point details',
+        'place': 'Place',
+        'placeNotSpecified': 'Place not specified',
+        'totalOccurrences': 'Total occurrences',
+        'familyNames': 'Family names',
+        'people': 'People',
+        'occurrence': 'occurrence',
+        'occurrences': 'occurrences',
+        
+        // Types d'événements
+        'birth': 'Birth',
+        'death': 'Death',
+        'residence': 'Residence',
+        'marriage': 'Marriage',
+        'place': 'Place',
+        
+        // Messages d'erreur
+        'mapInitError': 'Error creating the map. See console for details.',
+        'noValidCoordinates': 'No valid coordinates found in data',
+        'invalidHeatmapData': 'Invalid heatmap data:'
+      },
+      'es': {
+        // Titres et boutons
+        'moveMap': 'Mover el mapa',
+        'resizeMap': 'Redimensionar el mapa',
+        'refreshHeatmap': 'Actualizar mapa de calor',
+        'closeHeatmap': 'Cerrar mapa de calor',
+        
+        // Détails des points
+        'pointDetails': 'Detalles del punto',
+        'place': 'Lugar',
+        'placeNotSpecified': 'Lugar no especificado',
+        'totalOccurrences': 'Número total de apariciones',
+        'familyNames': 'Apellidos',
+        'people': 'Personas',
+        'occurrence': 'aparición',
+        'occurrences': 'apariciones',
+        
+        // Types d'événements
+        'birth': 'Nacimiento',
+        'death': 'Fallecimiento',
+        'residence': 'Residencia',
+        'marriage': 'Matrimonio',
+        'place': 'Lugar',
+        
+        // Messages d'erreur
+        'mapInitError': 'Error al crear el mapa. Ver consola para detalles.',
+        'noValidCoordinates': 'No se encontraron coordenadas válidas en los datos',
+        'invalidHeatmapData': 'Datos de mapa de calor inválidos:'
+      },
+      'hu': {
+        // Titres et boutons
+        'moveMap': 'Térkép mozgatása',
+        'resizeMap': 'Térkép átméretezése',
+        'refreshHeatmap': 'Hőtérkép frissítése',
+        'closeHeatmap': 'Hőtérkép bezárása',
+        
+        // Détails des points
+        'pointDetails': 'Pont részletei',
+        'place': 'Hely',
+        'placeNotSpecified': 'Hely nincs megadva',
+        'totalOccurrences': 'Összes előfordulás',
+        'familyNames': 'Vezetéknevek',
+        'people': 'Személyek',
+        'occurrence': 'előfordulás',
+        'occurrences': 'előfordulás',
+        
+        // Types d'événements
+        'birth': 'Születés',
+        'death': 'Halál',
+        'residence': 'Lakóhely',
+        'marriage': 'Házasság',
+        'place': 'Hely',
+        
+        // Messages d'erreur
+        'mapInitError': 'Hiba a térkép létrehozásakor. Részletek a konzolon.',
+        'noValidCoordinates': 'Nem található érvényes koordináta az adatokban',
+        'invalidHeatmapData': 'Érvénytelen hőtérkép adatok:'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
+  
+  /**
+   * Fonction utilitaire pour obtenir le type d'événement traduit
+   * @param {string} eventType - Type d'événement en français
+   * @returns {string} - Type d'événement traduit
+   */
+  function getTranslatedEventType(eventType) {
+    const eventTypeMap = {
+      'Naissance': 'birth',
+      'Décès': 'death',
+      'Résidence': 'residence',
+      'Mariage': 'marriage',
+      'Lieu': 'place'
+    };
+    
+    const key = eventTypeMap[eventType] || 'place';
+    return getUITranslation(key);
+  }
+  
+  /**
+   * Fonction utilitaire pour gérer les pluriels dans les traductions
+   * @param {number} count - Le nombre pour déterminer le pluriel
+   * @param {string} singularKey - Clé de traduction pour le singulier
+   * @param {string} pluralKey - Clé de traduction pour le pluriel
+   * @returns {string} - Texte traduit au singulier ou pluriel selon le nombre
+   */
+  function getPlural(count, singularKey, pluralKey) {
+    return count > 1 ? getUITranslation(pluralKey) : getUITranslation(singularKey);
+  }
+
+
+
+
+
 /**
  * Crée et affiche la heatmap avec son interface utilisateur
  * 
@@ -204,7 +369,8 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     dragHandle.style.cursor = 'move';
     dragHandle.style.zIndex = '9200';
     dragHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-    dragHandle.title = 'Déplacer la carte';
+    // dragHandle.title = 'Déplacer la carte';
+    dragHandle.title = getUITranslation('moveMap');
 
     // Styles pour les petits écrans
     const dragHandleStyle = document.createElement('style');
@@ -245,7 +411,8 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     resizeHandle.style.borderTopLeftRadius = '10px';
     resizeHandle.style.zIndex = '9200';
     resizeHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-    resizeHandle.title = 'Redimensionner la carte';
+    // resizeHandle.title = 'Redimensionner la carte';
+    resizeHandle.title = getUITranslation('resizeMap');
 
     // Ajouter des styles pour l'affichage conditionnel
     const resizeHandleStyle = document.createElement('style');
@@ -365,7 +532,9 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
 
         // Vérifier que nous avons des données valides
         if (!locationData || !Array.isArray(locationData) || locationData.length === 0) {
-            console.error('Données de heatmap invalides:', locationData);
+            // console.error('Données de heatmap invalides:', locationData);
+            console.error(getUITranslation('invalidHeatmapData'), locationData);
+
             return;
         }
 
@@ -376,7 +545,8 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
 
         // Vérifier qu'il y a des coordonnées valides
         if (coordinates.length === 0) {
-            console.error('Aucune coordonnée valide trouvée dans les données');
+            // console.error('Aucune coordonnée valide trouvée dans les données');
+            console.error(getUITranslation('noValidCoordinates'));
             return;
         }
 
@@ -446,6 +616,7 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             }
         } catch (error) {
             console.error('Erreur lors de l\'ajustement de la vue:', error);
+            alert(getUITranslation('mapInitError'));
         }
 
         // Gérer les événements des boutons avec restauration des z-index
@@ -545,18 +716,76 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
         detailsContainer.classList.add('heatmap-details-open');
         isDetailsOpen = true;
         
+        // // Générer le contenu des détails
+        // let details = `
+        //     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        //         <h3 style="margin: 0;">Détails du point</h3>
+        //         <button id="close-details" style="background: none; border: none; font-size: 16px; cursor: pointer;">✖</button>
+        //     </div>
+        //     <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
+        //     <p><strong>Nombre total d'occurrences :</strong> ${location.count}</p>
+        // `;
+    
+        // if (location.families && Object.keys(location.families).length > 0) {
+        //     details += `<h4>Noms de famille (${Object.keys(location.families).length}):</h4>
+        //     <div style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
+        //         <ul style="margin: 0; padding-left: 20px;">`;
+            
+        //     // Trier les noms de famille par nombre d'occurrences
+        //     const sortedFamilies = Object.entries(location.families)
+        //         .sort((a, b) => b[1] - a[1]);
+    
+        //     // Afficher tous les noms de famille
+        //     sortedFamilies.forEach(([family, count]) => {
+        //         details += `<li>${family}: ${count} occurrence${count > 1 ? 's' : ''}</li>`;
+        //     });
+            
+        //     details += `</ul></div>`;
+        // }
+    
+        // if (location.locations && location.locations.length > 0) {
+        //     details += `<h4>Personnes (${location.locations.length}):</h4>
+        //     <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
+        //         <ul style="margin: 0; padding-left: 20px;">`;
+            
+        //     // Trier les personnes par type d'événement et par année si disponible
+        //     const sortedLocations = [...location.locations].sort((a, b) => {
+        //         // D'abord par type d'événement
+        //         if (a.type !== b.type) {
+        //             return a.type.localeCompare(b.type);
+        //         }
+        //         // Ensuite par année si disponible
+        //         if (a.year && b.year && a.year !== 'N/A' && b.year !== 'N/A') {
+        //             return parseInt(a.year) - parseInt(b.year);
+        //         }
+        //         // Sinon par nom
+        //         return a.name.localeCompare(b.name);
+        //     });
+            
+        //     // Afficher toutes les personnes
+        //     sortedLocations.forEach(person => {
+        //         details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
+        //     });
+            
+        //     details += `</ul></div>`;
+        // }
+
+
+
+
+
         // Générer le contenu des détails
         let details = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="margin: 0;">Détails du point</h3>
+                <h3 style="margin: 0;">${getUITranslation('pointDetails')}</h3>
                 <button id="close-details" style="background: none; border: none; font-size: 16px; cursor: pointer;">✖</button>
             </div>
-            <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
-            <p><strong>Nombre total d'occurrences :</strong> ${location.count}</p>
+            <p><strong>${getUITranslation('place')} :</strong> ${location.placeName || getUITranslation('placeNotSpecified')}</p>
+            <p><strong>${getUITranslation('totalOccurrences')} :</strong> ${location.count}</p>
         `;
     
         if (location.families && Object.keys(location.families).length > 0) {
-            details += `<h4>Noms de famille (${Object.keys(location.families).length}):</h4>
+            details += `<h4>${getUITranslation('familyNames')} (${Object.keys(location.families).length}):</h4>
             <div style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
                 <ul style="margin: 0; padding-left: 20px;">`;
             
@@ -566,14 +795,15 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
     
             // Afficher tous les noms de famille
             sortedFamilies.forEach(([family, count]) => {
-                details += `<li>${family}: ${count} occurrence${count > 1 ? 's' : ''}</li>`;
+                const occurrenceText = getPlural(count, 'occurrence', 'occurrences');
+                details += `<li>${family}: ${count} ${occurrenceText}</li>`;
             });
             
             details += `</ul></div>`;
         }
     
         if (location.locations && location.locations.length > 0) {
-            details += `<h4>Personnes (${location.locations.length}):</h4>
+            details += `<h4>${getUITranslation('people')} (${location.locations.length}):</h4>
             <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
                 <ul style="margin: 0; padding-left: 20px;">`;
             
@@ -593,11 +823,23 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
             
             // Afficher toutes les personnes
             sortedLocations.forEach(person => {
-                details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
+                // Traduire le type d'événement
+                const translatedType = getTranslatedEventType(person.type);
+                details += `<li>${person.name} (${translatedType}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
             });
             
             details += `</ul></div>`;
         }
+
+
+
+
+
+
+
+
+
+
     
         detailsContainer.innerHTML = details;
         
@@ -706,7 +948,8 @@ function createMapControls(mapContainer, heatmapWrapper) {
     // Bouton refresh
     const refreshBtn = document.createElement('button');
     refreshBtn.innerHTML = '🔄';
-    refreshBtn.title = 'Rafraîchir la heatmap';
+    // refreshBtn.title = 'Rafraîchir la heatmap';
+    refreshBtn.title = getUITranslation('refreshHeatmap');
     refreshBtn.style.width = '24px';
     refreshBtn.style.height = '24px';
     refreshBtn.style.padding = '0';
@@ -722,7 +965,8 @@ function createMapControls(mapContainer, heatmapWrapper) {
     // Bouton fermeture
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '✖';
-    closeBtn.title = 'Fermer la heatmap';
+    // closeBtn.title = 'Fermer la heatmap';
+    closeBtn.title = getUITranslation('closeHeatmap');
     closeBtn.style.width = '24px';
     closeBtn.style.height = '24px';
     closeBtn.style.padding = '0';

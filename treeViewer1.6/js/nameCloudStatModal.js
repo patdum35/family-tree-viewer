@@ -3,6 +3,208 @@ import { statsConfig, findPeopleWithName, ensureStatsExist } from './nameCloudAv
 import { showPersonsList } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
 
+
+
+/**
+ * Fonction de traduction spécifique pour nameCloudStatModal.js
+ */
+function getStatTranslation(key) {
+    const translations = {
+      'fr': {
+        // Titres et labels généraux
+        'noDataAvailable': 'Aucune donnée disponible',
+        'between': 'entre',
+        'and': 'et',
+        'close': '×',
+        
+        // Labels pour les statistiques
+        'average': 'Moyenne',
+        'median': 'Médiane',
+        'minimum': 'Minimum',
+        'maximum': 'Maximum',
+        'sampleSize': 'Échantillon',
+        'people': 'pers.',
+        'mostFrequentAge': 'Age le plus fréquent',
+        'mostFrequentChildCount': 'nb enfant le plus fréquent',
+        'years': ' ans',
+        'yearsShort': 'a',
+        
+        // Abréviations
+        'male': 'H',
+        'female': 'F',
+        
+        // Textes pour les graphiques
+        'age': 'Âge',
+        'count': 'Nombre',
+        'men': 'Hommes',
+        'women': 'Femmes',
+        'avg': 'Moy',
+        
+        // Textes pour les fréquences
+        'total': 'Total',
+        'differentItems': 'différents',
+        
+        // Types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'prénom',
+        'firstnamesPlural': 'prénoms',
+        'lastnamesSingular': 'nom de famille',
+        'lastnamesPlural': 'noms de famille',
+        'professionsSingular': 'métier',
+        'professionsPlural': 'métiers',
+        'placesSingular': 'lieu',
+        'placesPlural': 'lieux',
+        'elementsSingular': 'élément',
+        'elementsPlural': 'éléments'
+      },
+      'en': {
+        // Titres et labels généraux
+        'noDataAvailable': 'No data available',
+        'between': 'between',
+        'and': 'and',
+        'close': '×',
+        
+        // Labels pour les statistiques
+        'average': 'Average',
+        'median': 'Median',
+        'minimum': 'Minimum',
+        'maximum': 'Maximum',
+        'sampleSize': 'Sample size',
+        'people': 'people',
+        'mostFrequentAge': 'Most frequent age',
+        'mostFrequentChildCount': 'Most frequent child count',
+        'years': ' yrs',
+        'yearsShort': 'y',
+        
+        // Abréviations
+        'male': 'M',
+        'female': 'F',
+        
+        // Textes pour les graphiques
+        'age': 'Age',
+        'count': 'Count',
+        'men': 'Men',
+        'women': 'Women',
+        'avg': 'Avg',
+        
+        // Textes pour les fréquences
+        'total': 'Total',
+        'differentItems': 'different',
+        
+        // Types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'first name',
+        'firstnamesPlural': 'first names',
+        'lastnamesSingular': 'last name',
+        'lastnamesPlural': 'last names',
+        'professionsSingular': 'occupation',
+        'professionsPlural': 'occupations',
+        'placesSingular': 'place',
+        'placesPlural': 'places',
+        'elementsSingular': 'element',
+        'elementsPlural': 'elements'
+      },
+      'es': {
+        // Titres et labels généraux
+        'noDataAvailable': 'Datos no disponibles',
+        'between': 'entre',
+        'and': 'y',
+        'close': '×',
+        
+        // Labels pour les statistiques
+        'average': 'Promedio',
+        'median': 'Mediana',
+        'minimum': 'Mínimo',
+        'maximum': 'Máximo',
+        'sampleSize': 'Muestra',
+        'people': 'pers.',
+        'mostFrequentAge': 'Edad más frecuente',
+        'mostFrequentChildCount': 'Número de hijos más frecuente',
+        'years': ' años',
+        'yearsShort': 'a',
+        
+        // Abréviations
+        'male': 'H',
+        'female': 'M',
+        
+        // Textes pour les graphiques
+        'age': 'Edad',
+        'count': 'Cantidad',
+        'men': 'Hombres',
+        'women': 'Mujeres',
+        'avg': 'Prom',
+        
+        // Textes pour les fréquences
+        'total': 'Total',
+        'differentItems': 'diferentes',
+        
+        // Types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'nombre',
+        'firstnamesPlural': 'nombres',
+        'lastnamesSingular': 'apellido',
+        'lastnamesPlural': 'apellidos',
+        'professionsSingular': 'profesión',
+        'professionsPlural': 'profesiones',
+        'placesSingular': 'lugar',
+        'placesPlural': 'lugares',
+        'elementsSingular': 'elemento',
+        'elementsPlural': 'elementos'
+      },
+      'hu': {
+        // Titres et labels généraux
+        'noDataAvailable': 'Nincs elérhető adat',
+        'between': 'között',
+        'and': 'és',
+        'close': '×',
+        
+        // Labels pour les statistiques
+        'average': 'Átlag',
+        'median': 'Medián',
+        'minimum': 'Minimum',
+        'maximum': 'Maximum',
+        'sampleSize': 'Mintanagyság',
+        'people': 'személy',
+        'mostFrequentAge': 'Leggyakoribb életkor',
+        'mostFrequentChildCount': 'Leggyakoribb gyermekszám',
+        'years': ' év',
+        'yearsShort': 'é',
+        
+        // Abréviations
+        'male': 'F',
+        'female': 'N',
+        
+        // Textes pour les graphiques
+        'age': 'Életkor',
+        'count': 'Darabszám',
+        'men': 'Férfiak',
+        'women': 'Nők',
+        'avg': 'Átl',
+        
+        // Textes pour les fréquences
+        'total': 'Összesen',
+        'differentItems': 'különböző',
+        
+        // Types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'keresztnév',
+        'firstnamesPlural': 'keresztnevek',
+        'lastnamesSingular': 'vezetéknév',
+        'lastnamesPlural': 'vezetéknevek',
+        'professionsSingular': 'foglalkozás',
+        'professionsPlural': 'foglalkozások',
+        'placesSingular': 'hely',
+        'placesPlural': 'helyek',
+        'elementsSingular': 'elem',
+        'elementsPlural': 'elemek'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
+
+
+
 function calculateMedian(nameData) {
     const ages = [];
     
@@ -18,8 +220,10 @@ function calculateMedian(nameData) {
     ages.sort((a, b) => a - b);
     
     const middle = Math.floor(ages.length / 2);
-    let units = ' ans';
+    // let units = ' ans';
+    let units = getStatTranslation('years'); 
     if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
+        
     
     if (ages.length % 2 === 0) {
         return ((ages[middle - 1] + ages[middle]) / 2).toFixed(1) + units;
@@ -61,7 +265,8 @@ function calculateMode(nameData) {
     const modeItem = nameData.reduce((prev, current) => {
         return (prev.size > current.size) ? prev : current;
     });
-    let units = ' ans';
+    // let units = ' ans';
+    let units = getStatTranslation('years'); 
     if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
     
     return modeItem.text + units;
@@ -223,7 +428,8 @@ function initializeDistributionChart(data, container) {
         .attr("x", 16)
         .attr("y", 9)
         .attr("font-size", "10px")
-        .text("Hommes");
+        // .text("Hommes");
+        .text(getStatTranslation('men'));
     
     // Légende pour femmes
     legend.append("rect")
@@ -237,7 +443,8 @@ function initializeDistributionChart(data, container) {
         .attr("x", 16)
         .attr("y", 25)
         .attr("font-size", "10px")
-        .text("Femmes");
+        // .text("Femmes");
+        .text(getStatTranslation('women'));
     
     // Ajouter les moyennes
     // Moyenne générale
@@ -468,7 +675,9 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
-        title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
+        // title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
+        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${nameCloudState.currentConfig.startDate} ${getStatTranslation('and')} ${nameCloudState.currentConfig.endDate}`;
+
     } else {
         title.textContent = cfg.title;
     }
@@ -498,8 +707,11 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     
     // Vérifier si nous sommes sur un écran de faible hauteur
     const isLowHeight = window.innerHeight < 400;
-    let units = 'ans'; 
-    let unitsShort = 'a';
+    // let units = 'ans'; 
+    // let unitsShort = 'a';
+    let units = getStatTranslation('years'); 
+    let unitsShort = getStatTranslation('yearsShort');
+
     if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; unitsShort = '' }
     
     if (isLowHeight) {
@@ -515,7 +727,7 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         
         // Formatage des statistiques sur la première ligne
         const average = document.createElement('div');
-        average.innerHTML = `<span style="font-size:12px">Moyenne:</span> <span style="color:#3949AB;font-weight:bold">${nameData.stats.average}${units}</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3;font-weight:bold">F:${nameData.femaleAverageData || 'N/A'}</span>)</span>`;
+        average.innerHTML = `<span style="font-size:12px">${getStatTranslation('average')}:</span> <span style="color:#3949AB;font-weight:bold">${nameData.stats.average}${units}</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3;font-weight:bold">F:${nameData.femaleAverageData || 'N/A'}</span>)</span>`;
         average.style.whiteSpace = 'nowrap';
         average.style.marginRight = '10px';
 
@@ -523,19 +735,19 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         const maleMedian = calculateMedianBySex(nameData, 'M');
         const femaleMedian = calculateMedianBySex(nameData, 'F');
 
-        median.innerHTML = `<span style="font-size:12px">Médiane:</span> <span style="font-weight:bold">${calculateMedian(nameData).replace(units, unitsShort)}</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${maleMedian}</span> / <span style="color:#F687B3;font-weight:bold">F:${femaleMedian}</span>)</span>`;
+        median.innerHTML = `<span style="font-size:12px">${getStatTranslation('median')}:</span> <span style="font-weight:bold"> ${calculateMedian(nameData).replace(units, unitsShort)}</span> <span style="font-size:12px">(<span style="color:#4299e1;font-weight:bold">H:${maleMedian}</span> / <span style="color:#F687B3;font-weight:bold">F:${femaleMedian}</span>)</span>`;
         median.style.whiteSpace = 'nowrap';
         median.style.marginRight = '10px';
 
 
         
         const min = document.createElement('div');
-        min.innerHTML = `<span style="font-size:12px">Min:</span> <span style="font-weight:bold">${nameData.stats.min}${unitsShort}</span>`;
+        min.innerHTML = `<span style="font-size:12px">${getStatTranslation('minimum')}:</span> <span style="font-weight:bold">${nameData.stats.min}${unitsShort}</span>`;
         min.style.whiteSpace = 'nowrap';
         min.style.marginRight = '10px';
         
         const max = document.createElement('div');
-        max.innerHTML = `<span style="font-size:12px">Max:</span> <span style="font-weight:bold">${nameData.stats.max}${unitsShort}</span>`;
+        max.innerHTML = `<span style="font-size:12px">${getStatTranslation('maximum')}:</span> <span style="font-weight:bold">${nameData.stats.max}${unitsShort}</span>`;
         max.style.whiteSpace = 'nowrap';
         
         row1.appendChild(average);
@@ -551,14 +763,14 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         
         const count = document.createElement('div');
         // Modification ici pour inclure les compteurs par sexe avec couleurs
-        count.innerHTML = `<span style="font-size:12px">Échantillon:</span> <span style="font-weight:bold">${nameData.stats.count} pers. </span> <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`;
+        count.innerHTML = `<span style="font-size:12px">${getStatTranslation('sampleSize')}:</span> <span style="font-weight:bold">${nameData.stats.count} pers. </span> <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`;
         count.style.whiteSpace = 'nowrap';
         count.style.marginRight = '10px';
 
 
         
         const mode = document.createElement('div');
-        mode.innerHTML = `<span style="font-size:12px">Age plus fréquent</span> <span style="font-weight:bold">${calculateMode(nameData).replace(units, unitsShort)}</span>`;
+        mode.innerHTML = `<span style="font-size:12px">${getStatTranslation('mostFrequentAge')}</span> <span style="font-weight:bold"> ${calculateMode(nameData).replace(units, unitsShort)}</span>`;
         mode.style.whiteSpace = 'nowrap';
         
         row2.appendChild(count);
@@ -575,21 +787,38 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         grid.style.marginBottom = '15px';
         
         // Ajout des statistiques principales
-        addStatItem(grid, `Moyenne`, `${nameData.stats.average} ${units} <span style="font-size:12px">(<span style="color:#4299e1">H: ${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3">F: ${nameData.femaleAverageData || 'N/A'}</span>)</span>`, '#3949AB');
+        // addStatItem(grid, `Moyenne`, `${nameData.stats.average} ${units} <span style="font-size:12px">(<span style="color:#4299e1">H: ${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3">F: ${nameData.femaleAverageData || 'N/A'}</span>)</span>`, '#3949AB');
+        addStatItem(grid, `${getStatTranslation('average')}`, `${nameData.stats.average} ${units} <span style="font-size:12px">(<span style="color:#4299e1">${getStatTranslation('male')}: ${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3">${getStatTranslation('female')}: ${nameData.femaleAverageData || 'N/A'}</span>)</span>`, '#3949AB');
+
 
         const maleMedian = calculateMedianBySex(nameData, 'M');
         const femaleMedian = calculateMedianBySex(nameData, 'F');
-        addStatItem(grid, `Médiane`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">H: ${maleMedian}</span> / <span style="color:#F687B3">F: ${femaleMedian}</span>)</span>`, '#3949AB');
+        // addStatItem(grid, `Médiane`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">H: ${maleMedian}</span> / <span style="color:#F687B3">F: ${femaleMedian}</span>)</span>`, '#3949AB');
 
-        addStatItem(grid, 'Minimum', `${stats.min} ${units}`);
-        addStatItem(grid, 'Maximum', `${stats.max} ${units}`);
+        // addStatItem(grid, 'Minimum', `${stats.min} ${units}`);
+        // addStatItem(grid, 'Maximum', `${stats.max} ${units}`);
+        
+        // // Modification ici pour inclure les compteurs par sexe
+        // addStatItem(grid, 'Nombre de personnes', `${nameData.stats.count} <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`);
+        // if (nameCloudState.currentConfig.type === 'nombre_enfants') { 
+        //     addStatItem(grid, 'nb enfant le plus fréquent', calculateMode(nameData));
+        // } else { 
+        //     addStatItem(grid, 'Age le plus fréquent', calculateMode(nameData));
+        // }
+
+
+        addStatItem(grid, `${getStatTranslation('median')}`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">${getStatTranslation('male')}: ${maleMedian}</span> / <span style="color:#F687B3">${getStatTranslation('female')}: ${femaleMedian}</span>)</span>`, '#3949AB');
+
+        addStatItem(grid, getStatTranslation('minimum'), `${stats.min} ${units}`);
+        addStatItem(grid, getStatTranslation('maximum'), `${stats.max} ${units}`);
         
         // Modification ici pour inclure les compteurs par sexe
-        addStatItem(grid, 'Nombre de personnes', `${nameData.stats.count} <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`);
+        addStatItem(grid, getStatTranslation('sampleSize'), `${nameData.stats.count} <span style="font-size:14px">(<span style="color:#4299e1">${getStatTranslation('male')}:${maleCount}</span> / <span style="color:#F687B3">${getStatTranslation('female')}:${femaleCount}</span>)</span>`);
+        
         if (nameCloudState.currentConfig.type === 'nombre_enfants') { 
-            addStatItem(grid, 'nb enfant le plus fréquent', calculateMode(nameData));
+            addStatItem(grid, getStatTranslation('mostFrequentChildCount'), calculateMode(nameData));
         } else { 
-            addStatItem(grid, 'Age le plus fréquent', calculateMode(nameData));
+            addStatItem(grid, getStatTranslation('mostFrequentAge'), calculateMode(nameData));
         }
         
 
@@ -701,7 +930,9 @@ export function createFrequencyStatsModal(nameData, type) {
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
-        title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
+        // title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
+        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${nameCloudState.currentConfig.startDate} ${getStatTranslation('and')} ${nameCloudState.currentConfig.endDate}`;
+
     } else {
         title.textContent = cfg.title;
     }
@@ -709,7 +940,8 @@ export function createFrequencyStatsModal(nameData, type) {
     title.style.fontSize = '16px';
     
     const closeButton = document.createElement('button');
-    closeButton.textContent = '×';
+    // closeButton.textContent = '×';
+    closeButton.textContent = getStatTranslation('close');
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
     closeButton.style.fontSize = '24px';
@@ -801,8 +1033,10 @@ export function createFrequencyStatsModal(nameData, type) {
     infoContainer.style.marginTop = '15px';
     infoContainer.style.fontSize = '14px';
     infoContainer.style.color = '#666';
-    infoContainer.textContent = `Total: ${sortedData.length} ${getTypeLabel(type)} différents`;
-    
+    // infoContainer.textContent = `Total: ${sortedData.length} ${getTypeLabel(type)} différents`;
+    infoContainer.textContent = `${getStatTranslation('total')}: ${sortedData.length} ${getTypeLabel(type)} ${getStatTranslation('differentItems')}`;
+
+
     modal.appendChild(infoContainer);
     
     // Création d'un overlay pour l'arrière-plan
@@ -840,17 +1074,30 @@ export function createFrequencyStatsModal(nameData, type) {
 }
 
 // Fonction auxiliaire pour obtenir le libellé pour un type
+// function getTypeLabel(type, form = 'plural') {
+//     switch (type) {
+//         case 'prenoms':
+//             return form === 'plural' ? 'prénoms' : 'prénom';
+//         case 'noms':
+//             return form === 'plural' ? 'noms de famille' : 'nom de famille';
+//         case 'professions':
+//             return form === 'plural' ? 'métiers' : 'métier';
+//         case 'lieux':
+//             return form === 'plural' ? 'lieux' : 'lieu';
+//         default:
+//             return form === 'plural' ? 'éléments' : 'élément';
+//     }
+// }
+
 function getTypeLabel(type, form = 'plural') {
-    switch (type) {
-        case 'prenoms':
-            return form === 'plural' ? 'prénoms' : 'prénom';
-        case 'noms':
-            return form === 'plural' ? 'noms de famille' : 'nom de famille';
-        case 'professions':
-            return form === 'plural' ? 'métiers' : 'métier';
-        case 'lieux':
-            return form === 'plural' ? 'lieux' : 'lieu';
-        default:
-            return form === 'plural' ? 'éléments' : 'élément';
-    }
+    const typeMapping = {
+        'prenoms': form === 'plural' ? 'firstnamesPlural' : 'firstnamesSingular',
+        'noms': form === 'plural' ? 'lastnamesPlural' : 'lastnamesSingular',
+        'professions': form === 'plural' ? 'professionsPlural' : 'professionsSingular',
+        'lieux': form === 'plural' ? 'placesPlural' : 'placesSingular',
+        'default': form === 'plural' ? 'elementsPlural' : 'elementsSingular'
+    };
+    
+    const key = typeMapping[type] || typeMapping['default'];
+    return getStatTranslation(key);
 }

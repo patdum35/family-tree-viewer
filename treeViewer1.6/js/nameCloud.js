@@ -7,6 +7,8 @@ import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyN
 import { hideHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
+import { translateOccupation } from './occupations.js'; // N
+
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -112,6 +114,37 @@ export function processNamesCloudWithDate(config, containerElement = null) {
     centerCloudNameContainer();
 
     nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
+
+    // const textsArray = nameData.map(item => item.text);
+
+    // console.log("\n\n\n\ ########################   Debug  nuage:", textsArray, " ###########################\n\n\n");
+
+    // // Sauvegarder dans un fichier
+    // async function saveToFile(data) {
+    //     try {
+    //         const handle = await window.showSaveFilePicker({
+    //             suggestedName: 'nuage_noms.txt',
+    //             types: [{
+    //                 description: 'Fichier texte',
+    //                 accept: {'text/plain': ['.txt']},
+    //             }],
+    //         });
+            
+    //         const writable = await handle.createWritable();
+    //         // Formater les données sous forme de tableau littéral
+    //         const formattedData = `[${data.map(text => `"${text}"`).join(', ')}]`;
+    //         await writable.write(formattedData);
+    //         await writable.close();
+            
+    //         console.log("✅ Fichier sauvegardé avec succès");
+    //     } catch (err) {
+    //         console.error("❌ Erreur lors de la sauvegarde:", err);
+    //     }
+    // }
+
+    // // Appeler la fonction de sauvegarde
+    // saveToFile(textsArray);
+
     // Conserver les données pour réutilisation
     nameCloudState.currentConfig = { ...config };
 
@@ -157,6 +190,9 @@ export function processPersonData(person, config, nameFrequency, stats, options 
     const { inRange, date } = hasDateInRange(person, config, stats);
     const hasDate = inRange; // Pour compatibilité avec le code existant
 
+    // Récupérer la langue actuelle (avec français comme fallback)
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+
     if (config.type === 'prenoms') {
         const firstName = person.name.split('/')[0].trim();
         const firstNames = firstName
@@ -191,7 +227,15 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             
             cleanedProfessions.forEach(prof => {
                 if (prof) {
-                    nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                    // nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                    // Si la langue courante est le français, pas besoin de traduire
+                    if (currentLang === 'fr') {
+                        nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                    } else {
+                        // Traduire la profession vers la langue courante
+                        const translatedProfession = translateOccupation(prof, currentLang);
+                        nameFrequency[translatedProfession] = (nameFrequency[translatedProfession] || 0) + 1;
+                    }
                 }
             });
         }
@@ -804,6 +848,7 @@ export function filterPeopleByText(text, config) {
     if (!state.gedcomData) return [];
     
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
 
     return Object.values(state.gedcomData.individuals)
         .filter(p => {
@@ -819,7 +864,19 @@ export function filterPeopleByText(text, config) {
                 matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === text.toLowerCase());
             } else if (config.type === 'professions') {
                 const cleanedProfessions = cleanProfession(p.occupation);
-                matches = cleanedProfessions.includes(text.toLowerCase());
+                // matches = cleanedProfessions.includes(text.toLowerCase());
+
+                if (currentLang === 'fr') {
+                    // En français, on utilise directement le texte
+                    matches = cleanedProfessions.includes(text.toLowerCase());
+                } else {
+                    // Pour les autres langues, il faut chercher la profession originale
+                    // dont la traduction correspond au texte
+                    matches = cleanedProfessions.some(prof => {
+                        const translatedProf = translateOccupation(prof, currentLang);
+                        return translatedProf.toLowerCase() === text.toLowerCase();
+                    });
+                }
             } else if (config.type === 'lieux') {
                 const personLocations = [
                     p.birthPlace, 

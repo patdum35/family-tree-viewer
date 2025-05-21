@@ -3,6 +3,125 @@ import { createCustomSelector } from './UIutils.js';
 
 
 
+// Dictionnaire des traductions pour nameCloudSettings
+const settingsTranslations = {
+    'fr': {
+        'cloudSettings': 'Paramètres du nuage',
+        'shape': 'Forme\ndu nuage',
+        'animation': 'Animation',
+        'minSize': 'Taille\nminimum',
+        'maxSize': 'Taille\nmaximum',
+        'spacing': 'Espace\nentre mots',
+        'font': 'Police',
+        'options': 'Options',
+        'apply': 'Appliquer',
+        'initialRotation': 'Rotation init.',
+        'outline': 'Contour',
+        'threeZones': '3 zones',
+        'none': 'Aucune',
+        'rotation': 'Rotation',
+        'simple': 'Simple',
+        'bounce': 'Rebond',
+        'float': 'Flottant',
+        'rectangle': 'Rectangle',
+        'ellipse': 'Ellipse',
+        'heart': 'Coeur',
+        'star': 'Étoile',
+        'arabesque': 'Arabesque',
+        'settingsLoaded': 'Paramètres du nuage de mots chargés depuis localStorage',
+        'loadingError': 'Erreur lors du chargement des paramètres:'
+    },
+    'en': {
+        'cloudSettings': 'Cloud Settings',
+        'shape': 'Cloud\nShape',
+        'animation': 'Animation',
+        'minSize': 'Minimum\nSize',
+        'maxSize': 'Maximum\nSize',
+        'spacing': 'Word\nSpacing',
+        'font': 'Font',
+        'options': 'Options',
+        'apply': 'Apply',
+        'initialRotation': 'Initial Rotation',
+        'outline': 'Outline',
+        'threeZones': '3 Zones',
+        'none': 'None',
+        'rotation': 'Rotation',
+        'simple': 'Simple',
+        'bounce': 'Bounce',
+        'float': 'Float',
+        'rectangle': 'Rectangle',
+        'ellipse': 'Ellipse',
+        'heart': 'Heart',
+        'star': 'Star',
+        'arabesque': 'Arabesque',
+        'settingsLoaded': 'Word cloud settings loaded from localStorage',
+        'loadingError': 'Error loading settings:'
+    },
+    'es': {
+        'cloudSettings': 'Configuración de la nube',
+        'shape': 'Forma\nde la nube',
+        'animation': 'Animación',
+        'minSize': 'Tamaño\nmínimo',
+        'maxSize': 'Tamaño\nmáximo',
+        'spacing': 'Espaciado\nentre palabras',
+        'font': 'Fuente',
+        'options': 'Opciones',
+        'apply': 'Aplicar',
+        'initialRotation': 'Rotación inicial',
+        'outline': 'Contorno',
+        'threeZones': '3 Zonas',
+        'none': 'Ninguna',
+        'rotation': 'Rotación',
+        'simple': 'Simple',
+        'bounce': 'Rebote',
+        'float': 'Flotante',
+        'rectangle': 'Rectángulo',
+        'ellipse': 'Elipse',
+        'heart': 'Corazón',
+        'star': 'Estrella',
+        'arabesque': 'Arabesco',
+        'settingsLoaded': 'Configuración de la nube de palabras cargada desde localStorage',
+        'loadingError': 'Error al cargar la configuración:'
+    },
+    'hu': {
+        'cloudSettings': 'Felhő beállítások',
+        'shape': 'Felhő\nalakja',
+        'animation': 'Animáció',
+        'minSize': 'Minimum\nméret',
+        'maxSize': 'Maximum\nméret',
+        'spacing': 'Szavak\ntávolsága',
+        'font': 'Betűtípus',
+        'options': 'Opciók',
+        'apply': 'Alkalmaz',
+        'initialRotation': 'Kezdeti forgatás',
+        'outline': 'Körvonal',
+        'threeZones': '3 zóna',
+        'none': 'Nincs',
+        'rotation': 'Forgás',
+        'simple': 'Egyszerű',
+        'bounce': 'Pattogás',
+        'float': 'Lebegés',
+        'rectangle': 'Téglalap',
+        'ellipse': 'Ellipszis',
+        'heart': 'Szív',
+        'star': 'Csillag',
+        'arabesque': 'Arabeszk',
+        'settingsLoaded': 'Szófelhő beállítások betöltve a localStorage-ból',
+        'loadingError': 'Hiba a beállítások betöltésekor:'
+    }
+};
+
+// Fonction pour obtenir une traduction en fonction de la langue actuelle
+function translateCloudSettings(key) {
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    return settingsTranslations[currentLang]?.[key] || 
+           settingsTranslations['fr'][key] || 
+           key;
+}
+
+
+
+
 // Au début du fichier nameCloudSettings.js, après les imports
 // Fonction pour charger les paramètres depuis localStorage
 export function loadSettingsFromLocalStorage() {
@@ -35,9 +154,12 @@ export function loadSettingsFromLocalStorage() {
                 nameCloudState.wordMovement = 'none';
             }
             
-            console.log('Paramètres du nuage de mots chargés depuis localStorage');
+            // console.log('Paramètres du nuage de mots chargés depuis localStorage');
+            console.log(translateCloudSettings('settingsLoaded'));
         } catch (error) {
-            console.error('Erreur lors du chargement des paramètres:', error);
+            // console.error('Erreur lors du chargement des paramètres:', error);
+            console.error(translateCloudSettings('loadingError'), error);
+
         }
     }
 }
@@ -45,12 +167,19 @@ export function loadSettingsFromLocalStorage() {
 // Fonction pour créer un sélecteur de forme personnalisé
 function createShapeSelect(selectedShape = 'rectangle') {
     // Définir les options et les valeurs correspondantes
+    // const options = [
+    //     { value: 'rectangle', label: 'Rectangle' },
+    //     { value: 'ellipse', label: 'Ellipse' },
+    //     { value: 'coeur', label: 'Coeur' },
+    //     { value: 'etoile', label: 'Étoile' },
+    //     // { value: 'arabesque', label: 'Arabesque' }
+    // ];
     const options = [
-        { value: 'rectangle', label: 'Rectangle' },
-        { value: 'ellipse', label: 'Ellipse' },
-        { value: 'coeur', label: 'Coeur' },
-        { value: 'etoile', label: 'Étoile' },
-        // { value: 'arabesque', label: 'Arabesque' }
+        { value: 'rectangle', label: translateCloudSettings('rectangle') },
+        { value: 'ellipse', label: translateCloudSettings('ellipse') },
+        { value: 'coeur', label: translateCloudSettings('heart') },
+        { value: 'etoile', label: translateCloudSettings('star') },
+        // { value: 'arabesque', label: translateCloudSettings('arabesque') }
     ];
     
     // Couleurs pour le sélecteur personnalisé
@@ -77,12 +206,19 @@ function createShapeSelect(selectedShape = 'rectangle') {
 // // Function to create an animation style selector
 function createAnimationStyleSelect(selectedValue = 'none') {
     // Définir les styles d'animation et leurs étiquettes correspondantes
+    // const options = [
+    //     { value: 'none', label: 'Aucune' },
+    //     { value: 'rotation', label: 'Rotation' },
+    //     { value: 'simple', label: 'Simple' },
+    //     { value: 'bounce', label: 'Rebond' },
+    //     { value: 'float', label: 'Flottant' }
+    // ];
     const options = [
-        { value: 'none', label: 'Aucune' },
-        { value: 'rotation', label: 'Rotation' },
-        { value: 'simple', label: 'Simple' },
-        { value: 'bounce', label: 'Rebond' },
-        { value: 'float', label: 'Flottant' }
+        { value: 'none', label: translateCloudSettings('none') },
+        { value: 'rotation', label: translateCloudSettings('rotation') },
+        { value: 'simple', label: translateCloudSettings('simple') },
+        { value: 'bounce', label: translateCloudSettings('bounce') },
+        { value: 'float', label: translateCloudSettings('float') }
     ];
     
     // Couleurs pour le sélecteur personnalisé
@@ -285,7 +421,8 @@ export function createSettingsModal(onSave) {
     titleContainer.style.marginBottom = '10px'; // Réduit de 15px à 10px
     
     const title = document.createElement('h3');
-    title.textContent = 'Paramètres du nuage';
+    // title.textContent = 'Paramètres du nuage';
+    title.textContent = translateCloudSettings('cloudSettings');
     title.style.margin = '0';
     title.style.color = 'white';
     title.style.textAlign = 'center';
@@ -410,13 +547,16 @@ export function createSettingsModal(onSave) {
     };
 
     // 1. Forme du nuage
-    const shapeContainer = createFormGroup('Forme\ndu nuage', '#8e44ad'); // Couleur violette
+    // const shapeContainer = createFormGroup('Forme\ndu nuage', '#8e44ad'); // Couleur violette
+    const shapeContainer = createFormGroup(translateCloudSettings('shape'), '#8e44ad'); // Couleur violette
+
     const shapeSelect = createShapeSelect(nameCloudState.cloudShape || 'rectangle');
     shapeSelect.addEventListener('change', applyChanges);
     shapeContainer.appendChild(shapeSelect);
     
     // 2. Animation (DÉPLACÉ JUSTE APRÈS LA FORME) - et avec couleur orange
-    const animationContainer = createFormGroup('Animation', '#f39c12'); // Maintenant en orange
+    // const animationContainer = createFormGroup('Animation', '#f39c12'); // Maintenant en orange
+    const animationContainer = createFormGroup(translateCloudSettings('animation'), '#f39c12'); // Maintenant en orange
     const animationLabel = animationContainer.querySelector('.form-group-label');
     animationLabel.style.padding = '1px 6px';
     animationLabel.style.lineHeight = '2';
@@ -427,22 +567,26 @@ export function createSettingsModal(onSave) {
     animationContainer.appendChild(animationStyleSelect);
     
     // 3. Taille de police minimum
-    const minFontContainer = createFormGroup('Taille\nminimum', '#8e44ad'); // Violet
+    // const minFontContainer = createFormGroup('Taille\nminimum', '#8e44ad'); // Violet
+    const minFontContainer = createFormGroup(translateCloudSettings('minSize'), '#8e44ad'); // Violet
     const minFontInput = createNumberInput(nameCloudState.minFontSize, applyChanges);
     minFontContainer.appendChild(minFontInput);
     
     // 4. Taille de police maximum
-    const maxFontContainer = createFormGroup('Taille\nmaximum', '#f39c12'); // Orange
+    // const maxFontContainer = createFormGroup('Taille\nmaximum', '#f39c12'); // Orange
+    const maxFontContainer = createFormGroup(translateCloudSettings('maxSize'), '#f39c12'); // Orange
     const maxFontInput = createNumberInput(nameCloudState.maxFontSize, applyChanges);
     maxFontContainer.appendChild(maxFontInput);
     
     // 5. Espace entre les mots
-    const paddingContainer = createFormGroup('Espace\nentre mots', '#8e44ad'); // Violet
+    // const paddingContainer = createFormGroup('Espace\nentre mots', '#8e44ad'); // Violet
+    const paddingContainer = createFormGroup(translateCloudSettings('spacing'), '#8e44ad'); // Violet
     const paddingInput = createNumberInput(nameCloudState.padding || 1, applyChanges);
     paddingContainer.appendChild(paddingInput);
     
     // 6. Police de caractères
-    const fontContainer = createFormGroup('Police', '#f39c12'); // Orange
+    // const fontContainer = createFormGroup('Police', '#f39c12'); // Orange
+    const fontContainer = createFormGroup(translateCloudSettings('font'), '#f39c12'); // Orange
     const fontLabel = fontContainer.querySelector('.form-group-label');
     fontLabel.style.padding = '1px 6px';
     fontLabel.style.lineHeight = '2'; 
@@ -474,7 +618,8 @@ export function createSettingsModal(onSave) {
     fontContainer.appendChild(fontSelect);
     
     // 7. Options (cases à cocher)
-    const optionsContainer = createFormGroup('Options', '#8e44ad'); // Violet
+    // const optionsContainer = createFormGroup('Options', '#8e44ad'); // Violet
+    const optionsContainer = createFormGroup(translateCloudSettings('options'), '#8e44ad'); // Violet
     const optionsLabel = optionsContainer.querySelector('.form-group-label');
     optionsLabel.style.padding = '1px 6px';
     optionsLabel.style.lineHeight = '2'; 
@@ -505,7 +650,8 @@ export function createSettingsModal(onSave) {
     wordRotationCheckbox.addEventListener('change', applyChanges);
 
     wordRotationLabel.appendChild(wordRotationCheckbox);
-    wordRotationLabel.appendChild(document.createTextNode('Rotation init.'));
+    // wordRotationLabel.appendChild(document.createTextNode('Rotation init.'));
+    wordRotationLabel.appendChild(document.createTextNode(translateCloudSettings('initialRotation')));
     
     // Case à cocher "Contour de la forme"
     const isShapeBorderLabel = document.createElement('label');
@@ -522,7 +668,9 @@ export function createSettingsModal(onSave) {
     isShapeBorderCheckbox.addEventListener('change', applyChanges);
     
     isShapeBorderLabel.appendChild(isShapeBorderCheckbox);
-    isShapeBorderLabel.appendChild(document.createTextNode('Contour'));
+    // isShapeBorderLabel.appendChild(document.createTextNode('Contour'));
+    isShapeBorderLabel.appendChild(document.createTextNode(translateCloudSettings('outline')));
+
     
     // Case à cocher "Placement 3 zones"
     const isThreeZonesLabel = document.createElement('label');
@@ -539,7 +687,8 @@ export function createSettingsModal(onSave) {
     isThreeZonesCheckbox.addEventListener('change', applyChanges);
     
     isThreeZonesLabel.appendChild(isThreeZonesCheckbox);
-    isThreeZonesLabel.appendChild(document.createTextNode('3 zones'));
+    // isThreeZonesLabel.appendChild(document.createTextNode('3 zones'));
+    isThreeZonesLabel.appendChild(document.createTextNode(translateCloudSettings('threeZones')));
 
     // Ajouter les cases à cocher au conteneur
     checkboxesContainer.appendChild(wordRotationLabel);
@@ -550,7 +699,8 @@ export function createSettingsModal(onSave) {
 
     // Bouton pour appliquer les paramètres
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Appliquer';
+    // saveButton.textContent = 'Appliquer';
+    saveButton.textContent = translateCloudSettings('apply');
     saveButton.style.padding = '5px 10px';
     saveButton.style.backgroundColor = '#4CAF50';
     saveButton.style.color = 'white';

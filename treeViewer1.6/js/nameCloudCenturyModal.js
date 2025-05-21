@@ -4,20 +4,315 @@ import { showPersonsList } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
 
 
+
+/**
+ * Fonction de traduction spécifique pour nameCloudCenturyModal.js
+ * Cette fonction utilise window.CURRENT_LANGUAGE pour déterminer la langue
+ */
+function getCenturyTranslation(key) {
+    const translations = {
+      'fr': {
+        // Textes généraux
+        'loadingStats': 'Calcul des statistiques par siècle...',
+        'noDataAvailable': 'Aucune donnée disponible pour les statistiques par siècle',
+        'globalStats': 'Statistiques globales',
+        'period': 'Période',
+        'from': 'du',
+        'to': 'au',
+        'centuryStats': 'Évolution',
+        'hideDetails': 'Masquer les détails',
+        'clickBarForList': 'Cliquez sur une barre pour la liste complète par siècle',
+        'of': 'des',
+        'perCentury': 'par siècle',
+        'Evolution': 'Évolution',
+        
+        // Textes pour les tableaux
+        'century': 'Siècle',
+        'count': 'Nbre',
+        'avg': 'Moy.',
+        'maleAvg': 'Moy. H',
+        'femaleAvg': 'Moy. F',
+        'total': 'TOTAL',
+        
+        // Textes pour les types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'prénom',
+        'firstnamesPlural': 'prénoms',
+        'lastnamesSingular': 'nom de famille',
+        'lastnamesPlural': 'noms de famille',
+        'professionsSingular': 'métier',
+        'professionsPlural': 'métiers',
+        'placesSingular': 'lieu',
+        'placesPlural': 'lieux',
+        'elementsSingular': 'élément',
+        'elementsPlural': 'éléments',
+        
+        // Textes pour les légendes du graphique
+        'rank': 'Rang',
+        'number': 'nbre',
+        'percentage': '%',
+        'noDataForCentury': 'Aucune donnée disponible pour ce siècle.',
+        'mostFrequent': 'plus fréquent',
+        '1stMostFrequent': '1er',
+        '2ndMostFrequent': '2e',
+        '3rdMostFrequent': '3e',
+        
+        // Textes pour les statistiques des personnes
+        'totalOccurrences': 'Total d\'occurrences',
+        'totalPersonsWithBirthDeath': 'Total de personnes ayant une date de naissance et de décés',
+        'totalPersonsWithBirthChild': 'Total de personnes ayant une date de naissance et un enfant avec une date de naissance',
+        'totalPersonsWithMarriage': 'Total de personnes ayant une date de mariage',
+        'totalPersonsWithFirstChild': 'Total de personnes ayant une date de naissance et un 1ier enfant avec une date de naissance',
+        'totalPersonsWithChildren': 'Total de personnes ayant au moins 1 enfant',
+        
+        // Titres des axes et légendes
+        'lifespanAxisTitle': 'Durée de vie moyenne (années)',
+        'procreationAgeAxisTitle': 'Âge moyen de procréation (années)',
+        'marriageAgeAxisTitle': 'Âge moyen au mariage (années)',
+        'firstChildAgeAxisTitle': 'Âge moyen au premier enfant (années)',
+        'childrenCountAxisTitle': 'Nombre moyen d\'enfants',
+        'defaultAxisTitle': 'Valeur moyenne',
+        'generalAverage': 'Moyenne générale',
+        'men': 'Hommes',
+        'women': 'Femmes',
+        'bc': 'av JC',
+        'mostFrequent2': 'les plus fréquents par siècle'
+      },
+      'en': {
+        // Textes généraux
+        'loadingStats': 'Calculating statistics by century...',
+        'noDataAvailable': 'No data available for statistics by century',
+        'globalStats': 'Global statistics',
+        'period': 'Period',
+        'from': 'from',
+        'to': 'to',
+        'centuryStats': 'Evolution',
+        'hideDetails': 'Hide details',
+        'clickBarForList': 'Click on a bar for the complete list by century',
+        'of': 'of',
+        'perCentury': 'per century',
+        'Evolution': 'Evolution',
+        
+        // Textes pour les tableaux
+        'century': 'Century',
+        'count': 'Count',
+        'avg': 'Avg.',
+        'maleAvg': 'Male Avg',
+        'femaleAvg': 'Fem. Avg',
+        'total': 'TOTAL',
+        
+        // Textes pour les types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'first name',
+        'firstnamesPlural': 'first names',
+        'lastnamesSingular': 'last name',
+        'lastnamesPlural': 'last names',
+        'professionsSingular': 'occupation',
+        'professionsPlural': 'occupations',
+        'placesSingular': 'place',
+        'placesPlural': 'places',
+        'elementsSingular': 'element',
+        'elementsPlural': 'elements',
+        
+        // Textes pour les légendes du graphique
+        'rank': 'Rank',
+        'number': 'count',
+        'percentage': '%',
+        'noDataForCentury': 'No data available for this century.',
+        'mostFrequent': 'most frequent',
+        '1stMostFrequent': '1st',
+        '2ndMostFrequent': '2nd',
+        '3rdMostFrequent': '3rd',
+        
+        // Textes pour les statistiques des personnes
+        'totalOccurrences': 'Total occurrences',
+        'totalPersonsWithBirthDeath': 'Total people with birth and death dates',
+        'totalPersonsWithBirthChild': 'Total people with birth date and a child with birth date',
+        'totalPersonsWithMarriage': 'Total people with marriage date',
+        'totalPersonsWithFirstChild': 'Total people with birth date and a 1st child with birth date',
+        'totalPersonsWithChildren': 'Total people with at least 1 child',
+        
+        // Titres des axes et légendes
+        'lifespanAxisTitle': 'Average lifespan (years)',
+        'procreationAgeAxisTitle': 'Average procreation age (years)',
+        'marriageAgeAxisTitle': 'Average marriage age (years)',
+        'firstChildAgeAxisTitle': 'Average age at first child (years)',
+        'childrenCountAxisTitle': 'Average number of children',
+        'defaultAxisTitle': 'Average value',
+        'generalAverage': 'General average',
+        'men': 'Men',
+        'women': 'Women',
+        'bc': 'BC',
+        'mostFrequent2': 'most frequent by century'
+      },
+      'es': {
+        // Textes généraux
+        'loadingStats': 'Calculando estadísticas por siglo...',
+        'noDataAvailable': 'No hay datos disponibles para estadísticas por siglo',
+        'globalStats': 'Estadísticas globales',
+        'period': 'Período',
+        'from': 'del',
+        'to': 'al',
+        'centuryStats': 'Evolución',
+        'hideDetails': 'Ocultar detalles',
+        'clickBarForList': 'Haga clic en una barra para la lista completa por siglo',
+        'of': 'de',
+        'perCentury': 'por siglo',
+        'Evolution': 'Evolución',
+        
+        // Textes pour les tableaux
+        'century': 'Siglo',
+        'count': 'Cant.',
+        'avg': 'Prom.',
+        'maleAvg': 'Prom. H',
+        'femaleAvg': 'Prom. M',
+        'total': 'TOTAL',
+        
+        // Textes pour les types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'nombre',
+        'firstnamesPlural': 'nombres',
+        'lastnamesSingular': 'apellido',
+        'lastnamesPlural': 'apellidos',
+        'professionsSingular': 'profesión',
+        'professionsPlural': 'profesiones',
+        'placesSingular': 'lugar',
+        'placesPlural': 'lugares',
+        'elementsSingular': 'elemento',
+        'elementsPlural': 'elementos',
+        
+        // Textes pour les légendes du graphique
+        'rank': 'Rango',
+        'number': 'cant.',
+        'percentage': '%',
+        'noDataForCentury': 'No hay datos disponibles para este siglo.',
+        'mostFrequent': 'más frecuente',
+        '1stMostFrequent': '1º',
+        '2ndMostFrequent': '2º',
+        '3rdMostFrequent': '3º',
+        
+        // Textes pour les statistiques des personnes
+        'totalOccurrences': 'Total de apariciones',
+        'totalPersonsWithBirthDeath': 'Total de personas con fecha de nacimiento y defunción',
+        'totalPersonsWithBirthChild': 'Total de personas con fecha de nacimiento y un hijo con fecha de nacimiento',
+        'totalPersonsWithMarriage': 'Total de personas con fecha de matrimonio',
+        'totalPersonsWithFirstChild': 'Total de personas con fecha de nacimiento y un primer hijo con fecha de nacimiento',
+        'totalPersonsWithChildren': 'Total de personas con al menos 1 hijo',
+        
+        // Titres des axes et légendes
+        'lifespanAxisTitle': 'Duración de vida media (años)',
+        'procreationAgeAxisTitle': 'Edad media de procreación (años)',
+        'marriageAgeAxisTitle': 'Edad media al matrimonio (años)',
+        'firstChildAgeAxisTitle': 'Edad media al primer hijo (años)',
+        'childrenCountAxisTitle': 'Número medio de hijos',
+        'defaultAxisTitle': 'Valor medio',
+        'generalAverage': 'Promedio general',
+        'men': 'Hombres',
+        'women': 'Mujeres',
+        'bc': 'a.C.',
+        'mostFrequent2': 'los más frecuentes por siglo'
+      },
+      'hu': {
+        // Textes généraux
+        'loadingStats': 'Évszázados statisztikák számítása...',
+        'noDataAvailable': 'Nincs elérhető adat az évszázados statisztikákhoz',
+        'globalStats': 'Globális statisztikák',
+        'period': 'Időszak',
+        'from': 'ettől',
+        'to': 'eddig',
+        'centuryStats': 'Fejlődés',
+        'hideDetails': 'Részletek elrejtése',
+        'clickBarForList': 'Kattintson egy sávra a teljes évszázados listához',
+        'of': 'a',
+        'perCentury': 'évszázadonként',
+        'Evolution': 'Fejlődés',
+        
+        // Textes pour les tableaux
+        'century': 'Évszázad',
+        'count': 'Szám',
+        'avg': 'Átl.',
+        'maleAvg': 'Férfi átl.',
+        'femaleAvg': 'Női átl.',
+        'total': 'ÖSSZESEN',
+        
+        // Textes pour les types d'éléments (singuliers et pluriels)
+        'firstnamesSingular': 'keresztnév',
+        'firstnamesPlural': 'keresztnevek',
+        'lastnamesSingular': 'vezetéknév',
+        'lastnamesPlural': 'vezetéknevek',
+        'professionsSingular': 'foglalkozás',
+        'professionsPlural': 'foglalkozások',
+        'placesSingular': 'hely',
+        'placesPlural': 'helyek',
+        'elementsSingular': 'elem',
+        'elementsPlural': 'elemek',
+        
+        // Textes pour les légendes du graphique
+        'rank': 'Rang',
+        'number': 'szám',
+        'percentage': '%',
+        'noDataForCentury': 'Nincs elérhető adat erre az évszázadra.',
+        'mostFrequent': 'leggyakoribb',
+        '1stMostFrequent': '1.',
+        '2ndMostFrequent': '2.',
+        '3rdMostFrequent': '3.',
+        
+        // Textes pour les statistiques des personnes
+        'totalOccurrences': 'Összes előfordulás',
+        'totalPersonsWithBirthDeath': 'Összes személy születési és halálozási dátummal',
+        'totalPersonsWithBirthChild': 'Összes személy születési dátummal és egy gyermek születési dátummal',
+        'totalPersonsWithMarriage': 'Összes személy házassági dátummal',
+        'totalPersonsWithFirstChild': 'Összes személy születési dátummal és egy első gyermek születési dátummal',
+        'totalPersonsWithChildren': 'Összes személy legalább 1 gyermekkel',
+        
+        // Titres des axes et légendes
+        'lifespanAxisTitle': 'Átlagos élettartam (év)',
+        'procreationAgeAxisTitle': 'Átlagos szaporodási életkor (év)',
+        'marriageAgeAxisTitle': 'Átlagos házasságkötési életkor (év)',
+        'firstChildAgeAxisTitle': 'Átlagos életkor az első gyermeknél (év)',
+        'childrenCountAxisTitle': 'Átlagos gyermekszám',
+        'defaultAxisTitle': 'Átlagérték',
+        'generalAverage': 'Általános átlag',
+        'men': 'Férfiak',
+        'women': 'Nők',
+        'bc': 'i.e.',
+        'mostFrequent2': 'leggyakoribb évszázadonként'
+      }
+    };
+  
+    // Récupérer la langue actuelle
+    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+    
+    // Retourner la traduction ou le fallback en français
+    return translations[currentLang]?.[key] || translations['fr'][key];
+  }
+
+
+
 // Fonction auxiliaire pour obtenir le libellé pour un type
+// function getTypeLabel(type, form = 'plural') {
+//     switch (type) {
+//         case 'prenoms':
+//             return form === 'plural' ? 'prénoms' : 'prénom';
+//         case 'noms':
+//             return form === 'plural' ? 'noms de famille' : 'nom de famille';
+//         case 'professions':
+//             return form === 'plural' ? 'métiers' : 'métier';
+//         case 'lieux':
+//             return form === 'plural' ? 'lieux' : 'lieu';
+//         default:
+//             return form === 'plural' ? 'éléments' : 'élément';
+//     }
+// }
+
 function getTypeLabel(type, form = 'plural') {
-    switch (type) {
-        case 'prenoms':
-            return form === 'plural' ? 'prénoms' : 'prénom';
-        case 'noms':
-            return form === 'plural' ? 'noms de famille' : 'nom de famille';
-        case 'professions':
-            return form === 'plural' ? 'métiers' : 'métier';
-        case 'lieux':
-            return form === 'plural' ? 'lieux' : 'lieu';
-        default:
-            return form === 'plural' ? 'éléments' : 'élément';
-    }
+    const typeMapping = {
+        'prenoms': form === 'plural' ? 'firstnamesPlural' : 'firstnamesSingular',
+        'noms': form === 'plural' ? 'lastnamesPlural' : 'lastnamesSingular',
+        'professions': form === 'plural' ? 'professionsPlural' : 'professionsSingular',
+        'lieux': form === 'plural' ? 'placesPlural' : 'placesSingular',
+        'default': form === 'plural' ? 'elementsPlural' : 'elementsSingular'
+    };
+    
+    const key = typeMapping[type] || typeMapping['default'];
+    return getCenturyTranslation(key);
 }
 
 // Fonction complète showCenturyStatsModal avec modifications pour les types non numériques
@@ -33,7 +328,8 @@ export function showCenturyStatsModal(type) {
     loadingIndicator.style.borderRadius = '8px';
     loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
     loadingIndicator.style.zIndex = '9999';
-    loadingIndicator.innerHTML = '<p>Calcul des statistiques par siècle...</p><progress style="width: 100%;"></progress>';
+    // loadingIndicator.innerHTML = '<p>Calcul des statistiques par siècle...</p><progress style="width: 100%;"></progress>';
+    loadingIndicator.innerHTML = `<p>${getCenturyTranslation('loadingStats')}</p><progress style="width: 100%;"></progress>`;
     document.body.appendChild(loadingIndicator);
 
     // NOUVEAU: Vérifier si c'est un type numérique ou non
@@ -106,7 +402,7 @@ export function showCenturyStatsModal(type) {
 
             
             const title = document.createElement('h2');
-            title.textContent = `Évolution ${cfg.modalArticle} ${cfg.modalTitle} par siècle`;
+            title.textContent = ` ${getCenturyTranslation('Evolution')} ${cfg.modalArticle} ${cfg.modalTitle} ${getCenturyTranslation('perCentury')}`; //  par siècle
             title.style.margin = '0';
             title.style.fontSize = '15px';
             
@@ -173,24 +469,54 @@ export function showCenturyStatsModal(type) {
                 } else if (type === 'noms') {
                 } else if (type === 'professions') {
                 } else if (type === 'lieux') {
+                // } else if (type === 'duree_vie') {
+                //     legend_person = 'Total de personnes ayant une date de naissance et de décés';
+                // } else if (type === 'age_procreation') {
+                //     legend_person = 'Total de personnes ayant une date de naissance et un enfant avec une date de naissance';
+                // } else if (type === 'age_marriage') {   
+                //     legend_person = 'Total de personnes ayant une date de mariage';        
+                // } else if (type === 'age_first_child') {
+                //     legend_person = 'Total de personnes ayant une date de naissance et un 1ier enfant avec une date de naissance';
+                // } else if (type === 'nombre_enfants') {
+                //     legend_person = 'Total de personnes ayant au moins 1 enfant';
+                // } 
                 } else if (type === 'duree_vie') {
-                    legend_person = 'Total de personnes ayant une date de naissance et de décés';
+                    legend_person = getCenturyTranslation('totalPersonsWithBirthDeath');
                 } else if (type === 'age_procreation') {
-                    legend_person = 'Total de personnes ayant une date de naissance et un enfant avec une date de naissance';
+                    legend_person = getCenturyTranslation('totalPersonsWithBirthChild');
                 } else if (type === 'age_marriage') {   
-                    legend_person = 'Total de personnes ayant une date de mariage';        
+                    legend_person = getCenturyTranslation('totalPersonsWithMarriage');        
                 } else if (type === 'age_first_child') {
-                    legend_person = 'Total de personnes ayant une date de naissance et un 1ier enfant avec une date de naissance';
+                    legend_person = getCenturyTranslation('totalPersonsWithFirstChild');
                 } else if (type === 'nombre_enfants') {
-                    legend_person = 'Total de personnes ayant au moins 1 enfant';
+                    legend_person = getCenturyTranslation('totalPersonsWithChildren');
                 } 
-    
+
+
+        
+                // globalStats.innerHTML = `
+                //     <div style="font-weight: bold; margin-bottom: 5px;">Statistiques globales</div>
+                //     <div>Période: ${firstCentury === 2100 ? 'N/A' : `du <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> au <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                //     <div>${legend_person}:<span style="font-weight: bold; color: #3949AB"> ${totalPersons}</span></div>
+                // `;
+
+                // globalStats.innerHTML = `
+                //     <div style="font-weight: bold; margin-bottom: 5px;">${getCenturyTranslation('globalStats')}</div>
+                //     <div>${getCenturyTranslation('period')}: ${firstCentury === 2100 ? 'N/A' : `${getCenturyTranslation('from')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> ${getCenturyTranslation('to')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                //     <div>${legend_person}:<span style="font-weight: bold; color: #3949AB"> ${totalPersons}</span></div>
+                // `;
+                // globalStats.innerHTML = `
+                //     <div style="font-weight: bold; margin-bottom: 5px;">${getCenturyTranslation('globalStats')}</div>
+                //     <div>${getCenturyTranslation('period')}: ${firstCentury === 2100 ? 'N/A' : `${getCenturyTranslation('from')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> ${getCenturyTranslation('to')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                //     <div>${getCenturyTranslation('totalOccurrences')}:<span style="font-weight: bold; color: #3949AB"> ${totalItems}</span></div>
+                // `;
+
                 globalStats.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">Statistiques globales</div>
-                    <div>Période: ${firstCentury === 2100 ? 'N/A' : `du <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> au <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                    <div style="font-weight: bold; margin-bottom: 5px;">${getCenturyTranslation('globalStats')}</div>
+                    <div>${getCenturyTranslation('period')}: ${firstCentury === 2100 ? 'N/A' : `${getCenturyTranslation('from')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> ${getCenturyTranslation('to')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
                     <div>${legend_person}:<span style="font-weight: bold; color: #3949AB"> ${totalPersons}</span></div>
                 `;
-                
+                        
                 statsContainer.appendChild(globalStats);
                 
                 // Ajouter un tableau des valeurs moyennes par siècle
@@ -208,7 +534,14 @@ export function showCenturyStatsModal(type) {
                     const thead = document.createElement('thead');
                     const headerRow = document.createElement('tr');
                     
-                    const headers = ['Siècle', 'Nbre', 'Moy.', 'Moy. H', 'Moy. F'];
+                    // const headers = ['Siècle', 'Nbre', 'Moy.', 'Moy. H', 'Moy. F'];
+                    const headers = [
+                        getCenturyTranslation('century'),
+                        getCenturyTranslation('count'),
+                        getCenturyTranslation('avg'),
+                        getCenturyTranslation('maleAvg'),
+                        getCenturyTranslation('femaleAvg')
+                    ];
                     headers.forEach(headerText => {
                         const th = document.createElement('th');
                         th.textContent = headerText;
@@ -395,7 +728,7 @@ export function showCenturyStatsModal(type) {
                 explanation.style.marginTop = '-80px';
                 explanation.style.fontSize = '14px';
                 explanation.style.color = '#555';
-                explanation.innerHTML = `<strong>top 3</strong> des ${getTypeLabel(type)} les plus fréquents par siècle`;
+                explanation.innerHTML = `<strong>top 3</strong> ${getCenturyTranslation('of')} ${getTypeLabel(type)} ${getCenturyTranslation('mostFrequent2')}`;
                 modal.appendChild(explanation);
                 
                 // Ajout des statistiques globales
@@ -405,10 +738,15 @@ export function showCenturyStatsModal(type) {
                 globalStats.style.borderRadius = '5px';
                 globalStats.style.marginBottom = '10px';
                 
+                // globalStats.innerHTML = `
+                //     <div style="font-weight: bold; margin-bottom: 5px;">Statistiques globales</div>
+                //     <div>Période: ${firstCentury === 2100 ? 'N/A' : `du <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> au <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                //     <div>Total d'occurrences:<span style="font-weight: bold; color: #3949AB"> ${totalItems}</span></div>
+                // `;
                 globalStats.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">Statistiques globales</div>
-                    <div>Période: ${firstCentury === 2100 ? 'N/A' : `du <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> au <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
-                    <div>Total d'occurrences:<span style="font-weight: bold; color: #3949AB"> ${totalItems}</span></div>
+                    <div style="font-weight: bold; margin-bottom: 5px;">${getCenturyTranslation('globalStats')}</div>
+                    <div>${getCenturyTranslation('period')}: ${firstCentury === 2100 ? 'N/A' : `${getCenturyTranslation('from')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(firstCentury)}</span> ${getCenturyTranslation('to')} <span style="font-weight: bold; color: #3949AB"> ${getDisplayCentury(lastCentury)}`}</span></div>
+                    <div>${getCenturyTranslation('totalOccurrences')}:<span style="font-weight: bold; color: #3949AB"> ${totalItems}</span></div>
                 `;
                 
                 modal.appendChild(globalStats);
@@ -702,7 +1040,8 @@ function initializeNonNumericCenturyChart(centuryStats, firstCentury, lastCentur
             .attr("x", width / 2)
             .attr("y", height / 2)
             .attr("text-anchor", "middle")
-            .text("Aucune donnée disponible");
+            // .text("Aucune donnée disponible");
+            .text(getCenturyTranslation('noDataAvailable'));
         return;
     }
     
@@ -798,7 +1137,14 @@ function initializeNonNumericCenturyChart(centuryStats, firstCentury, lastCentur
     .attr("transform", `translate(${width/2 - 150}, ${barHeight + 30})`); // Centré en bas
 
     // Légende pour le top 3 en horizontal
-    ['1er', '2e', '3e'].forEach((label, i) => {
+// ['1er', '2e', '3e'].forEach((label, i) => {
+    const mostFrequentLabels = [
+        getCenturyTranslation('1stMostFrequent'),
+        getCenturyTranslation('2ndMostFrequent'),
+        getCenturyTranslation('3rdMostFrequent')
+    ];
+    
+    mostFrequentLabels.forEach((label, i) => {        
         legend.append("rect")
             .attr("width", 12)
             .attr("height", 12)
@@ -811,7 +1157,8 @@ function initializeNonNumericCenturyChart(centuryStats, firstCentury, lastCentur
             .attr("x", i * 100 + 16)
             .attr("y", 9)
             .attr("font-size", "10px")
-            .text(`${label} plus fréquent`);
+            // .text(`${label} plus fréquent`);
+            .text(`${label} ${getCenturyTranslation('mostFrequent')}`);
     });
     
     // Instructions de clic
@@ -821,7 +1168,8 @@ function initializeNonNumericCenturyChart(centuryStats, firstCentury, lastCentur
         .attr("text-anchor", "middle")
         .style("font-size", "11px")
         .style("font-style", "italic")
-        .text("Cliquez sur une barre pour la liste complète par siècle");
+        // .text("Cliquez sur une barre pour la liste complète par siècle");
+        .text(getCenturyTranslation('clickBarForList'));
 }
 
 // Fonction pour initialiser le graphique par siècle
@@ -1026,7 +1374,8 @@ function initializeCenturyChart(centuryStats, firstCentury, lastCentury, contain
         .attr("x", 16)
         .attr("y", 9)
         .attr("font-size", "10px")
-        .text("Moyenne générale");
+        // .text("Moyenne générale");
+        .text(getCenturyTranslation('generalAverage'));
     
     // Légende pour les hommes
     legend.append("g")
@@ -1051,7 +1400,8 @@ function initializeCenturyChart(centuryStats, firstCentury, lastCentury, contain
                 .attr("x", 16)
                 .attr("y", 9)
                 .attr("font-size", "10px")
-                .text("Hommes");
+                // .text("Hommes");
+                .text(getCenturyTranslation('men'));
         });
     
     // Légende pour les femmes
@@ -1077,32 +1427,50 @@ function initializeCenturyChart(centuryStats, firstCentury, lastCentury, contain
                 .attr("x", 16)
                 .attr("y", 9)
                 .attr("font-size", "10px")
-                .text("Femmes");
+                // .text("Femmes");
+                .text(getCenturyTranslation('women'));
         });
 }
 
 // Fonction pour obtenir le titre de l'axe Y en fonction du type
+// function getYAxisTitle(type) {
+//     switch (type) {
+//         case 'duree_vie':
+//             return 'Durée de vie moyenne (années)';
+//         case 'age_procreation':
+//             return 'Âge moyen de procréation (années)';
+//         case 'age_marriage':
+//             return 'Âge moyen au mariage (années)';
+//         case 'age_first_child':
+//             return 'Âge moyen au premier enfant (années)';
+//         case 'nombre_enfants':
+//             return 'Nombre moyen d\'enfants';
+//         default:
+//             return 'Valeur moyenne';
+//     }
+// }
 function getYAxisTitle(type) {
     switch (type) {
         case 'duree_vie':
-            return 'Durée de vie moyenne (années)';
+            return getCenturyTranslation('lifespanAxisTitle');
         case 'age_procreation':
-            return 'Âge moyen de procréation (années)';
+            return getCenturyTranslation('procreationAgeAxisTitle');
         case 'age_marriage':
-            return 'Âge moyen au mariage (années)';
+            return getCenturyTranslation('marriageAgeAxisTitle');
         case 'age_first_child':
-            return 'Âge moyen au premier enfant (années)';
+            return getCenturyTranslation('firstChildAgeAxisTitle');
         case 'nombre_enfants':
-            return 'Nombre moyen d\'enfants';
+            return getCenturyTranslation('childrenCountAxisTitle');
         default:
-            return 'Valeur moyenne';
+            return getCenturyTranslation('defaultAxisTitle');
     }
 }
 
 // Fonction pour formater l'affichage du siècle
 function getDisplayCentury(century) {
     if (century < 0) {
-        return `${Math.abs(century + 100) / 100}e av JC`;
+        // return `${Math.abs(century + 100) / 100}e av JC`;
+        return `${Math.abs(century + 100) / 100}e ${getCenturyTranslation('bc')}`;
     } else {
         return `${(century / 100) + 1}e `;
     }
