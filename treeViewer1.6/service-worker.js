@@ -292,6 +292,7 @@ self.addEventListener('activate', (event) => {
         './js/hamburgerMenu.js',
         './js/helpHamburgerMenu.js',
         './js/historicalData.js',
+        './js/i18n.js',
         './js/mainUI.js',
         './js/mapTilesPreloader.js',
         './js/mapUtils.js',
