@@ -26,7 +26,8 @@ swConsole.log(`Service Worker démarré - Cache: ${CACHE_NAME}`);
 // Liste des ressources à mettre en cache immédiatement
 const RESOURCES_TO_CACHE = [
   './',
-  './treeViewer1.7.html',
+  './treeViewer1.6.html',
+  './offline.html',
   './css/styles.css',
   './cacheConfig.js', 
 
@@ -315,6 +316,7 @@ self.addEventListener('activate', (event) => {
         './js/treeSettingsModal.js',
         './js/UIutils.js',
         './js/utils.js',
+        './js/occupations.js',
         './libs/lodash.min.js',
         './libs/leaflet-heat.js',
         './libs/react.production.min.js',

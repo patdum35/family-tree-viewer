@@ -963,6 +963,10 @@
     "lat": 49.7614028,
     "lon": 0.5013556
   },
+  "Angerville-la-Martel, 76540, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7614028,
+    "lon": 0.5013556
+  },
   "Angerville-la-Martel, 76640, Seine-Maritime, Normandie, France": {
     "lat": 49.7614028,
     "lon": 0.5013556
@@ -1042,10 +1046,6 @@
   "Canouville, 76450, Seine-Maritime, Normandie, France": {
     "lat": 49.8066238,
     "lon": 0.6036945
-  },
-  "Angerville-la-Martel, 76540, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.7614028,
-    "lon": 0.5013556
   },
   "Vinnemerville, 76, SEINE MARITIME, France": {
     "lat": 49.80613,
@@ -3919,6 +3919,14 @@
     "lat": 48.2401637,
     "lon": -1.8316651
   },
+  "Langouët, 35146, Ille et Vilaine, Bretagne, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Gévezé, 35120, Ille et Vilaine, Bretagne, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
   "Landujan, 35143, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.2507903,
     "lon": -1.9957796
@@ -3963,6 +3971,22 @@
     "lat": 50.7653265,
     "lon": 3.0066319
   },
+  "Wervicq-sud,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Plat Parez - Quesnoy-sur-Deûle, 59890, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bas-Warneton, 7784, Hainaut, Wallonie, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
   "Reckem, Belgique": {
     "lat": 50.7861863,
     "lon": 3.1627429
@@ -3978,6 +4002,14 @@
   "Deûlémont, 59890, Nord, Nord-Pas-de-Calais, France": {
     "lat": 50.7348047,
     "lon": 2.9473109
+  },
+  "Moen, , , West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Rekkem, 8930, , West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
   },
   "Le Chesnot - Breteil, 35160, Ille-Et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.1465686,
@@ -4214,5 +4246,377 @@
   "Morlaix, 29600, Finistère, Bretagne, France": {
     "lat": 48.5824932,
     "lon": -3.8331972
+  },
+  "Satu Mare Roumanie": {
+    "lat": 47.7891763,
+    "lon": 22.8725598
+  },
+  "Thérouldeville, 76540, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Theuville-aux-Maillots, 76540, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Canouville, 76450, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Thérouldeville, 76685, Seine-Maritime, Normandie, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Halluin,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Halluin, Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque,59166,Nord,Nord - Pas-de-Calais,FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque, 59098, Nord, Nord-Pas-de-Calais, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervik, West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque ; 59166 ; Nord-Pas-de-Calais ; France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervicq,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque, 59166, Nord, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Linselles,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Roeselare, West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wevelgem,Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Menin,Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque (Boesbeke), 59166, Nord, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque, Nord, Hauts-De-France, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque France 59166 France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque 59 -": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque, 59088, Nord, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervik (2 Rives : Blg et Fr), FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Comines 2 Rives (Fr et Blg), Union Comines-Belg et Comines-France Avant 1789, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervicq-Sud/Wervik ( 2 Rives )": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Linselles Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "beaufort quebecq": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Linselles, 59352, Nord, Nord-Pas-de-Calais, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bondues Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "tourcoing": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Soissons, 02722, Aisne, Picardie, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "sceaux": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Tourcoing, 59599, Nord, Nord-Pas-de-Calais, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervik Flandre Occidentale Belgqique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Section de la Lys - Bousbecque,59166,Nord,Nord - Pas-de-Calais,FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Tourcoing,59200,Nord,Nord - Pas-de-Calais,FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Linselles,59126,Nord,Nord - Pas-de-Calais,FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervicq-Sud, Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bondues, Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Linselles, Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervik (2rives, B&F)": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Marcq-en-Baroeul,Nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wasquehal,nord": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Marchienne-au-Pont, Hainaut, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bellegem, , , West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Rumbeke, , , West-Vlaanderen, Belgique": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Dottenijs, Hen, Bel": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bellegem": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Dottenijs, Hen": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Moeskroen": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Kooigem": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Dottenijs": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Sint-Denijs ?": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Sint-Denijs": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Zwevegem": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Moen": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Hollebeke, 8902, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Quesnoy-sur-Deûle, 59890, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "section la Fleur des Champs - Comines, 59560, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Zonnebeke, 8980, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Comines, 7780, Hainaut, Wallonie, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Houthem, 7781, Hainaut, Wallonie, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Deûlémont, 59890, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Zillebeke, 8902, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "acte 1602 - Zillebeke, 8902, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Ypres (sint Jan), 8900, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "acte 1091 - Zillebeke, 8902, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Voormezele, 8902, Flandre Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "acte 969 - Zillebeke, 8902, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "acte 715 - Dikkebus, 8900, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Dikkebus, 8900, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Passendale, 8980, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wijtschate, 8953, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Gijverinkhove, 8691, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wambrechies, 59118, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "section du gavre - Linselles, 59126, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "section du Château du Bois - Quesnoy-sur-Deûle, 59890, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Lomme, 59455, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bondues, 59910, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wattignies, 59000, Nord, Hauts de France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Roncq, 59223, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Marquette-Lez-Lille, 59520, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Mr Nicolas Desobry acte 37 - Lille, 59000, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "domicile : section du Gavre - Linselles, 59126, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervik, 8940, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Hameau de la Vigne - Linselles, 59126, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Bousbecque, 59166, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Croix, 59170, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wambrechies, 59636, Nord, Nord-Pas-de-Calais, France": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Wervicq-Sud, 59117, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "section du Blandrisse - Bousbecque, 59166, Nord, Hauts-de-France, FRANCE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
+  },
+  "Marke, 8510, Flandre-Occidentale, Flandre, BELGIQUE": {
+    "lat": 48.249746,
+    "lon": -1.8219965
   }
 }

@@ -11,6 +11,35 @@
 
     <title>Arbre généalogique</title>
 
+
+    <!-- <script type="module" src="js/i18n.js"></script> -->
+
+
+
+
+    <script>
+        // Définir la fonction openGedcomModal globalement avant de charger i18n.js
+        window.openGedcomModal = function() {
+            var modal = document.getElementById('gedcom-modal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        };
+        
+        // Définir également la fonction de fermeture
+        window.closeGedcomModal = function() {
+            var modal = document.getElementById('gedcom-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+
+
+
+
+    <script src="js/i18n.js"></script>
+
     <!-- Script d'enregistrement amélioré du Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
@@ -124,6 +153,9 @@
     <meta name="theme-color" content="#4361ee">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 
+
+
+
 </head>
 
 
@@ -142,14 +174,47 @@
         <div style="background-color: white; width: 300px; max-width: 90%; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
     
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 18px; color: #333;">Charger un fichier GEDCOM</h2>
+                <h2 style="margin: 0; font-size: 18px; color: #333;" data-text-key="chargerGedcom">Charger un fichier GEDCOM</h2>
                 <span onclick="closeGedcomModal()" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
             </div>
             <div style="padding: 10px 0;">
-                <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;">
-                <button onclick="loadData(); closeGedcomModal()" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
-                <button id="clearCacheBtn" onclick="clearCacheStorage()" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button>
-                <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
+                <!-- <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;"> -->
+                
+
+                
+                <!-- Cacher l'input file original -->
+                <input type="file" id="gedFile" accept=".ged" style="display: none;">
+                
+                <!-- Créer un bouton personnalisé et un champ de texte -->
+                <div style="display: flex; margin-bottom: 15px; width: 100%;">
+                    <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" style="background-color: #4361ee; color: white; border: none; padding: 8px; border-radius: 4px 0 0 4px; cursor: pointer;">Choisir un fichier</button>
+                    <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-radius: 0 4px 4px 0; background-color: #f9f9f9; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" data-text-key="aucunFichier">Aucun fichier choisi</span>
+                </div>
+                
+                <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
+                <script>
+                document.getElementById('gedFile').addEventListener('change', function() {
+                    var fileNameDisplay = document.getElementById('fileNameDisplay');
+                    if (this.files.length > 0) {
+                        fileNameDisplay.textContent = this.files[0].name;
+                        // Supprimer l'attribut data-text-key pour que le nom du fichier ne soit pas traduit
+                        fileNameDisplay.removeAttribute('data-text-key');
+                    } else {
+                        // S'il n'y a pas de fichier, remettre le texte par défaut et l'attribut data-text-key
+                        fileNameDisplay.textContent = window.i18n ? window.i18n.getText('aucunFichier') : 'Aucun fichier choisi';
+                        fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
+                    }
+                });
+                </script>
+
+
+
+
+
+                
+                <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
+                <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button>
+                <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
@@ -159,12 +224,24 @@
     <div id="password-form" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; height: 100vh;">
         <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; box-sizing: border-box;">
             <div class="password-row">
-                <input type="password" id="password" placeholder="Mot de passe" style="width: 100%; max-width: 240px; box-sizing: border-box;" autocomplete="new-password">
+                <input type="password" id="password" placeholder="Mot de passe" data-text-key="motDePasse" style="width: 100%; max-width: 240px; box-sizing: border-box;" autocomplete="new-password">
             </div>
             <div class="submit-row">
-                <button id="loadDataButton" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">Visualiser l'arbre</button>
+                <button id="loadDataButton" data-text-key="visualiserArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">Visualiser l'arbre</button>
             </div>
         </div>
+
+
+        <div id="language-selector-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 999; pointer-events: none;">
+            <div class="language-selector" style="display: inline-flex; background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
+                <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr')"></div>
+                <div class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en')"></div>
+                <div class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es')"></div>
+                <div class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu')"></div>
+            </div>
+        </div>
+        
+
     </div>
 
 
@@ -180,15 +257,15 @@
                 <!-- <button onclick="zoomIn()" data-text-key="zoomIn"><span>➕</span></button> -->
                 <!-- <button onclick="zoomOut()" data-text-key="zoomOut"><span>➖</span></button> -->
                 <!-- <button onclick="resetZoom()" data-text-key="resetZoom"><span>🏠</span></button> -->
-                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech"><span class="wide-span">🔇</span></button>
+                <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔇</span></button>
                 <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>⏸️</span></button>
                 <button onclick="openSettingsModal()" id="settingsBtn" data-text-key="openSettingsModal"><span>⚙️</span></button>
                 <!-- <button onclick="toggleFullScreen()" class="large-button" data-text-key="toggleFullScreen"><span>⛶</span></button> -->
-                <button onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  data-text-key="processNamesCloudWithDate"> 
+                <button onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
                     <span class="wide-span">💖</span>
                 </button>          
                 <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" >
-                <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults" >
+                <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults"  >
                     <option value="">Select</option>
                 </select>
 
@@ -196,12 +273,12 @@
             <!-- <div class="controls-row-2" style="margin-top: -10px; gap: 5px;">   -->
             <div class="controls-row-2" style="position: fixed; top: 50px; left: 5px; gap: 5px;">                  
                 
-                <label for="generations">nbre<br>géné</label>
+                <label for="generations" data-text-key="nbreGene">nbre<br>géné</label>
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
                 <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
                 </select>
                     <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
-                    <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode" style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
+                    <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode"  style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
                         <option value="ancestors" data-text-key="treeModeAncestors" selected>Asc.</option>
                         <option value="descendants"  data-text-key="treeModeDescendants">Desc.</option>
                         <option value="both" data-text-key="treeModeBoth">A+D</option>
@@ -338,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
 
 </body>
 </html>
