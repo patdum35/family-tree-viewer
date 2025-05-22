@@ -22,7 +22,17 @@ window.i18n = {
       'nbreGene': 'nbre<br>géné',
       'choisirFichier': 'Choisir un fichier',
       'aucunFichier': 'Aucun fichier choisi',
-
+      'installerApp': '📱 Installer l\'application',
+      'parametresDefaut': '🔄 Paramètres par défaut',
+      'desinstallerApp': '🗑️ Désinstaller l\'application',
+      'desinstallationInstructions': 'Pour désinstaller cette application :',
+      'chromePCDesinstall': 'CHROME PC :\n\n1. Tapez "chrome://apps/" dans la barre d\'adresse\n2. Appuyez sur Entrée\n3. Trouvez "TreeViewer" ou "Genealogic Tree Viewer"\n4. Clic droit sur l\'application\n5. Sélectionnez "Supprimer de Chrome"\n\n✅ L\'application et son raccourci seront supprimés',
+      'edgePCDesinstall': 'EDGE PC :\n\n1. Tapez "edge://apps/" dans la barre d\'adresse\n2. Appuyez sur Entrée\n3. Trouvez votre application\n4. Cliquez sur les 3 points (...)\n5. Sélectionnez "Désinstaller"\n\n✅ L\'application sera supprimée',
+      'chromeMobileDesinstall': 'CHROME MOBILE :\n1. Maintenez appuyé sur l\'icône de l\'app\n2. Sélectionnez "Désinstaller" ou glissez vers "Supprimer"\n3. Confirmez la suppression',
+      'safariMobileDesinstall': 'SAFARI MOBILE :\n1. Maintenez appuyé sur l\'icône de l\'app\n2. Appuyez sur le "X" qui apparaît\n3. Confirmez la suppression',
+      'genericDesinstall': 'Cherchez dans les paramètres de votre navigateur la section "Applications" pour désinstaller',
+      'desinstallationTitle': '🗑️ Désinstallation',
+      'compris': 'Compris',     
     },
     'en': {
       // Page password-form
@@ -40,6 +50,17 @@ window.i18n = {
       'nbreGene': 'gene.<br>count',
       'choisirFichier': 'Choose file',
       'aucunFichier': 'No file chosen',
+      'installerApp': '📱 Install App',
+      'parametresDefaut': '🔄 Default Settings',
+      'desinstallerApp': '🗑️ Uninstall Application',
+      'desinstallationInstructions': 'To uninstall this application:',
+      'chromePCDesinstall': 'CHROME PC:\n\n1. Type "chrome://apps/" in the address bar\n2. Press Enter\n3. Find "TreeViewer" or "Genealogic Tree Viewer"\n4. Right-click on the application\n5. Select "Remove from Chrome"\n\n✅ The application and its shortcut will be removed',
+      'edgePCDesinstall': 'EDGE PC:\n\n1. Type "edge://apps/" in the address bar\n2. Press Enter\n3. Find your application\n4. Click on the 3 dots (...)\n5. Select "Uninstall"\n\n✅ The application will be removed',
+      'chromeMobileDesinstall': 'CHROME MOBILE:\n1. Long press on the app icon\n2. Select "Uninstall" or drag to "Remove"\n3. Confirm deletion',
+      'safariMobileDesinstall': 'SAFARI MOBILE:\n1. Long press on the app icon\n2. Tap the "X" that appears\n3. Confirm deletion',
+      'genericDesinstall': 'Look in your browser settings for the "Applications" section to uninstall',
+      'desinstallationTitle': '🗑️ Uninstallation',
+      'compris': 'Got it',
 
     },
     'es': {
@@ -58,6 +79,17 @@ window.i18n = {
       'nbreGene': 'núm.<br>gene.',
       'choisirFichier': 'Seleccionar archivo',
       'aucunFichier': 'Ningún archivo seleccionado',
+      'installerApp': '📱 Instalar App',
+      'parametresDefaut': '🔄 Configuración predeterminada',
+      'desinstallerApp': '🗑️ Desinstalar Aplicación',
+      'desinstallationInstructions': 'Para desinstalar esta aplicación:',
+      'chromePCDesinstall': 'CHROME PC:\n\n1. Escriba "chrome://apps/" en la barra de direcciones\n2. Presione Enter\n3. Busque "TreeViewer" o "Genealogic Tree Viewer"\n4. Clic derecho en la aplicación\n5. Seleccione "Eliminar de Chrome"\n\n✅ La aplicación y su acceso directo serán eliminados',
+      'edgePCDesinstall': 'EDGE PC:\n\n1. Escriba "edge://apps/" en la barra de direcciones\n2. Presione Enter\n3. Busque su aplicación\n4. Haga clic en los 3 puntos (...)\n5. Seleccione "Desinstalar"\n\n✅ La aplicación será eliminada',
+      'chromeMobileDesinstall': 'CHROME MÓVIL:\n1. Mantenga presionado el icono de la app\n2. Seleccione "Desinstalar" o arrastre a "Eliminar"\n3. Confirme la eliminación',
+      'safariMobileDesinstall': 'SAFARI MÓVIL:\n1. Mantenga presionado el icono de la app\n2. Toque la "X" que aparece\n3. Confirme la eliminación',
+      'genericDesinstall': 'Busque en la configuración de su navegador la sección "Aplicaciones" para desinstalar',
+      'desinstallationTitle': '🗑️ Desinstalación',
+      'compris': 'Entendido',
 
     },
     'hu': {
@@ -75,7 +107,18 @@ window.i18n = {
       
       // Contrôles de l'arbre
       'rootPersonSearch': '🔍gyökér',
-      'nbreGene': 'gene.<br>szám'
+      'nbreGene': 'gene.<br>szám',
+      'installerApp': '📱 Alkalmazás telepítése',
+      'parametresDefaut': '🔄 Alapértelmezett beállítások',
+      'desinstallerApp': '🗑️ Alkalmazás eltávolítása',
+      'desinstallationInstructions': 'Az alkalmazás eltávolításához:',
+      'chromePCDesinstall': 'CHROME PC:\n\n1. Írja be a "chrome://apps/" címet a címsorba\n2. Nyomja meg az Enter billentyűt\n3. Keresse meg a "TreeViewer" vagy "Genealogic Tree Viewer" alkalmazást\n4. Kattintson jobb gombbal az alkalmazásra\n5. Válassza az "Eltávolítás a Chrome-ból" lehetőséget\n\n✅ Az alkalmazás és a parancsikonja el lesz távolítva',
+      'edgePCDesinstall': 'EDGE PC:\n\n1. Írja be az "edge://apps/" címet a címsorba\n2. Nyomja meg az Enter billentyűt\n3. Keresse meg az alkalmazást\n4. Kattintson a 3 pontra (...)\n5. Válassza az "Eltávolítás" lehetőséget\n\n✅ Az alkalmazás el lesz távolítva',
+      'chromeMobileDesinstall': 'CHROME MOBIL:\n1. Tartsa nyomva az alkalmazás ikonját\n2. Válassza az "Eltávolítás" lehetőséget\n3. Erősítse meg a törlést',
+      'safariMobileDesinstall': 'SAFARI MOBIL:\n1. Tartsa nyomva az alkalmazás ikonját\n2. Érintse meg a megjelenő "X"-et\n3. Erősítse meg a törlést',
+      'genericDesinstall': 'Keresse meg a böngésző beállításaiban az "Alkalmazások" részt az eltávolításhoz',
+      'desinstallationTitle': '🗑️ Eltávolítás',
+      'compris': 'Értem',
     }
   },
   
@@ -125,6 +168,9 @@ window.i18n = {
       
       // Créer variable globale
       window.CURRENT_LANGUAGE = lang;
+
+
+      window.location.reload();
     }
   },
   
