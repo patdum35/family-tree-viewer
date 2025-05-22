@@ -12,11 +12,6 @@
     <title>Arbre généalogique</title>
 
 
-    <!-- <script type="module" src="js/i18n.js"></script> -->
-
-
-
-
     <script>
         // Définir la fonction openGedcomModal globalement avant de charger i18n.js
         window.openGedcomModal = function() {
@@ -295,35 +290,6 @@
     
 <!-- fenêtre toast pour faire un tooltip -->
 <div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
-
-
-<script>
-    // Fonction pour réinitialiser les paramètres
-    function resetToDefaultSettings() {
-        if (confirm('Êtes-vous sûr de vouloir remettre tous les paramètres par défaut ?\n\nCela va :\n• Supprimer vos préférences sauvegardées\n• Remettre la langue par défaut\n• Effacer les paramètres personnalisés\n\n(Le cache des fichiers sera conservé)')) {
-            try {
-                // Sauvegarder la langue actuelle si on veut la conserver
-                const currentLang = localStorage.getItem('preferredLanguage');
-                
-                // Vider tout le localStorage
-                localStorage.clear();
-                
-                
-                console.log('Paramètres remis à zéro');
-                
-                // Afficher un message de confirmation
-                alert('Paramètres remis par défaut avec succès !\n\nLa page va se recharger.');
-                
-                // Recharger la page pour appliquer les changements
-                window.location.reload();
-                
-            } catch (error) {
-                console.error('Erreur lors de la réinitialisation:', error);
-                alert('Erreur lors de la réinitialisation des paramètres.');
-            }
-        }
-    }
-</script>
 
 
 
