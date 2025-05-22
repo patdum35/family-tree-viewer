@@ -36,6 +36,9 @@ const RESOURCES_TO_CACHE = [
   './js/main.js',
   './js/appInitializer.js',
   './js/debugLogUtils.js',
+  './js/serviceWorkerInit.js',
+  './js/i18n.js',
+  './js/pwaInstaller_ProgressiveWebApps.js',
 
   // Bibliothèques externes essentielles
   './libs/pako.min.js',
@@ -292,8 +295,6 @@ self.addEventListener('activate', (event) => {
         './js/hamburgerMenu.js',
         './js/helpHamburgerMenu.js',
         './js/historicalData.js',
-        './js/i18n.js',
-        './js/pwaInstaller_ProgressiveWebApps.js',
         './js/mainUI.js',
         './js/mapTilesPreloader.js',
         './js/mapUtils.js',

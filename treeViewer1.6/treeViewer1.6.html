@@ -35,99 +35,11 @@
         };
     </script>
 
-
-
+    <!-- Script d'enregistrement amélioré du Service Worker -->
+    <script src="js/serviceWorkerInit.js"></script>
 
     <script src="js/i18n.js"></script>
 
-    <!-- Script d'enregistrement amélioré du Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Ajouter un délai pour s'assurer que la page est complètement chargée
-                setTimeout(() => {
-                    navigator.serviceWorker.register('./service-worker.js', {
-                        scope: './' // Spécifier explicitement le scope
-                    }).then(function(registration) {
-                        console.log('ServiceWorker enregistré avec succès sur scope: ', registration.scope);
-                        
-                        // Vérifier si le service worker contrôle déjà la page
-                        if (!navigator.serviceWorker.controller) {
-                            console.log('ServiceWorker est enregistré mais ne contrôle pas encore la page');
-                            
-                            // Sur Chrome mobile, parfois il faut un rechargement
-                            if (navigator.userAgent.includes('Android') || navigator.userAgent.includes('Mobile')) {
-                                console.log('Appareil mobile détecté, tentative de prise de contrôle');
-                                
-                                // Activer le service worker s'il est en attente
-                                if (registration.waiting) {
-                                    registration.waiting.postMessage({action: 'skipWaiting'});
-                                }
-                                
-                                // Essayer de forcer la prise de contrôle
-                                if (registration.active) {
-                                    registration.active.postMessage({action: 'claimClients'});
-                                }
-                                
-                                // Écouter les changements d'état
-                                navigator.serviceWorker.addEventListener('controllerchange', function() {
-                                    console.log('ServiceWorker a pris le contrôle, rechargement de la page');
-                                    // Recharger la page pour s'assurer que le SW la contrôle
-                                    window.location.reload();
-                                });
-                            }
-                        } else {
-                            console.log('ServiceWorker contrôle déjà cette page');
-                        }
-                        
-                        // Mettre à jour le service worker si une nouvelle version est disponible
-                        registration.update().then(() => {
-                            console.log('Vérification des mises à jour du SW effectuée');
-                        });
-                    }).catch(function(error) {
-                        console.error('Échec d\'enregistrement du ServiceWorker:', error);
-                        
-                        // Tentative d'enregistrement avec une approche différente sur mobile
-                        if (navigator.userAgent.includes('Android') || navigator.userAgent.includes('Mobile')) {
-                            console.log('Tentative alternative d\'enregistrement sur mobile');
-                            
-                            // Attendre un peu plus longtemps et réessayer
-                            setTimeout(() => {
-                                navigator.serviceWorker.register('./service-worker.js')
-                                .then(reg => console.log('Enregistrement alternatif réussi:', reg.scope))
-                                .catch(err => console.error('Échec définitif:', err));
-                            }, 3000);
-                        }
-                    });
-                }, 1000); // Délai d'1 seconde avant d'essayer d'enregistrer le SW
-            });
-            
-            // Écouter les messages du service worker
-            navigator.serviceWorker.addEventListener('message', function(event) {
-                console.log('Message reçu du ServiceWorker:', event.data);
-                
-                // Traiter les messages spécifiques
-                if (event.data && event.data.action === 'reload') {
-                    console.log('Rechargement demandé par le ServiceWorker');
-                    window.location.reload();
-                }
-            });
-        }
-
-        // Exposer une fonction pour forcer le nettoyage du cache
-        window.clearAppCache = function() {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                console.log('Envoi de la demande de vidage du cache au ServiceWorker');
-                navigator.serviceWorker.controller.postMessage({
-                    action: 'clearCache'
-                });
-                return true;
-            } else {
-                console.warn('Pas de ServiceWorker actif pour vider le cache');
-                return false;
-            }
-        };
-    </script>
 
     <script src="./cacheConfig.js"></script>
     
@@ -165,6 +77,7 @@
 <body>
     <div class="login-background">
         <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran">
+        <!-- <img class="login-background-image" alt="Fond d'écran"> -->
     </div>
 
 
@@ -215,7 +128,11 @@
 
                 
                 <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
-                <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button>
+                <!-- <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
+                <!-- <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
+                <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="SWUpdate" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Mise à jour du logiciel</button>
+                
+                
                 <button onclick="resetToDefaultSettings()" data-text-key="parametresDefaut"  style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
 
                 <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
@@ -223,11 +140,6 @@
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
 
-        <!-- <button onclick="window.pwaInstaller?.showManualInstructions()" 
-                data-text-key="testerInstructions" 
-                style="background-color: #ff8c42; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">
-            🧪 Tester instructions install
-        </button> -->
     </div>
 
     <!-- Formulaire de mot de passe -->
@@ -264,9 +176,6 @@
             <button id="close-tree-button" onclick="returnToLogin()" style="position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times;
             </button>
             <div class="controls-row-1" style="position: fixed; top: 5px; left: 40px;" >
-                <!-- <button onclick="zoomIn()" data-text-key="zoomIn"><span>➕</span></button> -->
-                <!-- <button onclick="zoomOut()" data-text-key="zoomOut"><span>➖</span></button> -->
-                <!-- <button onclick="resetZoom()" data-text-key="resetZoom"><span>🏠</span></button> -->
                 <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔇</span></button>
                 <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>⏸️</span></button>
                 <button onclick="openSettingsModal()" id="settingsBtn" data-text-key="openSettingsModal"><span>⚙️</span></button>
@@ -399,10 +308,6 @@
                 // Vider tout le localStorage
                 localStorage.clear();
                 
-                // Optionnel : remettre la langue (commentez cette ligne si vous voulez tout remettre à zéro)
-                // if (currentLang) {
-                //     localStorage.setItem('preferredLanguage', currentLang);
-                // }
                 
                 console.log('Paramètres remis à zéro');
                 
@@ -421,44 +326,8 @@
 </script>
 
 
-<!-- Script pour connecter le bouton clearCacheBtn à la fonction clearAppCache -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Remplacer le comportement du bouton de vidage de cache
-    const clearCacheBtn = document.getElementById('clearCacheBtn');
-    if (clearCacheBtn) {
-        clearCacheBtn.onclick = function() {
-            if (clearAppCache()) {
-                // Afficher un message de confirmation
-                const cacheStatus = document.getElementById('cache-status');
-                if (cacheStatus) {
-                    cacheStatus.textContent = "Demande de vidage du cache envoyée...";
-                    cacheStatus.style.display = "block";
-                    cacheStatus.style.color = "#4CAF50";
-                    
-                    // Masquer le message après 3 secondes
-                    setTimeout(() => {
-                        cacheStatus.style.display = "none";
-                    }, 3000);
-                }
-            } else {
-                // Afficher un message d'erreur
-                const cacheStatus = document.getElementById('cache-status');
-                if (cacheStatus) {
-                    cacheStatus.textContent = "Impossible de vider le cache - Service Worker non actif";
-                    cacheStatus.style.display = "block";
-                    cacheStatus.style.color = "#f44336";
-                    
-                    // Masquer le message après 3 secondes
-                    setTimeout(() => {
-                        cacheStatus.style.display = "none";
-                    }, 3000);
-                }
-            }
-        };
-    }
-});
-</script>
+
+
 
 
 </body>
