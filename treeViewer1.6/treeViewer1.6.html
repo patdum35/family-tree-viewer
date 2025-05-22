@@ -153,6 +153,8 @@
     <meta name="theme-color" content="#4361ee">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 
+    <script src="js/pwaInstaller_ProgressiveWebApps.js"></script>
+
 
 
 
@@ -214,10 +216,18 @@
                 
                 <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
                 <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button>
+                <button onclick="resetToDefaultSettings()" data-text-key="parametresDefaut"  style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
+
                 <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
+
+        <!-- <button onclick="window.pwaInstaller?.showManualInstructions()" 
+                data-text-key="testerInstructions" 
+                style="background-color: #ff8c42; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">
+            🧪 Tester instructions install
+        </button> -->
     </div>
 
     <!-- Formulaire de mot de passe -->
@@ -376,6 +386,40 @@
     
 <!-- fenêtre toast pour faire un tooltip -->
 <div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
+
+
+<script>
+    // Fonction pour réinitialiser les paramètres
+    function resetToDefaultSettings() {
+        if (confirm('Êtes-vous sûr de vouloir remettre tous les paramètres par défaut ?\n\nCela va :\n• Supprimer vos préférences sauvegardées\n• Remettre la langue par défaut\n• Effacer les paramètres personnalisés\n\n(Le cache des fichiers sera conservé)')) {
+            try {
+                // Sauvegarder la langue actuelle si on veut la conserver
+                const currentLang = localStorage.getItem('preferredLanguage');
+                
+                // Vider tout le localStorage
+                localStorage.clear();
+                
+                // Optionnel : remettre la langue (commentez cette ligne si vous voulez tout remettre à zéro)
+                // if (currentLang) {
+                //     localStorage.setItem('preferredLanguage', currentLang);
+                // }
+                
+                console.log('Paramètres remis à zéro');
+                
+                // Afficher un message de confirmation
+                alert('Paramètres remis par défaut avec succès !\n\nLa page va se recharger.');
+                
+                // Recharger la page pour appliquer les changements
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Erreur lors de la réinitialisation:', error);
+                alert('Erreur lors de la réinitialisation des paramètres.');
+            }
+        }
+    }
+</script>
+
 
 <!-- Script pour connecter le bouton clearCacheBtn à la fonction clearAppCache -->
 <script>
