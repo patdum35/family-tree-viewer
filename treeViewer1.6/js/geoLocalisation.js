@@ -13,33 +13,6 @@ function delay(ms) {
 // Variable globale pour le cache
 let geolocalisationCache = null;
 
-// Fonction pour charger le fichier au démarrage
-// export async function loadGeolocalisationFile() {
-//     try {
-//         // Déterminer le fichier à charger selon le propriétaire de l'arbre
-//         const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : 'geolocalisation.json';
-//         console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
-        
-//         // Vérifier d'abord si le fichier existe
-//         const response = await fetch(geoFileName, { method: 'HEAD' });
-        
-//         if (response.ok) {
-//             // Charger le contenu du fichier
-//             const dataResponse = await fetch(geoFileName);
-//             geolocalisationCache = await dataResponse.json();
-//             console.log(`Fichier ${geoFileName} chargé avec succès`);
-//             return true;
-//         } else {
-//             console.warn(`Le fichier ${geoFileName} n'a pas été trouvé. Statut: ${response.status}`);
-//             return false;
-//         }
-//     } catch (error) {
-//         console.error('Erreur lors du chargement du fichier de géolocalisation:', error);
-//         return false;
-//     }
-// }
-
-
 
 // Version qui va directement chercher dans le bon cache
 export async function loadGeolocalisationFile() {

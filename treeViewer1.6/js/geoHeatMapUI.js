@@ -716,60 +716,6 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
         detailsContainer.classList.add('heatmap-details-open');
         isDetailsOpen = true;
         
-        // // Générer le contenu des détails
-        // let details = `
-        //     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        //         <h3 style="margin: 0;">Détails du point</h3>
-        //         <button id="close-details" style="background: none; border: none; font-size: 16px; cursor: pointer;">✖</button>
-        //     </div>
-        //     <p><strong>Lieu :</strong> ${location.placeName || "Lieu non spécifié"}</p>
-        //     <p><strong>Nombre total d'occurrences :</strong> ${location.count}</p>
-        // `;
-    
-        // if (location.families && Object.keys(location.families).length > 0) {
-        //     details += `<h4>Noms de famille (${Object.keys(location.families).length}):</h4>
-        //     <div style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
-        //         <ul style="margin: 0; padding-left: 20px;">`;
-            
-        //     // Trier les noms de famille par nombre d'occurrences
-        //     const sortedFamilies = Object.entries(location.families)
-        //         .sort((a, b) => b[1] - a[1]);
-    
-        //     // Afficher tous les noms de famille
-        //     sortedFamilies.forEach(([family, count]) => {
-        //         details += `<li>${family}: ${count} occurrence${count > 1 ? 's' : ''}</li>`;
-        //     });
-            
-        //     details += `</ul></div>`;
-        // }
-    
-        // if (location.locations && location.locations.length > 0) {
-        //     details += `<h4>Personnes (${location.locations.length}):</h4>
-        //     <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;">
-        //         <ul style="margin: 0; padding-left: 20px;">`;
-            
-        //     // Trier les personnes par type d'événement et par année si disponible
-        //     const sortedLocations = [...location.locations].sort((a, b) => {
-        //         // D'abord par type d'événement
-        //         if (a.type !== b.type) {
-        //             return a.type.localeCompare(b.type);
-        //         }
-        //         // Ensuite par année si disponible
-        //         if (a.year && b.year && a.year !== 'N/A' && b.year !== 'N/A') {
-        //             return parseInt(a.year) - parseInt(b.year);
-        //         }
-        //         // Sinon par nom
-        //         return a.name.localeCompare(b.name);
-        //     });
-            
-        //     // Afficher toutes les personnes
-        //     sortedLocations.forEach(person => {
-        //         details += `<li>${person.name} (${person.type}${person.year && person.year !== 'N/A' ? ` - ${person.year}` : ''})</li>`;
-        //     });
-            
-        //     details += `</ul></div>`;
-        // }
-
 
 
 

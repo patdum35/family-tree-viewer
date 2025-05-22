@@ -302,30 +302,6 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     image.style.display = 'block';
     image.draggable = false; // Empêcher le drag de l'image elle-même
 
-    // // Créer le bouton de fermeture
-    // const closeButton = document.createElement('button');
-    // closeButton.innerHTML = '&times;';
-    // closeButton.style.position = 'absolute';
-    // closeButton.style.top = '5px';
-    // closeButton.style.right = '5px';
-    // closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    // closeButton.style.color = 'white';
-    // closeButton.style.border = 'none';
-    // closeButton.style.borderRadius = '50%';
-    // closeButton.style.width = '24px';
-    // closeButton.style.height = '24px';
-    // closeButton.style.fontSize = '16px';
-    // closeButton.style.cursor = 'pointer';
-    // closeButton.style.display = 'flex';
-    // closeButton.style.justifyContent = 'center';
-    // closeButton.style.alignItems = 'center';
-    // closeButton.style.padding = '2';
-    // closeButton.style.opacity = '0.7';
-    // closeButton.style.transition = 'opacity 0.2s';
-    // closeButton.title = 'Fermer';
-
-
-
 
     // Créer le bouton de fermeture amélioré pour mobile
     const closeButton = document.createElement('button');

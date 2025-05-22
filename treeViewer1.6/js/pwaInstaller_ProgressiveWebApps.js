@@ -199,6 +199,7 @@ class PWAInstaller {
         }
         
         this.showUninstallModal(instructions);
+
     }
 
     async uninstallApp() {
@@ -210,8 +211,8 @@ class PWAInstaller {
         
         // Détection du navigateur et de la plateforme
         const userAgent = navigator.userAgent.toLowerCase();
-        const isChrome = userAgent.includes('chrome') && !userAgent.includes('edge');
-        const isEdge = userAgent.includes('edge');
+        const isChrome = userAgent.includes('chrome') && !userAgent.includes('edg');
+        const isEdge = userAgent.includes('edg');
         const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
         
         let instructions = getText('desinstallationInstructions') + '\n\n';
@@ -313,8 +314,22 @@ class PWAInstaller {
         
         // Fermer la modal
         const closeBtn = modal.querySelector('#close-install-modal');
+        // const closeModal = () => {
+        //     document.body.removeChild(modal);
+        // };
+        // NOUVEAU CODE :
+        let modalClosed = false;
         const closeModal = () => {
-            document.body.removeChild(modal);
+            if (modalClosed) return;
+            modalClosed = true;
+            
+            try {
+                if (modal.parentNode) {
+                    document.body.removeChild(modal);
+                }
+            } catch (error) {
+                console.warn('Erreur lors de la fermeture de la modal:', error);
+            }
         };
         
         closeBtn.addEventListener('click', closeModal);
