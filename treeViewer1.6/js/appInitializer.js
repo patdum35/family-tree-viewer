@@ -22,7 +22,8 @@ import {
     openSettingsModal,
     closeSettingsModal,
     saveTargetAncestorId,
-    toggleFullScreen
+    toggleFullScreen,
+    resetToDefaultSettings
 } from './main.js';
 import { 
     startAncestorAnimation,
@@ -31,6 +32,7 @@ import {
 import {
     initBackgroundContainer
 } from './backgroundManager.js';
+
 
 // import { changeLanguage } from './i18n.js';
 
@@ -172,6 +174,7 @@ function initializeAppFunctions() {
     window.saveTargetAncestorId = saveTargetAncestorId;
     window.initBackgroundContainer = initBackgroundContainer;
     window.toggleFullScreen = toggleFullScreen;
+    window.resetToDefaultSettings = resetToDefaultSettings;
     // window.changeLanguage = changeLanguage;
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);
