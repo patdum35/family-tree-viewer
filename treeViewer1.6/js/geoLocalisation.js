@@ -1,5 +1,7 @@
 // geoLocalisation.js
 import { state } from './main.js';
+import { debugLog } from './debugLogUtils.js'
+import { fetchResourceWithCache } from './resourcePreloader.js';
 
 
 function delay(ms) {
@@ -12,30 +14,106 @@ function delay(ms) {
 let geolocalisationCache = null;
 
 // Fonction pour charger le fichier au démarrage
+// export async function loadGeolocalisationFile() {
+//     try {
+//         // Déterminer le fichier à charger selon le propriétaire de l'arbre
+//         const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : 'geolocalisation.json';
+//         console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
+        
+//         // Vérifier d'abord si le fichier existe
+//         const response = await fetch(geoFileName, { method: 'HEAD' });
+        
+//         if (response.ok) {
+//             // Charger le contenu du fichier
+//             const dataResponse = await fetch(geoFileName);
+//             geolocalisationCache = await dataResponse.json();
+//             console.log(`Fichier ${geoFileName} chargé avec succès`);
+//             return true;
+//         } else {
+//             console.warn(`Le fichier ${geoFileName} n'a pas été trouvé. Statut: ${response.status}`);
+//             return false;
+//         }
+//     } catch (error) {
+//         console.error('Erreur lors du chargement du fichier de géolocalisation:', error);
+//         return false;
+//     }
+// }
+
+
+
+// Version qui va directement chercher dans le bon cache
 export async function loadGeolocalisationFile() {
     try {
         // Déterminer le fichier à charger selon le propriétaire de l'arbre
         const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : 'geolocalisation.json';
-        console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
         
-        // Vérifier d'abord si le fichier existe
-        const response = await fetch(geoFileName, { method: 'HEAD' });
+        console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
+        debugLog(`🌍 Tentative de chargement: ${geoFileName}`, 'geoLocalisation');
+        
+        // Essayer d'abord de charger depuis le cache
+        let jsonData = await loadFromCache(geoFileName);
+        
+        if (jsonData) {
+            geolocalisationCache = jsonData;
+            console.log(`✅ Fichier ${geoFileName} chargé depuis le cache`);
+            debugLog(`✅ Géolocalisation chargée depuis cache: ${Object.keys(geolocalisationCache).length} entrées`, 'geoLocalisation');
+            return true;
+        }
+        
+        // Fallback : essayer avec fetch normal (mode connecté)
+        console.log('🔄 Tentative de chargement depuis le réseau...');
+        debugLog('🔄 Chargement réseau', 'geoLocalisation');
+        
+        const response = await fetch(geoFileName);
         
         if (response.ok) {
-            // Charger le contenu du fichier
-            const dataResponse = await fetch(geoFileName);
-            geolocalisationCache = await dataResponse.json();
-            console.log(`Fichier ${geoFileName} chargé avec succès`);
+            geolocalisationCache = await response.json();
+            console.log(`✅ Fichier ${geoFileName} chargé depuis le réseau`);
+            debugLog(`✅ Géolocalisation chargée depuis réseau: ${Object.keys(geolocalisationCache).length} entrées`, 'geoLocalisation');
             return true;
         } else {
-            console.warn(`Le fichier ${geoFileName} n'a pas été trouvé. Statut: ${response.status}`);
+            console.warn(`❌ Le fichier ${geoFileName} n'a pas pu être chargé. Statut: ${response.status}`);
+            debugLog(`❌ Échec réseau: statut ${response.status}`, 'geoLocalisation');
             return false;
         }
+        
     } catch (error) {
-        console.error('Erreur lors du chargement du fichier de géolocalisation:', error);
+        console.error('🔥 Erreur lors du chargement du fichier de géolocalisation:', error);
+        debugLog(`🔥 Erreur géolocalisation: ${error.message}`, 'geoLocalisation');
         return false;
     }
 }
+
+// Fonction pour charger depuis le cache directement
+async function loadFromCache(fileName) {
+    try {
+        // Chercher dans tous les caches disponibles
+        const cacheNames = await caches.keys();
+        
+        for (const cacheName of cacheNames) {
+            const cache = await caches.open(cacheName);
+            const cachedResponse = await cache.match(fileName);
+            
+            if (cachedResponse) {
+                console.log(`📦 ${fileName} trouvé dans le cache: ${cacheName}`);
+                debugLog(`📦 Trouvé dans cache: ${cacheName}`, 'geoLocalisation');
+                
+                const jsonData = await cachedResponse.json();
+                return jsonData;
+            }
+        }
+        
+        console.log(`📦 ${fileName} non trouvé dans aucun cache`);
+        debugLog(`📦 Absent des caches`, 'geoLocalisation');
+        return null;
+        
+    } catch (error) {
+        console.error('Erreur lors de la lecture du cache:', error);
+        debugLog(`🔥 Erreur lecture cache: ${error.message}`, 'geoLocalisation');
+        return null;
+    }
+}
+
 
 export async function geocodeLocation(location) {
     if (!location || location.trim() === '') return null;

@@ -66,51 +66,175 @@ if ('serviceWorker' in navigator) {
   }
 
   
-// Ajouter cette fonction à main.js
+
 
 // Fonction pour vider le cache storage
-export function clearCacheStorage() {
-    const cacheStatusElement = document.getElementById('cache-status');
-    cacheStatusElement.style.display = 'block';
-    cacheStatusElement.textContent = 'Vidage du cache en cours...';
-    cacheStatusElement.style.color = '#ff9800';
+// export function clearCacheStorage() {
+//     const cacheStatusElement = document.getElementById('cache-status');
+//     cacheStatusElement.style.display = 'block';
+//     cacheStatusElement.textContent = 'Vidage du cache en cours...';
+//     cacheStatusElement.style.color = '#ff9800';
 
-    // Vérifier si le service worker est enregistré
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        // Ajouter un écouteur d'événements pour recevoir la réponse du service worker
-        navigator.serviceWorker.addEventListener('message', function onMessage(event) {
-            if (event.data && event.data.action === 'cacheCleared') {
-                cacheStatusElement.textContent = 'Cache vidé avec succès ! Rechargement...';
-                cacheStatusElement.style.color = '#4CAF50';
+//     // Vérifier si le service worker est enregistré
+//     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+//         // Ajouter un écouteur d'événements pour recevoir la réponse du service worker
+//         navigator.serviceWorker.addEventListener('message', function onMessage(event) {
+//             if (event.data && event.data.action === 'cacheCleared') {
+//                 cacheStatusElement.textContent = 'Cache vidé avec succès ! Rechargement...';
+//                 cacheStatusElement.style.color = '#4CAF50';
                 
-                // Supprimer l'écouteur d'événements après traitement
-                navigator.serviceWorker.removeEventListener('message', onMessage);
+//                 // Supprimer l'écouteur d'événements après traitement
+//                 navigator.serviceWorker.removeEventListener('message', onMessage);
                 
-                // Attendre un peu pour que l'utilisateur voit le message
-                setTimeout(() => {
-                    // Recharger la page pour que les changements prennent effet
-                    window.location.reload(true);
-                }, 1500);
-            }
-        });
+//                 // Attendre un peu pour que l'utilisateur voit le message
+//                 setTimeout(() => {
+//                     // Recharger la page pour que les changements prennent effet
+//                     window.location.reload(true);
+//                 }, 1500);
+//             }
+//         });
 
-        // Envoyer un message au service worker pour vider le cache
-        navigator.serviceWorker.controller.postMessage({
-            action: 'clearCache'
-        });
-    } else {
-        cacheStatusElement.textContent = 'Service Worker non actif. Rechargement...';
-        cacheStatusElement.style.color = '#f44336';
+//         // Envoyer un message au service worker pour vider le cache
+//         navigator.serviceWorker.controller.postMessage({
+//             action: 'clearCache'
+//         });
+//     } else {
+//         cacheStatusElement.textContent = 'Service Worker non actif. Rechargement...';
+//         cacheStatusElement.style.color = '#f44336';
         
-        // Tenter de recharger la page de toute façon
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 1500);
-    }
-}
+//         // Tenter de recharger la page de toute façon
+//         setTimeout(() => {
+//             window.location.reload(true);
+//         }, 1500);
+//     }
+    
+// }
 
-// Exportez et exposez la fonction pour qu'elle soit accessible globalement
-window.clearCacheStorage = clearCacheStorage;
+// // Exportez et exposez la fonction pour qu'elle soit accessible globalement
+// window.clearCacheStorage = clearCacheStorage;
+
+
+
+
+
+
+
+
+// // Fonction pour vider le cache storage
+// export function clearCacheStorage() {
+//     const cacheStatusElement = document.getElementById('cache-status');
+//     cacheStatusElement.style.display = 'block';
+//     cacheStatusElement.textContent = 'Vidage du cache en cours...';
+//     cacheStatusElement.style.color = '#ff9800';
+
+//     // Vérifier si le service worker est enregistré
+//     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+//         // Ajouter un écouteur d'événements pour recevoir la réponse du service worker
+//         navigator.serviceWorker.addEventListener('message', function onMessage(event) {
+//             if (event.data && event.data.action === 'cacheCleared') {
+//                 cacheStatusElement.textContent = 'Cache vidé avec succès ! Mise à jour...';
+//                 cacheStatusElement.style.color = '#4CAF50';
+                
+//                 // Supprimer l'écouteur d'événements après traitement
+//                 navigator.serviceWorker.removeEventListener('message', onMessage);
+                
+//                 // NOUVELLE PARTIE : Forcer le rechargement du Service Worker
+//                 cacheStatusElement.textContent = 'Mise à jour du Service Worker...';
+                
+//                 navigator.serviceWorker.getRegistrations().then(registrations => {
+//                     // Forcer la mise à jour de chaque registration
+//                     const updatePromises = registrations.map(registration => {
+//                         return registration.update();
+//                     });
+                    
+//                     return Promise.all(updatePromises);
+//                 }).then(() => {
+//                     cacheStatusElement.textContent = 'Mise à jour terminée ! Rechargement...';
+//                     cacheStatusElement.style.color = '#4CAF50';
+                    
+//                     // Attendre un peu plus longtemps pour que le SW se remette en cache
+//                     setTimeout(() => {
+//                         window.location.reload(true);
+//                     }, 2500); // Augmenté à 2.5s au lieu de 1.5s
+//                 }).catch(error => {
+//                     console.error('Erreur lors de la mise à jour du SW:', error);
+//                     // Recharger quand même
+//                     setTimeout(() => {
+//                         window.location.reload(true);
+//                     }, 1500);
+//                 });
+//             }
+//         });
+
+//         // Envoyer un message au service worker pour vider le cache
+//         navigator.serviceWorker.controller.postMessage({
+//             action: 'clearCache'
+//         });
+//     } else {
+//         cacheStatusElement.textContent = 'Service Worker non actif. Rechargement...';
+//         cacheStatusElement.style.color = '#f44336';
+        
+//         // Tenter de recharger la page de toute façon
+//         setTimeout(() => {
+//             window.location.reload(true);
+//         }, 1500);
+//     }
+// }
+
+// // Exportez et exposez la fonction pour qu'elle soit accessible globalement
+// window.clearCacheStorage = clearCacheStorage;
+
+
+
+// // Fonction pour vider le cache storage
+// export function clearCacheStorage() {
+
+//     console.log('🔥 FONCTION MODIFIÉE APPELÉE');
+//     const cacheStatusElement = document.getElementById('cache-status');
+//     cacheStatusElement.style.display = 'block';
+//     cacheStatusElement.textContent = 'Vidage du cache en cours...';
+//     cacheStatusElement.style.color = '#ff9800';
+
+//     // Vérifier si le service worker est enregistré
+//     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+//         // Ajouter un écouteur d'événements pour recevoir la réponse du service worker
+//         navigator.serviceWorker.addEventListener('message', function onMessage(event) {
+//             if (event.data && event.data.action === 'cacheCleared') {
+//                 cacheStatusElement.textContent = 'Cache vidé avec succès ! Rechargement...';
+//                 cacheStatusElement.style.color = '#4CAF50';
+                
+//                 // Supprimer l'écouteur d'événements après traitement
+//                 navigator.serviceWorker.removeEventListener('message', onMessage);
+                
+//                 // Attendre un peu pour que l'utilisateur voit le message
+//                 setTimeout(() => {
+//                     // Simple reload (équivalent F5)
+//                     window.location.reload();
+//                 }, 1500);
+//             }
+//         });
+
+//         // Envoyer un message au service worker pour vider le cache
+//         navigator.serviceWorker.controller.postMessage({
+//             action: 'clearCache'
+//         });
+//     } else {
+//         cacheStatusElement.textContent = 'Service Worker non actif. Rechargement...';
+//         cacheStatusElement.style.color = '#f44336';
+        
+//         // Tenter de recharger la page de toute façon
+//         setTimeout(() => {
+//             window.location.reload();
+//         }, 1500);
+//     }
+// }
+
+// // Exportez et exposez la fonction pour qu'elle soit accessible globalement
+// window.clearCacheStorage = clearCacheStorage;
+
+
+
+
 
 
 export const state = {

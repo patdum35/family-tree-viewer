@@ -14,6 +14,7 @@ import { makeElementDraggable } from './geoHeatMapInteractions.js';
 import { fetchTileWithCache } from './mapTilesPreloader.js';
 import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
 import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
+import { debugLog } from './debugLogUtils.js'
 
 
 let animationTimeouts = [];
@@ -368,6 +369,8 @@ export async function testRealConnectivity() {
         return false;
     }
 }
+
+window.testRealConnectivity = testRealConnectivity;
 
 export function initNetworkListeners() {
     // console.log("🌐 Initialisation des écouteurs réseau...");
@@ -1241,6 +1244,7 @@ function selectVoice() {
 
     if (frenchVoice) {
         console.log("Voix  sélectionnée:", frenchVoice);
+        debugLog(`Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
     }
 
     

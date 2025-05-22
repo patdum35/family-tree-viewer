@@ -14,7 +14,8 @@ window.i18n = {
       // Modal GEDCOM
       'chargerGedcom': 'Charger un fichier GEDCOM',
       'afficherArbre': 'Afficher l\'arbre',
-      'viderCache': 'Vider le cache',
+      // 'viderCache': 'Vider le cache',
+      'SWUpdate': 'Mise à jour du logiciel',
       'activerLogs': 'Activer les logs de debug',
       
       // Contrôles de l'arbre
@@ -42,7 +43,8 @@ window.i18n = {
       // Modal GEDCOM
       'chargerGedcom': 'Load GEDCOM file',
       'afficherArbre': 'Show tree',
-      'viderCache': 'Clear cache',
+      // 'viderCache': 'Clear cache',
+      'SWUpdate': 'SW update',
       'activerLogs': 'Enable debug logs',
       
       // Contrôles de l'arbre
@@ -71,7 +73,8 @@ window.i18n = {
       // Modal GEDCOM
       'chargerGedcom': 'Cargar archivo GEDCOM',
       'afficherArbre': 'Mostrar árbol',
-      'viderCache': 'Limpiar caché',
+      // 'viderCache': 'Limpiar caché',
+      'SWUpdate': 'Mantenimiento de software',
       'activerLogs': 'Activar logs de depuración',
       
       // Contrôles de l'arbre
@@ -100,7 +103,8 @@ window.i18n = {
       // Modal GEDCOM
       'chargerGedcom': 'GEDCOM fájl betöltése',
       'afficherArbre': 'Fa megjelenítése',
-      'viderCache': 'Gyorsítótár törlése',
+      // 'viderCache': 'Gyorsítótár törlése',
+      'SWUpdate': 'Szoftverfrissítés',
       'activerLogs': 'Hibakeresési naplók engedélyezése',
       'choisirFichier': 'Fájl kiválasztása',
       'aucunFichier': 'Nincs kiválasztott fájl',
