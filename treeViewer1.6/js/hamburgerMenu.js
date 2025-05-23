@@ -1014,7 +1014,8 @@ function createSection(title, index = 0) {
         id: 'menu-speechToggleBtn',
         onclick: 'toggleSpeech2()', 
         title: getMenuTranslation('soundToggle'), //'Activer/désactiver le son', 
-        text: '🔇' 
+        text: '🗣️', //'🔇' 
+        style: 'filter: brightness(2) contrast(0.7) saturate(2);'
       },
       { 
         id: 'menu-animationPauseBtn',
@@ -1047,6 +1048,10 @@ function createSection(title, index = 0) {
         span.style.fontSize = '22px';
       } else {
         span.style.fontSize = '22px'; // Valeur originale
+      }
+
+      if (buttonData.style && buttonData.text === '🗣️') {
+        span.style.cssText = buttonData.style; // Appliquer le style au span
       }
       
       button.appendChild(span);

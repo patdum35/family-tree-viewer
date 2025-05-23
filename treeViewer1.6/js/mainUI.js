@@ -1438,7 +1438,7 @@ export const texts = {
     const currentLang = window.CURRENT_LANGUAGE || 'fr';
 
 
-    console.log("\n\n\n\n Langue actuelle:", currentLang, "\n\n\n\n");
+    // console.log("\n\n\n\n Langue actuelle:", currentLang, "\n\n\n\n");
     
     // Retourner la traduction dans la langue actuelle ou en français par défaut
     return translations[currentLang] || translations['fr'];

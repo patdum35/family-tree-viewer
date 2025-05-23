@@ -135,7 +135,7 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
         module.createAncestorsHeatMap({
             type: type,
             rootPersonId: rootPersonId
-        });
+        });k
     });
 }
 
@@ -151,7 +151,7 @@ export function toggleSpeech() {
 
     
     // Mettre à jour le bouton
-    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔇' : '🔊';
+    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
 
 
     // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
@@ -186,7 +186,13 @@ export function toggleSpeech2() {
 
     
     // Mettre à jour le bouton
-    menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🔇' : '🔊';
+    menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
+    // Appliquer le style uniquement pour l'emoji 🗣️
+    if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
+        menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+    } else {
+        menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+    }
 
 
     // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");

@@ -182,7 +182,7 @@
     
     section.content.innerHTML = `
       <div class="help-item">
-        <div class="help-icon-box">🔇</div>
+        <div class="help-icon-box">🗣️</div>
         <div class="help-text">
           <strong>Son</strong>
           <p>Active ou désactive le son pendant l'animation.</p>

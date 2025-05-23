@@ -44,7 +44,9 @@ window.i18n = {
       'pageWillReload': 'La page va se recharger',
       'resetError': 'Erreur lors de la réinitialisation des paramètres.',
       'SWUpdate': 'Mise à jour du logiciel',
-      'parametresDefaut': '🔄 Paramètres par défaut',     
+      'parametresDefaut': '🔄 Paramètres par défaut',
+      'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server.',
+   
     },
     'en': {
       // Page password-form
@@ -85,6 +87,7 @@ window.i18n = {
       'resetError': 'Error while resetting settings.',
       'SWUpdate': 'Software Update',
       'parametresDefaut': '🔄 Default Settings',
+      'noServerDetected': '⚠️ WARNING ⚠️\n\nNo server detected. Software update is not possible.\n\nThis operation requires VS Code with Live Server.',
 
     },
     'es': {
@@ -126,6 +129,8 @@ window.i18n = {
       'resetError': 'Error al restablecer la configuración.',
       'SWUpdate': 'Actualización de Software',
       'parametresDefaut': '🔄 Configuración Predeterminada',
+      'noServerDetected': '⚠️ ADVERTENCIA ⚠️\n\nNo se ha detectado ningún servidor. La actualización del software no es posible.\n\nEsta operación requiere VS Code con Live Server.',
+
 
     },
     'hu': {
@@ -166,7 +171,8 @@ window.i18n = {
       'pageWillReload': 'Az oldal újra fog töltődni',
       'resetError': 'Hiba a beállítások visszaállításakor.',
       'SWUpdate': 'Szoftver Frissítés',
-      'parametresDefaut': '🔄 Alapértelmezett Beállítások'
+      'parametresDefaut': '🔄 Alapértelmezett Beállítások',
+      'noServerDetected': '⚠️ FIGYELEM ⚠️\n\nNem észlelhető szerver. A szoftverfrissítés nem lehetséges.\n\nEhhez a művelethez VS Code szükséges Live Server kiegészítővel.'
     }
   },
   

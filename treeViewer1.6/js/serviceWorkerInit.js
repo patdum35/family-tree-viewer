@@ -72,8 +72,68 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+
+
+// Fonction pour tester si un serveur web est disponible
+async function isServerAvailable() {
+    try {
+        // Tentative de récupération d'un fichier avec un paramètre aléatoire pour éviter le cache
+        const testUrl = `./?test=${Date.now()}`;
+        const response = await fetch(testUrl, {
+            method: 'HEAD', // Utiliser HEAD pour minimiser le trafic
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            },
+            // Court timeout pour ne pas bloquer trop longtemps
+            signal: AbortSignal.timeout(2000)
+        });
+        
+        // Si la réponse est OK, un serveur est disponible
+        return response.ok;
+    } catch (error) {
+        console.log('Aucun serveur détecté:', error);
+        return false;
+    }
+}
+
+
 // Exposer une fonction pour forcer le nettoyage du cache
 window.clearAppCache = async function() {
+
+    console.log('🔍 Vérification de l\'environnement...');
+    
+    // Vérifier si un serveur est disponible (VS Code Live Server ou autre)
+    const hasServer = await isServerAvailable();
+    console.log('Serveur détecté:', hasServer ? 'OUI ✅' : 'NON ❌');
+    
+    // Vérifier si on est sur mobile (Android fonctionne même sans serveur)
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log('Appareil mobile:', isMobile ? 'OUI ✅' : 'NON ❌');
+    
+    // Si on est sur PC sans serveur, bloquer complètement le vidage du cache
+    if (!hasServer && !isMobile) {
+        console.warn('⚠️ Attention: Tentative de vidage du cache sans serveur disponible - BLOQUÉE');
+        
+        // Utiliser la traduction appropriée via i18n
+        const message = window.i18n ? window.i18n.getText('noServerDetected') : 
+            '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server.';
+        
+        // Afficher l'alerte avec le message traduit
+        window.alert(message);
+        
+        console.log('Opération bloquée: pas de serveur disponible sur PC');
+        
+        // Fermer la modal si elle est ouverte
+        const modal = document.getElementById('gedcom-modal');
+        if (modal && modal.style.display === 'block') {
+            closeGedcomModal(); // Utiliser votre fonction existante pour fermer la modal
+        }
+        
+        return false;
+    }
+
+
     console.log('🔍 Vérification de la connexion avant vidage de cache...');
     
     // Tester la vraie connectivité

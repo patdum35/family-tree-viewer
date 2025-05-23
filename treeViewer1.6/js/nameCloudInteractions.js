@@ -218,21 +218,23 @@ export function showPersonsList(name, people, config) {
 
     // Titre
     const title = document.createElement('h2');
-    // title.textContent = config.type === 'prenoms' ? 
-    //     `Personnes avec le prénom "${name}" (${people.length} personnes)` :
-    //     config.type === 'noms' ?
-    //         `Personnes avec le nom "${name}" (${people.length} personnes)` :
-    //         config.type === 'professions' ? 
-    //             `Personnes avec la profession "${name}" (${people.length} personnes)` :
-    //             config.type === 'duree_vie' ? 
-    //                 `Personnes ayant vécu ${name} ans (${people.length} personnes)` :
-    //                 config.type === 'age_procreation' ?
-    //                 `Personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
-    //                     config.type === 'lieux' ?
-    //                     `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
-    //                     'Personnes';
-
     title.textContent = getPersonsListTitle(name, people.length, config);
+
+    // on ajoute un titre caché en français , qui était l'ancien titre avant le multilingue pour le filtrage de personnes dans showHeatmapAndAdjustLayout qui est resté en français
+    const hiddenFormerFrenchTitle = config.type === 'prenoms' ? 
+        `Personnes avec le prénom "${name}" (${people.length} personnes)` :
+        config.type === 'noms' ?
+            `Personnes avec le nom "${name}" (${people.length} personnes)` :
+            config.type === 'professions' ? 
+                `Personnes avec la profession "${name}" (${people.length} personnes)` :
+                config.type === 'duree_vie' ? 
+                    `Personnes ayant vécu ${name} ans (${people.length} personnes)` :
+                    config.type === 'age_procreation' ?
+                    `Personnes ayant eu un enfant à ${name} ans (${people.length} personnes)` : 
+                        config.type === 'lieux' ?
+                        `Personnes ayant un lien avec le lieu ${name}  (${people.length} personnes)`:
+                        'Personnes';
+
 
 
     title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle
@@ -615,7 +617,7 @@ export function showPersonsList(name, people, config) {
                 // Si la heatmap n'est pas visible, il faut la créer et ajuster le layout
                 if (!currentlyHeatmapVisible) {
                     // Utiliser notre fonction qui réutilise le code existant
-                    heatmapWrapper = await showHeatmapAndAdjustLayout(modal, nameCloudState.currentConfig);
+                    heatmapWrapper = await showHeatmapAndAdjustLayout(modal, nameCloudState.currentConfig, hiddenFormerFrenchTitle);
                     
                     if (heatmapWrapper && heatmapWrapper.map) {
                         // Attendre un peu que la carte soit complètement initialisée
@@ -833,6 +835,117 @@ export function showPersonsList(name, people, config) {
 
 }
 
+/**
+ * Affiche la heatmap et ajuste le layout pour l'écran partagé
+ * @param {HTMLElement} modal - La modale de liste de personnes
+ * @param {Object} config - La configuration actuelle
+ * @returns {Promise<HTMLElement|null>} - Le wrapper de heatmap ou null en cas d'erreur
+ */
+async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle) {
+    // Afficher un indicateur de chargement
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.style.position = 'fixed';
+    loadingIndicator.style.top = '50%';
+    loadingIndicator.style.left = '50%';
+    loadingIndicator.style.transform = 'translate(-50%, -50%)';
+    loadingIndicator.style.backgroundColor = 'white';
+    loadingIndicator.style.padding = '20px';
+    loadingIndicator.style.borderRadius = '8px';
+    loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    loadingIndicator.style.zIndex = '9999';
+    loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+    document.body.appendChild(loadingIndicator);
+    
+    try {
+        // Extraire le titre pour obtenir le texte de recherche
+        const titleElement = modal.querySelector('h2');
+        // const searchText1 = extractSearchTextFromTitle(titleElement);
+
+        // Créer un élément h2 pour mettre l'ancien titre en français car le extractSearchTextFromTitle travaille sur le français alors que le titleElement = modal.querySelector('h2'); est en multilingue
+        const h2Element = document.createElement('h2');
+        h2Element.textContent = hiddenFormerFrenchTitle;
+        const searchText = extractSearchTextFromTitle(h2Element);
+
+        
+        let heatmapData;
+        
+        if (searchText) {
+            // Utiliser les personnes déjà filtrées que nous avons dans la liste
+            const filteredPeople = filterPeopleByText(searchText, config);
+            
+            if (filteredPeople && filteredPeople.length > 0) {
+                console.log(`Création de la heatmap pour ${filteredPeople.length} personnes filtrées avec "${searchText}"`);
+                
+                // Utiliser la fonction qui crée des données de heatmap à partir de personnes spécifiques
+                // Cette fonction existe déjà dans geoHeatMapDataProcessor.js sous le nom de updateHeatmapIfVisible
+                heatmapData = await createHeatmapDataForPeople(filteredPeople);
+            } else {
+                console.warn("Aucune personne filtrée trouvée pour", searchText);
+                heatmapData = await createDataForHeatMap(config);
+            }
+        } else {
+            // Fallback vers la méthode standard
+            heatmapData = await createDataForHeatMap(config);
+        }
+        
+        // Supprimer l'indicateur de chargement
+        document.body.removeChild(loadingIndicator);
+        
+        if (!heatmapData || heatmapData.length === 0) {
+            console.error("Aucune donnée géographique disponible");
+            alert("Aucune donnée géographique disponible.");
+            return null;
+        }
+        
+        // Créer un titre pour la heatmap
+        let heatmapTitle = "Heatmap";
+        if (titleElement) {
+            // Extraire un titre plus propre de l'élément de titre
+            const titleText = titleElement.textContent;
+            // const match = titleText.match(/^(Personnes.+?)\s*\(\d+\s*personnes\)$/);
+            const patterns = {
+                'fr': /^(Personnes.+?)\s*\(\d+\s*personnes\)$/,
+                'en': /^(People.+?)\s*\(\d+\s*people\)$/,
+                'es': /^(Personas.+?)\s*\(\d+\s*personas\)$/,
+                'hu': /^(Személyek.+?)\s*\(\d+\s*személy\)$/
+            };
+            const currentLang = window.CURRENT_LANGUAGE || 'fr';
+            const pattern = patterns[currentLang] || patterns['fr'];
+            
+            const match = titleText.match(pattern);
+            if (match && match[1]) {
+                heatmapTitle = `Heatmap - ${match[1]}`;
+            } else {
+                heatmapTitle = `Heatmap - ${titleText}`;
+            }
+        }
+        
+        // Utiliser la fonction existante pour créer la heatmap
+        createImprovedHeatmap(heatmapData, heatmapTitle);
+        
+        // Récupérer la référence à la heatmap nouvellement créée
+        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+        if (!heatmapWrapper) {
+            console.error("La heatmap n'a pas été créée correctement");
+            return null;
+        }
+        
+        // Ajuster la disposition pour le mode écran partagé
+        adjustSplitScreenLayout(modal, heatmapWrapper);
+        
+        return heatmapWrapper;
+    } catch (error) {
+        console.error("Erreur lors de la création de la heatmap:", error);
+        if (document.body.contains(loadingIndicator)) {
+            document.body.removeChild(loadingIndicator);
+        }
+        alert("Erreur lors de la création de la carte: " + error.message);
+        return null;
+    }
+}
+
+
+
 
 /**
  * Ajuste la disposition en mode écran partagé pour la modale et la heatmap
@@ -954,98 +1067,16 @@ function adjustSplitScreenLayout(modal, heatmapWrapper) {
     }, 300); // Augmenter le délai à 300ms pour plus de sécurité
 }
 
-/**
- * Affiche la heatmap et ajuste le layout pour l'écran partagé
- * @param {HTMLElement} modal - La modale de liste de personnes
- * @param {Object} config - La configuration actuelle
- * @returns {Promise<HTMLElement|null>} - Le wrapper de heatmap ou null en cas d'erreur
- */
-async function showHeatmapAndAdjustLayout(modal, config) {
-    // Afficher un indicateur de chargement
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.style.position = 'fixed';
-    loadingIndicator.style.top = '50%';
-    loadingIndicator.style.left = '50%';
-    loadingIndicator.style.transform = 'translate(-50%, -50%)';
-    loadingIndicator.style.backgroundColor = 'white';
-    loadingIndicator.style.padding = '20px';
-    loadingIndicator.style.borderRadius = '8px';
-    loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    loadingIndicator.style.zIndex = '9999';
-    loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
-    document.body.appendChild(loadingIndicator);
-    
-    try {
-        // Extraire le titre pour obtenir le texte de recherche
-        const titleElement = modal.querySelector('h2');
-        const searchText = extractSearchTextFromTitle(titleElement);
-        
-        let heatmapData;
-        
-        if (searchText) {
-            // Utiliser les personnes déjà filtrées que nous avons dans la liste
-            const filteredPeople = filterPeopleByText(searchText, config);
-            
-            if (filteredPeople && filteredPeople.length > 0) {
-                console.log(`Création de la heatmap pour ${filteredPeople.length} personnes filtrées avec "${searchText}"`);
-                
-                // Utiliser la fonction qui crée des données de heatmap à partir de personnes spécifiques
-                // Cette fonction existe déjà dans geoHeatMapDataProcessor.js sous le nom de updateHeatmapIfVisible
-                heatmapData = await createHeatmapDataForPeople(filteredPeople);
-            } else {
-                console.warn("Aucune personne filtrée trouvée pour", searchText);
-                heatmapData = await createDataForHeatMap(config);
-            }
-        } else {
-            // Fallback vers la méthode standard
-            heatmapData = await createDataForHeatMap(config);
-        }
-        
-        // Supprimer l'indicateur de chargement
-        document.body.removeChild(loadingIndicator);
-        
-        if (!heatmapData || heatmapData.length === 0) {
-            console.error("Aucune donnée géographique disponible");
-            alert("Aucune donnée géographique disponible.");
-            return null;
-        }
-        
-        // Créer un titre pour la heatmap
-        let heatmapTitle = "Heatmap";
-        if (titleElement) {
-            // Extraire un titre plus propre de l'élément de titre
-            const titleText = titleElement.textContent;
-            const match = titleText.match(/^(Personnes.+?)\s*\(\d+\s*personnes\)$/);
-            if (match && match[1]) {
-                heatmapTitle = `Heatmap - ${match[1]}`;
-            } else {
-                heatmapTitle = `Heatmap - ${titleText}`;
-            }
-        }
-        
-        // Utiliser la fonction existante pour créer la heatmap
-        createImprovedHeatmap(heatmapData, heatmapTitle);
-        
-        // Récupérer la référence à la heatmap nouvellement créée
-        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-        if (!heatmapWrapper) {
-            console.error("La heatmap n'a pas été créée correctement");
-            return null;
-        }
-        
-        // Ajuster la disposition pour le mode écran partagé
-        adjustSplitScreenLayout(modal, heatmapWrapper);
-        
-        return heatmapWrapper;
-    } catch (error) {
-        console.error("Erreur lors de la création de la heatmap:", error);
-        if (document.body.contains(loadingIndicator)) {
-            document.body.removeChild(loadingIndicator);
-        }
-        alert("Erreur lors de la création de la carte: " + error.message);
-        return null;
-    }
-}
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Créer les données de heatmap pour un ensemble spécifique de personnes

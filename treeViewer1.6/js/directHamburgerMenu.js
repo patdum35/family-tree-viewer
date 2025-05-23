@@ -557,25 +557,25 @@
   function setupButtonSync() {
     setTimeout(() => {
       // Synchroniser le bouton de son
-      const originalSpeechBtn = document.getElementById('speechToggleBtn');
-      const menuSpeechBtn = document.getElementById('menu-speechToggleBtn');
+      // const originalSpeechBtn = document.getElementById('speechToggleBtn');
+      // const menuSpeechBtn = document.getElementById('menu-speechToggleBtn');
       
-      if (originalSpeechBtn && menuSpeechBtn) {
-        // Observer les changements dans le bouton original
-        const observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList' || mutation.type === 'attributes') {
-              menuSpeechBtn.innerHTML = originalSpeechBtn.innerHTML;
-            }
-          });
-        });
+      // if (originalSpeechBtn && menuSpeechBtn) {
+      //   // Observer les changements dans le bouton original
+      //   const observer = new MutationObserver(function(mutations) {
+      //     mutations.forEach(function(mutation) {
+      //       if (mutation.type === 'childList' || mutation.type === 'attributes') {
+      //         menuSpeechBtn.innerHTML = originalSpeechBtn.innerHTML;
+      //       }
+      //     });
+      //   });
         
-        observer.observe(originalSpeechBtn, { 
-          childList: true,
-          attributes: true,
-          subtree: true
-        });
-      }
+      //   observer.observe(originalSpeechBtn, { 
+      //     childList: true,
+      //     attributes: true,
+      //     subtree: true
+      //   });
+      // }
       
       // Synchroniser le bouton de pause d'animation
       const originalPauseBtn = document.getElementById('animationPauseBtn');

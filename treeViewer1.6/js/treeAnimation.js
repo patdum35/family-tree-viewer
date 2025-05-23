@@ -50,13 +50,13 @@ let initialAnimationMapPosition = {
 let isSpeechInGoodHealth = false;
 let animationController = null;
 
-let animationState = {
+export let animationState = {
     path: [],          // Le chemin complet de l'animation de la racine vers l'ancetre
     descendpath: [],   // Le chemin complet descendant de l'ancetre vers la racine
     cousinPath: [], // Le chemin complet du cousin vers l'ancetre commun
     cousinDescendantPath: [], // Le chemin complet descendant de l'ancetre vers le cousin
     currentIndex: 0,   // L'index du nœud actuel
-    isPaused: false,
+    isPaused: true,
     currentHighlightedNodeId: null,  // Ajout de cette propriété pour suivre le nœud actuellement mis en évidence
     visitedAncestorNodeIds: null, //: new Set(), // Ensemble pour conserver l'historique des nœuds ancestors visités
     visitedDescendantNodeIds: null, //: new Set() // Ensemble pour conserver l'historique des nœuds descendants visités
@@ -2752,7 +2752,7 @@ export function resetAnimationState() {
     animationState = {
         path: [],
         currentIndex: 0,
-        isPaused: false,
+        isPaused: true,
         currentHighlightedNodeId: null
     };
 

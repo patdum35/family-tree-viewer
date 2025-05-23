@@ -7,7 +7,7 @@ import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.j
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
-import { stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
+import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
 
@@ -436,6 +436,8 @@ function highlightAndZoomToNode(matchedNode) {
 export async function returnToLogin() {
     // Masquer l'arbre
     document.getElementById('tree-container').style.display = 'none';
+
+
     
     
     // Masquer le menu hamburger
@@ -459,6 +461,11 @@ export async function returnToLogin() {
     // Réinitialiser d'autres propriétés si nécessaire
     state.isAnimationLaunched = false;
     stopAnimation();
+
+    animationState.isPaused = true;
+    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    // Mettre à jour le bouton
+    animationPauseBtn.querySelector('span').textContent = '▶️';
 
     // Masquer la carte
     hideMap();
