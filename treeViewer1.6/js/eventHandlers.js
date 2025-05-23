@@ -11,6 +11,7 @@ import { stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} 
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
 
+
 /**
  * Initialise les gestionnaires d'événements globaux
  */
@@ -478,14 +479,13 @@ export async function returnToLogin() {
 
         // Utiliser getCachedResourceUrl pour obtenir l'URL de l'image (si disponible)
         try {
-            const imagePath = 'background_images/fort_lalatte.jpg';
+            const imagePath = 'background_images/fort_lalatte.jpx';
             backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
             // Fallback en cas d'erreur
             backgroundImage.src = 'background_images/fort_lalatte.jpg';
         }
-
     }
     
     // Quitter le mode plein écran si actif
@@ -526,3 +526,4 @@ export function hideLoginBackground() {
 }
 
 // window.hideLoginBackground = hideLoginBackground;
+
