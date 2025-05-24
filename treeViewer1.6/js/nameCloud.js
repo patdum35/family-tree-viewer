@@ -24,7 +24,7 @@ export const nameCloudState = {
     maxFontSize: 45,
     appliedMinFontSize: 10,
     appliedMaxFontSize: 45,
-    cloudShape: 'coeur',
+    cloudShape: 'Rectangle',
     padding: 4,
     paddingLocal: 4,
     fontFamily: 'Arial',
