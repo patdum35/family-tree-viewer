@@ -336,6 +336,8 @@ export async function loadData() {
     state.nombre_generation = 4;
     updateGenerationSelectorValue(state.nombre_generation);
 
+
+
     // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
     // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
     // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
@@ -406,6 +408,26 @@ export async function loadData() {
         document.dispatchEvent(event);
 
         hideMap();
+
+
+
+        let ancestor;
+        let cousin;
+        if (state.treeOwner ===2 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('guillaume du');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else {              
+            // state.targetAncestorId = "@I739@" 
+            ancestor = searchRootPersonId('alain ii goyon de matignon');  
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        }
+
+
+
+
 
         state.initialTreeDisplay = true;
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
@@ -827,8 +849,6 @@ export function handleRootPersonChange(event) {
         // typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
         // typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
   
-
-
 
 
 
