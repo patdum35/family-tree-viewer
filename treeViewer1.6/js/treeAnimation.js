@@ -18,7 +18,7 @@ import { debugLog } from './debugLogUtils.js'
 
 
 let animationTimeouts = [];
-let optimalSpeechRate = 0.9; //1.1;
+let optimalSpeechRate = 1.0; //1.1;
 let animationMap = null;
 let animationMarker = null;
 
@@ -1146,7 +1146,6 @@ function selectVoice() {
     console.log("Voix disponibles:",voices);
 
     debugLog("=== Liste des voix disponibles ===");
-
     voices.forEach(voice => {
         debugLog(`Voix: ${voice.name}
         - Langue: ${voice.lang}
@@ -1157,15 +1156,21 @@ function selectVoice() {
     });
 
     // Trouver les voix françaises disponibles
+    // let frenchVoices = voices.filter(voice => 
+    //     // voice.lang.startsWith('fr-FR') && 
+    //     voice.lang.startsWith(voice_language) && !voice.name.includes('ulti'));
+
     let frenchVoices = voices.filter(voice => 
-        // voice.lang.startsWith('fr-FR') && 
         voice.lang.startsWith(voice_language) && 
-        !voice.name.includes('ulti'));
+        !voice.name.includes('ulti') &&  // Évite Multi/multilingue
+        !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
+    );
+
+        
 
 
 
-    let localVoices = voices.filter(voice => 
-        voice.localService);
+    let localVoices = voices.filter(voice => voice.localService);
 
     if (localVoices.length != 0) {
         console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
@@ -1179,14 +1184,14 @@ function selectVoice() {
     if (frenchVoices.length === 0) {
         frenchVoices = voices.filter(voice => 
             // voice.lang.startsWith('fr-') || 
-            voice.lang.startsWith(voice_language_short) || 
-            voice.name.toLowerCase().includes('french')
+            (voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence')) || 
+            (voice.name.toLowerCase().includes('french') && !voice.voiceURI.includes('eloquence'))
         );
         // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
     } 
     if (frenchVoices.length === 0) {
         frenchVoices = voices.filter(voice => 
-            voice.lang.startsWith('en-') );
+            voice.lang.startsWith('en-') && !voice.voiceURI.includes('eloquence') );
 
         if (frenchVoices.length === 0) {
             frenchVoices = voices.filter(voice =>
@@ -1202,11 +1207,11 @@ function selectVoice() {
     if (!isOnline) {
         frenchVoices = voices.filter(voice =>
             // voice.lang.startsWith('fr-') && voice.localService);
-            voice.lang.startsWith(voice_language_short) && voice.localService);
+            voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence') && voice.localService);
         console.log("Voix disponibles locales fr-:", frenchVoices);
         if (frenchVoices.length === 0) {
             frenchVoices = voices.filter(voice =>
-                voice.lang.startsWith('en-') && voice.localService);
+                voice.lang.startsWith('en-') &&!voice.voiceURI.includes('eloquence') && voice.localService);
             console.log("Voix disponibles locales en-:", frenchVoices);
         }
         if (frenchVoices.length === 0) {

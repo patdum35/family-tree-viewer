@@ -14,18 +14,49 @@ import { updateSelectorValue } from './UIutils.js';
  * Ajoute les contrôles pour changer la racine
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
+// export function addRootChangeButton(nodeGroups) {
+//     nodeGroups.append("text")
+//         .attr("class", "root-text")
+//         .attr("x", state.boxWidth/2 + 9)
+//         .attr("y", -state.boxHeight/2 + 46)
+//         .attr("text-anchor", "middle")
+//         .style("cursor", "pointer")
+//         .style("font-size", "16px")
+//         .style("fill", "#6495ED")
+//         .text("*")
+//         .on("click", handleRootChange);
+// }
+
 export function addRootChangeButton(nodeGroups) {
-    nodeGroups.append("text")
-        .attr("class", "root-text")
-        .attr("x", state.boxWidth/2 + 9)
-        .attr("y", -state.boxHeight/2 + 46)
-        .attr("text-anchor", "middle")
+    
+    
+    // Ajouter une zone de clic invisible plus grande
+    nodeGroups.append("circle")
+        .attr("cx", state.boxWidth/2 + 13)
+        .attr("cy", -state.boxHeight/2 + 39)
+        .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
+        .style("fill", "transparent")
         .style("cursor", "pointer")
-        .style("font-size", "16px")
-        .style("fill", "#6495ED")
-        .text("*")
         .on("click", handleRootChange);
+    
+    // Ajouter le texte visible par-dessus
+    nodeGroups.append("text")
+        .attr("x", state.boxWidth/2 + 13)
+        .attr("y", -state.boxHeight/2 + 39)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")  // Centrage vertical parfait
+        .style("cursor", "pointer")
+        .style("font-size", "18px")  // Taille agrandie
+        .style("font-weight", "bold")  // Optionnel : rendre plus visible
+        .style("fill", " #FF8C00" ) // d => d.data.isSibling ? " #4CAF50" : " #6495ED")
+        .style("pointer-events", "none")  // Laisser les clics passer au cercle invisible
+        .text("✶")
 }
+
+
+
+
+
 
 /**
  * Gère le changement de racine
@@ -2229,78 +2260,236 @@ function applyTreeLeftShift() {
 * Ajoute un bouton "+"  vert à gauche des siblings ayant des descendants.
  * @private
  */
+// function addSiblingDescendantsButton(nodeGroups) {
+//     nodeGroups.append("text")
+//         .filter(d => {
+//             if (!d.data.isSibling) return false;
+//             const person = state.gedcomData.individuals[d.data.id];
+//             return person && person.spouseFamilies && person.spouseFamilies.some(famId => {
+//                 const family = state.gedcomData.families[famId];
+//                 return family && family.children && family.children.length > 0;
+//             });
+//         })
+//         .attr("class", "toggle-text-left")
+//         .attr("x", -state.boxWidth/2 - 9)
+//         .attr("y", -state.boxHeight/2 + 15)
+//         .attr("text-anchor", "middle")
+//         .style("font-size", "20px")
+//         .style("fill", "#4CAF50")
+//         .text("+")
+//         // .on("click", event => event.stopPropagation());
+//         // .on("click", handleRootChange);
+//         .on("click", handleDescendantsClick);
+// }
+
+
+
+/**
+ * Ajoute un bouton "+"  vert à gauche des siblings ayant des descendants.
+ * @private
+ */
+// function addSiblingDescendantsButton(nodeGroups) {
+//     nodeGroups.append("text")
+//         .filter(d => {
+//             if (!d.data.isSibling) return false;
+            
+//             const person = state.gedcomData.individuals[d.data.id];
+//             if (!person) return false;
+            
+//             // Vérifier si la personne a des enfants généalogiques dans le GEDCOM
+//             const hasGenealogicalChildren = person.spouseFamilies && person.spouseFamilies.some(famId => {
+//                 const family = state.gedcomData.families[famId];
+//                 return family && family.children && family.children.length > 0;
+//             });
+            
+//             if (!hasGenealogicalChildren) return false;
+            
+//             // Utiliser la fonction existante pour trouver les descendants
+//             const descendantsInfo = findDescendantsForSibling(d.data.id, false, null);
+            
+//             // Vérifier si ces descendants existent déjà dans l'arbre
+//             const hasVisibleDescendants = descendantsInfo.childrenIds.some(childId => 
+//                 nodeExistsInTree(state.currentTree, childId)
+//             );
+            
+//             // Afficher le bouton "+" seulement s'il n'y a pas de descendants déjà visibles
+//             return !hasVisibleDescendants;
+//         })
+//         .attr("class", "toggle-text-left")
+//         .attr("x", -state.boxWidth/2 - 9)
+//         .attr("y", -state.boxHeight/2 + 15)
+//         .attr("text-anchor", "middle")
+//         .style("font-size", "20px")
+//         .style("fill", "#4CAF50")  // Vert pour les siblings
+//         .text("+")  // Toujours "+" car on n'affiche que quand il n'y a pas de descendants visibles
+//         .on("click", handleDescendantsClick);
+// }
+
 function addSiblingDescendantsButton(nodeGroups) {
-    nodeGroups.append("text")
-        .filter(d => {
+    // Créer un groupe pour chaque bouton
+    const buttonGroups = nodeGroups.append("g")
+        .filter(function(d) {
             if (!d.data.isSibling) return false;
+            
             const person = state.gedcomData.individuals[d.data.id];
-            return person && person.spouseFamilies && person.spouseFamilies.some(famId => {
+            if (!person) return false;
+            
+            // Vérifier si la personne a des enfants généalogiques dans le GEDCOM
+            const hasGenealogicalChildren = person.spouseFamilies && person.spouseFamilies.some(famId => {
                 const family = state.gedcomData.families[famId];
                 return family && family.children && family.children.length > 0;
             });
+            
+            if (!hasGenealogicalChildren) return false;
+            
+            // Utiliser la fonction existante pour trouver les descendants
+            const descendantsInfo = findDescendantsForSibling(d.data.id, false, null);
+            
+            // Vérifier si ces descendants existent déjà dans l'arbre
+            const hasVisibleDescendants = descendantsInfo.childrenIds.some(childId => 
+                nodeExistsInTree(state.currentTree, childId)
+            );
+            
+            // Afficher le bouton "+" seulement s'il n'y a pas de descendants déjà visibles
+            return !hasVisibleDescendants;
         })
+        .attr("class", "siblingDescendants-button-group");
+
+    // Ajouter une zone de clic invisible plus grande
+    buttonGroups.append("circle")
+        .attr("cx", -state.boxWidth/2 - 9)
+        .attr("cy", -state.boxHeight/2 + 10)
+        .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
+        .style("fill", "transparent")
+        .style("cursor", "pointer")
+        .on("click", handleDescendantsClick);
+
+    buttonGroups.append("text")
         .attr("class", "toggle-text-left")
         .attr("x", -state.boxWidth/2 - 9)
-        .attr("y", -state.boxHeight/2 + 15)
+        .attr("y", -state.boxHeight/2 + 10)
         .attr("text-anchor", "middle")
-        .style("font-size", "20px")
-        .style("fill", "#4CAF50")
+        .attr("dominant-baseline", "central")  // Centrage vertical parfait
+        .style("cursor", "pointer")
+        .style("font-size", "28px")
+        .style("font-weight", "bold")  // Optionnel : rendre plus visible
+        // .style("fill", "#6495ED")
+        .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
+        .style("pointer-events", "none")  // Laisser les clics passer au cercle invisible
         .text("+")
-        // .on("click", event => event.stopPropagation());
-        // .on("click", handleRootChange);
-        .on("click", handleDescendantsClick);
+
 }
+
+
+/**
+ * Ajoute un bouton interactif pour les descendants des autres nœuds
+ * @private
+ */
+// function addInteractiveDescendantsButton(nodeGroups) {
+//     nodeGroups.append("text")
+//         .filter(d => {
+//             if (d.data.isSibling) return false;
+//             const person = state.gedcomData.individuals[d.data.id];
+//             if (person) {
+//                 return person.spouseFamilies && person.spouseFamilies.some(famId => {
+//                     const family = state.gedcomData.families[famId];
+//                     return family && family.children && family.children.length > 0;
+//                 });
+//             }
+//             else return false;
+//         })
+//         .attr("class", "toggle-text-left")
+//         .attr("x", -state.boxWidth/2 - 9)
+//         .attr("y", -state.boxHeight/2 + 15)
+//         .attr("text-anchor", "middle")
+//         .style("cursor", "pointer")
+//         .style("font-size", "20px")
+//         .style("fill", "#6495ED")
+//         // .text(d => getDescendantsButtonText(d))
+//         .text(d => {
+//             // Pour les nœuds descendants à gauche avec des enfants dans GEDCOM mais pas affichés
+//             if (d.data.isLeftDescendant) {
+//                 const person = state.gedcomData.individuals[d.data.id];
+//                 const hasChildrenInGedcom = person.spouseFamilies && person.spouseFamilies.some(famId => {
+//                     const family = state.gedcomData.families[famId];
+//                     return family && family.children && family.children.length > 0;
+//                 });
+                
+//                 // Si le nœud a des enfants dans GEDCOM mais pas affichés dans l'arbre
+//                 if (hasChildrenInGedcom && (!d.data.children || d.data.children.length === 0)) {
+//                     return "+";
+//                 }
+//                 // return hasChildrenInGedcom ? "+" : "-"; // "+" si des enfants peuvent être affichés
+
+//             }
+            
+            
+//             // Pour les autres nœuds, logique existante
+//             return getDescendantsButtonText(d);
+//         })
+//         .on("click", handleDescendantsClick);
+// }
+
+
 
 /**
  * Ajoute un bouton interactif pour les descendants des autres nœuds
  * @private
  */
 function addInteractiveDescendantsButton(nodeGroups) {
-    nodeGroups.append("text")
-        .filter(d => {
+    // Créer un groupe pour chaque bouton
+    const buttonGroups = nodeGroups.append("g")
+        .filter(function(d) {
             if (d.data.isSibling) return false;
+            
             const person = state.gedcomData.individuals[d.data.id];
-            if (person) {
-                return person.spouseFamilies && person.spouseFamilies.some(famId => {
-                    const family = state.gedcomData.families[famId];
-                    return family && family.children && family.children.length > 0;
-                });
-            }
-            else return false;
+            if (!person) return false;
+            
+            // Vérifier si la personne a des enfants généalogiques dans le GEDCOM
+            const hasGenealogicalChildren = person.spouseFamilies && person.spouseFamilies.some(famId => {
+                const family = state.gedcomData.families[famId];
+                return family && family.children && family.children.length > 0;
+            });
+            
+            if (!hasGenealogicalChildren) return false;
+            
+            // Utiliser la fonction existante pour trouver les descendants
+            const descendantsInfo = findDescendantsForSibling(d.data.id, false, null);
+            
+            // Vérifier si ces descendants existent déjà dans l'arbre
+            const hasVisibleDescendants = descendantsInfo.childrenIds.some(childId => 
+                nodeExistsInTree(state.currentTree, childId)
+            );
+            
+            // Afficher le bouton "+" seulement s'il n'y a pas de descendants déjà visibles
+            return !hasVisibleDescendants;
         })
+        .attr("class", "descendants-button-group");
+
+    // Ajouter une zone de clic invisible plus grande
+    buttonGroups.append("circle")
+        .attr("cx", -state.boxWidth/2 - 9)
+        .attr("cy", -state.boxHeight/2 + 10)
+        .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
+        .style("fill", "transparent")
+        .style("cursor", "pointer")
+        .on("click", handleDescendantsClick);
+
+    buttonGroups.append("text")
         .attr("class", "toggle-text-left")
         .attr("x", -state.boxWidth/2 - 9)
-        .attr("y", -state.boxHeight/2 + 15)
+        .attr("y", -state.boxHeight/2 + 10)
         .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")  // Centrage vertical parfait
         .style("cursor", "pointer")
-        .style("font-size", "20px")
-        .style("fill", "#6495ED")
-        // .text(d => getDescendantsButtonText(d))
-        .text(d => {
-            // Pour les nœuds descendants à gauche avec des enfants dans GEDCOM mais pas affichés
-            if (d.data.isLeftDescendant) {
-                const person = state.gedcomData.individuals[d.data.id];
-                const hasChildrenInGedcom = person.spouseFamilies && person.spouseFamilies.some(famId => {
-                    const family = state.gedcomData.families[famId];
-                    return family && family.children && family.children.length > 0;
-                });
-                
-                // Si le nœud a des enfants dans GEDCOM mais pas affichés dans l'arbre
-                if (hasChildrenInGedcom && (!d.data.children || d.data.children.length === 0)) {
-                    return "+";
-                }
-                // return hasChildrenInGedcom ? "+" : "-"; // "+" si des enfants peuvent être affichés
+        .style("font-size", "28px")
+        .style("font-weight", "bold")  // Optionnel : rendre plus visible
+        // .style("fill", "#6495ED")
+        .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
+        .style("pointer-events", "none")  // Laisser les clics passer au cercle invisible
+        .text("+")
 
-            }
-            
-            // Pour les autres nœuds, logique existante
-            return getDescendantsButtonText(d);
-        })
-        .on("click", handleDescendantsClick);
 }
-
-
-
 
 
 /**
@@ -2500,28 +2689,64 @@ function updateRootToClosestDescendant(descendant) {
  * Ajoute les contrôles pour les ancêtres
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
+// export function addAncestorsControls(nodeGroups) {
+//     if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants'  ) return;
+//     nodeGroups.append("text")
+//         .filter(function(d) {
+//             d.ShowAncestorsButton = shouldShowAncestorsButton(d);
+//             return d.ShowAncestorsButton;
+//         })
+//         .attr("class", "toggle-text")
+//         .attr("x", state.boxWidth/2 + 9)
+//         .attr("y", -state.boxHeight/2 + 15)
+//         .attr("text-anchor", "middle")
+//         .style("cursor", "pointer")
+//         .style("font-size", "20px")
+//         .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
+//         .text(function(d) {
+//             // if (d.depth < 3 )
+//             // {
+//             //         console.log(" DEBUG addAncestorsControls:", d.data.id, d.data.name, d.data.genealogicalParentId, "depth:", d.depth, ", hasRealParents=", d.ShowAncestorsButton, "hasVisibleParent=", hasVisibleGenealogicalParents(d)); 
+//             // };
+//             return d.ShowAncestorsButton && hasVisibleGenealogicalParents(d) ? "-" : "+" 
+//         } )
+//         .on("click", handleAncestorsClick);
+// }
+// Version alternative avec zone de clic séparée (plus robuste)
 export function addAncestorsControls(nodeGroups) {
-    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants'  ) return;
-    nodeGroups.append("text")
+    if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants') return;
+    
+    // Créer un groupe pour chaque bouton
+    const buttonGroups = nodeGroups.append("g")
         .filter(function(d) {
             d.ShowAncestorsButton = shouldShowAncestorsButton(d);
             return d.ShowAncestorsButton;
         })
-        .attr("class", "toggle-text")
-        .attr("x", state.boxWidth/2 + 9)
-        .attr("y", -state.boxHeight/2 + 15)
-        .attr("text-anchor", "middle")
+        .attr("class", "ancestors-button-group");
+    
+    // Ajouter une zone de clic invisible plus grande
+    buttonGroups.append("circle")
+        .attr("cx", state.boxWidth/2 + 13)
+        .attr("cy", -state.boxHeight/2 + 10)
+        .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
+        .style("fill", "transparent")
         .style("cursor", "pointer")
-        .style("font-size", "20px")
-        .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
-        .text(function(d) {
-            // if (d.depth < 3 )
-            // {
-            //         console.log(" DEBUG addAncestorsControls:", d.data.id, d.data.name, d.data.genealogicalParentId, "depth:", d.depth, ", hasRealParents=", d.ShowAncestorsButton, "hasVisibleParent=", hasVisibleGenealogicalParents(d)); 
-            // };
-            return d.ShowAncestorsButton && hasVisibleGenealogicalParents(d) ? "-" : "+" 
-        } )
         .on("click", handleAncestorsClick);
+    
+    // Ajouter le texte visible par-dessus
+    buttonGroups.append("text")
+        .attr("x", state.boxWidth/2 + 13)
+        .attr("y", -state.boxHeight/2 + 10)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")  // Centrage vertical parfait
+        .style("cursor", "pointer")
+        .style("font-size", "28px")  // Taille agrandie
+        .style("font-weight", "bold")  // Optionnel : rendre plus visible
+        .style("fill", d => d.data.isSibling ? "#4CAF50" : "#6495ED")
+        .style("pointer-events", "none")  // Laisser les clics passer au cercle invisible
+        .text(function(d) {
+            return d.ShowAncestorsButton && hasVisibleGenealogicalParents(d) ? "-" : "+" 
+        });
 }
 
 

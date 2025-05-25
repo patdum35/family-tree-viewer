@@ -447,6 +447,34 @@ export function displayPersonDetails(personId) {
                 display: inline-block;
                 max-width: 100%;
             }
+            /* Style pour agrandir le bouton de fermeture - NOUVELLE SECTION */
+            .modal-close {
+                font-size: 24px !important;
+                width: 40px !important;
+                height: 40px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                line-height: 1 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                cursor: pointer !important;
+                border-radius: 4px !important;
+                transition: background-color 0.2s ease !important;
+            }
+            
+            .modal-close:hover {
+                background-color: rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            /* Sur les appareils tactiles, augmenter encore plus la zone */
+            @media (pointer: coarse) {
+                .modal-close {
+                    font-size: 28px !important;
+                    width: 50px !important;
+                    height: 50px !important;
+                }
+            }
         </style>
     `;
 

@@ -112,6 +112,37 @@ export function showPersonsList(name, people, config) {
             border-radius: 4px;
             margin: 30px;
         }
+
+        /* Style pour agrandir le bouton de fermeture - NOUVELLE SECTION */
+        #person-list-close-button {
+            font-size: 24px !important;
+            width: 40px !important;
+            height: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            border-radius: 4px !important;
+            transition: background-color 0.2s ease !important;
+            border: none !important;
+            background: none !important;
+        }
+        
+        #person-list-close-button:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Sur les appareils tactiles, augmenter encore plus la zone */
+        @media (pointer: coarse) {
+            #person-list-close-button {
+                font-size: 28px !important;
+                width: 40px !important;
+                height: 30px !important;
+            }
+        }
     `;
     // Ajouter le style au document
     document.head.appendChild(style);

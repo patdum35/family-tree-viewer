@@ -24,7 +24,7 @@ export const nameCloudState = {
     maxFontSize: 45,
     appliedMinFontSize: 10,
     appliedMaxFontSize: 45,
-    cloudShape: 'Rectangle',
+    cloudShape: 'rectangle',
     padding: 4,
     paddingLocal: 4,
     fontFamily: 'Arial',
@@ -52,6 +52,8 @@ export const nameCloudState = {
     isHeatmapVisible: false,
     heatmapWrapper: null,
     statsConfig: null,
+    
+    animationStyle: "none",
 }
 
 export function processNamesCloudWithDate(config, containerElement = null) {

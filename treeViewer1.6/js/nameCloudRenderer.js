@@ -618,6 +618,7 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
         .rotate(0)
         .fontSize(d => d.size)
         .spiral(nameCloudState.cloudShape === 'rectangle' ? 'rectangular' : 'archimedean')
+        .spiral('rectangular')
         .random(() => 0.5)
         .canvas(function() {
             const canvas = document.createElement('canvas');
