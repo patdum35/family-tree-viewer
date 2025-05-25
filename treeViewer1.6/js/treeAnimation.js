@@ -18,7 +18,7 @@ import { debugLog } from './debugLogUtils.js'
 
 
 let animationTimeouts = [];
-let optimalSpeechRate = 1.1;
+let optimalSpeechRate = 0.9; //1.1;
 let animationMap = null;
 let animationMarker = null;
 
@@ -1085,7 +1085,7 @@ function initSpeechSynthesis(voice) {
         // Créer et jouer une utterance silencieuse pour initialiser le moteur
         const initUtterance = new SpeechSynthesisUtterance("");
         initUtterance.volume = 0.00; // Muet
-        initUtterance.rate = 1.8; // 
+        initUtterance.rate = 1.0; // 
         initUtterance.voice = voice; // 
         initUtterance.onend = () => {
             console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
@@ -1360,12 +1360,12 @@ function speakPersonName(personName) {
         let timeOutDuration = Math.max(1800, simplifiedName.length * 150); // Base de 150ms par lettre, minimum 1800ms
         if (animationState.currentIndex === 0) {
             console.log("🔄 Premier nom - forçage taux initial à 1.2");
-            optimalSpeechRate = 1.2;
+            optimalSpeechRate = 1.0;//1.2;
             timeOutDuration = Math.max(isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
         }
         if (animationState.currentIndex === 1) {
             console.log("🔄 Deuxième nom - ajustement taux");
-            optimalSpeechRate = 1.2;
+            optimalSpeechRate = 1.0; //1.2;
             timeOutDuration = Math.max(isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
         }
 
