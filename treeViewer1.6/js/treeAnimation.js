@@ -1145,10 +1145,18 @@ function selectVoice() {
     let voices = window.speechSynthesis.getVoices();
     console.log("Voix disponibles:",voices);
 
+    debugLog("=== Liste des voix disponibles ===");
+
+    voices.forEach(voice => {
+        debugLog(`Voix: ${voice.name}
+        - Langue: ${voice.lang}
+        - Local: ${voice.localService}
+        - Par défaut: ${voice.default}
+        - URI: ${voice.voiceURI}
+        ---------------------`);
+    });
+
     // Trouver les voix françaises disponibles
-
-
-
     let frenchVoices = voices.filter(voice => 
         // voice.lang.startsWith('fr-FR') && 
         voice.lang.startsWith(voice_language) && 
