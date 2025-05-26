@@ -191,6 +191,16 @@ self.addEventListener('fetch', (event) => {
       event.request.headers.get('X-Requested-With') === 'no-sw-intercept') {
     return;
   }
+
+  const url = new URL(event.request.url);
+  // Ne pas mettre en cache les requêtes de géolocalisation ou d'autres api
+  if (url.hostname !== location.hostname || 
+      url.href.includes('nominatim.openstreetmap.org') ||
+      url.href.includes('api.') ||
+      url.href.includes('.api.')) {
+      return; // Laisser passer sans cache
+  }
+
   
   // Stratégie basic Cache-first
   event.respondWith(

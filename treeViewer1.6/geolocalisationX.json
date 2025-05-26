@@ -151,10 +151,6 @@
     "lat": 48.1244503,
     "lon": -1.214331
   },
-  "Challain-la-Potherie (Maine-et-Loire, France)": {
-    "lat": 47.6357208,
-    "lon": -1.04542
-  },
   "Louisfert (Loire-Atlantique, France)": {
     "lat": 47.6749877,
     "lon": -1.432721
@@ -183,6 +179,10 @@
     "lat": 48.06002505,
     "lon": -1.4592818143272492
   },
+  "Moulins (Ille-et-Vilaine, France)": {
+    "lat": 48.0030682,
+    "lon": -1.3729482
+  },
   "Essé (Ille-et-Vilaine, France)": {
     "lat": 47.9574503,
     "lon": -1.4242263
@@ -198,10 +198,6 @@
   "Ercé-en-Lamée (Ille-et-Vilaine, France)": {
     "lat": 47.830364,
     "lon": -1.5611201
-  },
-  "Abbaretz, Loire-Atlantique, France": {
-    "lat": 47.5525545,
-    "lon": -1.5322775
   },
   "Paris (France)": {
     "lat": 48.8588897,
@@ -266,10 +262,6 @@
   "La Chapelle-Hullin (Maine-et-Loire, France)": {
     "lat": 47.755676199999996,
     "lon": -1.0695416475103299
-  },
-  "La Chapelle-Heulin, Loire-Atlantique, France": {
-    "lat": 47.1760091,
-    "lon": -1.3404289
   },
   "Congrier (Mayenne, France)": {
     "lat": 47.8094454,
@@ -386,10 +378,6 @@
   "Saint-Herblon (Loire-Atlantique, France)": {
     "lat": 47.4080247,
     "lon": -1.0962598
-  },
-  "Poligny, Maine-et-Loire, France": {
-    "lat": 47.3850966,
-    "lon": 0.113553
   },
   "La Queuvre (Loiret, France)": {
     "lat": 47.8282727,
@@ -523,6 +511,10 @@
     "lat": 47.3309103,
     "lon": -1.6240815
   },
+  "Ancenis (Loire-Atlantique, France)": {
+    "lat": 47.3648141,
+    "lon": -1.1816088
+  },
   "Bierné (Mayenne, France)": {
     "lat": 47.8080342,
     "lon": -0.5335984871956923
@@ -567,6 +559,10 @@
     "lat": 47.783663250000004,
     "lon": -0.6044194545716848
   },
+  "Challain-la-Potherie (Maine-et-Loire, France)": {
+    "lat": 47.6357208,
+    "lon": -1.04542
+  },
   "Chancé (Ille-et-Vilaine, France)": {
     "lat": 48.03426305,
     "lon": -1.368443528487469
@@ -606,5 +602,25 @@
   "Nyoiseau (Maine-et-Loire, France)": {
     "lat": 47.712071249999994,
     "lon": -0.9022961880836337
+  },
+  "Chérancé (Mayenne, France)": {
+    "lat": 47.7954316,
+    "lon": -0.9366961
+  },
+  "Mée (Mayenne, France)": {
+    "lat": 47.7978449,
+    "lon": -0.8627255
+  },
+  "Angers (Maine-et-Loire, France)": {
+    "lat": 47.4739884,
+    "lon": -0.5515588
+  },
+  "Grugé-L'Hôpital (Maine-et-Loire, France)": {
+    "lat": 47.755109,
+    "lon": -1.0236595
+  },
+  "Montreuil-sur-Maine (Maine-et-Loire, France)": {
+    "lat": 47.65,
+    "lon": -0.7
   }
 }
