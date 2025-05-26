@@ -803,6 +803,61 @@ input[type=number] {
     }
 }
 
+
+
+
+/* Modifications à ajouter dans styles.css */
+
+/* Augmenter l'espacement des éléments dans controls-row-1 */
+.controls-row-1 {
+    gap: 11px !important; /* Augmenter de 10px à 15px */
+}
+
+/* Légère augmentation de taille pour les 3 boutons */
+.controls-row-1 button {
+    min-width: 30px !important; /* Augmenter de 28px à 32px */
+    height: 32px !important; /* Augmenter de 30px à 34px */
+}
+
+
+/* Augmenter la taille des icônes dans les boutons */
+.controls-row-1 button span {
+    font-size: 28px !important; /* 26px → 30px */
+}
+
+/* Augmenter aussi les icônes des boutons larges */
+.controls-row-1 button span.wide-span {
+    font-size: 34px !important; /* 32px → 36px */
+}
+
+
+
+/* Légère augmentation pour la zone de recherche */
+#root-person-search {
+    width: 65px !important; /* Augmenter de 65px à 70px */
+    height: 27px !important; /* Augmenter de 30px à 34px */
+}
+
+/* Légère augmentation pour le sélecteur */
+#root-person-results {
+    height: 27px !important; /* Augmenter de 23px à 27px */
+    min-width: 35px !important; /* Augmenter de 60px à 65px */
+    max-width: 70px !important; /* Augmenter de 60px à 65px */
+}
+
+/* Descendre le bouton de fermeture sur petits écrans */
+@media screen and (max-width: 400px) {
+    #close-tree-button {
+        top: 40px !important; /* Descendre de 10px à 40px */
+    }
+}
+
+
+
+
+
+
+
 /* Extra small screens */
 /* @media screen and (max-width: 480px) {
     .controls-row-1 button.large-button {
@@ -915,3 +970,7 @@ input[type=number] {
   .flag-hu {
     background: linear-gradient(to bottom, #CE2939 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #477050 66.66%);
   }
+
+
+
+
