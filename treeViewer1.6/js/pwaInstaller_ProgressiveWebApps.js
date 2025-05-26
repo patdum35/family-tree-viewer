@@ -81,7 +81,7 @@ class PWAInstaller {
             border: none; 
             padding: 10px; 
             width: 100%; 
-            max-width: 240px; 
+            max-width: 300px; 
             border-radius: 4px; 
             cursor: pointer; 
             font-weight: bold; 

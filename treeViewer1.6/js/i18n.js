@@ -12,7 +12,7 @@ window.i18n = {
       'visualiserArbre': 'Visualiser l\'arbre',
       
       // Modal GEDCOM
-      'chargerGedcom': 'Charger un fichier GEDCOM',
+      'AdvancedUserMenu': 'Menu utilisateur avancé',
       'afficherArbre': 'Afficher l\'arbre',
       // 'viderCache': 'Vider le cache',
       'SWUpdate': 'Mise à jour du logiciel',
@@ -22,6 +22,7 @@ window.i18n = {
       'rootPersonSearch': '🔍racine',
       'nbreGene': 'nbre<br>géné',
       'choisirFichier': 'Choisir un fichier',
+      'fichierGedcom': 'Fichier GEDCOM',
       'aucunFichier': 'Aucun fichier choisi',
       'installerApp': '📱 Installer l\'application',
       'parametresDefaut': '🔄 Paramètres par défaut',
@@ -54,7 +55,7 @@ window.i18n = {
       'visualiserArbre': 'View family tree',
       
       // Modal GEDCOM
-      'chargerGedcom': 'Load GEDCOM file',
+      'AdvancedUserMenu': 'Advanced user menu',
       'afficherArbre': 'Show tree',
       // 'viderCache': 'Clear cache',
       'SWUpdate': 'SW update',
@@ -64,6 +65,7 @@ window.i18n = {
       'rootPersonSearch': '🔍root',
       'nbreGene': 'gene.<br>count',
       'choisirFichier': 'Choose file',
+      'fichierGedcom': 'GEDCOM file',
       'aucunFichier': 'No file chosen',
       'installerApp': '📱 Install App',
       'parametresDefaut': '🔄 Default Settings',
@@ -96,7 +98,7 @@ window.i18n = {
       'visualiserArbre': 'Ver árbol genealógico',
       
       // Modal GEDCOM
-      'chargerGedcom': 'Cargar archivo GEDCOM',
+      'AdvancedUserMenu': 'Menú de usuario avanzado',
       'afficherArbre': 'Mostrar árbol',
       // 'viderCache': 'Limpiar caché',
       'SWUpdate': 'Mantenimiento de software',
@@ -106,6 +108,7 @@ window.i18n = {
       'rootPersonSearch': '🔍raíz',
       'nbreGene': 'núm.<br>gene.',
       'choisirFichier': 'Seleccionar archivo',
+      'fichierGedcom': 'Archivo GEDCOM',
       'aucunFichier': 'Ningún archivo seleccionado',
       'installerApp': '📱 Instalar App',
       'parametresDefaut': '🔄 Configuración predeterminada',
@@ -139,12 +142,13 @@ window.i18n = {
       'visualiserArbre': 'Családfa megtekintése',
       
       // Modal GEDCOM
-      'chargerGedcom': 'GEDCOM fájl betöltése',
+      'AdvancedUserMenu': 'Haladó felhasználói menü',
       'afficherArbre': 'Fa megjelenítése',
       // 'viderCache': 'Gyorsítótár törlése',
       'SWUpdate': 'Szoftverfrissítés',
       'activerLogs': 'Hibakeresési naplók engedélyezése',
       'choisirFichier': 'Fájl kiválasztása',
+      'fichierGedcom': 'GEDCOM fájl',
       'aucunFichier': 'Nincs kiválasztott fájl',
       
       // Contrôles de l'arbre
