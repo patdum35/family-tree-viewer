@@ -411,19 +411,32 @@ export async function loadData() {
 
 
 
-        let ancestor;
-        let cousin;
+        let ancestor = null;
+        let cousin = null;
         if (state.treeOwner ===2 ) {
             // state.targetAncestorId = "@I1152@";
-            ancestor = searchRootPersonId('guillaume du');
+            ancestor = searchRootPersonId('guillaume ducl');
             cousin = null; 
             state.targetAncestorId = ancestor.id;
-        } else {              
+        } else if (state.treeOwner ===1 ){              
             // state.targetAncestorId = "@I739@" 
             ancestor = searchRootPersonId('alain ii goyon de matignon');  
             cousin = null; 
             state.targetAncestorId = ancestor.id;
+        } else {
+            ancestor = searchRootPersonId('alain ii goyon de matignon', false);  
+            if (ancestor != null) {
+                state.treeOwner = 1;
+                state.targetAncestorId = ancestor.id;
+            } 
+            ancestor = searchRootPersonId('guillaume ducl', false);  
+            if (ancestor != null) {
+                state.treeOwner = 2;
+                state.targetAncestorId = ancestor.id;
+            }     
+
         }
+
 
 
 
@@ -1310,7 +1323,7 @@ window.addEventListener('load', initialize);
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
-export function searchRootPersonId(searchStr) {
+export function searchRootPersonId(searchStr, isAlert = true) {
 
     // searchStr = searchStr.value.toLowerCase();
 
@@ -1334,7 +1347,7 @@ export function searchRootPersonId(searchStr) {
         return matchedPerson;
         
 
-    } else {
+    } else if (isAlert) {
         alert('Aucune personne trouvée');
         return null;
     }
