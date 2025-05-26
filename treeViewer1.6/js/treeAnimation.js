@@ -1167,17 +1167,17 @@ function selectVoice() {
     );
 
 
-    // Trier les voix pour prioriser celles contenant 'compact'
-    frenchVoices.sort((a, b) => {
-        const aHasCompact = a.name.toLowerCase().includes('compact');
-        const bHasCompact = b.name.toLowerCase().includes('compact');
-        if (aHasCompact && !bHasCompact) return -1;
-        if (!aHasCompact && bHasCompact) return 1;
-        return 0;
-    });
-
         
+    // Chercher la première voix contenant 'compact'
+    const compactVoice = frenchVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
 
+    if (compactVoice) {
+        // Si on trouve une voix 'compact', la mettre en première position
+        frenchVoices = [
+            compactVoice,
+            ...frenchVoices.filter(voice => voice !== compactVoice)
+        ];
+    }
 
 
     let localVoices = voices.filter(voice => voice.localService);
@@ -1186,6 +1186,10 @@ function selectVoice() {
         console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
         localVoice = localVoices[0];
     } 
+
+
+
+
 
 
 
@@ -1275,7 +1279,7 @@ function selectVoice() {
 
     if (frenchVoice) {
         console.log("Voix  sélectionnée:", frenchVoice);
-        debugLog(`Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
+        debugLog(`Version 1.6, Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
     }
 
     
