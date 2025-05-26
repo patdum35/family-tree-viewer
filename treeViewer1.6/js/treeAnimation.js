@@ -1166,6 +1166,16 @@ function selectVoice() {
         !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
     );
 
+
+    // Trier les voix pour prioriser celles contenant 'compact'
+    frenchVoices.sort((a, b) => {
+        const aHasCompact = a.name.toLowerCase().includes('compact');
+        const bHasCompact = b.name.toLowerCase().includes('compact');
+        if (aHasCompact && !bHasCompact) return -1;
+        if (!aHasCompact && bHasCompact) return 1;
+        return 0;
+    });
+
         
 
 
