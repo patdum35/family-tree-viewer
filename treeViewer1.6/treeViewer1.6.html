@@ -79,12 +79,11 @@
     <!-- Bouton pour ouvrir la modal de chargement de fichier -->
     <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()" style="font-size: 24px;">⚙️</button>
 
-
     <div id="gedcom-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
         <div style="background-color: white; width: 300px; max-width: 90%; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
     
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 18px; color: #333;" data-text-key="chargerGedcom">Charger un fichier GEDCOM</h2>
+                <h2 style="margin: 0; font-size: 18px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
                 <span onclick="closeGedcomModal()" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
             </div>
             <div style="padding: 10px 0;">
@@ -94,6 +93,13 @@
                 
                 <!-- Cacher l'input file original -->
                 <input type="file" id="gedFile" accept=".ged" style="display: none;">
+
+                
+
+    
+                <!-- Label pour le fichier GEDCOM -->
+                <label for="gedFile" style="display: block; font-size: 14px; color: #333; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label>
+                
                 
                 <!-- Créer un bouton personnalisé et un champ de texte -->
                 <div style="display: flex; margin-bottom: 15px; width: 100%;">
@@ -122,15 +128,15 @@
 
 
                 
-                <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
+                <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
                 <!-- <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
                 <!-- <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
-                <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="SWUpdate" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Mise à jour du logiciel</button>
+                <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="SWUpdate" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Mise à jour du logiciel</button>
                 
                 
-                <button onclick="resetToDefaultSettings()" data-text-key="parametresDefaut"  style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
+                <button onclick="resetToDefaultSettings()" data-text-key="parametresDefaut"  style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
 
-                <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
+                <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
