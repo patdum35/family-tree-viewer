@@ -353,131 +353,184 @@ export function displayPersonDetails(personId) {
 
     // Style général pour les conteneurs
     const sectionStyle = `
-        <style>
-        /* Style unifié pour le modal */
-            #person-details-modal {
-                background-color: rgba(255, 255, 255, 0.95) !important;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
-                border-radius: 8px !important;
-                position: absolute !important;
-                overflow: auto !important;
-                max-width: calc(100% - 20px) !important;
-                max-height: calc(100% - 50px) !important;
-                /*left: 10px !important; */
-            }
+    <style>
+    /* Style unifié pour le modal */
+        #person-details-modal {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 8px !important;
+            position: absolute !important;
+            overflow: auto !important;
+            max-width: calc(100% - 20px) !important;
+            max-height: calc(100% - 50px) !important;
+            /*left: 10px !important; */
+        }
+        
+        .modal-content {
+            background-color: transparent !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+            padding: 10px !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        #person-details-content {
+            width: 100% !important;
+            max-width: 100% !important;
+            /* Permettre le scroll sur les petits écrans */
+            ${window.innerHeight < 400 ? 'overflow-y: auto !important; max-height: calc(100vh - 120px) !important;' : ''}
+        }
+        /* Réduire la hauteur du bandeau titre */
+        #modal-person-name {
+            font-size: ${nameCloudState && nameCloudState.mobilePhone ? '14px' : '16px'};
+            padding: 6px !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+        }
+        .modal-header {
+            padding: 4px !important;
+            min-height: unset !important;
+            background-color: rgba(248, 249, 250, 0.95) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+
+            /* Rendre l'en-tête fixe */
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1001 !important;
+            width: 100% !important;
             
-            .modal-content {
-                background-color: transparent !important;
-                box-shadow: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                overflow: visible !important;
-                padding: 10px !important;
-                margin: 0 !important;
-                box-sizing: border-box !important;
+            /* Ajouter une ombre pour démarcation visuelle */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        .details-section {
+            margin-bottom: 6px;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: ${nameCloudState && nameCloudState.mobilePhone ? '11px' : '13px'};
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(3px);
+        }
+        .details-icon {
+            font-size: 1.8em;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .details-value {
+            display: inline-block;
+        }
+        .details-section.birth { background-color: #E3F2FD; }
+        .details-section.death { background-color: #EFEBE9; }
+        .details-section.marriage { background-color: #F8BBD0; }
+        .details-section.residence { background-color: #E8F5E9; }
+        .details-section.notes { background-color: #FFF8E1; }
+        .details-section.sources { background-color: #F3E5F5; font-size: 85%; }
+        .details-section.context { background-color: #E0F2F1; }
+        .details-section.actions { background-color: #ECEFF1; text-align: center; }
+        .set-root-btn {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        .sources-link {
+            color: #3f51b5;
+            text-decoration: underline;
+            font-size: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        /* Ajustements spécifiques pour les petits écrans */
+        @media (max-height: 400px) {
+            #multi-location-map {
+                height: 200px !important; /* Réduire la hauteur de la carte */
             }
             
             #person-details-content {
-                width: 100% !important;
-                max-width: 100% !important;
+                overflow-y: auto !important;
+                max-height: calc(100vh - 100px) !important;
+                padding-right: 8px !important;
+                margin-right: -3px !important;
             }
-            /* Réduire la hauteur du bandeau titre */
-            #modal-person-name {
-                font-size: ${nameCloudState && nameCloudState.mobilePhone ? '14px' : '16px'};
-                padding: 6px !important;
-                margin: 0 !important;
-                line-height: 1.2 !important;
+            
+            /* Masquer la poignée Est (droite) sur petits écrans pour éviter conflit avec scrollbar */
+            .resize-handle.resize-e {
+                display: none !important;
             }
-            .modal-header {
-                padding: 4px !important;
-                min-height: unset !important;
-                background-color: rgba(248, 249, 250, 0.95) !important;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-
-                /* Rendre l'en-tête fixe */
-                position: sticky !important;
-                top: 0 !important;
-                z-index: 1001 !important;
-                width: 100% !important;
-                
-                /* Ajouter une ombre pour démarcation visuelle */
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            
+            /* Rendre la poignée Sud-Est plus visible pour compenser */
+            .resize-handle.resize-se {
+                background: linear-gradient(135deg, transparent 60%, rgba(0,0,0,0.4) 70%) !important;
+                width: 20px !important;
+                height: 20px !important;
             }
-            .details-section {
-                margin-bottom: 6px;
-                padding: 6px;
-                border-radius: 6px;
-                font-size: ${nameCloudState && nameCloudState.mobilePhone ? '11px' : '13px'};
-                background-color: rgba(255, 255, 255, 0.7);
-                backdrop-filter: blur(3px);
+            
+            .resize-handle.resize-se:hover {
+                background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.6) 60%) !important;
             }
-            .details-icon {
-                font-size: 1.8em;
-                vertical-align: middle;
-                margin-right: 4px;
+            
+            /* Style du scrollbar */
+            #person-details-content::-webkit-scrollbar {
+                width: 12px !important;
+                background: rgba(248, 249, 250, 0.9) !important;
             }
-            .details-value {
-                display: inline-block;
+            
+            #person-details-content::-webkit-scrollbar-track {
+                background: rgba(230, 230, 230, 0.8) !important;
+                border-radius: 6px !important;
             }
-            .details-section.birth { background-color: #E3F2FD; }
-            .details-section.death { background-color: #EFEBE9; }
-            .details-section.marriage { background-color: #F8BBD0; }
-            .details-section.residence { background-color: #E8F5E9; }
-            .details-section.notes { background-color: #FFF8E1; }
-            .details-section.sources { background-color: #F3E5F5; font-size: 85%; }
-            .details-section.context { background-color: #E0F2F1; }
-            .details-section.actions { background-color: #ECEFF1; text-align: center; }
-            .set-root-btn {
-                background-color: #4361ee;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 11px;
-                margin-top: 2px;
+            
+            #person-details-content::-webkit-scrollbar-thumb {
+                background: rgba(100, 100, 100, 0.8) !important;
+                border-radius: 6px !important;
+                min-height: 20px !important;
             }
-            .sources-link {
-                color: #3f51b5;
-                text-decoration: underline;
-                font-size: 80%;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: inline-block;
-                max-width: 100%;
+            
+            #person-details-content::-webkit-scrollbar-thumb:hover {
+                background: rgba(80, 80, 80, 0.9) !important;
             }
-            /* Style pour agrandir le bouton de fermeture - NOUVELLE SECTION */
+        }
+        
+        /* Style pour agrandir le bouton de fermeture - NOUVELLE SECTION */
+        .modal-close {
+            font-size: 24px !important;
+            width: 40px !important;
+            height: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            border-radius: 4px !important;
+            transition: background-color 0.2s ease !important;
+        }
+        
+        .modal-close:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Sur les appareils tactiles, augmenter encore plus la zone */
+        @media (pointer: coarse) {
             .modal-close {
-                font-size: 24px !important;
+                font-size: 28px !important;
                 width: 40px !important;
-                height: 40px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                line-height: 1 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                cursor: pointer !important;
-                border-radius: 4px !important;
-                transition: background-color 0.2s ease !important;
+                height: 30px !important;
             }
-            
-            .modal-close:hover {
-                background-color: rgba(0, 0, 0, 0.1) !important;
-            }
-            
-            /* Sur les appareils tactiles, augmenter encore plus la zone */
-            @media (pointer: coarse) {
-                .modal-close {
-                    font-size: 28px !important;
-                    width: 50px !important;
-                    height: 50px !important;
-                }
-            }
-        </style>
-    `;
-
+        }
+    </style>
+`;
 
 
 
@@ -1456,12 +1509,21 @@ function createEnhancedLocationMap(locations) {
     // Créer un conteneur pour la carte
     const mapContainer = document.createElement('div');
     mapContainer.id = 'multi-location-map';
-    mapContainer.style.height = '200px';
+    
+    // Ajuster la hauteur selon la taille d'écran
+    const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
+    mapContainer.style.height = mapHeight;
+    
     mapContainer.style.width = '100%';
     mapContainer.style.borderRadius = '6px';
     mapContainer.style.overflow = 'hidden';
     mapContainer.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
     mapContainer.style.marginBottom = '8px';
+    
+    // Ajouter une classe pour identifier les cartes sur petits écrans
+    if (window.innerHeight < 400) {
+        mapContainer.classList.add('small-screen-map');
+    }
 
     // Ajouter le conteneur à la modale
     const detailsContent = document.getElementById('person-details-content');
