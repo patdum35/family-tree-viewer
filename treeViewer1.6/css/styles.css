@@ -815,19 +815,19 @@ input[type=number] {
 
 /* Légère augmentation de taille pour les 3 boutons */
 .controls-row-1 button {
-    min-width: 30px !important; /* Augmenter de 28px à 32px */
-    height: 32px !important; /* Augmenter de 30px à 34px */
+    min-width: 29px !important; /* Augmenter de 28px à 32px */
+    height: 31px !important; /* Augmenter de 30px à 34px */
 }
 
 
 /* Augmenter la taille des icônes dans les boutons */
 .controls-row-1 button span {
-    font-size: 28px !important; /* 26px → 30px */
+    font-size: 27px !important; /* 26px → 30px */
 }
 
 /* Augmenter aussi les icônes des boutons larges */
 .controls-row-1 button span.wide-span {
-    font-size: 34px !important; /* 32px → 36px */
+    font-size: 33px !important; /* 32px → 36px */
 }
 
 
@@ -836,6 +836,7 @@ input[type=number] {
 #root-person-search {
     width: 65px !important; /* Augmenter de 65px à 70px */
     height: 27px !important; /* Augmenter de 30px à 34px */
+    margin-left: -4px !important; /* Rapprocher vers la gauche */
 }
 
 /* Légère augmentation pour le sélecteur */
@@ -843,7 +844,9 @@ input[type=number] {
     height: 27px !important; /* Augmenter de 23px à 27px */
     min-width: 35px !important; /* Augmenter de 60px à 65px */
     max-width: 70px !important; /* Augmenter de 60px à 65px */
+    margin-left: -7px !important; /* Rapprocher encore plus du search */
 }
+
 
 /* Descendre le bouton de fermeture sur petits écrans */
 @media screen and (max-width: 400px) {
