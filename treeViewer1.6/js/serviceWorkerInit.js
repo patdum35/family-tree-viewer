@@ -108,17 +108,34 @@ window.clearAppCache = async function() {
     console.log('Serveur détecté:', hasServer ? 'OUI ✅' : 'NON ❌');
     
     // Vérifier si on est sur mobile (Android fonctionne même sans serveur)
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
     console.log('Appareil mobile:', isMobile ? 'OUI ✅' : 'NON ❌');
     
+
+    // const textMessage = `debug Appareil mobile: ${isMobile}`;
+    // console.log(textMessage);
+
+    // if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    //         navigator.serviceWorker.controller.postMessage({
+    //         action: textMessage
+    //     });
+    // }
+
+
     // Si on est sur PC sans serveur, bloquer complètement le vidage du cache
     if (!hasServer && !isMobile) {
+    // if (true) {
         console.warn('⚠️ Attention: Tentative de vidage du cache sans serveur disponible - BLOQUÉE');
         
         // Utiliser la traduction appropriée via i18n
         const message = window.i18n ? window.i18n.getText('noServerDetected') : 
-            '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server.';
+            '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server. ou vous ';
         
+        // const isMobile2 = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+
+        // const message = `⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server. isMobile: ${isMobile2},   DEBUG********* ${ navigator.userAgent}`;
+        
+
         // Afficher l'alerte avec le message traduit
         window.alert(message);
         
