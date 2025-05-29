@@ -14,9 +14,9 @@ import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
-
+import { cleanupFanControls } from './treeFanControls.js';
+import { setMaxGenerationsInit } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
-
 
 
 import { 
@@ -91,6 +91,8 @@ export const state = {
     animationTargetAncestorId: "@I739@",
     animationRootPersonId: '@I1@',
     isTouchDevice: false,
+    isMobile: false,
+    isIOS: false,
     initialTreeDisplay: true,
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
@@ -106,7 +108,14 @@ export const state = {
     prevPrevWindowInnerHeightInMap: 0,
     treeOwner: 1,
     isOnLine: false,
-    isDebugLog: false
+    isDebugLog: false,
+    isRadarEnabled: false,
+    fanMode: {
+        maxGenerations: 5,
+        showSpouses: true,
+        showSiblings: true,
+        animationsEnabled: true
+    }
 };
 
 export { geocodeLocation };
@@ -138,6 +147,25 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
         });k
     });
 }
+
+
+export function toggleTreeRadar() {
+    const treeRadarToggleBtn = document.getElementById('radarBtn');
+    // Basculer l'état du tree/radar
+    state.isRadarEnabled = !state.isRadarEnabled;  
+    // Mettre à jour le bouton
+    treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
+    // treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿' : '🎯';
+    
+
+    if (state.isRadarEnabled) {
+        displayGenealogicTree(null, false, false,  false, 'fanAncestors');
+    } else {
+        displayGenealogicTree(null, true, false);
+    }
+
+}
+
 
 // Fonction pour basculer le son
 export function toggleSpeech() {
@@ -171,8 +199,6 @@ export function toggleSpeech() {
     // }
 
 }
-
-
 
 // Fonction pour desactiver complètement le son dans l'animation
 export function toggleSpeech2() {
@@ -212,8 +238,6 @@ export function toggleSpeech2() {
     // }
 
 }
-
-
 
 
 // Pour arrêter le monitoring
@@ -327,7 +351,7 @@ function initializeGenerationSelect() {
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData() {
-  
+
     state.lastWindowInnerWidth = window.innerWidth;
     state.lastWindowInnerHeight = window.innerHeight;
     state.previousWindowInnerWidth = state.lastWindowInnerWidth;
@@ -927,7 +951,7 @@ export function handleRootPersonChange(event) {
  * @param {string} rootPersonId - ID optionnel de la personne racine
  * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
  */
-export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false) {
+export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false, mode = 'ancestors') {
 
     // Réinitialiser l'état de l'animation avant de changer l'arbre
     resetAnimationState();
@@ -946,7 +970,6 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     } 
 
 
-
     // Si c'est l'initialisation, configurer le sélecteur avec la première racine
     if (isInit) {
         const rootPersonResults = document.getElementById('root-person-results');
@@ -962,8 +985,6 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
 
-
-
     updateBoxWidth();
 
     // Construire l'arbre selon le mode
@@ -973,22 +994,38 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         state.treeModeReal = 'directAncestors';
     }
 
+    // Nettoyer les contrôles existants
+    cleanupFanControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
         state.currentTree =  buildDescendantTree(tempPerson.id);
     }
     else {
-
-        state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
-            ? buildDescendantTree(person.id)
-            : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
-            ? buildAncestorTree(person.id)
-            : buildCombinedTree(person.id); // Pour le mode 'both'
+        if (['fanAncestors', 'fanDescendants'].includes(mode)) {
+            console.log('🌟 Mode éventail détecté:', mode);
+            // state.treeModeReal = mode;
+            state.treeMode = 'directAncestors';
+            state.treeModeReal = 'directAncestors';
+            // state.treeMode = 'ancestors';
+            // state.treeModeReal = 'ancestors';
+            state.currentTree = buildAncestorTree(person.id);
+            state.treeModeReal = mode;
+            setMaxGenerationsInit(state.nombre_generation);
+            // initializeAllFanControls();
+        } else {
+            console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
+            // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
+            state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
+                ? buildDescendantTree(person.id)
+                : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
+                ? buildAncestorTree(person.id)
+                : buildCombinedTree(person.id); // Pour le mode 'both'
+        }
     }
 
-
-    drawTree(isZoomRefresh);
+    // drawTree(isZoomRefresh);
+    drawTree(isZoomRefresh, false); // with fanAncestors
 
     // Ne pas faire resetView() en mode both
     if (state.treeModeReal !== 'both') {
@@ -996,6 +1033,8 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
 }
+
+window.displayGenealogicTree = displayGenealogicTree; // Exposer la fonction pour l'utiliser dans d'autres modules
 
 /**
  * Met à jour la largeur des boîtes en fonction du nombre de prénoms
@@ -1242,8 +1281,19 @@ function detectInputType() {
   return "inconnu";
 }
 
+// ==========  fonction de détection iOS ==========
+export function isIOSDevice() {
+    let isIOS = /iPad|iPhone|iPod|Macintosh|Mac OS/.test(navigator.userAgent) || 
+           (navigator.userAgent.includes('Mac') && 'ontouchend' in document) ||
+           (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
+    state.isIOS = isIOS;
+    // state.isIOS = true;
+    debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info")
+    return state.isIOS;
+}
 
-function detectDeviceType() {
+
+export function detectDeviceType() {
   const deviceInfo = {
     isMobile: false,
     hasTouchScreen: false,
@@ -1253,13 +1303,19 @@ function detectDeviceType() {
   };
   
   // Détection par user-agent
-  deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+//   deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
   
   // Détection de l'écran tactile
   deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
                               (navigator.maxTouchPoints > 0) || 
                               (navigator.msMaxTouchPoints > 0);
   
+  state.isMobile = deviceInfo.isMobile;
+  debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
+  state.isIOS = isIOSDevice();
+
   // Détection du type d'entrée principal
   if (window.matchMedia) {
     if (window.matchMedia('(pointer: fine)').matches) {
@@ -1412,3 +1468,115 @@ if (document.readyState === 'loading') {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { resetToDefaultSettings };
 }
+
+
+
+
+/**
+ * Gestion des erreurs
+ */
+function showErrorMessage(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    
+    // Ajouter des styles d'erreur
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #dc3545;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    // Supprimer après 5 secondes
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+
+/**
+ * Configuration par défaut à adapter selon vos besoins
+ */
+// export const fanConfig = {
+//     defaultMode: 'fanAncestors',
+//     maxGenerations: 5,
+//     enableAnimations: true,
+//     exportFormat: 'png',
+//     exportQuality: 1.0
+// };
+
+// Exemple d'utilisation :
+// displayPersonTree('PERSON_ID', 'fanAncestors');
+// switchTreeMode('fanDescendants');
+// exportToPDF();
+
+
+function positionRadarButton() {
+    // Votre fonction existante
+    const cloudButton = document.getElementById('cloudBtn');
+    const radarButton = document.getElementById('radarBtn');
+    
+    if (cloudButton && radarButton) {
+        const cloudRect = cloudButton.getBoundingClientRect();
+        radarButton.style.position = 'fixed';
+        radarButton.style.left = cloudRect.left + 'px';
+        radarButton.style.top = (cloudRect.bottom + 5) + 'px';
+        radarButton.style.zIndex = '1001';
+    }
+}
+// Nouvelle fonction pour l'overlay
+function createAndPositionRadarOverlay() {
+    // Trouver les boutons
+    const cloudButton = document.getElementById('cloudBtn');
+    const radarButton = document.getElementById('radarBtn');
+    
+    // Vérifier que les boutons existent
+    if (!cloudButton || !radarButton) return;
+    
+    // Récupérer les dimensions du bouton cloud
+    const cloudRect = cloudButton.getBoundingClientRect();
+    
+    // Créer l'overlay s'il n'existe pas déjà
+    let overlay = document.getElementById('radarBtn-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'radarBtn-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.backgroundColor = 'transparent';
+        overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+        overlay.style.cursor = 'pointer';
+        
+        // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+        overlay.addEventListener('click', () => {
+            radarButton.click();
+        });
+        
+        // Ajouter l'overlay au body
+        document.body.appendChild(overlay);
+    }
+    
+    // Positionner l'overlay
+    overlay.style.top = `${cloudRect.bottom + 5}px`;
+    overlay.style.left = `${cloudRect.left}px`;
+    overlay.style.width = `${radarButton.offsetWidth}px`;
+    overlay.style.height = `${radarButton.offsetHeight}px`;
+}
+
+// Modifier vos écouteurs existants
+document.addEventListener('DOMContentLoaded', () => {
+    positionRadarButton();
+    createAndPositionRadarOverlay();
+});
+
+window.addEventListener('resize', () => {
+    positionRadarButton();
+    createAndPositionRadarOverlay();
+});

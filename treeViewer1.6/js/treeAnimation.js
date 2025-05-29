@@ -1548,7 +1548,7 @@ function speakPersonName(personName) {
 
 //#####################################################
 export async function startAncestorAnimation() {
-
+    // playEndOfAnimationSound();
     
     // Vérifier que visitedNodeIds est bien un Set
     if (!(animationState.visitedAncestorNodeIds instanceof Set)) {

@@ -46,7 +46,7 @@ window.i18n = {
       'resetError': 'Erreur lors de la réinitialisation des paramètres.',
       'SWUpdate': 'Mise à jour du logiciel',
       'parametresDefaut': '🔄 Paramètres par défaut',
-      'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server.',
+      'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server ou tablette Apple.',
    
     },
     'en': {
@@ -336,7 +336,7 @@ function updateMainUITexts() {
   // Liste des clés utilisées dans mainUI.texts
   const mainUIKeys = [
     'zoomIn', 'zoomOut', 'resetZoom', 'toggleSpeech', 'toggleAnimationPause',
-    'openSettingsModal', 'toggleFullScreen', 'processNamesCloudWithDate',
+    'openSettingsModal', 'toggleFullScreen', 'processNamesCloudWithDate', 'radar',
     'rootPersonSearch', 'rootPersonResults', 'updateGenerations', 'treeMode',
     'treeModeAncestors', 'treeModeDescendants', 'treeModeBoth', 'search', 'prenoms'
   ];

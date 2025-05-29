@@ -1,12 +1,15 @@
 
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { state } from './main.js';
+import { state, isIOSDevice } from './main.js';
 import { getCachedResourceUrl } from './photoPlayer.js';
+import { debugLog } from './debugLogUtils.js'
 
 let animationAudio = null;
 let animationAudioPlayer = null;
 let isAudioPlayerVisible = false;
 
+
+let audioUnlocked = false;
 
 
 /**
@@ -541,6 +544,17 @@ function restoreAudioPlayerPosition() {
  */
 export async function playEndOfAnimationSound() {
     try {
+
+
+        if (isIOSDevice() && !audioUnlocked) {
+            console.log("⚠️ Audio pas encore débloqué - le son peut ne pas marcher");
+            debugLog("⚠️ sur IOS, Audio pas encore débloqué - le son peut ne pas marcher");
+        }
+        if (audioUnlocked) {
+            console.log("✅ Audio débloqué - le son peut marcher");
+            debugLog("✅ Audio débloqué - le son peut marcher", "info");            
+        }
+        
         // Créer l'élément audio s'il n'existe pas
         const audio = await createAudioElement();
         
@@ -751,6 +765,82 @@ export async function createAudioPlayerToggleButton() {
     document.body.appendChild(toggleButton);
 }
 
+
+
+
+function unlockAudioOnFirstClick() {
+    if (audioUnlocked) return;
+    
+    console.log("\n\n\n\n\n 🔓 Tentative de déblocage audio...\n\n\n\n\n");
+    
+    const audio = new Audio();
+    audio.volume = 0;
+    
+    // CORRECTION : Ajouter un timeout pour forcer la résolution
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            audio.pause();
+            audioUnlocked = true;
+            console.log("✅ Audio débloqué automatiquement");
+            debugLog("✅ Audio débloqué automatiquement", "info");
+            
+        }).catch((e) => {
+            console.log("❌ Audio toujours bloqué:", e.message);
+            debugLog("❌ Audio toujours bloqué:", "info");
+            // Sur PC, on peut quand même considérer que c'est débloqué
+            audioUnlocked = true;
+        });
+    } else {
+        // Navigateurs plus anciens - considérer comme débloqué
+        console.log("📱 Navigateur ancien - audio considéré comme débloqué");
+        debugLog("📱 Navigateur ancien - audio considéré comme débloqué", "info");
+        audioUnlocked = true;
+    }
+    
+    // AJOUT : Fallback après 100ms au cas où
+    setTimeout(() => {
+        if (!audioUnlocked) {
+            console.log("⏰ Timeout - audio considéré comme débloqué sur PC");
+            debugLog("⏰ Timeout - audio considéré comme débloqué sur PC", "info");
+            audioUnlocked = true;
+        }
+    }, 100);
+}
+
+
+
+
+// Installation GARANTIE des event listeners
+function setupAudioUnlock() {
+    console.log("🔧 Installation des event listeners pour déblocage audio");
+    
+    // Plusieurs événements pour être sûr
+    const events = ['click', 'touchstart', 'keydown', 'mousedown'];
+    
+    events.forEach(eventType => {
+        document.addEventListener(eventType, unlockAudioOnFirstClick, { 
+            once: true,  // Se retire automatiquement après 1 usage
+            passive: true 
+        });
+    });
+    
+    console.log("✅ Event listeners installés");
+}
+
+// Lancer l'installation au bon moment
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupAudioUnlock);
+} else {
+    setupAudioUnlock(); // DOM déjà chargé
+}
+
+
+
+
+
+
 // Fonction pour ajuster la position du bouton lorsque le lecteur est visible
 function updateToggleButtonPosition() {
     const toggleButton = document.getElementById('show-audio-player-btn');
@@ -762,6 +852,10 @@ function updateToggleButtonPosition() {
         toggleButton.style.display = 'block';
     }
 }
+
+
+
+
 
 
 
