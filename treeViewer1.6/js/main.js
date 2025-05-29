@@ -14,8 +14,8 @@ import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
-import { cleanupFanControls } from './treeFanControls.js';
-import { setMaxGenerationsInit } from './treeFanRenderer.js';
+// import { cleanupFanControls } from './treeFanControls.js';
+// import { setMaxGenerationsInit } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -995,7 +995,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // Nettoyer les contrôles existants
-    cleanupFanControls();
+    // cleanupFanControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
@@ -1011,7 +1011,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
             // state.treeModeReal = 'ancestors';
             state.currentTree = buildAncestorTree(person.id);
             state.treeModeReal = mode;
-            setMaxGenerationsInit(state.nombre_generation);
+            // setMaxGenerationsInit(state.nombre_generation);
             // initializeAllFanControls();
         } else {
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
