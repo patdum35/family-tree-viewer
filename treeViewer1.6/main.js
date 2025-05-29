@@ -15,7 +15,7 @@ import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { cleanupFanControls } from './treeFanControls.js';
-import { setMaxGenerationsInit } from './treeFanRenderer.js';
+// import { setMaxGenerationsInit } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -1011,7 +1011,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
             // state.treeModeReal = 'ancestors';
             state.currentTree = buildAncestorTree(person.id);
             state.treeModeReal = mode;
-            setMaxGenerationsInit(state.nombre_generation);
+            // setMaxGenerationsInit(state.nombre_generation);
             // initializeAllFanControls();
         } else {
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
@@ -1288,12 +1288,12 @@ export function isIOSDevice() {
            (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
     state.isIOS = isIOS;
     // state.isIOS = true;
-    debugLog(`isIOS : ${state.isIOS}`, "info")
+    debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info")
     return state.isIOS;
 }
 
 
-function detectDeviceType() {
+export function detectDeviceType() {
   const deviceInfo = {
     isMobile: false,
     hasTouchScreen: false,
@@ -1313,7 +1313,7 @@ function detectDeviceType() {
                               (navigator.msMaxTouchPoints > 0);
   
   state.isMobile = deviceInfo.isMobile;
-  debugLog(`isMobile : ${state.isMobile}`, "info")
+  debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
   state.isIOS = isIOSDevice();
 
   // Détection du type d'entrée principal
