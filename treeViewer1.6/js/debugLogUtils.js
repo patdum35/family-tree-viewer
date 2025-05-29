@@ -702,7 +702,7 @@ export function activateDebugLogs() {
     setupServiceWorkerLogging();
     
     // Afficher des informations de base
-    debugLog("=== INFORMATIONS SYSTÈME V1.7 ===", 'info');
+    debugLog("=== INFORMATIONS SYSTÈME V1.8 ===", 'info');
     debugLog(`User Agent: ${navigator.userAgent}`, 'info');
     debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
     debugLog(`URL: ${window.location.href}`, 'info');
