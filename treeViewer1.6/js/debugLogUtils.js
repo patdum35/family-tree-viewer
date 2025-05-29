@@ -3,7 +3,7 @@
  * Fournit un panneau de débogage entièrement fonctionnel et propre
  */
 
-import { state, isIOSDevice, detectDeviceType} from './main.js';
+import { state } from './main.js';
 
 import { verifyResourceCache } from './resourcePreloader.js';
 
@@ -706,7 +706,7 @@ export function activateDebugLogs() {
     debugLog(`User Agent: ${navigator.userAgent}`, 'info');
     debugLog(`En ligne: ${navigator.onLine ? 'Oui' : 'Non'}`, navigator.onLine ? 'success' : 'warning');
     debugLog(`URL: ${window.location.href}`, 'info');
-    const device = detectDeviceType();
+    // const device = detectDeviceType();
 
 
     
