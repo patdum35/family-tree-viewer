@@ -1169,7 +1169,7 @@ function selectVoice() {
 
         
     // Chercher la première voix contenant 'compact'
-    const compactVoice = frenchVoices.find(voice => voice.name.toLowerCase().includes('compact'));
+    const compactVoice = frenchVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
 
     if (compactVoice) {
         // Si on trouve une voix 'compact', la mettre en première position
@@ -1279,7 +1279,7 @@ function selectVoice() {
 
     if (frenchVoice) {
         console.log("Voix  sélectionnée:", frenchVoice);
-        debugLog(`Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
+        debugLog(`Version 1.6, Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
     }
 
     
@@ -1548,7 +1548,7 @@ function speakPersonName(personName) {
 
 //#####################################################
 export async function startAncestorAnimation() {
-
+    // playEndOfAnimationSound();
     
     // Vérifier que visitedNodeIds est bien un Set
     if (!(animationState.visitedAncestorNodeIds instanceof Set)) {
