@@ -1090,6 +1090,9 @@ function initSpeechSynthesis(voice) {
         initUtterance.onend = () => {
             console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
             speechSynthesisInitialized = true;
+            
+            // Tentative de déblocage audio HTML
+            new Audio().play().catch(() => {});
         };
         initUtterance.onerror = (err) => {
             console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
