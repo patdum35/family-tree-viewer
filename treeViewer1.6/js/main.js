@@ -14,6 +14,7 @@ import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
+import { createAudioElement } from './audioPlayer.js';
 // import { cleanupFanControls } from './treeFanControls.js';
 // import { setMaxGenerationsInit } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
@@ -347,10 +348,31 @@ function initializeGenerationSelect() {
     }
 }
 
+
+export let audio;
+export let audioUnlocked = false;
+
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData() {
+
+    audio = await createAudioElement();
+    audio.preload = 'auto';
+    audio.volume = 1;
+
+    // 💡 Débloque l'audio à ce moment-là pour IOS
+    if (!audioUnlocked) {
+        audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioUnlocked = true;
+            console.log("🔓 Audio débloqué !");
+        }).catch(e => {
+            console.warn("🛑 iOS a bloqué l’audio :", e);
+        });
+    }
+    
 
     state.lastWindowInnerWidth = window.innerWidth;
     state.lastWindowInnerHeight = window.innerHeight;

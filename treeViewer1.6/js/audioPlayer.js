@@ -1,6 +1,6 @@
 
 import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { state, isIOSDevice } from './main.js';
+import { state, isIOSDevice, audio, audioUnlocked } from './main.js';
 import { getCachedResourceUrl } from './photoPlayer.js';
 import { debugLog } from './debugLogUtils.js'
 
@@ -9,7 +9,7 @@ let animationAudioPlayer = null;
 let isAudioPlayerVisible = false;
 
 
-let audioUnlocked = false;
+// let audioUnlocked = false;
 
 
 /**
@@ -546,17 +546,17 @@ export async function playEndOfAnimationSound() {
     try {
 
 
-        if (isIOSDevice() && !audioUnlocked) {
-            console.log("⚠️ Audio pas encore débloqué - le son peut ne pas marcher");
-            debugLog("⚠️ sur IOS, Audio pas encore débloqué - le son peut ne pas marcher");
-        }
-        if (audioUnlocked) {
-            console.log("✅ Audio débloqué - le son peut marcher");
-            debugLog("✅ Audio débloqué - le son peut marcher", "info");            
-        }
+        // if (isIOSDevice() && !audioUnlocked) {
+        //     console.log("⚠️ Audio pas encore débloqué - le son peut ne pas marcher");
+        //     debugLog("⚠️ sur IOS, Audio pas encore débloqué - le son peut ne pas marcher");
+        // }
+        // if (audioUnlocked) {
+        //     console.log("✅ Audio débloqué - le son peut marcher");
+        //     debugLog("✅ Audio débloqué - le son peut marcher", "info");            
+        // }
         
         // Créer l'élément audio s'il n'existe pas
-        const audio = await createAudioElement();
+        // const audio = await createAudioElement();
         
         // Créer et afficher le lecteur
         animationAudioPlayer = createAudioPlayerGUI();
@@ -570,7 +570,19 @@ export async function playEndOfAnimationSound() {
         audio.currentTime = 0;
         
         // Commencer la lecture
-        const playPromise = audio.play();
+        // const playPromise = audio.play();
+
+        let playPromise = undefined;
+
+
+
+        if (audioUnlocked) {
+            audio.currentTime = 0;
+            playPromise = audio.play();
+        }
+
+
+
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 // Lecture démarrée avec succès
@@ -587,7 +599,11 @@ export async function playEndOfAnimationSound() {
                     showPlayerMessage("Cliquez pour lancer la musique");
                 }
             });
+        } else {
+            console.error("❌ L'audio n'a pas été débloqué !");
+            debugLog("❌ L'audio n'a pas été débloqué !", "info");
         }
+
     } catch (error) {
         console.error("❌ Erreur lors de la création/lecture de l'audio:", error);
     }
@@ -768,74 +784,76 @@ export async function createAudioPlayerToggleButton() {
 
 
 
-function unlockAudioOnFirstClick() {
-    if (audioUnlocked) return;
+
+
+// function unlockAudioOnFirstClick() {
+//     if (audioUnlocked) return;
     
-    console.log("\n\n\n\n\n 🔓 Tentative de déblocage audio...\n\n\n\n\n");
+//     console.log("\n\n\n\n\n 🔓 Tentative de déblocage audio...\n\n\n\n\n");
     
-    const audio = new Audio();
-    audio.volume = 0;
+//     const audio = new Audio();
+//     audio.volume = 0;
     
-    // CORRECTION : Ajouter un timeout pour forcer la résolution
-    const playPromise = audio.play();
+//     // CORRECTION : Ajouter un timeout pour forcer la résolution
+//     const playPromise = audio.play();
     
-    if (playPromise !== undefined) {
-        playPromise.then(() => {
-            audio.pause();
-            audioUnlocked = true;
-            console.log("✅ Audio débloqué automatiquement");
-            debugLog("✅ Audio débloqué automatiquement", "info");
+//     if (playPromise !== undefined) {
+//         playPromise.then(() => {
+//             audio.pause();
+//             audioUnlocked = true;
+//             console.log("✅ Audio débloqué automatiquement");
+//             debugLog("✅ Audio débloqué automatiquement", "info");
             
-        }).catch((e) => {
-            console.log("❌ Audio toujours bloqué:", e.message);
-            debugLog("❌ Audio toujours bloqué:", "info");
-            // Sur PC, on peut quand même considérer que c'est débloqué
-            audioUnlocked = true;
-        });
-    } else {
-        // Navigateurs plus anciens - considérer comme débloqué
-        console.log("📱 Navigateur ancien - audio considéré comme débloqué");
-        debugLog("📱 Navigateur ancien - audio considéré comme débloqué", "info");
-        audioUnlocked = true;
-    }
+//         }).catch((e) => {
+//             console.log("❌ Audio toujours bloqué:", e.message);
+//             debugLog("❌ Audio toujours bloqué:", "info");
+//             // Sur PC, on peut quand même considérer que c'est débloqué
+//             audioUnlocked = true;
+//         });
+//     } else {
+//         // Navigateurs plus anciens - considérer comme débloqué
+//         console.log("📱 Navigateur ancien - audio considéré comme débloqué");
+//         debugLog("📱 Navigateur ancien - audio considéré comme débloqué", "info");
+//         audioUnlocked = true;
+//     }
     
-    // AJOUT : Fallback après 100ms au cas où
-    setTimeout(() => {
-        if (!audioUnlocked) {
-            console.log("⏰ Timeout - audio considéré comme débloqué sur PC");
-            debugLog("⏰ Timeout - audio considéré comme débloqué sur PC", "info");
-            audioUnlocked = true;
-        }
-    }, 100);
-}
+//     // AJOUT : Fallback après 100ms au cas où
+//     setTimeout(() => {
+//         if (!audioUnlocked) {
+//             console.log("⏰ Timeout - audio considéré comme débloqué sur PC");
+//             debugLog("⏰ Timeout - audio considéré comme débloqué sur PC", "info");
+//             audioUnlocked = true;
+//         }
+//     }, 100);
+// }
 
 
-
-
-// Installation GARANTIE des event listeners
-function setupAudioUnlock() {
-    console.log("🔧 Installation des event listeners pour déblocage audio");
+/* */ 
+// // Installation GARANTIE des event listeners
+// function setupAudioUnlock() {
+//     console.log("🔧 Installation des event listeners pour déblocage audio");
     
-    // Plusieurs événements pour être sûr
-    const events = ['click', 'touchstart', 'keydown', 'mousedown'];
+//     // Plusieurs événements pour être sûr
+//     const events = ['click', 'touchstart', 'keydown', 'mousedown'];
     
-    events.forEach(eventType => {
-        document.addEventListener(eventType, unlockAudioOnFirstClick, { 
-            once: true,  // Se retire automatiquement après 1 usage
-            passive: true 
-        });
-    });
+//     events.forEach(eventType => {
+//         document.addEventListener(eventType, unlockAudioOnFirstClick, { 
+//             once: true,  // Se retire automatiquement après 1 usage
+//             passive: true 
+//         });
+//     });
     
-    console.log("✅ Event listeners installés");
-}
+//     console.log("✅ Event listeners installés");
+// }
+/* */
 
-// Lancer l'installation au bon moment
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAudioUnlock);
-} else {
-    setupAudioUnlock(); // DOM déjà chargé
-}
-
+// // Lancer l'installation au bon moment
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', setupAudioUnlock);
+// } else {
+//     setupAudioUnlock(); // DOM déjà chargé
+// }
+/* */
 
 
 
