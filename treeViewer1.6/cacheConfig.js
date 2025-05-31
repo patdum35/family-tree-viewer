@@ -1,5 +1,5 @@
  // cacheConfig.js - Seul endroit où le nom du cache est défini
-const CACHE_NAME = 'treeViewer-app-v7';
+const CACHE_NAME = 'treeViewer-app-v8';
 
 // Exporter pour le contexte de Service Worker
 if (typeof self !== 'undefined' && self.constructor && 
