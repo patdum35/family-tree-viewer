@@ -1,0 +1,626 @@
+{
+  "Châteaubriant (Loire-Atlantique, France)": {
+    "lat": 47.7194057,
+    "lon": -1.3757282
+  },
+  "Saint-Grégoire (Ille-et-Vilaine, France)": {
+    "lat": 48.1524129,
+    "lon": -1.685398
+  },
+  "Rennes (Ille-et-Vilaine, France)": {
+    "lat": 48.1113387,
+    "lon": -1.6800198
+  },
+  "Erbray (Loire-Atlantique, France)": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "Orléans (Loiret, France)": {
+    "lat": 47.9027336,
+    "lon": 1.9086066
+  },
+  "Moisdon-la-Rivière (Loire-Atlantique, France)": {
+    "lat": 47.6211147,
+    "lon": -1.3728134
+  },
+  "La Meilleraye-de-Bretagne (Loire-Atlantique, France)": {
+    "lat": 47.5590149,
+    "lon": -1.4021731
+  },
+  "Rougé (Loire-Atlantique, France)": {
+    "lat": 47.7832368,
+    "lon": -1.4487586
+  },
+  "Grand-Auverné (Loire-Atlantique, France)": {
+    "lat": 47.5917553,
+    "lon": -1.3300431
+  },
+  "Petit-Auverné (Loire-Atlantique, France)": {
+    "lat": 47.6097071,
+    "lon": -1.290325
+  },
+  "Saint-Julien-de-Vouvantes (Loire-Atlantique, France)": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
+  },
+  "Abbaretz (Loire-Atlantique, France)": {
+    "lat": 47.5525545,
+    "lon": -1.5322775
+  },
+  "Saffré (Loire-Atlantique, France)": {
+    "lat": 47.5015277,
+    "lon": -1.5786047
+  },
+  "Saint-Aubin-des-Châteaux (Loire-Atlantique, France)": {
+    "lat": 47.7195535,
+    "lon": -1.4849877
+  },
+  "Riaillé (Loire-Atlantique, France)": {
+    "lat": 47.5171973,
+    "lon": -1.295781
+  },
+  "Joué-sur-Erdre (Loire-Atlantique, France)": {
+    "lat": 47.4959351,
+    "lon": -1.421142
+  },
+  "Menestreau-en-Villette (Loiret, France)": {
+    "lat": 47.7008085,
+    "lon": 2.0232754
+  },
+  "Segré (Maine-et-Loire, France)": {
+    "lat": 47.6846685,
+    "lon": -0.8706239
+  },
+  "Boistrudan (Ille-et-Vilaine, France)": {
+    "lat": 47.9697818,
+    "lon": -1.4013536
+  },
+  "Sainte-Gemmes-d'Andigné (Maine-et-Loire, France)": {
+    "lat": 47.667083149999996,
+    "lon": -0.8948533686722202
+  },
+  "Landisacq (Orne, France)": {
+    "lat": 48.7564772,
+    "lon": -0.6498442
+  },
+  "Soudan (Loire-Atlantique, France)": {
+    "lat": 47.7376378,
+    "lon": -1.3069406
+  },
+  "Saint-Aubin-des-Châteaux (Loire-Atlantique, France": {
+    "lat": 47.7195535,
+    "lon": -1.4849877
+  },
+  "Saint-Vincent-des-Landes (Loire-Atlantique, France)": {
+    "lat": 47.6558361,
+    "lon": -1.4973775
+  },
+  "Saint-Sulpice-des-Landes (Loire-Atlantique, France)": {
+    "lat": 47.5744654,
+    "lon": -1.2061371
+  },
+  "Issé": {
+    "lat": 47.6240382,
+    "lon": -1.4527406
+  },
+  "Issé (Loire-Atlantique, France)": {
+    "lat": 47.6240382,
+    "lon": -1.4527406
+  },
+  "La Chapelle-Glain (Loire-Atlantique, France)": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "Vritz (Maine-et-Loire, France)": {
+    "lat": 47.564425299999996,
+    "lon": -1.0434418383066983
+  },
+  "Angrie (Maine-et-Loire, France)": {
+    "lat": 47.5706486,
+    "lon": -0.974366
+  },
+  "Saint-Mars-la-Jaille (Loire-Atlantique, France)": {
+    "lat": 47.5234988,
+    "lon": -1.1853553
+  },
+  "Freigné (Maine-et-Loire, France)": {
+    "lat": 47.5545462516719,
+    "lon": -1.0542755540715072
+  },
+  "Candé (Maine-et-Loire, France)": {
+    "lat": 47.560347,
+    "lon": -1.0414584
+  },
+  "Freigné (Maine-et-Loire, France) ?": {
+    "lat": 47.5545462516719,
+    "lon": -1.0542755540715072
+  },
+  "Le Louroux-Béconnais (Maine-et-Loire, France)": {
+    "lat": 47.5215888,
+    "lon": -0.8855198
+  },
+  "Liré (Maine-et-Loire, France)": {
+    "lat": 47.31968245,
+    "lon": -1.152324643552158
+  },
+  "Chazé-sur-Argos (Maine-et-Loire, France)": {
+    "lat": 47.6172265,
+    "lon": -0.8926005
+  },
+  "Vitré (Ille-et-Vilaine, France)": {
+    "lat": 48.1244503,
+    "lon": -1.214331
+  },
+  "Louisfert (Loire-Atlantique, France)": {
+    "lat": 47.6749877,
+    "lon": -1.432721
+  },
+  "Juigné-des-Moutiers (Loire-Atlantique, France)": {
+    "lat": 47.6793501,
+    "lon": -1.1855201
+  },
+  "Saint-Michel-et-Chanveaux (Maine-et-Loire, France)": {
+    "lat": 47.6685827,
+    "lon": -1.1418115394028239
+  },
+  "Noyal-sur-Brutz (Loire-Atlantique, France)": {
+    "lat": 47.7762491,
+    "lon": -1.3463595
+  },
+  "Soudan (Loire-Atlantique, France) ?": {
+    "lat": 47.7376378,
+    "lon": -1.3069406
+  },
+  "Soulvache?": {
+    "lat": 47.8287925,
+    "lon": -1.4730561
+  },
+  "Ossé (Ille-et-Vilaine, France)": {
+    "lat": 48.06002505,
+    "lon": -1.4592818143272492
+  },
+  "Moulins (Ille-et-Vilaine, France)": {
+    "lat": 48.0030682,
+    "lon": -1.3729482
+  },
+  "Essé (Ille-et-Vilaine, France)": {
+    "lat": 47.9574503,
+    "lon": -1.4242263
+  },
+  "Lunery (Cher, France)": {
+    "lat": 46.9358111,
+    "lon": 2.2695408
+  },
+  "Lamotte-Beuvron (Loir-et-Cher, France)": {
+    "lat": 47.6052963,
+    "lon": 2.0267353
+  },
+  "Ercé-en-Lamée (Ille-et-Vilaine, France)": {
+    "lat": 47.830364,
+    "lon": -1.5611201
+  },
+  "Paris (France)": {
+    "lat": 48.8588897,
+    "lon": 2.3200410217200766
+  },
+  "Pouancé (Maine-et-Loire, France)": {
+    "lat": 47.7403392,
+    "lon": -1.1729927
+  },
+  "Treffieux (Loire-Atlantique, France)": {
+    "lat": 47.6194957,
+    "lon": -1.5365843
+  },
+  "Martigné-Ferchaud (Ille-et-Vilaine, France)": {
+    "lat": 47.8313035,
+    "lon": -1.317543
+  },
+  "Bonnoeuvre (Loire-Atlantique, France)": {
+    "lat": 47.523818750000004,
+    "lon": -1.2471241765945809
+  },
+  "Boulogne-sur-Seine (Hauts-de-Seine, France)": {
+    "lat": 48.86409285,
+    "lon": 2.248257867854371
+  },
+  "Bourg-l'Evêque (Maine-et-Loire, France)": {
+    "lat": 47.7360504,
+    "lon": -1.0114057
+  },
+  "Bourg-L'Evêque (Maine-et-Loire, France)": {
+    "lat": 47.7360504,
+    "lon": -1.0114057
+  },
+  "Sion-les-Mines (Loire-Atlantique, France)": {
+    "lat": 47.7350228,
+    "lon": -1.5919675
+  },
+  "Plémet (Côtes-d'Armor, France)": {
+    "lat": 48.177313,
+    "lon": -2.5940447
+  },
+  "La Prévière (Maine-et-Loire, France)": {
+    "lat": 47.7156289,
+    "lon": -1.1793097203668186
+  },
+  "Bouillé-Ménard (Maine-et-Loire, France)": {
+    "lat": 47.7417704,
+    "lon": -0.9676743
+  },
+  "Chazé-Henry (Maine-et-Loire, France)": {
+    "lat": 47.758403099999995,
+    "lon": -1.1082521834260355
+  },
+  "Combrée (Maine-et-Loire, France)": {
+    "lat": 47.707434500000005,
+    "lon": -1.0229813000561654
+  },
+  "Bourg-L'Evêque (Maine-et-Loire, France) ?": {
+    "lat": 47.7360504,
+    "lon": -1.0114057
+  },
+  "La Chapelle-Hullin (Maine-et-Loire, France)": {
+    "lat": 47.755676199999996,
+    "lon": -1.0695416475103299
+  },
+  "Congrier (Mayenne, France)": {
+    "lat": 47.8094454,
+    "lon": -1.1174983
+  },
+  "Vergonnes (Maine-et-Loire, France)": {
+    "lat": 47.7239431,
+    "lon": -1.080128123436426
+  },
+  "Armaillé (Maine-et-Loire, France)": {
+    "lat": 47.7144519,
+    "lon": -1.1283295
+  },
+  "Juigné-Béné (Maine-et-Loire, France)": {
+    "lat": 47.5398968,
+    "lon": -0.6153318
+  },
+  "Le Bourg-d'Iré (Maine-et-Loire, France)": {
+    "lat": 47.67319715,
+    "lon": -0.9689879732893164
+  },
+  "Vern-d'Anjou (Maine-et-Loire, France)": {
+    "lat": 47.6004506,
+    "lon": -0.8344549
+  },
+  "Avrillé (Maine-et-Loire, France)": {
+    "lat": 47.5045657,
+    "lon": -0.5956539
+  },
+  "Vouzon (Loir-et-Cher, France)": {
+    "lat": 47.6442067,
+    "lon": 2.0579359
+  },
+  "La Ferté-Saint-Aubin (Loiret, France)": {
+    "lat": 47.7169399,
+    "lon": 1.9442053
+  },
+  "Menestreau-en-Villette (Loiret, France) ?": {
+    "lat": 47.7008085,
+    "lon": 2.0232754
+  },
+  "Vern-d'Anjou (Maine-et-Loire, France) ?": {
+    "lat": 47.6004506,
+    "lon": -0.8344549
+  },
+  "La Chapelle-sur-Oudon (Maine-et-Loire, France)": {
+    "lat": 47.66338615,
+    "lon": -0.8304611876576291
+  },
+  "La Pouèze (Maine-et-Loire, France)": {
+    "lat": 47.5520069,
+    "lon": -0.8083652877704737
+  },
+  "Petit-Auverné (Loire-Atlantique, France) ?": {
+    "lat": 47.6097071,
+    "lon": -1.290325
+  },
+  "Erbray (Loire-Atlantique, France) ?": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "Moisdon-la-Rivière (Loire-Atlantique, France) ?": {
+    "lat": 47.6211147,
+    "lon": -1.3728134
+  },
+  "Bain-de-Bretagne (Ille-et-Vilaine, France)": {
+    "lat": 47.8414377,
+    "lon": -1.6852229
+  },
+  "Le Pin (Loire-Atlantique, France)": {
+    "lat": 47.5897141,
+    "lon": -1.154128
+  },
+  "La Meilleraye-de-Bretagne (Loire-Atlantique, France) ?": {
+    "lat": 47.5590149,
+    "lon": -1.4021731
+  },
+  "Les Touches (Loire-Atlantique, France)": {
+    "lat": 47.4423506,
+    "lon": -1.4313813
+  },
+  "Saint-Julien-de-Vouvantes (Loire-Atlantique, France) ?": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
+  },
+  "Vay (Loire-Atlantique, France)": {
+    "lat": 47.5544344,
+    "lon": -1.7014636
+  },
+  "Lusanger (Loire-Atlantique, France)": {
+    "lat": 47.6821189,
+    "lon": -1.5883995
+  },
+  "Ruffigné (Loire-Atlantique, France)": {
+    "lat": 47.7564546,
+    "lon": -1.4929688
+  },
+  "Vouzon (Loir-et-Cher, France) ?": {
+    "lat": 47.6442067,
+    "lon": 2.0579359
+  },
+  "Vienne-en-Val (Loiret, France)": {
+    "lat": 47.8023787,
+    "lon": 2.138648
+  },
+  "Châteaubourg (Ille-et-Vilaine, France)": {
+    "lat": 48.1108554,
+    "lon": -1.3982411
+  },
+  "Servon-sur-Vilaine (Ille-et-Vilaine, France)": {
+    "lat": 48.121469,
+    "lon": -1.4603703
+  },
+  "Saint-Herblon (Loire-Atlantique, France)": {
+    "lat": 47.4080247,
+    "lon": -1.0962598
+  },
+  "La Queuvre (Loiret, France)": {
+    "lat": 47.8282727,
+    "lon": 2.1516368
+  },
+  "Saint-Benoit-sur-Loire (Loiret, France)": {
+    "lat": 47.8101798,
+    "lon": 2.3069095
+  },
+  "Trans-sur-Erdre (Loire-Atlantique, France)": {
+    "lat": 47.4770135,
+    "lon": -1.3725911
+  },
+  "Nort-sur-Erdre (Loire-Atlantique, France)": {
+    "lat": 47.4398626,
+    "lon": -1.499037
+  },
+  "Casson (Loire-Atlantique, France)": {
+    "lat": 47.3861828,
+    "lon": -1.5596079
+  },
+  "Marcilly-en-Val (Loiret, France)": {
+    "lat": 47.79463848454526,
+    "lon": 1.9950631977892936
+  },
+  "Brinon-sur-Sauldre (Cher, France)": {
+    "lat": 47.5662883,
+    "lon": 2.2550834
+  },
+  "Saint-Cyr-en-Val (Loiret, France)": {
+    "lat": 47.8320651,
+    "lon": 1.9684671
+  },
+  "Vouzon (Loir-et-Cher)": {
+    "lat": 47.6442067,
+    "lon": 2.0579359
+  },
+  "Chemiré-en-Charnie (Sarthe, France)": {
+    "lat": 48.0551157,
+    "lon": -0.2034033
+  },
+  "La Brûlatte (Mayenne, France)": {
+    "lat": 48.0856313,
+    "lon": -0.9529095
+  },
+  "Paimpont (Ille-et-Vilaine, France)": {
+    "lat": 48.0193594,
+    "lon": -2.1735324
+  },
+  "Pouancé (Maine-et-Loire, France) ?": {
+    "lat": 47.7403392,
+    "lon": -1.1729927
+  },
+  "Chemiré en Charnie (Sarthe, France)": {
+    "lat": 48.0551157,
+    "lon": -0.2034033
+  },
+  "Carquefou (Loire-Atlantique, France)": {
+    "lat": 47.2971979,
+    "lon": -1.4921233
+  },
+  "Jans (Loire-Atlantique, France)": {
+    "lat": 47.6205039,
+    "lon": -1.6136958
+  },
+  "Saint-Vincent-des-Landes (Loire-Atlantique, France": {
+    "lat": 47.6558361,
+    "lon": -1.4973775
+  },
+  "Saint-Sébastien-sur-Loire (Loire-Atlantique, France)": {
+    "lat": 47.2035029,
+    "lon": -1.4992075
+  },
+  "Nantes (Loire-Atlantique, France)": {
+    "lat": 47.2186371,
+    "lon": -1.5541362
+  },
+  "Saint-Julien-de-Vouvantes (Loire-Atlantique, Franc": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
+  },
+  "Noëllet (Maine-et-Loire, France)": {
+    "lat": 47.6974618,
+    "lon": -1.0848943413450118
+  },
+  "Saint-Sulpice-des-Landes (Loire-Atlantique, France": {
+    "lat": 47.5744654,
+    "lon": -1.2061371
+  },
+  "Athée (Mayenne, France)": {
+    "lat": 47.8869811,
+    "lon": -0.9516449
+  },
+  "Burgos (Espagne)": {
+    "lat": 42.343926,
+    "lon": -3.696977
+  },
+  "Burgos (Castille et Leon, Espagne)": {
+    "lat": 42.343926,
+    "lon": -3.696977
+  },
+  "(Castille, Espagne)": {
+    "lat": 41.55005,
+    "lon": -5.1387401
+  },
+  "Azincourt (Nord-Pas-de-Calais, France)": {
+    "lat": 50.4632937,
+    "lon": 2.1284519
+  },
+  "Canicosa de la Sierra (Castille et Leon, Espagne)": {
+    "lat": 41.9370583,
+    "lon": -3.0413238
+  },
+  "Canicosa de la Sierra (Castille-et-Leon, Espagne)": {
+    "lat": 41.9370583,
+    "lon": -3.0413238
+  },
+  "Varades (Loire-Atlantique, France)": {
+    "lat": 47.407783949999995,
+    "lon": -1.0270194380626334
+  },
+  "Ligné (Loire-Atlantique, France)": {
+    "lat": 47.4123249,
+    "lon": -1.3768667
+  },
+  "Villepot (Loire-Atlantique, France)": {
+    "lat": 47.7756596,
+    "lon": -1.2778074
+  },
+  "Treillières (Loire-Atlantique, France)": {
+    "lat": 47.3309103,
+    "lon": -1.6240815
+  },
+  "Ancenis (Loire-Atlantique, France)": {
+    "lat": 47.3648141,
+    "lon": -1.1816088
+  },
+  "Bierné (Mayenne, France)": {
+    "lat": 47.8080342,
+    "lon": -0.5335984871956923
+  },
+  "Saint-Saint-Julien-de-Vouvantes (Loire-Atlantique, France)": {
+    "lat": 47.64189025,
+    "lon": -1.2376332255681817
+  },
+  "Ombrée d'Anjou (Maine-et-Loire, France)": {
+    "lat": 47.722915900000004,
+    "lon": -1.0629503396734648
+  },
+  "Loiré (Maine-et-Loire, France)": {
+    "lat": 47.6150731,
+    "lon": -0.9784391
+  },
+  "Guémené-Penfao (Loire-Atlantique, France)": {
+    "lat": 47.6294113,
+    "lon": -1.8328831
+  },
+  "Beslé (Loire-Atlantique, France)": {
+    "lat": 47.6993384,
+    "lon": -1.8673352
+  },
+  "Saint-Aubin-du-Pavail (Ille-et-Vilaine, France) ?": {
+    "lat": 48.0411116,
+    "lon": -1.4625147797875016
+  },
+  "Noyal-sur-Vilaine (Ille-et-Vilaine, France)": {
+    "lat": 48.1140789,
+    "lon": -1.5234735
+  },
+  "Domagné (Ille-et-Vilaine, France)": {
+    "lat": 48.0706593,
+    "lon": -1.3918429
+  },
+  "Marans (Maine-et-Loire, France)": {
+    "lat": 47.642754499999995,
+    "lon": -0.8493011704644287
+  },
+  "Argenton-Notre-Dame (Mayenne, France)": {
+    "lat": 47.783663250000004,
+    "lon": -0.6044194545716848
+  },
+  "Challain-la-Potherie (Maine-et-Loire, France)": {
+    "lat": 47.6357208,
+    "lon": -1.04542
+  },
+  "Chancé (Ille-et-Vilaine, France)": {
+    "lat": 48.03426305,
+    "lon": -1.368443528487469
+  },
+  "Aviré (Maine-et-Loire, France)": {
+    "lat": 47.711612900000006,
+    "lon": -0.7955791307326829
+  },
+  "Saint-Aubin-de-Luigné (Maine-et-Loire, France)": {
+    "lat": 47.3210699,
+    "lon": -0.670830321657284
+  },
+  "Le Lion-d'Angers (Maine-et-Loire)": {
+    "lat": 47.628958850000004,
+    "lon": -0.7370899308201252
+  },
+  "Saint-Aubin-du-Pavoil (Maine-et-Loire, France)": {
+    "lat": 47.7040119,
+    "lon": -0.8766792
+  },
+  "Noyant (Maine-et-Loire, France)": {
+    "lat": 47.497443000000004,
+    "lon": 0.09233506732801888
+  },
+  "Chatelais (Maine-et-Loire, France)": {
+    "lat": 47.7578405,
+    "lon": -0.94583303783737
+  },
+  "Chemazé (Mayenne, France)": {
+    "lat": 47.7853491,
+    "lon": -0.7756615
+  },
+  "La Jaille-Yvon (Maine-et-Loire, France)": {
+    "lat": 47.7224055,
+    "lon": -0.670927
+  },
+  "Nyoiseau (Maine-et-Loire, France)": {
+    "lat": 47.712071249999994,
+    "lon": -0.9022961880836337
+  },
+  "Chérancé (Mayenne, France)": {
+    "lat": 47.7954316,
+    "lon": -0.9366961
+  },
+  "Mée (Mayenne, France)": {
+    "lat": 47.7978449,
+    "lon": -0.8627255
+  },
+  "Angers (Maine-et-Loire, France)": {
+    "lat": 47.4739884,
+    "lon": -0.5515588
+  },
+  "Grugé-L'Hôpital (Maine-et-Loire, France)": {
+    "lat": 47.755109,
+    "lon": -1.0236595
+  },
+  "Montreuil-sur-Maine (Maine-et-Loire, France)": {
+    "lat": 47.65,
+    "lon": -0.7
+  }
+}
