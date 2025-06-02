@@ -17,7 +17,7 @@ import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloa
 import { createAudioElement } from './audioPlayer.js';
 
 import { cleanupFanControls } from './treeFanControls.js';
-import { setMaxGenerationsInit } from './treeFanRenderer.js';
+import { setMaxGenerationsInit, enableFortuneMode, disableFortuneMode } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -162,8 +162,11 @@ export function toggleTreeRadar() {
 
     if (state.isRadarEnabled) {
         displayGenealogicTree(null, false, false,  false, 'fanAncestors');
+        enableFortuneMode();
+
     } else {
         displayGenealogicTree(null, true, false);
+        disableFortuneMode();
     }
 
 }

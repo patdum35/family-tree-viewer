@@ -7,7 +7,7 @@
 import { debugLog } from './debugLogUtils.js';
 
 // Nom du cache pour les ressources importantes
-const APP_CACHE_NAME = 'app-resources-cache-v2';
+const APP_CACHE_NAME = 'app-resources-cache-v1';
 
 // Liste des ressources importantes à précharger
 const RESOURCES_TO_CACHE = [
@@ -54,19 +54,79 @@ function log(message, type = 'info') {
   }
 }
 
-/**
- * Initialise le préchargement des ressources
- * À appeler au chargement de la page
- */
-export function initResourcePreloading() {
+
+
+// Ajouter cette fonction de debug
+async function debugCacheContent() {
+    try {
+        const cacheNames = await caches.keys();
+        console.log("🔍 Caches disponibles:", cacheNames);
+        
+        if (cacheNames.includes(APP_CACHE_NAME)) {
+            const cache = await caches.open(APP_CACHE_NAME);
+            const requests = await cache.keys();
+            // console.log(`🔍 Contenu du cache ${APP_CACHE_NAME}:`, requests.length, "entrées");
+            requests.forEach(req => console.log("  -", req.url));
+        } else {
+            console.log("❌ Cache APP_CACHE_NAME introuvable");
+        }
+    } catch (error) {
+        console.error("❌ Erreur debug cache:", error);
+    }
+}
+
+
+// Ajouter cette fonction avant initResourcePreloading()
+async function checkResourceCacheStatus() {
+    try {
+        const cacheNames = await caches.keys();
+        console.log("🔍 TOUS les caches:", cacheNames); // AJOUTER CETTE LIGNE
+        
+        const hasCache = cacheNames.includes(APP_CACHE_NAME);
+        
+        if (!hasCache) {
+            console.log(`❌ Cache ${APP_CACHE_NAME} introuvable dans:`, cacheNames); // AJOUTER
+            return { hasCache: false, hasContent: false };
+        }
+        
+        const cache = await caches.open(APP_CACHE_NAME);
+        const cachedRequests = await cache.keys();
+        const hasContent = cachedRequests.length > 0;
+        
+        console.log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`);
+        log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`, 'info');
+        
+        return { hasCache: true, hasContent };
+    } catch (error) {
+        console.error("❌ Erreur lors de la vérification du cache ressources:", error);
+        log(`❌ Erreur lors de la vérification du cache ressources: ${error.message}`, 'error');
+        return { hasCache: false, hasContent: false };
+    }
+}
+
+// Modifier initResourcePreloading() pour devenir async et ajouter la vérification :
+export async function initResourcePreloading() {
     console.log("🚀 Initialisation du préchargement des ressources...");
     log("🚀 Initialisation du préchargement des ressources...", 'info');
     
-    // Vérifier si le navigateur supporte le Cache API
+
+// DEBUG: Afficher le contenu actuel du cache
+    await debugCacheContent();
+
+
     if (!('caches' in window)) {
         console.warn("⚠️ Cache API non supportée par ce navigateur");
         log("⚠️ Cache API non supportée par ce navigateur", 'warning');
         return false;
+    }
+    
+    // NOUVEAU : Vérifier si le cache existe déjà et n'est pas vide
+    const cacheExists = await checkResourceCacheStatus();
+    
+    if (cacheExists.hasCache && cacheExists.hasContent) {
+        console.log("✅ Cache des ressources déjà présent, préchargement ignoré");
+        log("✅ Cache des ressources déjà présent, préchargement ignoré", 'info');
+        return true;
     }
     
     // Précharger les ressources importantes
@@ -74,6 +134,33 @@ export function initResourcePreloading() {
     
     return true;
 }
+
+
+
+
+
+
+
+// /**
+//  * Initialise le préchargement des ressources
+//  * À appeler au chargement de la page
+//  */
+// export function initResourcePreloading() {
+//     console.log("🚀 Initialisation du préchargement des ressources...");
+//     log("🚀 Initialisation du préchargement des ressources...", 'info');
+    
+//     // Vérifier si le navigateur supporte le Cache API
+//     if (!('caches' in window)) {
+//         console.warn("⚠️ Cache API non supportée par ce navigateur");
+//         log("⚠️ Cache API non supportée par ce navigateur", 'warning');
+//         return false;
+//     }
+    
+//     // Précharger les ressources importantes
+//     preloadAppResources();
+    
+//     return true;
+// }
 
 /**
  * Précharge les ressources importantes de l'application

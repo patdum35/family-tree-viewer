@@ -858,7 +858,7 @@ let originalZoom = null;
 //     console.log("✅ Mode Fortune activé !");
 // }
 
-function enableFortuneMode() {
+export function enableFortuneMode() {
     if (fortuneModeActive) return;
     
     console.log("🎰 Activation du mode Roue de la Fortune...");
@@ -889,7 +889,7 @@ function enableFortuneMode() {
 }
 
 // Désactiver le mode Fortune
-function disableFortuneMode() {
+export function disableFortuneMode() {
     if (!fortuneModeActive) return;
     
     console.log("🔄 Désactivation du mode Fortune...");

@@ -161,7 +161,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && !cacheName.includes('map-tiles')) {
+          if (cacheName !== CACHE_NAME && !cacheName.includes('map-tiles') && !cacheName.includes('app-resources-cache')) {
             swConsole.log(`🗑️ Suppression de l'ancien cache ${cacheName}`);
             return caches.delete(cacheName);
           }

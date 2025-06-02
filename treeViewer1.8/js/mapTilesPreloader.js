@@ -5,6 +5,30 @@
 // Nom du cache pour les tuiles
 const TILE_CACHE_NAME = 'map-tiles-cache-v1';
 
+
+
+// Verifier le status du cache storage avant de lancer initTilePreloading
+async function checkCacheStatus() {
+    try {
+        const cacheNames = await caches.keys();
+        const hasCache = cacheNames.includes(TILE_CACHE_NAME);
+        
+        if (!hasCache) {
+            return { hasCache: false, hasContent: false };
+        }
+        
+        const cache = await caches.open(TILE_CACHE_NAME);
+        const cachedRequests = await cache.keys();
+        const hasContent = cachedRequests.length > 0;
+        
+        console.log(`📊 Statut du cache: ${cachedRequests.length} tuiles en cache`);
+        return { hasCache: true, hasContent };
+    } catch (error) {
+        console.error("❌ Erreur lors de la vérification du cache:", error);
+        return { hasCache: false, hasContent: false };
+    }
+}
+
 /**
  * Initialise le préchargement des tuiles
  * À appeler au chargement de la page
@@ -21,6 +45,15 @@ export async function initTilePreloading() {
     }
     
     try {
+
+        // Vérifier si le cache existe déjà et n'est pas vide
+        const cacheExists = await checkCacheStatus();
+        
+        if (cacheExists.hasCache && cacheExists.hasContent) {
+            console.log("✅ Cache des tuiles déjà présent, préchargement ignoré");
+            return true;
+        }
+
         // Vérifier si le manifeste de tuiles existe
         const manifestResponse = await fetch('./maps/manifest.json');
         
@@ -117,10 +150,6 @@ async function preloadTilesInBackground(tileUrls) {
     }
 }
 
-
-
-
-
 /**
  * Traite des éléments par lot pour éviter de bloquer l'interface
  * @param {Array} items - Éléments à traiter
@@ -160,7 +189,15 @@ function createPreloadNotification() {
     notification.style.zIndex = '9999';
     notification.style.transition = 'opacity 0.5s';
     notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
-    notification.innerHTML = '<div>Préchargement des tuiles de carte...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
+    if (window.CURRENT_LANGUAGE == "fr") {
+        notification.innerHTML = '<div>Préchargement des tuiles de carte...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
+    } else if (window.CURRENT_LANGUAGE == "en") {
+        notification.innerHTML = '<div>Preloading map tiles...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
+    } else if (window.CURRENT_LANGUAGE == "es") {
+        notification.innerHTML = '<div>Precargando mosaicos del mapa...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
+    } else if (window.CURRENT_LANGUAGE == "hu") {
+        notification.innerHTML = '<div>Térkép csempe előtöltése...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
+    }
     
     return notification;
 }
@@ -176,7 +213,15 @@ function updatePreloadNotification(notification, current, total) {
     const percentage = Math.round((current / total) * 100);
     
     progress.value = percentage;
-    notification.firstChild.textContent = `Préchargement des tuiles: ${current}/${total} (${percentage}%)`;
+    if (window.CURRENT_LANGUAGE == "fr") {
+        notification.firstChild.textContent = `Préchargement des tuiles: ${current}/${total} (${percentage}%)`;
+    } else if (window.CURRENT_LANGUAGE == "en") {
+        notification.firstChild.textContent = `Preloading tiles: ${current}/${total} (${percentage}%)`;
+    } else if (window.CURRENT_LANGUAGE == "es") {
+        notification.firstChild.textContent = `Precargando mosaicos: ${current}/${total} (${percentage}%)`;
+    } else if (window.CURRENT_LANGUAGE == "hu") {
+        notification.firstChild.textContent = `Térkép csempe előtöltése: ${current}/${total} (${percentage}%)`;
+    }
 }
 
 /**
