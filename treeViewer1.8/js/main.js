@@ -17,7 +17,7 @@ import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloa
 import { createAudioElement } from './audioPlayer.js';
 
 import { cleanupFanControls } from './treeFanControls.js';
-import { setMaxGenerationsInit, enableFortuneMode, disableFortuneMode } from './treeFanRenderer.js';
+import { setMaxGenerationsInit, enableFortuneModeML, disableFortuneModeWithLever } from './treeFanRenderer.js';
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -162,11 +162,15 @@ export function toggleTreeRadar() {
 
     if (state.isRadarEnabled) {
         displayGenealogicTree(null, false, false,  false, 'fanAncestors');
-        enableFortuneMode();
+        // enableFortuneMode();
+        // enableFortuneModeRealistic();
+        enableFortuneModeML();
+
 
     } else {
         displayGenealogicTree(null, true, false);
-        disableFortuneMode();
+        // disableFortuneMode();
+        disableFortuneModeWithLever();
     }
 
 }
@@ -371,7 +375,11 @@ export async function loadData() {
     audio.volume = 1;
 
     // 💡 Débloque l'audio à ce moment-là pour IOS
-    if (!audioUnlocked) {
+    // Pour le cas IOS qui bloque la musique si la musique n'est pas déclenchée par un clic
+    // or en mode démo la musique est lancée à la fin de l'animation , loin après le clic
+    // dans ce cas il faut faire un pré-init de la musique. L eproblème c'est qu'il faut déjà connaitre quel mp3 il faut jouer. 
+    // Il faudra sans doute déplacer cet init juste après le clic du mode démo qui définit quelle musique doit être jouée
+    if (isIOSDevice() && !audioUnlocked) {
         audio.play().then(() => {
             audio.pause();
             audio.currentTime = 0;
@@ -380,6 +388,8 @@ export async function loadData() {
         }).catch(e => {
             console.warn("🛑 iOS a bloqué l’audio :", e);
         });
+    } else {
+        audioUnlocked = true;
     }
     
 

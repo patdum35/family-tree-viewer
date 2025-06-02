@@ -16,6 +16,7 @@ let fanConfig = {
     maxGenerations: 4,
     limitMaxGenerations: 26 
 };
+let lastWinner = null;
 
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
@@ -281,14 +282,6 @@ function organizeByGenerations(rootTree) {
             position: position
         });
         
-        // Debug détaillé des relations
-        // if (generation === 0) {
-        //     console.log(`➤ ${person.name} -> Gen:${generation}, Pos:${position} (RACINE)`);
-        //     console.log(`   Père de ${person.name}: ${person.genealogicalFatherId}`);
-        //     console.log(`   Mère de ${person.name}: ${person.genealogicalMotherId}`);
-        // } else {
-        //     console.log(`➤ ${person.name} -> Gen:${generation}, Pos:${position}`);
-        // }
         
         // Continuer avec les enfants (qui sont en fait les parents dans l'arbre ascendant)
         if (person.children && generation < fanConfig.maxGenerations) {
@@ -323,19 +316,7 @@ function organizeByGenerations(rootTree) {
     }
     
     traverse(rootTree, 0, 0);
-    
-    // Debug des résultats avec relations claires
-    // generations.forEach((people, gen) => {
-    //     console.log(`Gen ${gen}:`);
-    //     people.forEach(p => {
-    //         if (gen === 0) {
-    //             console.log(`  ${p.person.name} (RACINE, pos:${p.position})`);
-    //         } else {
-    //             console.log(`  ${p.person.name} (pos:${p.position})`);
-    //         }
-    //     });
-    // });
-    
+        
     return generations;
 }
 
@@ -361,28 +342,10 @@ function drawGeneration(mainGroup, people, generation) {
         }
     });
     
-    // Position 0 en bas (-90°), puis sens horaire
-    // for (let i = 0; i < maxSegments; i++) {
-
-    //     const startAngle = -Math.PI + (i * anglePerSegment);
-
-    //     const endAngle = startAngle + anglePerSegment;
-        
-    //     const person = positionArray[i];
-        
-    //     if (person) {
-    //         console.log(`🎯 ${person.name} pos:${i} -> ${(startAngle*180/Math.PI).toFixed(0)}° à ${(endAngle*180/Math.PI).toFixed(0)}°`);
-    //         drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation);
-    //     } else {
-    //         console.log(`⚪ Vide pos:${i} -> ${(startAngle*180/Math.PI).toFixed(0)}° à ${(endAngle*180/Math.PI).toFixed(0)}°`);
-    //         drawEmptySegment(mainGroup, innerRadius, outerRadius, startAngle, endAngle, generation);
-    //     }
-    // }
-
     people.forEach(personData => {
         const startAngle = -Math.PI + (personData.position * anglePerSegment);
         const endAngle = startAngle + anglePerSegment;
-        drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, startAngle, endAngle, generation);
+        drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, startAngle, endAngle, generation, personData.position);
     });
 }
 
@@ -475,14 +438,6 @@ function formatFanDates(person) {
  */
 const FAN_TEXT_CONFIG = {
     // Espacement entre les lignes par génération
-    // lineSpacing: {
-    //     0: 18,  // Centre - espacement très large
-    //     1: 14,  // Gen 1 - espacement large
-    //     2: 12,  // Gen 2 - espacement réduit
-    //     3: 10,  // Gen 3 - espacement encore réduit
-    //     4: 8,   // Gen 4+ - espacement minimal
-    //     default: 8
-    // },
     lineSpacingFactor: 1.2,
     
     // Taille de police de base par génération
@@ -511,7 +466,6 @@ const FAN_TEXT_CONFIG = {
         default: 1
     }
 };
-
 
 /**
  * Calcule la taille de police adaptée selon la longueur du texte
@@ -737,7 +691,7 @@ function drawAllGenerations(mainGroup, generationsData) {
 
 }
 
-function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation) {
+function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation, position) {
     if (!person || !person.name) {
         console.warn('⚠️ Personne invalide pour segment:', person);
         return;
@@ -751,6 +705,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
     
     const segmentGroup = mainGroup.append("g")
         .attr("class", `person-segment-group gen-${generation}`)
+        .attr("data-segment-position", position)
         .datum(person); 
     
     // Couleur selon la génération
@@ -821,236 +776,341 @@ export const getLastFanTransform = () => lastFanTransform;
 export const getFanConfig = () => ({ ...fanConfig });
 
 
-
-
-
 // Variables globales pour le mode fortune
 let fortuneModeActive = false;
 let slotHandle = null;
 let isSpinning = false;
 let originalZoom = null;
 
-// Activer le mode Roue de la Fortune
-// function enableFortuneMode() {
-//     if (fortuneModeActive) return;
+// Mise à jour de la fonction d'animation pour réactiver le levier
+function createSpinningWheelWithLever(finalRotation, duration) {
+    // Code de création de la roue identique...
+    console.log("🎨 Création de la roue avec levier réaliste...");
     
-//     console.log("🎰 Activation du mode Roue de la Fortune...");
+    const originalSvg = d3.select("#tree-svg");
     
-//     fortuneModeActive = true;
+    d3.selectAll('.background-element, .bubble-group').style('display', 'none');
     
-//     // 1. Sauvegarder et désactiver le zoom
-//     const svg = d3.select("#tree-svg");
-//     originalZoom = svg.on(".zoom");
-//     svg.on(".zoom", null);
+    const whiteRect = originalSvg.insert("rect", ":first-child")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", "#FFFFFF");
     
-//     // 2. Forcer le centrage du radar
-//     resetRadarToCenter();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-//     // 3. Créer le levier de machine à sous
-//     createSlotMachineHandle();
+    const svgData = new XMLSerializer().serializeToString(originalSvg.node());
+    const img = new Image();
     
-//     // 4. Créer l'indicateur de position (flèche)
-//     createWinnerIndicator();
-    
-//     // 5. Afficher les instructions
-//     showFortuneInstructions();
-    
-//     console.log("✅ Mode Fortune activé !");
-// }
-
-export function enableFortuneMode() {
-    if (fortuneModeActive) return;
-    
-    console.log("🎰 Activation du mode Roue de la Fortune...");
-    
-    fortuneModeActive = true;
-    
-    // 1. Sauvegarder et désactiver le zoom
-    const svg = d3.select("#tree-svg");
-    originalZoom = getFanZoom(); // Utiliser la fonction existante pour récupérer le zoom
-    svg.on(".zoom", null);
-    
-    // 2. Sauvegarder le zoom initial avant toute modification
-    const initialTransform = getLastFanTransform();
-    
-    // 3. Forcer le centrage du radar
-    resetRadarToCenter(initialTransform);
-    
-    // 4. Créer le levier de machine à sous
-    createSlotMachineHandle();
-    
-    // 5. Créer l'indicateur de position (flèche)
-    createWinnerIndicator();
-    
-    // 6. Afficher les instructions
-    showFortuneInstructions();
-    
-    console.log("✅ Mode Fortune activé !");
-}
-
-// Désactiver le mode Fortune
-export function disableFortuneMode() {
-    if (!fortuneModeActive) return;
-    
-    console.log("🔄 Désactivation du mode Fortune...");
-    
-    fortuneModeActive = false;
-    
-    // Restaurer le zoom
-    if (originalZoom) {
-        d3.select("#tree-svg").on(".zoom", originalZoom);
-    }
-    
-    // Supprimer les éléments de l'interface
-    if (slotHandle && slotHandle.parentNode) {
-        document.body.removeChild(slotHandle);
-        slotHandle = null;
-    }
-    
-    // Supprimer l'indicateur
-    d3.select("#winner-indicator").remove();
-    
-    console.log("✅ Mode Fortune désactivé");
-}
-
-// Créer le levier de machine à sous
-function createSlotMachineHandle() {
-    slotHandle = document.createElement("div");
-    slotHandle.id = "slot-machine-handle";
-    slotHandle.style.cssText = `
-        position: fixed;
-        right: 30px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 80px;
-        height: 200px;
-        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%);
-        border-radius: 40px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        border: 4px solid #fff;
-        transition: all 0.2s ease;
-        z-index: 1000;
-        user-select: none;
-    `;
-    
-    slotHandle.innerHTML = `
-        <div style="font-size: 30px; margin-bottom: 10px;">🎰</div>
-        <div>TIRER</div>
-        <div style="font-size: 10px; margin-top: 5px;">LE LEVIER</div>
-    `;
-    
-    // Effets hover
-    slotHandle.onmouseenter = () => {
-        if (!isSpinning) {
-            slotHandle.style.transform = "translateY(-50%) scale(1.1)";
-            slotHandle.style.boxShadow = "0 12px 30px rgba(255, 107, 107, 0.4)";
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i] === 255 && data[i+1] === 255 && data[i+2] === 255) {
+                data[i + 3] = 0;
+            }
         }
+        
+        ctx.putImageData(imageData, 0, 0);
+        const transparentPng = canvas.toDataURL("image/png");
+        
+        whiteRect.remove();
+        d3.selectAll('.background-element, .bubble-group').style('display', null);
+        
+        // Animation avec réactivation du levier à la fin
+        animateFortuneWheelWithLever(transparentPng, finalRotation, duration);
     };
     
-    slotHandle.onmouseleave = () => {
-        if (!isSpinning) {
-            slotHandle.style.transform = "translateY(-50%) scale(1)";
-            slotHandle.style.boxShadow = "0 8px 20px rgba(0,0,0,0.3)";
-        }
-    };
-    
-    // Action du levier
-    slotHandle.onclick = () => {
-        if (!isSpinning) {
-            pullSlotHandle();
-        }
-    };
-    
-    document.body.appendChild(slotHandle);
-    
-    console.log("🎰 Levier créé !");
+    const encodedSvgData = encodeURIComponent(svgData);
+    img.src = "data:image/svg+xml;charset=utf-8," + encodedSvgData;
 }
 
-// Animation et action du levier
-function pullSlotHandle() {
+// Fonction de lancement
+function launchFortuneWheelWithLever(baseVelocity) {
     if (isSpinning) return;
     
-    console.log("🎯 Levier tiré !");
+    isSpinning = true;
+    console.log(`🎡 Lancement avec levier réaliste - vitesse: ${baseVelocity.toFixed(2)}`);
     
-    // Animation du levier
-    slotHandle.style.transform = "translateY(-40%) scale(0.95)";
-    slotHandle.style.background = "linear-gradient(135deg, #ff4444 0%, #ff6666 50%, #ff8888 100%)";
+    // CORRECTION : Utiliser les nouveaux contrôles du levier
+    if (window.leverControls) {
+        window.leverControls.disable();
+    }
     
-    // Son du levier (si disponible)
-    playSound('lever-pull');
+    // Calculs avec randomisation (identique)
+    const minSpins = 3 + Math.random() * 2;
+    const velocityMultiplier = 1.5 + Math.random() * 1;
+    const finalSpins = minSpins + (baseVelocity * velocityMultiplier);
+    const baseRotation = finalSpins * 360;
+    
+    const randomStops = [
+        Math.random() * 90,
+        90 + Math.random() * 90,
+        180 + Math.random() * 90,
+        270 + Math.random() * 90
+    ];
+    const randomStop = randomStops[Math.floor(Math.random() * 4)];
+    
+    const microAdjustment = (Math.random() - 0.5) * 30;
+    const finalRotation = baseRotation + randomStop + microAdjustment;
+    
+    const baseDuration = 4000 + Math.random() * 2000;
+    const duration = Math.max(3000, baseDuration + (baseVelocity * 500));
+    
+    console.log(`🎯 Rotation finale: ${finalRotation.toFixed(1)}° en ${duration}ms`);
+    
+    // CORRECTION : Utiliser la nouvelle fonction
+    createSpinningWheelWithLever(finalRotation, duration);
+}
+
+// fonction d'animation
+function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
+    console.log("🌪️ Animation avec levier réaliste...");
+    
+    const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
+        return this.querySelector(".center-person-group") !== null;
+    });
+    originalRadar.style("opacity", 0);
+    
+    const spinningImg = document.createElement("img");
+    spinningImg.src = transparentPng;
+    spinningImg.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        transform-origin: center;
+        z-index: 999;
+        pointer-events: none;
+    `;
+    
+    document.body.appendChild(spinningImg);
+    
+    playSound('wheel-spinning');
     
     setTimeout(() => {
-        slotHandle.style.transform = "translateY(-50%) scale(1)";
-        slotHandle.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%)";
+        spinningImg.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+        spinningImg.style.transform = `rotate(${finalRotation}deg)`;
+    }, 50);
+    
+    // setTimeout(() => {
+    //     console.log("🎉 Roue arrêtée - Réactivation du levier !");
         
-        // Générer vitesse aléatoire pour variation
-        const randomVelocity = 1.5 + Math.random() * 2; // Entre 1.5 et 3.5
-        launchFortuneWheel(randomVelocity);
+    //     playSound('wheel-stop');
         
-    }, 200);
+    //     // // NOUVEAU : Capturer l'angle RÉEL du PNG depuis son transform CSS
+    //     // const spinningImgTransform = spinningImg.style.transform;
+    //     // const rotateMatch = spinningImgTransform.match(/rotate\(([-\d.]+)deg\)/);
+        
+    //     // let actualFinalAngle = finalRotation % 360; // Valeur par défaut
+        
+    //     // if (rotateMatch) {
+    //     //     actualFinalAngle = parseFloat(rotateMatch[1]) % 360;
+    //     //     console.log(`🎯 Angle RÉEL du PNG: ${actualFinalAngle.toFixed(1)}°`);
+    //     // } else {
+    //     //     console.log(`⚠️ Impossible de lire l'angle PNG, utilisation du calcul: ${actualFinalAngle.toFixed(1)}°`);
+    //     // }
+        
+    //     // Utiliser detectWinner avec l'angle RÉEL
+    //     // const winner = detectWinner(actualFinalAngle);
+
+
+    //     const winner = detectWinner(finalRotation);
+        
+    //     if (spinningImg.parentNode) {
+    //         document.body.removeChild(spinningImg);
+    //     }
+
+    //     // Récupérer le zoom actuel
+    //     const currentTransformAttr = originalRadar.attr("transform");
+    //     let currentScale = 0.7;
+    //     if (currentTransformAttr) {
+    //         const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
+    //         if (scaleMatch) {
+    //             currentScale = parseFloat(scaleMatch[1]);
+    //         }
+    //     }
+
+    //     const centerX = window.innerWidth / 2;
+    //     const centerY = window.innerHeight / 2;
+
+    //     console.log(`🔄 Applique angle RÉEL au radar: ${actualFinalAngle.toFixed(1)}°`);
+
+    //     // UTILISER L'ANGLE RÉEL pour le radar
+    //     originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${actualFinalAngle}) scale(${currentScale})`)
+    //             .style("opacity", 1);
+
+    //     // Correction des textes avec l'angle RÉEL
+    //     d3.selectAll(".segment-text-group").each(function() {
+    //         const currentTransform = d3.select(this).attr("transform");
+            
+    //         if (currentTransform) {
+    //             const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
+    //             if (rotateMatch) {
+    //                 const currentTextAngle = parseFloat(rotateMatch[1]);
+    //                 const finalTextAngle = (currentTextAngle + actualFinalAngle) % 360;
+                    
+    //                 if (finalTextAngle > 90 && finalTextAngle < 270) {
+    //                     const flippedAngle = currentTextAngle + 180;
+    //                     const newTransform = currentTransform.replace(/rotate\([-\d.]+\)/, `rotate(${flippedAngle})`);
+    //                     d3.select(this).attr("transform", newTransform);
+    //                 }
+    //             }
+    //         }
+    //     });
+
+    //     // Centre avec angle RÉEL
+    //     d3.selectAll(".center-text-group").each(function() {
+    //         if (actualFinalAngle > 90 && actualFinalAngle < 270) {
+    //             d3.select(this).attr("transform", "rotate(180)");
+    //         } else {
+    //             d3.select(this).attr("transform", "rotate(0)");
+    //         }
+    //     });
+
+    //     console.log(`🔄 Radar affiché avec angle: ${actualFinalAngle .toFixed(1)}°`);
+
+       
+    //     //  Réactiver le nouveau levier
+    //     if (window.leverControls) {
+    //         window.leverControls.enable();
+    //     }
+    //     isSpinning = false;
+        
+    //     announceWinnerML(winner);
+
+
+
+    //     setTimeout(() => {
+    //         hideWinnerText(); // Masquer "GAGNANT" après 3 secondes
+    //     }, 3000);
+    // }, duration + 100);
+
+
+    setTimeout(() => {
+        console.log("🎉 Roue arrêtée - Réactivation du levier !");
+
+        playSound('wheel-stop');
+        // const winner = detectWinner(finalRotation);
+
+        if (spinningImg.parentNode) {
+            document.body.removeChild(spinningImg);
+        }
+
+        // Récupérer le zoom ET l'angle actuel du radar
+        const currentTransformAttr = originalRadar.attr("transform");
+        let currentScale = 0.7;
+        let currentRadarAngle = 0; // NOUVEAU : angle de départ du radar
+        
+        if (currentTransformAttr) {
+            const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
+            if (scaleMatch) {
+                currentScale = parseFloat(scaleMatch[1]);
+            }
+            
+            // NOUVEAU : extraire l'angle actuel du radar
+            const rotateMatch = currentTransformAttr.match(/rotate\(([-\d.]+)\)/);
+            if (rotateMatch) {
+                currentRadarAngle = parseFloat(rotateMatch[1]);
+            }
+        }
+        
+        console.log(`📊 Angle radar avant rotation: ${currentRadarAngle.toFixed(1)}°`);
+        console.log(`📊 Rotation PNG ajoutée: ${finalRotation.toFixed(1)}°`);
+        
+        // NOUVEAU : Angle final = angle de départ + rotation du PNG
+        const finalAngleTotal = currentRadarAngle + finalRotation;
+        const finalAngleNormalized = finalAngleTotal % 360;
+        
+        console.log(`📊 Angle final total: ${finalAngleTotal.toFixed(1)}°`);
+        console.log(`🔄 Radar affiché avec angle: ${finalAngleNormalized.toFixed(1)}°`);
+        
+        const winner = detectWinner(finalAngleTotal); // Utiliser l'angle total
+        
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // Afficher le radar avec l'angle total
+        originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
+                .style("opacity", 1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Corriger uniquement l'inversion tête en bas des textes
+        d3.selectAll(".segment-text-group").each(function() {
+            const currentTransform = d3.select(this).attr("transform");
+            
+            if (currentTransform) {
+                const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
+                if (rotateMatch) {
+                    const currentTextAngle = parseFloat(rotateMatch[1]);
+                    const finalTextAngle = (currentTextAngle + finalAngleNormalized) % 360;
+                    
+                    if (finalTextAngle > 90 && finalTextAngle < 270) {
+                        const flippedAngle = currentTextAngle + 180;
+                        const newTransform = currentTransform.replace(/rotate\([-\d.]+\)/, `rotate(${flippedAngle})`);
+                        d3.select(this).attr("transform", newTransform);
+                    }
+                }
+            }
+        });
+
+        // Corriger aussi le texte du centre
+        d3.selectAll(".center-text-group").each(function() {
+            if (finalAngleNormalized > 90 && finalAngleNormalized < 270) {
+                d3.select(this).attr("transform", "rotate(180)");
+            } else {
+                d3.select(this).attr("transform", "rotate(0)");
+            }
+        });
+
+        // Réactiver le nouveau levier
+        if (window.leverControls) {
+            window.leverControls.enable();
+        }
+        isSpinning = false;
+
+        announceWinnerML(winner);
+
+        setTimeout(() => {
+            hideWinnerText();
+        }, 3000);
+
+    }, duration + 100);
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
-// Créer l'indicateur de gagnant (flèche en haut)
-function createWinnerIndicator() {
-    const svg = d3.select("#tree-svg");
-    
-    // Supprimer l'ancien indicateur s'il existe
-    svg.select("#winner-indicator").remove();
-    
-    // Créer le groupe pour l'indicateur
-    const indicator = svg.append("g")
-        .attr("id", "winner-indicator")
-        .attr("transform", `translate(${window.innerWidth/2}, 50)`);
-    
-    // Flèche principale
-    indicator.append("polygon")
-        .attr("points", "0,30 -20,0 -8,0 -8,-15 8,-15 8,0 20,0")
-        .attr("fill", "#ff4444")
-        .attr("stroke", "white")
-        .attr("stroke-width", "3")
-        .attr("filter", "drop-shadow(0 4px 8px rgba(0,0,0,0.3))");
-    
-    // Texte "GAGNANT"
-    indicator.append("text")
-        .attr("x", 0)
-        .attr("y", -25)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "14px")
-        .attr("font-weight", "bold")
-        .attr("fill", "#ff4444")
-        .attr("stroke", "white")
-        .attr("stroke-width", "2")
-        .text("GAGNANT");
-    
-    console.log("🏆 Indicateur de gagnant créé");
-}
-
-// Recentrer le radar chart
-// function resetRadarToCenter() {
-//     const radarGroup = d3.select("#tree-svg").selectAll("g").filter(function() {
-//         return this.querySelector(".center-person-group") !== null;
-//     });
-    
-//     if (!radarGroup.empty()) {
-//         const centerX = window.innerWidth / 2;
-//         const centerY = window.innerHeight / 2;
-        
-//         radarGroup.transition()
-//             .duration(500)
-//             .attr("transform", `translate(${centerX}, ${centerY}) scale(0.7)`);
-        
-//         console.log("🎯 Radar recentré");
-//     }
-// }
 
 // Recentrer le radar chart (avec préservation du zoom initial)
 function resetRadarToCenter(initialTransform) {
@@ -1071,202 +1131,717 @@ function resetRadarToCenter(initialTransform) {
     }
 }
 
-// Lancement de la roue avec randomisation avancée
-function launchFortuneWheel(baseVelocity) {
-    if (isSpinning) return;
+
+
+
+function highlightWinnerSegment(segmentIndex, generation) {
+    // Mémoriser le gagnant actuel
+    lastWinner = { segment: segmentIndex, generation: generation };
     
-    isSpinning = true;
-    console.log(`🎡 Lancement avec vitesse de base: ${baseVelocity.toFixed(2)}`);
-    
-    // Désactiver le levier pendant la rotation
-    slotHandle.style.opacity = "0.5";
-    slotHandle.style.cursor = "not-allowed";
-    
-    // Calculs avec randomisation poussée
-    const minSpins = 3 + Math.random() * 2; // Entre 3 et 5 tours minimum
-    const velocityMultiplier = 1.5 + Math.random() * 1; // Variation de vitesse
-    const finalSpins = minSpins + (baseVelocity * velocityMultiplier);
-    const baseRotation = finalSpins * 360;
-    
-    // Randomisation de l'arrêt final
-    const randomStops = [
-        Math.random() * 90,      // 1er quart
-        90 + Math.random() * 90, // 2ème quart  
-        180 + Math.random() * 90, // 3ème quart
-        270 + Math.random() * 90  // 4ème quart
-    ];
-    const randomStop = randomStops[Math.floor(Math.random() * 4)];
-    
-    // Micro-ajustements pour éviter les patterns
-    const microAdjustment = (Math.random() - 0.5) * 30; // ±15°
-    const finalRotation = baseRotation + randomStop + microAdjustment;
-    
-    // Durée avec variation
-    const baseDuration = 4000 + Math.random() * 2000; // Entre 4 et 6 secondes
-    const duration = Math.max(3000, baseDuration + (baseVelocity * 500));
-    
-    console.log(`🎯 Rotation finale: ${finalRotation.toFixed(1)}° en ${duration}ms`);
-    console.log(`📊 Arrêt sur: ${(finalRotation % 360).toFixed(1)}°`);
-    
-    // Créer et lancer la roue
-    createSpinningWheel(finalRotation, duration);
+    if (generation === 0) {
+        d3.select(".center-person-group circle")
+            .style("fill", "#ff0000")
+            .style("stroke", "#ffffff")
+            .style("stroke-width", "4");
+    } else {
+        // CORRECTION : Chercher par data-segment-position au lieu de l'index DOM
+        const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
+        
+        if (!targetElement.empty()) {
+            targetElement.select("path")
+                .style("fill", "#ff0000")
+                .style("stroke", "#ffffff")
+                .style("stroke-width", "3");
+                
+            console.log(`🔴 Gen${generation} segment ${segmentIndex} coloré en rouge (trouvé par attribut)`);
+        } else {
+            console.log(`❌ Impossible de trouver l'élément Gen${generation} segment ${segmentIndex} pour le colorer`);
+        }
+    }
 }
 
-// Créer la roue tournante (reprise de la fonction précédente, optimisée)
-function createSpinningWheel(finalRotation, duration) {
-    console.log("🎨 Création de la roue tournante...");
-    
-    const originalSvg = d3.select("#tree-svg");
-    
-    // Masquer fond
-    d3.selectAll('.background-element, .bubble-group').style('display', 'none');
-    
-    // Fond blanc temporaire
-    const whiteRect = originalSvg.insert("rect", ":first-child")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "#FFFFFF");
-    
-    // Canvas et traitement
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const svgData = new XMLSerializer().serializeToString(originalSvg.node());
-    const img = new Image();
-    
-    img.onload = function() {
-        ctx.drawImage(img, 0, 0);
-        
-        // Traitement blanc → transparent
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i] === 255 && data[i+1] === 255 && data[i+2] === 255) {
-                data[i + 3] = 0;
-            }
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-        const transparentPng = canvas.toDataURL("image/png");
-        
-        // Nettoyage
-        whiteRect.remove();
-        d3.selectAll('.background-element, .bubble-group').style('display', null);
-        
-        // Animation
-        animateFortuneWheel(transparentPng, finalRotation, duration);
-    };
-    
-    const encodedSvgData = encodeURIComponent(svgData);
-    img.src = "data:image/svg+xml;charset=utf-8," + encodedSvgData;
-}
 
-// Animation avec effets sonores
-function animateFortuneWheel(transparentPng, finalRotation, duration) {
-    console.log("🌪️ Animation de la roue...");
+
+
+
+//// avec log de début  pour comprendre si le problème ré-apparait
+// function resetLastWinnerHighlight() {
+//     if (!lastWinner) {
+//         console.log("🔄 Pas de dernier gagnant à reset");
+//         return;
+//     }
     
-    // Masquer radar original
-    const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
-        return this.querySelector(".center-person-group") !== null;
-    });
-    originalRadar.style("opacity", 0);
+//     console.log(`🔄 Reset du gagnant précédent: Gen${lastWinner.generation} segment ${lastWinner.segment}`);
     
-    // Image rotative
-    const spinningImg = document.createElement("img");
-    spinningImg.src = transparentPng;
-    spinningImg.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        transform-origin: center;
-        z-index: 999;
-        pointer-events: none;
-    `;
-    
-    document.body.appendChild(spinningImg);
-    
-    // Son de rotation
-    playSound('wheel-spinning');
-    
-    // Animation avec décélération réaliste
-    setTimeout(() => {
-        spinningImg.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-        spinningImg.style.transform = `rotate(${finalRotation}deg)`;
-    }, 50);
-    
-    // Fin de l'animation
-    setTimeout(() => {
-        console.log("🎉 Roue arrêtée !");
+//     if (lastWinner.generation === 0) {
+//         d3.select(".center-person-group circle")
+//             .style("fill", "#ff6b6b")
+//             .style("stroke", "white")
+//             .style("stroke-width", "4");
+//         console.log("✅ Centre remis à sa couleur d'origine");
+//     } else {
+//         const originalColor = getGenerationColor(lastWinner.generation);
+//         const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
         
-        // Son d'arrêt
-        playSound('wheel-stop');
+//         console.log(`🔍 Recherche élément: .person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
+//         console.log(`🔍 Élément trouvé:`, !targetElement.empty());
         
-        // Déterminer le gagnant
-        const winner = detectWinner(finalRotation);
+//         if (!targetElement.empty()) {
+//             targetElement.select("path")
+//                 .style("fill", originalColor)
+//                 .style("stroke", "white")
+//                 .style("stroke-width", "1");
+                
+//             console.log(`✅ Segment Gen${lastWinner.generation} remis en ${originalColor}`);
+//         } else {
+//             console.log(`❌ ÉLÉMENT NON TROUVÉ pour reset ! Gen${lastWinner.generation} segment ${lastWinner.segment}`);
+            
+//             // DEBUG : lister tous les éléments de cette génération
+//             d3.selectAll(`.person-segment-group.gen-${lastWinner.generation}`).each(function() {
+//                 const pos = d3.select(this).attr("data-segment-position");
+//                 console.log(`  - Trouvé: Gen${lastWinner.generation} position ${pos}`);
+//             });
+//         }
+//     }
+    
+//     lastWinner = null;
+// }
+
+
+
+
+function resetLastWinnerHighlight() {
+    if (!lastWinner) return;
+    
+    if (lastWinner.generation === 0) {
+        d3.select(".center-person-group circle")
+            .style("fill", "#ff6b6b")
+            .style("stroke", "white")
+            .style("stroke-width", "4");
+    } else {
+        const originalColor = getGenerationColor(lastWinner.generation);
+        const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
         
-        // Nettoyer
-        if (spinningImg.parentNode) {
-            document.body.removeChild(spinningImg);
+        if (!targetElement.empty()) {
+            targetElement.select("path")
+                .style("fill", originalColor)
+                .style("stroke", "white")
+                .style("stroke-width", "1");
         }
-        originalRadar.style("opacity", 1);
-        
-        // Réactiver le levier
-        slotHandle.style.opacity = "1";
-        slotHandle.style.cursor = "pointer";
-        isSpinning = false;
-        
-        // Annoncer le résultat
-        announceWinner(winner);
-        
-    }, duration + 100);
+    }
+    
+    lastWinner = null;
 }
 
 // Détection du gagnant basée sur l'angle
 function detectWinner(finalAngle) {
-    const normalizedAngle = (360 - (finalAngle % 360)) % 360; // Inverser car rotation horaire
-    console.log(`🎯 Angle normalisé: ${normalizedAngle.toFixed(1)}°`);
+    const normalizedAngle = (360 - ((finalAngle + 180) % 360)) % 360;
     
-    // TODO: Implémenter détection réelle basée sur les segments du radar
-    // Pour l'instant, simulation
-    const segments = ['Grand-père paternel', 'Grand-mère paternelle', 'Grand-père maternel', 'Grand-mère maternelle'];
-    const segmentSize = 360 / segments.length;
-    const winnerIndex = Math.floor(normalizedAngle / segmentSize);
+    console.log(`🎯 Angle final: ${finalAngle.toFixed(1)}°`);
+    console.log(`📐 Angle normalisé: ${normalizedAngle.toFixed(1)}°`);
     
-    return {
-        name: segments[winnerIndex] || "Personne inconnue",
-        angle: normalizedAngle
-    };
+    for (let gen = 10; gen >= 0; gen--) {
+        
+        if (gen === 0) {
+            const centerPerson = d3.select(".center-person-group").datum();
+            console.log(`🎯 Gagnant trouvé au centre: ${centerPerson.name || 'Personne centrale'}`);
+            
+            return {
+                name: centerPerson.name || 'Personne centrale',
+                segment: 0,
+                generation: 0,
+                angle: normalizedAngle
+            };
+        }
+        
+        const segmentsInGen = Math.pow(2, gen);
+        const anglePerSegment = 360 / segmentsInGen;
+        const targetSegment = Math.floor(normalizedAngle / anglePerSegment);
+        
+        console.log(`🔍 Test Gen ${gen}: cherche segment ${targetSegment}`);
+        
+        // NOUVEAU : Chercher par attribut data-segment-position
+        const targetElement = d3.select(`.person-segment-group.gen-${gen}[data-segment-position="${targetSegment}"]`);
+        
+        if (!targetElement.empty()) {
+            const person = targetElement.datum();
+            if (person && person.name) {
+                console.log(`✅ Gagnant trouvé Gen ${gen}, segment ${targetSegment}: ${person.name}`);
+                
+                return {
+                    name: person.name,
+                    segment: targetSegment,
+                    generation: gen,
+                    angle: normalizedAngle,
+                    element: targetElement.node()
+                };
+            }
+        }
+        
+        console.log(`❌ Gen ${gen}, segment ${targetSegment}: vide`);
+    }
 }
 
-// Annonce du gagnant avec effets
-function announceWinner(winner) {
-    console.log(`🏆 GAGNANT: ${winner.name}`);
+
+// Système de sons pour la roue de la fortune
+class FortuneWheelSounds {
+    constructor() {
+        this.sounds = {};
+        this.enabled = true;
+        this.volume = 0.7;
+        this.initSounds();
+    }
     
-    // Animation de l'indicateur
-    const indicator = d3.select("#winner-indicator");
-    indicator.transition()
-        .duration(500)
-        .attr("transform", `translate(${window.innerWidth/2}, 30) scale(1.2)`)
-        .transition()
-        .duration(500)
-        .attr("transform", `translate(${window.innerWidth/2}, 50) scale(1)`);
+    // Initialiser tous les sons
+    initSounds() {
+        console.log("🔊 Initialisation du système de sons...");
+        
+        // Sons générés par Web Audio API (pas besoin de fichiers externes)
+        this.createLeverPullSound();
+        this.createLeverSpringSound();
+        this.createWheelSpinningSound();
+        this.createWheelStopSound();
+        this.createWinnerSound();
+        this.createClickSound();
+        
+        console.log("✅ Système de sons initialisé !");
+    }
     
-    // Message de victoire
-    showWinnerMessage(winner);
+    // Son de tirage du levier (mécanique)
+    createLeverPullSound() {
+        this.sounds['lever-pull'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Son mécanique avec bruit blanc filtré
+            const duration = 0.3;
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Générer bruit blanc avec enveloppe
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 8); // Décroissance rapide
+                const noise = (Math.random() * 2 - 1) * envelope;
+                
+                // Filtrage pour son métallique
+                const frequency = 800 + Math.sin(t * 50) * 200;
+                const metallic = Math.sin(t * frequency * 2 * Math.PI) * 0.3;
+                
+                data[i] = (noise * 0.7 + metallic) * this.volume;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    }
+    
+    // Son de ressort (retour du levier)
+    createLeverSpringSound() {
+        this.sounds['lever-spring'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const duration = 0.4;
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 6);
+                
+                // Oscillation amortie (ressort)
+                const springFreq = 400 + Math.exp(-t * 4) * 200;
+                const spring = Math.sin(t * springFreq * 2 * Math.PI) * envelope;
+                
+                // Ajout d'harmoniques
+                const harmonic = Math.sin(t * springFreq * 4 * Math.PI) * envelope * 0.3;
+                
+                data[i] = (spring + harmonic) * this.volume * 0.8;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    }
+    
+    // Son de rotation de la roue (continu)
+    createWheelSpinningSound() {
+        this.sounds['wheel-spinning'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Oscillateur pour le son continu
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            // Configuration
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
+            
+            // Filtre passe-bas pour le réalisme
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, audioContext.currentTime);
+            filter.Q.setValueAtTime(5, audioContext.currentTime);
+            
+            // Enveloppe de volume
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.6, audioContext.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.4, audioContext.currentTime + 2);
+            
+            // Modulation de fréquence pour effet de rotation
+            const lfo = audioContext.createOscillator();
+            const lfoGain = audioContext.createGain();
+            lfo.frequency.setValueAtTime(3, audioContext.currentTime);
+            lfoGain.gain.setValueAtTime(20, audioContext.currentTime);
+            
+            // Connexions
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            lfo.connect(lfoGain);
+            lfoGain.connect(oscillator.frequency);
+            
+            // Démarrage
+            oscillator.start();
+            lfo.start();
+            
+            // Arrêt automatique après 8 secondes max
+            setTimeout(() => {
+                try {
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+                    setTimeout(() => {
+                        oscillator.stop();
+                        lfo.stop();
+                    }, 500);
+                } catch (e) {
+                    // L'oscillateur est peut-être déjà arrêté
+                }
+            }, 8000);
+            
+            // Stocker pour arrêt manuel
+            this.currentSpinSound = { oscillator, lfo, gainNode, audioContext };
+        };
+    }
+    
+    // Arrêter le son de rotation
+    stopWheelSpinning() {
+        if (this.currentSpinSound) {
+            try {
+                const { oscillator, lfo, gainNode, audioContext } = this.currentSpinSound;
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+                setTimeout(() => {
+                    oscillator.stop();
+                    lfo.stop();
+                }, 300);
+            } catch (e) {
+                // Déjà arrêté
+            }
+            this.currentSpinSound = null;
+        }
+    }
+    
+    // Son d'arrêt de la roue
+    createWheelStopSound() {
+        this.sounds['wheel-stop'] = () => {
+            // D'abord arrêter le son de rotation
+            this.stopWheelSpinning();
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const duration = 0.8;
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 3);
+                
+                // Son de frottement/arrêt
+                const friction = Math.sin(t * 150 * 2 * Math.PI) * envelope;
+                const thud = Math.sin(t * 60 * 2 * Math.PI) * Math.exp(-t * 10) * 2;
+                
+                data[i] = (friction * 0.4 + thud * 0.6) * this.volume;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    }
     
     // Son de victoire
-    playSound('winner');
+    createWinnerSound() {
+        this.sounds['winner'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Mélodie de victoire simple
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do aigu
+            const noteDuration = 0.3;
+            
+            notes.forEach((frequency, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(this.volume * 0.7, audioContext.currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + noteDuration);
+                }, index * 200);
+            });
+        };
+    }
+    
+    // Son de clic
+    createClickSound() {
+        this.sounds['click'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const duration = 0.1;
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 50);
+                const click = Math.sin(t * 1200 * 2 * Math.PI) * envelope;
+                data[i] = click * this.volume * 0.5;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    }
+    
+    // Jouer un son
+    play(soundName) {
+        if (!this.enabled) {
+            console.log(`🔇 Son désactivé: ${soundName}`);
+            return;
+        }
+        
+        if (this.sounds[soundName]) {
+            console.log(`🔊 Lecture: ${soundName}`);
+            try {
+                this.sounds[soundName]();
+            } catch (error) {
+                console.warn(`⚠️ Erreur son ${soundName}:`, error);
+            }
+        } else {
+            console.warn(`⚠️ Son non trouvé: ${soundName}`);
+        }
+    }
+    
+    // Contrôles du volume
+    setVolume(volume) {
+        this.volume = Math.max(0, Math.min(1, volume));
+        console.log(`🔊 Volume: ${(this.volume * 100).toFixed(0)}%`);
+    }
+    
+    // Activer/désactiver les sons
+    toggle() {
+        this.enabled = !this.enabled;
+        console.log(`🔊 Sons: ${this.enabled ? 'ACTIVÉS' : 'DÉSACTIVÉS'}`);
+        return this.enabled;
+    }
+    
+    // Tester tous les sons
+    testAll() {
+        console.log("🎵 Test de tous les sons...");
+        const soundNames = ['click', 'lever-pull', 'lever-spring', 'wheel-spinning', 'wheel-stop', 'winner'];
+        
+        soundNames.forEach((sound, index) => {
+            setTimeout(() => {
+                this.play(sound);
+            }, index * 1000);
+        });
+    }
 }
 
-// Message de victoire
-function showWinnerMessage(winner) {
+// Initialiser le système de sons
+const fortuneSounds = new FortuneWheelSounds();
+
+//  fonction playSound
+function playSound(soundName) {
+    fortuneSounds.play(soundName);
+}
+
+
+
+// fonctions pour utiliser les traductions
+
+// Système multilingue ultra-simple
+function getFortuneText(textType) {
+    const lang = window.CURRENT_LANGUAGE || 'fr';
+    
+    const texts = {
+        leverText: {
+            fr: "TIREZ",
+            en: "PULL", 
+            es: "TIRAR",
+            hu: "HÚZD"
+        },
+        leverPulling: {
+            fr: "TIRAGE...",
+            en: "PULLING...",
+            es: "TIRANDO...",
+            hu: "HÚZÁS..."
+        },
+        leverRotating: {
+            fr: "ROTATION...",
+            en: "SPINNING...",
+            es: "GIRANDO...",
+            hu: "PÖRGETÉS..."
+        },
+        winnerIndicator: {
+            fr: "GAGNANT",
+            en: "WINNER",
+            es: "GANADOR", 
+            hu: "NYERTES"
+        },
+        winnerTitle: {
+            fr: "LA ROUE S'EST ARRÊTÉE SUR",
+            en: "THE WHEEL STOPPED ON",
+            es: "LA RUEDA SE DETUVO EN",
+            hu: "A KERÉK MEGÁLLT"
+        },
+        winnerContinue: {
+            fr: "Cliquez pour continuer",
+            en: "Click to continue",
+            es: "Haz clic para continuar",
+            hu: "Kattints a folytatáshoz"
+        },
+        fortuneInstructions: {
+            fr: "🎰 Tirez le levier pour faire tourner la roue de la fortune !",
+            en: "🎰 Pull the lever to spin the fortune wheel!",
+            es: "🎰 ¡Tira de la palanca para hacer girar la rueda de la fortuna!",
+            hu: "🎰 Húzd meg a kart a szerencsekerék forgatásához!"
+        },
+        fortuneModeActive: {
+            fr: "fortuneModeActive",
+            en: "fortuneModeActive",
+            es: "fortuneModeActive",
+            hu: "fortuneModeActive"
+        }
+    };
+
+    // AJOUT : Vérification de sécurité
+    if (!texts[textType]) {
+        console.warn(`🌍 Texte manquant: ${textType}`);
+        return textType; // Retourner la clé si pas trouvé
+    }
+    
+    return texts[textType][lang] || texts[textType]['fr'];
+}
+
+// Fonction createRealisticSlotHandle modifiée pour être multilingue
+function createRealisticSlotHandleML() {
+    const leverContainer = document.createElement("div");
+    leverContainer.id = "lever-container";
+    leverContainer.style.cssText = `
+        position: fixed;
+        right: 30px;
+        top: 80px;
+        width: 100px;
+        height: 200px;
+        z-index: 1000;
+    `;
+    
+    const leverPivot = document.createElement("div");
+    leverPivot.style.cssText = `
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 25px;
+        height: 25px;
+        background: radial-gradient(circle, #888, #555);
+        border-radius: 50%;
+        border: 2px solid #333;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    `;
+    
+    const leverArm = document.createElement("div");
+    leverArm.id = "lever-arm";
+    leverArm.style.cssText = `
+        position: absolute;
+        bottom: 52px;
+        left: 50%;
+        transform-origin: center bottom;
+        transform: translateX(-50%) rotate(-15deg);
+        width: 10px;
+        height: 120px;
+        background: linear-gradient(90deg, #888, #aaa, #888);
+        border-radius: 5px;
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+    `;
+    
+    const leverHandle = document.createElement("div");
+    leverHandle.id = "lever-handle";
+    leverHandle.style.cssText = `
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 70px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%);
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        border: 2px solid #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        user-select: none;
+        touch-action: manipulation;
+    `;
+    
+    leverHandle.innerHTML = "🎰";
+    
+    const leverText = document.createElement("div");
+    leverText.style.cssText = `
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+        background: rgba(0,0,0,0.7);
+        padding: 6px 10px;
+        border-radius: 12px;
+        white-space: nowrap;
+    `;
+    
+    // UTILISER LA TRADUCTION
+    leverText.textContent = getFortuneText('leverText');
+    
+    leverContainer.appendChild(leverPivot);
+    leverContainer.appendChild(leverArm);
+    leverArm.appendChild(leverHandle);
+    leverContainer.appendChild(leverText);
+    
+    let leverEnabled = true;
+    
+    function pullLever() {
+
+
+        if (!leverEnabled || isSpinning) {
+            console.log(getFortuneText('leverDisabled'));
+            return;
+        }
+        resetLastWinnerHighlight();
+        
+        leverEnabled = false;
+        console.log("🎯", getFortuneText('leverPulling'));
+
+        showWinnerText(); // Afficher "GAGNANT" pendant la rotation
+        
+        if (navigator.vibrate) {
+            navigator.vibrate([50, 30, 100]);
+        }
+        
+        leverArm.style.transform = "translateX(-50%) rotate(75deg)";
+        leverHandle.style.background = "linear-gradient(135deg, #ff4444 0%, #ff6666 50%, #ff8888 100%)";
+        leverText.textContent = getFortuneText('leverPulling'); // TRADUCTION
+        
+        playSound('lever-pull');
+        
+        setTimeout(() => {
+            leverArm.style.transform = "translateX(-50%) rotate(-15deg)";
+            leverHandle.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%)";
+            
+            playSound('lever-spring');
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+            
+            const randomVelocity = 1.5 + Math.random() * 2;
+            launchFortuneWheelWithLever(randomVelocity);
+            
+        }, 400);
+        
+        setTimeout(() => {
+            leverEnabled = true;
+            leverText.textContent = getFortuneText('leverText'); // TRADUCTION
+        }, 1000);
+    }
+    
+    function disableLever() {
+        leverEnabled = false;
+        leverHandle.style.opacity = "0.6";
+        leverHandle.style.cursor = "not-allowed";
+        leverText.textContent = getFortuneText('leverRotating'); // TRADUCTION
+    }
+    
+    function enableLever() {
+        leverEnabled = true;
+        leverHandle.style.opacity = "1";
+        leverHandle.style.cursor = "pointer";
+        leverText.textContent = getFortuneText('leverText'); // TRADUCTION
+    }
+    
+    leverHandle.addEventListener('click', pullLever);
+    leverHandle.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        pullLever();
+    });
+    
+    leverHandle.addEventListener('mouseenter', () => {
+        if (leverEnabled) {
+            leverHandle.style.transform = "translateX(-50%) scale(1.05)";
+            leverHandle.style.boxShadow = "0 6px 18px rgba(255, 107, 107, 0.6)";
+        }
+    });
+    
+    leverHandle.addEventListener('mouseleave', () => {
+        if (leverEnabled) {
+            leverHandle.style.transform = "translateX(-50%) scale(1)";
+            leverHandle.style.boxShadow = "0 4px 12px rgba(255, 107, 107, 0.4)";
+        }
+    });
+    
+    document.body.appendChild(leverContainer);
+    
+    window.leverControls = {
+        disable: disableLever,
+        enable: enableLever,
+        container: leverContainer
+    };
+    
+    console.log("🎰 Levier multilingue créé !");
+    
+    return leverContainer;
+}
+
+// Fonction showWinnerMessage multilingue
+function showWinnerMessageML(winner) {
     const message = document.createElement("div");
     message.style.cssText = `
         position: fixed;
@@ -1287,9 +1862,9 @@ function showWinnerMessage(winner) {
     
     message.innerHTML = `
         <div style="font-size: 50px;">🎉</div>
-        <div>LA ROUE S'EST ARRÊTÉE SUR</div>
+        <div>${getFortuneText('winnerTitle')}</div>
         <div style="font-size: 28px; margin: 15px 0; color: #fff700;">${winner.name}</div>
-        <div style="font-size: 16px; opacity: 0.9;">Cliquez pour continuer</div>
+        <div style="font-size: 16px; opacity: 0.9;">${getFortuneText('winnerContinue')}</div>
     `;
     
     document.body.appendChild(message);
@@ -1308,8 +1883,8 @@ function showWinnerMessage(winner) {
     };
 }
 
-// Instructions pour l'utilisateur
-function showFortuneInstructions() {
+// Fonction Instructions pour l'utilisateur  multilingue
+function showFortuneInstructionsML() {
     const instructions = document.createElement("div");
     instructions.style.cssText = `
         position: fixed;
@@ -1325,9 +1900,8 @@ function showFortuneInstructions() {
         animation: fadeInOut 4s ease;
     `;
     
-    instructions.innerHTML = "🎰 Tirez le levier pour faire tourner la roue de la fortune !";
+    instructions.innerHTML = getFortuneText('fortuneInstructions');
     
-    // Ajouter l'animation CSS
     const style = document.createElement("style");
     style.textContent = `
         @keyframes fadeInOut {
@@ -1346,187 +1920,123 @@ function showFortuneInstructions() {
     }, 4000);
 }
 
-// Fonction de son (placeholder)
-function playSound(soundType) {
-    // TODO: Implémenter les vrais sons
-    console.log(`🔊 Son: ${soundType}`);
+function createWinnerIndicatorML() {
+    // Supprimer l'ancienne
+    d3.select("#winner-indicator-fixed").remove();
+    
+    // SVG séparé pour la flèche fixe
+    const fixedSvg = d3.select("body").append("svg")
+        .attr("id", "winner-indicator-fixed")
+        .style("position", "fixed")
+        .style("top", "0")
+        .style("left", "0")
+        .style("width", "100vw")
+        .style("height", "100vh")
+        .style("pointer-events", "none")
+        .style("z-index", "1001");
+    
+    const indicator = fixedSvg.append("g")
+        .attr("transform", `translate(${window.innerWidth/2}, 70)`); // DESCENDU de 50 à 70px
+    
+    // Flèche descendue de 30px supplémentaires
+    indicator.append("polygon")
+        .attr("points", "0,60 -20,30 -8,30 -8,15 8,15 8,30 20,30") // +30px sur tous les Y
+        .attr("fill", "#ff4444")
+        .attr("stroke", "white")
+        .attr("stroke-width", "3");
+    
+    // PAS DE TEXTE au début - sera ajouté dynamiquement
+    
+    console.log("🏆 Indicateur FIXE créé (sans texte)");
 }
 
-// Fonctions publiques
-window.enableFortuneMode = enableFortuneMode;
-window.disableFortuneMode = disableFortuneMode;
-
-console.log("🎰 Système de roue de la fortune avec levier prêt !");
-console.log("📝 Tapez: enableFortuneMode() pour activer");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function drawEmptySegment(mainGroup, innerRadius, outerRadius, startAngle, endAngle, generation) {
-    const arc = d3.arc()
-        .innerRadius(innerRadius)
-        .outerRadius(outerRadius)
-        .startAngle(startAngle)
-        .endAngle(endAngle);
+// Fonction pour afficher le texte "GAGNANT" pendant la rotation
+function showWinnerText() {
+    const indicator = d3.select("#winner-indicator-fixed g");
     
-    mainGroup.append("path")
-        .attr("d", arc)
-        .attr("class", `empty-segment generation-${generation}`)
-        .datum({ name: 'Segment vide', isEmpty: true }) // ← AJOUT : données pour les segments vides
-        .style("fill", "#f5f5f5")
-        .style("stroke", "white")
-        .style("stroke-width", "1")
-        .style("opacity", "0.3");
+    // Supprimer l'ancien texte s'il existe
+    indicator.select("text").remove();
     
-    console.log(`⚪ Segment vide créé avec données`);
+    // Ajouter le texte avec meilleure visibilité
+    indicator.append("text")
+        .attr("x", 0)
+        .attr("y", 5) // Plus bas que la flèche
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .attr("fill", "#ffffff") // Blanc pur
+        .attr("stroke", "#000000") // Contour noir
+        .attr("stroke-width", "3")
+        .attr("paint-order", "stroke fill") // Contour en arrière-plan
+        .style("text-shadow", "2px 2px 4px rgba(0,0,0,0.8)") // Ombre supplémentaire
+        .text(getFortuneText('winnerIndicator'));
 }
 
+// Fonction pour masquer le texte
+function hideWinnerText() {
+    d3.select("#winner-indicator-fixed g text").remove();
+}
 
+// fonction d'activation
+export function enableFortuneModeML() {
+    if (fortuneModeActive) return;
+    
+    console.log(getFortuneText('fortuneModeActive'));
+    
+    fortuneModeActive = true;
+    
+    const svg = d3.select("#tree-svg");
+    originalZoom = svg.on(".zoom");
+    svg.on(".zoom", null);
+    
+    resetRadarToCenter();
+    createRealisticSlotHandleML(); // Version multilingue
+    createWinnerIndicatorML(); // Version multilingue
+    showFortuneInstructionsML(); // Version multilingue
+    
+    console.log("✅", getFortuneText('fortuneModeActive'));
+}
 
-function superFastRotation() {
-    const group = d3.select("#tree-svg").selectAll("g").filter(function() {
-        return this.querySelector(".center-person-group") !== null;
-    });
+// fonction de désactivation
+export function disableFortuneModeWithLever() {
+    if (!fortuneModeActive) return;
     
-    // Masquer TOUT le texte ET réduire les détails visuels
-    d3.selectAll(".segment-text-group").style("opacity", 0);
-    d3.selectAll("text").style("opacity", 0); // Tous les textes
-    d3.selectAll("path").style("stroke-width", "0.5"); // Contours plus fins
+    console.log("🔄 Désactivation du mode Fortune...");
     
-    // Animation plus fluide avec requestAnimationFrame
-    let startTime = null;
-    let angle = 0;
+    fortuneModeActive = false;
     
-    function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / 1000, 1); // 3 secondes
-        
-        angle = progress * 360;
-        group.attr("transform", `translate(395, 400) rotate(${angle}) scale(0.7)`);
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            // Restaurer tout à la fin
-            d3.selectAll(".segment-text-group").style("opacity", 1);
-            d3.selectAll("text").style("opacity", 1);
-            d3.selectAll("path").style("stroke-width", "1");
-            group.attr("transform", "translate(395, 400) rotate(0) scale(0.7)");
-            console.log("✅ Rotation fluide terminée !");
-        }
+    if (originalZoom) {
+        d3.select("#tree-svg").on(".zoom", originalZoom);
     }
     
-    requestAnimationFrame(animate);
-}
-// Rendez la fonction accessible globalement
-window.superFastRotation = superFastRotation; 
-
-// Fonction pour afficher les images de debug
-function showDebugImg(pngDataUrl, title, rightPos) {
-    const img = document.createElement("img");
-    img.src = pngDataUrl;
-    img.style.position = "fixed";
-    img.style.top = "10px";
-    img.style.right = rightPos;
-    img.style.width = "300px";
-    img.style.height = "200px";
-    img.style.border = "3px solid red";
-    img.style.zIndex = "9999";
-    img.style.objectFit = "contain";
-    
-    if (title.includes("transparent")) {
-        img.style.background = "repeating-conic-gradient(#ddd 0% 25%, white 0% 50%) 50% / 20px 20px";
-    } else {
-        img.style.background = "white";
+    // Supprimer le levier réaliste
+    if (window.leverControls && window.leverControls.container) {
+        if (window.leverControls.container.parentNode) {
+            document.body.removeChild(window.leverControls.container);
+        }
+        window.leverControls = null;
     }
     
-    const titleDiv = document.createElement("div");
-    titleDiv.textContent = title;
-    titleDiv.style.position = "fixed";
-    titleDiv.style.top = "220px";
-    titleDiv.style.right = rightPos;
-    titleDiv.style.background = "black";
-    titleDiv.style.color = "white";
-    titleDiv.style.padding = "5px";
-    titleDiv.style.fontSize = "12px";
-    titleDiv.style.zIndex = "9999";
+    d3.select("#winner-indicator").remove();
     
-    document.body.appendChild(img);
-    document.body.appendChild(titleDiv);
-    
-    setTimeout(() => {
-        if (img.parentNode) document.body.removeChild(img);
-        if (titleDiv.parentNode) document.body.removeChild(titleDiv);
-    }, 12000);
+    console.log("✅ Mode Fortune désactivé");
 }
 
-function spinRadarWhite() {
-    console.log("🎡 Rotation avec fond blanc...");
+function announceWinnerML(winner) {
+    console.log(`🏆 ${getFortuneText('winnerIndicator')}: ${winner.name}`);
+
+    // AJOUTER : Colorer le segment gagnant
+    highlightWinnerSegment(winner.segment, winner.generation);
     
-    const originalSvg = d3.select("#tree-svg");
+    const indicator = d3.select("#winner-indicator");
+    indicator.transition()
+        .duration(500)
+        .attr("transform", `translate(${window.innerWidth/2}, 30) scale(1.2)`)
+        .transition()
+        .duration(500)
+        .attr("transform", `translate(${window.innerWidth/2}, 50) scale(1)`);
     
-    // Masquer fond
-    d3.selectAll('.background-element, .bubble-group').style('display', 'none');
+    showWinnerMessageML(winner); // Version multilingue
     
-    // Fond BLANC (ultra discret)
-    const whiteRect = originalSvg.insert("rect", ":first-child")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "#FFFFFF"); // BLANC PUR
-    
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    // Canvas blanc
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const svgData = new XMLSerializer().serializeToString(originalSvg.node());
-    const img = new Image();
-    
-    img.onload = function() {
-        ctx.drawImage(img, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // Détecter BLANC PUR (rouge=255, vert=255, bleu=255)
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i] === 255 && data[i+1] === 255 && data[i+2] === 255) {
-                data[i + 3] = 0; // Transparent
-            }
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-        const transparentPng = canvas.toDataURL("image/png");
-        
-        // Nettoyage
-        whiteRect.remove();
-        d3.selectAll('.background-element, .bubble-group').style('display', null);
-        
-        // Rotation
-        spinTransparentPng(transparentPng);
-        
-        console.log("✅ Rotation blanche terminée !");
-    };
-    
-    const encodedSvgData = encodeURIComponent(svgData);
-    img.src = "data:image/svg+xml;charset=utf-8," + encodedSvgData;
+    playSound('winner');
 }
-
-window.spinRadarWhite = spinRadarWhite;
-
