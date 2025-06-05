@@ -1,5 +1,5 @@
 
-import { state } from './main.js';
+import { state, updateRadarButtonText } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
   // Variables pour garder une référence aux éléments
@@ -1100,6 +1100,14 @@ function createSection(title, index = 0) {
     // const section = createSection('Nuage de mots', 0);
     const section = createSection(getMenuTranslation('section_namecloud'), 0);
     
+
+    function enableRadarAndDisplay() {
+        state.isRadarEnabled = true;
+        updateRadarButtonText();
+        displayGenealogicTree(null, false, false, false, 'fanAncestors');
+    }
+    window.enableRadarAndDisplay = enableRadarAndDisplay;
+
     const buttons = [
       { 
         id: 'menu-nameCloudBtn',
@@ -1109,7 +1117,7 @@ function createSection(title, index = 0) {
       },
       { 
         id: 'menu-nameCloudBtn',
-        onclick: "displayGenealogicTree(null, false, false,  false, 'fanAncestors')",
+        onclick: 'enableRadarAndDisplay()',
         title: getMenuTranslation('section_radar'), //'Nuage de noms', 
         text: '🕸️🎯' // '👥'
       }

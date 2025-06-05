@@ -500,7 +500,13 @@ export function replaceRootPersonSelector(customOptions = null) {
                     }
                 } else {
                     // En mode historique, simplement afficher l'arbre
-                    displayGenealogicTree(value, true);
+                    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in replaceRootPersonSelector ################# ')
+                    // displayGenealogicTree(value, true);
+                    if (state.isRadarEnabled) {
+                        displayGenealogicTree(value, false, false,  false, 'fanAncestors');
+                    } else {
+                        displayGenealogicTree(value, true, false);
+                    }
                 }
             }
             
@@ -731,6 +737,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                                 selectFoundPerson(option.value);
                             } else {
                                 // Fallback si la fonction n'est pas disponible
+                                console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateCustomSelectorOptions 1  ################# ')
                                 displayGenealogicTree(option.value, true);
                                 
                                 // Recharger le sélecteur après un court délai
@@ -743,6 +750,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                             }
                         } else {
                             // Si nous sommes en mode normal (historique), simplement afficher l'arbre
+                            console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateCustomSelectorOptions 1  ################# ')
                             displayGenealogicTree(option.value, true);
                             
                             // Désactiver le clignotement

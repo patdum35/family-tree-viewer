@@ -10,7 +10,7 @@ import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
-import { setMaxGenerations } from './treeFanRenderer.js'
+import { setMaxGenerations, disableFortuneModeWithLever } from './treeFanRenderer.js'
 
 
 /**
@@ -161,6 +161,7 @@ export function selectRootPerson() {
         }
 
         state.rootPersonId = selectedPersonId;
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in selectRootPerson ################# ')
         displayGenealogicTree(selectedPersonId, true);
         
         resultsSelect.style.display = 'block';
@@ -227,7 +228,10 @@ export function selectFoundPerson(personId) {
     }
     
     // Afficher la personne comme racine
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
     displayGenealogicTree(personId, true);
+
+
     
     // Attendre que l'arbre soit affiché et que l'historique soit mis à jour
     setTimeout(() => {
@@ -474,7 +478,9 @@ export async function returnToLogin() {
 
     // Masquer la carte
     hideMap();
-    
+
+    disableFortuneModeWithLever();
+    state.isRadarEnabled = false;
     
     // Restaurer le fond d'écran de connexion s'il a été supprimé
     const loginBackground = document.querySelector('.login-background');

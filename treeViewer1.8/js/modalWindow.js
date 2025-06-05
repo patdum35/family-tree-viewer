@@ -1444,6 +1444,8 @@ export function setAsRootPerson(personId) {
     document.getElementById('person-details-modal').style.display = 'none';
     
     // Redessiner l'arbre avec cette personne comme point de départ
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setAsRootPerson  ################# ')
+
     displayGenealogicTree(personId, true);
 }
 

@@ -7,7 +7,8 @@ import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyN
 import { hideHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
-import { translateOccupation } from './occupations.js'; // N
+import { translateOccupation } from './occupations.js'; 
+import { disableFortuneModeWithLever } from './treeFanRenderer.js';
 
 
 export const nameCloudState = {
@@ -56,10 +57,12 @@ export const nameCloudState = {
     animationStyle: "none",
 }
 
-export function processNamesCloudWithDate(config, containerElement = null) {
+export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
     // Pour désactiver le fond d'écran
     enableBackground(false);
+
+    disableFortuneModeWithLever();
 
     // Appeler la fonction au chargement du module
     loadSettingsFromLocalStorage();

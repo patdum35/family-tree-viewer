@@ -1,9 +1,9 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state } from './main.js';
+import { state, displayGenealogicTree } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
-import { svgToCanvasFixed } from './exportManager.js';
+
 
 let fanZoom;
 let lastFanTransform = null;
@@ -24,7 +24,12 @@ let leverStartTime = 0;
 let cachedRadarPNG = null;
 let isCacheValid = false;
 
-let currentRadarAngle = 0; //  angle de départ du radar
+// let state.currentRadarAngle = 0; //  angle de départ du radar
+let previousRootPersonId = null;
+let previousNombreGeneration = null;
+
+let currentAnimationTimeouts = [];
+let allWinnerSegments = []; // Mémoriser tous les segments gagnants
 
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
@@ -63,8 +68,9 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     
     // Gestion de l'affichage initial
     // if (!isAnimation && isZoomRefresh) {
-    //     resetFanView();
-    // }
+    if (!isZoomRefresh) {
+        resetFanView();
+    }
     
     // Fond élégant
     if (state.initialTreeDisplay) {
@@ -78,8 +84,13 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     
     console.log('✅ Rendu éventail 360° terminé');
 
+    // detect id root person has changed : rootPersonId
+    // detect if nombre_genearation has changed : nombre_generation
+    // detect si treeMode has changed : treeModeReal
+
+
     // Générer le cache PNG seulement s'il n'existe pas
-    if (!isCacheValid || !cachedRadarPNG) {
+    if (!isCacheValid || !cachedRadarPNG || (previousRootPersonId != state.rootPersonId) || (previousNombreGeneration != state.nombre_generation)) {
         console.log(`🔄 \n\nGénération du cache PNG...`);
         setTimeout(() => {
             generateRadarCache();
@@ -87,6 +98,11 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     } else {
         console.log(`✅ \n\nCache PNG déjà disponible`);
     }
+
+    previousRootPersonId = state.rootPersonId;
+    previousNombreGeneration = state.nombre_generation;
+    
+    console.log('\n\n ******* DEBUG : ', state.rootPersonId, state.nombre_generation)
 }
 
 
@@ -196,7 +212,8 @@ function setupFanSVG() {
     
     const svg = d3.select("#tree-svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+        .style("touch-action", "pan-x pan-y pinch-zoom");
     
     svg.selectAll("*").remove();
     return svg;
@@ -278,7 +295,8 @@ function setupFanZoom(svg, mainGroup) {
             // Toujours centrer, mais autoriser le zoom
             lastFanTransform = transform;
             mainGroup.attr("transform", 
-                `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
+                // `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
+                `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
         });
     
     svg.call(fanZoom);
@@ -295,23 +313,65 @@ function setupFanZoom(svg, mainGroup) {
 /**
  * Réinitialise la vue de l'éventail
  */
+// export function resetFanView() {
+//     const svg = d3.select("#tree-svg");
+//     if (fanZoom) {
+//         const resetTransform = d3.zoomIdentity.scale(0.7);
+//         svg.transition()
+//             .duration(750)
+//             .call(fanZoom.transform, resetTransform);
+//     }
+// }
+
+
+
 export function resetFanView() {
     const svg = d3.select("#tree-svg");
     if (fanZoom) {
-        const resetTransform = d3.zoomIdentity.scale(0.7);
+        // Calculer le zoom optimal et centrer
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
+        const optimalZoom = Math.min((width * 0.8) / (2 * totalRadius), (height * 0.8) / (2 * totalRadius));
+        const finalZoom = Math.max(0.1, Math.min(optimalZoom, 1));
+        
+        const resetTransform = d3.zoomIdentity
+            .translate(fanConfig.centerX, fanConfig.centerY)
+            .scale(finalZoom);
+            
         svg.transition()
             .duration(750)
             .call(fanZoom.transform, resetTransform);
     }
 }
 
+
 /**
  * Change la personne racine
  */
+// function changeRootPerson(personId) {
+//     console.log(`🎯 Changement de racine vers: ${personId}`);
+//     if (typeof displayGenealogicTree === 'function') {
+//         console.log('\n\n\n\n #######   CALL displayGenealogicTree in changeRootPerson ### ')
+//         displayGenealogicTree(personId, false, false, false, state.treeModeReal);
+//         setupFanZoom();
+//     }
+// }
+
 function changeRootPerson(personId) {
     console.log(`🎯 Changement de racine vers: ${personId}`);
-    if (typeof displayGenealogicTree === 'function') {
-        displayGenealogicTree(personId, false, false, false, state.treeModeReal);
+    
+    // Vérifier que fanZoom existe avant d'appeler displayGenealogicTree
+    if (!fanZoom) {
+        console.warn('⚠️ fanZoom pas encore initialisé, on attend...');
+        setTimeout(() => changeRootPerson(personId), 100);
+        return;
+    }
+    
+    if (typeof window.displayGenealogicTree === 'function') {
+        window.displayGenealogicTree(personId, false, false, false, state.treeModeReal);
+    } else {
+        console.error('❌ displayGenealogicTree non trouvée');
     }
 }
 
@@ -339,6 +399,7 @@ export function setMaxGenerations(max) {
     if (state.currentTree && state.rootPersonId) {
         setTimeout(() => {
             if (typeof displayGenealogicTree === 'function') {
+                console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setMaxGenerations  ################# ')
                 displayGenealogicTree(state.rootPersonId, false, false, false, 'fanAncestors');
             }
         }, 100);
@@ -821,6 +882,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
     const fillColor = getGenerationColor(generation);
     
     // Segment principal avec données liées
+    let clickTimeout = null;
     segmentGroup.append("path")
         .attr("d", arc)
         .attr("class", `person-box person-segment generation-${generation}`)
@@ -830,13 +892,105 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         .style("stroke-width", "1")
         .style("filter", "url(#drop-shadow)")
         .style("cursor", "pointer")
+        .style("touch-action", "manipulation")
+        // .on("click", function(event, d) { 
+        //     event.stopPropagation();
+        //     displayPersonDetails(d.id);
+        // })
+        // .on("dblclick", function(event, d) { 
+        //     event.stopPropagation();
+        //     changeRootPerson(d.id);
+        // });
+        // .on("click", function(event, d) { 
+        //     event.stopPropagation();
+            
+        //     // Délai pour distinguer click simple du double-click
+        //     setTimeout(() => {
+        //         if (!this._doubleClicked) {
+        //             displayPersonDetails(d.id);
+        //         }
+        //         this._doubleClicked = false;
+        //     }, 300);
+        // })
+        // .on("dblclick", function(event, d) { 
+        //     event.stopPropagation();
+        //     this._doubleClicked = true;
+        //     changeRootPerson(d.id);
+        // })
+        // .on("touchend", function(event, d) {
+        //     event.stopPropagation();
+        //     event.preventDefault();
+            
+        //     const now = Date.now();
+        //     const timeDiff = now - (this._lastTap || 0);
+            
+        //     if (timeDiff < 400 && timeDiff > 0) {
+        //         // Double-tap détecté
+        //         changeRootPerson(d.id);
+        //     } else {
+        //         // Premier tap
+        //         setTimeout(() => {
+        //             displayPersonDetails(d.id);
+        //         }, 400);
+        //     }
+            
+        //     this._lastTap = now;
+        // });
+
+
+
         .on("click", function(event, d) { 
             event.stopPropagation();
-            displayPersonDetails(d.id);
+            
+            // Annuler le timeout précédent s'il existe
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+            }
+            
+            // Attendre 300ms pour voir s'il y a un double-click
+            clickTimeout = setTimeout(() => {
+                displayPersonDetails(d.id);
+                clickTimeout = null;
+            }, 300);
         })
         .on("dblclick", function(event, d) { 
             event.stopPropagation();
+            
+            // Annuler le click simple en cours
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+            }
+            
+            // Exécuter immédiatement le changement de racine
             changeRootPerson(d.id);
+        })
+        .on("touchend", function(event, d) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const now = Date.now();
+            const timeDiff = now - (this._lastTap || 0);
+            
+            if (timeDiff < 400 && timeDiff > 0) {
+                // Double-tap : annuler le click simple
+                if (clickTimeout) {
+                    clearTimeout(clickTimeout);
+                    clickTimeout = null;
+                }
+                changeRootPerson(d.id);
+            } else {
+                // Premier tap : attendre avant d'exécuter
+                if (clickTimeout) {
+                    clearTimeout(clickTimeout);
+                }
+                clickTimeout = setTimeout(() => {
+                    displayPersonDetails(d.id);
+                    clickTimeout = null;
+                }, 400);
+            }
+            
+            this._lastTap = now;
         });
     
     // Texte de la personne
@@ -986,7 +1140,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     playSound('wheel-spinning');
     
     // rotation  de l'image png
-    setTimeout(() => {
+    const timeoutId1 = setTimeout(() => {
         spinningImg.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
         // spinningImg.style.transform = `rotate(${finalRotation}deg)`;
         // NOUVEAU : Récupérer l'angle actuel du radar
@@ -998,9 +1152,10 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         const totalRotation = radarAngle + finalRotation;
         spinningImg.style.transform = `rotate(${totalRotation}deg)`;
     }, 50);
+    currentAnimationTimeouts.push(timeoutId1);
     
 
-    setTimeout(() => {
+    const timeoutId2 = setTimeout(() => {
         console.log("🎉 Roue arrêtée - Réactivation du levier !");
 
         playSound('wheel-stop');
@@ -1013,7 +1168,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         // Récupérer le zoom ET l'angle actuel du radar
         const currentTransformAttr = originalRadar.attr("transform");
         let currentScale = 0.7;
-        // let currentRadarAngle = 0; //  angle de départ du radar
+        // let state.currentRadarAngle = 0; //  angle de départ du radar
         
         if (currentTransformAttr) {
             const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
@@ -1024,15 +1179,15 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
             // extraire l'angle actuel du radar
             const rotateMatch = currentTransformAttr.match(/rotate\(([-\d.]+)\)/);
             if (rotateMatch) {
-                currentRadarAngle = parseFloat(rotateMatch[1]);
+                state.currentRadarAngle = parseFloat(rotateMatch[1]);
             }
         }
         
-        console.log(`📊 Angle radar avant rotation: ${currentRadarAngle.toFixed(1)}°`);
+        console.log(`📊 Angle radar avant rotation: ${state.currentRadarAngle.toFixed(1)}°`);
         console.log(`📊 Rotation PNG ajoutée: ${finalRotation.toFixed(1)}°`);
         
         //  Angle final = angle de départ + rotation du PNG
-        const finalAngleTotal = currentRadarAngle + finalRotation;
+        const finalAngleTotal = state.currentRadarAngle + finalRotation;
         const finalAngleNormalized = finalAngleTotal % 360;
         
         console.log(`📊 Angle final total: ${finalAngleTotal.toFixed(1)}°`);
@@ -1093,19 +1248,22 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         
         const startTime4 = performance.now(); 
         // announceWinnerML(winner);
-        setTimeout(() => {
+        const timeoutId3 = setTimeout(() => {
             announceWinnerML(winner);
         }, 5000); // RETARD de 2 secondes au lieu d'immédiat
+        currentAnimationTimeouts.push(timeoutId3);
 
 
        console.log(`🔄 announceWinnerML en ${(performance.now()-startTime4).toFixed(1)}ms`);
 
-        setTimeout(() => {
+        const timeoutId4 = setTimeout(() => {
             hideWinnerText();
         // }, 3000);
         }, 8000); // Ajuster en conséquence
+        currentAnimationTimeouts.push(timeoutId4);
 
     }, duration + 100);
+    currentAnimationTimeouts.push(timeoutId2);
 
 }
 
@@ -1120,7 +1278,7 @@ function resetRadarToCenter() {
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
         
-        // NOUVEAU : Récupérer le zoom actuel au lieu de forcer 0.7
+        // Récupérer le zoom actuel au lieu de forcer 0.7
         const svg = d3.select("#tree-svg");
         const currentTransform = d3.zoomTransform(svg.node());
         const currentScale = currentTransform ? currentTransform.k : 0.7;
@@ -1137,63 +1295,7 @@ function resetRadarToCenter() {
 
 
 
-// function highlightWinnerSegment(segmentIndex, generation) {
-//     // // Mémoriser le gagnant actuel
-//     // lastWinner = { segment: segmentIndex, generation: generation };
 
-
-
-//     // Reset de l'ancien si il existe
-//     if (lastWinner && lastWinner.element) {
-//         // Utiliser l'élément stocké directement
-//         if (lastWinner.generation === 0) {
-//             d3.select(lastWinner.element)
-//                 .style("fill", "#ff6b6b")
-//                 .style("stroke", "white")
-//                 .style("stroke-width", "4");
-//         } else {
-//             const originalColor = getGenerationColor(lastWinner.generation);
-//             d3.select(lastWinner.element).select("path")
-//                 .style("fill", originalColor)
-//                 .style("stroke", "white")
-//                 .style("stroke-width", "1");
-//         }
-//     }
-    
-//     // Mémoriser le nouveau gagnant avec l'élément
-    
-
-
-//     if (generation === 0) {
-//         d3.select(".center-person-group circle")
-//             .style("fill", "#ff0000")
-//             .style("stroke", "#ffffff")
-//             .style("stroke-width", "4");
-//     } else {
-//         // CORRECTION : Chercher par data-segment-position au lieu de l'index DOM
-//         const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
-        
-//         if (!targetElement.empty()) {
-//             targetElement.select("path")
-//                 .style("fill", "#ff0000")
-//                 .style("stroke", "#ffffff")
-//                 .style("stroke-width", "3");
-            
-//                 // STOCKER L'ÉLÉMENT
-//             lastWinner = { segment: segmentIndex, generation: generation, element: targetElement.node() };
-                
-
-//             console.log(`🔴 Gen${generation} segment ${segmentIndex} coloré en rouge (trouvé par attribut)`);
-//         } else {
-//             console.log(`❌ Impossible de trouver l'élément Gen${generation} segment ${segmentIndex} pour le colorer`);
-//         }
-//     }
-// }
-
-
-
-
-/* OK c'est bon */
 function highlightWinnerSegment(segmentIndex, generation) {
     // Reset de l'ancien gagnant
     if (lastWinner && lastWinner.clonedSegment) {
@@ -1206,6 +1308,14 @@ function highlightWinnerSegment(segmentIndex, generation) {
             .style("fill", " #ff0000")
             .style("stroke", " #ffffff")
             .style("stroke-width", "4");
+
+        // Mémoriser le centre
+        allWinnerSegments.push({
+            generation: generation,
+            segment: segmentIndex,
+            element: centerElement.node()
+        });
+
         lastWinner = { segment: segmentIndex, generation: generation, element: centerElement.node() };
         
     } else {
@@ -1217,8 +1327,15 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 .style("fill", " #ff0000")
                 .style("stroke", " #ffffff")
                 .style("stroke-width", "3");
+
+            // Mémoriser ce segment gagnant
+            allWinnerSegments.push({
+                generation: generation,
+                segment: segmentIndex,
+                element: targetElement.node()
+            });
             
-            setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 // 2. MESURER le segment rouge
                 const targetRect = targetElement.node().getBoundingClientRect();
                 const startX = targetRect.left + targetRect.width / 2;
@@ -1389,7 +1506,10 @@ function highlightWinnerSegment(segmentIndex, generation) {
                         }
                         
                         // Stocker pour nettoyage
-                        lastWinner.textOverlay = textOverlay;
+                        // lastWinner.textOverlay = textOverlay;
+                        if (lastWinner) {
+                            lastWinner.textOverlay = textOverlay;
+                        }
                     });
                 
                 lastWinner = { 
@@ -1400,10 +1520,12 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 };
                 
             }, 1500);
+            currentAnimationTimeouts.push(timeoutId);
         }
     }
-}
 
+
+}
 
 
 function resetLastWinnerHighlightAsync() {
@@ -1453,6 +1575,7 @@ function resetLastWinnerHighlightAsync() {
         lastWinner = null;
     });
 }
+
 
 
 
@@ -1809,10 +1932,24 @@ class FortuneWheelSounds {
 }
 
 // Initialiser le système de sons
+// const fortuneSounds = new FortuneWheelSounds();
+
+const soundsInitStart = performance.now();
+console.log('🔊 Début initialisation FortuneWheelSounds...');
+
 const fortuneSounds = new FortuneWheelSounds();
+
+
+const soundsInitEnd = performance.now();
+console.log(`🔊 FortuneWheelSounds initialisé en: ${(soundsInitEnd - soundsInitStart).toFixed(1)}ms`);
+
 
 //  fonction playSound
 function playSound(soundName) {
+    if (state.isSpeechEnabled === false) {
+        console.log(`🔇 Son désactivé par state.isSpeechEnabled: ${soundName}`);
+        return;
+    }
     fortuneSounds.play(soundName);
 }
 
@@ -1983,12 +2120,52 @@ function createRealisticSlotHandleML() {
         const pullStart = performance.now();
         console.log("🎯 DÉBUT pullLever()");
 
-
         if (!leverEnabled || isSpinning) {
             console.log(getFortuneText('leverDisabled'));
             return;
         }
 
+        // closeWinnerMessage();
+
+        // RESET complet de toutes les animations et fenêtres en cours
+        // RESET avec nettoyage des segments mémorisés uniquement
+        currentAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        currentAnimationTimeouts = [];
+        d3.selectAll("*").interrupt();
+
+        // Nettoyer UNIQUEMENT les segments gagnants mémorisés
+        allWinnerSegments.forEach(winner => {
+            if (winner.generation === 0) {
+                d3.select(".center-person-group circle")
+                    .style("fill", "#ff6b6b")
+                    .style("stroke", "white")
+                    .style("stroke-width", "4");
+            } else {
+                const originalColor = getGenerationColor(winner.generation);
+                const targetElement = d3.select(`.person-segment-group.gen-${winner.generation}[data-segment-position="${winner.segment}"]`);
+                
+                if (!targetElement.empty()) {
+                    targetElement.select("path")
+                        .style("fill", originalColor)
+                        .style("stroke", "white")
+                        .style("stroke-width", "1");
+                }
+            }
+        });
+
+        // Vider la liste des segments gagnants
+        allWinnerSegments = [];
+
+        // Supprimer éléments clonés
+        d3.selectAll("svg[style*='z-index: 9999']").remove();
+        d3.selectAll("div[style*='z-index: 10000']").remove();
+        lastWinner = null;
+
+        // Autres nettoyages
+        if (typeof closeWinnerMessage === 'function') {
+            closeWinnerMessage();
+        }
+        hideWinnerText();
         
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
@@ -2008,7 +2185,7 @@ function createRealisticSlotHandleML() {
         
         playSound('lever-pull');
         
-        setTimeout(() => {
+        const timeoutId6 = setTimeout(() => {
             const timeoutStart = performance.now();
             console.log(`🎯 setTimeout déclenché après: ${(timeoutStart - pullStart).toFixed(1)}ms`);
 
@@ -2035,12 +2212,14 @@ function createRealisticSlotHandleML() {
 
             
         }, 400);
+        currentAnimationTimeouts.push(timeoutId6);
         console.log(`🎯 FIN pullLever(): ${(performance.now() - pullStart).toFixed(1)}ms`);
         
-        setTimeout(() => {
+        const timeoutId7 = setTimeout(() => {
             leverEnabled = true;
             leverText.textContent = getFortuneText('leverText'); // TRADUCTION
         }, 1000);
+        currentAnimationTimeouts.push(timeoutId7);
 
         console.log(`🎯 FIN pullLever() après traduction: ${(performance.now() - pullStart).toFixed(1)}ms`);
     }
@@ -2131,9 +2310,44 @@ function showWinnerMessageML(winner) {
             if (message.parentNode) {
                 document.body.removeChild(message);
             }
+            hideWinnerText();
+            resetLastWinnerHighlightAsync();
+
         }, 300);
     };
 }
+
+// Fonction pour fermer le message gagnant
+function closeWinnerMessage() {
+    // Chercher le message gagnant actuel
+    const winnerMessages = document.querySelectorAll('div[style*="position: fixed"][style*="transform: translate(-50%, -50%)"]');
+    
+    winnerMessages.forEach(message => {
+        // Vérifier que c'est bien un message gagnant (contient les emojis ou textes typiques)
+        if (message.innerHTML.includes('🎉') || 
+            message.innerHTML.includes(getFortuneText('winnerTitle')) ||
+            message.innerHTML.includes('GAGNANT') ||
+            message.innerHTML.includes('WINNER')) {
+            
+            console.log('🗑️ Fermeture du message gagnant');
+            
+            // Animation de fermeture
+            message.style.transition = 'transform 0.3s ease';
+            message.style.transform = 'translate(-50%, -50%) scale(0)';
+            
+            // Suppression après l'animation
+            setTimeout(() => {
+                if (message.parentNode) {
+                    document.body.removeChild(message);
+                    console.log('✅ Message gagnant supprimé');
+                }
+            }, 300);
+        }
+    });
+}
+
+// Export pour utilisation dans d'autres modules
+window.closeWinnerMessage = closeWinnerMessage;
 
 // Fonction Instructions pour l'utilisateur  multilingue
 function showFortuneInstructionsML() {
@@ -2172,7 +2386,7 @@ function showFortuneInstructionsML() {
     }, 4000);
 }
 
-function createWinnerIndicatorML() {
+function createWinnerRedArrowIndicatorML() {
     // Supprimer l'ancienne
     d3.select("#winner-indicator-fixed").remove();
     
@@ -2193,13 +2407,19 @@ function createWinnerIndicatorML() {
     // Flèche descendue de 30px supplémentaires
     indicator.append("polygon")
         .attr("points", "0,60 -20,30 -8,30 -8,15 8,15 8,30 20,30") // +30px sur tous les Y
-        .attr("fill", "#ff4444")
+        .attr("fill", " #ff4444")
         .attr("stroke", "white")
         .attr("stroke-width", "3");
     
     // PAS DE TEXTE au début - sera ajouté dynamiquement
     
     console.log("🏆 Indicateur FIXE créé (sans texte)");
+}
+
+function removeWinnerRedArrowIndicator() {
+    d3.select("#winner-indicator").remove();
+    d3.select("#winner-indicator-fixed").remove();
+    console.log('🗑️ Flèche rouge supprimée');
 }
 
 // Fonction pour afficher le texte "GAGNANT" pendant la rotation
@@ -2239,11 +2459,11 @@ export function enableFortuneModeML() {
     
     const svg = d3.select("#tree-svg");
     originalZoom = svg.on(".zoom");
-    svg.on(".zoom", null);
+    // svg.on(".zoom", null);
     
     resetRadarToCenter();
     createRealisticSlotHandleML(); // Version multilingue
-    createWinnerIndicatorML(); // Version multilingue
+    createWinnerRedArrowIndicatorML(); // Version multilingue
     showFortuneInstructionsML(); // Version multilingue
     
     console.log("✅", getFortuneText('fortuneModeActive'));
@@ -2270,15 +2490,17 @@ export function disableFortuneModeWithLever() {
     }
     
     d3.select("#winner-indicator").remove();
+
+    closeWinnerMessage();
+    hideWinnerText();
+    resetLastWinnerHighlightAsync();
+    removeWinnerRedArrowIndicator();
     
     console.log("✅ Mode Fortune désactivé");
 }
 
 function announceWinnerML(winner) {
     console.log(`🏆 ${getFortuneText('winnerIndicator')}: ${winner.name}`);
-
-    // AJOUTER : Colorer le segment gagnant
-    // highlightWinnerSegment(winner.segment, winner.generation);
     
     const indicator = d3.select("#winner-indicator");
     indicator.transition()

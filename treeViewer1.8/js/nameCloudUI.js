@@ -10,6 +10,7 @@ import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
 import { showHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
+import { enableFortuneModeML } from './treeFanRenderer.js';
 
 
 
@@ -839,6 +840,9 @@ function setupModalEvents(modal, closeButton, generateNameCloud) {
         console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
         enableBackground(true);
         state.backgroundEnabled = true;
+        if (state.isRadarEnabled) {
+            enableFortuneModeML();
+        }
 
     });
 

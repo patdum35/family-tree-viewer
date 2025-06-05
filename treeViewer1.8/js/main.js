@@ -117,7 +117,9 @@ export const state = {
         showSpouses: true,
         showSiblings: true,
         animationsEnabled: true
-    }
+    },
+    currentRadarAngle: 0
+
 };
 
 export { geocodeLocation };
@@ -151,26 +153,26 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
 }
 
 
+export function updateRadarButtonText() {
+    const treeRadarToggleBtn = document.getElementById('radarBtn');
+    if (treeRadarToggleBtn) {
+        const span = treeRadarToggleBtn.querySelector('span');
+        if (span) {
+            span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
+        }
+    }
+}
+
 export function toggleTreeRadar() {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
-    // Mettre à jour le bouton
-    treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
-    // treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿' : '🎯';
-    
+    updateRadarButtonText();  
 
     if (state.isRadarEnabled) {
         displayGenealogicTree(null, false, false,  false, 'fanAncestors');
-        // enableFortuneMode();
-        // enableFortuneModeRealistic();
-        enableFortuneModeML();
-
-
     } else {
         displayGenealogicTree(null, true, false);
-        // disableFortuneMode();
-        disableFortuneModeWithLever();
     }
 
 }
@@ -505,9 +507,11 @@ export async function loadData() {
 
 
 
-
+        updateRadarButtonText();
 
         state.initialTreeDisplay = true;
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in loadData ################# ')
+
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
 
         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
@@ -955,6 +959,8 @@ export function handleRootPersonChange(event) {
                
         
         // Redessiner l'arbre d'abord
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
+
         displayGenealogicTree(null, true, false, true);
         
         // Nettoyer tous les conteneurs de fond d'écran existants
@@ -996,6 +1002,14 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
     // Réinitialiser l'état de l'animation avant de changer l'arbre
     resetAnimationState();
+
+    if (state.isRadarEnabled) {
+        disableFortuneModeWithLever();
+        enableFortuneModeML();
+        state.currentRadarAngle = 0;
+    } else {
+        disableFortuneModeWithLever();
+    }
 
     // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
     // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
@@ -1121,8 +1135,20 @@ function updateBoxWidth() {
 export function updateTreeMode(mode) {
     // Réinitialiser l'état de l'animation avant de changer le mode
     resetAnimationState();
-    state.treeMode = mode;
-    displayGenealogicTree(null, true, false);
+
+    if (state.isRadarEnabled) {
+        state.treeMode = 'directAncestors';
+        mode = 'directAncestors';
+        displayGenealogicTree(null, false, false,  false, 'fanAncestors');
+    } else {
+        state.treeMode = mode;
+        displayGenealogicTree(null, true, false);
+    }
+
+    // state.treeMode = mode;
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateTreeMode ################# ')
+
+    // displayGenealogicTree(null, true, false);
 
     // pour mettre à jour la description
     const description = document.getElementById('treeModeDescription');

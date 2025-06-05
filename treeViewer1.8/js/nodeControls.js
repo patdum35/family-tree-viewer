@@ -71,6 +71,8 @@ export function handleRootChange(event, d) {
     
 
     event.stopPropagation();
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootChange  ################# ')
+
     displayGenealogicTree(d.data.id, true); 
 
     
@@ -365,7 +367,7 @@ function findDescendantsForSibling(siblingId, isAnimation, nextNodeId) {
         });
     }
     
-    console.log("\n\n\n *** DEBUG in findDescendantsForSibling   *** Descendants trouvés pour", siblingId, ":", childrenIds, childrenData, isAnimation, nextNodeId);
+    // console.log("\n\n\n *** DEBUG in findDescendantsForSibling   *** Descendants trouvés pour", siblingId, ":", childrenIds, childrenData, isAnimation, nextNodeId);
     return {
         childrenIds: childrenIds,
         childrenData: childrenData
@@ -2680,6 +2682,7 @@ function updateRootToClosestDescendant(descendant) {
     
     // Mettre à jour le sélecteur de personnes racines
     updateSelectorValue('root-person-results', descendant.id, displayName, { replaceOptions: true });
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateRootToClosestDescendant  ################# ')
 
     displayGenealogicTree(descendant.id);
 }
