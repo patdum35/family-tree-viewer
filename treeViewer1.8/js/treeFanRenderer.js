@@ -68,9 +68,11 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     
     // Gestion de l'affichage initial
     // if (!isAnimation && isZoomRefresh) {
-    if (!isZoomRefresh) {
-        resetFanView();
-    }
+    // if (!isZoomRefresh) {
+    //     resetFanView();
+    // }
+
+    resetFanView();
     
     // Fond élégant
     if (state.initialTreeDisplay) {
@@ -83,11 +85,6 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     }
     
     console.log('✅ Rendu éventail 360° terminé');
-
-    // detect id root person has changed : rootPersonId
-    // detect if nombre_genearation has changed : nombre_generation
-    // detect si treeMode has changed : treeModeReal
-
 
     // Générer le cache PNG seulement s'il n'existe pas
     if (!isCacheValid || !cachedRadarPNG || (previousRootPersonId != state.rootPersonId) || (previousNombreGeneration != state.nombre_generation)) {
@@ -2169,6 +2166,8 @@ function createRealisticSlotHandleML() {
         
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
+
+        resetFanView();
 
         const showWinnerStart = performance.now();
         showWinnerText(); // Afficher "GAGNANT" pendant la rotation
