@@ -320,27 +320,53 @@ function setupFanZoom(svg, mainGroup) {
 //     }
 // }
 
+function resetBrowserZoom() {
+    // // Méthode 1 : Scroll vers le haut pour forcer le reset
+    // window.scrollTo(0, 0);
+    
+    // Méthode 2 : Manipulation du viewport temporaire
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        const original = viewport.getAttribute('content');
+        
+        // Force le reset en modifiant temporairement le viewport
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        
+        // Remettre l'original après 100ms
+        setTimeout(() => {
+            viewport.setAttribute('content', original || 'width=device-width, initial-scale=1.0, user-scalable=yes');
+        }, 100);
+    }
+    
+    // // Méthode 3 : Force refresh du layout
+    // document.body.style.transform = 'scale(1.001)';
+    // setTimeout(() => {
+    //     document.body.style.transform = '';
+    // }, 50);
+}
 
 
 export function resetFanView() {
 
-    // Forcer le zoom navigateur à 1
-    if (window.visualViewport) {
-        // Méthode moderne
-        document.documentElement.style.transform = 'scale(1)';
-        document.documentElement.style.transformOrigin = '0 0';
-    } else {
-        // Fallback : viewport meta refresh
-        let viewport = document.querySelector('meta[name="viewport"]');
-        if (viewport) {
-            const content = viewport.getAttribute('content');
-            viewport.setAttribute('content', content + ', initial-scale=1.0');
-            // Force refresh
-            setTimeout(() => {
-                viewport.setAttribute('content', content);
-            }, 100);
-        }
-    }
+    // // Forcer le zoom navigateur à 1
+    // if (window.visualViewport) {
+    //     // Méthode moderne
+    //     document.documentElement.style.transform = 'scale(1)';
+    //     document.documentElement.style.transformOrigin = '0 0';
+    // } else {
+    //     // Fallback : viewport meta refresh
+    //     let viewport = document.querySelector('meta[name="viewport"]');
+    //     if (viewport) {
+    //         const content = viewport.getAttribute('content');
+    //         viewport.setAttribute('content', content + ', initial-scale=1.0');
+    //         // Force refresh
+    //         setTimeout(() => {
+    //             viewport.setAttribute('content', content);
+    //         }, 100);
+    //     }
+    // }
+
+    resetBrowserZoom();
 
     // zoom du d3.js
     const svg = d3.select("#tree-svg");
@@ -2186,6 +2212,8 @@ function createRealisticSlotHandleML() {
         
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
+
+        resetBrowserZoom();
 
         resetFanView();
 
