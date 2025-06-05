@@ -323,6 +323,26 @@ function setupFanZoom(svg, mainGroup) {
 
 
 export function resetFanView() {
+
+    // Forcer le zoom navigateur à 1
+    if (window.visualViewport) {
+        // Méthode moderne
+        document.documentElement.style.transform = 'scale(1)';
+        document.documentElement.style.transformOrigin = '0 0';
+    } else {
+        // Fallback : viewport meta refresh
+        let viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            const content = viewport.getAttribute('content');
+            viewport.setAttribute('content', content + ', initial-scale=1.0');
+            // Force refresh
+            setTimeout(() => {
+                viewport.setAttribute('content', content);
+            }, 100);
+        }
+    }
+
+    // zoom du d3.js
     const svg = d3.select("#tree-svg");
     if (fanZoom) {
         // Calculer le zoom optimal et centrer
