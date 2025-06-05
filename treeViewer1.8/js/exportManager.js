@@ -87,7 +87,7 @@ export async function exportToPDF(filename = null) {
 /**
  * Convertit un SVG en canvas - VERSION CORRIGÉE
  */
-async function svgToCanvasFixed(svgElement, scale = 1) {
+export async function svgToCanvasFixed(svgElement, scale = 1) {
     return new Promise((resolve, reject) => {
         try {
             console.log('🔄 Conversion SVG vers Canvas...');

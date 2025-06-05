@@ -3,6 +3,7 @@
 // ====================================
 import { state } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
+import { svgToCanvasFixed } from './exportManager.js';
 
 let fanZoom;
 let lastFanTransform = null;
@@ -18,6 +19,13 @@ let fanConfig = {
 };
 let lastWinner = null;
 
+let leverStartTime = 0;
+
+let cachedRadarPNG = null;
+let isCacheValid = false;
+
+let currentRadarAngle = 0; //  angle de départ du radar
+
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
  */
@@ -27,6 +35,7 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
         return;
     }
     
+
     console.log('🌟 Début du rendu éventail 360°...');
     console.log('📊 Arbre reçu:', state.currentTree);
     
@@ -53,9 +62,9 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     setupFanZoom(svg, mainGroup);
     
     // Gestion de l'affichage initial
-    if (!isAnimation && isZoomRefresh) {
-        resetFanView();
-    }
+    // if (!isAnimation && isZoomRefresh) {
+    //     resetFanView();
+    // }
     
     // Fond élégant
     if (state.initialTreeDisplay) {
@@ -68,6 +77,102 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     }
     
     console.log('✅ Rendu éventail 360° terminé');
+
+    // Générer le cache PNG seulement s'il n'existe pas
+    if (!isCacheValid || !cachedRadarPNG) {
+        console.log(`🔄 \n\nGénération du cache PNG...`);
+        setTimeout(() => {
+            generateRadarCache();
+        }, 500);
+    } else {
+        console.log(`✅ \n\nCache PNG déjà disponible`);
+    }
+}
+
+
+
+// AJOUTER cette nouvelle fonction dans treeFanRenderer.js
+async function generateRadarCache() {
+    try {
+        console.log('🎯 Génération du cache PNG...');
+        const startTime = performance.now();
+        
+        const originalSvg = d3.select("#tree-svg");
+        if (originalSvg.empty()) {
+            console.warn('⚠️ SVG non trouvé pour cache');
+            return;
+        }
+
+        // Masquer le fond d'écran pour avoir un fond blanc
+        d3.selectAll('.background-element, .bubble-group').style('display', 'none');
+             
+        // Canvas
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Sérialisation SVG
+        const serializeStart = performance.now();
+        const svgData = new XMLSerializer().serializeToString(originalSvg.node());
+        const serializeEnd = performance.now();
+        console.log(`⏱️ Sérialisation SVG cache: ${(serializeEnd - serializeStart).toFixed(1)}ms`);
+        
+        const img = new Image();
+        
+        img.onload = function() {
+            console.log(`📏 Taille PNG en cache: ${canvas.width}×${canvas.height} = ${canvas.width * canvas.height} pixels`);
+            console.log(`📏 Données à traiter: ${canvas.width * canvas.height * 4} bytes`);
+            const imageLoadEnd = performance.now();
+            console.log(`⏱️ Chargement image SVG en cache: ${(imageLoadEnd - serializeEnd).toFixed(1)}ms`);
+                        
+            const drawStart = performance.now();
+            ctx.drawImage(img, 0, 0);
+            const drawEnd = performance.now();
+            console.log(`⏱️ Dessin sur canvas cache: ${(drawEnd - drawStart).toFixed(1)}ms`);
+            
+            // Traitement pixels pour transparence
+            const pixelStart = performance.now();
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // remettre le fond d'écran 
+            d3.selectAll('.background-element, .bubble-group').style('display', null);
+
+            const pixelgetImageData = performance.now();
+            console.log(`⏱️ Traitement ctx.getImageData: ${(pixelgetImageData - pixelStart).toFixed(1)}ms`); 
+            
+
+            const data = imageData.data;
+            
+            // Remplacer blanc par transparent
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] === 255 && data[i+1] === 255 && data[i+2] === 255) {
+                    data[i + 3] = 0;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            const pixelEnd = performance.now();
+            console.log(`⏱️ Traitement pixels cache: ${(pixelEnd - pixelStart).toFixed(1)}ms`);
+            
+            cachedRadarPNG = canvas.toDataURL("image/png");
+            isCacheValid = true;
+            
+            const totalEnd = performance.now();
+            console.log(`✅ Cache PNG généré en: ${(totalEnd - startTime).toFixed(1)}ms`);
+        };
+        
+        const encodedSvgData = encodeURIComponent(svgData);
+        img.src = "data:image/svg+xml;charset=utf-8," + encodedSvgData;
+        
+    } catch (error) {
+        console.error('❌ Erreur génération cache:', error);
+        isCacheValid = false;
+        // Nettoyer en cas d'erreur
+        d3.selectAll('.background-element, .bubble-group').style('display', null);
+    }
 }
 
 /**
@@ -153,8 +258,8 @@ function setupFanZoom(svg, mainGroup) {
         const height = window.innerHeight;
         
         // Rayon total du radar
-        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
-        
+        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
+
         // Calcul du zoom pour que le radar tienne dans la fenêtre
         // On laisse une marge de 10% de chaque côté
         const widthZoom = (width * 0.8) / (2 * totalRadius);
@@ -226,6 +331,10 @@ function displayPersonDetails(personId) {
 export function setMaxGenerations(max) {
     fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
     console.log(`📊 Générations max mises à jour: ${max}`);
+
+    // Invalider le cache
+    isCacheValid = false;
+    cachedRadarPNG = null;
     
     if (state.currentTree && state.rootPersonId) {
         setTimeout(() => {
@@ -782,64 +891,45 @@ let slotHandle = null;
 let isSpinning = false;
 let originalZoom = null;
 
-// Mise à jour de la fonction d'animation pour réactiver le levier
+// fonction d'animation pour réactiver le levier
 function createSpinningWheelWithLever(finalRotation, duration) {
-    // Code de création de la roue identique...
-    console.log("🎨 Création de la roue avec levier réaliste...");
+    console.log("📸 Utilisation cache PNG...");
+    const overallStart = performance.now();
     
-    const originalSvg = d3.select("#tree-svg");
-    
-    d3.selectAll('.background-element, .bubble-group').style('display', 'none');
-    
-    const whiteRect = originalSvg.insert("rect", ":first-child")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "#FFFFFF");
-    
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const svgData = new XMLSerializer().serializeToString(originalSvg.node());
-    const img = new Image();
-    
-    img.onload = function() {
-        ctx.drawImage(img, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i] === 255 && data[i+1] === 255 && data[i+2] === 255) {
-                data[i + 3] = 0;
-            }
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-        const transparentPng = canvas.toDataURL("image/png");
-        
-        whiteRect.remove();
-        d3.selectAll('.background-element, .bubble-group').style('display', null);
-        
-        // Animation avec réactivation du levier à la fin
-        animateFortuneWheelWithLever(transparentPng, finalRotation, duration);
-    };
-    
-    const encodedSvgData = encodeURIComponent(svgData);
-    img.src = "data:image/svg+xml;charset=utf-8," + encodedSvgData;
+    try {
+        // Utiliser le cache si disponible
+        if (isCacheValid && cachedRadarPNG) {
+            console.log(`⚡ Cache utilisé instantanément !`);
+
+            // NOUVEAU : Récupérer l'angle actuel du radar avant animation
+            const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
+                return this.querySelector(".center-person-group") !== null;
+            });
+            
+            const currentTransform = originalRadar.attr("transform") || "";
+            const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
+            const currentAngle = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+            
+            console.log(`📐 Animation partira de l'angle: ${currentAngle.toFixed(1)}°`);
+            
+            animateFortuneWheelWithLever(cachedRadarPNG, finalRotation, duration);
+            return;
+        }      
+    } catch (error) {
+        console.error("❌ Erreur animation:", error);
+    }
 }
+
+
 
 // Fonction de lancement
 function launchFortuneWheelWithLever(baseVelocity) {
     if (isSpinning) return;
     
     isSpinning = true;
+    leverStartTime = performance.now();
     console.log(`🎡 Lancement avec levier réaliste - vitesse: ${baseVelocity.toFixed(2)}`);
     
-    // CORRECTION : Utiliser les nouveaux contrôles du levier
     if (window.leverControls) {
         window.leverControls.disable();
     }
@@ -866,7 +956,6 @@ function launchFortuneWheelWithLever(baseVelocity) {
     
     console.log(`🎯 Rotation finale: ${finalRotation.toFixed(1)}° en ${duration}ms`);
     
-    // CORRECTION : Utiliser la nouvelle fonction
     createSpinningWheelWithLever(finalRotation, duration);
 }
 
@@ -896,104 +985,20 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     
     playSound('wheel-spinning');
     
+    // rotation  de l'image png
     setTimeout(() => {
         spinningImg.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-        spinningImg.style.transform = `rotate(${finalRotation}deg)`;
+        // spinningImg.style.transform = `rotate(${finalRotation}deg)`;
+        // NOUVEAU : Récupérer l'angle actuel du radar
+        const currentTransform = originalRadar.attr("transform") || "";
+        const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
+        const radarAngle = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+        
+        // Faire tourner le PNG depuis l'angle du radar
+        const totalRotation = radarAngle + finalRotation;
+        spinningImg.style.transform = `rotate(${totalRotation}deg)`;
     }, 50);
     
-    // setTimeout(() => {
-    //     console.log("🎉 Roue arrêtée - Réactivation du levier !");
-        
-    //     playSound('wheel-stop');
-        
-    //     // // NOUVEAU : Capturer l'angle RÉEL du PNG depuis son transform CSS
-    //     // const spinningImgTransform = spinningImg.style.transform;
-    //     // const rotateMatch = spinningImgTransform.match(/rotate\(([-\d.]+)deg\)/);
-        
-    //     // let actualFinalAngle = finalRotation % 360; // Valeur par défaut
-        
-    //     // if (rotateMatch) {
-    //     //     actualFinalAngle = parseFloat(rotateMatch[1]) % 360;
-    //     //     console.log(`🎯 Angle RÉEL du PNG: ${actualFinalAngle.toFixed(1)}°`);
-    //     // } else {
-    //     //     console.log(`⚠️ Impossible de lire l'angle PNG, utilisation du calcul: ${actualFinalAngle.toFixed(1)}°`);
-    //     // }
-        
-    //     // Utiliser detectWinner avec l'angle RÉEL
-    //     // const winner = detectWinner(actualFinalAngle);
-
-
-    //     const winner = detectWinner(finalRotation);
-        
-    //     if (spinningImg.parentNode) {
-    //         document.body.removeChild(spinningImg);
-    //     }
-
-    //     // Récupérer le zoom actuel
-    //     const currentTransformAttr = originalRadar.attr("transform");
-    //     let currentScale = 0.7;
-    //     if (currentTransformAttr) {
-    //         const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
-    //         if (scaleMatch) {
-    //             currentScale = parseFloat(scaleMatch[1]);
-    //         }
-    //     }
-
-    //     const centerX = window.innerWidth / 2;
-    //     const centerY = window.innerHeight / 2;
-
-    //     console.log(`🔄 Applique angle RÉEL au radar: ${actualFinalAngle.toFixed(1)}°`);
-
-    //     // UTILISER L'ANGLE RÉEL pour le radar
-    //     originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${actualFinalAngle}) scale(${currentScale})`)
-    //             .style("opacity", 1);
-
-    //     // Correction des textes avec l'angle RÉEL
-    //     d3.selectAll(".segment-text-group").each(function() {
-    //         const currentTransform = d3.select(this).attr("transform");
-            
-    //         if (currentTransform) {
-    //             const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
-    //             if (rotateMatch) {
-    //                 const currentTextAngle = parseFloat(rotateMatch[1]);
-    //                 const finalTextAngle = (currentTextAngle + actualFinalAngle) % 360;
-                    
-    //                 if (finalTextAngle > 90 && finalTextAngle < 270) {
-    //                     const flippedAngle = currentTextAngle + 180;
-    //                     const newTransform = currentTransform.replace(/rotate\([-\d.]+\)/, `rotate(${flippedAngle})`);
-    //                     d3.select(this).attr("transform", newTransform);
-    //                 }
-    //             }
-    //         }
-    //     });
-
-    //     // Centre avec angle RÉEL
-    //     d3.selectAll(".center-text-group").each(function() {
-    //         if (actualFinalAngle > 90 && actualFinalAngle < 270) {
-    //             d3.select(this).attr("transform", "rotate(180)");
-    //         } else {
-    //             d3.select(this).attr("transform", "rotate(0)");
-    //         }
-    //     });
-
-    //     console.log(`🔄 Radar affiché avec angle: ${actualFinalAngle .toFixed(1)}°`);
-
-       
-    //     //  Réactiver le nouveau levier
-    //     if (window.leverControls) {
-    //         window.leverControls.enable();
-    //     }
-    //     isSpinning = false;
-        
-    //     announceWinnerML(winner);
-
-
-
-    //     setTimeout(() => {
-    //         hideWinnerText(); // Masquer "GAGNANT" après 3 secondes
-    //     }, 3000);
-    // }, duration + 100);
-
 
     setTimeout(() => {
         console.log("🎉 Roue arrêtée - Réactivation du levier !");
@@ -1008,7 +1013,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         // Récupérer le zoom ET l'angle actuel du radar
         const currentTransformAttr = originalRadar.attr("transform");
         let currentScale = 0.7;
-        let currentRadarAngle = 0; // NOUVEAU : angle de départ du radar
+        // let currentRadarAngle = 0; //  angle de départ du radar
         
         if (currentTransformAttr) {
             const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
@@ -1016,7 +1021,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
                 currentScale = parseFloat(scaleMatch[1]);
             }
             
-            // NOUVEAU : extraire l'angle actuel du radar
+            // extraire l'angle actuel du radar
             const rotateMatch = currentTransformAttr.match(/rotate\(([-\d.]+)\)/);
             if (rotateMatch) {
                 currentRadarAngle = parseFloat(rotateMatch[1]);
@@ -1026,35 +1031,28 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         console.log(`📊 Angle radar avant rotation: ${currentRadarAngle.toFixed(1)}°`);
         console.log(`📊 Rotation PNG ajoutée: ${finalRotation.toFixed(1)}°`);
         
-        // NOUVEAU : Angle final = angle de départ + rotation du PNG
+        //  Angle final = angle de départ + rotation du PNG
         const finalAngleTotal = currentRadarAngle + finalRotation;
         const finalAngleNormalized = finalAngleTotal % 360;
         
         console.log(`📊 Angle final total: ${finalAngleTotal.toFixed(1)}°`);
-        console.log(`🔄 Radar affiché avec angle: ${finalAngleNormalized.toFixed(1)}°`);
-        
+
+        const startTime = performance.now();
         const winner = detectWinner(finalAngleTotal); // Utiliser l'angle total
+        console.log(`detectWinner en : ${(performance.now()-startTime).toFixed(1)}ms`);
         
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
         // Afficher le radar avec l'angle total
+        const startTime2 = performance.now(); 
         originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
                 .style("opacity", 1);
 
+        console.log(`🔄 Radar ré-affiché avec nouvel angle: ${finalAngleNormalized.toFixed(1)}° en ${(performance.now()-startTime2).toFixed(1)}ms`);
 
 
-
-
-
-
-
-
-
-
-
-
-
+        const startTime3 = performance.now(); 
         // Corriger uniquement l'inversion tête en bas des textes
         d3.selectAll(".segment-text-group").each(function() {
             const currentTransform = d3.select(this).attr("transform");
@@ -1089,31 +1087,31 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         }
         isSpinning = false;
 
-        announceWinnerML(winner);
+        console.log(`🔄 correction inverson texte en ${(performance.now()-startTime3).toFixed(1)}ms`);
+
+        highlightWinnerSegment(winner.segment, winner.generation);
+        
+        const startTime4 = performance.now(); 
+        // announceWinnerML(winner);
+        setTimeout(() => {
+            announceWinnerML(winner);
+        }, 5000); // RETARD de 2 secondes au lieu d'immédiat
+
+
+       console.log(`🔄 announceWinnerML en ${(performance.now()-startTime4).toFixed(1)}ms`);
 
         setTimeout(() => {
             hideWinnerText();
-        }, 3000);
+        // }, 3000);
+        }, 8000); // Ajuster en conséquence
 
     }, duration + 100);
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
 
 // Recentrer le radar chart (avec préservation du zoom initial)
-function resetRadarToCenter(initialTransform) {
+function resetRadarToCenter() {
     const radarGroup = d3.select("#tree-svg").selectAll("g").filter(function() {
         return this.querySelector(".center-person-group") !== null;
     });
@@ -1122,166 +1120,399 @@ function resetRadarToCenter(initialTransform) {
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
         
-        // Utiliser la transformation initiale plutôt que de forcer un zoom fixe
+        // NOUVEAU : Récupérer le zoom actuel au lieu de forcer 0.7
+        const svg = d3.select("#tree-svg");
+        const currentTransform = d3.zoomTransform(svg.node());
+        const currentScale = currentTransform ? currentTransform.k : 0.7;
+        
+        console.log(`🎯 resetRadarToCenter - zoom préservé: ${currentScale}`);
+        
         radarGroup.transition()
             .duration(500)
-            .attr("transform", `translate(${centerX}, ${centerY}) scale(${initialTransform ? initialTransform.k : 0.7})`);
+            .attr("transform", `translate(${centerX}, ${centerY}) scale(${currentScale})`);
         
-        console.log("🎯 Radar recentré");
+        console.log("🎯 Radar recentré avec zoom préservé");
     }
 }
 
 
 
-
-function highlightWinnerSegment(segmentIndex, generation) {
-    // Mémoriser le gagnant actuel
-    lastWinner = { segment: segmentIndex, generation: generation };
-    
-    if (generation === 0) {
-        d3.select(".center-person-group circle")
-            .style("fill", "#ff0000")
-            .style("stroke", "#ffffff")
-            .style("stroke-width", "4");
-    } else {
-        // CORRECTION : Chercher par data-segment-position au lieu de l'index DOM
-        const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
-        
-        if (!targetElement.empty()) {
-            targetElement.select("path")
-                .style("fill", "#ff0000")
-                .style("stroke", "#ffffff")
-                .style("stroke-width", "3");
-                
-            console.log(`🔴 Gen${generation} segment ${segmentIndex} coloré en rouge (trouvé par attribut)`);
-        } else {
-            console.log(`❌ Impossible de trouver l'élément Gen${generation} segment ${segmentIndex} pour le colorer`);
-        }
-    }
-}
+// function highlightWinnerSegment(segmentIndex, generation) {
+//     // // Mémoriser le gagnant actuel
+//     // lastWinner = { segment: segmentIndex, generation: generation };
 
 
 
-
-
-//// avec log de début  pour comprendre si le problème ré-apparait
-// function resetLastWinnerHighlight() {
-//     if (!lastWinner) {
-//         console.log("🔄 Pas de dernier gagnant à reset");
-//         return;
-//     }
-    
-//     console.log(`🔄 Reset du gagnant précédent: Gen${lastWinner.generation} segment ${lastWinner.segment}`);
-    
-//     if (lastWinner.generation === 0) {
-//         d3.select(".center-person-group circle")
-//             .style("fill", "#ff6b6b")
-//             .style("stroke", "white")
-//             .style("stroke-width", "4");
-//         console.log("✅ Centre remis à sa couleur d'origine");
-//     } else {
-//         const originalColor = getGenerationColor(lastWinner.generation);
-//         const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
-        
-//         console.log(`🔍 Recherche élément: .person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
-//         console.log(`🔍 Élément trouvé:`, !targetElement.empty());
-        
-//         if (!targetElement.empty()) {
-//             targetElement.select("path")
+//     // Reset de l'ancien si il existe
+//     if (lastWinner && lastWinner.element) {
+//         // Utiliser l'élément stocké directement
+//         if (lastWinner.generation === 0) {
+//             d3.select(lastWinner.element)
+//                 .style("fill", "#ff6b6b")
+//                 .style("stroke", "white")
+//                 .style("stroke-width", "4");
+//         } else {
+//             const originalColor = getGenerationColor(lastWinner.generation);
+//             d3.select(lastWinner.element).select("path")
 //                 .style("fill", originalColor)
 //                 .style("stroke", "white")
 //                 .style("stroke-width", "1");
-                
-//             console.log(`✅ Segment Gen${lastWinner.generation} remis en ${originalColor}`);
-//         } else {
-//             console.log(`❌ ÉLÉMENT NON TROUVÉ pour reset ! Gen${lastWinner.generation} segment ${lastWinner.segment}`);
-            
-//             // DEBUG : lister tous les éléments de cette génération
-//             d3.selectAll(`.person-segment-group.gen-${lastWinner.generation}`).each(function() {
-//                 const pos = d3.select(this).attr("data-segment-position");
-//                 console.log(`  - Trouvé: Gen${lastWinner.generation} position ${pos}`);
-//             });
 //         }
 //     }
     
-//     lastWinner = null;
+//     // Mémoriser le nouveau gagnant avec l'élément
+    
+
+
+//     if (generation === 0) {
+//         d3.select(".center-person-group circle")
+//             .style("fill", "#ff0000")
+//             .style("stroke", "#ffffff")
+//             .style("stroke-width", "4");
+//     } else {
+//         // CORRECTION : Chercher par data-segment-position au lieu de l'index DOM
+//         const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
+        
+//         if (!targetElement.empty()) {
+//             targetElement.select("path")
+//                 .style("fill", "#ff0000")
+//                 .style("stroke", "#ffffff")
+//                 .style("stroke-width", "3");
+            
+//                 // STOCKER L'ÉLÉMENT
+//             lastWinner = { segment: segmentIndex, generation: generation, element: targetElement.node() };
+                
+
+//             console.log(`🔴 Gen${generation} segment ${segmentIndex} coloré en rouge (trouvé par attribut)`);
+//         } else {
+//             console.log(`❌ Impossible de trouver l'élément Gen${generation} segment ${segmentIndex} pour le colorer`);
+//         }
+//     }
 // }
 
 
 
 
-function resetLastWinnerHighlight() {
-    if (!lastWinner) return;
-    
-    if (lastWinner.generation === 0) {
-        d3.select(".center-person-group circle")
-            .style("fill", "#ff6b6b")
-            .style("stroke", "white")
-            .style("stroke-width", "4");
-    } else {
-        const originalColor = getGenerationColor(lastWinner.generation);
-        const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
-        
-        if (!targetElement.empty()) {
-            targetElement.select("path")
-                .style("fill", originalColor)
-                .style("stroke", "white")
-                .style("stroke-width", "1");
-        }
+/* OK c'est bon */
+function highlightWinnerSegment(segmentIndex, generation) {
+    // Reset de l'ancien gagnant
+    if (lastWinner && lastWinner.clonedSegment) {
+        lastWinner.clonedSegment.remove();
     }
     
-    lastWinner = null;
+    if (generation === 0) {
+        const centerElement = d3.select(".center-person-group circle");
+        centerElement
+            .style("fill", " #ff0000")
+            .style("stroke", " #ffffff")
+            .style("stroke-width", "4");
+        lastWinner = { segment: segmentIndex, generation: generation, element: centerElement.node() };
+        
+    } else {
+        const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
+        
+        if (!targetElement.empty()) {
+            // 1. ROUGE à sa place
+            targetElement.select("path")
+                .style("fill", " #ff0000")
+                .style("stroke", " #ffffff")
+                .style("stroke-width", "3");
+            
+            setTimeout(() => {
+                // 2. MESURER le segment rouge
+                const targetRect = targetElement.node().getBoundingClientRect();
+                const startX = targetRect.left + targetRect.width / 2;
+                const startY = targetRect.top + targetRect.height / 2;
+                const startSize = Math.max(targetRect.width, targetRect.height);
+                
+                console.log(`📍 SEGMENT ROUGE:`);
+                console.log(`   Position: (${startX.toFixed(1)}, ${startY.toFixed(1)})`);
+                console.log(`   Taille: ${startSize.toFixed(1)}px`);
+                
+                // 3. CALCULER LE ZOOM
+                const targetScreenSize = Math.min(window.innerWidth, window.innerHeight) / 3;
+                const zoomFactor = targetScreenSize / startSize;
+                
+                console.log(`🎯 ZOOM: ${zoomFactor.toFixed(2)}x (${targetScreenSize.toFixed(1)}px)`);
+                
+                // 4. CRÉER le clone rouge
+                const radarGroup = d3.select("#tree-svg").selectAll("g").filter(function() {
+                    return this.querySelector(".center-person-group") !== null;
+                });
+                const radarTransform = radarGroup.attr("transform") || "";
+                
+                // Décomposer les transformations
+                const translateMatch = radarTransform.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+                const rotateMatch = radarTransform.match(/rotate\(([-\d.]+)\)/);
+                const scaleMatch = radarTransform.match(/scale\(([\d.]+)\)/);
+                
+                const translateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
+                const translateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
+                const rotate = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
+                const currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+                
+                console.log(`🔧 Transform: translate(${translateX}, ${translateY}) rotate(${rotate.toFixed(1)}°) scale(${currentScale.toFixed(3)})`);
+                
+                const clonedSvg = d3.select("body").append("svg")
+                    .style("position", "fixed")
+                    .style("top", "0")
+                    .style("left", "0")
+                    .style("width", "100vw")
+                    .style("height", "100vh")
+                    .style("pointer-events", "none")
+                    .style("z-index", "9999");
+                
+                const clonedSegment = clonedSvg.append("g");
+                clonedSegment.node().innerHTML = targetElement.node().innerHTML;
+                clonedSegment.attr("transform", radarTransform);
+                
+                // Couleur rouge
+                clonedSegment.select("path")
+                    .style("fill", " #ff0000")
+                    .style("stroke", " #ffffff")
+                    .style("stroke-width", "3");
+                
+                // Vérifier superposition
+                const initialRect = clonedSegment.node().getBoundingClientRect();
+                const initialX = initialRect.left + initialRect.width / 2;
+                const initialY = initialRect.top + initialRect.height / 2;
+                
+                console.log(`📍 CLONE INITIAL: (${initialX.toFixed(1)}, ${initialY.toFixed(1)})`);
+                console.log(`📊 Superposition: ${Math.abs(initialX - startX).toFixed(1)}px, ${Math.abs(initialY - startY).toFixed(1)}px`);
+                
+                // 5. CALCUL INVISIBLE de la correction
+                const tempClone = clonedSvg.append("g");
+                tempClone.node().innerHTML = targetElement.node().innerHTML;
+                tempClone.attr("transform", radarTransform);
+                tempClone.style("opacity", "0");
+                
+                const newScale = currentScale * zoomFactor;
+                const tempScaleTransform = radarTransform.replace(/scale\([\d.]+\)/, `scale(${newScale})`);
+                tempClone.attr("transform", tempScaleTransform);
+                
+                const tempRect = tempClone.node().getBoundingClientRect();
+                const tempX = tempRect.left + tempRect.width / 2;
+                const tempY = tempRect.top + tempRect.height / 2;
+                
+                const predictedDeltaX = tempX - initialX;
+                const predictedDeltaY = tempY - initialY;
+                
+                console.log(`📐 Déplacement prédit: (${predictedDeltaX.toFixed(1)}, ${predictedDeltaY.toFixed(1)})`);
+                
+                tempClone.remove();
+                
+                // Correction
+                const correctedTranslateX = translateX - predictedDeltaX;
+                const correctedTranslateY = translateY - predictedDeltaY;
+                const correctedTransform = `translate(${correctedTranslateX}, ${correctedTranslateY}) rotate(${rotate}) scale(${newScale})`;
+                
+                console.log(`🔧 Transform corrigé: ${correctedTransform}`);
+                
+                // 6. ANIMATION de grossissement
+                clonedSegment
+                    .transition()
+                    .duration(3000)
+                    .ease(d3.easeQuadOut)
+                    .attr("transform", correctedTransform)
+                    .on("end", function() {
+                        const finalRect = clonedSegment.node().getBoundingClientRect();
+                        const finalX = finalRect.left + finalRect.width / 2;
+                        const finalY = finalRect.top + finalRect.height / 2;
+                        const finalSize = Math.max(finalRect.width, finalRect.height);
+                        
+                        console.log(`🎯 RÉSULTAT FINAL:`);
+                        console.log(`   Position: (${finalX.toFixed(1)}, ${finalY.toFixed(1)})`);
+                        console.log(`   Taille: ${finalSize.toFixed(1)}px`);
+                        console.log(`   Déplacement: ${Math.abs(finalX - startX).toFixed(1)}px, ${Math.abs(finalY - startY).toFixed(1)}px`);
+                        console.log(`   Zoom: ${(finalSize / startSize).toFixed(2)}x`);
+                        
+                        // 7. AJOUTER TEXTE HORIZONTAL LISIBLE par-dessus
+                        console.log(`📝 AJOUT TEXTE HORIZONTAL:`);
+                        
+                        // Récupérer les données de la personne
+                        const personData = targetElement.datum();
+                        console.log(`   Personne: ${personData.name}`);
+                        
+                        // Créer un div pour le texte horizontal
+                        const textOverlay = document.createElement("div");
+                        textOverlay.style.cssText = `
+                            position: fixed;
+                            left: ${finalX - 120}px;
+                            top: ${finalY - 15}px;
+                            width: 240px;
+                            height: 30px;
+                            z-index: 10000;
+                            pointer-events: none;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: rgba(255, 255, 255, 0.95);
+                            border: 2px solid #0000ff;
+                            border-radius: 6px;
+                            font-family: Arial, sans-serif;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: #000;
+                            text-align: center;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                        `;
+                        
+                        // Extraire et formater le nom
+                        let displayName = personData.name || "Nom inconnu";
+                        if (displayName.includes('/')) {
+                            const match = displayName.match(/(.*?)\/(.*?)\//);
+                            if (match) {
+                                const prenom = match[1].trim();
+                                const nom = match[2].trim();
+                                displayName = `${prenom} ${nom.toUpperCase()}`;
+                            }
+                        }
+                        
+                        textOverlay.textContent = displayName;
+                        document.body.appendChild(textOverlay);
+                        
+                        console.log(`   Texte créé: "${displayName}"`);
+                        console.log(`   Position texte: (${finalX - 120}, ${finalY - 15})`);
+                        
+                        // Animation d'apparition du texte
+                        textOverlay.style.opacity = "0";
+                        textOverlay.style.transform = "scale(0.8)";
+                        
+                        setTimeout(() => {
+                            textOverlay.style.transition = "all 0.5s ease";
+                            textOverlay.style.opacity = "1";
+                            textOverlay.style.transform = "scale(1)";
+                        }, 200);
+                        
+                        if (Math.abs(finalX - startX) < 10 && Math.abs(finalY - startY) < 10) {
+                            console.log(`✅ GROSSISSEMENT + TEXTE RÉUSSIS !`);
+                        }
+                        
+                        // Stocker pour nettoyage
+                        lastWinner.textOverlay = textOverlay;
+                    });
+                
+                lastWinner = { 
+                    segment: segmentIndex, 
+                    generation: generation, 
+                    element: targetElement.node(),
+                    clonedSegment: clonedSvg.node()
+                };
+                
+            }, 1500);
+        }
+    }
 }
 
-// Détection du gagnant basée sur l'angle
+
+
+function resetLastWinnerHighlightAsync() {
+    if (!lastWinner) return;
+    
+    // Déférer à la prochaine frame pour ne pas bloquer
+    requestAnimationFrame(() => {
+        if (lastWinner.generation === 0) {
+            d3.select(".center-person-group circle")
+                .style("fill", " #ff6b6b")
+                .style("stroke", "white")
+                .style("stroke-width", "4");
+        } else {
+            const originalColor = getGenerationColor(lastWinner.generation);
+            const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
+            
+            if (!targetElement.empty()) {
+                targetElement.select("path")
+                    .style("fill", originalColor)
+                    .style("stroke", "white")
+                    .style("stroke-width", "1");
+            }
+        }
+        
+        // Supprimer le segment rouge cloné
+        if (lastWinner.clonedSegment) {
+            try {
+                lastWinner.clonedSegment.remove();
+                console.log('🗑️ Segment rouge cloné supprimé');
+            } catch (error) {
+                console.warn('⚠️ Erreur suppression segment cloné:', error);
+            }
+        }
+        
+        // Supprimer le texte horizontal
+        if (lastWinner.textOverlay) {
+            try {
+                if (lastWinner.textOverlay.parentNode) {
+                    lastWinner.textOverlay.remove();
+                    console.log('🗑️ Texte horizontal supprimé');
+                }
+            } catch (error) {
+                console.warn('⚠️ Erreur suppression texte:', error);
+            }
+        }
+        
+        lastWinner = null;
+    });
+}
+
+
+
+// Détection du gagnant basée sur l'angle avec tirage aléatoire entre les géneration
 function detectWinner(finalAngle) {
     const normalizedAngle = (360 - ((finalAngle + 180) % 360)) % 360;
     
     console.log(`🎯 Angle final: ${finalAngle.toFixed(1)}°`);
     console.log(`📐 Angle normalisé: ${normalizedAngle.toFixed(1)}°`);
     
-    for (let gen = 10; gen >= 0; gen--) {
-        
-        if (gen === 0) {
-            const centerPerson = d3.select(".center-person-group").datum();
-            console.log(`🎯 Gagnant trouvé au centre: ${centerPerson.name || 'Personne centrale'}`);
-            
-            return {
-                name: centerPerson.name || 'Personne centrale',
-                segment: 0,
-                generation: 0,
-                angle: normalizedAngle
-            };
-        }
-        
+    // NOUVEAU : Collecter tous les segments sous la flèche
+    const candidateSegments = [];
+    
+    // Parcourir toutes les générations (sauf le centre)
+    for (let gen = 1; gen <= fanConfig.maxGenerations; gen++) {
         const segmentsInGen = Math.pow(2, gen);
         const anglePerSegment = 360 / segmentsInGen;
         const targetSegment = Math.floor(normalizedAngle / anglePerSegment);
         
         console.log(`🔍 Test Gen ${gen}: cherche segment ${targetSegment}`);
         
-        // NOUVEAU : Chercher par attribut data-segment-position
         const targetElement = d3.select(`.person-segment-group.gen-${gen}[data-segment-position="${targetSegment}"]`);
         
         if (!targetElement.empty()) {
             const person = targetElement.datum();
             if (person && person.name) {
-                console.log(`✅ Gagnant trouvé Gen ${gen}, segment ${targetSegment}: ${person.name}`);
+                console.log(`✅ Candidat Gen ${gen}, segment ${targetSegment}: ${person.name}`);
                 
-                return {
+                candidateSegments.push({
                     name: person.name,
                     segment: targetSegment,
                     generation: gen,
                     angle: normalizedAngle,
                     element: targetElement.node()
-                };
+                });
             }
         }
+    }
+    
+    // NOUVEAU : Tirage aléatoire ou fallback centre
+    if (candidateSegments.length > 0) {
+        const randomIndex = Math.floor(Math.random() * candidateSegments.length);
+        const winner = candidateSegments[randomIndex];
         
-        console.log(`❌ Gen ${gen}, segment ${targetSegment}: vide`);
+        console.log(`🎲 Tirage aléatoire: ${winner.name} (Gen ${winner.generation}) parmi ${candidateSegments.length} candidats`);
+        return winner;
+        
+    } else {
+        // Fallback : personne centrale
+        console.log(`🎯 Aucun segment trouvé, fallback sur le centre`);
+        const centerPerson = d3.select(".center-person-group").datum();
+        
+        return {
+            name: centerPerson.name || 'Personne centrale',
+            segment: 0,
+            generation: 0,
+            angle: normalizedAngle
+        };
     }
 }
-
 
 // Système de sons pour la roue de la fortune
 class FortuneWheelSounds {
@@ -1749,18 +1980,23 @@ function createRealisticSlotHandleML() {
     let leverEnabled = true;
     
     function pullLever() {
+        const pullStart = performance.now();
+        console.log("🎯 DÉBUT pullLever()");
 
 
         if (!leverEnabled || isSpinning) {
             console.log(getFortuneText('leverDisabled'));
             return;
         }
-        resetLastWinnerHighlight();
+
         
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
 
+        const showWinnerStart = performance.now();
         showWinnerText(); // Afficher "GAGNANT" pendant la rotation
+        console.log(`🎯 showWinnerText(): ${(performance.now() - showWinnerStart).toFixed(1)}ms`);
+    
         
         if (navigator.vibrate) {
             navigator.vibrate([50, 30, 100]);
@@ -1773,6 +2009,14 @@ function createRealisticSlotHandleML() {
         playSound('lever-pull');
         
         setTimeout(() => {
+            const timeoutStart = performance.now();
+            console.log(`🎯 setTimeout déclenché après: ${(timeoutStart - pullStart).toFixed(1)}ms`);
+
+            const resetStart = performance.now();
+            resetLastWinnerHighlightAsync();
+            console.log(`🎯 resetLastWinnerHighlightAsync(): ${(performance.now() - resetStart).toFixed(1)}ms`);
+
+
             leverArm.style.transform = "translateX(-50%) rotate(-15deg)";
             leverHandle.style.background = "linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%)";
             
@@ -1783,14 +2027,22 @@ function createRealisticSlotHandleML() {
             }
             
             const randomVelocity = 1.5 + Math.random() * 2;
+
+            const launchStart = performance.now();
             launchFortuneWheelWithLever(randomVelocity);
+
+            console.log(`🎯 launchFortuneWheelWithLever(): ${(performance.now() - launchStart).toFixed(1)}ms`);
+
             
         }, 400);
+        console.log(`🎯 FIN pullLever(): ${(performance.now() - pullStart).toFixed(1)}ms`);
         
         setTimeout(() => {
             leverEnabled = true;
             leverText.textContent = getFortuneText('leverText'); // TRADUCTION
         }, 1000);
+
+        console.log(`🎯 FIN pullLever() après traduction: ${(performance.now() - pullStart).toFixed(1)}ms`);
     }
     
     function disableLever() {
@@ -2026,7 +2278,7 @@ function announceWinnerML(winner) {
     console.log(`🏆 ${getFortuneText('winnerIndicator')}: ${winner.name}`);
 
     // AJOUTER : Colorer le segment gagnant
-    highlightWinnerSegment(winner.segment, winner.generation);
+    // highlightWinnerSegment(winner.segment, winner.generation);
     
     const indicator = d3.select("#winner-indicator");
     indicator.transition()
