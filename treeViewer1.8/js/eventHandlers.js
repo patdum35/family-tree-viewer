@@ -229,8 +229,12 @@ export function selectFoundPerson(personId) {
     
     // Afficher la personne comme racine
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
-    displayGenealogicTree(personId, true);
-
+    // displayGenealogicTree(personId, true);
+    if (state.isRadarEnabled) {
+        displayGenealogicTree(personId, false, false,  false, 'fanAncestors');
+    } else {
+        displayGenealogicTree(personId, true, false);
+    }
 
     
     // Attendre que l'arbre soit affiché et que l'historique soit mis à jour

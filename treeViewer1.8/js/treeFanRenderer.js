@@ -31,6 +31,9 @@ let previousNombreGeneration = null;
 let currentAnimationTimeouts = [];
 let allWinnerSegments = []; // Mémoriser tous les segments gagnants
 
+let userHasInteracted = false;
+let stableD3Transform = null;
+
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
  */
@@ -40,12 +43,13 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
         return;
     }
     
-
     console.log('🌟 Début du rendu éventail 360°...');
     console.log('📊 Arbre reçu:', state.currentTree);
     
     const svg = setupFanSVG();
     const mainGroup = createFanMainGroup(svg);
+
+    
     
     // Configuration selon le mode
     configureFanMode();
@@ -68,11 +72,11 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     
     // Gestion de l'affichage initial
     // if (!isAnimation && isZoomRefresh) {
-    // if (!isZoomRefresh) {
-    //     resetFanView();
-    // }
+    if (isZoomRefresh) {
+        resetFanView();
+    }
 
-    resetFanView();
+    // resetFanView();
     
     // Fond élégant
     if (state.initialTreeDisplay) {
@@ -104,7 +108,6 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
 
 
 
-// AJOUTER cette nouvelle fonction dans treeFanRenderer.js
 async function generateRadarCache() {
     try {
         console.log('🎯 Génération du cache PNG...');
@@ -290,6 +293,7 @@ function setupFanZoom(svg, mainGroup) {
         .scaleExtent([0.1, 3]) // Garder une liberté de zoom
         .on("zoom", ({transform}) => {
             // Toujours centrer, mais autoriser le zoom
+            userHasInteracted = true; // L'utilisateur a bougé
             lastFanTransform = transform;
             mainGroup.attr("transform", 
                 // `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
@@ -303,8 +307,27 @@ function setupFanZoom(svg, mainGroup) {
     const initialTransform = d3.zoomIdentity
         .translate(fanConfig.centerX, fanConfig.centerY)
         .scale(initialZoom);
+
+
+    // CAPTURER le vrai zoom AVANT que D3.js fasse ses ajustements
+    window.initialFanTransform = {
+        k: initialZoom,
+        x: fanConfig.centerX,
+        y: fanConfig.centerY
+    };
+    console.log('VRAI Transform initial capturé:', window.initialFanTransform);
     
     svg.call(fanZoom.transform, initialTransform);
+
+
+    setTimeout(() => {
+        userHasInteracted = false; // Reset après stabilisation
+    }, 1000);
+}
+
+function needsReset() {
+    console.log('Utilisateur a interagi:', userHasInteracted);
+    return userHasInteracted;
 }
 
 /**
@@ -366,26 +389,46 @@ export function resetFanView() {
     //     }
     // }
 
-    resetBrowserZoom();
+    // resetBrowserZoom();
+
 
     // zoom du d3.js
     const svg = d3.select("#tree-svg");
-    if (fanZoom) {
-        // Calculer le zoom optimal et centrer
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
-        const optimalZoom = Math.min((width * 0.8) / (2 * totalRadius), (height * 0.8) / (2 * totalRadius));
-        const finalZoom = Math.max(0.1, Math.min(optimalZoom, 1));
+    // if (fanZoom) {
+    //     // Calculer le zoom optimal et centrer
+    //     const width = window.innerWidth;
+    //     const height = window.innerHeight;
+    //     const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
+    //     const optimalZoom = Math.min((width * 0.8) / (2 * totalRadius), (height * 0.8) / (2 * totalRadius));
+    //     const finalZoom = Math.max(0.1, Math.min(optimalZoom, 1));
         
-        const resetTransform = d3.zoomIdentity
-            .translate(fanConfig.centerX, fanConfig.centerY)
-            .scale(finalZoom);
+    //     const resetTransform = d3.zoomIdentity
+    //         .translate(fanConfig.centerX, fanConfig.centerY)
+    //         .scale(finalZoom);
             
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(fanZoom.transform, resetTransform);
+    //     state.currentRadarAngle = 0;
+    // }
+
+    if (fanZoom && window.initialFanTransform) {
+        console.log('🔄 Reset vers transform initial exact:', window.initialFanTransform);
+        
+        // Utiliser le transform initial EXACT
         svg.transition()
             .duration(750)
-            .call(fanZoom.transform, resetTransform);
+            .call(fanZoom.transform, window.initialFanTransform);
+            
+        state.currentRadarAngle = 0;
+        userHasInteracted = false;
+    } else {
+        console.warn('⚠️ Pas de transform initial sauvegardé');
     }
+
+    
+    
+    
 }
 
 
@@ -1158,7 +1201,12 @@ function launchFortuneWheelWithLever(baseVelocity) {
 
 // fonction d'animation
 function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
+
     console.log("🌪️ Animation avec levier réaliste...");
+
+    console.log('🔍 DEBUG window.initialFanTransform:', window.initialFanTransform, 'k=',window.initialFanTransform.k, ' x=',window.initialFanTransform.x, ' y=' ,window.initialFanTransform.y  );
+    console.log('🔍 Type:', typeof window.initialFanTransform);
+
     
     const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
         return this.querySelector(".center-person-group") !== null;
@@ -1244,8 +1292,38 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
 
         // Afficher le radar avec l'angle total
         const startTime2 = performance.now(); 
-        originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
+
+
+        // originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
+        //         .style("opacity", 1);
+
+        // setTimeout(() => {
+        //     if (window.initialFanTransform && fanZoom) {
+        //         const svg = d3.select("#tree-svg");
+        //         svg.call(fanZoom.transform, window.initialFanTransform);
+        //         console.log('🔄 Zoom initial forcé après animation');
+        //     }
+        // }, 200);
+
+        // UTILISER le zoom initial au lieu de l'ancien zoom
+        // const resetScale = window.initialFanTransform ? window.initialFanTransform.k : 0.7;
+
+        console.log('🔍 scale actuel:', currentScale);
+        console.log('🔍 centerX/Y actuels:', centerX, centerY);
+        console.log('🔍 initialFanTransform:', window.initialFanTransform);
+        console.log('🔍 scale initial:', window.initialFanTransform.k);        
+        console.log('🔍 x/y initiaux:', window.initialFanTransform.x, window.initialFanTransform.y);
+
+        const resetScale = window.initialFanTransform.k;
+
+        originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${resetScale})`)
                 .style("opacity", 1);
+
+
+
+
+                
+
 
         console.log(`🔄 Radar ré-affiché avec nouvel angle: ${finalAngleNormalized.toFixed(1)}° en ${(performance.now()-startTime2).toFixed(1)}ms`);
 
@@ -2168,6 +2246,15 @@ function createRealisticSlotHandleML() {
             return;
         }
 
+
+
+        console.log('Reset nécessaire:', needsReset());
+    
+        if (needsReset()) {
+            resetFanView();
+            userHasInteracted = false;
+        }
+
         // closeWinnerMessage();
 
         // RESET complet de toutes les animations et fenêtres en cours
@@ -2209,13 +2296,14 @@ function createRealisticSlotHandleML() {
             closeWinnerMessage();
         }
         hideWinnerText();
-        
+
+        // // resetBrowserZoom();
+
+        // resetFanView();
+
+
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
-
-        resetBrowserZoom();
-
-        resetFanView();
 
         const showWinnerStart = performance.now();
         showWinnerText(); // Afficher "GAGNANT" pendant la rotation
@@ -2506,7 +2594,11 @@ export function enableFortuneModeML() {
     
     const svg = d3.select("#tree-svg");
     originalZoom = svg.on(".zoom");
+
+
+    //#######################    ATTENTION : à enlever peut-être #########
     // svg.on(".zoom", null);
+    //####################################################################
     
     resetRadarToCenter();
     createRealisticSlotHandleML(); // Version multilingue
