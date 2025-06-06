@@ -3,7 +3,7 @@
  */
 
 // Nom du cache pour les tuiles
-const TILE_CACHE_NAME = 'map-tiles-cache-v1';
+const TILE_CACHE_NAME = 'map-tiles-cache-v2';
 
 
 
