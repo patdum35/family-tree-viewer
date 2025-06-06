@@ -2597,7 +2597,7 @@ export function enableFortuneModeML() {
 
 
     //#######################    ATTENTION : à enlever peut-être #########
-    // svg.on(".zoom", null);
+    svg.on(".zoom", null);
     //####################################################################
     
     resetRadarToCenter();
