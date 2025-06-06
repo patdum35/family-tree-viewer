@@ -37,102 +37,100 @@ let userHasInteracted = false;
 // Variable globale en haut du fichier
 let isRepairingZoom = false;
 
+let lastTapTime = 0;
+let tapTimeout = null;
+let clickTimeout = null;  // Si cette variable existe déjà
+
+
+
+function cleanupFanTreeState() {
+    // Réinitialisation des variables et états globaux
+    if (fanZoom) {
+        const svg = d3.select("#tree-svg");
+        svg.on(".zoom", null);  // Supprimer tous les gestionnaires
+    }
+
+    fanZoom = null;
+    window.initialFanTransform = null;
+    lastFanTransform = null;
+    
+    // Annuler les animations et timeouts en cours
+    currentAnimationTimeouts.forEach(clearTimeout);
+    currentAnimationTimeouts = [];
+
+    // Réinitialiser les drapeaux et états
+    userHasInteracted = false;
+    state.currentRadarAngle = 0;
+}
+
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
  */
 export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
+
     if (!state.currentTree) {
         console.error('❌ Pas d\'arbre à dessiner');
         return;
+    }
+
+    // DIAGNOSTIC SUPPLÉMENTAIRE
+    console.log('🚨 ÉTAT COMPLET AVANT DRAWFANTREE');
+    console.log('fanZoom existant:', !!fanZoom);
+    console.log('Propriétés du zoom existant:', fanZoom ? Object.keys(fanZoom) : 'N/A');
+    
+    // Si fanZoom existe, essayez de le réinitialiser complètement
+    if (fanZoom) {
+        const svg = d3.select("#tree-svg");
+        svg.on(".zoom", null);  // Supprimer tous les gestionnaires de zoom
+        fanZoom = null;  // Forcer une réinitialisation complète
     }
     
     console.log('🌟 Début du rendu éventail 360°...');
     console.log('📊 Arbre reçu:', state.currentTree);
     
+    console.log('🔍 DIAGNOSTIC DÉBUT drawFanTree');
+    console.log('🔍 isZoomRefresh:', isZoomRefresh);
+    console.log('🔍 isAnimation:', isAnimation);
+    
     const svg = setupFanSVG();
-
-
-
-
-// ESPION : Écouter TOUS les événements possibles
-svg.node().addEventListener('wheel', (e) => {
-    console.log('🚨 WHEEL détecté:', e);
-});
-
-svg.node().addEventListener('gesturestart', (e) => {
-    console.log('🚨 GESTURESTART détecté:', e);
-});
-
-svg.node().addEventListener('gesturechange', (e) => {
-    console.log('🚨 GESTURECHANGE détecté:', e);
-});
-
-svg.node().addEventListener('gestureend', (e) => {
-    console.log('🚨 GESTUREEND détecté:', e);
-});
-
-// ESPION sur le document aussi
-document.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 1) {
-        console.log('🚨 PINCH détecté sur document:', e);
+    
+    const initialD3Transform = d3.zoomTransform(svg.node());
+    console.log('🔍 Zoom D3 initial:', {
+        k: initialD3Transform.k,
+        x: initialD3Transform.x,
+        y: initialD3Transform.y
+    });
+    
+    if (window.initialFanTransform) {
+        console.log('🔍 window.initialFanTransform:', window.initialFanTransform);
     }
-});
-
-
-
-
-
-
-
 
     const mainGroup = createFanMainGroup(svg);
-
     
-
-
-    // RESET du zoom D3.js AVANT setupFanZoom si on a déjà un zoom
-    // if (d3.select("#tree-svg").node() && userHasInteracted) {
-    //     // Reset seulement s'il y a déjà eu des interactions
-    //     const currentTransform = d3.zoomTransform(svg.node());
-    //     if (currentTransform && (currentTransform.k !== 1 || currentTransform.x !== 0 || currentTransform.y !== 0)) {
-    //         const resetTransform = d3.zoomIdentity;
-    //         svg.call(d3.zoom().transform, resetTransform);
-    //         console.log('🔄 Zoom D3.js resetté AVANT setupFanZoom');
-    //     }
-    //     window.initialFanTransform = null;
-    //     userHasInteracted = false;
-    // }
-
-
-    
-    // Configuration selon le mode
     configureFanMode();
     
-    // Organiser les données par génération avec logique positionnelle
     const generationsData = organizeByGenerations(state.currentTree);
     console.log('📊 Données par génération:', generationsData);
     
-    // Créer les filtres et defs
     createSVGFilters(svg);
     
-    // Dessiner le centre
     drawCenterPerson(mainGroup, state.currentTree);
     
-    // Dessiner chaque génération
     drawAllGenerations(mainGroup, generationsData);
     
-    // Configuration du zoom
     setupFanZoom(svg, mainGroup);
     
-    // Gestion de l'affichage initial
-    // if (!isAnimation && isZoomRefresh) {
+    const afterD3Transform = d3.zoomTransform(svg.node());
+    console.log('🔍 Zoom D3 APRÈS setupFanZoom:', {
+        k: afterD3Transform.k,
+        x: afterD3Transform.x,
+        y: afterD3Transform.y
+    });
+
     if (isZoomRefresh) {
         resetFanView();
     }
-
-    // resetFanView();
     
-    // Fond élégant
     if (state.initialTreeDisplay) {
         state.initialTreeDisplay = false;
         setTimeout(() => {
@@ -144,22 +142,18 @@ document.addEventListener('touchstart', (e) => {
     
     console.log('✅ Rendu éventail 360° terminé');
 
-    // Générer le cache PNG seulement s'il n'existe pas
     if (!isCacheValid || !cachedRadarPNG || (previousRootPersonId != state.rootPersonId) || (previousNombreGeneration != state.nombre_generation)) {
-        console.log(`🔄 \n\nGénération du cache PNG...`);
+        console.log(`🔄 Génération du cache PNG...`);
         setTimeout(() => {
             generateRadarCache();
         }, 500);
     } else {
-        console.log(`✅ \n\nCache PNG déjà disponible`);
+        console.log(`✅ Cache PNG déjà disponible`);
     }
 
     previousRootPersonId = state.rootPersonId;
     previousNombreGeneration = state.nombre_generation;
-    
-    console.log('\n\n ******* DEBUG : ', state.rootPersonId, state.nombre_generation)
 }
-
 
 
 async function generateRadarCache() {
@@ -258,20 +252,24 @@ function configureFanMode() {
  * Configure le SVG initial
  */
 function setupFanSVG() {
+    cleanupFanTreeState();
+
     const width = window.innerWidth;
     const height = window.innerHeight;
+    
+    const svg = d3.select("#tree-svg");
+    svg.selectAll("*").remove();  // Nettoyer le SVG
     
     fanConfig.centerX = width / 2;
     fanConfig.centerY = height / 2;
     
-    const svg = d3.select("#tree-svg")
-        .attr("width", width)
-        .attr("height", height)
-        .style("touch-action", "pan-x pan-y pinch-zoom");
+    svg.attr("width", width)
+       .attr("height", height)
+       .style("touch-action", "pan-x pan-y pinch-zoom");
     
-    svg.selectAll("*").remove();
     return svg;
 }
+
 
 /**
  * Crée le groupe principal pour l'éventail
@@ -327,6 +325,7 @@ function setupFanZoom(svg, mainGroup) {
     let isUpdatingTransform = false; // Flag pour éviter la boucle
 
     console.log('🚀 DÉBUT setupFanZoom');
+    
 
     const calculateOptimalZoom = () => {
         const width = window.innerWidth;
@@ -432,88 +431,14 @@ function needsReset() {
     return userHasInteracted;
 }
 
+
+
 /**
  * Réinitialise la vue de l'éventail
  */
-// export function resetFanView() {
-//     const svg = d3.select("#tree-svg");
-//     if (fanZoom) {
-//         const resetTransform = d3.zoomIdentity.scale(0.7);
-//         svg.transition()
-//             .duration(750)
-//             .call(fanZoom.transform, resetTransform);
-//     }
-// }
-
-function resetBrowserZoom() {
-    // // Méthode 1 : Scroll vers le haut pour forcer le reset
-    // window.scrollTo(0, 0);
-    
-    // Méthode 2 : Manipulation du viewport temporaire
-    const viewport = document.querySelector('meta[name="viewport"]');
-    if (viewport) {
-        const original = viewport.getAttribute('content');
-        
-        // Force le reset en modifiant temporairement le viewport
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        
-        // Remettre l'original après 100ms
-        setTimeout(() => {
-            viewport.setAttribute('content', original || 'width=device-width, initial-scale=1.0, user-scalable=yes');
-        }, 100);
-    }
-    
-    // // Méthode 3 : Force refresh du layout
-    // document.body.style.transform = 'scale(1.001)';
-    // setTimeout(() => {
-    //     document.body.style.transform = '';
-    // }, 50);
-}
-
-
 export function resetFanView() {
-
-    // // Forcer le zoom navigateur à 1
-    // if (window.visualViewport) {
-    //     // Méthode moderne
-    //     document.documentElement.style.transform = 'scale(1)';
-    //     document.documentElement.style.transformOrigin = '0 0';
-    // } else {
-    //     // Fallback : viewport meta refresh
-    //     let viewport = document.querySelector('meta[name="viewport"]');
-    //     if (viewport) {
-    //         const content = viewport.getAttribute('content');
-    //         viewport.setAttribute('content', content + ', initial-scale=1.0');
-    //         // Force refresh
-    //         setTimeout(() => {
-    //             viewport.setAttribute('content', content);
-    //         }, 100);
-    //     }
-    // }
-
-    // resetBrowserZoom();
-
-
     // zoom du d3.js
     const svg = d3.select("#tree-svg");
-    // if (fanZoom) {
-    //     // Calculer le zoom optimal et centrer
-    //     const width = window.innerWidth;
-    //     const height = window.innerHeight;
-    //     const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
-    //     const optimalZoom = Math.min((width * 0.8) / (2 * totalRadius), (height * 0.8) / (2 * totalRadius));
-    //     const finalZoom = Math.max(0.1, Math.min(optimalZoom, 1));
-        
-    //     const resetTransform = d3.zoomIdentity
-    //         .translate(fanConfig.centerX, fanConfig.centerY)
-    //         .scale(finalZoom);
-            
-    //     svg.transition()
-    //         .duration(750)
-    //         .call(fanZoom.transform, resetTransform);
-    //     state.currentRadarAngle = 0;
-    // }
-
     if (fanZoom && window.initialFanTransform) {
         console.log('🔄 Reset vers transform initial exact:', window.initialFanTransform);
         
@@ -526,26 +451,13 @@ export function resetFanView() {
         userHasInteracted = false;
     } else {
         console.warn('⚠️ Pas de transform initial sauvegardé');
-    }
-
-    
-    
-    
+    }  
 }
 
 
 /**
  * Change la personne racine
  */
-// function changeRootPerson(personId) {
-//     console.log(`🎯 Changement de racine vers: ${personId}`);
-//     if (typeof displayGenealogicTree === 'function') {
-//         console.log('\n\n\n\n #######   CALL displayGenealogicTree in changeRootPerson ### ')
-//         displayGenealogicTree(personId, false, false, false, state.treeModeReal);
-//         setupFanZoom();
-//     }
-// }
-
 function changeRootPerson(personId) {
     console.log(`🎯 Changement de racine vers: ${personId}`);
     
@@ -573,70 +485,6 @@ function displayPersonDetails(personId) {
     console.log(`Affichage des détails pour: ${personId}`);
 }
 
-// function displayPersonDetails(personId) {
-//     console.log('🚨 displayPersonDetails AVANT - zoom état:', d3.zoomTransform(d3.select("#tree-svg").node()));
-    
-//     if (typeof window.displayPersonDetails === 'function') {
-//         window.displayPersonDetails(personId);
-        
-//         // RÉPARER le zoom après la modal
-//         setTimeout(() => {
-//             console.log('🔧 Réparation du zoom après modal');
-//             const svg = d3.select("#tree-svg");
-//             const currentTransform = d3.zoomTransform(svg.node());
-//             console.log('🚨 displayPersonDetails APRÈS - zoom état:', currentTransform);
-            
-//             // Forcer la resynchronisation
-//             if (fanZoom && currentTransform) {
-//                 svg.call(fanZoom.transform, currentTransform);
-//                 console.log('🔧 Zoom resynchronisé');
-//             }
-//         }, 500); // Attendre que la modal soit fermée
-//     }
-    
-//     console.log(`Affichage des détails pour: ${personId}`);
-// }
-
-
-// function displayPersonDetails(personId) {
-//     if (typeof window.displayPersonDetails === 'function') {
-//         window.displayPersonDetails(personId);
-        
-//         // RESET SYSTÉMATIQUE après toute ouverture de modal
-//         setTimeout(() => {
-//             if (fanZoom) {
-//                 const svg = d3.select("#tree-svg");
-                
-//                 // Calculer le zoom optimal actuel
-//                 const width = window.innerWidth;
-//                 const height = window.innerHeight;
-//                 const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
-//                 const optimalZoom = Math.max(0.1, Math.min(Math.min(
-//                     (width * 0.8) / (2 * totalRadius),
-//                     (height * 0.8) / (2 * totalRadius)
-//                 ), 1));
-                
-//                 // FORCER le bon zoom
-//                 const correctTransform = d3.zoomIdentity
-//                     .translate(fanConfig.centerX, fanConfig.centerY)
-//                     .scale(optimalZoom);
-                
-//                 svg.call(fanZoom.transform, correctTransform);
-                
-//                 // Mettre à jour les variables
-//                 window.initialFanTransform = {
-//                     k: optimalZoom,
-//                     x: fanConfig.centerX,
-//                     y: fanConfig.centerY
-//                 };
-//                 userHasInteracted = false;
-                
-//                 console.log('🔧 Reset automatique après modal:', optimalZoom);
-//             }
-//         }, 100);
-//     }
-// }
-
 /**
  * Modifie le nombre maximum de générations
  */
@@ -644,149 +492,15 @@ export function setMaxGenerations(max) {
 
     fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
     console.log(`📊 Générations max mises à jour: ${max}`);
+    console.log(`🔍 Recalcul zoom pour ${max} générations`);
+
+    fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
+    console.log(`📊 Générations max mises à jour: ${max}`);
 
     // Invalider le cache
     isCacheValid = false;
     cachedRadarPNG = null;
-
-
-    // // NOUVEAU : Reset complet du zoom D3.js
-    // window.initialFanTransform = null;
-    // userHasInteracted = false;
-    
-    // // FORCER le reset du zoom D3.js actuel
-    // if (fanZoom) {
-    //     const svg = d3.select("#tree-svg");
-    //     const resetTransform = d3.zoomIdentity; // Zoom neutre
-    //     svg.call(fanZoom.transform, resetTransform);
-    //     console.log('🔄 Zoom D3.js forcé à 1x avant recalcul');
-    // }
-
-
-
-
-
-
-
-
-
-    // // DIAGNOSTIC COMPLET
-    // const svg = d3.select("#tree-svg");
-    // const currentD3Transform = d3.zoomTransform(svg.node());
-    // const mainGroup = svg.selectAll("g").filter(function() {
-    //     return this.querySelector(".center-person-group") !== null;
-    // });
-    // const actualTransform = mainGroup.attr("transform");
-    
-    // console.log('🔍 DIAGNOSTIC - D3 transform:', currentD3Transform);
-    // console.log('🔍 DIAGNOSTIC - MainGroup transform:', actualTransform);
-    // console.log('🔍 DIAGNOSTIC - fanZoom existe:', !!fanZoom);
-    // console.log('🔍 DIAGNOSTIC - userHasInteracted:', userHasInteracted);
-    
-    // // CALCULER le zoom optimal attendu
-    // const width = window.innerWidth;
-    // const height = window.innerHeight;
-    // const totalRadius = fanConfig.innerRadius + (max * fanConfig.generationWidth);
-    // const expectedZoom = Math.max(0.1, Math.min(Math.min(
-    //     (width * 0.8) / (2 * totalRadius),
-    //     (height * 0.8) / (2 * totalRadius)
-    // ), 1));
-    
-    // console.log('🔍 DIAGNOSTIC - Zoom attendu:', expectedZoom);
-    // console.log('🔍 DIAGNOSTIC - Écart zoom:', Math.abs(currentD3Transform.k - expectedZoom));
-    
-    // // DÉTECTER si planté
-    // const isZoomBroken = Math.abs(currentD3Transform.k - expectedZoom) > 0.3;
-    // console.log('🔍 DIAGNOSTIC - Zoom planté ?', isZoomBroken);
-    
-
-
-    // // Dans la réparation
-    // if (isZoomBroken) {
-    //     console.log('🚨 ZOOM PLANTÉ DÉTECTÉ - RÉPARATION PROTÉGÉE');
-        
-    //     isRepairingZoom = true; // PROTECTION
-        
-    //     try {
-    //         const correctTransform = d3.zoomIdentity
-    //             .translate(fanConfig.centerX, fanConfig.centerY)
-    //             .scale(expectedZoom);
-            
-    //         if (fanZoom) {
-    //             svg.call(fanZoom.transform, correctTransform);
-    //         }
-            
-    //         window.initialFanTransform = {
-    //             k: expectedZoom,
-    //             x: fanConfig.centerX,
-    //             y: fanConfig.centerY
-    //         };
-    //         userHasInteracted = false;
-            
-    //         console.log('🔧 Réparation protégée effectuée');
-            
-    //         setTimeout(() => {
-    //             console.log('🔄 Redraw après réparation protégée');
-    //             if (state.currentTree && state.rootPersonId) {
-    //                 if (typeof displayGenealogicTree === 'function') {
-    //                     displayGenealogicTree(state.rootPersonId, false, false, false, 'fanAncestors');
-    //                 }
-    //             }
-                
-    //             // Libérer la protection après le redraw
-    //             setTimeout(() => {
-    //                 isRepairingZoom = false;
-    //                 console.log('🔓 Protection désactivée');
-    //             }, 500);
-    //         }, 100);
-            
-    //     } catch (error) {
-    //         console.error('❌ Erreur pendant réparation:', error);
-    //         isRepairingZoom = false;
-    //     }
-        
-    //     return;
-    // }
-
-
-
-
-    // // AJOUTER ce nouveau bloc APRÈS
-    // if (Math.abs(currentD3Transform.k - expectedZoom) > 0.1) {
-    //     console.log('🚨 DÉSYNCHRONISATION DÉTECTÉE');
-        
-    //     // FORCER la synchronisation du mainGroup
-    //     const mainGroup = svg.selectAll("g").filter(function() {
-    //         return this.querySelector(".center-person-group") !== null;
-    //     });
-        
-    //     if (!mainGroup.empty()) {
-    //         const correctTransform = `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${expectedZoom})`;
-    //         mainGroup.attr("transform", correctTransform);
-    //         console.log('🔧 MainGroup forcé à:', correctTransform);
-            
-    //         // FORCER aussi D3.js
-    //         const d3Transform = d3.zoomIdentity
-    //             .translate(fanConfig.centerX, fanConfig.centerY)
-    //             .scale(expectedZoom);
-    //         svg.call(fanZoom.transform, d3Transform);
-            
-    //         console.log('🔧 Synchronisation forcée terminée');
-    //         return; // STOP le traitement normal
-    //     }
-    // }
-
-
-
-
-
-
-
-
-
-
-
-    
+   
     if (state.currentTree && state.rootPersonId) {
         setTimeout(() => {
             if (typeof displayGenealogicTree === 'function') {
@@ -1273,7 +987,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
     const fillColor = getGenerationColor(generation);
     
     // Segment principal avec données liées
-    let clickTimeout = null;
+    // let clickTimeout = null;
     segmentGroup.append("path")
         .attr("d", arc)
         .attr("class", `person-box person-segment generation-${generation}`)
@@ -1284,52 +998,6 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         .style("filter", "url(#drop-shadow)")
         .style("cursor", "pointer")
         .style("touch-action", "manipulation")
-        // .on("click", function(event, d) { 
-        //     event.stopPropagation();
-        //     displayPersonDetails(d.id);
-        // })
-        // .on("dblclick", function(event, d) { 
-        //     event.stopPropagation();
-        //     changeRootPerson(d.id);
-        // });
-        // .on("click", function(event, d) { 
-        //     event.stopPropagation();
-            
-        //     // Délai pour distinguer click simple du double-click
-        //     setTimeout(() => {
-        //         if (!this._doubleClicked) {
-        //             displayPersonDetails(d.id);
-        //         }
-        //         this._doubleClicked = false;
-        //     }, 300);
-        // })
-        // .on("dblclick", function(event, d) { 
-        //     event.stopPropagation();
-        //     this._doubleClicked = true;
-        //     changeRootPerson(d.id);
-        // })
-        // .on("touchend", function(event, d) {
-        //     event.stopPropagation();
-        //     event.preventDefault();
-            
-        //     const now = Date.now();
-        //     const timeDiff = now - (this._lastTap || 0);
-            
-        //     if (timeDiff < 400 && timeDiff > 0) {
-        //         // Double-tap détecté
-        //         changeRootPerson(d.id);
-        //     } else {
-        //         // Premier tap
-        //         setTimeout(() => {
-        //             displayPersonDetails(d.id);
-        //         }, 400);
-        //     }
-            
-        //     this._lastTap = now;
-        // });
-
-
-
         .on("click", function(event, d) { 
             event.stopPropagation();
             
@@ -1357,95 +1025,138 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
             // Exécuter immédiatement le changement de racine
             changeRootPerson(d.id);
         })
-        .on("touchstart", function(event, d) {
-            // Bloquer dès le start
-            if (event.touches && event.touches.length === 1) {
+        .on("touchend", function(event, d) {
+            // Bloquer les comportements par défaut
+            if (event.cancelable) {
                 event.preventDefault();
             }
             
-            // Détecter si c'est un zoom (2 doigts)
-            if (event.touches && event.touches.length > 1) {
-                this._isZooming = true;
-                console.log('🔍 Zoom détecté - modal désactivée');
-                return;
-            }
-            this._isZooming = false;
-        })
-        // .on("touchend", function(event, d) {
-        //     event.stopPropagation();
-        //     event.preventDefault();
-
-        //     // NOUVEAU : Empêcher TOUS les comportements par défaut
-        //     if (event.cancelable) {
-        //         event.preventDefault();
-        //     }
-
-        //     // NE PAS déclencher la modal si on était en train de zoomer
-        //     if (this._isZooming) {
-        //         console.log('🚫 Modal bloquée car zoom en cours');
-        //         this._isZooming = false;
-        //         return;
-        //     }
-            
-        //     const now = Date.now();
-        //     const timeDiff = now - (this._lastTap || 0);
-            
-        //     if (timeDiff < 400 && timeDiff > 0) {
-        //         // Double-tap : annuler le click simple
-        //         if (clickTimeout) {
-        //             clearTimeout(clickTimeout);
-        //             clickTimeout = null;
-        //         }
-        //         changeRootPerson(d.id);
-        //     } else {
-        //         // Premier tap : attendre avant d'exécuter
-        //         if (clickTimeout) {
-        //             clearTimeout(clickTimeout);
-        //         }
-        //         clickTimeout = setTimeout(() => {
-        //             displayPersonDetails(d.id);
-        //             clickTimeout = null;
-        //         }, 400);
-        //     }
-            
-        //     this._lastTap = now;
-        // });
-        .on("touchend", function(event, d) {
-            // NE PAS traiter si on vient de zoomer
+            // Ne rien faire si c'était un zoom ou un glissement
             if (this._isZooming) {
-                console.log('🚫 touchend ignoré car zoom en cours');
+                console.log('🚫 Interaction zoom/glissement bloquée');
                 this._isZooming = false;
+                this._startTouch = null;
                 return;
             }
-            
-            event.stopPropagation();
-            // event.preventDefault(); // ← COMMENTÉ pour éviter le conflit avec D3.js
             
             const now = Date.now();
-            const timeDiff = now - (this._lastTap || 0);
+            const timeSinceLastTap = now - lastTapTime;
             
-            if (timeDiff < 400 && timeDiff > 0) {
-                // Double-tap : annuler le click simple
-                if (clickTimeout) {
-                    clearTimeout(clickTimeout);
-                    clickTimeout = null;
+            // Double tap détecté rapidement (moins de 300ms)
+            if (timeSinceLastTap < 300) {
+                // Annuler le timeout de simple tap s'il existe
+                if (tapTimeout) {
+                    clearTimeout(tapTimeout);
+                    tapTimeout = null;
                 }
-                changeRootPerson(d.id);
+                
+                const svg = d3.select("#tree-svg");
+                
+                // FORCER LE ZOOM AVANT TOUT
+                const calculateOptimalZoom = () => {
+                    const width = window.innerWidth;
+                    const height = window.innerHeight;
+                    
+                    const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
+
+                    const widthZoom = (width * 0.8) / (2 * totalRadius);
+                    const heightZoom = (height * 0.8) / (2 * totalRadius);
+                    
+                    const optimalZoom = Math.min(widthZoom, heightZoom);
+                    
+                    return Math.max(0.1, Math.min(optimalZoom, 1));
+                };
+
+                const optimalZoom = calculateOptimalZoom();
+                
+                // FORCER LE ZOOM AVANT LE CHANGEMENT DE RACINE
+                const initialTransform = d3.zoomIdentity
+                    .translate(fanConfig.centerX, fanConfig.centerY)
+                    .scale(optimalZoom);
+                
+                svg.call(fanZoom.transform, initialTransform);
+                
+                console.log('🔍 Zoom FORCÉ avant changement de racine:', {
+                    k: optimalZoom,
+                    x: fanConfig.centerX,
+                    y: fanConfig.centerY
+                });
+
+                // Léger délai pour s'assurer que le zoom est appliqué
+                setTimeout(() => {
+                    // Changer la personne racine
+                    console.log('🔄 Double tap détecté - Changement de racine');
+                    changeRootPerson(d.id);
+                }, 50);
+                
+                // Réinitialiser le dernier tap
+                lastTapTime = 0;
             } else {
-                // Premier tap : attendre avant d'exécuter
-                if (clickTimeout) {
-                    clearTimeout(clickTimeout);
-                }
-                clickTimeout = setTimeout(() => {
+                // Simple tap potentiel (inchangé)
+                tapTimeout = setTimeout(() => {
+                    const svg = d3.select("#tree-svg");
+                    const currentTransform = d3.zoomTransform(svg.node());
+                    
+                    console.log('🔍 Transform avant modal:', {
+                        k: currentTransform.k,
+                        x: currentTransform.x,
+                        y: currentTransform.y
+                    });
+
+                    // Stocker le transform actuel
+                    window.lastTransformBeforeModal = currentTransform;
+
                     displayPersonDetails(d.id);
-                    clickTimeout = null;
-                }, 400);
+                    tapTimeout = null;
+                }, 250);
+                
+                // Mettre à jour le temps du dernier tap
+                lastTapTime = now;
+            }
+        })
+        .on("touchstart", function(event, d) {
+            // Bloquer TOUS les comportements par défaut
+            if (event.cancelable) {
+                event.preventDefault();
             }
             
-            this._lastTap = now;
+            // Détecter multi-touch (zoom)
+            if (event.touches && event.touches.length > 1) {
+                this._isZooming = true;
+                console.log('🔍 Zoom multi-touch détecté');
+                return;
+            }
+            
+            // Stocker la position initiale du toucher
+            this._startTouch = {
+                x: event.touches[0].clientX,
+                y: event.touches[0].clientY,
+                time: Date.now()
+            };
+            
+            this._isZooming = false;
+        })
+        .on("touchmove", function(event, d) {
+            // Détecter un déplacement significatif
+            if (this._startTouch) {
+                const touch = event.touches[0];
+                const deltaX = Math.abs(touch.clientX - this._startTouch.x);
+                const deltaY = Math.abs(touch.clientY - this._startTouch.y);
+                
+                // Si déplacement > 10px, considérer comme un glissement
+                if (deltaX > 10 || deltaY > 10) {
+                    this._isZooming = true;
+                    console.log('🔍 Glissement détecté');
+                    
+                    // Annuler le timeout de tap s'il existe
+                    if (tapTimeout) {
+                        clearTimeout(tapTimeout);
+                        tapTimeout = null;
+                    }
+                }
+            }
         });
-        
-    
+   
     // Texte de la personne
     drawSegmentText(segmentGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation);
     
@@ -1533,6 +1244,51 @@ function createSpinningWheelWithLever(finalRotation, duration) {
 function launchFortuneWheelWithLever(baseVelocity) {
     if (isSpinning) return;
     
+    // NEUTRALISATION COMPLÈTE DES ZOOMS
+    const svg = d3.select("#tree-svg");
+    
+    // Calculer le zoom optimal
+    const calculateOptimalZoom = () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
+
+        const widthZoom = (width * 0.8) / (2 * totalRadius);
+        const heightZoom = (height * 0.8) / (2 * totalRadius);
+        
+        const optimalZoom = Math.min(widthZoom, heightZoom);
+        
+        return Math.max(0.1, Math.min(optimalZoom, 1));
+    };
+
+    const optimalZoom = calculateOptimalZoom();
+    
+    // RÉINITIALISATION AGRESSIVE DU ZOOM
+    const initialTransform = d3.zoomIdentity
+        .translate(fanConfig.centerX, fanConfig.centerY)
+        .scale(optimalZoom);
+    
+    // Supprimer TOUS les gestionnaires de zoom
+    svg.on(".zoom", null);
+    
+    // Forcer le zoom optimal
+    svg.call(fanZoom.transform, initialTransform);
+    
+    // Recréer le zoom avec filtrage strict
+    fanZoom = d3.zoom()
+        .scaleExtent([optimalZoom, optimalZoom])  // Verrouiller le zoom
+        .filter(event => {
+            // Bloquer TOUS les événements de zoom
+            console.log('🚫 Zoom bloqué:', event.type);
+            return false;
+        })
+        .on("zoom", () => {
+            // Ne rien faire
+        });
+    
+    svg.call(fanZoom);
+    
     isSpinning = true;
     leverStartTime = performance.now();
     console.log(`🎡 Lancement avec levier réaliste - vitesse: ${baseVelocity.toFixed(2)}`);
@@ -1566,14 +1322,14 @@ function launchFortuneWheelWithLever(baseVelocity) {
     createSpinningWheelWithLever(finalRotation, duration);
 }
 
-// fonction d'animation
 function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
-
     console.log("🌪️ Animation avec levier réaliste...");
 
-    console.log('🔍 DEBUG window.initialFanTransform:', window.initialFanTransform, 'k=',window.initialFanTransform.k, ' x=',window.initialFanTransform.x, ' y=' ,window.initialFanTransform.y  );
-    console.log('🔍 Type:', typeof window.initialFanTransform);
-
+    console.log('🔍 DEBUG window.initialFanTransform:', window.initialFanTransform, 
+        'k=', window.initialFanTransform ? window.initialFanTransform.k : 'N/A', 
+        ' x=', window.initialFanTransform ? window.initialFanTransform.x : 'N/A', 
+        ' y=', window.initialFanTransform ? window.initialFanTransform.y : 'N/A'
+    );
     
     const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
         return this.querySelector(".center-person-group") !== null;
@@ -1597,44 +1353,61 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     
     playSound('wheel-spinning');
     
-    // rotation  de l'image png
     const timeoutId1 = setTimeout(() => {
         spinningImg.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-        // spinningImg.style.transform = `rotate(${finalRotation}deg)`;
-        // NOUVEAU : Récupérer l'angle actuel du radar
+        
         const currentTransform = originalRadar.attr("transform") || "";
         const rotateMatch = currentTransform.match(/rotate\(([-\d.]+)\)/);
         const radarAngle = rotateMatch ? parseFloat(rotateMatch[1]) : 0;
         
-        // Faire tourner le PNG depuis l'angle du radar
         const totalRotation = radarAngle + finalRotation;
         spinningImg.style.transform = `rotate(${totalRotation}deg)`;
     }, 50);
-    currentAnimationTimeouts.push(timeoutId1);
-    
 
     const timeoutId2 = setTimeout(() => {
         console.log("🎉 Roue arrêtée - Réactivation du levier !");
 
+        // RESTAURER le zoom normal à la fin de l'animation
+        const svg = d3.select("#tree-svg");
+
+        // Récupérer le groupe principal
+        const mainGroup = svg.selectAll("g").filter(function() {
+            return this.querySelector(".center-person-group") !== null;
+        });
+        
+        // Recréer le zoom avec les paramètres par défaut
+        fanZoom = d3.zoom()
+            .scaleExtent([0.1, 3])  // Retrouver la plage de zoom normale
+            .on("zoom", ({transform}) => {
+                mainGroup.attr("transform", 
+                    `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
+                
+                userHasInteracted = true;
+                lastFanTransform = transform;
+            });
+        
+        svg.call(fanZoom);
+
         playSound('wheel-stop');
-        // const winner = detectWinner(finalRotation);
 
         if (spinningImg.parentNode) {
             document.body.removeChild(spinningImg);
         }
 
-        // Récupérer le zoom ET l'angle actuel du radar
         const currentTransformAttr = originalRadar.attr("transform");
-        let currentScale = 0.7;
-        // let state.currentRadarAngle = 0; //  angle de départ du radar
+        
+        let currentScale = window.initialFanTransform ? window.initialFanTransform.k : 0.7;
         
         if (currentTransformAttr) {
             const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
             if (scaleMatch) {
                 currentScale = parseFloat(scaleMatch[1]);
             }
-            
-            // extraire l'angle actuel du radar
+        }
+        
+        state.currentRadarAngle = 0;
+        
+        if (currentTransformAttr) {
             const rotateMatch = currentTransformAttr.match(/rotate\(([-\d.]+)\)/);
             if (rotateMatch) {
                 state.currentRadarAngle = parseFloat(rotateMatch[1]);
@@ -1644,59 +1417,26 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         console.log(`📊 Angle radar avant rotation: ${state.currentRadarAngle.toFixed(1)}°`);
         console.log(`📊 Rotation PNG ajoutée: ${finalRotation.toFixed(1)}°`);
         
-        //  Angle final = angle de départ + rotation du PNG
         const finalAngleTotal = state.currentRadarAngle + finalRotation;
         const finalAngleNormalized = finalAngleTotal % 360;
         
         console.log(`📊 Angle final total: ${finalAngleTotal.toFixed(1)}°`);
 
         const startTime = performance.now();
-        const winner = detectWinner(finalAngleTotal); // Utiliser l'angle total
+        const winner = detectWinner(finalAngleTotal);
         console.log(`detectWinner en : ${(performance.now()-startTime).toFixed(1)}ms`);
         
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
-        // Afficher le radar avec l'angle total
-        const startTime2 = performance.now(); 
-
-
-        // originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
-        //         .style("opacity", 1);
-
-        // setTimeout(() => {
-        //     if (window.initialFanTransform && fanZoom) {
-        //         const svg = d3.select("#tree-svg");
-        //         svg.call(fanZoom.transform, window.initialFanTransform);
-        //         console.log('🔄 Zoom initial forcé après animation');
-        //     }
-        // }, 200);
-
-        // UTILISER le zoom initial au lieu de l'ancien zoom
-        // const resetScale = window.initialFanTransform ? window.initialFanTransform.k : 0.7;
-
         console.log('🔍 scale actuel:', currentScale);
         console.log('🔍 centerX/Y actuels:', centerX, centerY);
         console.log('🔍 initialFanTransform:', window.initialFanTransform);
-        console.log('🔍 scale initial:', window.initialFanTransform.k);        
-        console.log('🔍 x/y initiaux:', window.initialFanTransform.x, window.initialFanTransform.y);
 
-        const resetScale = window.initialFanTransform.k;
+        originalRadar.attr("transform", 
+            `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
+            .style("opacity", 1);
 
-        originalRadar.attr("transform", `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${resetScale})`)
-                .style("opacity", 1);
-
-
-
-
-                
-
-
-        console.log(`🔄 Radar ré-affiché avec nouvel angle: ${finalAngleNormalized.toFixed(1)}° en ${(performance.now()-startTime2).toFixed(1)}ms`);
-
-
-        const startTime3 = performance.now(); 
-        // Corriger uniquement l'inversion tête en bas des textes
         d3.selectAll(".segment-text-group").each(function() {
             const currentTransform = d3.select(this).attr("transform");
             
@@ -1715,7 +1455,6 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
             }
         });
 
-        // Corriger aussi le texte du centre
         d3.selectAll(".center-text-group").each(function() {
             if (finalAngleNormalized > 90 && finalAngleNormalized < 270) {
                 d3.select(this).attr("transform", "rotate(180)");
@@ -1724,36 +1463,29 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
             }
         });
 
-        // Réactiver le nouveau levier
         if (window.leverControls) {
             window.leverControls.enable();
         }
         isSpinning = false;
 
-        console.log(`🔄 correction inverson texte en ${(performance.now()-startTime3).toFixed(1)}ms`);
-
         highlightWinnerSegment(winner.segment, winner.generation);
         
-        const startTime4 = performance.now(); 
-        // announceWinnerML(winner);
         const timeoutId3 = setTimeout(() => {
             announceWinnerML(winner);
-        }, 5000); // RETARD de 2 secondes au lieu d'immédiat
+        }, 5000);
         currentAnimationTimeouts.push(timeoutId3);
-
-
-       console.log(`🔄 announceWinnerML en ${(performance.now()-startTime4).toFixed(1)}ms`);
 
         const timeoutId4 = setTimeout(() => {
             hideWinnerText();
-        // }, 3000);
-        }, 8000); // Ajuster en conséquence
+        }, 8000);
         currentAnimationTimeouts.push(timeoutId4);
 
     }, duration + 100);
+    
+    currentAnimationTimeouts.push(timeoutId1);
     currentAnimationTimeouts.push(timeoutId2);
-
 }
+
 
 
 // Recentrer le radar chart (avec préservation du zoom initial)
@@ -2011,8 +1743,6 @@ function highlightWinnerSegment(segmentIndex, generation) {
             currentAnimationTimeouts.push(timeoutId);
         }
     }
-
-
 }
 
 
@@ -2065,8 +1795,6 @@ function resetLastWinnerHighlightAsync() {
 }
 
 
-
-
 // Détection du gagnant basée sur l'angle avec tirage aléatoire entre les géneration
 function detectWinner(finalAngle) {
     const normalizedAngle = (360 - ((finalAngle + 180) % 360)) % 360;
@@ -2103,7 +1831,7 @@ function detectWinner(finalAngle) {
         }
     }
     
-    // NOUVEAU : Tirage aléatoire ou fallback centre
+    // Tirage aléatoire ou fallback centre
     if (candidateSegments.length > 0) {
         const randomIndex = Math.floor(Math.random() * candidateSegments.length);
         const winner = candidateSegments[randomIndex];
@@ -2624,8 +2352,7 @@ function createRealisticSlotHandleML() {
 
         // closeWinnerMessage();
 
-        // RESET complet de toutes les animations et fenêtres en cours
-        // RESET avec nettoyage des segments mémorisés uniquement
+        // RESET complet de toutes les animations et fenêtres en cours avec nettoyage des segments mémorisés uniquement
         currentAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
         currentAnimationTimeouts = [];
         d3.selectAll("*").interrupt();
@@ -2663,11 +2390,6 @@ function createRealisticSlotHandleML() {
             closeWinnerMessage();
         }
         hideWinnerText();
-
-        // // resetBrowserZoom();
-
-        // resetFanView();
-
 
         leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
