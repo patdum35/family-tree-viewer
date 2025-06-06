@@ -32,7 +32,10 @@ let currentAnimationTimeouts = [];
 let allWinnerSegments = []; // Mémoriser tous les segments gagnants
 
 let userHasInteracted = false;
-let stableD3Transform = null;
+
+
+// Variable globale en haut du fichier
+let isRepairingZoom = false;
 
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
@@ -47,9 +50,60 @@ export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
     console.log('📊 Arbre reçu:', state.currentTree);
     
     const svg = setupFanSVG();
+
+
+
+
+// ESPION : Écouter TOUS les événements possibles
+svg.node().addEventListener('wheel', (e) => {
+    console.log('🚨 WHEEL détecté:', e);
+});
+
+svg.node().addEventListener('gesturestart', (e) => {
+    console.log('🚨 GESTURESTART détecté:', e);
+});
+
+svg.node().addEventListener('gesturechange', (e) => {
+    console.log('🚨 GESTURECHANGE détecté:', e);
+});
+
+svg.node().addEventListener('gestureend', (e) => {
+    console.log('🚨 GESTUREEND détecté:', e);
+});
+
+// ESPION sur le document aussi
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+        console.log('🚨 PINCH détecté sur document:', e);
+    }
+});
+
+
+
+
+
+
+
+
     const mainGroup = createFanMainGroup(svg);
 
     
+
+
+    // RESET du zoom D3.js AVANT setupFanZoom si on a déjà un zoom
+    // if (d3.select("#tree-svg").node() && userHasInteracted) {
+    //     // Reset seulement s'il y a déjà eu des interactions
+    //     const currentTransform = d3.zoomTransform(svg.node());
+    //     if (currentTransform && (currentTransform.k !== 1 || currentTransform.x !== 0 || currentTransform.y !== 0)) {
+    //         const resetTransform = d3.zoomIdentity;
+    //         svg.call(d3.zoom().transform, resetTransform);
+    //         console.log('🔄 Zoom D3.js resetté AVANT setupFanZoom');
+    //     }
+    //     window.initialFanTransform = null;
+    //     userHasInteracted = false;
+    // }
+
+
     
     // Configuration selon le mode
     configureFanMode();
@@ -270,6 +324,10 @@ function createSVGFilters(svg) {
  */
 function setupFanZoom(svg, mainGroup) {
     // Calculer un zoom optimal basé sur le nombre de générations et la taille de la fenêtre
+    let isUpdatingTransform = false; // Flag pour éviter la boucle
+
+    console.log('🚀 DÉBUT setupFanZoom');
+
     const calculateOptimalZoom = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -289,24 +347,59 @@ function setupFanZoom(svg, mainGroup) {
         return Math.max(0.1, Math.min(optimalZoom, 1));
     };
 
+    // fanZoom = d3.zoom()
+    //     .scaleExtent([0.1, 3]) // Garder une liberté de zoom
+    //     .on("zoom", ({transform}) => {
+    //         console.log('🔍 ZOOM DÉTECTÉ dans D3:', transform);
+    //         console.log('🔍 Source du zoom:', event ? event.type : 'inconnue');
+    //         console.log('🔍 Événement complet:', event);
+    //         // Toujours centrer, mais autoriser le zoom
+    //         userHasInteracted = true; // L'utilisateur a bougé
+    //         lastFanTransform = transform;
+    //         mainGroup.attr("transform", 
+    //             // `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
+    //             `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
+    //     });
+
+
+
+
     fanZoom = d3.zoom()
-        .scaleExtent([0.1, 3]) // Garder une liberté de zoom
-        .on("zoom", ({transform}) => {
-            // Toujours centrer, mais autoriser le zoom
-            userHasInteracted = true; // L'utilisateur a bougé
-            lastFanTransform = transform;
-            mainGroup.attr("transform", 
-                // `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
-                `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
-        });
+    .scaleExtent([0.1, 3])
+    .on("zoom", ({transform}) => {
+        // BLOQUER la boucle infinie
+        if (isUpdatingTransform) {
+            console.log('🚫 Boucle de zoom bloquée');
+            return;
+        }
+        
+        console.log('🔍 ZOOM LÉGITIME:', transform);
+        
+        isUpdatingTransform = true; // Bloquer les suivants
+        
+        userHasInteracted = true;
+        lastFanTransform = transform;
+        mainGroup.attr("transform", 
+            `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
+        
+        // Remettre le flag après un délai
+        setTimeout(() => {
+            isUpdatingTransform = false;
+        }, 50);
+    });
+
     
     svg.call(fanZoom);
     
     // Transformation initiale optimale
     const initialZoom = calculateOptimalZoom();
+    console.log('🔍 Zoom optimal calculé:', initialZoom);
+    console.log('🔍 Nombre générations:', fanConfig.maxGenerations);
+
     const initialTransform = d3.zoomIdentity
         .translate(fanConfig.centerX, fanConfig.centerY)
         .scale(initialZoom);
+    console.log('🔍 Transform à appliquer:', initialTransform);
 
 
     // CAPTURER le vrai zoom AVANT que D3.js fasse ses ajustements
@@ -316,8 +409,17 @@ function setupFanZoom(svg, mainGroup) {
         y: fanConfig.centerY
     };
     console.log('VRAI Transform initial capturé:', window.initialFanTransform);
+
+    // État AVANT application
+    const beforeTransform = d3.zoomTransform(svg.node());
+    console.log('🔍 Transform AVANT application:', beforeTransform);
     
     svg.call(fanZoom.transform, initialTransform);
+
+
+    // État APRÈS application
+    const afterTransform = d3.zoomTransform(svg.node());
+    console.log('🔍 Transform APRÈS application:', afterTransform);
 
 
     setTimeout(() => {
@@ -471,16 +573,219 @@ function displayPersonDetails(personId) {
     console.log(`Affichage des détails pour: ${personId}`);
 }
 
+// function displayPersonDetails(personId) {
+//     console.log('🚨 displayPersonDetails AVANT - zoom état:', d3.zoomTransform(d3.select("#tree-svg").node()));
+    
+//     if (typeof window.displayPersonDetails === 'function') {
+//         window.displayPersonDetails(personId);
+        
+//         // RÉPARER le zoom après la modal
+//         setTimeout(() => {
+//             console.log('🔧 Réparation du zoom après modal');
+//             const svg = d3.select("#tree-svg");
+//             const currentTransform = d3.zoomTransform(svg.node());
+//             console.log('🚨 displayPersonDetails APRÈS - zoom état:', currentTransform);
+            
+//             // Forcer la resynchronisation
+//             if (fanZoom && currentTransform) {
+//                 svg.call(fanZoom.transform, currentTransform);
+//                 console.log('🔧 Zoom resynchronisé');
+//             }
+//         }, 500); // Attendre que la modal soit fermée
+//     }
+    
+//     console.log(`Affichage des détails pour: ${personId}`);
+// }
+
+
+// function displayPersonDetails(personId) {
+//     if (typeof window.displayPersonDetails === 'function') {
+//         window.displayPersonDetails(personId);
+        
+//         // RESET SYSTÉMATIQUE après toute ouverture de modal
+//         setTimeout(() => {
+//             if (fanZoom) {
+//                 const svg = d3.select("#tree-svg");
+                
+//                 // Calculer le zoom optimal actuel
+//                 const width = window.innerWidth;
+//                 const height = window.innerHeight;
+//                 const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);
+//                 const optimalZoom = Math.max(0.1, Math.min(Math.min(
+//                     (width * 0.8) / (2 * totalRadius),
+//                     (height * 0.8) / (2 * totalRadius)
+//                 ), 1));
+                
+//                 // FORCER le bon zoom
+//                 const correctTransform = d3.zoomIdentity
+//                     .translate(fanConfig.centerX, fanConfig.centerY)
+//                     .scale(optimalZoom);
+                
+//                 svg.call(fanZoom.transform, correctTransform);
+                
+//                 // Mettre à jour les variables
+//                 window.initialFanTransform = {
+//                     k: optimalZoom,
+//                     x: fanConfig.centerX,
+//                     y: fanConfig.centerY
+//                 };
+//                 userHasInteracted = false;
+                
+//                 console.log('🔧 Reset automatique après modal:', optimalZoom);
+//             }
+//         }, 100);
+//     }
+// }
+
 /**
  * Modifie le nombre maximum de générations
  */
 export function setMaxGenerations(max) {
+
     fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
     console.log(`📊 Générations max mises à jour: ${max}`);
 
     // Invalider le cache
     isCacheValid = false;
     cachedRadarPNG = null;
+
+
+    // // NOUVEAU : Reset complet du zoom D3.js
+    // window.initialFanTransform = null;
+    // userHasInteracted = false;
+    
+    // // FORCER le reset du zoom D3.js actuel
+    // if (fanZoom) {
+    //     const svg = d3.select("#tree-svg");
+    //     const resetTransform = d3.zoomIdentity; // Zoom neutre
+    //     svg.call(fanZoom.transform, resetTransform);
+    //     console.log('🔄 Zoom D3.js forcé à 1x avant recalcul');
+    // }
+
+
+
+
+
+
+
+
+
+    // // DIAGNOSTIC COMPLET
+    // const svg = d3.select("#tree-svg");
+    // const currentD3Transform = d3.zoomTransform(svg.node());
+    // const mainGroup = svg.selectAll("g").filter(function() {
+    //     return this.querySelector(".center-person-group") !== null;
+    // });
+    // const actualTransform = mainGroup.attr("transform");
+    
+    // console.log('🔍 DIAGNOSTIC - D3 transform:', currentD3Transform);
+    // console.log('🔍 DIAGNOSTIC - MainGroup transform:', actualTransform);
+    // console.log('🔍 DIAGNOSTIC - fanZoom existe:', !!fanZoom);
+    // console.log('🔍 DIAGNOSTIC - userHasInteracted:', userHasInteracted);
+    
+    // // CALCULER le zoom optimal attendu
+    // const width = window.innerWidth;
+    // const height = window.innerHeight;
+    // const totalRadius = fanConfig.innerRadius + (max * fanConfig.generationWidth);
+    // const expectedZoom = Math.max(0.1, Math.min(Math.min(
+    //     (width * 0.8) / (2 * totalRadius),
+    //     (height * 0.8) / (2 * totalRadius)
+    // ), 1));
+    
+    // console.log('🔍 DIAGNOSTIC - Zoom attendu:', expectedZoom);
+    // console.log('🔍 DIAGNOSTIC - Écart zoom:', Math.abs(currentD3Transform.k - expectedZoom));
+    
+    // // DÉTECTER si planté
+    // const isZoomBroken = Math.abs(currentD3Transform.k - expectedZoom) > 0.3;
+    // console.log('🔍 DIAGNOSTIC - Zoom planté ?', isZoomBroken);
+    
+
+
+    // // Dans la réparation
+    // if (isZoomBroken) {
+    //     console.log('🚨 ZOOM PLANTÉ DÉTECTÉ - RÉPARATION PROTÉGÉE');
+        
+    //     isRepairingZoom = true; // PROTECTION
+        
+    //     try {
+    //         const correctTransform = d3.zoomIdentity
+    //             .translate(fanConfig.centerX, fanConfig.centerY)
+    //             .scale(expectedZoom);
+            
+    //         if (fanZoom) {
+    //             svg.call(fanZoom.transform, correctTransform);
+    //         }
+            
+    //         window.initialFanTransform = {
+    //             k: expectedZoom,
+    //             x: fanConfig.centerX,
+    //             y: fanConfig.centerY
+    //         };
+    //         userHasInteracted = false;
+            
+    //         console.log('🔧 Réparation protégée effectuée');
+            
+    //         setTimeout(() => {
+    //             console.log('🔄 Redraw après réparation protégée');
+    //             if (state.currentTree && state.rootPersonId) {
+    //                 if (typeof displayGenealogicTree === 'function') {
+    //                     displayGenealogicTree(state.rootPersonId, false, false, false, 'fanAncestors');
+    //                 }
+    //             }
+                
+    //             // Libérer la protection après le redraw
+    //             setTimeout(() => {
+    //                 isRepairingZoom = false;
+    //                 console.log('🔓 Protection désactivée');
+    //             }, 500);
+    //         }, 100);
+            
+    //     } catch (error) {
+    //         console.error('❌ Erreur pendant réparation:', error);
+    //         isRepairingZoom = false;
+    //     }
+        
+    //     return;
+    // }
+
+
+
+
+    // // AJOUTER ce nouveau bloc APRÈS
+    // if (Math.abs(currentD3Transform.k - expectedZoom) > 0.1) {
+    //     console.log('🚨 DÉSYNCHRONISATION DÉTECTÉE');
+        
+    //     // FORCER la synchronisation du mainGroup
+    //     const mainGroup = svg.selectAll("g").filter(function() {
+    //         return this.querySelector(".center-person-group") !== null;
+    //     });
+        
+    //     if (!mainGroup.empty()) {
+    //         const correctTransform = `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${expectedZoom})`;
+    //         mainGroup.attr("transform", correctTransform);
+    //         console.log('🔧 MainGroup forcé à:', correctTransform);
+            
+    //         // FORCER aussi D3.js
+    //         const d3Transform = d3.zoomIdentity
+    //             .translate(fanConfig.centerX, fanConfig.centerY)
+    //             .scale(expectedZoom);
+    //         svg.call(fanZoom.transform, d3Transform);
+            
+    //         console.log('🔧 Synchronisation forcée terminée');
+    //         return; // STOP le traitement normal
+    //     }
+    // }
+
+
+
+
+
+
+
+
+
+
+
     
     if (state.currentTree && state.rootPersonId) {
         setTimeout(() => {
@@ -1041,6 +1346,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         })
         .on("dblclick", function(event, d) { 
             event.stopPropagation();
+            event.preventDefault();
             
             // Annuler le click simple en cours
             if (clickTimeout) {
@@ -1051,9 +1357,69 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
             // Exécuter immédiatement le changement de racine
             changeRootPerson(d.id);
         })
+        .on("touchstart", function(event, d) {
+            // Bloquer dès le start
+            if (event.touches && event.touches.length === 1) {
+                event.preventDefault();
+            }
+            
+            // Détecter si c'est un zoom (2 doigts)
+            if (event.touches && event.touches.length > 1) {
+                this._isZooming = true;
+                console.log('🔍 Zoom détecté - modal désactivée');
+                return;
+            }
+            this._isZooming = false;
+        })
+        // .on("touchend", function(event, d) {
+        //     event.stopPropagation();
+        //     event.preventDefault();
+
+        //     // NOUVEAU : Empêcher TOUS les comportements par défaut
+        //     if (event.cancelable) {
+        //         event.preventDefault();
+        //     }
+
+        //     // NE PAS déclencher la modal si on était en train de zoomer
+        //     if (this._isZooming) {
+        //         console.log('🚫 Modal bloquée car zoom en cours');
+        //         this._isZooming = false;
+        //         return;
+        //     }
+            
+        //     const now = Date.now();
+        //     const timeDiff = now - (this._lastTap || 0);
+            
+        //     if (timeDiff < 400 && timeDiff > 0) {
+        //         // Double-tap : annuler le click simple
+        //         if (clickTimeout) {
+        //             clearTimeout(clickTimeout);
+        //             clickTimeout = null;
+        //         }
+        //         changeRootPerson(d.id);
+        //     } else {
+        //         // Premier tap : attendre avant d'exécuter
+        //         if (clickTimeout) {
+        //             clearTimeout(clickTimeout);
+        //         }
+        //         clickTimeout = setTimeout(() => {
+        //             displayPersonDetails(d.id);
+        //             clickTimeout = null;
+        //         }, 400);
+        //     }
+            
+        //     this._lastTap = now;
+        // });
         .on("touchend", function(event, d) {
+            // NE PAS traiter si on vient de zoomer
+            if (this._isZooming) {
+                console.log('🚫 touchend ignoré car zoom en cours');
+                this._isZooming = false;
+                return;
+            }
+            
             event.stopPropagation();
-            event.preventDefault();
+            // event.preventDefault(); // ← COMMENTÉ pour éviter le conflit avec D3.js
             
             const now = Date.now();
             const timeDiff = now - (this._lastTap || 0);
@@ -1078,6 +1444,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
             
             this._lastTap = now;
         });
+        
     
     // Texte de la personne
     drawSegmentText(segmentGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation);
@@ -2597,7 +2964,7 @@ export function enableFortuneModeML() {
 
 
     //#######################    ATTENTION : à enlever peut-être #########
-    svg.on(".zoom", null);
+    // svg.on(".zoom", null);
     //####################################################################
     
     resetRadarToCenter();
@@ -2610,6 +2977,13 @@ export function enableFortuneModeML() {
 
 // fonction de désactivation
 export function disableFortuneModeWithLever() {
+
+    // BLOQUER si réparation en cours
+    if (isRepairingZoom) {
+        console.log('🚫 Désactivation bloquée - réparation en cours');
+        return;
+    }
+
     if (!fortuneModeActive) return;
     
     console.log("🔄 Désactivation du mode Fortune...");
