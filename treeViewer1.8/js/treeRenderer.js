@@ -6,7 +6,7 @@ import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
 import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
-import { drawFanTree, resetFanView } from './treeFanRenderer.js';
+import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
 
 
 
@@ -20,8 +20,8 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
     if (!state.currentTree) return;
     
     // Modes éventail
-    if (isFanMode(state.treeModeReal)) {
-        drawFanTree(isZoomRefresh, isAnimation);
+    if (isWheelMode(state.treeModeReal)) {
+        drawWheelTree(isZoomRefresh, isAnimation);
         return;
     }
     
@@ -118,16 +118,16 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
 /**
  * Vérifie si le mode est un mode éventail
  */
-function isFanMode(mode) {
-    return ['fanAncestors', 'fanDescendants'].includes(mode);
+function isWheelMode(mode) {
+    return ['WheelAncestors', 'WheelDescendants'].includes(mode);
 }
 
 /**
  * Réinitialise la vue selon le mode
  */
 export function resetTreeView() {
-    if (isFanMode(state.treeModeReal)) {
-        resetFanView();
+    if (isWheelMode(state.treeModeReal)) {
+        resetWheelView();
     } else {
         resetView();
     }
@@ -141,10 +141,10 @@ export function resetTreeView() {
 //     state.treeModeReal = newMode;
     
 //     // Animation de transition si on change de famille de modes
-//     const wasTreeMode = !isFanMode(previousMode);
-//     const isFanModeNow = isFanMode(newMode);
+//     const wasTreeMode = !isWheelMode(previousMode);
+//     const isWheelModeNow = isWheelMode(newMode);
     
-//     if (wasTreeMode !== isFanModeNow) {
+//     if (wasTreeMode !== isWheelModeNow) {
 //         // Transition entre mode arbre et mode éventail
 //         animateTreeModeTransition(previousMode, newMode);
 //     } else {

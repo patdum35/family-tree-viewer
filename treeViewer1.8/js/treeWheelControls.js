@@ -3,34 +3,34 @@
 // ====================================
 import { state } from './main.js';
 // import { changeTreeMode } from './treeRenderer.js';
-import { resetFanView } from './treeFanRenderer.js';
+import { resetWheelView } from './treeWheelRenderer.js';
 import { exportToPNG, exportToPDF, exportWithOptions, exportVisibleArea } from './exportManager.js';
 
 
 /**
  * Initialise les contrôles pour le mode éventail
  */
-export function initializeFanControls() {
-    createFanControlPanel();
-    setupFanEventListeners();
+export function initializeWheelControls() {
+    createWheelControlPanel();
+    setupWheelEventListeners();
 }
 
 /**
  * Crée le panneau de contrôles pour l'éventail
  */
-function createFanControlPanel() {
+function createWheelControlPanel() {
     // Supprimer l'ancien panneau s'il existe
-    const existingPanel = document.getElementById('fan-controls-panel');
+    const existingPanel = document.getElementById('Wheel-controls-panel');
     if (existingPanel) {
         existingPanel.remove();
     }
 
     // Créer le nouveau panneau
     const controlPanel = document.createElement('div');
-    controlPanel.id = 'fan-controls-panel';
+    controlPanel.id = 'Wheel-controls-panel';
     controlPanel.innerHTML = `
-        <div class="fan-controls">
-            <button id="fan-controls-close" class="close-btn" title="Fermer">×</button>
+        <div class="Wheel-controls">
+            <button id="Wheel-controls-close" class="close-btn" title="Fermer">×</button>
             <h4>🌟 Mode radar / Éventail 360°</h4>
             
 
@@ -38,9 +38,9 @@ function createFanControlPanel() {
             <div class="control-group">
                 <label>Export :</label>
                 <div class="export-buttons">
-                    <button id="fan-export-png">📷 PNG</button>
-                    <button id="fan-export-pdf">📄 PDF</button>
-                    <button id="fan-export-options">⚙️ Options</button>
+                    <button id="Wheel-export-png">📷 PNG</button>
+                    <button id="Wheel-export-pdf">📄 PDF</button>
+                    <button id="Wheel-export-options">⚙️ Options</button>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@ function createFanControlPanel() {
     // Ajouter les styles CSS
     const styles = `
         <style>
-        #fan-controls-panel {
+        #Wheel-controls-panel {
             position: fixed;
             top: 20px;
             left: 20px;
@@ -97,7 +97,7 @@ function createFanControlPanel() {
             transform: scale(0.95);
         }
 
-        .fan-controls h4 {
+        .Wheel-controls h4 {
             margin: 0 0 15px 0;
             color: #007bff;
             font-size: 16px;
@@ -142,15 +142,15 @@ function createFanControlPanel() {
             transform: translateY(-1px);
         }
 
-        #fan-export-png {
+        #Wheel-export-png {
             background: #17a2b8;
         }
 
-        #fan-export-pdf {
+        #Wheel-export-pdf {
             background: #dc3545;
         }
 
-        #fan-export-options {
+        #Wheel-export-options {
             background: #6f42c1;
         }
 
@@ -181,34 +181,32 @@ function createFanControlPanel() {
 /**
  * Configure les événements pour les contrôles
  */
-function setupFanEventListeners() {
+function setupWheelEventListeners() {
     // Boutons de mode arbre traditionnel
     document.querySelectorAll('.tree-mode-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const mode = e.target.dataset.mode;
             // changeTreeMode(mode);
-            hideFanControls();
+            hideWheelControls();
         });
     });
 
-
-    // 3. Dans la fonction setupFanEventListeners(), ajouter cet événement :
+    // Dans la fonction setupWheelEventListeners(), ajouter cet événement :
     // Bouton de fermeture
-    document.getElementById('fan-controls-close')?.addEventListener('click', () => {
-        hideFanControls();
+    document.getElementById('Wheel-controls-close')?.addEventListener('click', () => {
+        hideWheelControls();
     });
 
-
     // Boutons d'export
-    document.getElementById('fan-export-png')?.addEventListener('click', () => {
+    document.getElementById('Wheel-export-png')?.addEventListener('click', () => {
         exportToPNG();
     });
 
-    document.getElementById('fan-export-pdf')?.addEventListener('click', () => {
+    document.getElementById('Wheel-export-pdf')?.addEventListener('click', () => {
         exportToPDF();
     });
 
-    document.getElementById('fan-export-options')?.addEventListener('click', () => {
+    document.getElementById('Wheel-export-options')?.addEventListener('click', () => {
         showExportOptionsDialog();
     });
 }
@@ -216,7 +214,7 @@ function setupFanEventListeners() {
 /**
  * Contrôle de zoom pour l'éventail
  */
-function zoomFan(factor) {
+function zoomWheel(factor) {
     const svg = d3.select("#tree-svg");
     const currentTransform = d3.zoomTransform(svg.node());
     
@@ -231,8 +229,8 @@ function zoomFan(factor) {
 /**
  * Réinitialise le zoom de l'éventail
  */
-function resetFanZoom() {
-    resetFanView();
+function resetWheelZoom() {
+    resetWheelView();
 }
 
 /**
@@ -501,8 +499,8 @@ async function executeExportWithOptions(modal) {
 /**
  * Masque les contrôles de l'éventail
  */
-function hideFanControls() {
-    const panel = document.getElementById('fan-controls-panel');
+function hideWheelControls() {
+    const panel = document.getElementById('Wheel-controls-panel');
     if (panel) {
         panel.style.opacity = '0';
         panel.style.transform = 'translateX(-100%)';
@@ -515,27 +513,25 @@ function hideFanControls() {
 /**
  * Affiche les contrôles de l'éventail
  */
-export function showFanControls() {
-    const existingPanel = document.getElementById('fan-controls-panel');
+export function showWheelControls() {
+    const existingPanel = document.getElementById('Wheel-controls-panel');
     if (!existingPanel) {
-        initializeFanControls();
+        initializeWheelControls();
     }
 }
-
-
 
 /**
  * Initialise tous les contrôles de l'éventail
  */
-export function initializeAllFanControls() {
-    showFanControls();
+export function initializeAllWheelControls() {
+    showWheelControls();
 }
 
 /**
  * Nettoie les contrôles de l'éventail
  */
-export function cleanupFanControls() {
-    hideFanControls();
+export function cleanupWheelControls() {
+    hideWheelControls();
     // Supprimer les modals ouvertes
     const modals = document.querySelectorAll('#export-options-modal');
     modals.forEach(modal => modal.remove());

@@ -1,162 +1,25 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state, displayGenealogicTree } from './main.js';
-import { setupElegantBackground } from './backgroundManager.js';
+import { state } from './main.js';
+import { needsReset, resetWheelView, getGenerationColor } from './treeWheelRenderer.js';
+import { historicalFigures } from './historicalData.js';
+import { formatGedcomDate, cleanupPlace, findContextualHistoricalFigures } from './modalWindow.js';
+import { translateOccupation } from './occupations.js';
+import { cleanProfession} from './nameCloudUtils.js';
 
-
-let fanZoom;
-let lastFanTransform = null;
-let fanConfig = {
-    innerRadius: 80,
-    generationWidth: 80,
-    centerX: 0,
-    centerY: 0,
-    totalAngle: 2 * Math.PI, // 360° complet
-    startAngle: -Math.PI / 2, // Commencer en haut
-    maxGenerations: 4,
-    limitMaxGenerations: 26 
-};
-let lastWinner = null;
 
 let leverStartTime = 0;
+let lastWinner = null;
 
-let cachedRadarPNG = null;
-let isCacheValid = false;
-
-// let state.currentRadarAngle = 0; //  angle de départ du radar
-let previousRootPersonId = null;
-let previousNombreGeneration = null;
-
-let currentAnimationTimeouts = [];
+// let state.currentAnimationTimeouts = [];
 let allWinnerSegments = []; // Mémoriser tous les segments gagnants
 
-let userHasInteracted = false;
-
-
-// Variable globale en haut du fichier
+// // Variable globale en haut du fichier
 let isRepairingZoom = false;
 
-let lastTapTime = 0;
-let tapTimeout = null;
-let clickTimeout = null;  // Si cette variable existe déjà
 
-
-
-function cleanupFanTreeState() {
-    // Réinitialisation des variables et états globaux
-    if (fanZoom) {
-        const svg = d3.select("#tree-svg");
-        svg.on(".zoom", null);  // Supprimer tous les gestionnaires
-    }
-
-    fanZoom = null;
-    window.initialFanTransform = null;
-    lastFanTransform = null;
-    
-    // Annuler les animations et timeouts en cours
-    currentAnimationTimeouts.forEach(clearTimeout);
-    currentAnimationTimeouts = [];
-
-    // Réinitialiser les drapeaux et états
-    userHasInteracted = false;
-    state.currentRadarAngle = 0;
-}
-
-/**
- * Initialise et dessine l'arbre en éventail complet 360°
- */
-export function drawFanTree(isZoomRefresh = false, isAnimation = false) {
-
-    if (!state.currentTree) {
-        console.error('❌ Pas d\'arbre à dessiner');
-        return;
-    }
-
-    // DIAGNOSTIC SUPPLÉMENTAIRE
-    console.log('🚨 ÉTAT COMPLET AVANT DRAWFANTREE');
-    console.log('fanZoom existant:', !!fanZoom);
-    console.log('Propriétés du zoom existant:', fanZoom ? Object.keys(fanZoom) : 'N/A');
-    
-    // Si fanZoom existe, essayez de le réinitialiser complètement
-    if (fanZoom) {
-        const svg = d3.select("#tree-svg");
-        svg.on(".zoom", null);  // Supprimer tous les gestionnaires de zoom
-        fanZoom = null;  // Forcer une réinitialisation complète
-    }
-    
-    console.log('🌟 Début du rendu éventail 360°...');
-    console.log('📊 Arbre reçu:', state.currentTree);
-    
-    console.log('🔍 DIAGNOSTIC DÉBUT drawFanTree');
-    console.log('🔍 isZoomRefresh:', isZoomRefresh);
-    console.log('🔍 isAnimation:', isAnimation);
-    
-    const svg = setupFanSVG();
-    
-    const initialD3Transform = d3.zoomTransform(svg.node());
-    console.log('🔍 Zoom D3 initial:', {
-        k: initialD3Transform.k,
-        x: initialD3Transform.x,
-        y: initialD3Transform.y
-    });
-    
-    if (window.initialFanTransform) {
-        console.log('🔍 window.initialFanTransform:', window.initialFanTransform);
-    }
-
-    const mainGroup = createFanMainGroup(svg);
-    
-    configureFanMode();
-    
-    const generationsData = organizeByGenerations(state.currentTree);
-    console.log('📊 Données par génération:', generationsData);
-    
-    createSVGFilters(svg);
-    
-    drawCenterPerson(mainGroup, state.currentTree);
-    
-    drawAllGenerations(mainGroup, generationsData);
-    
-    setupFanZoom(svg, mainGroup);
-    
-    const afterD3Transform = d3.zoomTransform(svg.node());
-    console.log('🔍 Zoom D3 APRÈS setupFanZoom:', {
-        k: afterD3Transform.k,
-        x: afterD3Transform.x,
-        y: afterD3Transform.y
-    });
-
-    if (isZoomRefresh) {
-        resetFanView();
-    }
-    
-    if (state.initialTreeDisplay) {
-        state.initialTreeDisplay = false;
-        setTimeout(() => {
-            setupElegantBackground(svg);
-        }, 100);
-    } else {
-        setupElegantBackground(svg);
-    }
-    
-    console.log('✅ Rendu éventail 360° terminé');
-
-    if (!isCacheValid || !cachedRadarPNG || (previousRootPersonId != state.rootPersonId) || (previousNombreGeneration != state.nombre_generation)) {
-        console.log(`🔄 Génération du cache PNG...`);
-        setTimeout(() => {
-            generateRadarCache();
-        }, 500);
-    } else {
-        console.log(`✅ Cache PNG déjà disponible`);
-    }
-
-    previousRootPersonId = state.rootPersonId;
-    previousNombreGeneration = state.nombre_generation;
-}
-
-
-async function generateRadarCache() {
+export async function generateRadarCache() {
     try {
         console.log('🎯 Génération du cache PNG...');
         const startTime = performance.now();
@@ -221,8 +84,8 @@ async function generateRadarCache() {
             const pixelEnd = performance.now();
             console.log(`⏱️ Traitement pixels cache: ${(pixelEnd - pixelStart).toFixed(1)}ms`);
             
-            cachedRadarPNG = canvas.toDataURL("image/png");
-            isCacheValid = true;
+            state.cachedRadarPNG = canvas.toDataURL("image/png");
+            state.isCacheValid = true;
             
             const totalEnd = performance.now();
             console.log(`✅ Cache PNG généré en: ${(totalEnd - startTime).toFixed(1)}ms`);
@@ -233,980 +96,16 @@ async function generateRadarCache() {
         
     } catch (error) {
         console.error('❌ Erreur génération cache:', error);
-        isCacheValid = false;
+        state.isCacheValid = false;
         // Nettoyer en cas d'erreur
         d3.selectAll('.background-element, .bubble-group').style('display', null);
     }
 }
 
-/**
- * Configure le mode éventail
- */
-function configureFanMode() {
-    // Toujours 360° complet pour le mode ancêtres
-    fanConfig.totalAngle = 2 * Math.PI;
-    fanConfig.startAngle = -Math.PI / 2;
-}
-
-/**
- * Configure le SVG initial
- */
-function setupFanSVG() {
-    cleanupFanTreeState();
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    const svg = d3.select("#tree-svg");
-    svg.selectAll("*").remove();  // Nettoyer le SVG
-    
-    fanConfig.centerX = width / 2;
-    fanConfig.centerY = height / 2;
-    
-    svg.attr("width", width)
-       .attr("height", height)
-       .style("touch-action", "pan-x pan-y pinch-zoom");
-    
-    return svg;
-}
-
-
-/**
- * Crée le groupe principal pour l'éventail
- */
-function createFanMainGroup(svg) {
-    return svg.append("g")
-        .attr("transform", `translate(${fanConfig.centerX}, ${fanConfig.centerY})`);
-}
-
-/**
- * Crée les filtres SVG nécessaires
- */
-function createSVGFilters(svg) {
-    let defs = svg.select('defs');
-    if (defs.empty()) {
-        defs = svg.append('defs');
-    }
-    
-    // Filtre d'ombre
-    if (defs.select('#drop-shadow').empty()) {
-        const filter = defs.append('filter')
-            .attr('id', 'drop-shadow')
-            .attr('height', '125%')
-            .attr('width', '125%');
-        
-        filter.append('feGaussianBlur')
-            .attr('in', 'SourceAlpha')
-            .attr('stdDeviation', 2)
-            .attr('result', 'blur');
-        
-        filter.append('feOffset')
-            .attr('in', 'blur')
-            .attr('dx', 2)
-            .attr('dy', 2)
-            .attr('result', 'offsetBlur');
-        
-        filter.append('feComponentTransfer')
-            .append('feFuncA')
-            .attr('type', 'linear')
-            .attr('slope', '0.5');
-        
-        const feMerge = filter.append('feMerge');
-        feMerge.append('feMergeNode').attr('in', 'offsetBlur');
-        feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
-    }
-}
-
-/**
- * Configure le zoom pour l'éventail
- */
-function setupFanZoom(svg, mainGroup) {
-    // Calculer un zoom optimal basé sur le nombre de générations et la taille de la fenêtre
-    let isUpdatingTransform = false; // Flag pour éviter la boucle
-
-    console.log('🚀 DÉBUT setupFanZoom');
-    
-
-    const calculateOptimalZoom = () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        // Rayon total du radar
-        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
-
-        // Calcul du zoom pour que le radar tienne dans la fenêtre
-        // On laisse une marge de 10% de chaque côté
-        const widthZoom = (width * 0.8) / (2 * totalRadius);
-        const heightZoom = (height * 0.8) / (2 * totalRadius);
-        
-        // Prendre le zoom le plus petit pour s'assurer que tout rentre
-        const optimalZoom = Math.min(widthZoom, heightZoom);
-        
-        // Limiter entre 0.1 et 1 pour éviter des zooms trop extrêmes
-        return Math.max(0.1, Math.min(optimalZoom, 1));
-    };
-
-    // fanZoom = d3.zoom()
-    //     .scaleExtent([0.1, 3]) // Garder une liberté de zoom
-    //     .on("zoom", ({transform}) => {
-    //         console.log('🔍 ZOOM DÉTECTÉ dans D3:', transform);
-    //         console.log('🔍 Source du zoom:', event ? event.type : 'inconnue');
-    //         console.log('🔍 Événement complet:', event);
-    //         // Toujours centrer, mais autoriser le zoom
-    //         userHasInteracted = true; // L'utilisateur a bougé
-    //         lastFanTransform = transform;
-    //         mainGroup.attr("transform", 
-    //             // `translate(${fanConfig.centerX}, ${fanConfig.centerY}) scale(${transform.k})`);
-    //             `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
-    //     });
-
-
-
-
-    fanZoom = d3.zoom()
-    .scaleExtent([0.1, 3])
-    .on("zoom", ({transform}) => {
-        // BLOQUER la boucle infinie
-        if (isUpdatingTransform) {
-            console.log('🚫 Boucle de zoom bloquée');
-            return;
-        }
-        
-        console.log('🔍 ZOOM LÉGITIME:', transform);
-        
-        isUpdatingTransform = true; // Bloquer les suivants
-        
-        userHasInteracted = true;
-        lastFanTransform = transform;
-        mainGroup.attr("transform", 
-            `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
-        
-        // Remettre le flag après un délai
-        setTimeout(() => {
-            isUpdatingTransform = false;
-        }, 50);
-    });
-
-    
-    svg.call(fanZoom);
-    
-    // Transformation initiale optimale
-    const initialZoom = calculateOptimalZoom();
-    console.log('🔍 Zoom optimal calculé:', initialZoom);
-    console.log('🔍 Nombre générations:', fanConfig.maxGenerations);
-
-    const initialTransform = d3.zoomIdentity
-        .translate(fanConfig.centerX, fanConfig.centerY)
-        .scale(initialZoom);
-    console.log('🔍 Transform à appliquer:', initialTransform);
-
-
-    // CAPTURER le vrai zoom AVANT que D3.js fasse ses ajustements
-    window.initialFanTransform = {
-        k: initialZoom,
-        x: fanConfig.centerX,
-        y: fanConfig.centerY
-    };
-    console.log('VRAI Transform initial capturé:', window.initialFanTransform);
-
-    // État AVANT application
-    const beforeTransform = d3.zoomTransform(svg.node());
-    console.log('🔍 Transform AVANT application:', beforeTransform);
-    
-    svg.call(fanZoom.transform, initialTransform);
-
-
-    // État APRÈS application
-    const afterTransform = d3.zoomTransform(svg.node());
-    console.log('🔍 Transform APRÈS application:', afterTransform);
-
-
-    setTimeout(() => {
-        userHasInteracted = false; // Reset après stabilisation
-    }, 1000);
-}
-
-function needsReset() {
-    console.log('Utilisateur a interagi:', userHasInteracted);
-    return userHasInteracted;
-}
-
-
-
-/**
- * Réinitialise la vue de l'éventail
- */
-export function resetFanView() {
-    // zoom du d3.js
-    const svg = d3.select("#tree-svg");
-    if (fanZoom && window.initialFanTransform) {
-        console.log('🔄 Reset vers transform initial exact:', window.initialFanTransform);
-        
-        // Utiliser le transform initial EXACT
-        svg.transition()
-            .duration(750)
-            .call(fanZoom.transform, window.initialFanTransform);
-            
-        state.currentRadarAngle = 0;
-        userHasInteracted = false;
-    } else {
-        console.warn('⚠️ Pas de transform initial sauvegardé');
-    }  
-}
-
-
-/**
- * Change la personne racine
- */
-function changeRootPerson(personId) {
-    console.log(`🎯 Changement de racine vers: ${personId}`);
-    
-    // Vérifier que fanZoom existe avant d'appeler displayGenealogicTree
-    if (!fanZoom) {
-        console.warn('⚠️ fanZoom pas encore initialisé, on attend...');
-        setTimeout(() => changeRootPerson(personId), 100);
-        return;
-    }
-    
-    if (typeof window.displayGenealogicTree === 'function') {
-        window.displayGenealogicTree(personId, false, false, false, state.treeModeReal);
-    } else {
-        console.error('❌ displayGenealogicTree non trouvée');
-    }
-}
-
-/**
- * Affiche les détails d'une personne
- */
-function displayPersonDetails(personId) {
-    if (typeof window.displayPersonDetails === 'function') {
-        window.displayPersonDetails(personId);
-    }
-    console.log(`Affichage des détails pour: ${personId}`);
-}
-
-/**
- * Modifie le nombre maximum de générations
- */
-export function setMaxGenerations(max) {
-
-    fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
-    console.log(`📊 Générations max mises à jour: ${max}`);
-    console.log(`🔍 Recalcul zoom pour ${max} générations`);
-
-    fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
-    console.log(`📊 Générations max mises à jour: ${max}`);
-
-    // Invalider le cache
-    isCacheValid = false;
-    cachedRadarPNG = null;
-   
-    if (state.currentTree && state.rootPersonId) {
-        setTimeout(() => {
-            if (typeof displayGenealogicTree === 'function') {
-                console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setMaxGenerations  ################# ')
-                displayGenealogicTree(state.rootPersonId, false, false, false, 'fanAncestors');
-            }
-        }, 100);
-    }
-}
-
-/**
- * Modifie le nombre maximum de générations
- */
-export function setMaxGenerationsInit(max) {
-    fanConfig.maxGenerations = Math.min(max, fanConfig.limitMaxGenerations);
-    console.log(`📊 Générations max mises à jour: ${max}`);
-}
-
-function getGenerationColor(generation) {
-    const colors = [
-        '#e3f2fd', // gen 1 - bleu très clair
-        '#bbdefb', // gen 2 - bleu clair
-        '#90caf9', // gen 3 - bleu moyen
-        '#64b5f6', // gen 4 - bleu
-        '#42a5f5', // gen 5 - bleu foncé
-        '#2196f3', // gen 6 - bleu plus foncé
-        '#1976d2', // gen 7 - bleu très foncé
-        '#1565c0'  // gen 8 - bleu foncé final
-    ];
-    return colors[Math.min(generation - 1, colors.length - 1)] || '#e3f2fd';
-}
-
-/**
- * Organisation par génération avec positionnement généalogique CORRECT
- * Convention: segment 0 en bas, sens horaire, père toujours à gauche de la mère
- */
-function organizeByGenerations(rootTree) {
-    console.log('📋 Organisation par génération GÉNÉALOGIQUE...');
-    // console.log('🌟 Arbre racine:', rootTree);
-    
-    const generations = new Map();
-    
-    function traverse(person, generation, position = 0) {
-        if (!person || generation > fanConfig.maxGenerations) return;
-        
-        if (!generations.has(generation)) {
-            generations.set(generation, []);
-        }
-        
-        // Ajouter la personne avec sa position calculée
-        generations.get(generation).push({
-            person: person,
-            generation: generation,
-            position: position
-        });
-        
-        
-        // Continuer avec les enfants (qui sont en fait les parents dans l'arbre ascendant)
-        if (person.children && generation < fanConfig.maxGenerations) {
-            
-            // IMPORTANT: Dans l'arbre ascendant, person.children contient les PARENTS de person
-            // Il faut les trier: père en position 0, mère en position 1
-            
-            let fatherPerson = null;
-            let motherPerson = null;
-            
-            // Identifier père et mère parmi les "children" (parents)
-            for (const child of person.children) {
-                if (child.id === person.genealogicalFatherId) {
-                    fatherPerson = child;
-                    // console.log(`   └─ Père identifié: ${child.name} (${child.id})`);
-                } else if (child.id === person.genealogicalMotherId) {
-                    motherPerson = child;
-                    // console.log(`   └─ Mère identifiée: ${child.name} (${child.id})`);
-                }
-            }
-            
-            // Placer dans l'ordre: père d'abord (position paire), mère ensuite (position impaire)
-            if (fatherPerson) {
-                const fatherPosition = position * 2;
-                traverse(fatherPerson, generation + 1, fatherPosition);
-            }
-            if (motherPerson) {
-                const motherPosition = position * 2 + 1;
-                traverse(motherPerson, generation + 1, motherPosition);
-            }
-        }
-    }
-    
-    traverse(rootTree, 0, 0);
-        
-    return generations;
-}
-
-/**
- * Dessine une génération avec positionnement généalogique correct
- * Convention : position 0 en bas (-90°), sens horaire
- * le 0° en angle est en haut du cercle
- */
-function drawGeneration(mainGroup, people, generation) {
-    // console.log(`🎨 Dessin génération ${generation} avec ${people.length} personnes`);
-
-    const innerRadius = fanConfig.innerRadius + ((generation - 1) * fanConfig.generationWidth);
-    const outerRadius = innerRadius + fanConfig.generationWidth - 5;
-
-    const maxSegments = Math.pow(2, generation);
-    const anglePerSegment = (2 * Math.PI) / maxSegments;
-    
-    const positionArray = new Array(maxSegments).fill(null);
-    
-    people.forEach(personData => {
-        if (personData.position < maxSegments) {
-            positionArray[personData.position] = personData.person;
-        }
-    });
-    
-    people.forEach(personData => {
-        const startAngle = -Math.PI + (personData.position * anglePerSegment);
-        const endAngle = startAngle + anglePerSegment;
-        drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, startAngle, endAngle, generation, personData.position);
-    });
-}
-
-/**
- * Dessine le texte d'un segment avec le même style que l'arbre normal
- */
-function drawSegmentText(group, person, innerRadius, outerRadius, startAngle, endAngle, generation) {
-    const midAngle = -Math.PI/2 + (startAngle + endAngle) / 2;
-    const textRadius = (innerRadius + outerRadius) / 2;
-    const textX = Math.cos(midAngle) * textRadius;
-    const textY = Math.sin(midAngle) * textRadius;
-    
-    // Calculer la rotation du texte pour qu'il soit toujours lisible
-    let rotation = (midAngle * 180 / Math.PI);
-    if (rotation > -270 && rotation < -90) {
-        rotation += 180;
-    }
-    while (rotation > 360) rotation -= 360;
-    while (rotation < 0) rotation += 360;
-    
-    const textGroup = group.append("g")
-        .attr("class", "segment-text-group")
-        .attr("transform", `translate(${textX}, ${textY}) rotate(${rotation})`);
-    
-    // Utiliser la même logique que l'arbre normal
-    const match = person.name?.match(/(.*?)\/(.*?)\//);
-    if (match) {
-        drawFanPersonDetails(textGroup, match, person, generation);
-    } else {
-        // Nom simple sans format GEDCOM
-        textGroup.append("text")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("text-anchor", "middle")
-            .style("font-size", `${Math.max(10, 16 - generation * 2)}px`)
-            .style("font-weight", "bold")
-            .style("fill", "#1a1a1a")
-            .style("stroke", "white")
-            .style("stroke-width", "1px")
-            .style("paint-order", "stroke fill")
-            .text(person.name.substring(0, 12));
-    }
-}
-
-/**
- * Formate les noms (réutilise la logique de nodeRenderer.js)
- */
-function formatLastNames(lastNames) {
-    return lastNames.trim()
-        .split('(')[0]
-        .replace(')', '')
-        .split(',')[0]
-        .split(' ')
-        .join(' ')
-        .slice(0, 12); // Max 12 caractères pour l'éventail
-}
-
-/**
- * Capitalise la première lettre
- */
-function capitalizeFirstLetter(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-}
-
-/**
- * Formate les dates pour l'éventail (même logique que nodeRenderer.js)
- */
-function formatFanDates(person) {
-    if (!person.birthDate && !person.deathDate) return '';
-    
-    const extractYear = (dateStr) => {
-        if (!dateStr) return null;
-        const match = dateStr.match(/(\d{4})/);
-        return match ? match[1] : null;
-    };
-    
-    const birthYear = person.birthDate ? extractYear(person.birthDate) : '?';
-    const deathYear = person.deathDate ? extractYear(person.deathDate) : '?';
-    
-    let dateText = birthYear;
-    if (parseInt(birthYear) <= 1930 || deathYear !== '?') {
-        dateText += ` - ${deathYear}`;
-    }
-    
-    return dateText;
-}
-
-/**
- * Configuration des paramètres d'affichage par génération
- */
-const FAN_TEXT_CONFIG = {
-    // Espacement entre les lignes par génération
-    lineSpacingFactor: 1.2,
-    
-    // Taille de police de base par génération
-    baseFontSize: {
-        0: 16,  // Centre
-        1: 14,  // Gen 1
-        2: 12,  // Gen 2
-        3: 10,  // Gen 3
-        4: 8,   // Gen 4+
-        default: 8
-    },
-    
-    // Réduction de police si texte trop long
-    fontReduction: {
-        threshold: 8,    // Seuil de nombre de lettres
-        reductionFactor: 0.8  // Facteur de réduction (80% de la taille)
-    },
-    
-    // Nombre maximum de prénoms par génération
-    maxFirstNames: {
-        0: 2,   // Centre
-        1: 2,   // Gen 1
-        2: 2,   // Gen 2
-        3: 2,   // Gen 3
-        4: 1,   // Gen 4+
-        default: 1
-    }
-};
-
-/**
- * Calcule la taille de police adaptée selon la longueur du texte
- */
-function calculateAdaptiveFontSize(text, baseSize) {
-    const config = FAN_TEXT_CONFIG.fontReduction;
-    if (text.length > config.threshold) {
-        return Math.round(baseSize * config.reductionFactor);
-    }
-    return baseSize;
-}
-
-/**
- * Formate les prénoms pour l'éventail (adapté par génération)
- */
-function formatFirstNamesForFan(firstNames, generation) {
-    const config = FAN_TEXT_CONFIG;
-    const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
-    
-    return firstNames.trim()
-        .split(' ')
-        .reduce((acc, word) => {
-            if (word.includes('-')) {
-                const parts = word.split('-')
-                    .map(part => capitalizeFirstLetter(part));
-                acc.push(...parts);
-            } else {
-                acc.push(capitalizeFirstLetter(word));
-            }
-            return acc;
-        }, [])
-        .slice(0, maxNames)
-        .join(' ')
-        .slice(0, 20); // Limite globale de caractères
-}
-
-/**
- * Dessine les détails d'une personne dans l'éventail avec centrage correct
- */
-function drawFanPersonDetails(textGroup, match, person, generation) {
-    const [_, firstNames, lastName] = match;
-    const formattedFirstNames = formatFirstNamesForFan(firstNames, generation);
-    const formattedLastName = formatLastNames(lastName);
-    
-    // Récupérer les paramètres pour cette génération
-    const config = FAN_TEXT_CONFIG;
-    const baseSize = config.baseFontSize[generation] || config.baseFontSize.default;
-    // const lineSpacing = config.lineSpacing[generation] || config.lineSpacing.default;
-    const lineSpacing = baseSize * config.lineSpacingFactor;
-    const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
-    
-    // Préparer les éléments à dessiner
-    const firstNamesList = formattedFirstNames.split(' ').slice(0, maxNames);
-    const hasDate = generation <= 3 && formatFanDates(person);
-    
-    // Calculer la hauteur totale
-    const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0); // prénoms + nom + date éventuelle
-    const totalHeight = (totalLines - 1) * lineSpacing;
-    
-    // Position de départ (pour centrer le nom au milieu)
-    // const startY = -(totalHeight / 2) + (firstNamesList.length * lineSpacing);
-    // const startY = -((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;
-    let startY;
-    if (firstNamesList.length === 1) {
-        startY = -lineSpacing*0.3;
-    } else {
-        startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
-    }
-    
-    // Dessiner les prénoms (au-dessus du nom)
-    firstNamesList.forEach((firstName, index) => {
-        const fontSize = calculateAdaptiveFontSize(firstName, baseSize);
-        const y = startY - lineSpacing * (firstNamesList.length - index);
-        
-        textGroup.append("text")
-            .attr("x", 0)
-            .attr("y", y)
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .style("font-size", `${fontSize}px`)
-            .style("font-weight", "bold")
-            .style("fill", "#1a1a1a")
-            .style("stroke", "white")
-            .style("stroke-width", "1px")
-            .style("paint-order", "stroke fill")
-            .text(firstName);
-    });
-    
-    // Dessiner le nom (centré au milieu)
-    const nameFontSize = calculateAdaptiveFontSize(formattedLastName, baseSize);
-    textGroup.append("text")
-        .attr("x", 0)
-        .attr("y", 0) // Centré au milieu
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", `${nameFontSize}px`)
-        .style("font-weight", "bold")
-        .style("fill", "#0000CD")
-        .style("stroke", "white")
-        .style("stroke-width", "1px")
-        .style("paint-order", "stroke fill")
-        .text(formattedLastName.toUpperCase());
-    
-    // Dessiner la date (sous le nom)
-    if (hasDate) {
-        const dateText = formatFanDates(person);
-        const dateFontSize = Math.max(6, nameFontSize - 2);
-        
-        textGroup.append("text")
-            .attr("x", 0)
-            .attr("y", lineSpacing)
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .style("font-size", `${dateFontSize}px`)
-            .style("font-weight", "normal")
-            .style("fill", "#006400")
-            .style("stroke", "white")
-            .style("stroke-width", "0.8px")
-            .style("paint-order", "stroke fill")
-            .text(dateText);
-    }
-}
-
-/**
- * Améliore le rendu du centre avec centrage correct du nom
- */
-function drawCenterPersonText(group, person) {
-    const textGroup = group.append("g").attr("class", "center-text-group");
-    
-    if (!person.name) return;
-    
-    const match = person.name?.match(/(.*?)\/(.*?)\//);
-    if (match) {
-        const [_, firstNames, lastName] = match;
-        const formattedFirstNames = formatFirstNamesForFan(firstNames, 0);
-        const formattedLastName = formatLastNames(lastName);
-        
-        const config = FAN_TEXT_CONFIG;
-        const baseSize = config.baseFontSize[0];
-        // const lineSpacing = config.lineSpacing[0];
-        const lineSpacing = baseSize * config.lineSpacingFactor;
-        
-        // Préparer les éléments
-        const firstNamesList = formattedFirstNames.split(' ').slice(0, 2);
-        const hasDate = formatFanDates(person);
-        
-        // Calculer positions pour centrer le nom
-        const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0);
-        const totalHeight = (totalLines - 1) * lineSpacing;
-        // const startY = -(totalHeight / 2) + (firstNamesList.length * lineSpacing);
-        // const startY = -((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;
-        let startY;
-        if (firstNamesList.length === 1) {
-            startY = -lineSpacing*0.3;
-        } else {
-            startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
-        }
-        
-        // Dessiner les prénoms
-        firstNamesList.forEach((firstName, index) => {
-            const fontSize = calculateAdaptiveFontSize(firstName, baseSize);
-            const y = startY - lineSpacing * (firstNamesList.length - index);
-            
-            textGroup.append("text")
-                .attr("x", 0)
-                .attr("y", y)
-                .attr("text-anchor", "middle")
-                .style("font-size", `${fontSize}px`)
-                .style("font-weight", "bold")
-                .style("fill", "white")
-                .style("stroke", "rgba(0,0,0,0.5)")
-                .style("stroke-width", "1px")
-                .style("paint-order", "stroke fill")
-                .text(firstName);
-        });
-        
-        // Nom de famille (centré)
-        const nameFontSize = calculateAdaptiveFontSize(formattedLastName, baseSize - 2);
-        textGroup.append("text")
-            .attr("x", 0)
-            .attr("y", 0) // Centré
-            .attr("text-anchor", "middle")
-            .style("font-size", `${nameFontSize}px`)
-            .style("font-weight", "bold")
-            .style("fill", "#e6f3ff")
-            .style("stroke", "rgba(0,0,0,0.5)")
-            .style("stroke-width", "1px")
-            .style("paint-order", "stroke fill")
-            .text(formattedLastName.toUpperCase());
-        
-        // Date (sous le nom)
-        if (hasDate) {
-            const dateText = formatFanDates(person);
-            textGroup.append("text")
-                .attr("x", 0)
-                .attr("y", lineSpacing)
-                .attr("text-anchor", "middle")
-                .style("font-size", `${Math.max(8, nameFontSize - 2)}px`)
-                .style("fill", "#b3d9ff")
-                .style("stroke", "rgba(0,0,0,0.3)")
-                .style("stroke-width", "0.8px")
-                .style("paint-order", "stroke fill")
-                .text(dateText);
-        }
-    }
-}
-
-function drawAllGenerations(mainGroup, generationsData) {
-    console.log('🎨 Début du dessin des générations...');
-    
-    // Debug de la structure reçue
-    console.log('📊 Données reçues:', generationsData);
-    generationsData.forEach((people, gen) => {
-        console.log(`  Gen ${gen}: ${people.length} personnes`);
-    });
-    
-    generationsData.forEach((people, generation) => {
-        if (generation > 0 && generation <= fanConfig.maxGenerations) {
-            console.log(`🖊️ Génération ${generation}: ${people.length} personnes`);
-            drawGeneration(mainGroup, people, generation);
-        }
-    });
-
-}
-
-function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation, position) {
-    if (!person || !person.name) {
-        console.warn('⚠️ Personne invalide pour segment:', person);
-        return;
-    }
-    
-    const arc = d3.arc()
-        .innerRadius(innerRadius)
-        .outerRadius(outerRadius)
-        .startAngle(startAngle)
-        .endAngle(endAngle);
-    
-    const segmentGroup = mainGroup.append("g")
-        .attr("class", `person-segment-group gen-${generation}`)
-        .attr("data-segment-position", position)
-        .datum(person); 
-    
-    // Couleur selon la génération
-    const fillColor = getGenerationColor(generation);
-    
-    // Segment principal avec données liées
-    // let clickTimeout = null;
-    segmentGroup.append("path")
-        .attr("d", arc)
-        .attr("class", `person-box person-segment generation-${generation}`)
-        .datum(person) // ← AJOUT : lier les données au path aussi
-        .style("fill", fillColor)
-        .style("stroke", "white")
-        .style("stroke-width", "1")
-        .style("filter", "url(#drop-shadow)")
-        .style("cursor", "pointer")
-        .style("touch-action", "manipulation")
-        .on("click", function(event, d) { 
-            event.stopPropagation();
-            
-            // Annuler le timeout précédent s'il existe
-            if (clickTimeout) {
-                clearTimeout(clickTimeout);
-            }
-            
-            // Attendre 300ms pour voir s'il y a un double-click
-            clickTimeout = setTimeout(() => {
-                displayPersonDetails(d.id);
-                clickTimeout = null;
-            }, 300);
-        })
-        .on("dblclick", function(event, d) { 
-            event.stopPropagation();
-            event.preventDefault();
-            
-            // Annuler le click simple en cours
-            if (clickTimeout) {
-                clearTimeout(clickTimeout);
-                clickTimeout = null;
-            }
-            
-            // Exécuter immédiatement le changement de racine
-            changeRootPerson(d.id);
-        })
-        .on("touchend", function(event, d) {
-            // Bloquer les comportements par défaut
-            if (event.cancelable) {
-                event.preventDefault();
-            }
-            
-            // Ne rien faire si c'était un zoom ou un glissement
-            if (this._isZooming) {
-                console.log('🚫 Interaction zoom/glissement bloquée');
-                this._isZooming = false;
-                this._startTouch = null;
-                return;
-            }
-            
-            const now = Date.now();
-            const timeSinceLastTap = now - lastTapTime;
-            
-            // Double tap détecté rapidement (moins de 300ms)
-            if (timeSinceLastTap < 300) {
-                // Annuler le timeout de simple tap s'il existe
-                if (tapTimeout) {
-                    clearTimeout(tapTimeout);
-                    tapTimeout = null;
-                }
-                
-                const svg = d3.select("#tree-svg");
-                
-                // FORCER LE ZOOM AVANT TOUT
-                const calculateOptimalZoom = () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    
-                    const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
-
-                    const widthZoom = (width * 0.8) / (2 * totalRadius);
-                    const heightZoom = (height * 0.8) / (2 * totalRadius);
-                    
-                    const optimalZoom = Math.min(widthZoom, heightZoom);
-                    
-                    return Math.max(0.1, Math.min(optimalZoom, 1));
-                };
-
-                const optimalZoom = calculateOptimalZoom();
-                
-                // FORCER LE ZOOM AVANT LE CHANGEMENT DE RACINE
-                const initialTransform = d3.zoomIdentity
-                    .translate(fanConfig.centerX, fanConfig.centerY)
-                    .scale(optimalZoom);
-                
-                svg.call(fanZoom.transform, initialTransform);
-                
-                console.log('🔍 Zoom FORCÉ avant changement de racine:', {
-                    k: optimalZoom,
-                    x: fanConfig.centerX,
-                    y: fanConfig.centerY
-                });
-
-                // Léger délai pour s'assurer que le zoom est appliqué
-                setTimeout(() => {
-                    // Changer la personne racine
-                    console.log('🔄 Double tap détecté - Changement de racine');
-                    changeRootPerson(d.id);
-                }, 50);
-                
-                // Réinitialiser le dernier tap
-                lastTapTime = 0;
-            } else {
-                // Simple tap potentiel (inchangé)
-                tapTimeout = setTimeout(() => {
-                    const svg = d3.select("#tree-svg");
-                    const currentTransform = d3.zoomTransform(svg.node());
-                    
-                    console.log('🔍 Transform avant modal:', {
-                        k: currentTransform.k,
-                        x: currentTransform.x,
-                        y: currentTransform.y
-                    });
-
-                    // Stocker le transform actuel
-                    window.lastTransformBeforeModal = currentTransform;
-
-                    displayPersonDetails(d.id);
-                    tapTimeout = null;
-                }, 250);
-                
-                // Mettre à jour le temps du dernier tap
-                lastTapTime = now;
-            }
-        })
-        .on("touchstart", function(event, d) {
-            // Bloquer TOUS les comportements par défaut
-            if (event.cancelable) {
-                event.preventDefault();
-            }
-            
-            // Détecter multi-touch (zoom)
-            if (event.touches && event.touches.length > 1) {
-                this._isZooming = true;
-                console.log('🔍 Zoom multi-touch détecté');
-                return;
-            }
-            
-            // Stocker la position initiale du toucher
-            this._startTouch = {
-                x: event.touches[0].clientX,
-                y: event.touches[0].clientY,
-                time: Date.now()
-            };
-            
-            this._isZooming = false;
-        })
-        .on("touchmove", function(event, d) {
-            // Détecter un déplacement significatif
-            if (this._startTouch) {
-                const touch = event.touches[0];
-                const deltaX = Math.abs(touch.clientX - this._startTouch.x);
-                const deltaY = Math.abs(touch.clientY - this._startTouch.y);
-                
-                // Si déplacement > 10px, considérer comme un glissement
-                if (deltaX > 10 || deltaY > 10) {
-                    this._isZooming = true;
-                    console.log('🔍 Glissement détecté');
-                    
-                    // Annuler le timeout de tap s'il existe
-                    if (tapTimeout) {
-                        clearTimeout(tapTimeout);
-                        tapTimeout = null;
-                    }
-                }
-            }
-        });
-   
-    // Texte de la personne
-    drawSegmentText(segmentGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation);
-    
-    // console.log(`✅ Segment créé pour ${person.name} avec données liées`);
-}
-
-function drawCenterPerson(mainGroup, person) {
-    console.log('🎯 Dessin personne centrale:', person.name);
-    
-    const centerGroup = mainGroup.append("g")
-        .attr("class", "center-person-group")
-        .datum(person); // ← AJOUT : lier les données
-    
-    // Cercle principal avec données liées
-    centerGroup.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", fanConfig.innerRadius)
-        .attr("class", "person-box root center-person")
-        .datum(person) // ← AJOUT : lier les données
-        .style("fill", "#ff6b6b")
-        .style("stroke", "white")
-        .style("stroke-width", "4")
-        .style("filter", "url(#drop-shadow)")
-        .style("cursor", "pointer")
-        .on("click", function(event, d) { // ← CORRECTION
-            event.stopPropagation();
-            displayPersonDetails(d.id);
-        });
-    
-    // Contenu textuel
-    drawCenterPersonText(centerGroup, person);
-    
-    // console.log(`✅ Centre créé pour ${person.name} avec données liées`);
-}
-
-window.drawSegmentText = drawSegmentText;
-
-/**
- * Exports pour les autres modules
- */
-export const getFanZoom = () => fanZoom;
-export const getLastFanTransform = () => lastFanTransform;
-export const getFanConfig = () => ({ ...fanConfig });
-
-
 // Variables globales pour le mode fortune
 let fortuneModeActive = false;
 let slotHandle = null;
-let isSpinning = false;
+// let state.isSpinning = false;
 let originalZoom = null;
 
 // fonction d'animation pour réactiver le levier
@@ -1216,7 +115,7 @@ function createSpinningWheelWithLever(finalRotation, duration) {
     
     try {
         // Utiliser le cache si disponible
-        if (isCacheValid && cachedRadarPNG) {
+        if (state.isCacheValid && state.cachedRadarPNG) {
             console.log(`⚡ Cache utilisé instantanément !`);
 
             // NOUVEAU : Récupérer l'angle actuel du radar avant animation
@@ -1230,7 +129,7 @@ function createSpinningWheelWithLever(finalRotation, duration) {
             
             console.log(`📐 Animation partira de l'angle: ${currentAngle.toFixed(1)}°`);
             
-            animateFortuneWheelWithLever(cachedRadarPNG, finalRotation, duration);
+            animateFortuneWheelWithLever(state.cachedRadarPNG, finalRotation, duration);
             return;
         }      
     } catch (error) {
@@ -1238,11 +137,9 @@ function createSpinningWheelWithLever(finalRotation, duration) {
     }
 }
 
-
-
 // Fonction de lancement
 function launchFortuneWheelWithLever(baseVelocity) {
-    if (isSpinning) return;
+    if (state.isSpinning) return;
     
     // NEUTRALISATION COMPLÈTE DES ZOOMS
     const svg = d3.select("#tree-svg");
@@ -1252,7 +149,7 @@ function launchFortuneWheelWithLever(baseVelocity) {
         const width = window.innerWidth;
         const height = window.innerHeight;
         
-        const totalRadius = fanConfig.innerRadius + (fanConfig.maxGenerations * fanConfig.generationWidth);   
+        const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
 
         const widthZoom = (width * 0.8) / (2 * totalRadius);
         const heightZoom = (height * 0.8) / (2 * totalRadius);
@@ -1266,17 +163,17 @@ function launchFortuneWheelWithLever(baseVelocity) {
     
     // RÉINITIALISATION AGRESSIVE DU ZOOM
     const initialTransform = d3.zoomIdentity
-        .translate(fanConfig.centerX, fanConfig.centerY)
+        .translate(state.WheelConfig.centerX, state.WheelConfig.centerY)
         .scale(optimalZoom);
     
     // Supprimer TOUS les gestionnaires de zoom
     svg.on(".zoom", null);
     
     // Forcer le zoom optimal
-    svg.call(fanZoom.transform, initialTransform);
+    svg.call(state.WheelZoom.transform, initialTransform);
     
     // Recréer le zoom avec filtrage strict
-    fanZoom = d3.zoom()
+    state.WheelZoom = d3.zoom()
         .scaleExtent([optimalZoom, optimalZoom])  // Verrouiller le zoom
         .filter(event => {
             // Bloquer TOUS les événements de zoom
@@ -1287,9 +184,9 @@ function launchFortuneWheelWithLever(baseVelocity) {
             // Ne rien faire
         });
     
-    svg.call(fanZoom);
+    svg.call(state.WheelZoom);
     
-    isSpinning = true;
+    state.isSpinning = true;
     leverStartTime = performance.now();
     console.log(`🎡 Lancement avec levier réaliste - vitesse: ${baseVelocity.toFixed(2)}`);
     
@@ -1325,10 +222,10 @@ function launchFortuneWheelWithLever(baseVelocity) {
 function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     console.log("🌪️ Animation avec levier réaliste...");
 
-    console.log('🔍 DEBUG window.initialFanTransform:', window.initialFanTransform, 
-        'k=', window.initialFanTransform ? window.initialFanTransform.k : 'N/A', 
-        ' x=', window.initialFanTransform ? window.initialFanTransform.x : 'N/A', 
-        ' y=', window.initialFanTransform ? window.initialFanTransform.y : 'N/A'
+    console.log('🔍 DEBUG window.initialWheelTransform:', window.initialWheelTransform, 
+        'k=', window.initialWheelTransform ? window.initialWheelTransform.k : 'N/A', 
+        ' x=', window.initialWheelTransform ? window.initialWheelTransform.x : 'N/A', 
+        ' y=', window.initialWheelTransform ? window.initialWheelTransform.y : 'N/A'
     );
     
     const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
@@ -1337,6 +234,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     originalRadar.style("opacity", 0);
     
     const spinningImg = document.createElement("img");
+    spinningImg.id = "fortune-wheel-spinning-img"; // ⭐ Ajouter un ID
     spinningImg.src = transparentPng;
     spinningImg.style.cssText = `
         position: fixed;
@@ -1376,17 +274,17 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         });
         
         // Recréer le zoom avec les paramètres par défaut
-        fanZoom = d3.zoom()
+        state.WheelZoom = d3.zoom()
             .scaleExtent([0.1, 3])  // Retrouver la plage de zoom normale
             .on("zoom", ({transform}) => {
                 mainGroup.attr("transform", 
                     `translate(${transform.x}, ${transform.y}) scale(${transform.k})`);
                 
-                userHasInteracted = true;
-                lastFanTransform = transform;
+                state.userHasInteracted = true;
+                state.lastWheelTransform = transform;
             });
         
-        svg.call(fanZoom);
+        svg.call(state.WheelZoom);
 
         playSound('wheel-stop');
 
@@ -1396,7 +294,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
 
         const currentTransformAttr = originalRadar.attr("transform");
         
-        let currentScale = window.initialFanTransform ? window.initialFanTransform.k : 0.7;
+        let currentScale = window.initialWheelTransform ? window.initialWheelTransform.k : 0.7;
         
         if (currentTransformAttr) {
             const scaleMatch = currentTransformAttr.match(/scale\(([\d.]+)\)/);
@@ -1431,7 +329,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
 
         console.log('🔍 scale actuel:', currentScale);
         console.log('🔍 centerX/Y actuels:', centerX, centerY);
-        console.log('🔍 initialFanTransform:', window.initialFanTransform);
+        console.log('🔍 initialWheelTransform:', window.initialWheelTransform);
 
         originalRadar.attr("transform", 
             `translate(${centerX}, ${centerY}) rotate(${finalAngleNormalized}) scale(${currentScale})`)
@@ -1466,26 +364,25 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         if (window.leverControls) {
             window.leverControls.enable();
         }
-        isSpinning = false;
+        state.isSpinning = false;
 
         highlightWinnerSegment(winner.segment, winner.generation);
         
         const timeoutId3 = setTimeout(() => {
-            announceWinnerML(winner);
+            announceWinner(winner);
         }, 5000);
-        currentAnimationTimeouts.push(timeoutId3);
+        state.currentAnimationTimeouts.push(timeoutId3);
 
         const timeoutId4 = setTimeout(() => {
             hideWinnerText();
         }, 8000);
-        currentAnimationTimeouts.push(timeoutId4);
+        state.currentAnimationTimeouts.push(timeoutId4);
 
     }, duration + 100);
     
-    currentAnimationTimeouts.push(timeoutId1);
-    currentAnimationTimeouts.push(timeoutId2);
+    state.currentAnimationTimeouts.push(timeoutId1);
+    state.currentAnimationTimeouts.push(timeoutId2);
 }
-
 
 
 // Recentrer le radar chart (avec préservation du zoom initial)
@@ -1512,8 +409,6 @@ function resetRadarToCenter() {
         console.log("🎯 Radar recentré avec zoom préservé");
     }
 }
-
-
 
 
 function highlightWinnerSegment(segmentIndex, generation) {
@@ -1740,7 +635,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 };
                 
             }, 1500);
-            currentAnimationTimeouts.push(timeoutId);
+            state.currentAnimationTimeouts.push(timeoutId);
         }
     }
 }
@@ -1806,7 +701,7 @@ function detectWinner(finalAngle) {
     const candidateSegments = [];
     
     // Parcourir toutes les générations (sauf le centre)
-    for (let gen = 1; gen <= fanConfig.maxGenerations; gen++) {
+    for (let gen = 1; gen <= state.WheelConfig.maxGenerations; gen++) {
         const segmentsInGen = Math.pow(2, gen);
         const anglePerSegment = 360 / segmentsInGen;
         const targetSegment = Math.floor(normalizedAngle / anglePerSegment);
@@ -1818,10 +713,10 @@ function detectWinner(finalAngle) {
         if (!targetElement.empty()) {
             const person = targetElement.datum();
             if (person && person.name) {
-                console.log(`✅ Candidat Gen ${gen}, segment ${targetSegment}: ${person.name}`);
-                
+                console.log(`✅ Candidat Gen ${gen}, segment ${targetSegment}: ${person.name} : ${person.id}`);
                 candidateSegments.push({
                     name: person.name,
+                    id: person.id,
                     segment: targetSegment,
                     generation: gen,
                     angle: normalizedAngle,
@@ -1859,6 +754,7 @@ class FortuneWheelSounds {
         this.sounds = {};
         this.enabled = true;
         this.volume = 0.7;
+        this.currentTickInterval = null; // Pour le tic-tac continu
         this.initSounds();
     }
     
@@ -1873,6 +769,8 @@ class FortuneWheelSounds {
         this.createWheelStopSound();
         this.createWinnerSound();
         this.createClickSound();
+        this.createTickSound();
+        this.createTimerExpiredSound();
         
         console.log("✅ Système de sons initialisé !");
     }
@@ -2101,6 +999,111 @@ class FortuneWheelSounds {
             source.start();
         };
     }
+
+    // Son de tic-tac d'horloge/timer
+    createTickSound() {
+        this.sounds['tick'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const duration = 0.1;
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 30); // Décroissance rapide
+                
+                // Son métallique d'horloge
+                const tick = Math.sin(t * 2000 * 2 * Math.PI) * envelope * 0.7;
+                const click = Math.sin(t * 4000 * 2 * Math.PI) * envelope * 0.3;
+                
+                data[i] = (tick + click) * this.volume * 0.6;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        };
+    }
+
+    // Son de timer écoulé (alarme)
+    createTimerExpiredSound() {
+        this.sounds['timer-expired'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Séquence d'alarme avec oscillations
+            const beepCount = 3;
+            const beepDuration = 0.4;
+            const pauseDuration = 0.2;
+            
+            for (let i = 0; i < beepCount; i++) {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    
+                    // Configuration de l'oscillateur
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    
+                    // Filtre pour adoucir le son carré
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+                    
+                    // Enveloppe d'amplitude avec vibrato
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(this.volume * 0.8, audioContext.currentTime + 0.05);
+                    gainNode.gain.linearRampToValueAtTime(this.volume * 0.6, audioContext.currentTime + beepDuration * 0.7);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + beepDuration);
+                    
+                    // Modulation de fréquence pour effet d'urgence
+                    const lfo = audioContext.createOscillator();
+                    const lfoGain = audioContext.createGain();
+                    lfo.frequency.setValueAtTime(8, audioContext.currentTime);
+                    lfoGain.gain.setValueAtTime(100, audioContext.currentTime);
+                    
+                    // Connexions
+                    oscillator.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    lfo.connect(lfoGain);
+                    lfoGain.connect(oscillator.frequency);
+                    
+                    // Démarrage
+                    oscillator.start();
+                    lfo.start();
+                    
+                    // Arrêt
+                    setTimeout(() => {
+                        oscillator.stop();
+                        lfo.stop();
+                    }, beepDuration * 1000);
+                    
+                }, i * (beepDuration + pauseDuration) * 1000);
+            }
+        };
+    }
+
+    // Démarrer le tic-tac continu du timer
+    startTicking(interval = 1000) {
+        this.stopTicking(); // Arrêter le précédent s'il existe
+        
+        console.log("⏰ Démarrage du tic-tac");
+        this.currentTickInterval = setInterval(() => {
+            this.play('tick');
+        }, interval);
+    }
+
+    // Arrêter le tic-tac
+    stopTicking() {
+        if (this.currentTickInterval) {
+            clearInterval(this.currentTickInterval);
+            this.currentTickInterval = null;
+            console.log("⏰ Arrêt du tic-tac");
+        }
+    }
     
     // Jouer un son
     play(soundName) {
@@ -2137,14 +1140,27 @@ class FortuneWheelSounds {
     // Tester tous les sons
     testAll() {
         console.log("🎵 Test de tous les sons...");
-        const soundNames = ['click', 'lever-pull', 'lever-spring', 'wheel-spinning', 'wheel-stop', 'winner'];
+        const soundNames = ['click', 'lever-pull', 'lever-spring', 'wheel-spinning', 'wheel-stop', 'winner', 'tick', 'timer-expired'];
         
         soundNames.forEach((sound, index) => {
             setTimeout(() => {
-                this.play(sound);
+                if (sound === 'tick') {
+                    // Démo du tic-tac continu pendant 3 secondes
+                    this.startTicking(500);
+                    setTimeout(() => this.stopTicking(), 3000);
+                } else {
+                    this.play(sound);
+                }
             }, index * 1000);
         });
     }
+
+    // Pour activer le tic-tac lancer :
+    // const sounds = new FortuneWheelSounds();
+    // sounds.play('tick');
+    // sounds.startTicking(1000);
+    // sounds.stopTicking();
+    
 }
 
 // Initialiser le système de sons
@@ -2169,10 +1185,7 @@ function playSound(soundName) {
     fortuneSounds.play(soundName);
 }
 
-
-
 // fonctions pour utiliser les traductions
-
 // Système multilingue ultra-simple
 function getFortuneText(textType) {
     const lang = window.CURRENT_LANGUAGE || 'fr';
@@ -2203,16 +1216,10 @@ function getFortuneText(textType) {
             hu: "NYERTES"
         },
         winnerTitle: {
-            fr: "LA ROUE S'EST ARRÊTÉE SUR",
-            en: "THE WHEEL STOPPED ON",
-            es: "LA RUEDA SE DETUVO EN",
-            hu: "A KERÉK MEGÁLLT"
-        },
-        winnerContinue: {
-            fr: "Cliquez pour continuer",
-            en: "Click to continue",
-            es: "Haz clic para continuar",
-            hu: "Kattints a folytatáshoz"
+            fr: "LA ROUE S'EST ARRÊTÉE SUR?",
+            en: "THE WHEEL STOPPED ON?",
+            es: "LA RUEDA SE DETUVO EN?",
+            hu: "A KERÉK MEGÁLLT?"
         },
         fortuneInstructions: {
             fr: "🎰 Tirez le levier pour faire tourner la roue de la fortune !",
@@ -2225,6 +1232,198 @@ function getFortuneText(textType) {
             en: "fortuneModeActive",
             es: "fortuneModeActive",
             hu: "fortuneModeActive"
+        },
+        winnerContinue: {
+            fr: "Cliquez pour continuer",
+            en: "Click to continue",
+            es: "Haz clic para continuar",
+            hu: "Kattints a folytatáshoz"
+        },
+        showWinner: {
+            fr: "Montrer le gagnant",
+            en: "Show winner",
+            es: "Mostrar ganador",
+            hu: "Mutasd a győztest"
+        },
+        quiz: {
+            fr: "quiz sur le gagnant",
+            en: "winner quiz",
+            es: "cuestionario del ganador", 
+            hu: "kvíz a győztesről"
+        },
+        closeQuiz: {
+            fr: "fermer",
+            en: "close",
+            es: "cerrar",
+            hu: "bezár"
+        },
+        quizTitle: {
+            "fr": "Qui suis-je ?",
+            "en": "Who am I?",
+            "es": "¿Quién soy?",
+            "hu": "Ki vagyok?"
+        },
+        quizSubtitle: {
+            "fr": "Devinez de qui il s'agit grâce aux indices !",
+            "en": "Guess who it is with the clues!",
+            "es": "¡Adivina de quién se trata con las pistas!",
+            "hu": "Találd ki, ki az a nyomok alapján!"
+        },
+        clickNextClue: {
+            "fr": "Cliquez sur 'Indice suivant' pour commencer !",
+            "en": "Click 'Next clue' to start!",
+            "es": "¡Haz clic en 'Siguiente pista' para empezar!",
+            "hu": "Kattints a 'Következő nyom'-ra a kezdéshez!"
+        },
+        enterName: {
+            "fr": "Tapez le nom de la personne",
+            "en": "Enter the person's name",
+            "es": "Escriba el nombre de la persona",
+            "hu": "Írd be a személy nevét"
+        },
+        checkAnswer: {
+            "fr": "Vérifier",
+            "en": "Check",
+            "es": "Verificar",
+            "hu": "Ellenőrizés"
+        },
+        nextClue: {
+            "fr": "Indice suivant",
+            "en": "Next clue",
+            "es": "Siguiente pista",
+            "hu": "Következő nyom"
+        },
+        showSolution: {
+            "fr": "Voir la solution",
+            "en": "Show solution",
+            "es": "Ver solución",
+            "hu": "Megoldás mutatása"
+        },
+        closeQuiz: {
+            "fr": "Fermer le quiz",
+            "en": "Close quiz",
+            "es": "Cerrar quiz",
+            "hu": "Kvíz bezárása"
+        },
+        clue: {
+            "fr": "Indice",
+            "en": "Clue",
+            "es": "Pista",
+            "hu": "Nyom"
+        },
+        correctGuess: {
+            "fr": "Félicitations ! Vous avez trouvé !",
+            "en": "Congratulations! You found it!",
+            "es": "¡Felicidades! ¡Lo encontraste!",
+            "hu": "Gratulálok! Megtaláltad!"
+        },
+        wrongGuess: {
+            "fr": "Pas tout à fait ! La bonne réponse était :",
+            "en": "Not quite! The correct answer was:",
+            "es": "¡No del todo! La respuesta correcta era:",
+            "hu": "Nem egészen! A helyes válasz:"
+        },
+        solutionRevealed: {
+            "fr": "La solution était :",
+            "en": "The solution was:",
+            "es": "La solución era:",
+            "hu": "A megoldás:"
+        },
+        clueNaissance: {
+            "fr": "Je suis né(e)",
+            "en": "I was born",
+            "es": "Nací",
+            "hu": "Születtem"
+        },
+        clueDeces: {
+            "fr": "Je suis décédé(e)",
+            "en": "I died",
+            "es": "Morí",
+            "hu": "Meghaltam"
+        },
+        clueLieu: {
+            "fr": "à",
+            "en": "in",
+            "es": "en",
+            "hu": "helyen:"
+        },
+        clueLe: {
+            "fr": "le",
+            "en": "on",
+            "es": "el",
+            "hu": ""
+        },
+        clueEn: {
+            "fr": "en",
+            "en": "in",
+            "es": "en",
+            "hu": "-ban/-ben"
+        },
+        clueMetier: {
+            "fr": "J'ai exercé le métier de",
+            "en": "I worked as",
+            "es": "Trabajé como",
+            "hu": "A foglalkozásom"
+        },
+        clueMariage: {
+            "fr": "Je me suis marié(e) avec",
+            "en": "I married",
+            "es": "Me casé con",
+            "hu": "Feleségül vettem / Férjhez mentem"
+        },
+        clueResidence: {
+            "fr": "J'ai habité à",
+            "en": "I lived in",
+            "es": "Viví en",
+            "hu": "Laktam"
+        },
+        clueEnfants: {
+            "fr": "J'ai eu",
+            "en": "I had",
+            "es": "Tuve",
+            "hu": "volt"
+        },
+        enfants: {
+            "fr": "enfant(s)",
+            "en": "child(ren)",
+            "es": "hijo(s)",
+            "hu": "gyermekem"
+        },
+        cluePrenomsEnfants: {
+            "fr": "Les prénoms de mes enfants sont :",
+            "en": "My children's names are:",
+            "es": "Los nombres de mis hijos son:",
+            "hu": "A gyermekeim nevei:"
+        },
+        cluePere: {
+            "fr": "Le prénom de mon père est",
+            "en": "My father's name is",
+            "es": "El nombre de mi padre es",
+            "hu": "Apám neve"
+        },
+        clueMere: {
+            "fr": "Le prénom de ma mère est",
+            "en": "My mother's name is",
+            "es": "El nombre de mi madre es",
+            "hu": "Anyám neve"
+        },
+        cluePrenom: {
+            "fr": "Mon prénom est",
+            "en": "My first name is",
+            "es": "Mi nombre es",
+            "hu": "A keresztnevem"
+        },
+        clueContexte: {
+            "fr": "je suis né à l'époque de",
+            "en": "I was born in the time of",
+            "es": "nací en la época de",
+            "hu": "abban az időben születtem, amikor"
+        },
+        wrongAnswer: {
+            "fr": "❌ Réponse incorrecte, essayez encore !",
+            "en": "❌ Wrong answer, try again!",
+            "es": "❌ Respuesta incorrecta, ¡inténtalo de nuevo!",
+            "hu": "❌ Rossz válasz, próbáld újra!"
         }
     };
 
@@ -2235,10 +1434,11 @@ function getFortuneText(textType) {
     }
     
     return texts[textType][lang] || texts[textType]['fr'];
+    // return ("coucou");
 }
 
-// Fonction createRealisticSlotHandle modifiée pour être multilingue
-function createRealisticSlotHandleML() {
+// Fonction createRealisticSlotHandle 
+function createRealisticSlotHandle() {
     const leverContainer = document.createElement("div");
     leverContainer.id = "lever-container";
     leverContainer.style.cssText = `
@@ -2330,13 +1530,13 @@ function createRealisticSlotHandleML() {
     leverArm.appendChild(leverHandle);
     leverContainer.appendChild(leverText);
     
-    let leverEnabled = true;
+    // let state.leverEnabled = true;
     
     function pullLever() {
         const pullStart = performance.now();
         console.log("🎯 DÉBUT pullLever()");
 
-        if (!leverEnabled || isSpinning) {
+        if (!state.leverEnabled || state.isSpinning) {
             console.log(getFortuneText('leverDisabled'));
             return;
         }
@@ -2346,15 +1546,15 @@ function createRealisticSlotHandleML() {
         console.log('Reset nécessaire:', needsReset());
     
         if (needsReset()) {
-            resetFanView();
-            userHasInteracted = false;
+            resetWheelView();
+            state.userHasInteracted = false;
         }
 
         // closeWinnerMessage();
 
         // RESET complet de toutes les animations et fenêtres en cours avec nettoyage des segments mémorisés uniquement
-        currentAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
-        currentAnimationTimeouts = [];
+        state.currentAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        state.currentAnimationTimeouts = [];
         d3.selectAll("*").interrupt();
 
         // Nettoyer UNIQUEMENT les segments gagnants mémorisés
@@ -2391,7 +1591,7 @@ function createRealisticSlotHandleML() {
         }
         hideWinnerText();
 
-        leverEnabled = false;
+        state.leverEnabled = false;
         console.log("🎯", getFortuneText('leverPulling'));
 
         const showWinnerStart = performance.now();
@@ -2436,27 +1636,27 @@ function createRealisticSlotHandleML() {
 
             
         }, 400);
-        currentAnimationTimeouts.push(timeoutId6);
+        state.currentAnimationTimeouts.push(timeoutId6);
         console.log(`🎯 FIN pullLever(): ${(performance.now() - pullStart).toFixed(1)}ms`);
         
         const timeoutId7 = setTimeout(() => {
-            leverEnabled = true;
+            state.leverEnabled = true;
             leverText.textContent = getFortuneText('leverText'); // TRADUCTION
         }, 1000);
-        currentAnimationTimeouts.push(timeoutId7);
+        state.currentAnimationTimeouts.push(timeoutId7);
 
         console.log(`🎯 FIN pullLever() après traduction: ${(performance.now() - pullStart).toFixed(1)}ms`);
     }
     
     function disableLever() {
-        leverEnabled = false;
+        state.leverEnabled = false;
         leverHandle.style.opacity = "0.6";
         leverHandle.style.cursor = "not-allowed";
         leverText.textContent = getFortuneText('leverRotating'); // TRADUCTION
     }
     
     function enableLever() {
-        leverEnabled = true;
+        state.leverEnabled = true;
         leverHandle.style.opacity = "1";
         leverHandle.style.cursor = "pointer";
         leverText.textContent = getFortuneText('leverText'); // TRADUCTION
@@ -2469,14 +1669,14 @@ function createRealisticSlotHandleML() {
     });
     
     leverHandle.addEventListener('mouseenter', () => {
-        if (leverEnabled) {
+        if (state.leverEnabled) {
             leverHandle.style.transform = "translateX(-50%) scale(1.05)";
             leverHandle.style.boxShadow = "0 6px 18px rgba(255, 107, 107, 0.6)";
         }
     });
     
     leverHandle.addEventListener('mouseleave', () => {
-        if (leverEnabled) {
+        if (state.leverEnabled) {
             leverHandle.style.transform = "translateX(-50%) scale(1)";
             leverHandle.style.boxShadow = "0 4px 12px rgba(255, 107, 107, 0.4)";
         }
@@ -2490,55 +1690,9 @@ function createRealisticSlotHandleML() {
         container: leverContainer
     };
     
-    console.log("🎰 Levier multilingue créé !");
+    console.log("🎰 Levier créé !");
     
     return leverContainer;
-}
-
-// Fonction showWinnerMessage multilingue
-function showWinnerMessageML(winner) {
-    const message = document.createElement("div");
-    message.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-        color: white;
-        padding: 30px;
-        border-radius: 20px;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        z-index: 9999;
-        transition: transform 0.5s ease;
-    `;
-    
-    message.innerHTML = `
-        <div style="font-size: 50px;">🎉</div>
-        <div>${getFortuneText('winnerTitle')}</div>
-        <div style="font-size: 28px; margin: 15px 0; color: #fff700;">${winner.name}</div>
-        <div style="font-size: 16px; opacity: 0.9;">${getFortuneText('winnerContinue')}</div>
-    `;
-    
-    document.body.appendChild(message);
-    
-    setTimeout(() => {
-        message.style.transform = "translate(-50%, -50%) scale(1)";
-    }, 100);
-    
-    message.onclick = () => {
-        message.style.transform = "translate(-50%, -50%) scale(0)";
-        setTimeout(() => {
-            if (message.parentNode) {
-                document.body.removeChild(message);
-            }
-            hideWinnerText();
-            resetLastWinnerHighlightAsync();
-
-        }, 300);
-    };
 }
 
 // Fonction pour fermer le message gagnant
@@ -2573,8 +1727,686 @@ function closeWinnerMessage() {
 // Export pour utilisation dans d'autres modules
 window.closeWinnerMessage = closeWinnerMessage;
 
-// Fonction Instructions pour l'utilisateur  multilingue
-function showFortuneInstructionsML() {
+
+// Fonction showWinnerMessage modifiée avec 3 boutons
+function showWinnerMessage(winner) {
+    const message = document.createElement("div");
+    message.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        z-index: 9999;
+        transition: transform 0.5s ease;
+        min-width: 400px;
+        max-width: 90vw;
+    `;
+    
+    message.innerHTML = `
+        <div style="font-size: 50px;">🎉</div>
+        <div style="margin-bottom: 20px;">${getFortuneText('winnerTitle')}</div>
+        
+        <!-- Zone pour afficher le nom du gagnant (cachée au début) -->
+        <div id="winnerNameDisplay" style="
+            font-size: 28px; 
+            margin: 15px 0; 
+            color: #fff700;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        ">${winner.name}</div>
+        
+        <!-- Conteneur des boutons -->
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 25px;">
+            <button id="showWinnerBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                🏆 ${getFortuneText('showWinner')}
+            </button>
+            
+            <button id="quizBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                🧠 ${getFortuneText('quiz')}
+            </button>
+            
+            <button id="continueBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                ➡️ ${getFortuneText('winnerContinue')}
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    // Animation d'apparition
+    setTimeout(() => {
+        message.style.transform = "translate(-50%, -50%) scale(1)";
+    }, 100);
+    
+    // Gestion des clics sur les boutons
+    const showWinnerBtn = message.querySelector('#showWinnerBtn');
+    const quizBtn = message.querySelector('#quizBtn');
+    const continueBtn = message.querySelector('#continueBtn');
+    const winnerNameDisplay = message.querySelector('#winnerNameDisplay');
+    
+    // Bouton 1 : Afficher le gagnant
+    showWinnerBtn.onclick = (e) => {
+        e.stopPropagation();
+        winnerNameDisplay.style.display = 'block';
+        setTimeout(() => {
+            winnerNameDisplay.style.opacity = '1';
+        }, 10);
+        
+        // Désactiver le bouton après utilisation
+        showWinnerBtn.style.opacity = '0.5';
+        showWinnerBtn.style.cursor = 'not-allowed';
+        showWinnerBtn.onclick = null;
+        
+        // Jouer un son si disponible
+        if (typeof sounds !== 'undefined') {
+            sounds.play('winner');
+        }
+    };
+    
+    // Bouton 2 : Quiz sur le gagnant
+    quizBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeWinnerMessage(message);
+        showQuizMessage(winner);
+    };
+    
+    // Bouton 3 : Continuer (fermer)
+    continueBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeWinnerMessage(message);
+    };
+}
+
+
+
+// Fonction pour afficher le quiz progressif
+function showQuizMessage(winner) {
+    const quizMessage = document.createElement("div");
+    quizMessage.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        z-index: 10000;
+        transition: transform 0.5s ease;
+        min-width: 500px;
+        max-width: 90vw;
+        max-height: 80vh;
+        overflow-y: auto;
+    `;
+    
+    // Préparer les indices dans l'ordre spécifié
+    const clues = prepareProgressiveClues(winner);
+    console.log("Indices préparés pour", winner.name, ":", clues);
+    
+    quizMessage.innerHTML = `
+        <div style="font-size: 40px;">🧠</div>
+        <div style="margin-bottom: 20px;">${getFortuneText('quizTitle')}</div>
+        <div style="font-size: 16px; margin-bottom: 20px; opacity: 0.9;">
+            ${getFortuneText('quizSubtitle')}
+        </div>
+        
+        <!-- Zone des indices -->
+        <div id="clues-container" style="
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+        ">
+            <div style="text-align: center; color: rgba(255,255,255,0.7);">
+                ${getFortuneText('clickNextClue')}
+            </div>
+        </div>
+        
+        <!-- Zone de saisie de réponse -->
+        <div style="margin: 20px 0;">
+            <input type="text" id="answer-input" placeholder="${getFortuneText('enterName')}" style="
+                width: 70%;
+                padding: 10px;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                text-align: center;
+                margin-bottom: 10px;
+            ">
+            <button id="check-answer-btn" style="
+                background: rgba(255, 255, 255, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                cursor: pointer;
+                margin-left: 10px;
+            ">${getFortuneText('checkAnswer')}</button>
+        </div>
+        
+        <!-- Boutons de contrôle -->
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <button id="next-clue-btn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">${getFortuneText('nextClue')}</button>
+            
+            <button id="show-solution-btn" style="
+                background: rgba(255, 165, 0, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">${getFortuneText('showSolution')}</button>
+            
+            <button id="close-quiz-btn" style="
+                background: rgba(255, 0, 0, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">${getFortuneText('closeQuiz')}</button>
+        </div>
+        
+        <!-- Zone de résultat -->
+        <div id="result-container" style="margin-top: 20px; display: none;"></div>
+    `;
+    
+    document.body.appendChild(quizMessage);
+    
+    // Animation d'apparition
+    setTimeout(() => {
+        quizMessage.style.transform = "translate(-50%, -50%) scale(1)";
+    }, 100);
+    
+    // État du quiz
+    let currentClueIndex = -1;
+    let gameFinished = false;
+    
+    // Éléments DOM
+    const cluesContainer = quizMessage.querySelector('#clues-container');
+    const answerInput = quizMessage.querySelector('#answer-input');
+    const checkAnswerBtn = quizMessage.querySelector('#check-answer-btn');
+    const nextClueBtn = quizMessage.querySelector('#next-clue-btn');
+    const showSolutionBtn = quizMessage.querySelector('#show-solution-btn');
+    const closeQuizBtn = quizMessage.querySelector('#close-quiz-btn');
+    const resultContainer = quizMessage.querySelector('#result-container');
+    
+    // Fonction pour afficher l'indice suivant
+    function showNextClue() {
+        console.log("showNextClue appelée - currentClueIndex:", currentClueIndex, "clues.length:", clues.length, "gameFinished:", gameFinished);
+
+        if (currentClueIndex < clues.length - 1 && !gameFinished) {
+            currentClueIndex++;
+            const clue = clues[currentClueIndex];
+            
+            const clueDiv = document.createElement('div');
+            clueDiv.style.cssText = `
+                background: rgba(255, 255, 255, 0.15);
+                padding: 10px;
+                margin: 5px 0;
+                border-radius: 5px;
+                border-left: 4px solid white;
+                animation: slideIn 0.5s ease;
+            `;
+            clueDiv.innerHTML = `<strong>${getFortuneText('clue')} ${currentClueIndex + 1}:</strong> ${clue}`;
+            
+            // Remplacer le contenu de placeholder s'il existe
+            if (cluesContainer.children.length === 1 && 
+                cluesContainer.firstChild.textContent.includes(getFortuneText('clickNextClue'))) {
+                cluesContainer.innerHTML = '';
+            }
+            
+            cluesContainer.appendChild(clueDiv);
+            cluesContainer.scrollTop = cluesContainer.scrollHeight;
+            
+            // Jouer un son si disponible
+            if (typeof sounds !== 'undefined') {
+                sounds.play('tick');
+            }
+            
+            // Désactiver le bouton si plus d'indices
+            if (currentClueIndex >= clues.length - 1) {
+                nextClueBtn.style.opacity = '0.5';
+                nextClueBtn.style.cursor = 'not-allowed';
+                nextClueBtn.disabled = true;
+            }
+        }
+    }
+    
+    // Fonction pour vérifier la réponse
+    function checkAnswer() {
+        if (gameFinished) return;
+        
+        const userAnswer = answerInput.value.trim().toLowerCase();
+        const correctAnswer = winner.name.replace(/\//g, '').toLowerCase();
+        
+        // Vérification flexible (nom complet ou prénom)
+        const isCorrect = userAnswer === correctAnswer || 
+                        correctAnswer.includes(userAnswer) ||
+                        userAnswer.includes(correctAnswer.split(' ')[0]); // Premier prénom
+        
+        if (isCorrect) {
+            // gameFinished = true;
+            showResult(true, winner.name.replace(/\//g, ''));
+            if (typeof sounds !== 'undefined') {
+                sounds.play('winner');
+            }
+        } else {
+            // Réponse fausse : afficher message temporaire et vider le champ
+            showTemporaryMessage(getFortuneText('wrongAnswer'));
+            answerInput.value = '';
+            if (typeof sounds !== 'undefined') {
+                sounds.play('click');
+            }
+        }
+    }
+
+
+    function showTemporaryMessage(message) {
+        const tempMsg = document.createElement('div');
+        tempMsg.style.cssText = `
+            background: rgba(255, 0, 0, 0.2);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        `;
+        tempMsg.textContent = message;
+        
+        // Insérer avant la zone de saisie
+        const answerInput = document.querySelector('#answer-input');
+        answerInput.parentNode.insertBefore(tempMsg, answerInput);
+        
+        // Supprimer après 3 secondes
+        setTimeout(() => {
+            if (tempMsg.parentNode) {
+                tempMsg.parentNode.removeChild(tempMsg);
+            }
+        }, 3000);
+    }
+
+    
+    // Fonction pour afficher la solution
+    function showSolution() {
+        // gameFinished = true;
+        showResult('solution', winner.name.replace(/\//g, ''));
+    }
+    
+    // Fonction pour afficher le résultat
+    function showResult(type, correctName) {
+        let resultHTML = '';
+        let bgColor = '';
+        
+        switch(type) {
+            case true:
+                resultHTML = `
+                    <div style="font-size: 24px;">🎉</div>
+                    <div>${getFortuneText('correctGuess')}</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                `;
+                bgColor = 'rgba(0, 255, 0, 0.2)';
+                break;
+            case false:
+                resultHTML = `
+                    <div style="font-size: 24px;">😔</div>
+                    <div>${getFortuneText('wrongGuess')}</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                `;
+                bgColor = 'rgba(255, 0, 0, 0.2)';
+                break;
+            case 'solution':
+                resultHTML = `
+                    <div style="font-size: 24px;">💡</div>
+                    <div>${getFortuneText('solutionRevealed')}</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                `;
+                bgColor = 'rgba(255, 165, 0, 0.2)';
+                break;
+        }
+        
+        resultContainer.style.cssText = `
+            background: ${bgColor};
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: block;
+            animation: fadeIn 0.5s ease;
+        `;
+        resultContainer.innerHTML = resultHTML;
+        
+        // Garder nextClueBtn actif
+        answerInput.disabled = true;
+        checkAnswerBtn.disabled = true;
+        showSolutionBtn.disabled = true;
+        
+        [checkAnswerBtn, showSolutionBtn].forEach(btn => {
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        });
+        
+
+    }
+    
+    // Gestionnaires d'événements
+    nextClueBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Clic sur indice suivant, index actuel:", currentClueIndex);
+        showNextClue();
+    };
+
+    checkAnswerBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        checkAnswer();
+    };
+
+    showSolutionBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showSolution();
+    };
+    
+    // Permettre validation avec Entrée
+    answerInput.onkeypress = (e) => {
+        if (e.key === 'Enter' && !gameFinished) {
+            checkAnswer();
+        }
+    };
+    
+    // Fermer le quiz
+    closeQuizBtn.onclick = () => {
+        quizMessage.style.transform = "translate(-50%, -50%) scale(0)";
+        setTimeout(() => {
+            if (quizMessage.parentNode) {
+                document.body.removeChild(quizMessage);
+            }
+            hideWinnerText();
+            resetLastWinnerHighlightAsync();
+        }, 300);
+    };
+    
+    // Focus sur le champ de saisie
+    setTimeout(() => answerInput.focus(), 500);
+}
+
+
+
+function formatDateForClue(dateString) {
+    if (!dateString) return '';
+    
+    const formatted = formatGedcomDate(dateString);
+    const parts = dateString.trim().split(' ').filter(part => part.length > 0);
+    
+    if (parts.length === 1) {
+        // Seulement l'année
+        return ` ${getFortuneText('clueEn')} ${formatted}`;
+    } else if (parts.length === 2) {
+        // Mois et année  
+        return ` ${getFortuneText('clueEn')} ${formatted}`;
+    } else {
+        // Jour complet
+        return ` ${getFortuneText('clueLe')} ${formatted}`;
+    }
+}
+
+// Fonction pour préparer les indices progressifs
+function prepareProgressiveClues(person) {
+    const clues = [];
+    console.log("prepareProgressiveClues - person:", person);
+    console.log("person.id:", person.id);
+    console.log("state.gedcomData.individuals[person.id]:", state.gedcomData.individuals[person.id]);
+    
+    const personData = state.gedcomData.individuals[person.id];
+    
+    if (!personData) {
+        console.log("❌ PersonData introuvable pour", person.id);
+        return clues;
+    }
+    console.log("✅ PersonData trouvée:", personData);
+    
+    // 1. Date et lieu de naissance
+    if (personData.birthDate) {
+        let clue = `${getFortuneText('clueNaissance')} ${formatDateForClue(personData.birthDate)}`;
+        if (personData.birthPlace) {
+            clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(personData.birthPlace)}`;
+        }
+        clues.push(clue);
+    }
+    
+    // 2. Date et lieu de décès
+    if (personData.deathDate) {
+        let clue = `${getFortuneText('clueDeces')} ${formatDateForClue(personData.deathDate)}`;
+        if (personData.deathPlace) {
+            clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(personData.deathPlace)}`;
+        }
+        clues.push(clue);
+    }
+    
+    // 3. Métier
+    if (personData.occupation) {
+        const cleanedProfessions = cleanProfession(personData.occupation);
+        cleanedProfessions.forEach(prof => {
+            if (prof) {
+                const translatedProf = translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr');
+                clues.push(`${getFortuneText('clueMetier')} ${translatedProf}`);
+            }
+        });
+    }
+    
+    // 4. Lieu de résidence
+    const residences = [
+        { place: personData.residPlace1, date: personData.residDate1 },
+        { place: personData.residPlace2, date: personData.residDate2 },
+        { place: personData.residPlace3, date: personData.residDate3 }
+    ].filter(r => r.place);
+    
+    if (residences.length > 0) {
+        residences.forEach(residence => {
+            clues.push(`${getFortuneText('clueResidence')} ${cleanupPlace(residence.place)}`);
+        });
+    }
+    
+    // 5. Enfants
+    if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
+        const family = state.gedcomData.families[personData.spouseFamilies[0]];
+        if (family && family.children && family.children.length > 0) {
+            clues.push(`${getFortuneText('clueEnfants')} ${family.children.length} ${getFortuneText('enfants')}`);
+            
+            // Prénoms des enfants
+            const childNames = family.children
+                .map(childId => {
+                    const child = state.gedcomData.individuals[childId];
+                    return child ? child.name.replace(/\//g, '').split(' ')[0] : null;
+                })
+                .filter(name => name)
+                .join(', ');
+            
+            if (childNames) {
+                clues.push(`${getFortuneText('cluePrenomsEnfants')} ${childNames}`);
+            }
+        }
+    }
+    
+    // // 6. Père
+    // if (personData.families && personData.families.length > 0) {
+    //     const family = state.gedcomData.families[personData.families[0]];
+    //     if (family && family.husband) {
+    //         const father = state.gedcomData.individuals[family.husband];
+    //         if (father) {
+    //             const fatherFirstName = father.name.replace(/\//g, '').split(' ')[0];
+    //             clues.push(`${getFortuneText('cluePere')} ${fatherFirstName}`);
+    //         }
+    //     }
+    // }
+    
+    // // 7. Mère
+    // if (personData.families && personData.families.length > 0) {
+    //     const family = state.gedcomData.families[personData.families[0]];
+    //     if (family && family.wife) {
+    //         const mother = state.gedcomData.individuals[family.wife];
+    //         if (mother) {
+    //             const motherFirstName = mother.name.replace(/\//g, '').split(' ')[0];
+    //             clues.push(`${getFortuneText('clueMere')} ${motherFirstName}`);
+    //         }
+    //     }
+    // }
+
+
+    // 6. Père - chercher dans les familles où la personne est enfant
+    const parentFamilies = personData.families ? personData.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children && family.children.includes(person.id);
+    }) : [];
+
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.husband) {
+            const father = state.gedcomData.individuals[family.husband];
+            if (father) {
+                const fatherFirstName = father.name.replace(/\//g, '').split(' ')[0];
+                clues.push(`${getFortuneText('cluePere')} ${fatherFirstName}`);
+            }
+        }
+    }
+
+    // 7. Mère - même logique
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.wife) {
+            const mother = state.gedcomData.individuals[family.wife];
+            if (mother) {
+                const motherFirstName = mother.name.replace(/\//g, '').split(' ')[0];
+                clues.push(`${getFortuneText('clueMere')} ${motherFirstName}`);
+            }
+        }
+    }
+
+
+
+    // 8. Mariage (conjoint, date, lieu)
+    if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
+        const family = state.gedcomData.families[personData.spouseFamilies[0]];
+        if (family) {
+            // Trouver le conjoint
+            const spouseId = family.husband === person.id ? family.wife : family.husband;
+            if (spouseId) {
+                const spouse = state.gedcomData.individuals[spouseId];
+                if (spouse) {
+                    let clue = `${getFortuneText('clueMariage')} ${spouse.name.replace(/\//g, '')}`;
+                    if (family.marriageDate) {
+                        clue += `${formatDateForClue(family.marriageDate)}`;
+                    }
+                    if (family.marriagePlace) {
+                        clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(family.marriagePlace)}`;
+                    }
+                    clues.push(clue);
+                }
+            }
+        }
+    }
+    
+    // 9. Prénom (avant-dernier indice)
+    const fullName = personData.name.replace(/\//g, '');
+    const firstName = fullName.split(' ')[0];
+    if (firstName && firstName !== fullName) {
+        clues.push(`${getFortuneText('cluePrenom')} ${firstName}`);
+    }
+    
+    // 10. Contexte historique
+    const historicalContext = findContextualHistoricalFigures(person.id);
+    if (historicalContext) {
+        const contexts = [historicalContext.birthContext, historicalContext.marriageContext, historicalContext.deathContext]
+            .filter(ctx => ctx && (ctx.governmentType || (ctx.rulers && ctx.rulers.length > 0)));
+        
+        if (contexts.length > 0) {
+            const context = contexts[0];
+            let contextClue = getFortuneText('clueContexte');
+            
+            if (context.rulers && context.rulers.length > 0) {
+                contextClue += ` ${context.rulers[0].name}`;
+            } else if (context.governmentType) {
+                contextClue += ` ${context.governmentType.type}`;
+            }
+            
+            clues.push(contextClue);
+        }
+    }
+    
+    return clues;
+}
+
+// Fonction Instructions pour l'utilisateur  
+function showFortuneInstructions() {
     const instructions = document.createElement("div");
     instructions.style.cssText = `
         position: fixed;
@@ -2610,9 +2442,66 @@ function showFortuneInstructionsML() {
     }, 4000);
 }
 
-function createWinnerRedArrowIndicatorML() {
+function removeWinnerRedArrowIndicator() {
+    d3.select("#winner-indicator").remove();
+    d3.select("#winner-indicator-fixed").remove();
+    console.log('🗑️ Flèche rouge supprimée');
+}
+
+// Fonction pour calculer les dimensions responsives
+function getResponsiveDimensions() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const screenSize = Math.min(screenWidth, screenHeight);
+    
+    // Calcul des échelles basées sur la taille d'écran
+    // Base de référence : 1024px = échelle 1.0
+    const baseSize = 1024;
+    const scale = Math.max(0.6, Math.min(2.0, screenSize / baseSize));
+    
+    // Dimensions de la flèche (ajustées selon l'échelle)
+    const arrowScale = scale;
+    const arrowWidth = Math.round(40 * arrowScale);        // Base: 40px
+    const arrowHeight = Math.round(45 * arrowScale);       // Base: 45px
+    const arrowStrokeWidth = Math.max(2, Math.round(3 * arrowScale));
+    
+    // Position de la flèche (plus bas dans l'écran)
+    const arrowTopOffset = Math.max(80, Math.round(120 * scale));
+    
+    // Taille du texte (avec limites min/max)
+    const baseFontSize = 16;
+    const fontSize = Math.max(12, Math.min(24, Math.round(baseFontSize * scale)));
+    const textStrokeWidth = Math.max(2, Math.round(3 * scale));
+    
+    // Position du texte par rapport à la flèche
+    const textOffsetY = Math.round(5 * scale);
+    
+    console.log(`📱 Écran: ${screenWidth}x${screenHeight}, Échelle: ${scale.toFixed(2)}`);
+    console.log(`🎯 Flèche: ${arrowWidth}x${arrowHeight}px, Police: ${fontSize}px`);
+    
+    return {
+        scale,
+        arrow: {
+            width: arrowWidth,
+            height: arrowHeight,
+            strokeWidth: arrowStrokeWidth,
+            topOffset: arrowTopOffset
+        },
+        text: {
+            fontSize,
+            strokeWidth: textStrokeWidth,
+            offsetY: textOffsetY
+        }
+    };
+}
+
+// Version améliorée de createWinnerRedArrowIndicator
+export function createWinnerRedArrowIndicator() {
     // Supprimer l'ancienne
     d3.select("#winner-indicator-fixed").remove();
+    
+    // Calculer les dimensions responsives
+    const dimensions = getResponsiveDimensions();
     
     // SVG séparé pour la flèche fixe
     const fixedSvg = d3.select("body").append("svg")
@@ -2626,24 +2515,37 @@ function createWinnerRedArrowIndicatorML() {
         .style("z-index", "1001");
     
     const indicator = fixedSvg.append("g")
-        .attr("transform", `translate(${window.innerWidth/2}, 70)`); // DESCENDU de 50 à 70px
+        .attr("transform", `translate(${window.innerWidth/2}, ${dimensions.arrow.topOffset})`);
     
-    // Flèche descendue de 30px supplémentaires
+    // Flèche adaptative avec tige plus longue
+    const arrowHalfWidth = dimensions.arrow.width / 2;
+    const arrowHalfHeight = dimensions.arrow.height / 2;
+    const arrowTipHeight = Math.round(dimensions.arrow.height * 0.8); // Réduire la pointe pour allonger la tige
+    const arrowShaftWidth = Math.round(dimensions.arrow.width * 0.35); // Tige légèrement plus fine
+    const arrowShaftHalfWidth = arrowShaftWidth / 2;
+    
+    // Points de la flèche (forme proportionnelle)
+    const arrowPoints = [
+        `0,${arrowTipHeight}`,                                    // Pointe
+        `-${arrowHalfWidth},${arrowTipHeight - arrowHalfHeight}`, // Gauche
+        `-${arrowShaftHalfWidth},${arrowTipHeight - arrowHalfHeight}`, // Gauche shaft
+        `-${arrowShaftHalfWidth},0`,                             // Haut gauche shaft
+        `${arrowShaftHalfWidth},0`,                              // Haut droit shaft
+        `${arrowShaftHalfWidth},${arrowTipHeight - arrowHalfHeight}`, // Droit shaft
+        `${arrowHalfWidth},${arrowTipHeight - arrowHalfHeight}`   // Droite
+    ].join(' ');
+    
     indicator.append("polygon")
-        .attr("points", "0,60 -20,30 -8,30 -8,15 8,15 8,30 20,30") // +30px sur tous les Y
-        .attr("fill", " #ff4444")
+        .attr("points", arrowPoints)
+        .attr("fill", "#ff4444")
         .attr("stroke", "white")
-        .attr("stroke-width", "3");
+        .attr("stroke-width", dimensions.arrow.strokeWidth)
+        .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.3))"); // Ombre pour meilleure visibilité
     
-    // PAS DE TEXTE au début - sera ajouté dynamiquement
+    console.log(`🏆 Indicateur FIXE adaptatif créé - Flèche: ${dimensions.arrow.width}x${dimensions.arrow.height}px`);
     
-    console.log("🏆 Indicateur FIXE créé (sans texte)");
-}
-
-function removeWinnerRedArrowIndicator() {
-    d3.select("#winner-indicator").remove();
-    d3.select("#winner-indicator-fixed").remove();
-    console.log('🗑️ Flèche rouge supprimée');
+    // Stocker les dimensions pour showWinnerText
+    window.winnerIndicatorDimensions = dimensions;
 }
 
 // Fonction pour afficher le texte "GAGNANT" pendant la rotation
@@ -2653,19 +2555,30 @@ function showWinnerText() {
     // Supprimer l'ancien texte s'il existe
     indicator.select("text").remove();
     
-    // Ajouter le texte avec meilleure visibilité
+    // Utiliser les dimensions calculées ou les recalculer si nécessaire
+    const dimensions = window.winnerIndicatorDimensions || getResponsiveDimensions();
+    
+    // Position du texte (sous la flèche)
+    const textY = dimensions.arrow.height + dimensions.text.offsetY;
+    
+    // Ajouter le texte avec taille adaptative
     indicator.append("text")
         .attr("x", 0)
-        .attr("y", 5) // Plus bas que la flèche
+        .attr("y", textY)
         .attr("text-anchor", "middle")
-        .attr("font-size", "16px")
+        .attr("dominant-baseline", "hanging") // Meilleur alignement
+        .attr("font-size", `${dimensions.text.fontSize}px`)
         .attr("font-weight", "bold")
-        .attr("fill", "#ffffff") // Blanc pur
-        .attr("stroke", "#000000") // Contour noir
-        .attr("stroke-width", "3")
-        .attr("paint-order", "stroke fill") // Contour en arrière-plan
-        .style("text-shadow", "2px 2px 4px rgba(0,0,0,0.8)") // Ombre supplémentaire
+        .attr("font-family", "Arial, sans-serif") // Police système
+        .attr("fill", "#ffffff")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", dimensions.text.strokeWidth)
+        .attr("paint-order", "stroke fill")
+        .style("text-shadow", `2px 2px 4px rgba(0,0,0,0.8)`)
+        .style("filter", "drop-shadow(0 1px 2px rgba(0,0,0,0.5))") // Ombre supplémentaire
         .text(getFortuneText('winnerIndicator'));
+    
+    console.log(`📝 Texte gagnant adaptatif - Taille: ${dimensions.text.fontSize}px, Position Y: ${textY}px`);
 }
 
 // Fonction pour masquer le texte
@@ -2674,7 +2587,7 @@ function hideWinnerText() {
 }
 
 // fonction d'activation
-export function enableFortuneModeML() {
+export function enableFortuneMode() {
     if (fortuneModeActive) return;
     
     console.log(getFortuneText('fortuneModeActive'));
@@ -2690,9 +2603,9 @@ export function enableFortuneModeML() {
     //####################################################################
     
     resetRadarToCenter();
-    createRealisticSlotHandleML(); // Version multilingue
-    createWinnerRedArrowIndicatorML(); // Version multilingue
-    showFortuneInstructionsML(); // Version multilingue
+    createRealisticSlotHandle(); 
+    createWinnerRedArrowIndicator(); 
+    showFortuneInstructions(); 
     
     console.log("✅", getFortuneText('fortuneModeActive'));
 }
@@ -2734,7 +2647,7 @@ export function disableFortuneModeWithLever() {
     console.log("✅ Mode Fortune désactivé");
 }
 
-function announceWinnerML(winner) {
+function announceWinner(winner) {
     console.log(`🏆 ${getFortuneText('winnerIndicator')}: ${winner.name}`);
     
     const indicator = d3.select("#winner-indicator");
@@ -2745,7 +2658,7 @@ function announceWinnerML(winner) {
         .duration(500)
         .attr("transform", `translate(${window.innerWidth/2}, 50) scale(1)`);
     
-    showWinnerMessageML(winner); // Version multilingue
+    showWinnerMessage(winner); 
     
     playSound('winner');
 }

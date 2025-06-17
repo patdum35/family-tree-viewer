@@ -503,7 +503,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in replaceRootPersonSelector ################# ')
                     // displayGenealogicTree(value, true);
                     if (state.isRadarEnabled) {
-                        displayGenealogicTree(value, false, false,  false, 'fanAncestors');
+                        displayGenealogicTree(value, false, false,  false, 'WheelAncestors');
                     } else {
                         displayGenealogicTree(value, true, false);
                     }

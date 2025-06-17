@@ -5,7 +5,7 @@ import { nameCloudState } from './nameCloud.js';
 import { setTargetAncestorId } from './treeAnimation.js';
 import { updatePrenoms } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
-import { initializeAllFanControls } from './treeFanControls.js';
+import { initializeAllWheelControls } from './treeWheelControls.js';
 
 
 
@@ -1631,7 +1631,7 @@ function createExportControls() {
     
     // Gestionnaire d'événements pour ouvrir l'interface d'export
     openExportButton.addEventListener('click', () => {
-        initializeAllFanControls();
+        initializeAllWheelControls();
         // Fermer la modal de settings
         const enhancedModal = document.getElementById('enhanced-settings-modal');
         if (enhancedModal) {

@@ -10,7 +10,8 @@ import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
-import { setMaxGenerations, disableFortuneModeWithLever } from './treeFanRenderer.js'
+import { drawWheelTree, setMaxGenerations, resetWheelView } from './treeWheelRenderer.js'
+import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
 
 
 /**
@@ -80,6 +81,12 @@ export function handleWindowResize() {
     //  };
 
 
+
+
+
+    /* */
+
+    // if (state.isRadarEnabled) {  resetWheelView() } ;// drawWheelTree(true, false); }
 
 
 }
@@ -231,7 +238,7 @@ export function selectFoundPerson(personId) {
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
     // displayGenealogicTree(personId, true);
     if (state.isRadarEnabled) {
-        displayGenealogicTree(personId, false, false,  false, 'fanAncestors');
+        displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
     } else {
         displayGenealogicTree(personId, true, false);
     }

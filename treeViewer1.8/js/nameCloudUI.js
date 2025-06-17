@@ -10,7 +10,7 @@ import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
 import { showHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
-import { enableFortuneModeML } from './treeFanRenderer.js';
+import { enableFortuneMode } from './treeWheelAnimation.js';
 
 
 
@@ -841,7 +841,7 @@ function setupModalEvents(modal, closeButton, generateNameCloud) {
         enableBackground(true);
         state.backgroundEnabled = true;
         if (state.isRadarEnabled) {
-            enableFortuneModeML();
+            enableFortuneMode();
         }
 
     });

@@ -8,7 +8,7 @@ import { hideHamburgerButtonForcefully } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
-import { disableFortuneModeWithLever } from './treeFanRenderer.js';
+import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
 
 
 export const nameCloudState = {

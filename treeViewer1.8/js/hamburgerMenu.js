@@ -1104,7 +1104,7 @@ function createSection(title, index = 0) {
     function enableRadarAndDisplay() {
         state.isRadarEnabled = true;
         updateRadarButtonText();
-        displayGenealogicTree(null, false, false, false, 'fanAncestors');
+        displayGenealogicTree(null, false, false, false, 'WheelAncestors');
     }
     window.enableRadarAndDisplay = enableRadarAndDisplay;
 

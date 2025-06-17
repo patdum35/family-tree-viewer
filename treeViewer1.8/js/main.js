@@ -16,8 +16,9 @@ import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
 
-import { cleanupFanControls } from './treeFanControls.js';
-import { setMaxGenerationsInit, enableFortuneModeML, disableFortuneModeWithLever } from './treeFanRenderer.js';
+import { cleanupWheelControls } from './treeWheelControls.js';
+import { setMaxGenerationsInit } from './treeWheelRenderer.js';
+import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -112,13 +113,32 @@ export const state = {
     isOnLine: false,
     isDebugLog: false,
     isRadarEnabled: false,
-    fanMode: {
+    WheelMode: {
         maxGenerations: 5,
         showSpouses: true,
         showSiblings: true,
         animationsEnabled: true
     },
-    currentRadarAngle: 0
+    currentRadarAngle: 0,
+    WheelZoom: null,
+    cachedRadarPNG: null,
+    isCacheValid: false,
+    userHasInteracted: false,
+    currentAnimationTimeouts: [],
+    WheelConfig: {
+        innerRadius: 80,
+        generationWidth: 80,
+        centerX: 0,
+        centerY: 0,
+        totalAngle: 2 * Math.PI, // 360° complet
+        startAngle: -Math.PI / 2, // Commencer en haut
+        maxGenerations: 4,
+        limitMaxGenerations: 26 
+    },
+    lastWheelTransform: null,
+    leverEnabled: true,
+    isSpinning: false,
+
 
 };
 
@@ -170,7 +190,7 @@ export function toggleTreeRadar() {
     updateRadarButtonText();  
 
     if (state.isRadarEnabled) {
-        displayGenealogicTree(null, false, false,  false, 'fanAncestors');
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
     } else {
         displayGenealogicTree(null, true, false);
     }
@@ -1005,7 +1025,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
     if (state.isRadarEnabled) {
         disableFortuneModeWithLever();
-        enableFortuneModeML();
+        enableFortuneMode();
         state.currentRadarAngle = 0;
     } else {
         disableFortuneModeWithLever();
@@ -1050,14 +1070,14 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // Nettoyer les contrôles existants
-    cleanupFanControls();
+    cleanupWheelControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
         state.currentTree =  buildDescendantTree(tempPerson.id);
     }
     else {
-        if (['fanAncestors', 'fanDescendants'].includes(mode)) {
+        if (['WheelAncestors', 'WheelDescendants'].includes(mode)) {
             console.log('🌟 Mode éventail détecté:', mode);
             // state.treeModeReal = mode;
             state.treeMode = 'directAncestors';
@@ -1067,7 +1087,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
             state.currentTree = buildAncestorTree(person.id);
             state.treeModeReal = mode;
             setMaxGenerationsInit(state.nombre_generation);
-            // initializeAllFanControls();
+            // initializeAllWheelControls();
         } else {
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
             // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
@@ -1080,7 +1100,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // drawTree(isZoomRefresh);
-    drawTree(isZoomRefresh, false); // with fanAncestors
+    drawTree(isZoomRefresh, false); // with WheelAncestors
 
     // Ne pas faire resetView() en mode both
     if (state.treeModeReal !== 'both') {
@@ -1139,7 +1159,7 @@ export function updateTreeMode(mode) {
     if (state.isRadarEnabled) {
         state.treeMode = 'directAncestors';
         mode = 'directAncestors';
-        displayGenealogicTree(null, false, false,  false, 'fanAncestors');
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
     } else {
         state.treeMode = mode;
         displayGenealogicTree(null, true, false);
@@ -1572,8 +1592,8 @@ function showErrorMessage(message) {
 /**
  * Configuration par défaut à adapter selon vos besoins
  */
-// export const fanConfig = {
-//     defaultMode: 'fanAncestors',
+// export const WheelConfig = {
+//     defaultMode: 'WheelAncestors',
 //     maxGenerations: 5,
 //     enableAnimations: true,
 //     exportFormat: 'png',
@@ -1581,8 +1601,8 @@ function showErrorMessage(message) {
 // };
 
 // Exemple d'utilisation :
-// displayPersonTree('PERSON_ID', 'fanAncestors');
-// switchTreeMode('fanDescendants');
+// displayPersonTree('PERSON_ID', 'WheelAncestors');
+// switchTreeMode('WheelDescendants');
 // exportToPDF();
 
 
