@@ -138,6 +138,9 @@ export const state = {
     lastWheelTransform: null,
     leverEnabled: true,
     isSpinning: false,
+    speechSynthesisInitialized: false,
+    isSpeechInGoodHealth: false,
+    frenchVoice: null,
 
 
 };

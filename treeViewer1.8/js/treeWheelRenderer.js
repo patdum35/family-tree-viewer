@@ -4,6 +4,7 @@
 import { state, displayGenealogicTree } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
+import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;
@@ -36,11 +37,28 @@ function cleanupWheelTreeState() {
 /**
  * Initialise et dessine l'arbre en éventail complet 360°
  */
-export function drawWheelTree(isZoomRefresh = false, isAnimation = false) {
+export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) {
 
     if (!state.currentTree) {
         console.error('❌ Pas d\'arbre à dessiner');
         return;
+    }
+
+    if (state.isSpeechEnabled2)
+    {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
+
+
+        selectVoice();
+
     }
 
     // DIAGNOSTIC SUPPLÉMENTAIRE

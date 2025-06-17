@@ -22,7 +22,7 @@ let optimalSpeechRate = 1.0; //1.1;
 let animationMap = null;
 let animationMarker = null;
 
-let frenchVoice = null;
+// let frenchVoice = null;
 let localVoice = null;
 
 // Au début du fichier, après les imports
@@ -47,7 +47,7 @@ let initialAnimationMapPosition = {
 
 
 
-let isSpeechInGoodHealth = false;
+// let state.isSpeechInGoodHealth = false;
 let animationController = null;
 
 export let animationState = {
@@ -297,31 +297,6 @@ function addHighlightStyle() {
         console.error("Erreur lors de l'ajout du style:", e);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export async function testRealConnectivity() {
     try {
@@ -1073,14 +1048,17 @@ function simplifyName(fullName) {
     return `${firstFirstName} ${lastName}`;
 }
 
+
+
+
 /*  NOUVEAU CODE BON pour nouveau Chrome */
 // Variable globale pour suivre si la synthèse vocale a été initialisée
-let speechSynthesisInitialized = false;
+// let state.speechSynthesisInitialized = false;
 let errorInSpeechInit = false;
 
 // Fonction d'initialisation de la synthèse vocale à exécuter au chargement
 function initSpeechSynthesis(voice) {
-    if ('speechSynthesis' in window && !speechSynthesisInitialized) {
+    if ('speechSynthesis' in window && !state.speechSynthesisInitialized) {
         console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
         // Créer et jouer une utterance silencieuse pour initialiser le moteur
         const initUtterance = new SpeechSynthesisUtterance("");
@@ -1089,14 +1067,14 @@ function initSpeechSynthesis(voice) {
         initUtterance.voice = voice; // 
         initUtterance.onend = () => {
             console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
-            speechSynthesisInitialized = true;
+            state.speechSynthesisInitialized = true;
             
             // Tentative de déblocage audio HTML
             new Audio().play().catch(() => {});
         };
         initUtterance.onerror = (err) => {
             console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
-            speechSynthesisInitialized = true; // Considérer comme initialisé quand même
+            state.speechSynthesisInitialized = true; // Considérer comme initialisé quand même
             errorInSpeechInit = true;
         };
         
@@ -1109,7 +1087,7 @@ function initSpeechSynthesis(voice) {
 }
 /* */
 
-async function testSpeechSynthesisHealth(timeout = 1000) {
+export async function testSpeechSynthesisHealth(timeout = 1000) {
     // console.log("🔍 Test de la santé de la synthèse vocale...");
     return new Promise((resolve) => {
       let ok = false;
@@ -1143,7 +1121,7 @@ async function testSpeechSynthesisHealth(timeout = 1000) {
 }
 
 
-function selectVoice() {
+export function selectVoice() {
     // Sélectionner une voix française si possible
     let voices = window.speechSynthesis.getVoices();
     console.log("Voix disponibles:",voices);
@@ -1256,33 +1234,33 @@ function selectVoice() {
     // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
     if (isOnline) {
         // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
-        frenchVoice = frenchVoices.find(voice => 
+        state.frenchVoice = frenchVoices.find(voice => 
             voice.name.includes('Google') || 
             voice.name.includes('Microsoft')
         );
         
-        if (frenchVoice) {
-            console.log("✅ Utilisation de la voix réseau haute qualité:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        if (state.frenchVoice) {
+            console.log("✅ Utilisation de la voix réseau haute qualité:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         } else if (frenchVoices.length != 0) {
             // Sélectionner la première voix française disponible
-            frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix  ?:", frenchVoice.name, ', localService=', frenchVoice.localService);
+            state.frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix  ?:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         }
 
     } else {
         if (frenchVoices.length != 0) {
             // Sélectionner la première voix française disponible
-            frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+            state.frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix locale:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         } else {
             console.log("⚠️ Aucune voix disponible hors ligne ");
         }
     }
 
 
-    if (frenchVoice) {
-        console.log("Voix  sélectionnée:", frenchVoice);
-        debugLog(`Version 1.6, Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
+    if (state.frenchVoice) {
+        console.log("Voix  sélectionnée:", state.frenchVoice);
+        debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
     }
 
     
@@ -1309,21 +1287,21 @@ function selectVoice() {
 }
 
 /* */
-function speakPersonName(personName) {
+export function speakPersonName(personName) {
     // console.log(`⏱️ DÉBUT: speakPersonName pour ${personName}, vitesse initiale: ${optimalSpeechRate}`);
     
     // Initialiser la synthèse vocale si ce n'est pas déjà fait
-    if (!speechSynthesisInitialized) {
+    if (!state.speechSynthesisInitialized) {
         console.log("🔄 Premier appel à la synthèse vocale - initialisation... avec french voice");
-        if (frenchVoice) {
-            initSpeechSynthesis(frenchVoice);
+        if (state.frenchVoice) {
+            initSpeechSynthesis(state.frenchVoice);
 
-            // if (!speechSynthesisInitialized) {
+            // if (!state.speechSynthesisInitialized) {
             //     console.log("🔄 2ième appel à la synthèse vocale - initialisation.. avec local voice");
             //     if (localVoice) {
             //         initSpeechSynthesis(localVoice);
             //         frenchVoice = localVoice;
-            //         speechSynthesisInitialized = true;
+            //         state.speechSynthesisInitialized = true;
             //     }   
             // }
             // Ajouter un petit délai pour laisser le temps à l'initialisation
@@ -1373,13 +1351,13 @@ function speakPersonName(personName) {
         // if (animationState.currentIndex === 0) {
         //     console.log("🔄 Premier nom - forçage taux initial à 1.2");
         //     optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
-        //     if (isSpeechInGoodHealth) timeOutDuration = 3500;
+        //     if (state.isSpeechInGoodHealth) timeOutDuration = 3500;
         //     else timeOutDuration = 2500;
         // }
         // if (animationState.currentIndex === 1) {
         //     console.log("🔄 Premier nom - forçage taux initial à 1.0");
         //     optimalSpeechRate = 1.2; //
-        //     if (isSpeechInGoodHealth) timeOutDuration = 2500; 
+        //     if (state.isSpeechInGoodHealth) timeOutDuration = 2500; 
         //     else timeOutDuration = 1600;
         // }
 
@@ -1391,12 +1369,12 @@ function speakPersonName(personName) {
         if (animationState.currentIndex === 0) {
             console.log("🔄 Premier nom - forçage taux initial à 1.2");
             optimalSpeechRate = 1.0;//1.2;
-            timeOutDuration = Math.max(isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
+            timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
         }
         if (animationState.currentIndex === 1) {
             console.log("🔄 Deuxième nom - ajustement taux");
             optimalSpeechRate = 1.0; //1.2;
-            timeOutDuration = Math.max(isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
+            timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
         }
 
 
@@ -1480,9 +1458,9 @@ function speakPersonName(personName) {
                 //     voice.name.toLowerCase().includes('french')
                 // );
 
-                if (frenchVoice) {
-                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
-                    utterance.voice = frenchVoice;
+                if (state.frenchVoice) {
+                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${state.frenchVoice.name}`);
+                    utterance.voice = state.frenchVoice;
                 }
 
                 // console.log(`🔊 Début synthèse pour ${simplifiedName} avec taux ${rate}`);
@@ -1496,7 +1474,7 @@ function speakPersonName(personName) {
             try {
                 // console.log(`⚙️ DÉBUT adaptiveSpeech avec taux: ${optimalSpeechRate}`);
                 // pour bug de chrome
-                if (!isSpeechInGoodHealth) {
+                if (!state.isSpeechInGoodHealth) {
                     const silentUtterance = new SpeechSynthesisUtterance(' ');
                     window.speechSynthesis.speak(silentUtterance);
                     window.speechSynthesis.cancel();
@@ -1580,8 +1558,8 @@ export async function startAncestorAnimation() {
 
     if (state.isSpeechEnabled2)
     {
-        isSpeechInGoodHealth = await testSpeechSynthesisHealth();
-        if (isSpeechInGoodHealth) {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
             // Chrome ou Edge est coopératif
             console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
         } else {

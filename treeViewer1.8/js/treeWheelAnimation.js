@@ -3,10 +3,13 @@
 // ====================================
 import { state } from './main.js';
 import { needsReset, resetWheelView, getGenerationColor } from './treeWheelRenderer.js';
-import { historicalFigures } from './historicalData.js';
-import { formatGedcomDate, cleanupPlace, findContextualHistoricalFigures } from './modalWindow.js';
+// import { historicalFigures } from './historicalData.js';
+import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow.js';
 import { translateOccupation } from './occupations.js';
-import { cleanProfession} from './nameCloudUtils.js';
+import { cleanProfession, cleanLocation} from './nameCloudUtils.js';
+import { speakPersonName} from './treeAnimation.js';
+
+
 
 
 let leverStartTime = 0;
@@ -322,7 +325,7 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
 
         const startTime = performance.now();
         const winner = detectWinner(finalAngleTotal);
-        console.log(`detectWinner en : ${(performance.now()-startTime).toFixed(1)}ms`);
+        console.log(`detectWinner en : ${(performance.now()-startTime).toFixed(1)}ms  `);
         
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
@@ -367,15 +370,21 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         state.isSpinning = false;
 
         highlightWinnerSegment(winner.segment, winner.generation);
+
+
+        resetLastWinnerHighlightAsync();
+
+
+        
         
         const timeoutId3 = setTimeout(() => {
             announceWinner(winner);
-        }, 5000);
+        }, 2500);
         state.currentAnimationTimeouts.push(timeoutId3);
 
         const timeoutId4 = setTimeout(() => {
             hideWinnerText();
-        }, 8000);
+        }, 800);
         state.currentAnimationTimeouts.push(timeoutId4);
 
     }, duration + 100);
@@ -543,7 +552,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 // 6. ANIMATION de grossissement
                 clonedSegment
                     .transition()
-                    .duration(3000)
+                    .duration(1500)
                     .ease(d3.easeQuadOut)
                     .attr("transform", correctedTransform)
                     .on("end", function() {
@@ -565,56 +574,56 @@ function highlightWinnerSegment(segmentIndex, generation) {
                         const personData = targetElement.datum();
                         console.log(`   Personne: ${personData.name}`);
                         
-                        // Créer un div pour le texte horizontal
-                        const textOverlay = document.createElement("div");
-                        textOverlay.style.cssText = `
-                            position: fixed;
-                            left: ${finalX - 120}px;
-                            top: ${finalY - 15}px;
-                            width: 240px;
-                            height: 30px;
-                            z-index: 10000;
-                            pointer-events: none;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            background: rgba(255, 255, 255, 0.95);
-                            border: 2px solid #0000ff;
-                            border-radius: 6px;
-                            font-family: Arial, sans-serif;
-                            font-size: 14px;
-                            font-weight: bold;
-                            color: #000;
-                            text-align: center;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                        `;
+                        // // Créer un div pour le texte horizontal
+                        // const textOverlay = document.createElement("div");
+                        // textOverlay.style.cssText = `
+                        //     position: fixed;
+                        //     left: ${finalX - 120}px;
+                        //     top: ${finalY - 15}px;
+                        //     width: 240px;
+                        //     height: 30px;
+                        //     z-index: 10000;
+                        //     pointer-events: none;
+                        //     display: flex;
+                        //     align-items: center;
+                        //     justify-content: center;
+                        //     background: rgba(255, 255, 255, 0.95);
+                        //     border: 2px solid #0000ff;
+                        //     border-radius: 6px;
+                        //     font-family: Arial, sans-serif;
+                        //     font-size: 14px;
+                        //     font-weight: bold;
+                        //     color: #000;
+                        //     text-align: center;
+                        //     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                        // `;
                         
-                        // Extraire et formater le nom
-                        let displayName = personData.name || "Nom inconnu";
-                        if (displayName.includes('/')) {
-                            const match = displayName.match(/(.*?)\/(.*?)\//);
-                            if (match) {
-                                const prenom = match[1].trim();
-                                const nom = match[2].trim();
-                                displayName = `${prenom} ${nom.toUpperCase()}`;
-                            }
-                        }
+                        // // Extraire et formater le nom
+                        // let displayName = personData.name || "Nom inconnu";
+                        // if (displayName.includes('/')) {
+                        //     const match = displayName.match(/(.*?)\/(.*?)\//);
+                        //     if (match) {
+                        //         const prenom = match[1].trim();
+                        //         const nom = match[2].trim();
+                        //         displayName = `${prenom} ${nom.toUpperCase()}`;
+                        //     }
+                        // }
                         
-                        textOverlay.textContent = displayName;
-                        document.body.appendChild(textOverlay);
+                        // textOverlay.textContent = displayName;
+                        // document.body.appendChild(textOverlay);
                         
-                        console.log(`   Texte créé: "${displayName}"`);
-                        console.log(`   Position texte: (${finalX - 120}, ${finalY - 15})`);
+                        // console.log(`   Texte créé: "${displayName}"`);
+                        // console.log(`   Position texte: (${finalX - 120}, ${finalY - 15})`);
                         
-                        // Animation d'apparition du texte
-                        textOverlay.style.opacity = "0";
-                        textOverlay.style.transform = "scale(0.8)";
+                        // // Animation d'apparition du texte
+                        // textOverlay.style.opacity = "0";
+                        // textOverlay.style.transform = "scale(0.8)";
                         
-                        setTimeout(() => {
-                            textOverlay.style.transition = "all 0.5s ease";
-                            textOverlay.style.opacity = "1";
-                            textOverlay.style.transform = "scale(1)";
-                        }, 200);
+                        // setTimeout(() => {
+                        //     textOverlay.style.transition = "all 0.5s ease";
+                        //     textOverlay.style.opacity = "1";
+                        //     textOverlay.style.transform = "scale(1)";
+                        // }, 200);
                         
                         if (Math.abs(finalX - startX) < 10 && Math.abs(finalY - startY) < 10) {
                             console.log(`✅ GROSSISSEMENT + TEXTE RÉUSSIS !`);
@@ -623,7 +632,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                         // Stocker pour nettoyage
                         // lastWinner.textOverlay = textOverlay;
                         if (lastWinner) {
-                            lastWinner.textOverlay = textOverlay;
+                            lastWinner.textOverlay = '';//textOverlay;
                         }
                     });
                 
@@ -634,7 +643,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                     clonedSegment: clonedSvg.node()
                 };
                 
-            }, 1500);
+            }, 750);
             state.currentAnimationTimeouts.push(timeoutId);
         }
     }
@@ -712,11 +721,13 @@ function detectWinner(finalAngle) {
         
         if (!targetElement.empty()) {
             const person = targetElement.datum();
+            const personData = state.gedcomData.individuals[person.id];
             if (person && person.name) {
                 console.log(`✅ Candidat Gen ${gen}, segment ${targetSegment}: ${person.name} : ${person.id}`);
                 candidateSegments.push({
                     name: person.name,
                     id: person.id,
+                    sex: personData.sex,
                     segment: targetSegment,
                     generation: gen,
                     angle: normalizedAngle,
@@ -738,9 +749,12 @@ function detectWinner(finalAngle) {
         // Fallback : personne centrale
         console.log(`🎯 Aucun segment trouvé, fallback sur le centre`);
         const centerPerson = d3.select(".center-person-group").datum();
+        const personData = state.gedcomData.individuals[centerPerson.id];
         
         return {
             name: centerPerson.name || 'Personne centrale',
+            id: centerPerson.id,
+            sex: personData.sex,
             segment: 0,
             generation: 0,
             angle: normalizedAngle
@@ -1264,16 +1278,16 @@ function getFortuneText(textType) {
             "hu": "Ki vagyok?"
         },
         quizSubtitle: {
-            "fr": "Devinez de qui il s'agit grâce aux indices !",
-            "en": "Guess who it is with the clues!",
-            "es": "¡Adivina de quién se trata con las pistas!",
-            "hu": "Találd ki, ki az a nyomok alapján!"
+            "fr": "un indice ?",
+            "en": "A clue?",
+            "es": "¿Una pista?",
+            "hu": "Egy nyom?"
         },
         clickNextClue: {
-            "fr": "Cliquez sur 'Indice suivant' pour commencer !",
-            "en": "Click 'Next clue' to start!",
-            "es": "¡Haz clic en 'Siguiente pista' para empezar!",
-            "hu": "Kattints a 'Következő nyom'-ra a kezdéshez!"
+            "fr": "Cliquez sur 'Indice suivant'",
+            "en": "Click 'Next clue'",
+            "es": "Haz clic en 'Siguiente pista'",
+            "hu": "Kattints a 'Következő nyom'-ra"
         },
         enterName: {
             "fr": "Tapez le nom de la personne",
@@ -1294,16 +1308,16 @@ function getFortuneText(textType) {
             "hu": "Következő nyom"
         },
         showSolution: {
-            "fr": "Voir la solution",
-            "en": "Show solution",
-            "es": "Ver solución",
-            "hu": "Megoldás mutatása"
+            "fr": "Solution",
+            "en": "Solution", 
+            "es": "Solución",
+            "hu": "Megoldás"
         },
         closeQuiz: {
-            "fr": "Fermer le quiz",
-            "en": "Close quiz",
-            "es": "Cerrar quiz",
-            "hu": "Kvíz bezárása"
+            "fr": "Fermer",
+            "en": "Close",
+            "es": "Cerrar",
+            "hu": "bezárása"
         },
         clue: {
             "fr": "Indice",
@@ -1414,10 +1428,28 @@ function getFortuneText(textType) {
             "hu": "A keresztnevem"
         },
         clueContexte: {
-            "fr": "je suis né à l'époque de",
+            "fr": "je suis né(e) à l'époque de",
             "en": "I was born in the time of",
             "es": "nací en la época de",
             "hu": "abban az időben születtem, amikor"
+        },
+        clueSexMale: {
+            "fr": "Je suis un homme",
+            "en": "I am a man", 
+            "es": "Soy un hombre",
+            "hu": "Férfi vagyok"
+        },
+        clueSexFemale: {
+            "fr": "Je suis une femme",
+            "en": "I am a woman",
+            "es": "Soy una mujer", 
+            "hu": "Nő vagyok"
+        },
+        Iam:{
+            "fr": " ;  je suis, je suis ?",
+            "en": " ;  I am, I am ?",
+            "es": " ;  soy, soy ?",
+            "hu": " ; vagyok, vagyok ?"
         },
         wrongAnswer: {
             "fr": "❌ Réponse incorrecte, essayez encore !",
@@ -1746,9 +1778,22 @@ function showWinnerMessage(winner) {
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         z-index: 9999;
         transition: transform 0.5s ease;
-        min-width: 400px;
-        max-width: 90vw;
+        min-width: 300px;
+        max-width: 95vw;
+        width: auto;
+        @media (max-width: 600px) {
+            font-size: 16px !important;
+            padding: 20px !important;
+            min-width: 280px !important;
+        }
+        @media (max-width: 400px) {
+            font-size: 14px !important;
+            padding: 15px !important;
+            min-width: 250px !important;
+        }
     `;
+        // min-width: 400px;
+        // max-width: 90vw;
     
     message.innerHTML = `
         <div style="font-size: 50px;">🎉</div>
@@ -1864,6 +1909,34 @@ function showWinnerMessage(winner) {
 
 
 
+function cleanClueForSpeech(clueText, personSex = null) {
+    let cleaned = clueText;
+    
+    // Supprimer (e) si c'est un homme, garder si c'est une femme
+    if (personSex === 'M') {
+        cleaned = cleaned.replace(/\(e\)/g, '');
+    } else if (personSex === 'F') {
+        cleaned = cleaned.replace(/\(e\)/g, 'e');
+    }
+
+    // Gestion des pluriels
+    const hasOne = cleaned.includes(' 1 ');
+    
+    if (hasOne) {
+        // Singulier : supprimer les marqueurs de pluriel
+        cleaned = cleaned.replace(/\(s\)/g, '');
+        cleaned = cleaned.replace(/\(ren\)/g, '');
+    } else {
+        // Pluriel : remplacer par les vraies terminaisons
+        cleaned = cleaned.replace(/\(s\)/g, 's');
+        cleaned = cleaned.replace(/\(ren\)/g, 'ren');
+    }
+    
+    return cleaned
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 // Fonction pour afficher le quiz progressif
 function showQuizMessage(winner) {
     const quizMessage = document.createElement("div");
@@ -1874,7 +1947,7 @@ function showQuizMessage(winner) {
         transform: translate(-50%, -50%) scale(0);
         background: linear-gradient(135deg, #4ecdc4, #44a08d);
         color: white;
-        padding: 30px;
+        padding: 15px;
         border-radius: 20px;
         font-size: 18px;
         font-weight: bold;
@@ -1882,97 +1955,138 @@ function showQuizMessage(winner) {
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         z-index: 10000;
         transition: transform 0.5s ease;
-        min-width: 500px;
-        max-width: 90vw;
-        max-height: 80vh;
+        min-width: 280px;
+        max-width: 95vw;
+        max-height: 85vh;
         overflow-y: auto;
+        @media (max-width: 600px) {
+            font-size: 16px !important;
+            padding: 20px !important;
+            min-width: 280px !important;
+        }
+        @media (max-width: 400px) {
+            font-size: 14px !important;
+            padding: 15px !important;
+            min-width: 250px !important;
+        }
     `;
+        // min-width: 500px;
+        // max-width: 90vw;
+        // max-height: 80vh;
     
     // Préparer les indices dans l'ordre spécifié
     const clues = prepareProgressiveClues(winner);
     console.log("Indices préparés pour", winner.name, ":", clues);
     
     quizMessage.innerHTML = `
-        <div style="font-size: 40px;">🧠</div>
-        <div style="margin-bottom: 20px;">${getFortuneText('quizTitle')}</div>
-        <div style="font-size: 16px; margin-bottom: 20px; opacity: 0.9;">
-            ${getFortuneText('quizSubtitle')}
-        </div>
-        
-        <!-- Zone des indices -->
-        <div id="clues-container" style="
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
-            min-height: 150px;
-            max-height: 300px;
-            overflow-y: auto;
-        ">
-            <div style="text-align: center; color: rgba(255,255,255,0.7);">
-                ${getFortuneText('clickNextClue')}
-            </div>
-        </div>
-        
-        <!-- Zone de saisie de réponse -->
-        <div style="margin: 20px 0;">
-            <input type="text" id="answer-input" placeholder="${getFortuneText('enterName')}" style="
-                width: 70%;
-                padding: 10px;
-                border: none;
-                border-radius: 5px;
-                font-size: 16px;
-                text-align: center;
-                margin-bottom: 10px;
-            ">
-            <button id="check-answer-btn" style="
-                background: rgba(255, 255, 255, 0.3);
-                border: 2px solid white;
-                color: white;
-                padding: 10px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-                cursor: pointer;
-                margin-left: 10px;
-            ">${getFortuneText('checkAnswer')}</button>
-        </div>
-        
-        <!-- Boutons de contrôle -->
-        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+        <div style="font-size: 32px; margin: 5px 0;">🧠</div>
+        <div style="margin-bottom: 15px; font-size: 18px;">${getFortuneText('quizTitle')} ${getFortuneText('quizSubtitle')}</div>
+
+        <!-- Boutons de contrôle en haut -->
+        <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 15px;">
             <button id="next-clue-btn" style="
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
-                border-radius: 10px;
-                font-size: 16px;
+                padding: 8px 6px;
+                border-radius: 8px;
+                font-size: 13px;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                white-space: nowrap;
+                flex: 1;
+                max-width: 110px;
             ">${getFortuneText('nextClue')}</button>
             
             <button id="show-solution-btn" style="
                 background: rgba(255, 165, 0, 0.3);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
-                border-radius: 10px;
-                font-size: 16px;
+                padding: 8px 6px;
+                border-radius: 8px;
+                font-size: 13px;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                white-space: nowrap;
+                flex: 1;
+                max-width: 80px;
             ">${getFortuneText('showSolution')}</button>
             
+
             <button id="close-quiz-btn" style="
                 background: rgba(255, 0, 0, 0.3);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
-                border-radius: 10px;
+                padding: 0;
+                border-radius: 8px;
                 font-size: 16px;
                 cursor: pointer;
                 transition: all 0.3s ease;
-            ">${getFortuneText('closeQuiz')}</button>
+                width: 40px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">❌</button>
         </div>
+
+        <!-- Zone des indices -->
+        <div id="clues-container" style="
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 0 15px 0;
+            text-align: left;
+            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+        ">
+            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 14px;">
+                ${getFortuneText('clickNextClue')}
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        <!-- Zone de saisie de réponse -->
+        <div style="margin: 15px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;">
+            <input type="text" id="answer-input" placeholder="${getFortuneText('enterName')}" style="
+                flex: 1;
+                min-width: 140px;
+                max-width: 200px;
+                padding: 8px;
+                border: none;
+                border-radius: 5px;
+                font-size: 14px;
+                text-align: center;
+            ">
+            <button id="check-answer-btn" style="
+                background: rgba(255, 255, 255, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 8px 6px;
+                border-radius: 6px;
+                font-size: 13px;
+                cursor: pointer;
+                white-space: nowrap;
+            ">${getFortuneText('checkAnswer')}</button>
+        </div>
+        
         
         <!-- Zone de résultat -->
         <div id="result-container" style="margin-top: 20px; display: none;"></div>
@@ -2016,6 +2130,9 @@ function showQuizMessage(winner) {
                 animation: slideIn 0.5s ease;
             `;
             clueDiv.innerHTML = `<strong>${getFortuneText('clue')} ${currentClueIndex + 1}:</strong> ${clue}`;
+
+            const displayClue = cleanClueForSpeech(clue, winner.sex);
+            clueDiv.innerHTML = `<strong>${getFortuneText('clue')} ${currentClueIndex + 1}:</strong> ${displayClue}`;
             
             // Remplacer le contenu de placeholder s'il existe
             if (cluesContainer.children.length === 1 && 
@@ -2025,11 +2142,22 @@ function showQuizMessage(winner) {
             
             cluesContainer.appendChild(clueDiv);
             cluesContainer.scrollTop = cluesContainer.scrollHeight;
+
+            // lecture vocale de l'indice
+            const cleanedClue = cleanClueForSpeech(clue, winner.sex) + getFortuneText('Iam');
+            console.log('🧹 Indice nettoyé:', cleanedClue);
+            speakClue(cleanedClue);
+
+
             
             // Jouer un son si disponible
-            if (typeof sounds !== 'undefined') {
-                sounds.play('tick');
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.stopTicking();
+                fortuneSounds.play('tick');
+                fortuneSounds.startTicking(1000);
             }
+
+
             
             // Désactiver le bouton si plus d'indices
             if (currentClueIndex >= clues.length - 1) {
@@ -2099,6 +2227,7 @@ function showQuizMessage(winner) {
     function showSolution() {
         // gameFinished = true;
         showResult('solution', winner.name.replace(/\//g, ''));
+        fortuneSounds.stopTicking();
     }
     
     // Fonction pour afficher le résultat
@@ -2192,13 +2321,13 @@ function showQuizMessage(winner) {
             }
             hideWinnerText();
             resetLastWinnerHighlightAsync();
+            fortuneSounds.stopTicking();
         }, 300);
     };
     
     // Focus sur le champ de saisie
     setTimeout(() => answerInput.focus(), 500);
 }
-
 
 
 function formatDateForClue(dateString) {
@@ -2219,6 +2348,413 @@ function formatDateForClue(dateString) {
     }
 }
 
+
+// async function speakClue(clueText) {
+//     if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
+//         await new Promise(resolve => setTimeout(resolve, 1500));
+//         return;
+//     }
+    
+//     return new Promise((resolve) => {
+//         // ALWAYS cancel before speak (Chrome fix)
+//         window.speechSynthesis.cancel();
+        
+//         setTimeout(() => {
+//             const utterance = new SpeechSynthesisUtterance(clueText);
+//             utterance.rate = 1.0; // Bien en dessous de 2.0
+//             utterance.lang = 'fr-FR';
+//             utterance.volume = 1.0;
+            
+//             if (state.frenchVoice) {
+//                 utterance.voice = state.frenchVoice;
+//             }
+            
+//             utterance.onend = resolve;
+//             utterance.onerror = resolve;
+            
+//             // Fallback timeout
+//             setTimeout(resolve, Math.max(3500, clueText.length * 85));
+            
+//             window.speechSynthesis.speak(utterance);
+//         }, 100);
+//     });
+// }
+
+
+/* */
+
+
+
+async function forceUnblockBeforeSpeak() {
+    console.log('🔥 DÉBLOCAGE SYSTÉMATIQUE avant speak');
+    
+    // 1. Reset total
+    window.speechSynthesis.cancel();
+    
+    // 2. Force reload des voix (Chrome bug fix)
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) {
+        // Attendre que les voix se chargent
+        await new Promise(resolve => {
+            window.speechSynthesis.onvoiceschanged = () => resolve();
+            setTimeout(resolve, 100); // Timeout de sécurité
+        });
+    }
+    
+    // 3. Test de déblocage avec phrase vide
+    return new Promise((resolve) => {
+        const testUtterance = new SpeechSynthesisUtterance(' ');
+        testUtterance.volume = 0.001;
+        testUtterance.rate = 1.9;
+        
+        let completed = false;
+        
+        testUtterance.onend = () => {
+            if (!completed) {
+                completed = true;
+                console.log('✅ Déblocage test réussi');
+                resolve(true);
+            }
+        };
+        
+        testUtterance.onerror = () => {
+            if (!completed) {
+                completed = true;
+                console.log('⚠️ Déblocage test échoué mais on continue');
+                resolve(false);
+            }
+        };
+        
+        setTimeout(() => {
+            if (!completed) {
+                completed = true;
+                window.speechSynthesis.cancel();
+                console.log('🔄 Déblocage test timeout');
+                resolve(false);
+            }
+        }, 100);
+        
+        window.speechSynthesis.speak(testUtterance);
+    });
+}
+
+
+/* */
+
+
+// async function speakClue(clueText) {
+//     if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
+//         console.log('🔇 Son désactivé, délai simulé');
+//         await new Promise(resolve => setTimeout(resolve, 1500));
+//         return;
+//     }
+    
+//     // Déblocage systématique
+//     // await forceUnblockBeforeSpeak();
+
+//     console.log('🔊 Lecture du texte:', clueText);
+    
+//     return new Promise((resolve) => {
+//         let attempts = 0;
+//         const maxAttempts = 3;
+//         let resolved = false;
+        
+//         function trySpeak() {
+//             if (resolved) return;
+            
+//             attempts++;
+//             console.log(`🎤 Tentative ${attempts}/${maxAttempts}`);
+            
+//             // CANCEL MULTIPLE
+//             window.speechSynthesis.cancel();
+//             setTimeout(() => window.speechSynthesis.cancel(), 30);
+//             setTimeout(() => window.speechSynthesis.cancel(), 50);
+            
+//             setTimeout(() => {
+//                 // if (resolved) return; // PROTECTION contre double exécution
+//                 if (resolved) {
+//                     console.log(`⚠️ SKIP: Tentative ${attempts} ignorée car resolved`);
+//                     return;
+//                 }
+
+//                 // Déterminer le type d'essai
+//                 const isWarmup = attempts <= 2;
+//                 const textToSpeak = isWarmup ? ' ' : clueText;
+//                 const volume = isWarmup ? 0.01 : 1.0;
+//                 const rate = isWarmup ? 1.9 : 1.0;
+                
+//                 // const utterance = new SpeechSynthesisUtterance(textToSpeak);
+//                 // Clone fresh utterance
+//                 const utterance = new SpeechSynthesisUtterance();
+//                 utterance.text = textToSpeak;
+//                 utterance.rate = rate;
+//                 utterance.lang = 'fr-FR';
+//                 utterance.volume = volume;
+                
+//                 if (state.frenchVoice) {
+//                     utterance.voice = state.frenchVoice;
+//                 }
+                
+//                 console.log(`${isWarmup ? '🔥 Échauffement' : '🎤 Lecture réelle'} ${attempts}`);
+                
+//                 utterance.onend = () => {
+//                     console.log(`✅ Tentative ${attempts} terminée`);
+                    
+//                     if (isWarmup && attempts < maxAttempts && !resolved) {
+//                         // Passer à l'essai suivant
+//                         resolved = true; // BLOQUER d'autres appels
+//                         setTimeout(() => {
+//                             resolved = false; // DÉBLOQUER pour le prochain
+//                             if (!resolved) trySpeak();
+//                         }, 50);
+//                     } else if (!isWarmup) {
+//                         // Lecture réelle terminée
+//                         if (!resolved) {
+//                             resolved = true;
+//                             resolve();
+//                         }
+//                     } else {
+//                         // Tous les essais épuisés
+//                         if (!resolved) {
+//                             resolved = true;
+//                             resolve();
+//                         }
+//                     }
+//                 };
+                
+//                 utterance.onerror = (e) => {
+//                     console.log(`❌ Erreur tentative ${attempts}:`, e.error);
+                    
+//                     // if (attempts < maxAttempts) {
+//                     if (attempts < maxAttempts && !resolved) {
+//                         // setTimeout(() => trySpeak(), 150);
+//                         resolved = true; // BLOQUER d'autres appels
+//                         setTimeout(() => {
+//                             resolved = false; // DÉBLOQUER pour le prochain
+//                             if (!resolved) trySpeak();
+//                         }, 50);
+//                     } else if (!resolved) {
+//                         resolved = true;
+//                         resolve();
+//                     }
+//                 };
+                
+//                 // Timeout adaptatif
+//                 const timeoutDuration = isWarmup ? 80 : Math.max(4000, clueText.length * 130);
+                
+//                 if (!isWarmup) {
+//                     console.log(`⏰ Timeout configuré: ${timeoutDuration}ms pour ${clueText.length} caractères`);
+//                 }
+                
+//                 setTimeout(() => {
+//                     if (!resolved) {
+//                         console.log(`⏰ Timeout tentative ${attempts}`);
+//                         window.speechSynthesis.cancel();
+                        
+//                         if (attempts < maxAttempts && !resolved) {
+//                             setTimeout(() => {
+//                                 if (!resolved) trySpeak();
+//                             },200);
+//                         } else if (!resolved) {
+//                             resolved = true;
+//                             resolve();
+//                         }
+//                                             }
+//                 }, timeoutDuration);
+                
+//                 // Lancement
+//                 window.speechSynthesis.speak(utterance);
+                
+//             }, 200);
+//         }
+        
+//         // Démarrage
+//         trySpeak();
+//     });
+// }
+
+
+/* */
+
+
+
+async function speakClue(clueText) {
+    if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
+        console.log('🔇 Son désactivé, délai simulé');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return;
+    }
+    
+    console.log('🔊 Lecture du texte:', clueText);
+    
+    return new Promise((resolve) => {
+        // Simple cancel avant de commencer
+        window.speechSynthesis.cancel();
+        
+        setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(clueText);
+            utterance.rate = 1.0;
+            utterance.lang = 'fr-FR';
+            utterance.volume = 1.0;
+            
+            if (state.frenchVoice) {
+                utterance.voice = state.frenchVoice;
+            }
+            
+            let finished = false;
+            
+            utterance.onend = () => {
+                if (!finished) {
+                    finished = true;
+                    console.log('✅ Lecture terminée');
+                    resolve();
+                }
+            };
+            
+            utterance.onerror = (e) => {
+                if (!finished) {
+                    finished = true;
+                    console.log('❌ Erreur:', e.error);
+                    resolve();
+                }
+            };
+            
+            // Timeout simple
+            setTimeout(() => {
+                if (!finished) {
+                    finished = true;
+                    console.log('⏰ Timeout');
+                    window.speechSynthesis.cancel();
+                    resolve();
+                }
+            }, Math.max(4000, clueText.length * 120));
+            
+            console.log('🎤 Lancement lecture');
+            window.speechSynthesis.speak(utterance);
+            
+        }, 100);
+    });
+}
+
+
+
+// // Test massif avec boucles pour détecter les patterns de blocage
+// async function testSpeechMassively(rounds = 5, testsPerRound = 20) {
+//     window.stopSpeechTest = false; // Flag d'arrêt
+//     console.log(`🚀 DÉBUT TEST MASSIF: ${rounds} rounds de ${testsPerRound} tests`);
+//     console.log(`🛑 Pour arrêter: tapez stopSpeechTest() dans la console`);
+
+//     const testPhrases = [
+//         "Je suis né en 1965",
+//         "J'ai habité à Paris", 
+//         "Mon métier était ingénieur",
+//         "Je me suis marié avec Marie",
+//         "J'ai eu 3 enfants",
+//         "Mon père s'appelait Pierre",
+//         "Ma mère s'appelait Jeanne",
+//         "Je suis décédé en 2020",
+//         "I was born in London",
+//         "My name is John"
+//     ];
+    
+//     let globalSuccess = 0;
+//     let globalBlocked = 0;
+//     let globalTotal = 0;
+    
+//     for (let round = 1; round <= rounds; round++) {
+//         if (window.stopSpeechTest) {
+//             console.log(`🛑 TEST ARRÊTÉ par l'utilisateur au round ${round}`);
+//             break;
+//         }
+//         console.log(`\n🔄 ===== ROUND ${round}/${rounds} =====`);
+        
+//         let roundSuccess = 0;
+//         let roundBlocked = 0;
+        
+//         for (let test = 1; test <= testsPerRound; test++) {
+//             if (window.stopSpeechTest) {
+//                 console.log(`🛑 TEST ARRÊTÉ par l'utilisateur à R${round}-T${test}`);
+//                 break;
+//             }
+//             const phrase = testPhrases[(test - 1) % testPhrases.length];
+//             globalTotal++;
+            
+//             console.log(`📝 R${round}-T${test}: "${phrase}"`);
+            
+//             const startTime = Date.now();
+//             const maxTime = Math.max(3000, phrase.length * 100);
+            
+//             try {
+//                 await Promise.race([
+//                     speakClue(phrase),
+//                     new Promise((_, reject) => setTimeout(() => reject('TIMEOUT'), maxTime))
+//                 ]);
+                
+//                 const duration = Date.now() - startTime;
+//                 if (duration < maxTime * 0.9) {
+//                     roundSuccess++;
+//                     globalSuccess++;
+//                     console.log(`✅ OK (${duration}ms)`);
+//                 } else {
+//                     roundBlocked++;
+//                     globalBlocked++;
+//                     console.log(`⚠️ LENT (${duration}ms) = probablement bloqué`);
+//                 }
+//             } catch (e) {
+//                 roundBlocked++;
+//                 globalBlocked++;
+//                 console.log(`❌ TIMEOUT/ERROR`);
+//             }
+            
+//             // Micro-pause entre tests
+//             await new Promise(resolve => setTimeout(resolve, 200));
+//         }
+        
+//         const roundPercent = (roundSuccess / testsPerRound * 100).toFixed(1);
+//         console.log(`📊 ROUND ${round}: ${roundSuccess}/${testsPerRound} succès (${roundPercent}%)`);
+        
+//         // Pause plus longue entre rounds
+//         if (round < rounds) {
+//             console.log(`⏸️ Pause 2s avant round ${round + 1}...`);
+//             await new Promise(resolve => setTimeout(resolve, 2000));
+//         }
+//     }
+    
+//     const finalPercent = (globalSuccess / globalTotal * 100).toFixed(1);
+    
+//     console.log(`\n🏁 ===== RÉSULTATS GLOBAUX =====`);
+//     console.log(`📈 Succès: ${globalSuccess}/${globalTotal} (${finalPercent}%)`);
+//     console.log(`📉 Bloqués: ${globalBlocked}/${globalTotal} (${(100 - finalPercent).toFixed(1)}%)`);
+    
+//     if (finalPercent >= 90) {
+//         console.log('🎉 EXCELLENTE FIABILITÉ !');
+//     } else if (finalPercent >= 70) {
+//         console.log('👍 FIABILITÉ CORRECTE');
+//     } else if (finalPercent >= 50) {
+//         console.log('⚠️ FIABILITÉ MOYENNE');
+//     } else {
+//         console.log('💀 FIABILITÉ CATASTROPHIQUE !');
+//     }
+    
+//     return { success: globalSuccess, blocked: globalBlocked, total: globalTotal, percent: finalPercent };
+// }
+
+// // Usage: testSpeechMassively() ou testSpeechMassively(10, 30) pour 300 tests
+// window.testSpeechMassively = testSpeechMassively;
+
+
+
+// // Fonction pour arrêter le test
+// function stopSpeechTest() {
+//     window.stopSpeechTest = true;
+//     window.speechSynthesis.cancel(); // Arrêter aussi la synthèse en cours
+//     console.log('🛑 ARRÊT DU TEST DEMANDÉ...');
+// }
+// window.stopSpeechTest = stopSpeechTest;
+
+
+
+
 // Fonction pour préparer les indices progressifs
 function prepareProgressiveClues(person) {
     const clues = [];
@@ -2233,26 +2769,34 @@ function prepareProgressiveClues(person) {
         return clues;
     }
     console.log("✅ PersonData trouvée:", personData);
+
+    // 1. Premier indice : sexe
+    if (personData.sex) {
+        const sexClue = personData.sex === 'M' 
+            ? getFortuneText('clueSexMale') 
+            : getFortuneText('clueSexFemale');
+        clues.push(sexClue);
+    }
     
-    // 1. Date et lieu de naissance
+    // 2. Date et lieu de naissance
     if (personData.birthDate) {
         let clue = `${getFortuneText('clueNaissance')} ${formatDateForClue(personData.birthDate)}`;
         if (personData.birthPlace) {
-            clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(personData.birthPlace)}`;
+            clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.birthPlace)}`;
         }
         clues.push(clue);
     }
     
-    // 2. Date et lieu de décès
+    // 3. Date et lieu de décès
     if (personData.deathDate) {
         let clue = `${getFortuneText('clueDeces')} ${formatDateForClue(personData.deathDate)}`;
         if (personData.deathPlace) {
-            clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(personData.deathPlace)}`;
+            clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.deathPlace)}`;
         }
         clues.push(clue);
     }
     
-    // 3. Métier
+    // 4. Métier
     if (personData.occupation) {
         const cleanedProfessions = cleanProfession(personData.occupation);
         cleanedProfessions.forEach(prof => {
@@ -2263,7 +2807,7 @@ function prepareProgressiveClues(person) {
         });
     }
     
-    // 4. Lieu de résidence
+    // 5. Lieu de résidence
     const residences = [
         { place: personData.residPlace1, date: personData.residDate1 },
         { place: personData.residPlace2, date: personData.residDate2 },
@@ -2272,11 +2816,11 @@ function prepareProgressiveClues(person) {
     
     if (residences.length > 0) {
         residences.forEach(residence => {
-            clues.push(`${getFortuneText('clueResidence')} ${cleanupPlace(residence.place)}`);
+            clues.push(`${getFortuneText('clueResidence')} ${cleanLocation(residence.place)}`);
         });
     }
     
-    // 5. Enfants
+    // 6. Enfants
     if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
         const family = state.gedcomData.families[personData.spouseFamilies[0]];
         if (family && family.children && family.children.length > 0) {
@@ -2297,32 +2841,8 @@ function prepareProgressiveClues(person) {
         }
     }
     
-    // // 6. Père
-    // if (personData.families && personData.families.length > 0) {
-    //     const family = state.gedcomData.families[personData.families[0]];
-    //     if (family && family.husband) {
-    //         const father = state.gedcomData.individuals[family.husband];
-    //         if (father) {
-    //             const fatherFirstName = father.name.replace(/\//g, '').split(' ')[0];
-    //             clues.push(`${getFortuneText('cluePere')} ${fatherFirstName}`);
-    //         }
-    //     }
-    // }
-    
-    // // 7. Mère
-    // if (personData.families && personData.families.length > 0) {
-    //     const family = state.gedcomData.families[personData.families[0]];
-    //     if (family && family.wife) {
-    //         const mother = state.gedcomData.individuals[family.wife];
-    //         if (mother) {
-    //             const motherFirstName = mother.name.replace(/\//g, '').split(' ')[0];
-    //             clues.push(`${getFortuneText('clueMere')} ${motherFirstName}`);
-    //         }
-    //     }
-    // }
 
-
-    // 6. Père - chercher dans les familles où la personne est enfant
+    // 7. Père - chercher dans les familles où la personne est enfant
     const parentFamilies = personData.families ? personData.families.filter(famId => {
         const family = state.gedcomData.families[famId];
         return family && family.children && family.children.includes(person.id);
@@ -2339,7 +2859,7 @@ function prepareProgressiveClues(person) {
         }
     }
 
-    // 7. Mère - même logique
+    // 8. Mère - même logique
     if (parentFamilies.length > 0) {
         const family = state.gedcomData.families[parentFamilies[0]];
         if (family && family.wife) {
@@ -2353,7 +2873,7 @@ function prepareProgressiveClues(person) {
 
 
 
-    // 8. Mariage (conjoint, date, lieu)
+    // 9. Mariage (conjoint, date, lieu)
     if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
         const family = state.gedcomData.families[personData.spouseFamilies[0]];
         if (family) {
@@ -2367,7 +2887,7 @@ function prepareProgressiveClues(person) {
                         clue += `${formatDateForClue(family.marriageDate)}`;
                     }
                     if (family.marriagePlace) {
-                        clue += ` ${getFortuneText('clueLieu')} ${cleanupPlace(family.marriagePlace)}`;
+                        clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(family.marriagePlace)}`;
                     }
                     clues.push(clue);
                 }
@@ -2375,14 +2895,14 @@ function prepareProgressiveClues(person) {
         }
     }
     
-    // 9. Prénom (avant-dernier indice)
+    // 10. Prénom (avant-dernier indice)
     const fullName = personData.name.replace(/\//g, '');
     const firstName = fullName.split(' ')[0];
     if (firstName && firstName !== fullName) {
         clues.push(`${getFortuneText('cluePrenom')} ${firstName}`);
     }
     
-    // 10. Contexte historique
+    // 11. Contexte historique
     const historicalContext = findContextualHistoricalFigures(person.id);
     if (historicalContext) {
         const contexts = [historicalContext.birthContext, historicalContext.marriageContext, historicalContext.deathContext]
