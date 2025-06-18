@@ -784,6 +784,7 @@ class FortuneWheelSounds {
         this.createWinnerSound();
         this.createClickSound();
         this.createTickSound();
+        this.createTickingLoopSound();
         this.createTimerExpiredSound();
         
         console.log("✅ Système de sons initialisé !");
@@ -1042,7 +1043,69 @@ class FortuneWheelSounds {
         };
     }
 
-    // Son de timer écoulé (alarme)
+    // Créer un son de tic-tac continu (2 tics par cycle)
+    createTickingLoopSound() {
+        this.sounds['ticking-loop'] = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Créer un buffer de 2 secondes avec 2 tics
+            const duration = 2; // 2 secondes = 1 tic par seconde
+            const sampleRate = audioContext.sampleRate;
+            const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // // Premier tic à 0.1s
+            // const tick1Start = Math.floor(0.1 * sampleRate);
+            // const tick1End = Math.floor(0.2 * sampleRate);
+            
+            // // Deuxième tic à 1.1s  
+            // const tick2Start = Math.floor(1.1 * sampleRate);
+            // const tick2End = Math.floor(1.2 * sampleRate);
+
+            // Premier tic à 0.2s
+            const tick1Start = Math.floor(0.2 * sampleRate);
+            const tick1End = Math.floor(0.25 * sampleRate);
+
+            // Deuxième tic à 1.2s (bien séparé du premier)
+            const tick2Start = Math.floor(1.2 * sampleRate);
+            const tick2End = Math.floor(1.25 * sampleRate);
+
+
+            console.log(`🎵 Création tic-tac: tick1 [${tick1Start}-${tick1End}], tick2 [${tick2Start}-${tick2End}]`);
+            
+            // Générer les tics
+            for (let i = tick1Start; i < tick1End; i++) {
+                const t = (i - tick1Start) / (tick1End - tick1Start);
+                const envelope = Math.exp(-t * 30);
+                // data[i] = Math.sin(t * 2000 * 2 * Math.PI) * envelope * this.volume * 0.6;
+                // Son métallique d'horloge
+                const tick = Math.sin(t * 2000 * 2 * Math.PI) * envelope * 0.7;
+                const click = Math.sin(t * 4000 * 2 * Math.PI) * envelope * 0.3;
+                data[i] = (tick + click) * this.volume * 0.6;
+    
+    
+            }
+            
+            for (let i = tick2Start; i < tick2End; i++) {
+                const t = (i - tick2Start) / (tick2End - tick2Start);
+                const envelope = Math.exp(-t * 30);
+                // data[i] = Math.sin(t * 2000 * 2 * Math.PI) * envelope * this.volume * 0.6;
+                const tick = Math.sin(t * 2000 * 2 * Math.PI) * envelope * 0.7;
+                const click = Math.sin(t * 4000 * 2 * Math.PI) * envelope * 0.3;
+                data[i] = (tick + click) * this.volume * 0.6;
+            }
+            
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true; // BOUCLE INFINIE !
+            source.connect(audioContext.destination);
+            source.start();
+            
+            return source; // Pour pouvoir l'arrêter
+        };
+    }
+
+    // // Son de timer écoulé (alarme)
     createTimerExpiredSound() {
         this.sounds['timer-expired'] = () => {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1140,47 +1203,62 @@ class FortuneWheelSounds {
     //     }, interval);
     // }
 
-    // Démarrer le tic-tac continu du timer - version Web Worker
+    // // Démarrer le tic-tac continu du timer - version Web Worker
+    // startTicking(interval = 1000) {
+    //     this.stopTicking(); // Arrêter le précédent s'il existe
+        
+    //     console.log("⏰ Démarrage du tic-tac (Web Worker)");
+        
+    //     // Créer un Web Worker inline pour éviter les fichiers séparés
+    //     const workerCode = `
+    //         let timerId;
+    //         onmessage = function(e) {
+    //             if (e.data.action === 'start') {
+    //                 timerId = setInterval(() => {
+    //                     postMessage('tick');
+    //                 }, e.data.interval);
+    //             } else if (e.data.action === 'stop') {
+    //                 clearInterval(timerId);
+    //             }
+    //         }
+    //     `;
+        
+    //     const blob = new Blob([workerCode], { type: 'application/javascript' });
+    //     this.timerWorker = new Worker(URL.createObjectURL(blob));
+        
+    //     this.timerWorker.onmessage = () => {
+    //         this.play('tick');
+    //     };
+        
+    //     this.timerWorker.postMessage({ action: 'start', interval: interval });
+    // }
+
+    // // Arrêter le tic-tac
+    // stopTicking() {
+    //     if (this.timerWorker) {
+    //         this.timerWorker.postMessage({ action: 'stop' });
+    //         this.timerWorker.terminate();
+    //         this.timerWorker = null;
+    //         console.log("⏰ Arrêt du tic-tac (Web Worker)");
+    //     }
+    // }
+
+
+
+
     startTicking(interval = 1000) {
-        this.stopTicking(); // Arrêter le précédent s'il existe
-        
-        console.log("⏰ Démarrage du tic-tac (Web Worker)");
-        
-        // Créer un Web Worker inline pour éviter les fichiers séparés
-        const workerCode = `
-            let timerId;
-            onmessage = function(e) {
-                if (e.data.action === 'start') {
-                    timerId = setInterval(() => {
-                        postMessage('tick');
-                    }, e.data.interval);
-                } else if (e.data.action === 'stop') {
-                    clearInterval(timerId);
-                }
-            }
-        `;
-        
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        this.timerWorker = new Worker(URL.createObjectURL(blob));
-        
-        this.timerWorker.onmessage = () => {
-            this.play('tick');
-        };
-        
-        this.timerWorker.postMessage({ action: 'start', interval: interval });
+        this.stopTicking();
+        console.log("⏰ Démarrage tic-tac audio en boucle");
+        this.currentTickingSource = this.sounds['ticking-loop']();
     }
 
-    // Arrêter le tic-tac
     stopTicking() {
-        if (this.timerWorker) {
-            this.timerWorker.postMessage({ action: 'stop' });
-            this.timerWorker.terminate();
-            this.timerWorker = null;
-            console.log("⏰ Arrêt du tic-tac (Web Worker)");
+        if (this.currentTickingSource) {
+            this.currentTickingSource.stop();
+            this.currentTickingSource = null;
+            console.log("⏰ Arrêt tic-tac audio");
         }
     }
-
-
 
 
     // // Arrêter le tic-tac
@@ -2226,7 +2304,7 @@ function showQuizMessage(winner) {
             // Jouer un son si disponible
             if (typeof fortuneSounds !== 'undefined') {
                 // fortuneSounds.stopTicking();
-                fortuneSounds.play('tick');
+                // fortuneSounds.play('tick');
                 fortuneSounds.startTicking(800);
             }
 
