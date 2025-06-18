@@ -489,15 +489,47 @@ export function setMaxGenerationsInit(max) {
 }
 
 export function getGenerationColor(generation) {
+    // const colors = [
+    //     '#e3f2fd', // gen 1 - bleu très clair
+    //     '#bbdefb', // gen 2 - bleu clair
+    //     '#90caf9', // gen 3 - bleu moyen
+    //     '#64b5f6', // gen 4 - bleu
+    //     '#42a5f5', // gen 5 - bleu foncé
+    //     '#2196f3', // gen 6 - bleu plus foncé
+    //     '#1976d2', // gen 7 - bleu très foncé
+    //     '#1565c0'  // gen 8 - bleu foncé final
+    // ];
+    // palette chatGPT
+    // const colors = [
+    //     '#FFCDD2', // Rouge clair
+    //     '#F8BBD0', // Rose
+    //     '#E1BEE7', // Violet
+    //     '#D1C4E9', // Lavande
+    //     '#C5CAE9', // Bleu lavande
+    //     '#BBDEFB', // Bleu clair
+    //     '#B2EBF2', // Cyan clair
+    //     '#C8E6C9'  // Vert clair
+    // ];
+    // const colors = [
+    //     '#e3f2fd', // gen 1 - bleu très clair
+    //     '#c6e4fb', // gen 2 - légèrement plus saturé
+    //     '#a8d4f8', // gen 3 - plus doux que #90caf9
+    //     '#7cbcf5', // gen 4 -entre #64b5f6 et #90caf9
+    //     '#5caaf2', // gen 5 -entre #64b5f6 et #42a5f5
+    //     '#3b97f0', // gen 6 -plus punchy
+    //     '#1f7de5', // gen 7 -un bleu dense
+    //     '#0e60c7'  // gen 8 - pour finir bien profond
+    // ];
+
     const colors = [
-        '#e3f2fd', // gen 1 - bleu très clair
-        '#bbdefb', // gen 2 - bleu clair
-        '#90caf9', // gen 3 - bleu moyen
-        '#64b5f6', // gen 4 - bleu
-        '#42a5f5', // gen 5 - bleu foncé
-        '#2196f3', // gen 6 - bleu plus foncé
-        '#1976d2', // gen 7 - bleu très foncé
-        '#1565c0'  // gen 8 - bleu foncé final
+        '#e6f3ff', // gen 1 - bleu très clair
+        '#c1e1ff', // gen 2 - légèrement plus saturé
+        '#9bceff', // gen 3 - bleu ciel doux
+        '#72b8ff', // gen 4 - bleu ciel vibrant
+        '#4da2ff', // gen 5 - bleu franc
+        '#2b8fff', // gen 6 - bleu électrique
+        '#0a7cff', // gen 7 - bleu profond
+        '#005ce6'  // gen 8 - bleu nuit
     ];
     return colors[Math.min(generation - 1, colors.length - 1)] || '#e3f2fd';
 }
@@ -794,6 +826,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
             .style("fill", "#1a1a1a")
             .style("stroke", "white")
             .style("stroke-width", "1px")
+            // .style("stroke", "rgba(255,255,255,0.8)")
+            // .style("stroke-width", "2px")
             .style("paint-order", "stroke fill")
             .text(firstName);
     });
@@ -810,6 +844,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
         .style("fill", "#0000CD")
         .style("stroke", "white")
         .style("stroke-width", "1px")
+        // .style("stroke", "rgba(255,255,255,0.8)")
+        // .style("stroke-width", "2px")
         .style("paint-order", "stroke fill")
         .text(formattedLastName.toUpperCase());
     
@@ -935,6 +971,8 @@ function drawAllGenerations(mainGroup, generationsData) {
 
 }
 
+
+
 function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation, position) {
     if (!person || !person.name) {
         console.warn('⚠️ Personne invalide pour segment:', person);
@@ -952,9 +990,9 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         .attr("data-segment-position", position)
         .datum(person); 
     
-    // Couleur selon la génération
+    // // Couleur selon la génération
     const fillColor = getGenerationColor(generation);
-    
+   
     // Segment principal avec données liées
     // let clickTimeout = null;
     segmentGroup.append("path")
@@ -993,6 +1031,12 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
             
             // Exécuter immédiatement le changement de racine
             changeRootPerson(d.id);
+        })
+        .on("mouseover", function () {
+            d3.select(this).style("filter", "drop-shadow(0px 0px 4px rgba(0,0,0,0.4))");
+        })
+        .on("mouseout", function () {
+            d3.select(this).style("filter", "url(#drop-shadow)");
         })
         .on("touchend", function(event, d) {
             // Bloquer les comportements par défaut
@@ -1131,6 +1175,8 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
     
     // console.log(`✅ Segment créé pour ${person.name} avec données liées`);
 }
+
+
 
 function drawCenterPerson(mainGroup, person) {
     console.log('🎯 Dessin personne centrale:', person.name);

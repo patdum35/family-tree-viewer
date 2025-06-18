@@ -1287,42 +1287,29 @@ export function selectVoice() {
 }
 
 /* */
-export function speakPersonName(personName) {
-    // console.log(`⏱️ DÉBUT: speakPersonName pour ${personName}, vitesse initiale: ${optimalSpeechRate}`);
-    
+export function speakPersonName(personName, isFullText = false) {
     // Initialiser la synthèse vocale si ce n'est pas déjà fait
     if (!state.speechSynthesisInitialized) {
         console.log("🔄 Premier appel à la synthèse vocale - initialisation... avec french voice");
         if (state.frenchVoice) {
             initSpeechSynthesis(state.frenchVoice);
 
-            // if (!state.speechSynthesisInitialized) {
-            //     console.log("🔄 2ième appel à la synthèse vocale - initialisation.. avec local voice");
-            //     if (localVoice) {
-            //         initSpeechSynthesis(localVoice);
-            //         frenchVoice = localVoice;
-            //         state.speechSynthesisInitialized = true;
-            //     }   
-            // }
             // Ajouter un petit délai pour laisser le temps à l'initialisation
             return new Promise(resolve => {
                 setTimeout(() => {
                     // Réappeler la fonction après initialisation
-                    speakPersonName(personName).then(resolve);
+                    speakPersonName(personName, isFullText).then(resolve);
                 }, 200);
             });
         }
     }
     
-    // console.log("index animation =", animationState.currentIndex);
     
     // Vérifier si le son est activé
     if (!state.isSpeechEnabled) {
-        // console.log("🔇 Son désactivé - résolution immédiate");
         return new Promise(resolve => setTimeout(resolve, 1600));
     }
     
-
 
     return new Promise((resolve, reject) => {
 
@@ -1340,41 +1327,45 @@ export function speakPersonName(personName) {
         }
 
 
-
         // Simplifier le nom avant lecture
-        const simplifiedName = simplifyName(personName);
-        console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
+        // const simplifiedName = simplifyName(personName);
+        // console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
 
 
 
-        // let timeOutDuration = 1800;
-        // if (animationState.currentIndex === 0) {
-        //     console.log("🔄 Premier nom - forçage taux initial à 1.2");
-        //     optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
-        //     if (state.isSpeechInGoodHealth) timeOutDuration = 3500;
-        //     else timeOutDuration = 2500;
-        // }
-        // if (animationState.currentIndex === 1) {
-        //     console.log("🔄 Premier nom - forçage taux initial à 1.0");
-        //     optimalSpeechRate = 1.2; //
-        //     if (state.isSpeechInGoodHealth) timeOutDuration = 2500; 
-        //     else timeOutDuration = 1600;
-        // }
-
+        let textToSpeak;
+        if (isFullText) {
+            // Pour les phrases complètes : pas de simplification
+            textToSpeak = personName.trim();
+            console.log(`📝 Texte complet à lire: ${textToSpeak}`);
+        } else {
+            // Pour les noms de personnes : utiliser simplifyName comme avant
+            textToSpeak = simplifyName(personName);
+            console.log(`📝 Nom simplifié: ${textToSpeak}, index : ${animationState.currentIndex}`);
+        }
 
 
 
         // Ajustement dynamique du timeout en fonction de la longueur du nom
-        let timeOutDuration = Math.max(1800, simplifiedName.length * 150); // Base de 150ms par lettre, minimum 1800ms
-        if (animationState.currentIndex === 0) {
-            console.log("🔄 Premier nom - forçage taux initial à 1.2");
-            optimalSpeechRate = 1.0;//1.2;
-            timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
-        }
-        if (animationState.currentIndex === 1) {
-            console.log("🔄 Deuxième nom - ajustement taux");
-            optimalSpeechRate = 1.0; //1.2;
-            timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
+        let timeOutDuration = Math.max(1800, textToSpeak.length * 150); // Base de 150ms par lettre, minimum 1800ms
+
+        // Ajustements spéciaux pour les noms (pas pour le texte complet)
+        if (!isFullText) {
+        
+            if (animationState.currentIndex === 0) {
+                console.log("🔄 Premier nom - forçage taux initial à 1.2");
+                optimalSpeechRate = 1.0;//1.2;
+                timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
+            }
+            if (animationState.currentIndex === 1) {
+                console.log("🔄 Deuxième nom - ajustement taux");
+                optimalSpeechRate = 1.0; //1.2;
+                timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
+            }
+        } else {
+            // Pour le texte complet : timeout plus généreux
+            timeOutDuration = Math.max(4000, textToSpeak.length * 120);
+            optimalSpeechRate = 1.0; // Vitesse normale pour le texte
         }
 
 
@@ -1383,7 +1374,6 @@ export function speakPersonName(personName) {
 
         //Ajouter un timeout de sécurité qui résoudra la promesse après 3 secondes quoi qu'il arrive
         safetyTimeout = setTimeout(() => {
-            // console.log("⚠️ TIMEOUT: Timeout de sécurité de la synthèse vocale déclenché");
             window.speechSynthesis.cancel(); // Annuler toute synthèse en cours
             resolve(); // Résoudre la promesse pour continuer l'animation
         }, timeOutDuration);
@@ -1394,25 +1384,23 @@ export function speakPersonName(personName) {
         const maxRate = 2.7; // Vitesse maximale
         const minRate = 0.8; // Vitesse minimale
 
-
-
-
-
-
-
-
-        
+       
         
         async function measureSpeechDuration(rate) {
-            // console.log(`📏 DÉBUT mesure avec taux: ${rate}`);
             return new Promise((innerResolve) => {
-                const utterance = new SpeechSynthesisUtterance(simplifiedName);
+                // const utterance = new SpeechSynthesisUtterance(simplifiedName);
+
+
+
+                window.speechSynthesis.cancel();
+
+
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.rate = rate;
                 utterance.lang = 'fr-FR';
                 utterance.volume = 1.0;
 
                 const startTime = Date.now();
-                // console.log(`⏱️ Démarrage mesure à: ${startTime}`);
 
                 utterance.onend = () => {
                     const duration = Date.now() - startTime;
@@ -1450,23 +1438,12 @@ export function speakPersonName(personName) {
                 };
                 
 
-
-                // // Sélectionner une voix française si possible
-                // const voices = window.speechSynthesis.getVoices();
-                // const frenchVoice = voices.find(voice => 
-                //     voice.lang.startsWith('fr-') || 
-                //     voice.name.toLowerCase().includes('french')
-                // );
-
                 if (state.frenchVoice) {
                     console.log(`✅  🇫🇷 Voix française sélectionnée: ${state.frenchVoice.name}`);
                     utterance.voice = state.frenchVoice;
                 }
 
-                // console.log(`🔊 Début synthèse pour ${simplifiedName} avec taux ${rate}`);
                 window.speechSynthesis.speak(utterance);
-
-                // speakAfterCancel(utterance);
             });
         }
 
@@ -1480,34 +1457,8 @@ export function speakPersonName(personName) {
                     window.speechSynthesis.cancel();
                 }
                 const result = await measureSpeechDuration(optimalSpeechRate);
-
-                // console.log(`📊 Résultat mesure:`, result);
-                
-
-
-
-                // // Ajuster la vitesse globale avec une approche plus symétrique
-                // if (result.duration > targetDuration + 200) {
-                //     // Si trop lent, augmenter progressivement
-                //     const oldRate = optimalSpeechRate;
-                //     optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
-                //     console.log(`🐢 Trop LENT (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                // } else if (result.duration < targetDuration - 200) {
-                //     // Si trop rapide, diminuer progressivement
-                //     const oldRate = optimalSpeechRate;
-                //     optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
-                //     // console.log(`🐇 Trop RAPIDE (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                // } else {
-                //     // console.log(`✅ Durée OPTIMALE (${result.duration}ms) - Maintien taux: ${optimalSpeechRate}`);
-                // }
-
-
-
-
                 
                 clearTimeout(safetyTimeout); // Annuler le timeout si tout s'est bien passé
-                // console.log(`✅ FIN: speakPersonName - promesse résolue`);
-                // resolve();
                 resolve();
             } catch (error) {
                 console.error(`❌ Erreur dans la synthèse vocale:`, error);
@@ -1519,8 +1470,6 @@ export function speakPersonName(personName) {
         // Lancer la lecture adaptative
         return adaptiveSpeech();
     });
-
-
 
 }
 /* */

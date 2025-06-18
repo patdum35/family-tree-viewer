@@ -1607,7 +1607,80 @@ function getFortuneText(textType) {
             "en": "❌ Wrong answer, try again!",
             "es": "❌ Respuesta incorrecta, ¡inténtalo de nuevo!",
             "hu": "❌ Rossz válasz, próbáld újra!"
-        }
+        },
+        clueSiblingsMixed: {
+            "fr": "j'ai",
+            "en": "I have",
+            "es": "tengo",
+            "hu": "van"
+        },
+        clueSiblingsOnly: {
+            "fr": "j'ai",
+            "en": "I have", 
+            "es": "tengo",
+            "hu": "van"
+        },
+        clueSiblingsGeneral: {
+            "fr": "j'ai",
+            "en": "I have",
+            "es": "tengo", 
+            "hu": "van"
+        },
+        cluePrenomsFreresSoeurs: {
+            "fr": "Les prénoms de mes frères et sœurs sont :",
+            "en": "The first names of my siblings are:",
+            "es": "Los nombres de mis hermanos y hermanas son:",
+            "hu": "A testvéreim keresztnevei:"
+        },
+        freres: {
+            "fr": "frères",
+            "en": "brothers",
+            "es": "hermanos", 
+            "hu": "fiútestvér"
+        },
+        frere: {
+            "fr": "frère",
+            "en": "brother",
+            "es": "hermano",
+            "hu": "fiútestvér"
+        },
+        soeurs: {
+            "fr": "sœurs",
+            "en": "sisters",
+            "es": "hermanas",
+            "hu": "lánytestvér"
+        },
+        soeur: {
+            "fr": "sœur", 
+            "en": "sister",
+            "es": "hermana",
+            "hu": "lánytestvér"
+        },
+        freressoeurs: {
+            "fr": "frères et sœurs",
+            "en": "siblings",
+            "es": "hermanos y hermanas",
+            "hu": "testvér"
+        },
+        freresoeur: {
+            "fr": "frère ou sœur",
+            "en": "sibling", 
+            "es": "hermano o hermana",
+            "hu": "testvér"
+        },
+        et: {
+            "fr": "et",
+            "en": "and",
+            "es": "y",
+            "hu": "és"
+        },
+        uneSoeur: {
+            "fr": "une sœur",
+            "en": "one sister",
+            "es": "una hermana", 
+            "hu": "egy lánytestvér"
+        },
+        
     };
 
     // AJOUT : Vérification de sécurité
@@ -2508,293 +2581,11 @@ function formatDateForClue(dateString) {
 }
 
 
-// async function speakClue(clueText) {
-//     if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
-//         await new Promise(resolve => setTimeout(resolve, 1500));
-//         return;
-//     }
-    
-//     return new Promise((resolve) => {
-//         // ALWAYS cancel before speak (Chrome fix)
-//         window.speechSynthesis.cancel();
-        
-//         setTimeout(() => {
-//             const utterance = new SpeechSynthesisUtterance(clueText);
-//             utterance.rate = 1.0; // Bien en dessous de 2.0
-//             utterance.lang = 'fr-FR';
-//             utterance.volume = 1.0;
-            
-//             if (state.frenchVoice) {
-//                 utterance.voice = state.frenchVoice;
-//             }
-            
-//             utterance.onend = resolve;
-//             utterance.onerror = resolve;
-            
-//             // Fallback timeout
-//             setTimeout(resolve, Math.max(3500, clueText.length * 85));
-            
-//             window.speechSynthesis.speak(utterance);
-//         }, 100);
-//     });
-// }
 
-
-/* */
-
-
-
-async function forceUnblockBeforeSpeak() {
-    console.log('🔥 DÉBLOCAGE SYSTÉMATIQUE avant speak');
-    
-    // 1. Reset total
-    window.speechSynthesis.cancel();
-    
-    // 2. Force reload des voix (Chrome bug fix)
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) {
-        // Attendre que les voix se chargent
-        await new Promise(resolve => {
-            window.speechSynthesis.onvoiceschanged = () => resolve();
-            setTimeout(resolve, 100); // Timeout de sécurité
-        });
-    }
-    
-    // 3. Test de déblocage avec phrase vide
-    return new Promise((resolve) => {
-        const testUtterance = new SpeechSynthesisUtterance(' ');
-        testUtterance.volume = 0.001;
-        testUtterance.rate = 1.9;
-        
-        let completed = false;
-        
-        testUtterance.onend = () => {
-            if (!completed) {
-                completed = true;
-                console.log('✅ Déblocage test réussi');
-                resolve(true);
-            }
-        };
-        
-        testUtterance.onerror = () => {
-            if (!completed) {
-                completed = true;
-                console.log('⚠️ Déblocage test échoué mais on continue');
-                resolve(false);
-            }
-        };
-        
-        setTimeout(() => {
-            if (!completed) {
-                completed = true;
-                window.speechSynthesis.cancel();
-                console.log('🔄 Déblocage test timeout');
-                resolve(false);
-            }
-        }, 100);
-        
-        window.speechSynthesis.speak(testUtterance);
-    });
+export function speakClue(clueText) {
+    console.log('🔊 Lecture de phrase complète:', clueText);
+    return speakPersonName(clueText, true);
 }
-
-
-/* */
-
-
-// async function speakClue(clueText) {
-//     if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
-//         console.log('🔇 Son désactivé, délai simulé');
-//         await new Promise(resolve => setTimeout(resolve, 1500));
-//         return;
-//     }
-    
-//     // Déblocage systématique
-//     // await forceUnblockBeforeSpeak();
-
-//     console.log('🔊 Lecture du texte:', clueText);
-    
-//     return new Promise((resolve) => {
-//         let attempts = 0;
-//         const maxAttempts = 3;
-//         let resolved = false;
-        
-//         function trySpeak() {
-//             if (resolved) return;
-            
-//             attempts++;
-//             console.log(`🎤 Tentative ${attempts}/${maxAttempts}`);
-            
-//             // CANCEL MULTIPLE
-//             window.speechSynthesis.cancel();
-//             setTimeout(() => window.speechSynthesis.cancel(), 30);
-//             setTimeout(() => window.speechSynthesis.cancel(), 50);
-            
-//             setTimeout(() => {
-//                 // if (resolved) return; // PROTECTION contre double exécution
-//                 if (resolved) {
-//                     console.log(`⚠️ SKIP: Tentative ${attempts} ignorée car resolved`);
-//                     return;
-//                 }
-
-//                 // Déterminer le type d'essai
-//                 const isWarmup = attempts <= 2;
-//                 const textToSpeak = isWarmup ? ' ' : clueText;
-//                 const volume = isWarmup ? 0.01 : 1.0;
-//                 const rate = isWarmup ? 1.9 : 1.0;
-                
-//                 // const utterance = new SpeechSynthesisUtterance(textToSpeak);
-//                 // Clone fresh utterance
-//                 const utterance = new SpeechSynthesisUtterance();
-//                 utterance.text = textToSpeak;
-//                 utterance.rate = rate;
-//                 utterance.lang = 'fr-FR';
-//                 utterance.volume = volume;
-                
-//                 if (state.frenchVoice) {
-//                     utterance.voice = state.frenchVoice;
-//                 }
-                
-//                 console.log(`${isWarmup ? '🔥 Échauffement' : '🎤 Lecture réelle'} ${attempts}`);
-                
-//                 utterance.onend = () => {
-//                     console.log(`✅ Tentative ${attempts} terminée`);
-                    
-//                     if (isWarmup && attempts < maxAttempts && !resolved) {
-//                         // Passer à l'essai suivant
-//                         resolved = true; // BLOQUER d'autres appels
-//                         setTimeout(() => {
-//                             resolved = false; // DÉBLOQUER pour le prochain
-//                             if (!resolved) trySpeak();
-//                         }, 50);
-//                     } else if (!isWarmup) {
-//                         // Lecture réelle terminée
-//                         if (!resolved) {
-//                             resolved = true;
-//                             resolve();
-//                         }
-//                     } else {
-//                         // Tous les essais épuisés
-//                         if (!resolved) {
-//                             resolved = true;
-//                             resolve();
-//                         }
-//                     }
-//                 };
-                
-//                 utterance.onerror = (e) => {
-//                     console.log(`❌ Erreur tentative ${attempts}:`, e.error);
-                    
-//                     // if (attempts < maxAttempts) {
-//                     if (attempts < maxAttempts && !resolved) {
-//                         // setTimeout(() => trySpeak(), 150);
-//                         resolved = true; // BLOQUER d'autres appels
-//                         setTimeout(() => {
-//                             resolved = false; // DÉBLOQUER pour le prochain
-//                             if (!resolved) trySpeak();
-//                         }, 50);
-//                     } else if (!resolved) {
-//                         resolved = true;
-//                         resolve();
-//                     }
-//                 };
-                
-//                 // Timeout adaptatif
-//                 const timeoutDuration = isWarmup ? 80 : Math.max(4000, clueText.length * 130);
-                
-//                 if (!isWarmup) {
-//                     console.log(`⏰ Timeout configuré: ${timeoutDuration}ms pour ${clueText.length} caractères`);
-//                 }
-                
-//                 setTimeout(() => {
-//                     if (!resolved) {
-//                         console.log(`⏰ Timeout tentative ${attempts}`);
-//                         window.speechSynthesis.cancel();
-                        
-//                         if (attempts < maxAttempts && !resolved) {
-//                             setTimeout(() => {
-//                                 if (!resolved) trySpeak();
-//                             },200);
-//                         } else if (!resolved) {
-//                             resolved = true;
-//                             resolve();
-//                         }
-//                                             }
-//                 }, timeoutDuration);
-                
-//                 // Lancement
-//                 window.speechSynthesis.speak(utterance);
-                
-//             }, 200);
-//         }
-        
-//         // Démarrage
-//         trySpeak();
-//     });
-// }
-
-
-/* */
-
-
-
-async function speakClue(clueText) {
-    if (!state.isSpeechEnabled || !state.isSpeechEnabled2) {
-        console.log('🔇 Son désactivé, délai simulé');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        return;
-    }
-    
-    console.log('🔊 Lecture du texte:', clueText);
-    
-    return new Promise((resolve) => {
-        // Simple cancel avant de commencer
-        window.speechSynthesis.cancel();
-        
-        setTimeout(() => {
-            const utterance = new SpeechSynthesisUtterance(clueText);
-            utterance.rate = 1.0;
-            utterance.lang = 'fr-FR';
-            utterance.volume = 1.0;
-            
-            if (state.frenchVoice) {
-                utterance.voice = state.frenchVoice;
-            }
-            
-            let finished = false;
-            
-            utterance.onend = () => {
-                if (!finished) {
-                    finished = true;
-                    console.log('✅ Lecture terminée');
-                    resolve();
-                }
-            };
-            
-            utterance.onerror = (e) => {
-                if (!finished) {
-                    finished = true;
-                    console.log('❌ Erreur:', e.error);
-                    resolve();
-                }
-            };
-            
-            // Timeout simple
-            setTimeout(() => {
-                if (!finished) {
-                    finished = true;
-                    console.log('⏰ Timeout');
-                    window.speechSynthesis.cancel();
-                    resolve();
-                }
-            }, Math.max(4000, clueText.length * 120));
-            
-            console.log('🎤 Lancement lecture');
-            window.speechSynthesis.speak(utterance);
-            
-        }, 100);
-    });
-}
-
 
 
 // // Test massif avec boucles pour détecter les patterns de blocage
@@ -3032,7 +2823,76 @@ function prepareProgressiveClues(person) {
 
 
 
-    // 9. Mariage (conjoint, date, lieu)
+    // 9. Frères et sœurs
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.children && family.children.length > 1) {
+            // Récupérer tous les enfants sauf la personne actuelle
+            const siblings = family.children
+                .filter(childId => childId !== person.id)
+                .map(siblingId => {
+                    const sibling = state.gedcomData.individuals[siblingId];
+                    return sibling ? {
+                        id: siblingId,
+                        name: sibling.name.replace(/\//g, ''),
+                        firstName: sibling.name.replace(/\//g, '').split(' ')[0],
+                        sex: sibling.sex
+                    } : null;
+                })
+                .filter(sibling => sibling);
+
+            if (siblings.length > 0) {
+                // Indice sur le nombre de frères et sœurs
+                const siblingsCount = siblings.length;
+                const brothersCount = siblings.filter(s => s.sex === 'M').length;
+                const sistersCount = siblings.filter(s => s.sex === 'F').length;
+                
+                let siblingClue = '';
+                if (brothersCount > 0 && sistersCount > 0) {
+                    // Frères ET sœurs
+                    if (brothersCount > 1 && sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('freres')} ${getFortuneText('et')} ${getFortuneText('uneSoeur')}`;
+                    } else if (brothersCount === 1 && sistersCount > 1) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('frere')} ${getFortuneText('et')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    } else if (brothersCount === 1 && sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('frere')} ${getFortuneText('et')} ${getFortuneText('uneSoeur')}`;
+                    } else if (brothersCount > 1 && sistersCount > 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('freres')} ${getFortuneText('et')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    }
+                } else if (brothersCount > 0) {
+                    // Que des frères
+                    siblingClue = `${getFortuneText('clueSiblingsOnly')} ${brothersCount} ${getFortuneText(brothersCount > 1 ? 'freres' : 'frere')}`;
+                } else if (sistersCount > 0) {
+                    // Que des sœurs
+                    if (sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsOnly')} ${getFortuneText('uneSoeur')}`;
+                    } else {
+                        siblingClue = `${getFortuneText('clueSiblingsOnly')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    }
+                } else {
+                    // Fallback général
+                    siblingClue = `${getFortuneText('clueSiblingsGeneral')} ${siblingsCount} ${getFortuneText(siblingsCount > 1 ? 'freressoeurs' : 'freresoeur')}`;
+                }
+                
+                clues.push(siblingClue);
+                
+                // Prénoms des frères et sœurs (si pas trop nombreux)
+                if (siblings.length <= 5) {
+                    const siblingNames = siblings
+                        .map(s => s.firstName)
+                        .filter(name => name)
+                        .join(', ');
+                    
+                    if (siblingNames) {
+                        clues.push(`${getFortuneText('cluePrenomsFreresSoeurs')} ${siblingNames}`);
+                    }
+                }
+            }
+        }
+    }
+
+
+    // 10. Mariage (conjoint, date, lieu)
     if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
         const family = state.gedcomData.families[personData.spouseFamilies[0]];
         if (family) {
@@ -3054,14 +2914,14 @@ function prepareProgressiveClues(person) {
         }
     }
     
-    // 10. Prénom (avant-dernier indice)
+    // 11. Prénom (avant-dernier indice)
     const fullName = personData.name.replace(/\//g, '');
     const firstName = fullName.split(' ')[0];
     if (firstName && firstName !== fullName) {
         clues.push(`${getFortuneText('cluePrenom')} ${firstName}`);
     }
     
-    // 11. Contexte historique
+    // 12. Contexte historique
     const historicalContext = findContextualHistoricalFigures(person.id);
     if (historicalContext) {
         const contexts = [historicalContext.birthContext, historicalContext.marriageContext, historicalContext.deathContext]
