@@ -1101,14 +1101,47 @@ class FortuneWheelSounds {
     }
 
     // Démarrer le tic-tac continu du timer
+    // startTicking(interval = 1000) {
+    //     this.stopTicking(); // Arrêter le précédent s'il existe
+        
+    //     console.log("⏰ Démarrage du tic-tac");
+    //     this.currentTickInterval = setInterval(() => {
+    //         this.play('tick');
+    //     }, interval);
+    // }
+
+    // Démarrer le tic-tac continu du timer - version mobile-friendly
     startTicking(interval = 1000) {
         this.stopTicking(); // Arrêter le précédent s'il existe
         
         console.log("⏰ Démarrage du tic-tac");
+        
+        const startTime = Date.now();
+        let tickCount = 0;
+        
         this.currentTickInterval = setInterval(() => {
-            this.play('tick');
+            // Calculer le temps écoulé réel
+            const elapsed = Date.now() - startTime;
+            const expectedTicks = Math.floor(elapsed / interval);
+            
+            // Rattraper les ticks manqués (max 2 pour éviter le spam)
+            const missedTicks = Math.min(2, expectedTicks - tickCount);
+            
+            for (let i = 0; i <= missedTicks; i++) {
+                this.play('tick');
+            }
+            
+            tickCount = expectedTicks + 1;
+            
+            // Log pour debug mobile
+            // if (missedTicks > 0) {
+            //     console.log(`⚠️ Mobile: rattrapé ${missedTicks} tick(s)`);
+            // }
         }, interval);
     }
+
+
+
 
     // Arrêter le tic-tac
     stopTicking() {
