@@ -2326,7 +2326,15 @@ function showQuizMessage(winner) {
     };
     
     // Focus sur le champ de saisie
-    setTimeout(() => answerInput.focus(), 500);
+    // setTimeout(() => answerInput.focus(), 500);
+    // Empêcher le focus automatique sur mobile
+    answerInput.setAttribute('readonly', true);
+
+    // Activer l'input seulement quand l'utilisateur veut taper
+    answerInput.onclick = () => {
+        answerInput.removeAttribute('readonly');
+        answerInput.focus();
+    };
 }
 
 
