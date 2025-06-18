@@ -2152,9 +2152,9 @@ function showQuizMessage(winner) {
             
             // Jouer un son si disponible
             if (typeof fortuneSounds !== 'undefined') {
-                fortuneSounds.stopTicking();
+                // fortuneSounds.stopTicking();
                 fortuneSounds.play('tick');
-                fortuneSounds.startTicking(1000);
+                fortuneSounds.startTicking(800);
             }
 
 
