@@ -1111,46 +1111,86 @@ class FortuneWheelSounds {
     // }
 
     // Démarrer le tic-tac continu du timer - version mobile-friendly
+    // startTicking(interval = 1000) {
+    //     this.stopTicking(); // Arrêter le précédent s'il existe
+        
+    //     console.log("⏰ Démarrage du tic-tac");
+        
+    //     const startTime = Date.now();
+    //     let tickCount = 0;
+        
+    //     this.currentTickInterval = setInterval(() => {
+    //         // Calculer le temps écoulé réel
+    //         const elapsed = Date.now() - startTime;
+    //         const expectedTicks = Math.floor(elapsed / interval);
+            
+    //         // Rattraper les ticks manqués (max 2 pour éviter le spam)
+    //         const missedTicks = Math.min(2, expectedTicks - tickCount);
+            
+    //         for (let i = 0; i <= missedTicks; i++) {
+    //             this.play('tick');
+    //         }
+            
+    //         tickCount = expectedTicks + 1;
+            
+    //         // Log pour debug mobile
+    //         // if (missedTicks > 0) {
+    //         //     console.log(`⚠️ Mobile: rattrapé ${missedTicks} tick(s)`);
+    //         // }
+    //     }, interval);
+    // }
+
+    // Démarrer le tic-tac continu du timer - version Web Worker
     startTicking(interval = 1000) {
         this.stopTicking(); // Arrêter le précédent s'il existe
         
-        console.log("⏰ Démarrage du tic-tac");
+        console.log("⏰ Démarrage du tic-tac (Web Worker)");
         
-        const startTime = Date.now();
-        let tickCount = 0;
-        
-        this.currentTickInterval = setInterval(() => {
-            // Calculer le temps écoulé réel
-            const elapsed = Date.now() - startTime;
-            const expectedTicks = Math.floor(elapsed / interval);
-            
-            // Rattraper les ticks manqués (max 2 pour éviter le spam)
-            const missedTicks = Math.min(2, expectedTicks - tickCount);
-            
-            for (let i = 0; i <= missedTicks; i++) {
-                this.play('tick');
+        // Créer un Web Worker inline pour éviter les fichiers séparés
+        const workerCode = `
+            let timerId;
+            onmessage = function(e) {
+                if (e.data.action === 'start') {
+                    timerId = setInterval(() => {
+                        postMessage('tick');
+                    }, e.data.interval);
+                } else if (e.data.action === 'stop') {
+                    clearInterval(timerId);
+                }
             }
-            
-            tickCount = expectedTicks + 1;
-            
-            // Log pour debug mobile
-            // if (missedTicks > 0) {
-            //     console.log(`⚠️ Mobile: rattrapé ${missedTicks} tick(s)`);
-            // }
-        }, interval);
+        `;
+        
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        this.timerWorker = new Worker(URL.createObjectURL(blob));
+        
+        this.timerWorker.onmessage = () => {
+            this.play('tick');
+        };
+        
+        this.timerWorker.postMessage({ action: 'start', interval: interval });
     }
-
-
-
 
     // Arrêter le tic-tac
     stopTicking() {
-        if (this.currentTickInterval) {
-            clearInterval(this.currentTickInterval);
-            this.currentTickInterval = null;
-            console.log("⏰ Arrêt du tic-tac");
+        if (this.timerWorker) {
+            this.timerWorker.postMessage({ action: 'stop' });
+            this.timerWorker.terminate();
+            this.timerWorker = null;
+            console.log("⏰ Arrêt du tic-tac (Web Worker)");
         }
     }
+
+
+
+
+    // // Arrêter le tic-tac
+    // stopTicking() {
+    //     if (this.currentTickInterval) {
+    //         clearInterval(this.currentTickInterval);
+    //         this.currentTickInterval = null;
+    //         console.log("⏰ Arrêt du tic-tac");
+    //     }
+    // }
     
     // Jouer un son
     play(soundName) {
