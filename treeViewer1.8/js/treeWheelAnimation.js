@@ -2112,9 +2112,10 @@ function showWinnerMessage(winner) {
         showWinnerBtn.onclick = null;
         
         // Jouer un son si disponible
-        if (typeof sounds !== 'undefined') {
-            sounds.play('winner');
+        if (typeof fortuneSounds !== 'undefined') {
+            fortuneSounds.play('winner');
         }
+        speakClue(winner.name.replace(/\//g, ''));
     };
     
     // Bouton 2 : Quiz sur le gagnant
@@ -2407,15 +2408,18 @@ function showQuizMessage(winner) {
         if (isCorrect) {
             // gameFinished = true;
             showResult(true, winner.name.replace(/\//g, ''));
-            if (typeof sounds !== 'undefined') {
-                sounds.play('winner');
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.play('winner');
             }
         } else {
             // Réponse fausse : afficher message temporaire et vider le champ
             showTemporaryMessage(getFortuneText('wrongAnswer'));
+            speakClue(getFortuneText('wrongAnswer'));
+            
+
             answerInput.value = '';
-            if (typeof sounds !== 'undefined') {
-                sounds.play('click');
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.play('click');
             }
         }
     }
@@ -2450,7 +2454,12 @@ function showQuizMessage(winner) {
     // Fonction pour afficher la solution
     function showSolution() {
         // gameFinished = true;
+        // Jouer un son si disponible
+        if (typeof fortuneSounds !== 'undefined') {
+            fortuneSounds.play('winner');
+        }
         showResult('solution', winner.name.replace(/\//g, ''));
+        speakClue(winner.name.replace(/\//g, ''));
         fortuneSounds.stopTicking();
     }
     
