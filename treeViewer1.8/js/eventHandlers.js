@@ -490,8 +490,11 @@ export async function returnToLogin() {
     // Masquer la carte
     hideMap();
 
+    state.isRadarEnabled = false;
     disableFortuneModeWithLever();
     state.isRadarEnabled = false;
+
+    // updateRadarButtonText();
     
     // Restaurer le fond d'écran de connexion s'il a été supprimé
     const loginBackground = document.querySelector('.login-background');

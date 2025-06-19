@@ -1,4 +1,4 @@
-import { state, displayGenealogicTree } from './main.js';
+import { state, displayGenealogicTree, updateRadarButtonText } from './main.js';
 import { historicalFigures } from './historicalData.js';
 import { extractYear } from './utils.js';
 import { geocodeLocation } from './geoLocalisation.js';
@@ -6,6 +6,8 @@ import { nameCloudState } from './nameCloud.js';
 import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPersonLocations, createLocationMap } from './mapUtils.js';
 import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
+import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
+import { updateTreeModeSelector } from './mainUI.js';
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne
@@ -28,9 +30,6 @@ import { cleanProfession} from './nameCloudUtils.js';
 * - Permet de définir la personne comme nouveau point de départ de l'arbre
 * - Utilise un style moderne avec des sections distinctes et colorées
 */
-
-
-
 
 
 /**
@@ -280,9 +279,6 @@ export const translations = {
     // Supprimer le pays à la fin
     return place.replace(pattern, '');
   }
-
-
-
 
 export function displayPersonDetails(personId) {
     console.log("Affichage des détails de la personne :", personId);
@@ -741,11 +737,15 @@ export function displayPersonDetails(personId) {
     detailsContent.innerHTML = detailsHTML;
     modal.style.display = 'block';
 
-    // Position initiale centrée si pas de position sauvegardée
+
+    // Position initiale vers le haut si pas de position sauvegardée
     if (!state.modalSettings || !state.modalSettings.personDetailsModal) {
         // Définir d'abord les dimensions
-        const modalWidth = Math.min(600, window.innerWidth - 20); // Largeur initiale de 600px maximum
+        const modalWidth = Math.min(600, window.innerWidth - 20);
+        const modalHeight = Math.min(Math.max(500, window.innerHeight * 0.8), window.innerHeight - 60);
+        
         modal.style.width = `${modalWidth}px`;
+        modal.style.height = `${modalHeight}px`;
         modal.style.maxWidth = `${window.innerWidth - 20}px`;
         modal.style.maxHeight = `${window.innerHeight - 50}px`;
         
@@ -753,10 +753,10 @@ export function displayPersonDetails(personId) {
         modal.style.left = `${(window.innerWidth - modalWidth) / 2}px`;
         modal.style.right = 'auto';
         
-        // Centrer verticalement (optionnel)
-        const modalHeight = Math.min(400, window.innerHeight - 50); // Hauteur initiale estimée
-        modal.style.top = `${(window.innerHeight - modalHeight) / 2}px`;
+        // Positionner plus haut dans l'écran
+        modal.style.top = `${Math.max(10, window.innerHeight * 0.05)}px`;
     }
+
     // Rendre la modale déplaçable et resizable
     setTimeout(() => {
         makeModalDraggable();
@@ -773,8 +773,6 @@ export function displayPersonDetails(personId) {
     }, 150);
 }
    
-   
-
 // makeModalDraggable pour fonctionner en tactile    
 function makeModalDraggable() {
     const modal = document.getElementById('person-details-modal');
@@ -1120,8 +1118,6 @@ function addResizeHandles(modal) {
 
 }
 
-
-
 //Configuration des événements de redimensionnement pour la souris et le tactile
 function setupResizeEvents(handle, modal, pos) {
     let isResizing = false;
@@ -1305,10 +1301,6 @@ function setupResizeEvents(handle, modal, pos) {
     }
 }
 
-
-
-
-
 // Ajouter cette fonction à la fin du fichier
 function adjustModalOnResize() {
     const modal = document.getElementById('person-details-modal');
@@ -1446,7 +1438,19 @@ export function setAsRootPerson(personId) {
     // Redessiner l'arbre avec cette personne comme point de départ
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setAsRootPerson  ################# ')
 
+    if (state.isRadarEnabled) {
+            // Basculer l'état du tree/radar
+            state.isRadarEnabled = !state.isRadarEnabled;  
+            updateRadarButtonText(); 
+            state.treeModeReal = 'ancestors';
+            state.treeMode = 'ancestors';
+            updateTreeModeSelector(state.treeMode);
+            disableFortuneModeWithLever();
+            // displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
+    }
+
     displayGenealogicTree(personId, true);
+
 }
 
 export function findContextualHistoricalFigures(personId) {
@@ -1513,7 +1517,8 @@ function createEnhancedLocationMap(locations) {
     mapContainer.id = 'multi-location-map';
     
     // Ajuster la hauteur selon la taille d'écran
-    const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
+    // const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
+    const mapHeight = window.innerHeight < 400 ? '180px' : '200px';
     mapContainer.style.height = mapHeight;
     
     mapContainer.style.width = '100%';

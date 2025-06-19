@@ -133,25 +133,6 @@ export function resetTreeView() {
     }
 }
 
-// /**
-//  * Change le mode d'affichage de l'arbre
-//  */
-// export function changeTreeMode(newMode) {
-//     const previousMode = state.treeModeReal;
-//     state.treeModeReal = newMode;
-    
-//     // Animation de transition si on change de famille de modes
-//     const wasTreeMode = !isWheelMode(previousMode);
-//     const isWheelModeNow = isWheelMode(newMode);
-    
-//     if (wasTreeMode !== isWheelModeNow) {
-//         // Transition entre mode arbre et mode éventail
-//         animateTreeModeTransition(previousMode, newMode);
-//     } else {
-//         // Redessiner directement
-//         drawTree(false, false);
-//     }
-// }
 
 /**
  * Anime la transition entre les modes
@@ -177,156 +158,6 @@ function animateTreeModeTransition(fromMode, toMode) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // ====================================
-// // Rendu de l'arbre
-// // ====================================
-// import { isNodeHidden } from './utils.js';
-// import { drawNodes } from './nodeRenderer.js';
-// import { state } from './main.js';
-// import { resetView } from './eventHandlers.js';
-// import { setupElegantBackground } from './backgroundManager.js';
-
-// let zoom;
-// let lastTransform = null;
-
-/**
- * Initialise et dessine l'arbre
- */
-// export function drawTree(isZoomRefresh = false, isAnimation = false) {
-//     if (!state.currentTree) return;
-    
-//     // Extraire l'arbre réel (ignorer le super-root)
-//     let treeToRender = state.currentTree;
-    
-//     // Mode both : on crée deux arbres distincts
-//     if (state.treeModeReal === 'both') {
-//         drawBothModeTree(isZoomRefresh);
-//         return;
-//     }
-
-//     // Logique existante pour les modes descendants et ascendants
-//     const rootHierarchy = d3.hierarchy(treeToRender, node => node.children);   
-    
-//     processSiblings(rootHierarchy);
-//     processSpouses(rootHierarchy);
-
-//     const svg = setupSVG();
-    
-    
-//     const mainGroup = createMainGroup(svg);
-//     const treeLayout = createTreeLayout();
-    
-//     // Appliquer le layout une seule fois
-//     const layoutResult = treeLayout(rootHierarchy);
-
-//     // Grouper les nœuds par niveau
-//     const nodesByLevel = {};
-//     layoutResult.descendants().forEach(node => {
-//         nodesByLevel[node.depth] = nodesByLevel[node.depth] || [];
-//         nodesByLevel[node.depth].push(node);
-//     });
-
-
-//     // Structure pour mémoriser les infos par niveau
-//     const levelMetrics = {};
-
-//     // Première passe : collecte des métriques
-//     Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
-//         if (depth > 0) {
-//             const positions = levelNodes.map(node => node.x);
-//             levelMetrics[depth] = {
-//                 count: levelNodes.length,
-//                 minPos: Math.min(...positions),
-//                 maxPos: Math.max(...positions),
-//                 avgPos: d3.mean(positions)
-//             };
-
-//             levelNodes.forEach(node => {
-//                 // Garder les positions originales pour la deuxième passe
-//                 node.originalX = node.x;
-//             });
-//         }
-//     });
-
-
-//     // Deuxième passe : ajustement des positions
-//     Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
-//         if (depth > 0) {
-//             const metrics = levelMetrics[depth];
-//             let offset = 0;
-//             // if (metrics.minPos > 0) { offset = - metrics.minPos -state.boxHeight }
-//             // offset = -(metrics.maxPos - metrics.minPos)/2- metrics.minPos; // -state.boxHeight 
-//             // levelNodes.forEach(node => {
-//             //     // TODO: Utiliser metrics pour ajuster node.x
-//             //     // Pour l'instant, on garde le même comportement
-//             //     // const deviation = node.originalX - metrics.avgPos;
-//             //     // node.x = metrics.avgPos + (deviation * 0.5);
-
-//             //     node.x = node.x + offset
-
-//             // });
-//         }
-//     });
-
-//     drawNodes(mainGroup, layoutResult, isZoomRefresh);
-    
-//     // Dessiner les liens selon le mode
-//     drawLinks(mainGroup, layoutResult);
-    
-//     if (state.treeModeReal  !== 'descendants' && state.treeModeReal  !== 'directDescendants') {
-//         adjustLevel0SiblingsPosition(mainGroup);
-//     }
-
-//     if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
-//         drawSpouseLinks(mainGroup, layoutResult);
-//     } else {
-//         drawSiblingLinks(mainGroup, layoutResult);
-//         drawLevel0SiblingLinks(mainGroup, layoutResult);
-//     }
-
-//     setupZoom(svg, mainGroup);
-
-//     // Détecter si nous avons une racine virtuelle masquée, mais ne pas appliquer en mode animation
-//     if (!isAnimation) {
-//         if (treeToRender.isVirtualRoot && treeToRender.children && treeToRender.children.length > 0) {
-//             let rootOffsetX = -state.boxWidth*1.1; // On décale l'affichage vers la gauche pour gagner la place de la virtual root masquée
-//             // console.log( "\n\n   VIRTUAL ROOT detected offset = ", rootOffsetX, "  \n\n")
-//             resetViewVirtualRoot(svg, mainGroup, rootOffsetX);
-//         } 
-//     }
-
-    
-//     if (state.initialTreeDisplay) {
-//         // Premier affichage de l'arbre - appliquer le fond avec délai
-//         state.initialTreeDisplay = false; // Marquer que ce n'est plus l'affichage initial
-//         setTimeout(() => {
-//             setupElegantBackground(svg);
-//         }, 100); // délai de 300ms        
-//     } else {
-//         // Ce n'est pas le premier affichage - appliquer le fond immédiatement
-//         setupElegantBackground(svg);
-//     }  
-    
-// }
-    
 function drawBothModeTree(isZoomRefresh = false) {
     const rootPerson = state.currentTree;
     const descendants = rootPerson.descendants || [];
@@ -478,6 +309,15 @@ function drawBothModeTree(isZoomRefresh = false) {
     if (isZoomRefresh) {
         const leftmostPositionX = d3.min(descendantsResult.descendants(), d => d.y);
         resetZoomBoth(mainGroup, svg, -leftmostPositionX + 150, window.innerHeight/2 );
+    }
+
+    if (state.initialTreeDisplay) {
+        state.initialTreeDisplay = false;
+        setTimeout(() => {
+            setupElegantBackground(svg);
+        }, 100);        
+    } else {
+        setupElegantBackground(svg);
     }
 
 }

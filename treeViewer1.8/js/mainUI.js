@@ -286,6 +286,43 @@ function replaceTreeModeSelector() {
     parentElement.replaceChild(customSelector, originalSelect);   
 }
 
+
+
+
+// Fonction pour mettre à jour l'affichage du sélecteur
+export function updateTreeModeSelector(newValue) {
+    const customSelector = document.getElementById('treeMode');
+    if (!customSelector) return;
+    
+    // Trouver l'élément d'affichage (le bouton principal)
+    const displayElement = customSelector.querySelector('div[style*="background"]');
+    if (!displayElement) return;
+    
+    // Trouver l'option correspondante à la nouvelle valeur
+    const typeValues = ['directAncestors', 'ancestors', 'directDescendants', 'descendants', 'both'];
+    let typeOptions = ['Ascd', 'Asc.', 'Desd', 'Desc.', 'A+D'];
+    
+    // Adapter selon la langue
+    if (window.CURRENT_LANGUAGE === 'en') {  
+        typeOptions = ['dAnc', 'Anc.', 'dDes', 'Desc.', 'A+D'];
+    } else if (window.CURRENT_LANGUAGE === 'es') {
+        typeOptions = ['Antd', 'Ant.', 'Desd', 'Desc.', 'A+D'];
+    } else if (window.CURRENT_LANGUAGE === 'hu') {
+        typeOptions = ['k.őse', 'Őse.', 'k.Les', 'Les.', 'Ő+L'];
+    }
+    
+    // Trouver l'index de la nouvelle valeur
+    const valueIndex = typeValues.indexOf(newValue);
+    if (valueIndex !== -1) {
+        // Mettre à jour le texte affiché
+        displayElement.textContent = typeOptions[valueIndex];
+        
+        // Mettre à jour l'attribut data-value du sélecteur
+        customSelector.setAttribute('data-selected-value', newValue);
+    }
+}
+
+
 /**
  * Tronque un texte à un certain nombre de caractères,
  * ajoute des points de suspension si nécessaire,

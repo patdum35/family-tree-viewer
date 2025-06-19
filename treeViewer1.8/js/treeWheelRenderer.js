@@ -169,59 +169,62 @@ function setupWheelResizeHandler() {
     let resizeTimeout;
     
     const handleResize = () => {
-        // Vérifier qu'on est bien en mode wheel
-        if (!state.currentTree || !state.rootPersonId) {
-            return;
-        }
-        
-        console.log('🔄 Redimensionnement détecté - Reconstruction du radar');
-        
-        // Sauvegarder l'état d'interaction de l'utilisateur
-        const hadUserInteraction = state.userHasInteracted;
-        
-        // Nettoyer complètement l'état du wheel
-        cleanupWheelTreeState();
-        
-        // Invalider le cache
-        state.isCacheValid = false;
-        state.cachedRadarPNG = null;
-        
-        // Utiliser la fonction displayGenealogicTree pour reconstruire proprement
-        setTimeout(() => {
-            if (typeof displayGenealogicTree === 'function') {
-                console.log('🔄 Reconstruction via displayGenealogicTree');
-                displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+        if (state.isRadarEnabled) {
 
-                createWinnerRedArrowIndicator();
-
-                state.leverEnabled = true;
-                state.isSpinning = false;
-
-                removeSpinningImage();
-               
-                // Restaurer l'état d'interaction après reconstruction
-                setTimeout(() => {
-                    if (hadUserInteraction) {
-                        state.userHasInteracted = true;
-                    }
-                }, 200);
+            // Vérifier qu'on est bien en mode wheel
+            if (!state.currentTree || !state.rootPersonId) {
+                return;
             }
-        }, 100);
+            
+            console.log('🔄 Redimensionnement détecté - Reconstruction du radar');
+            
+            // Sauvegarder l'état d'interaction de l'utilisateur
+            const hadUserInteraction = state.userHasInteracted;
+            
+            // Nettoyer complètement l'état du wheel
+            cleanupWheelTreeState();
+            
+            // Invalider le cache
+            state.isCacheValid = false;
+            state.cachedRadarPNG = null;
+            
+            // Utiliser la fonction displayGenealogicTree pour reconstruire proprement
+            setTimeout(() => {
+                if (typeof displayGenealogicTree === 'function') {
+                    console.log('🔄 Reconstruction via displayGenealogicTree');
+                    displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+
+                    createWinnerRedArrowIndicator();
+
+                    state.leverEnabled = true;
+                    state.isSpinning = false;
+
+                    removeSpinningImage();
+                
+                    // Restaurer l'état d'interaction après reconstruction
+                    setTimeout(() => {
+                        if (hadUserInteraction) {
+                            state.userHasInteracted = true;
+                        }
+                    }, 200);
+                }
+            }, 100);
+            
+            console.log('✅ Redimensionnement en cours:', {
+                width: window.innerWidth, 
+                height: window.innerHeight
+            });
+        };
         
-        console.log('✅ Redimensionnement en cours:', {
-            width: window.innerWidth, 
-            height: window.innerHeight
+        // Gestionnaire avec debounce pour éviter trop d'appels
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 200);
         });
-    };
-    
-    // Gestionnaire avec debounce pour éviter trop d'appels
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(handleResize, 200);
-    });
-    
-    resizeHandlerSetup = true;
-    console.log('✅ Gestionnaire de redimensionnement configuré pour le radar');
+        
+        resizeHandlerSetup = true;
+        console.log('✅ Gestionnaire de redimensionnement configuré pour le radar');
+    }
 }
 
 
@@ -303,6 +306,36 @@ function createSVGFilters(svg) {
     }
 }
 
+
+export const calculateOptimalZoom = () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Rayon total du radar
+    const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
+
+    // Calcul du zoom pour que le radar tienne dans la fenêtre
+    // On laisse une marge de 10% de chaque côté
+    let widthZoom = (width * 0.8) / (2 * totalRadius);
+    let heightZoom = (height * 0.8) / (2 * totalRadius);
+
+    if (state.WheelConfig.maxGenerations > 10) {
+        widthZoom = widthZoom * 1.4;
+        heightZoom = heightZoom * 1.4;
+    } else if (state.WheelConfig.maxGenerations > 5 ) {
+        widthZoom = widthZoom * 1.2;
+        heightZoom = heightZoom * 1.2;
+    }
+    
+    // Prendre le zoom le plus petit pour s'assurer que tout rentre
+    const optimalZoom = Math.min(widthZoom, heightZoom);
+    
+    // Limiter entre 0.1 et 1 pour éviter des zooms trop extrêmes
+    return Math.max(0.1, Math.min(optimalZoom, 1));
+};
+
+
+
 /**
  * Configure le zoom pour l'éventail
  */
@@ -312,27 +345,6 @@ function setupWheelZoom(svg, mainGroup) {
 
     console.log('🚀 DÉBUT setupWheelZoom');
     
-
-    const calculateOptimalZoom = () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        // Rayon total du radar
-        const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
-
-        // Calcul du zoom pour que le radar tienne dans la fenêtre
-        // On laisse une marge de 10% de chaque côté
-        const widthZoom = (width * 0.8) / (2 * totalRadius);
-        const heightZoom = (height * 0.8) / (2 * totalRadius);
-        
-        // Prendre le zoom le plus petit pour s'assurer que tout rentre
-        const optimalZoom = Math.min(widthZoom, heightZoom);
-        
-        // Limiter entre 0.1 et 1 pour éviter des zooms trop extrêmes
-        return Math.max(0.1, Math.min(optimalZoom, 1));
-    };
-
-
     state.WheelZoom = d3.zoom()
     .scaleExtent([0.1, 3])
     .on("zoom", ({transform}) => {
@@ -488,18 +500,65 @@ export function setMaxGenerationsInit(max) {
     console.log(`📊 Générations max mises à jour: ${max}`);
 }
 
-export function getGenerationColor(generation) {
-    // const colors = [
-    //     '#e3f2fd', // gen 1 - bleu très clair
-    //     '#bbdefb', // gen 2 - bleu clair
-    //     '#90caf9', // gen 3 - bleu moyen
-    //     '#64b5f6', // gen 4 - bleu
-    //     '#42a5f5', // gen 5 - bleu foncé
-    //     '#2196f3', // gen 6 - bleu plus foncé
-    //     '#1976d2', // gen 7 - bleu très foncé
-    //     '#1565c0'  // gen 8 - bleu foncé final
+
+
+// export function getGenerationColor(generation, sex = 'M') {
+//     // palette homme / nuances de bleu
+//     const maleColors = [
+//         '#e6f3ff', // gen 1 - bleu très clair
+//         '#c1e1ff', // gen 2 - légèrement plus saturé
+//         '#9bceff', // gen 3 - bleu ciel doux
+//         '#72b8ff', // gen 4 - bleu ciel vibrant
+//         '#4da2ff', // gen 5 - bleu franc
+//         '#2b8fff', // gen 6 - bleu électrique
+//         '#0a7cff', // gen 7 - bleu profond
+//         '#005ce6'  // gen 8 - bleu nuit
+//     ];
+    
+//     // palette femme / nuances de rose/rouge
+//     // const femaleColors = [
+//     //     '#ffe6f3', // gen 1 - rose très clair
+//     //     '#ffc1e1', // gen 2 - rose clair
+//     //     '#ff9bce', // gen 3 - rose doux
+//     //     '#ff72b8', // gen 4 - rose vibrant
+//     //     '#ff4da2', // gen 5 - rose franc
+//     //     '#ff2b8f', // gen 6 - rose électrique
+//     //     '#ff0a7c', // gen 7 - rose profond
+//     //     '#e6005c'  // gen 8 - rose nuit
+//     // ];
+
+//     // palette femme / nuances de vert
+//     const femaleColors = [
+//         '#f0fff0', // gen 1 - vert menthe très clair
+//         '#e0ffe0', // gen 2 - vert pastel
+//         '#c8ffc8', // gen 3 - vert clair
+//         '#90ee90', // gen 4 - vert clair vibrant
+//         '#7dd87d', // gen 5 - vert moyen
+//         '#5cb85c', // gen 6 - vert franc
+//         '#4a934a', // gen 7 - vert foncé
+//         '#2d5a2d'  // gen 8 - vert très foncé
+//     ];
+        
+//     const colors = sex === 'F' ? femaleColors : maleColors;
+//     return colors[Math.min(generation - 1, colors.length - 1)] || colors[0];
+// }
+
+
+
+export function getGenerationColor(generation, sex = 'M') {
+    
+    // PALETTE HARMONIEUSE - OPTION 1 : Bleu/Rose doux
+    // const maleColorsV1 = [
+    //     '#f0f8ff', // gen 1 - bleu alice très clair
+    //     '#e6f3ff', // gen 2 - bleu ciel très clair  
+    //     '#ccebff', // gen 3 - bleu ciel clair
+    //     '#99d6ff', // gen 4 - bleu ciel
+    //     '#66c2ff', // gen 5 - bleu moyen
+    //     '#3399ff', // gen 6 - bleu franc
+    //     '#0080ff', // gen 7 - bleu vif
+    //     '#0066cc'  // gen 8 - bleu profond
     // ];
-    const colors = [
+    const maleColorsV1 = [
         '#e6f3ff', // gen 1 - bleu très clair
         '#c1e1ff', // gen 2 - légèrement plus saturé
         '#9bceff', // gen 3 - bleu ciel doux
@@ -509,13 +568,128 @@ export function getGenerationColor(generation) {
         '#0a7cff', // gen 7 - bleu profond
         '#005ce6'  // gen 8 - bleu nuit
     ];
-    return colors[Math.min(generation - 1, colors.length - 1)] || '#e3f2fd';
+
+
+
+    
+    // const femaleColorsV1 = [
+    //     '#fff0f8', // gen 1 - rose alice très clair
+    //     '#ffe6f3', // gen 2 - rose très clair
+    //     '#ffcceb', // gen 3 - rose clair
+    //     '#ff99d6', // gen 4 - rose
+    //     '#ff66c2', // gen 5 - rose moyen
+    //     '#ff3399', // gen 6 - rose franc
+    //     '#ff0080', // gen 7 - rose vif
+    //     '#cc0066'  // gen 8 - rose profond
+    // ];
+    const femaleColorsV1 = [
+        '#ffe6f3', // gen 1 - rose alice très clair
+        '#ffe6f3', // gen 2 - rose alice très clair
+        '#ffe6f3', // gen 3 - rose alice très clair
+        '#ffe6f3', // gen 4 - rose alice très clair
+        '#ffe6f3', // gen 5 - rose alice très clair
+        '#ffe6f3', // gen 6 - rose alice très clair
+        '#ffe6f3', // gen 7 - rose alice très clair
+        '#ffe6f3', // gen 8 - rose alice très clairsssss
+    ];
+
+    // PALETTE HARMONIEUSE - OPTION 2 : Bleu/Corail élégant
+    const maleColorsV2 = [
+        '#f8fcff', // gen 1 - bleu glacé
+        '#e8f4ff', // gen 2 - bleu très clair
+        '#d1e7ff', // gen 3 - bleu poudré
+        '#a8ccff', // gen 4 - bleu doux
+        '#7fb3ff', // gen 5 - bleu moyen
+        '#5599ff', // gen 6 - bleu saturé
+        '#2b7fff', // gen 7 - bleu intense
+        '#0066ff'  // gen 8 - bleu électrique
+    ];
+    
+    const femaleColorsV2 = [
+        '#fff8f5', // gen 1 - corail glacé
+        '#fff0e8', // gen 2 - corail très clair
+        '#ffe4d1', // gen 3 - corail poudré
+        '#ffcca8', // gen 4 - corail doux
+        '#ffb37f', // gen 5 - corail moyen
+        '#ff9955', // gen 6 - corail saturé
+        '#ff7f2b', // gen 7 - corail intense
+        '#ff6600'  // gen 8 - orange corail
+    ];
+
+    // PALETTE HARMONIEUSE - OPTION 3 : Bleu marine/Rose antique
+    const maleColorsV3 = [
+        '#f5f8ff', // gen 1 - bleu porcelaine
+        '#ebf2ff', // gen 2 - bleu pâle
+        '#d6e5ff', // gen 3 - bleu lavande
+        '#b3ccff', // gen 4 - bleu pervenche
+        '#8fb3ff', // gen 5 - bleu bleuet
+        '#6699ff', // gen 6 - bleu roi
+        '#4080ff', // gen 7 - bleu marine clair
+        '#1a66ff'  // gen 8 - bleu marine
+    ];
+    
+    const femaleColorsV3 = [
+        '#fff5f8', // gen 1 - rose porcelaine
+        '#ffebf2', // gen 2 - rose pâle
+        '#ffd6e5', // gen 3 - rose antique
+        '#ffb3cc', // gen 4 - rose poudré
+        '#ff8fb3', // gen 5 - rose tendre
+        '#ff6699', // gen 6 - rose vif
+        '#ff4080', // gen 7 - rose fuchsia
+        '#ff1a66'  // gen 8 - rose intense
+    ];
+
+    // SÉLECTION DE LA PALETTE (changez le numéro pour tester)
+    const paletteVersion = 1; // Changez ça pour tester : 1, 2 ou 3
+    
+    let maleColors, femaleColors;
+    
+    switch(paletteVersion) {
+        case 1:
+            maleColors = maleColorsV1;
+            femaleColors = femaleColorsV1;
+            break;
+        case 2:
+            maleColors = maleColorsV2;
+            femaleColors = femaleColorsV2;
+            break;
+        case 3:
+            maleColors = maleColorsV3;
+            femaleColors = femaleColorsV3;
+            break;
+        default:
+            maleColors = maleColorsV1;
+            femaleColors = femaleColorsV1;
+    }
+    
+    const colors = sex === 'F' ? femaleColors : maleColors;
+    return colors[Math.min(generation - 1, colors.length - 1)] || colors[0];
 }
 
+/*
+DESCRIPTION DES PALETTES :
+
+OPTION 1 - Bleu/Rose classique :
+- Harmonie parfaite, très lisible
+- Distinction claire homme/femme
+- Couleurs douces et professionnelles
+
+OPTION 2 - Bleu/Corail moderne :
+- Plus contemporain et chaleureux
+- Corail plus original que le rose
+- Excellent contraste visuel
+
+OPTION 3 - Bleu marine/Rose antique :
+- Plus sophistiqué et élégant
+- Couleurs plus saturées
+- Look plus premium
+
+Pour tester une palette, changez juste le numéro dans "paletteVersion = 1"
+*/
 
 // calcul des couleurs de texte adaptatives
-function getAdaptiveTextColors(generation) {
-    if (generation <= 2) {
+function getAdaptiveTextColors(generation, sex = 'M') {
+    if (generation <= 2 || sex === 'F') {
         // Générations claires (0-4) : texte foncé avec contour blanc
         return {
             firstName: { fill: "#1a1a1a", stroke: "white", strokeWidth: "1.5px", fontWeight: "bold" },
@@ -595,7 +769,10 @@ function organizeByGenerations(rootTree) {
             generations.set(generation, []);
         }
         
-        // Ajouter la personne avec sa position calculée
+        // Ajouter la sex à personne 
+        const fullPersonData = state.gedcomData.individuals[person.id];
+        person.sex = fullPersonData.sex;
+
         generations.get(generation).push({
             person: person,
             generation: generation,
@@ -898,7 +1075,7 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     
 
 
-    const textColors = getAdaptiveTextColors(generation);
+    const textColors = getAdaptiveTextColors(generation, person.sex);
 
     // Dessiner les prénoms SEULEMENT pour gen ≤ 6
     if (generation <= 6) {
@@ -1061,7 +1238,7 @@ function drawAllGenerations(mainGroup, generationsData) {
     // Debug de la structure reçue
     console.log('📊 Données reçues:', generationsData);
     generationsData.forEach((people, gen) => {
-        console.log(`  Gen ${gen}: ${people.length} personnes`);
+        console.log(`  Gen ${gen}: ${people.length} personnes }`);
     });
     
     generationsData.forEach((people, generation) => {
@@ -1093,7 +1270,7 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         .datum(person); 
     
     // // Couleur selon la génération
-    const fillColor = getGenerationColor(generation);
+    const fillColor = getGenerationColor(generation, person.sex);
    
     // Segment principal avec données liées
     // let clickTimeout = null;
@@ -1171,20 +1348,6 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
                 const svg = d3.select("#tree-svg");
                 
                 // FORCER LE ZOOM AVANT TOUT
-                const calculateOptimalZoom = () => {
-                    const width = window.innerWidth;
-                    const height = window.innerHeight;
-                    
-                    const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
-
-                    const widthZoom = (width * 0.8) / (2 * totalRadius);
-                    const heightZoom = (height * 0.8) / (2 * totalRadius);
-                    
-                    const optimalZoom = Math.min(widthZoom, heightZoom);
-                    
-                    return Math.max(0.1, Math.min(optimalZoom, 1));
-                };
-
                 const optimalZoom = calculateOptimalZoom();
                 
                 // FORCER LE ZOOM AVANT LE CHANGEMENT DE RACINE

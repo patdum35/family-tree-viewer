@@ -1,13 +1,14 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state } from './main.js';
-import { needsReset, resetWheelView, getGenerationColor } from './treeWheelRenderer.js';
+import { state, updateRadarButtonText } from './main.js';
+import { needsReset, resetWheelView, getGenerationColor, calculateOptimalZoom } from './treeWheelRenderer.js';
 // import { historicalFigures } from './historicalData.js';
 import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow.js';
 import { translateOccupation } from './occupations.js';
 import { cleanProfession, cleanLocation} from './nameCloudUtils.js';
 import { speakPersonName} from './treeAnimation.js';
+import { updateTreeModeSelector } from './mainUI.js';
 
 
 
@@ -148,20 +149,6 @@ function launchFortuneWheelWithLever(baseVelocity) {
     const svg = d3.select("#tree-svg");
     
     // Calculer le zoom optimal
-    const calculateOptimalZoom = () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
-
-        const widthZoom = (width * 0.8) / (2 * totalRadius);
-        const heightZoom = (height * 0.8) / (2 * totalRadius);
-        
-        const optimalZoom = Math.min(widthZoom, heightZoom);
-        
-        return Math.max(0.1, Math.min(optimalZoom, 1));
-    };
-
     const optimalZoom = calculateOptimalZoom();
     
     // RÉINITIALISATION AGRESSIVE DU ZOOM
@@ -369,10 +356,10 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         }
         state.isSpinning = false;
 
-        highlightWinnerSegment(winner.segment, winner.generation);
+        highlightWinnerSegment(winner.segment, winner.generation, winner.sex);
 
 
-        resetLastWinnerHighlightAsync();
+        // resetLastWinnerHighlightAsync();
 
 
         
@@ -420,7 +407,7 @@ function resetRadarToCenter() {
 }
 
 
-function highlightWinnerSegment(segmentIndex, generation) {
+function highlightWinnerSegment(segmentIndex, generation, sex) {
     // Reset de l'ancien gagnant
     if (lastWinner && lastWinner.clonedSegment) {
         lastWinner.clonedSegment.remove();
@@ -435,12 +422,13 @@ function highlightWinnerSegment(segmentIndex, generation) {
 
         // Mémoriser le centre
         allWinnerSegments.push({
-            generation: generation,
             segment: segmentIndex,
+            generation: generation,
+            sex: sex,
             element: centerElement.node()
         });
 
-        lastWinner = { segment: segmentIndex, generation: generation, element: centerElement.node() };
+        lastWinner = { segment: segmentIndex, generation: generation, sex: sex, element: centerElement.node() };
         
     } else {
         const targetElement = d3.select(`.person-segment-group.gen-${generation}[data-segment-position="${segmentIndex}"]`);
@@ -454,8 +442,9 @@ function highlightWinnerSegment(segmentIndex, generation) {
 
             // Mémoriser ce segment gagnant
             allWinnerSegments.push({
-                generation: generation,
                 segment: segmentIndex,
+                generation: generation,
+                sex: sex,
                 element: targetElement.node()
             });
             
@@ -550,6 +539,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 console.log(`🔧 Transform corrigé: ${correctedTransform}`);
                 
                 // 6. ANIMATION de grossissement
+                const personData = targetElement.datum();
                 clonedSegment
                     .transition()
                     .duration(1500)
@@ -571,7 +561,7 @@ function highlightWinnerSegment(segmentIndex, generation) {
                         console.log(`📝 AJOUT TEXTE HORIZONTAL:`);
                         
                         // Récupérer les données de la personne
-                        const personData = targetElement.datum();
+
                         console.log(`   Personne: ${personData.name}`);
                         
                         // // Créer un div pour le texte horizontal
@@ -639,9 +629,12 @@ function highlightWinnerSegment(segmentIndex, generation) {
                 lastWinner = { 
                     segment: segmentIndex, 
                     generation: generation, 
+                    sex: sex,
                     element: targetElement.node(),
                     clonedSegment: clonedSvg.node()
                 };
+
+                console.log(`✅ Segment gagnant mis en évidence: Gen ${generation}, Segment ${segmentIndex}, sex ${sex} personData.name:${personData.name} personData.id:${personData.id} personData.sex:${personData.sex} element:${targetElement.node()}`);
                 
             }, 750);
             state.currentAnimationTimeouts.push(timeoutId);
@@ -651,8 +644,9 @@ function highlightWinnerSegment(segmentIndex, generation) {
 
 
 function resetLastWinnerHighlightAsync() {
-    if (!lastWinner) return;
-    
+    if (!lastWinner ) return;
+        
+
     // Déférer à la prochaine frame pour ne pas bloquer
     requestAnimationFrame(() => {
         if (lastWinner.generation === 0) {
@@ -661,7 +655,7 @@ function resetLastWinnerHighlightAsync() {
                 .style("stroke", "white")
                 .style("stroke-width", "4");
         } else {
-            const originalColor = getGenerationColor(lastWinner.generation);
+            const originalColor = getGenerationColor(lastWinner.generation, lastWinner.sex);
             const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
             
             if (!targetElement.empty()) {
@@ -1398,23 +1392,35 @@ function getFortuneText(textType) {
             es: "fortuneModeActive",
             hu: "fortuneModeActive"
         },
-        winnerContinue: {
-            fr: "Cliquez pour continuer",
-            en: "Click to continue",
-            es: "Haz clic para continuar",
-            hu: "Kattints a folytatáshoz"
-        },
         showWinner: {
-            fr: "Montrer le gagnant",
-            en: "Show winner",
-            es: "Mostrar ganador",
-            hu: "Mutasd a győztest"
+            fr: "Nom du gagnant?",
+            en: "winner's name?",
+            es: "ganador nombre?",
+            hu: "nyertes neve?",
         },
         quiz: {
-            fr: "quiz sur le gagnant",
-            en: "winner quiz",
-            es: "cuestionario del ganador", 
-            hu: "kvíz a győztesről"
+            fr: "quiz",
+            en: "quiz",
+            es: "cuestionario", 
+            hu: "kvíz"
+        },
+        showInTree: {
+            "fr": "Voir le gagnant dans l'arbre",
+            "en": "Show winner in tree", 
+            "es": "Ver ganador en árbol",
+            "hu": "Nyertes mutatása a fán"
+        },
+        centerWinner: {
+            "fr": "Gagnant au centre de la roue",
+            "en": "Winner at center of wheel",
+            "es": "Ganador al centro de la rueda", 
+            "hu": "Nyertes a kerék közepén"
+        },
+        winnerContinue: {
+            fr: "Continuer",
+            en: "Continue",
+            es: "Continuar",
+            hu: "Folytatás"
         },
         closeQuiz: {
             fr: "fermer",
@@ -1680,7 +1686,6 @@ function getFortuneText(textType) {
             "es": "una hermana", 
             "hu": "egy lánytestvér"
         },
-        
     };
 
     // AJOUT : Vérification de sécurité
@@ -1820,17 +1825,23 @@ function createRealisticSlotHandle() {
                     .style("fill", "#ff6b6b")
                     .style("stroke", "white")
                     .style("stroke-width", "4");
-            } else {
-                const originalColor = getGenerationColor(winner.generation);
+            }
+            else {
+                console.log(`🎯 DEBUG ----- Nettoyage du segment gagnant: génération ${winner.generation}, segment ${winner.segment},  name ${winner.name},  sex ${winner.sex}`);
+
+                const originalColor = getGenerationColor(winner.generation, winner.sex);
                 const targetElement = d3.select(`.person-segment-group.gen-${winner.generation}[data-segment-position="${winner.segment}"]`);
                 
                 if (!targetElement.empty()) {
                     targetElement.select("path")
                         .style("fill", originalColor)
+                        // .style("fill", " #FFFFFF")
                         .style("stroke", "white")
                         .style("stroke-width", "1");
                 }
-            }
+            }            
+            
+
         });
 
         // Vider la liste des segments gagnants
@@ -1985,6 +1996,159 @@ window.closeWinnerMessage = closeWinnerMessage;
 
 
 // Fonction showWinnerMessage modifiée avec 3 boutons
+// function showWinnerMessage(winner) {
+//     const message = document.createElement("div");
+//     message.style.cssText = `
+//         position: fixed;
+//         top: 50%;
+//         left: 50%;
+//         transform: translate(-50%, -50%) scale(0);
+//         background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+//         color: white;
+//         padding: 30px;
+//         border-radius: 20px;
+//         font-size: 24px;
+//         font-weight: bold;
+//         text-align: center;
+//         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+//         z-index: 9999;
+//         transition: transform 0.5s ease;
+//         min-width: 300px;
+//         max-width: 95vw;
+//         width: auto;
+//         @media (max-width: 600px) {
+//             font-size: 16px !important;
+//             padding: 20px !important;
+//             min-width: 280px !important;
+//         }
+//         @media (max-width: 400px) {
+//             font-size: 14px !important;
+//             padding: 15px !important;
+//             min-width: 250px !important;
+//         }
+//     `;
+//         // min-width: 400px;
+//         // max-width: 90vw;
+    
+//     message.innerHTML = `
+//         <div style="font-size: 50px;">🎉</div>
+//         <div style="margin-bottom: 20px;">${getFortuneText('winnerTitle')}</div>
+        
+//         <!-- Zone pour afficher le nom du gagnant (cachée au début) -->
+//         <div id="winnerNameDisplay" style="
+//             font-size: 28px; 
+//             margin: 15px 0; 
+//             color: #fff700;
+//             display: none;
+//             opacity: 0;
+//             transition: opacity 0.3s ease;
+//         ">${winner.name}</div>
+        
+//         <!-- Conteneur des boutons -->
+//         <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 25px;">
+//             <button id="showWinnerBtn" style="
+//                 background: rgba(255, 255, 255, 0.2);
+//                 border: 2px solid white;
+//                 color: white;
+//                 padding: 12px 20px;
+//                 border-radius: 10px;
+//                 font-size: 16px;
+//                 font-weight: bold;
+//                 cursor: pointer;
+//                 transition: all 0.3s ease;
+//                 backdrop-filter: blur(10px);
+//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+//                 🏆 ${getFortuneText('showWinner')}
+//             </button>
+            
+//             <button id="quizBtn" style="
+//                 background: rgba(255, 255, 255, 0.2);
+//                 border: 2px solid white;
+//                 color: white;
+//                 padding: 12px 20px;
+//                 border-radius: 10px;
+//                 font-size: 16px;
+//                 font-weight: bold;
+//                 cursor: pointer;
+//                 transition: all 0.3s ease;
+//                 backdrop-filter: blur(10px);
+//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+//                 🧠 ${getFortuneText('quiz')}
+//             </button>
+            
+//             <button id="continueBtn" style="
+//                 background: rgba(255, 255, 255, 0.2);
+//                 border: 2px solid white;
+//                 color: white;
+//                 padding: 12px 20px;
+//                 border-radius: 10px;
+//                 font-size: 16px;
+//                 font-weight: bold;
+//                 cursor: pointer;
+//                 transition: all 0.3s ease;
+//                 backdrop-filter: blur(10px);
+//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+//                 ➡️ ${getFortuneText('winnerContinue')}
+//             </button>
+//         </div>
+//     `;
+    
+//     document.body.appendChild(message);
+    
+//     // Animation d'apparition
+//     setTimeout(() => {
+//         message.style.transform = "translate(-50%, -50%) scale(1)";
+//     }, 100);
+    
+//     // Gestion des clics sur les boutons
+//     const showWinnerBtn = message.querySelector('#showWinnerBtn');
+//     const quizBtn = message.querySelector('#quizBtn');
+//     const continueBtn = message.querySelector('#continueBtn');
+//     const winnerNameDisplay = message.querySelector('#winnerNameDisplay');
+    
+//     // Bouton 1 : Afficher le gagnant
+//     showWinnerBtn.onclick = (e) => {
+//         e.stopPropagation();
+//         winnerNameDisplay.style.display = 'block';
+//         setTimeout(() => {
+//             winnerNameDisplay.style.opacity = '1';
+//         }, 10);
+        
+//         // Désactiver le bouton après utilisation
+//         showWinnerBtn.style.opacity = '0.5';
+//         showWinnerBtn.style.cursor = 'not-allowed';
+//         showWinnerBtn.onclick = null;
+
+//         resetLastWinnerHighlightAsync();
+        
+//         // Jouer un son si disponible
+//         if (typeof fortuneSounds !== 'undefined') {
+//             fortuneSounds.play('winner');
+//         }
+//         speakClue(winner.name.replace(/\//g, ''));
+//     };
+    
+//     // Bouton 2 : Quiz sur le gagnant
+//     quizBtn.onclick = (e) => {
+//         e.stopPropagation();
+//         closeWinnerMessage(message);
+//         showQuizMessage(winner);
+//         resetLastWinnerHighlightAsync();
+//     };
+    
+//     // Bouton 3 : Continuer (fermer)
+//     continueBtn.onclick = (e) => {
+//         e.stopPropagation();
+//         closeWinnerMessage(message);
+//         resetLastWinnerHighlightAsync();
+//     };
+// }
+
+
+// Fonction showWinnerMessage modifiée avec 5 boutons
 function showWinnerMessage(winner) {
     const message = document.createElement("div");
     message.style.cssText = `
@@ -2016,8 +2180,6 @@ function showWinnerMessage(winner) {
             min-width: 250px !important;
         }
     `;
-        // min-width: 400px;
-        // max-width: 90vw;
     
     message.innerHTML = `
         <div style="font-size: 50px;">🎉</div>
@@ -2034,14 +2196,14 @@ function showWinnerMessage(winner) {
         ">${winner.name}</div>
         
         <!-- Conteneur des boutons -->
-        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 25px;">
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
             <button id="showWinnerBtn" style="
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
+                padding: 10px 18px;
                 border-radius: 10px;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2055,9 +2217,9 @@ function showWinnerMessage(winner) {
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
+                padding: 10px 18px;
                 border-radius: 10px;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2066,14 +2228,48 @@ function showWinnerMessage(winner) {
                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
                 🧠 ${getFortuneText('quiz')}
             </button>
+
+            <!-- NOUVEAU : Bouton voir dans l'arbre -->
+            <button id="showInTreeBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 10px 18px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                🌳 ${getFortuneText('showInTree')}
+            </button>
+
+            <!-- NOUVEAU : Bouton mettre au centre -->
+            <button id="centerWinnerBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 10px 18px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                🎯 ${getFortuneText('centerWinner')}
+            </button>
             
             <button id="continueBtn" style="
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 12px 20px;
+                padding: 10px 18px;
                 border-radius: 10px;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2095,6 +2291,8 @@ function showWinnerMessage(winner) {
     // Gestion des clics sur les boutons
     const showWinnerBtn = message.querySelector('#showWinnerBtn');
     const quizBtn = message.querySelector('#quizBtn');
+    const showInTreeBtn = message.querySelector('#showInTreeBtn');
+    const centerWinnerBtn = message.querySelector('#centerWinnerBtn');
     const continueBtn = message.querySelector('#continueBtn');
     const winnerNameDisplay = message.querySelector('#winnerNameDisplay');
     
@@ -2106,12 +2304,12 @@ function showWinnerMessage(winner) {
             winnerNameDisplay.style.opacity = '1';
         }, 10);
         
-        // Désactiver le bouton après utilisation
         showWinnerBtn.style.opacity = '0.5';
         showWinnerBtn.style.cursor = 'not-allowed';
         showWinnerBtn.onclick = null;
+
+        resetLastWinnerHighlightAsync();
         
-        // Jouer un son si disponible
         if (typeof fortuneSounds !== 'undefined') {
             fortuneSounds.play('winner');
         }
@@ -2123,14 +2321,47 @@ function showWinnerMessage(winner) {
         e.stopPropagation();
         closeWinnerMessage(message);
         showQuizMessage(winner);
+        resetLastWinnerHighlightAsync();
+    };
+
+    // Bouton 3 : Voir dans l'arbre
+    showInTreeBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeWinnerMessage(message);
+        
+        // Passer en mode arbre et centrer sur le gagnant
+        if (typeof displayGenealogicTree === 'function') {
+            // Basculer l'état du tree/radar
+            state.isRadarEnabled = !state.isRadarEnabled;  
+            updateRadarButtonText(); 
+            state.treeModeReal = 'ancestors';
+            state.treeMode = 'ancestors';
+            updateTreeModeSelector(state.treeMode);
+            displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
+        }
+        resetLastWinnerHighlightAsync();
+    };
+
+    // Bouton 4 : Mettre au centre de la roue
+    centerWinnerBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeWinnerMessage(message);
+        
+        // Rester en mode roue mais changer la racine
+        if (typeof displayGenealogicTree === 'function') {
+            displayGenealogicTree(winner.id, false, false, false, 'WheelAncestors');
+        }
+        resetLastWinnerHighlightAsync();
     };
     
-    // Bouton 3 : Continuer (fermer)
+    // Bouton 5 : Continuer (fermer)
     continueBtn.onclick = (e) => {
         e.stopPropagation();
         closeWinnerMessage(message);
+        resetLastWinnerHighlightAsync();
     };
 }
+
 
 
 

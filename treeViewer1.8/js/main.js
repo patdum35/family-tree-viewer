@@ -399,6 +399,8 @@ export async function loadData() {
     audio.preload = 'auto';
     audio.volume = 1;
 
+
+
     // 💡 Débloque l'audio à ce moment-là pour IOS
     // Pour le cas IOS qui bloque la musique si la musique n'est pas déclenchée par un clic
     // or en mode démo la musique est lancée à la fin de l'animation , loin après le clic
@@ -528,6 +530,7 @@ export async function loadData() {
         }
 
 
+        state.isRadarEnabled = false;
 
 
         updateRadarButtonText();
@@ -1098,7 +1101,9 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
                 ? buildDescendantTree(person.id)
                 : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
                 ? buildAncestorTree(person.id)
-                : buildCombinedTree(person.id); // Pour le mode 'both'
+                : (state.treeMode === 'both')
+                ? buildCombinedTree(person.id) // Pour le mode 'both'
+                : buildAncestorTree(person.id);
         }
     }
 
