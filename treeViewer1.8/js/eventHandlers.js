@@ -493,6 +493,8 @@ export async function returnToLogin() {
     state.isRadarEnabled = false;
     disableFortuneModeWithLever();
     state.isRadarEnabled = false;
+    state.treeMode = 'ancestors';
+    state.treeModeReal = 'ancestors';
 
     // updateRadarButtonText();
     

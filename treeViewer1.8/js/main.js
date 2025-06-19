@@ -82,6 +82,8 @@ export const state = {
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
+    treeMode_backup: 'ancestors', // ou 'descendants' ou 'both'
+    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'    
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
@@ -113,6 +115,7 @@ export const state = {
     isOnLine: false,
     isDebugLog: false,
     isRadarEnabled: false,
+    isWordCloudEnabled: false,
     WheelMode: {
         maxGenerations: 5,
         showSpouses: true,
@@ -141,6 +144,7 @@ export const state = {
     speechSynthesisInitialized: false,
     isSpeechInGoodHealth: false,
     frenchVoice: null,
+    currentNameCloudModal: null, // Pour stocker le modal du nuage de mots
 
 
 };
@@ -178,23 +182,37 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
 
 export function updateRadarButtonText() {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
+    const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
     if (treeRadarToggleBtn) {
         const span = treeRadarToggleBtn.querySelector('span');
         if (span) {
             span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
         }
     }
+
+    if (menu_nameTreeRadarBtn) {
+        // Mettre à jour le bouton du menu hamburger
+        if (window.innerHeight < 800) {
+            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
+        } else {
+            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
+        }
+    }
+
 }
 
 export function toggleTreeRadar() {
-    const treeRadarToggleBtn = document.getElementById('radarBtn');
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
     updateRadarButtonText();  
 
     if (state.isRadarEnabled) {
+        state.treeMode_backup = state.treeMode;
+        state.treeModeReal_backup = state.treeModeReal;
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
     } else {
+        state.treeMode = state.treeMode_backup;
+        state.treeModeReal = state.treeModeReal_backup;        
         displayGenealogicTree(null, true, false);
     }
 

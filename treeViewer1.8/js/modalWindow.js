@@ -7,7 +7,9 @@ import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPers
 import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
 import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
-import { updateTreeModeSelector } from './mainUI.js';
+import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
+
+
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne
@@ -1445,6 +1447,9 @@ export function setAsRootPerson(personId) {
             state.treeModeReal = 'ancestors';
             state.treeMode = 'ancestors';
             updateTreeModeSelector(state.treeMode);
+            state.nombre_generation = 4; // Réinitialiser à 4 générations
+            updateGenerationSelector(state.nombre_generation)
+            
             disableFortuneModeWithLever();
             // displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
     }

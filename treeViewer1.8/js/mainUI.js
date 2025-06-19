@@ -149,6 +149,31 @@ function replaceGenerationSelector() {
     parentElement.replaceChild(customSelector, originalSelect);
 }
 
+
+// Fonction pour mettre à jour l'affichage du sélecteur de générations
+export function updateGenerationSelector(newValue) {
+    const customSelector = document.getElementById('generations');
+    if (!customSelector) return;
+    
+    // Mettre à jour la propriété value
+    customSelector.value = newValue.toString();
+    
+    // Mettre à jour l'attribut data-value
+    customSelector.setAttribute('data-value', newValue.toString());
+    
+    // Trouver et mettre à jour l'élément d'affichage
+    const displayElement = customSelector.querySelector('div span') || 
+                          customSelector.querySelector('div');
+    
+    if (displayElement) {
+        displayElement.textContent = newValue.toString();
+    }
+    
+    console.log(`Sélecteur générations mis à jour: ${newValue}`);
+}
+
+
+
 // Fonction pour remplacer le sélecteur TreeMode
 function replaceTreeModeSelector() {
     const originalSelect = document.getElementById('treeMode');

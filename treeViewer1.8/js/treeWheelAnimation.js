@@ -8,7 +8,7 @@ import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow
 import { translateOccupation } from './occupations.js';
 import { cleanProfession, cleanLocation} from './nameCloudUtils.js';
 import { speakPersonName} from './treeAnimation.js';
-import { updateTreeModeSelector } from './mainUI.js';
+import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
 
 
 
@@ -2337,6 +2337,10 @@ function showWinnerMessage(winner) {
             state.treeModeReal = 'ancestors';
             state.treeMode = 'ancestors';
             updateTreeModeSelector(state.treeMode);
+
+            state.nombre_generation = 4; // Réinitialiser à 4 générations
+            updateGenerationSelector(state.nombre_generation)
+
             displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
         }
         resetLastWinnerHighlightAsync();
@@ -2705,6 +2709,7 @@ function showQuizMessage(winner) {
                     <div style="font-size: 24px;">🎉</div>
                     <div>${getFortuneText('correctGuess')}</div>
                     <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
                 `;
                 bgColor = 'rgba(0, 255, 0, 0.2)';
                 break;
@@ -2713,6 +2718,7 @@ function showQuizMessage(winner) {
                     <div style="font-size: 24px;">😔</div>
                     <div>${getFortuneText('wrongGuess')}</div>
                     <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 0, 0, 0.2)';
                 break;
@@ -2721,6 +2727,7 @@ function showQuizMessage(winner) {
                     <div style="font-size: 24px;">💡</div>
                     <div>${getFortuneText('solutionRevealed')}</div>
                     <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 165, 0, 0.2)';
                 break;
@@ -2736,6 +2743,9 @@ function showQuizMessage(winner) {
         `;
         resultContainer.innerHTML = resultHTML;
         
+        // Ajouter les gestionnaires d'événements pour les nouveaux boutons
+        setupActionButtonsEvents();
+        
         // Garder nextClueBtn actif
         answerInput.disabled = true;
         checkAnswerBtn.disabled = true;
@@ -2745,9 +2755,125 @@ function showQuizMessage(winner) {
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
         });
-        
-
     }
+
+    // Fonction pour créer les boutons d'action
+    function createActionButtons() {
+        return `
+            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+                <button id="showInTreeBtn" style="
+                    background: rgba(33, 150, 243, 0.8);
+                    border: 1px solid #2196f3;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='rgba(33, 150, 243, 1)'" 
+                onmouseout="this.style.background='rgba(33, 150, 243, 0.8)'">
+                    🌳 ${getFortuneText('showInTree')}
+                </button>
+                
+                <button id="centerWinnerBtn" style="
+                    background: rgba(76, 175, 80, 0.8);
+                    border: 1px solid #4caf50;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='rgba(76, 175, 80, 1)'" 
+                onmouseout="this.style.background='rgba(76, 175, 80, 0.8)'">
+                    🎯 ${getFortuneText('centerWinner')}
+                </button>
+            </div>
+        `;
+    }
+
+
+    // Fonction pour configurer les événements des boutons
+    function setupActionButtonsEvents() {
+        const showInTreeBtn = document.getElementById('showInTreeBtn');
+        const centerWinnerBtn = document.getElementById('centerWinnerBtn');
+        
+        if (showInTreeBtn) {
+            showInTreeBtn.onclick = (e) => {
+                e.stopPropagation();
+                
+                // Fermer la fenêtre quiz avec la même logique
+                closeQuizWindow(() => {
+                    // Passer en mode arbre et centrer sur le gagnant
+                    if (typeof displayGenealogicTree === 'function') {
+                        // Basculer l'état du tree/radar
+                        state.isRadarEnabled = !state.isRadarEnabled;  
+                        updateRadarButtonText(); 
+                        state.treeModeReal = 'ancestors';
+                        state.treeMode = 'ancestors';
+                        updateTreeModeSelector(state.treeMode);
+
+                        state.nombre_generation = 4; // Réinitialiser à 4 générations
+                        updateGenerationSelector(state.nombre_generation)
+
+                        displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+        
+        if (centerWinnerBtn) {
+            centerWinnerBtn.onclick = (e) => {
+                e.stopPropagation();
+                
+                // Fermer la fenêtre quiz avec la même logique
+                closeQuizWindow(() => {
+                    // Rester en mode roue mais changer la racine
+                    if (typeof displayGenealogicTree === 'function') {
+                        displayGenealogicTree(winner.id, false, false, false, 'WheelAncestors');
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+    }
+
+
+    // Fonction pour fermer la fenêtre quiz 
+    function closeQuizWindow(callback) {
+        // Utiliser directement la variable quizMessage qui existe déjà !
+        quizMessage.style.transform = "translate(-50%, -50%) scale(0)";
+        setTimeout(() => {
+            if (quizMessage.parentNode) {
+                document.body.removeChild(quizMessage);
+            }
+            
+            // Appeler les fonctions de nettoyage
+            if (typeof hideWinnerText === 'function') {
+                hideWinnerText();
+            }
+            if (typeof resetLastWinnerHighlightAsync === 'function') {
+                resetLastWinnerHighlightAsync();
+            }
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.stopTicking();
+            }
+            
+            // Exécuter le callback
+            if (callback) {
+                callback();
+            }
+        }, 300);
+    }
+
+
+
+
+
+
     
     // Gestionnaires d'événements
     nextClueBtn.onclick = (e) => {

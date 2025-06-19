@@ -59,6 +59,8 @@ export const nameCloudState = {
 
 export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
+    state.isWordCloudEnabled = true; // Activer le nuage de mots
+    
     // Pour désactiver le fond d'écran
     enableBackground(false);
 

@@ -2,6 +2,7 @@
 import { state, updateRadarButtonText } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 
+
   // Variables pour garder une référence aux éléments
   let hamburgerMenu, sideMenu, menuOverlay;
 
@@ -25,7 +26,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animation et audio',
         'section_root': 'Racine',
         'section_modes': 'Modes',
-        'section_namecloud': 'Nuage de mots',
+        'section_namecloud': 'Nuage / radar / arbre',
         'section_radar': 'radar',
         'section_settings': 'Fonds d\'écran',
         'section_search': 'Recherche dans l\'arbre',
@@ -61,7 +62,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animation and audio',
         'section_root': 'Root',
         'section_modes': 'Modes',
-        'section_namecloud': 'Word cloud',
+        'section_namecloud': 'Cloud / radar / tree',
         'section_radar': 'radar chart',
         'section_settings': 'Backgrounds',
         'section_search': 'Tree search',
@@ -95,7 +96,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animación y audio',
         'section_root': 'Raíz',
         'section_modes': 'Modos',
-        'section_namecloud': 'Nube de palabras',
+        'section_namecloud': 'Nube / radar / árbol',
         'section_radar': 'gráfico de radar',
         'section_settings': 'Fondos de pantalla',
         'section_search': 'Búsqueda en el árbol',
@@ -129,7 +130,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animáció és hang',
         'section_root': 'Gyökér',
         'section_modes': 'Módok',
-        'section_namecloud': 'Szófelhő',
+        'section_namecloud': 'Szófelhő / radar / fa',
         'section_radar': 'radardiagram',
         'section_settings': 'Hátterek',
         'section_search': 'Fa keresés',
@@ -1094,6 +1095,8 @@ function createSection(title, index = 0) {
   }
 
 
+
+
   // Créer la section Name Cloud
   function createNameCloudSection() {
     const height = window.innerHeight;
@@ -1111,16 +1114,18 @@ function createSection(title, index = 0) {
     const buttons = [
       { 
         id: 'menu-nameCloudBtn',
-        onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })', 
+        onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
         title: getMenuTranslation('section_namecloud'), //'Nuage de noms', 
-        text: '💖🔠💗' // '👥'
+        text: '💖🔠💗' 
       },
       { 
-        id: 'menu-nameCloudBtn',
-        onclick: 'enableRadarAndDisplay()',
+        id: 'menu-nameTreeRadarBtn',
+        // onclick: 'enableRadarAndDisplay()',
+        onclick: 'toggleTreeRadar()',
         title: getMenuTranslation('section_radar'), //'Nuage de noms', 
-        text: '🕸️🎯' // '👥'
+        text: (window.innerHeight < 800) ? '  -  🕸️🎯' : '🕸️🎯'
       }
+
     ];
 
 
@@ -1150,8 +1155,7 @@ function createSection(title, index = 0) {
       if (height < 400) {
         // Créer un conteneur pour le label + bouton
         const container = document.createElement('span');
-        // container.textContent = "Nuage de mots";
-        container.textContent = getMenuTranslation('nameCloudLabel');
+
         container.style.fontSize = '13px';
         container.appendChild(button);
         section.content.appendChild(container);
@@ -1163,6 +1167,88 @@ function createSection(title, index = 0) {
     
     sideMenu.appendChild(section.container);
   }
+
+
+
+
+  // // Créer la section Name Cloud
+  // function createNameCloudSection() {
+  //     const height = window.innerHeight;
+  //     const section = createSection(getMenuTranslation('section_namecloud'), 0);
+      
+  //     function enableRadarAndDisplay() {
+  //         state.isRadarEnabled = true;
+  //         updateRadarButtonText();
+  //         displayGenealogicTree(null, false, false, false, 'WheelAncestors');
+  //     }
+  //     window.enableRadarAndDisplay = enableRadarAndDisplay;
+
+  //     const buttons = [
+  //         { 
+  //             id: 'menu-nameCloudBtn',
+  //             onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
+  //             title: getMenuTranslation('section_namecloud'),
+  //             text: '💖🔠💗' 
+  //         },
+  //         { 
+  //             id: 'menu-nameTreeRadarBtn',
+  //             onclick: 'toggleTreeRadar()',
+  //             title: getMenuTranslation('section_radar'),
+  //             text: '🕸️🎯' 
+  //         }
+  //     ];
+
+  //     // INVERSER L'ORDRE POUR LES PETITS ÉCRANS
+  //     const orderedButtons = height < 400 ? buttons.reverse() : buttons;
+      
+  //     orderedButtons.forEach((buttonData, index) => {
+  //         const button = document.createElement('button');
+  //         button.setAttribute('onclick', buttonData.onclick);
+  //         if (buttonData.id) button.id = buttonData.id;
+  //         button.title = buttonData.title;
+          
+  //         const span = document.createElement('span');
+  //         span.textContent = buttonData.text;
+          
+  //         // Adapter uniquement pour les petits écrans
+  //         if (height < 400) {
+  //             span.style.fontSize = '16px';
+  //             button.style.padding = '1px';
+  //         } else if (height < 800) {
+  //             span.style.fontSize = '16px';
+  //             button.style.padding = '2px';
+  //         }
+          
+  //         button.appendChild(span);
+          
+  //         if (height < 400) {
+  //             // AJOUTER LE SÉPARATEUR ENTRE LES BOUTONS
+  //             if (index > 0) {
+  //                 const separator = document.createElement('span');
+  //                 separator.textContent = ' - ';
+  //                 separator.style.fontSize = '13px';
+  //                 separator.style.margin = '0 5px';
+  //                 section.content.appendChild(separator);
+  //             }
+              
+  //             // Créer un conteneur pour le label + bouton
+  //             const container = document.createElement('span');
+  //             container.textContent = getMenuTranslation('nameCloudLabel');
+  //             container.style.fontSize = '13px';
+  //             container.appendChild(button);
+  //             section.content.appendChild(container);
+  //         } else {
+  //             section.content.appendChild(button);
+  //         }
+  //     });
+
+
+
+
+
+      
+  //     sideMenu.appendChild(section.container);
+  // }
 
   // Créer la section Paramètres
   function createSettingsSection() {
