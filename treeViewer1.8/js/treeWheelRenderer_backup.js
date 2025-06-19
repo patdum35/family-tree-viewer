@@ -499,6 +499,28 @@ export function getGenerationColor(generation) {
     //     '#1976d2', // gen 7 - bleu très foncé
     //     '#1565c0'  // gen 8 - bleu foncé final
     // ];
+    // palette chatGPT
+    // const colors = [
+    //     '#FFCDD2', // Rouge clair
+    //     '#F8BBD0', // Rose
+    //     '#E1BEE7', // Violet
+    //     '#D1C4E9', // Lavande
+    //     '#C5CAE9', // Bleu lavande
+    //     '#BBDEFB', // Bleu clair
+    //     '#B2EBF2', // Cyan clair
+    //     '#C8E6C9'  // Vert clair
+    // ];
+    // const colors = [
+    //     '#e3f2fd', // gen 1 - bleu très clair
+    //     '#c6e4fb', // gen 2 - légèrement plus saturé
+    //     '#a8d4f8', // gen 3 - plus doux que #90caf9
+    //     '#7cbcf5', // gen 4 -entre #64b5f6 et #90caf9
+    //     '#5caaf2', // gen 5 -entre #64b5f6 et #42a5f5
+    //     '#3b97f0', // gen 6 -plus punchy
+    //     '#1f7de5', // gen 7 -un bleu dense
+    //     '#0e60c7'  // gen 8 - pour finir bien profond
+    // ];
+
     const colors = [
         '#e6f3ff', // gen 1 - bleu très clair
         '#c1e1ff', // gen 2 - légèrement plus saturé
@@ -529,26 +551,12 @@ function getAdaptiveTextColors(generation) {
             lastName: { fill: "#0d47a1", stroke: "white", strokeWidth: "0.5px", fontWeight: "bold" },
             date: { fill: "#8B4513", stroke: "none", strokeWidth: "0", fontWeight: "normal" }
         };
-    } else if (generation <= 8){
+    } else {
         // Générations foncées (5-8) : texte blanc sans contour
         return {
             firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "500"  },
             lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "600"  },
             date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "400"  }  // Jaune pour les dates
-        };
-    } else if (generation <= 12){
-        // Générations foncées 
-        return {
-            firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
-            lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
-            date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "100"  }  // Jaune pour les dates
-        };
-    } else {
-        // Générations foncées 
-        return {
-            firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
-            lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
-            date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "50"  }  // Jaune pour les dates
         };
     }
 }
@@ -761,7 +769,15 @@ const Wheel_TEXT_CONFIG = {
     lineSpacingFactor: 1.2,
     
     // Taille de police de base par génération
-     baseFontSize: {
+    // baseFontSize: {
+    //     0: 16,  // Centre
+    //     1: 14,  // Gen 1
+    //     2: 12,  // Gen 2
+    //     3: 10,  // Gen 3
+    //     4: 8,   // Gen 4+
+    //     default: 8
+    // },
+    baseFontSize: {
         0: 16,  // Centre
         1: 14,  // Gen 1
         2: 14,  // Gen 2
@@ -799,43 +815,60 @@ const Wheel_TEXT_CONFIG = {
 /**
  * Calcule la taille de police adaptée selon la longueur du texte
  */
+function calculateAdaptiveFontSizeOld(text, baseSize) {
+    const config = Wheel_TEXT_CONFIG.fontReduction;
+    if (text.length > config.threshold) {
+        return Math.round(baseSize * config.reductionFactor);
+    }
+    return baseSize;
+}
+
+
+
 function calculateAdaptiveFontSize(text, baseSize, generation, isLastName = false) {
-    const config = Wheel_TEXT_CONFIG;
+    // const config = Wheel_TEXT_CONFIG;
     
-    let adjustedSize = baseSize;
-    let transformedText = text;
-
-    if (isLastName) {
-        // Pour les noms de famille, on les met en majuscules
-        transformedText = text.toUpperCase();
-    }
+    // let adjustedSize = baseSize;
+    // let transformedText = text;
     
-    // Si encore trop long après transformation, alors réduire la police
-    if (isLastName && (transformedText.length > config.fontReduction.threshold) && (transformedText.length < config.fontReduction.threshold  + 3))  {
-         adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
-    }
-    // Pour les noms de famille, essayer minuscules d'abord
-    else if (isLastName && (text.length >= config.fontReduction.threshold + 3)  ) {
-        // Transformer en "Première lettre + minuscules"
-        transformedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    // // NOUVEAU : Pour les noms de famille, essayer minuscules d'abord
+    // if (isLastName && text.length > config.fontReduction.threshold) {
+    //     // Transformer en "Première lettre + minuscules"
+    //     transformedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
         
-        // Si encore trop long après transformation, alors réduire la police
-        if (transformedText.length > config.fontReduction.threshold +  3) {
-            adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
-        }
-    } else if (!isLastName && text.length > config.fontReduction.threshold) {
-        // Pour les prénoms : réduction de police classique
-        adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
-    }
-    if (isLastName && generation >= 9) {
-        transformedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-    }
+    //     // Si encore trop long après transformation, alors réduire la police
+    //     if (transformedText.length > config.fontReduction.threshold + 2) {
+    //         adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
+    //     }
+    // } else if (!isLastName && text.length > config.fontReduction.threshold) {
+    //     // Pour les prénoms : réduction de police classique
+    //     adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
+    // }
     
-    return {
-        fontSize: Math.max(0.1, adjustedSize),
-        text: transformedText
-    };
+    // // Réduction supplémentaire pour les générations éloignées
+    // if (generation > 3 && text.length > 8) {
+    //     adjustedSize = Math.round(adjustedSize * 0.9);
+    // }
+    
+    // return {
+    //     fontSize: Math.max(8, adjustedSize),
+    //     text: transformedText
+    // };
 
+
+    const config = Wheel_TEXT_CONFIG.fontReduction;
+    let name = text;
+    let fontSize = baseSize;
+    if (isLastName) {
+        name = text.toUpperCase();
+    }
+    if (text.length > config.threshold) {
+        fontSize =  Math.round(baseSize * config.reductionFactor);
+    }
+    return {
+        fontSize: fontSize,
+        text: name 
+    };
 }
 
 
@@ -876,6 +909,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     // Récupérer les paramètres pour cette génération
     const config = Wheel_TEXT_CONFIG;
     const baseSize = config.baseFontSize[generation] || config.baseFontSize.default;
+    // const lineSpacing = config.lineSpacing[generation] || config.lineSpacing.default;
+    // const lineSpacing = baseSize * config.lineSpacingFactor;
     const lineSpacing = baseSize * (generation <= 4 ? config.lineSpacingFactor : config.lineSpacingFactor*0.8); // Plus serré pour les petites générations
 
     const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
@@ -889,6 +924,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     const totalHeight = (totalLines - 1) * lineSpacing;
     
     // Position de départ (pour centrer le nom au milieu)
+    // const startY = -(totalHeight / 2) + (firstNamesList.length * lineSpacing);
+    // const startY = -((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;
     let startY;
     if (firstNamesList.length === 1) {
         startY = -lineSpacing*0.3;
@@ -904,6 +941,7 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     if (generation <= 6) {
         // Dessiner les prénoms (au-dessus du nom)
         firstNamesList.forEach((firstName, index) => {
+            // const fontSize = calculateAdaptiveFontSize(firstName, baseSize);
             const firstNameResult = calculateAdaptiveFontSize(firstName, baseSize, generation, false);
             const y = startY - lineSpacing * (firstNamesList.length - index);
             
@@ -914,6 +952,11 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
                 .attr("dominant-baseline", "middle")
                 .style("font-size", `${firstNameResult.fontSize}px`)
                 .style("font-weight", "bold")
+                // .style("fill", "#1a1a1a")
+                // .style("stroke", "white")
+                // .style("stroke-width", "1px")
+                // .style("stroke", "rgba(255,255,255,0.8)")
+                // .style("stroke-width", "2px")
                 .style("fill", textColors.firstName.fill)
                 .style("stroke", textColors.firstName.stroke)
                 .style("stroke-width", textColors.firstName.strokeWidth)
@@ -922,8 +965,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
                 .style("paint-order", "stroke fill")
                 .text(firstName);
         });
-    }    
-
+    }
+    
 
 
     
@@ -931,14 +974,22 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     // Pour centrer le nom quand pas de prénom (gen > 6)
     const nameY = generation > 6 ? 0 : 0; // Reste à 0 car déjà centré
 
+    // const nameFontSize = calculateAdaptiveFontSize(formattedLastName, baseSize);
     const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
     textGroup.append("text")
         .attr("x", 0)
+        // .attr("y", 0) // Centré au milieu
         .attr("y", nameY) // Position du nom
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
+        // .style("font-size", `${nameFontSize}px`)
         .style("font-size", `${nameResult.fontSize}px`)
         .style("font-weight", "bold")
+        // .style("fill", "#0000CD")
+        // .style("stroke", "white")
+        // .style("stroke-width", "1px")
+        // .style("stroke", "rgba(255,255,255,0.8)")
+        // .style("stroke-width", "2px")
         .style("fill", textColors.lastName.fill)
         .style("stroke", textColors.lastName.stroke)
         .style("stroke-width", textColors.lastName.strokeWidth)
@@ -950,8 +1001,8 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
     // Dessiner la date (sous le nom)
     if (hasDate) {
         const dateText = formatWheelDates(person);
-        const baseDateSize = (config.baseFontSize[generation] || config.baseFontSize.default);
-        const dateFontSize = Math.max(12, baseDateSize - 2);
+        const baseDateSize = (config.baseFontSize[generation] || config.baseFontSize.default) - 4;
+        const dateFontSize = Math.max(7, baseDateSize);
         
         textGroup.append("text")
             .attr("x", 0)
@@ -960,10 +1011,24 @@ function drawWheelPersonDetails(textGroup, match, person, generation) {
             .attr("dominant-baseline", "middle")
             .style("font-size", `${dateFontSize}px`)
             .style("font-weight", "normal")
+            // // .style("fill", "#006400")
+            // // .style("stroke", "white")
+            // // .style("stroke-width", "0.8px")
+            // .style("fill", "#8B4513")  // Brun chocolat foncé
+            // // .style("fill", "#8B0000")  // Rouge foncé
+            // // .style("fill", "#654321")  // Brun sépia foncé
+            // .style("stroke", "#ffffff")
+
+
             .style("fill", textColors.date.fill)
             .style("stroke", textColors.date.stroke)
             .style("stroke-width", textColors.date.strokeWidth)
-            .style("font-weight", textColors.date.fontWeight)
+            .style("font-weight", textColors.firstName.fontWeight)
+
+
+
+
+            .style("stroke-width", "1.2px")
             .style("paint-order", "stroke fill")
             .text(dateText);
     }
@@ -995,16 +1060,18 @@ function drawCenterPersonText(group, person) {
         // Calculer positions pour centrer le nom
         const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0);
         const totalHeight = (totalLines - 1) * lineSpacing;
+        // const startY = -(totalHeight / 2) + (firstNamesList.length * lineSpacing);
+        // const startY = -((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;
         let startY;
         if (firstNamesList.length === 1) {
             startY = -lineSpacing*0.3;
         } else {
-            startY = -lineSpacing*0.3; 
+            startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
         }
         
         // Dessiner les prénoms
         firstNamesList.forEach((firstName, index) => {
-
+            // const fontSize = calculateAdaptiveFontSize(firstName, baseSize);
             const firstNameResult = calculateAdaptiveFontSize(firstName, baseSize, 0, false);
             const y = startY - lineSpacing * (firstNamesList.length - index);
             
@@ -1022,6 +1089,7 @@ function drawCenterPersonText(group, person) {
         });
         
         // Nom de famille (centré)
+        // const nameFontSize = calculateAdaptiveFontSize(formattedLastName, baseSize - 2);
         const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize -2 , 0, true);
         textGroup.append("text")
             .attr("x", 0)
@@ -1040,12 +1108,12 @@ function drawCenterPersonText(group, person) {
         if (hasDate) {
             const dateText = formatWheelDates(person);
             const baseDateSize = (config.baseFontSize[0] || config.baseFontSize.default) - 2;
-            const dateFontSize = Math.max(14, baseDateSize-2);            
+            const dateFontSize = Math.max(14, baseDateSize);
             textGroup.append("text")
                 .attr("x", 0)
                 .attr("y", lineSpacing)
                 .attr("text-anchor", "middle")
-                .style("font-size", `${dateFontSize}px`)
+                .style("font-size", `${Math.max(8, dateFontSize)}px`)
                 .style("fill", "#b3d9ff")
                 .style("stroke", "rgba(0,0,0,0.3)")
                 .style("stroke-width", "0.8px")
@@ -1105,6 +1173,9 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
         .attr("class", `person-box person-segment generation-${generation}`)
         .datum(person) // ← AJOUT : lier les données au path aussi
         .style("fill", fillColor)
+        // .style("stroke", "white")
+        // .style("stroke-width", "1")
+        // .style("filter", "url(#drop-shadow)")
         .style("stroke", segmentStyle.stroke)
         .style("stroke-width", segmentStyle.width)
         .style("filter", segmentStyle.filter)
@@ -1309,6 +1380,8 @@ function drawCenterPerson(mainGroup, person) {
     
     // Contenu textuel
     drawCenterPersonText(centerGroup, person);
+    
+    // console.log(`✅ Centre créé pour ${person.name} avec données liées`);
 }
 
 window.drawSegmentText = drawSegmentText;
