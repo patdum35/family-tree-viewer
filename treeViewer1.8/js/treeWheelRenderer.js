@@ -323,9 +323,15 @@ export const calculateOptimalZoom = () => {
         widthZoom = widthZoom * 1.4;
         heightZoom = heightZoom * 1.4;
     } else if (state.WheelConfig.maxGenerations > 5 ) {
-        widthZoom = widthZoom * 1.2;
-        heightZoom = heightZoom * 1.2;
+        widthZoom = widthZoom * 1.4;
+        heightZoom = heightZoom * 1.4;
     }
+    if ((state.WheelConfig.maxGenerations > 2  && state.WheelConfig.maxGenerations < 6)  && (window.innerHeight < 400  || window.innerWidth < 400)) {
+        widthZoom = widthZoom * 1.4;
+        heightZoom = heightZoom * 1.4;
+    }
+
+
     
     // Prendre le zoom le plus petit pour s'assurer que tout rentre
     const optimalZoom = Math.min(widthZoom, heightZoom);
