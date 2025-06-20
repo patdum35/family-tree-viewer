@@ -10,7 +10,7 @@ import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
-import { drawWheelTree, setMaxGenerations, resetWheelView } from './treeWheelRenderer.js'
+import { drawWheelTree, setMaxGenerations, resetWheelView, removeSpinningImage } from './treeWheelRenderer.js'
 import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
 
 
@@ -495,6 +495,7 @@ export async function returnToLogin() {
     state.isRadarEnabled = false;
     state.treeMode = 'ancestors';
     state.treeModeReal = 'ancestors';
+    removeSpinningImage();
 
     // updateRadarButtonText();
     

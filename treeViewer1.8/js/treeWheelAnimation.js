@@ -1157,88 +1157,6 @@ class FortuneWheelSounds {
         };
     }
 
-    // Démarrer le tic-tac continu du timer
-    // startTicking(interval = 1000) {
-    //     this.stopTicking(); // Arrêter le précédent s'il existe
-        
-    //     console.log("⏰ Démarrage du tic-tac");
-    //     this.currentTickInterval = setInterval(() => {
-    //         this.play('tick');
-    //     }, interval);
-    // }
-
-    // Démarrer le tic-tac continu du timer - version mobile-friendly
-    // startTicking(interval = 1000) {
-    //     this.stopTicking(); // Arrêter le précédent s'il existe
-        
-    //     console.log("⏰ Démarrage du tic-tac");
-        
-    //     const startTime = Date.now();
-    //     let tickCount = 0;
-        
-    //     this.currentTickInterval = setInterval(() => {
-    //         // Calculer le temps écoulé réel
-    //         const elapsed = Date.now() - startTime;
-    //         const expectedTicks = Math.floor(elapsed / interval);
-            
-    //         // Rattraper les ticks manqués (max 2 pour éviter le spam)
-    //         const missedTicks = Math.min(2, expectedTicks - tickCount);
-            
-    //         for (let i = 0; i <= missedTicks; i++) {
-    //             this.play('tick');
-    //         }
-            
-    //         tickCount = expectedTicks + 1;
-            
-    //         // Log pour debug mobile
-    //         // if (missedTicks > 0) {
-    //         //     console.log(`⚠️ Mobile: rattrapé ${missedTicks} tick(s)`);
-    //         // }
-    //     }, interval);
-    // }
-
-    // // Démarrer le tic-tac continu du timer - version Web Worker
-    // startTicking(interval = 1000) {
-    //     this.stopTicking(); // Arrêter le précédent s'il existe
-        
-    //     console.log("⏰ Démarrage du tic-tac (Web Worker)");
-        
-    //     // Créer un Web Worker inline pour éviter les fichiers séparés
-    //     const workerCode = `
-    //         let timerId;
-    //         onmessage = function(e) {
-    //             if (e.data.action === 'start') {
-    //                 timerId = setInterval(() => {
-    //                     postMessage('tick');
-    //                 }, e.data.interval);
-    //             } else if (e.data.action === 'stop') {
-    //                 clearInterval(timerId);
-    //             }
-    //         }
-    //     `;
-        
-    //     const blob = new Blob([workerCode], { type: 'application/javascript' });
-    //     this.timerWorker = new Worker(URL.createObjectURL(blob));
-        
-    //     this.timerWorker.onmessage = () => {
-    //         this.play('tick');
-    //     };
-        
-    //     this.timerWorker.postMessage({ action: 'start', interval: interval });
-    // }
-
-    // // Arrêter le tic-tac
-    // stopTicking() {
-    //     if (this.timerWorker) {
-    //         this.timerWorker.postMessage({ action: 'stop' });
-    //         this.timerWorker.terminate();
-    //         this.timerWorker = null;
-    //         console.log("⏰ Arrêt du tic-tac (Web Worker)");
-    //     }
-    // }
-
-
-
 
     startTicking(interval = 1000) {
         this.stopTicking();
@@ -1255,15 +1173,7 @@ class FortuneWheelSounds {
     }
 
 
-    // // Arrêter le tic-tac
-    // stopTicking() {
-    //     if (this.currentTickInterval) {
-    //         clearInterval(this.currentTickInterval);
-    //         this.currentTickInterval = null;
-    //         console.log("⏰ Arrêt du tic-tac");
-    //     }
-    // }
-    
+   
     // Jouer un son
     play(soundName) {
         if (!this.enabled) {
@@ -1995,159 +1905,6 @@ function closeWinnerMessage() {
 window.closeWinnerMessage = closeWinnerMessage;
 
 
-// Fonction showWinnerMessage modifiée avec 3 boutons
-// function showWinnerMessage(winner) {
-//     const message = document.createElement("div");
-//     message.style.cssText = `
-//         position: fixed;
-//         top: 50%;
-//         left: 50%;
-//         transform: translate(-50%, -50%) scale(0);
-//         background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-//         color: white;
-//         padding: 30px;
-//         border-radius: 20px;
-//         font-size: 24px;
-//         font-weight: bold;
-//         text-align: center;
-//         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-//         z-index: 9999;
-//         transition: transform 0.5s ease;
-//         min-width: 300px;
-//         max-width: 95vw;
-//         width: auto;
-//         @media (max-width: 600px) {
-//             font-size: 16px !important;
-//             padding: 20px !important;
-//             min-width: 280px !important;
-//         }
-//         @media (max-width: 400px) {
-//             font-size: 14px !important;
-//             padding: 15px !important;
-//             min-width: 250px !important;
-//         }
-//     `;
-//         // min-width: 400px;
-//         // max-width: 90vw;
-    
-//     message.innerHTML = `
-//         <div style="font-size: 50px;">🎉</div>
-//         <div style="margin-bottom: 20px;">${getFortuneText('winnerTitle')}</div>
-        
-//         <!-- Zone pour afficher le nom du gagnant (cachée au début) -->
-//         <div id="winnerNameDisplay" style="
-//             font-size: 28px; 
-//             margin: 15px 0; 
-//             color: #fff700;
-//             display: none;
-//             opacity: 0;
-//             transition: opacity 0.3s ease;
-//         ">${winner.name}</div>
-        
-//         <!-- Conteneur des boutons -->
-//         <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 25px;">
-//             <button id="showWinnerBtn" style="
-//                 background: rgba(255, 255, 255, 0.2);
-//                 border: 2px solid white;
-//                 color: white;
-//                 padding: 12px 20px;
-//                 border-radius: 10px;
-//                 font-size: 16px;
-//                 font-weight: bold;
-//                 cursor: pointer;
-//                 transition: all 0.3s ease;
-//                 backdrop-filter: blur(10px);
-//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
-//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-//                 🏆 ${getFortuneText('showWinner')}
-//             </button>
-            
-//             <button id="quizBtn" style="
-//                 background: rgba(255, 255, 255, 0.2);
-//                 border: 2px solid white;
-//                 color: white;
-//                 padding: 12px 20px;
-//                 border-radius: 10px;
-//                 font-size: 16px;
-//                 font-weight: bold;
-//                 cursor: pointer;
-//                 transition: all 0.3s ease;
-//                 backdrop-filter: blur(10px);
-//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
-//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-//                 🧠 ${getFortuneText('quiz')}
-//             </button>
-            
-//             <button id="continueBtn" style="
-//                 background: rgba(255, 255, 255, 0.2);
-//                 border: 2px solid white;
-//                 color: white;
-//                 padding: 12px 20px;
-//                 border-radius: 10px;
-//                 font-size: 16px;
-//                 font-weight: bold;
-//                 cursor: pointer;
-//                 transition: all 0.3s ease;
-//                 backdrop-filter: blur(10px);
-//             " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
-//                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-//                 ➡️ ${getFortuneText('winnerContinue')}
-//             </button>
-//         </div>
-//     `;
-    
-//     document.body.appendChild(message);
-    
-//     // Animation d'apparition
-//     setTimeout(() => {
-//         message.style.transform = "translate(-50%, -50%) scale(1)";
-//     }, 100);
-    
-//     // Gestion des clics sur les boutons
-//     const showWinnerBtn = message.querySelector('#showWinnerBtn');
-//     const quizBtn = message.querySelector('#quizBtn');
-//     const continueBtn = message.querySelector('#continueBtn');
-//     const winnerNameDisplay = message.querySelector('#winnerNameDisplay');
-    
-//     // Bouton 1 : Afficher le gagnant
-//     showWinnerBtn.onclick = (e) => {
-//         e.stopPropagation();
-//         winnerNameDisplay.style.display = 'block';
-//         setTimeout(() => {
-//             winnerNameDisplay.style.opacity = '1';
-//         }, 10);
-        
-//         // Désactiver le bouton après utilisation
-//         showWinnerBtn.style.opacity = '0.5';
-//         showWinnerBtn.style.cursor = 'not-allowed';
-//         showWinnerBtn.onclick = null;
-
-//         resetLastWinnerHighlightAsync();
-        
-//         // Jouer un son si disponible
-//         if (typeof fortuneSounds !== 'undefined') {
-//             fortuneSounds.play('winner');
-//         }
-//         speakClue(winner.name.replace(/\//g, ''));
-//     };
-    
-//     // Bouton 2 : Quiz sur le gagnant
-//     quizBtn.onclick = (e) => {
-//         e.stopPropagation();
-//         closeWinnerMessage(message);
-//         showQuizMessage(winner);
-//         resetLastWinnerHighlightAsync();
-//     };
-    
-//     // Bouton 3 : Continuer (fermer)
-//     continueBtn.onclick = (e) => {
-//         e.stopPropagation();
-//         closeWinnerMessage(message);
-//         resetLastWinnerHighlightAsync();
-//     };
-// }
-
-
 // Fonction showWinnerMessage modifiée avec 5 boutons
 function showWinnerMessage(winner) {
     const message = document.createElement("div");
@@ -2158,37 +1915,44 @@ function showWinnerMessage(winner) {
         transform: translate(-50%, -50%) scale(0);
         background: linear-gradient(135deg, #ff6b6b, #ffd93d);
         color: white;
-        padding: 30px;
-        border-radius: 20px;
-        font-size: 24px;
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 20px;
         font-weight: bold;
         text-align: center;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         z-index: 9999;
         transition: transform 0.5s ease;
         min-width: 300px;
         max-width: 95vw;
+        max-height: 90vh;
+        overflow-y: auto;
         width: auto;
         @media (max-width: 600px) {
             font-size: 16px !important;
-            padding: 20px !important;
+            padding: 15px !important;
             min-width: 280px !important;
         }
         @media (max-width: 400px) {
             font-size: 14px !important;
-            padding: 15px !important;
+            padding: 12px !important;
             min-width: 250px !important;
+        }
+        @media (max-height: 500px) {
+            padding: 10px !important;
+            font-size: 14px !important;
+            border-radius: 10px !important;
         }
     `;
     
     message.innerHTML = `
-        <div style="font-size: 50px;">🎉</div>
-        <div style="margin-bottom: 20px;">${getFortuneText('winnerTitle')}</div>
+        <div style="font-size: 30px; margin-bottom: 8px;">🎉</div>
+        <div style="margin-bottom: 12px; font-size: 0.9em;">${getFortuneText('winnerTitle')}</div>
         
         <!-- Zone pour afficher le nom du gagnant (cachée au début) -->
         <div id="winnerNameDisplay" style="
-            font-size: 28px; 
-            margin: 15px 0; 
+            font-size: 1.2em; 
+            margin: 8px 0; 
             color: #fff700;
             display: none;
             opacity: 0;
@@ -2196,14 +1960,14 @@ function showWinnerMessage(winner) {
         ">${winner.name}</div>
         
         <!-- Conteneur des boutons -->
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
             <button id="showWinnerBtn" style="
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2217,9 +1981,9 @@ function showWinnerMessage(winner) {
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2234,9 +1998,9 @@ function showWinnerMessage(winner) {
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2251,9 +2015,9 @@ function showWinnerMessage(winner) {
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2267,9 +2031,9 @@ function showWinnerMessage(winner) {
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
                 color: white;
-                padding: 10px 18px;
-                border-radius: 10px;
-                font-size: 15px;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2368,7 +2132,6 @@ function showWinnerMessage(winner) {
 
 
 
-
 function cleanClueForSpeech(clueText, personSex = null) {
     let cleaned = clueText;
     
@@ -2396,6 +2159,7 @@ function cleanClueForSpeech(clueText, personSex = null) {
         .replace(/\s+/g, ' ')
         .trim();
 }
+
 
 // Fonction pour afficher le quiz progressif
 function showQuizMessage(winner) {
@@ -2430,9 +2194,6 @@ function showQuizMessage(winner) {
             min-width: 250px !important;
         }
     `;
-        // min-width: 500px;
-        // max-width: 90vw;
-        // max-height: 80vh;
     
     // Préparer les indices dans l'ordre spécifié
     const clues = prepareProgressiveClues(winner);
@@ -2472,7 +2233,6 @@ function showQuizMessage(winner) {
                 max-width: 80px;
             ">${getFortuneText('showSolution')}</button>
             
-
             <button id="close-quiz-btn" style="
                 background: rgba(255, 0, 0, 0.3);
                 border: 2px solid white;
@@ -2490,6 +2250,9 @@ function showQuizMessage(winner) {
             ">❌</button>
         </div>
 
+        <!-- Zone de résultat (initialement cachée, sera déplacée ici quand solution affichée) -->
+        <div id="result-container" style="margin: 15px 0; display: none;"></div>
+
         <!-- Zone des indices -->
         <div id="clues-container" style="
             background: rgba(255, 255, 255, 0.1);
@@ -2505,23 +2268,6 @@ function showQuizMessage(winner) {
                 ${getFortuneText('clickNextClue')}
             </div>
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         
         <!-- Zone de saisie de réponse -->
         <div style="margin: 15px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;">
@@ -2546,10 +2292,6 @@ function showQuizMessage(winner) {
                 white-space: nowrap;
             ">${getFortuneText('checkAnswer')}</button>
         </div>
-        
-        
-        <!-- Zone de résultat -->
-        <div id="result-container" style="margin-top: 20px; display: none;"></div>
     `;
     
     document.body.appendChild(quizMessage);
@@ -2607,17 +2349,11 @@ function showQuizMessage(winner) {
             const cleanedClue = cleanClueForSpeech(clue, winner.sex) + getFortuneText('Iam');
             console.log('🧹 Indice nettoyé:', cleanedClue);
             speakClue(cleanedClue);
-
-
             
             // Jouer un son si disponible
             if (typeof fortuneSounds !== 'undefined') {
-                // fortuneSounds.stopTicking();
-                // fortuneSounds.play('tick');
                 fortuneSounds.startTicking(800);
             }
-
-
             
             // Désactiver le bouton si plus d'indices
             if (currentClueIndex >= clues.length - 1) {
@@ -2641,7 +2377,6 @@ function showQuizMessage(winner) {
                         userAnswer.includes(correctAnswer.split(' ')[0]); // Premier prénom
         
         if (isCorrect) {
-            // gameFinished = true;
             showResult(true, winner.name.replace(/\//g, ''));
             if (typeof fortuneSounds !== 'undefined') {
                 fortuneSounds.play('winner');
@@ -2651,14 +2386,12 @@ function showQuizMessage(winner) {
             showTemporaryMessage(getFortuneText('wrongAnswer'));
             speakClue(getFortuneText('wrongAnswer'));
             
-
             answerInput.value = '';
             if (typeof fortuneSounds !== 'undefined') {
                 fortuneSounds.play('click');
             }
         }
     }
-
 
     function showTemporaryMessage(message) {
         const tempMsg = document.createElement('div');
@@ -2684,11 +2417,9 @@ function showQuizMessage(winner) {
             }
         }, 3000);
     }
-
     
     // Fonction pour afficher la solution
     function showSolution() {
-        // gameFinished = true;
         // Jouer un son si disponible
         if (typeof fortuneSounds !== 'undefined') {
             fortuneSounds.play('winner');
@@ -2737,7 +2468,7 @@ function showQuizMessage(winner) {
             background: ${bgColor};
             border-radius: 10px;
             padding: 20px;
-            margin-top: 20px;
+            margin: 15px 0;
             display: block;
             animation: fadeIn 0.5s ease;
         `;
@@ -2777,8 +2508,8 @@ function showQuizMessage(winner) {
                 </button>
                 
                 <button id="centerWinnerBtn" style="
-                    background: rgba(76, 175, 80, 0.8);
-                    border: 1px solid #4caf50;
+                    background: rgba(255, 152, 0, 0.8);
+                    border: 1px solid #ff9800;
                     color: white;
                     padding: 8px 16px;
                     border-radius: 8px;
@@ -2786,14 +2517,13 @@ function showQuizMessage(winner) {
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                " onmouseover="this.style.background='rgba(76, 175, 80, 1)'" 
-                onmouseout="this.style.background='rgba(76, 175, 80, 0.8)'">
+                " onmouseover="this.style.background='rgba(255, 152, 0, 1)'" 
+                onmouseout="this.style.background='rgba(255, 152, 0, 0.8)'">
                     🎯 ${getFortuneText('centerWinner')}
                 </button>
             </div>
         `;
     }
-
 
     // Fonction pour configurer les événements des boutons
     function setupActionButtonsEvents() {
@@ -2841,7 +2571,6 @@ function showQuizMessage(winner) {
         }
     }
 
-
     // Fonction pour fermer la fenêtre quiz 
     function closeQuizWindow(callback) {
         // Utiliser directement la variable quizMessage qui existe déjà !
@@ -2868,12 +2597,6 @@ function showQuizMessage(winner) {
             }
         }, 300);
     }
-
-
-
-
-
-
     
     // Gestionnaires d'événements
     nextClueBtn.onclick = (e) => {
@@ -2915,8 +2638,6 @@ function showQuizMessage(winner) {
         }, 300);
     };
     
-    // Focus sur le champ de saisie
-    // setTimeout(() => answerInput.focus(), 500);
     // Empêcher le focus automatique sur mobile
     answerInput.setAttribute('readonly', true);
 

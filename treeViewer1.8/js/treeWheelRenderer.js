@@ -148,7 +148,7 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
 
 
 
-function removeSpinningImage() {
+export function removeSpinningImage() {
     const spinningImg = document.getElementById("fortune-wheel-spinning-img");
     if (spinningImg && spinningImg.parentNode) {
         document.body.removeChild(spinningImg);
@@ -170,7 +170,6 @@ function setupWheelResizeHandler() {
     
     const handleResize = () => {
         if (state.isRadarEnabled) {
-
             // Vérifier qu'on est bien en mode wheel
             if (!state.currentTree || !state.rootPersonId) {
                 return;
@@ -214,17 +213,19 @@ function setupWheelResizeHandler() {
                 width: window.innerWidth, 
                 height: window.innerHeight
             });
-        };
-        
-        // Gestionnaire avec debounce pour éviter trop d'appels
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(handleResize, 200);
-        });
-        
-        resizeHandlerSetup = true;
-        console.log('✅ Gestionnaire de redimensionnement configuré pour le radar');
+        }
     }
+    
+
+        
+    // Gestionnaire avec debounce pour éviter trop d'appels
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(handleResize, 200);
+    });
+    
+    resizeHandlerSetup = true;
+    console.log('✅ Gestionnaire de redimensionnement configuré pour le radar');
 }
 
 
