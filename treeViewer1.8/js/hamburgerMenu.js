@@ -2497,6 +2497,47 @@ function syncCustomSelectors() {
   }
 
   /**
+   * Fonction pour décaler le bouton hamburger de 20px vers le bas
+   * Approche minimaliste pour éviter les conflits
+   */
+  export function offsetHamburgerButtonDown() {
+    console.log("Tentative de décalage du bouton hamburger vers le bas");
+    
+    // Récupérer l'élément bouton
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    
+    if (!hamburgerButton) {
+      console.error("Le bouton hamburger n'existe pas dans le DOM");
+      return;
+    }
+    
+    // Appliquer UNIQUEMENT le décalage, sans toucher aux autres propriétés
+    hamburgerButton.style.setProperty('margin-top', '50px', 'important');
+    
+    console.log("Décalage de 20px vers le bas appliqué au bouton hamburger");
+  }
+
+  /**
+   * Fonction pour remettre le bouton hamburger à sa position initiale
+   */
+  export function resetHamburgerButtonPosition() {
+    console.log("Remise à zéro de la position du bouton hamburger");
+    
+    // Récupérer l'élément bouton
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    
+    if (!hamburgerButton) {
+      console.error("Le bouton hamburger n'existe pas dans le DOM");
+      return;
+    }
+    
+    // Remettre le margin-top à zéro
+    hamburgerButton.style.setProperty('margin-top', '0px', 'important');
+    
+    console.log("Position initiale restaurée pour le bouton hamburger");
+  }
+
+  /**
    * Fonction pour réafficher le bouton hamburger après masquage forcé
    */
   export function showHamburgerButtonForcefully() {

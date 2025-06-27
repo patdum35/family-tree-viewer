@@ -88,6 +88,7 @@ export const state = {
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
     isSpeechEnabled2: true,
+    isVoiceSelected: false,
     isAnimationPaused: false,
     isAnimationLaunched: false,
     isAnimationMapInitialized: false,
@@ -115,6 +116,7 @@ export const state = {
     isOnLine: false,
     isDebugLog: false,
     isRadarEnabled: false,
+    radarStyle: 0,
     isWordCloudEnabled: false,
     WheelMode: {
         maxGenerations: 5,

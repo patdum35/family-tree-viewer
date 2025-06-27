@@ -3,9 +3,12 @@ import { setupElegantBackground, setupCustomImageBackground } from './background
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { nameCloudState } from './nameCloud.js';
 import { setTargetAncestorId } from './treeAnimation.js';
-import { updatePrenoms } from './main.js';
+import { state, updatePrenoms, toggleTreeRadar } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
 import { initializeAllWheelControls } from './treeWheelControls.js';
+import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { createSettingsModal } from './nameCloudSettings.js'
+import { generateNameCloudExport } from './nameCloudUI.js'
 
 
 
@@ -13,7 +16,8 @@ import { initializeAllWheelControls } from './treeWheelControls.js';
 const settingsTranslations = {
     'fr': {
         'settingsTitle': 'Paramètres Avancés',
-        'backgroundTab': 'Fond d\'écran',
+        'backgroundTab': 'Fond\nd\'écran',
+        'exportTab': 'Export\npng/pdf',
         'diversTab': 'Divers',
         'geolocTab': 'Géoloc',
         'backgroundType': 'Type de fond',
@@ -69,10 +73,14 @@ const settingsTranslations = {
         'exportTab': 'Export png/jpg/pdf',
         'exportInfo': 'Configuration des options d\'export PNG, PDF et JPEG.',
         'openExportInterface': 'Ouvrir l\'interface d\'export',
+        'treeTab': 'Arbre',
+        'radarTab': 'Radar', 
+        'nuageTab': 'Nuage',
     },
     'en': {
         'settingsTitle': 'Advanced Settings',
-        'backgroundTab': 'Background',
+        'backgroundTab': 'Back\nground',
+        'exportTab': 'Export\npng/pdf',
         'diversTab': 'Miscellaneous',
         'geolocTab': 'Geoloc',
         'backgroundType': 'Background type',
@@ -127,10 +135,14 @@ const settingsTranslations = {
         'exportTab': 'Export png/jpg/pdf',
         'exportInfo': 'Configure PNG, PDF and JPEG export options.',
         'openExportInterface': 'Open export interface',
+        'treeTab': 'Tree',
+        'radarTab': 'Radar',
+        'nuageTab': 'Cloud',
     },
     'es': {
         'settingsTitle': 'Configuración Avanzada',
-        'backgroundTab': 'Fondo',
+        'backgroundTab': 'Fondo\nde\npant',
+        'exportTab': 'Export\npng/pdf',
         'diversTab': 'Varios',
         'geolocTab': 'Geoloc',
         'backgroundType': 'Tipo de fondo',
@@ -185,10 +197,14 @@ const settingsTranslations = {
         'exportTab': 'Export png/jpg/pdf', 
         'exportInfo': 'Configuración de opciones de exportación PNG, PDF y JPEG.',
         'openExportInterface': 'Abrir interfaz de exportación',
+        'treeTab': 'Árbol',
+        'radarTab': 'Radar',
+        'nuageTab': 'Nube',
     },
     'hu': {
         'settingsTitle': 'Speciális Beállítások',
         'backgroundTab': 'Háttér',
+        'exportTab': 'Export\npng/pdf',
         'diversTab': 'Egyéb',
         'geolocTab': 'Geoloc',
         'backgroundType': 'Háttér típusa',
@@ -243,8 +259,14 @@ const settingsTranslations = {
         'exportTab': 'Export png/jpg/pdf',
         'exportInfo': 'PNG, PDF és JPEG export opciók konfigurálása.',
         'openExportInterface': 'Export felület megnyitása',
+        'treeTab': 'Fa',
+        'radarTab': 'Radar',
+        'nuageTab': 'Felhő',
     }
 };
+
+
+
 
 // Fonction pour obtenir le texte traduit selon la langue actuelle
 function translateSettings(key) {
@@ -327,6 +349,11 @@ export function createEnhancedSettingsModal() {
     
     // Configurer les événements
     setupModalEvents(modal);
+
+
+    // NOUVEAU : Rendre la modal déplaçable et redimensionnable
+    const modalHeader = modalContent.querySelector('.modal-header');
+    makeModalDraggableAndResizable(modal, modalHeader);
     
     return modal;
 }
@@ -336,20 +363,22 @@ function createModalContainer() {
     modal.id = 'enhanced-settings-modal';
     modal.className = 'enhanced-modal-container';
     modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    // modal.style.width = '100%';
+    modal.style.top = '50px';
+    modal.style.left = '50px';
+    modal.style.backgroundColor = 'transparent';
+    modal.style.display = 'block';
+    modal.style.zIndex = '1000';
+   
+    // Gestion responsive de la largeur
     if (window.innerWidth < 400) {
         modal.style.width = '350px';
+        modal.style.left = '10px'; // Plus proche du bord sur mobile
+        modal.style.top = '20px';  // Plus haut sur mobile
     } else {
-        modal.style.width = '100%';
+        modal.style.width = '500px';
     }
-    modal.style.height = '100%';
-    modal.style.backgroundColor = 'transparent'; // Complètement transparent
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '1000';
+    
+    modal.style.height = 'auto';
     return modal;
 }
 
@@ -492,7 +521,7 @@ function createModalContent() {
     header.style.borderRadius = '10px 10px 0 0';
     header.style.marginLeft = '-10px';
     header.style.marginRight = '-10px';
-    header.style.marginTop = '-10px';
+    header.style.marginTop = '-15px';
     header.style.width = 'calc(100% + 0px)';
     // header.style.width = '100%';
     header.style.position = 'sticky'; // Rendre l'en-tête sticky
@@ -565,16 +594,15 @@ function createModalContent() {
     return content;
 }
 
+
 function createTargetAncestorControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.gap = '15px';
     
-    // Section pour l'ID de l'ancêtre cible
-    // const targetSection = createControlSection('ID de l\'Ancêtre Cible');
+    // Section pour l'ID de l'ancêtre cible UNIQUEMENT
     const targetSection = createControlSection(translateSettings('targetAncestorId'));
-
     
     const targetIdWrapper = document.createElement('div');
     targetIdWrapper.style.display = 'flex';
@@ -584,7 +612,6 @@ function createTargetAncestorControls() {
     targetIdInput.type = 'text';
     targetIdInput.id = 'targetAncestorId';
     targetIdInput.value = localStorage.getItem('targetAncestorId') || '@I741@';
-    // targetIdInput.placeholder = 'Entrez l\'ID de l\'ancêtre';
     targetIdInput.placeholder = translateSettings('enterAncestorId');
     targetIdInput.style.flexGrow = '1';
     targetIdInput.style.padding = '8px 12px';
@@ -593,7 +620,6 @@ function createTargetAncestorControls() {
     targetIdInput.style.fontSize = '14px';
     
     const saveButton = document.createElement('button');
-    // saveButton.textContent = 'Enregistrer';
     saveButton.textContent = translateSettings('save');
     saveButton.style.padding = '8px 15px';
     saveButton.style.backgroundColor = '#4CAF50';
@@ -608,58 +634,26 @@ function createTargetAncestorControls() {
         
         if (targetId) {
             localStorage.setItem('targetAncestorId', targetId);
-            
-            // Utiliser la fonction de mise à jour
             setTargetAncestorId(targetId);
-            // showFeedback('ID de l\'ancêtre enregistré avec succès !', 'success');
             showFeedback(translateSettings('ancestorIdSaved'), 'success');
         } else {
-            // showFeedback('Veuillez entrer un ID valide', 'error');
             showFeedback(translateSettings('enterValidId'), 'error');
         }
     });
     
     targetIdWrapper.appendChild(targetIdInput);
     targetIdWrapper.appendChild(saveButton);
-    
     targetSection.appendChild(targetIdWrapper);
     
-    // Section pour le nombre de prénoms
-    // const prenomsSection = createControlSection('Nombre de Prénoms');
-    const prenomsSection = createControlSection(translateSettings('firstNameCount'));
-
-    
-    const prenomsSelector = document.createElement('select');
-    prenomsSelector.id = 'prenoms';
-    prenomsSelector.style.width = '100%';
-    prenomsSelector.style.padding = '8px 12px';
-    prenomsSelector.style.border = '1px solid #ccc';
-    prenomsSelector.style.borderRadius = '4px';
-    prenomsSelector.style.fontSize = '14px';
-    
-    for (let i = 1; i <= 4; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        if (i === parseInt(localStorage.getItem('nombre_prenoms') || 2)) {
-            option.selected = true;
-        }
-        prenomsSelector.appendChild(option);
-    }
-    
-    prenomsSelector.addEventListener('change', () => {
-        updatePrenoms(prenomsSelector.value);
-        // showFeedback('Nombre de prénoms mis à jour', 'success');
-        showFeedback(translateSettings('firstNameCountUpdated'), 'success');
-    });
-    
-    prenomsSection.appendChild(prenomsSelector);
-    
+    // Ne garder que la section de l'ID de l'ancêtre
     container.appendChild(targetSection);
-    container.appendChild(prenomsSection);
     
     return container;
 }
+
+
+
+
 
 function showFeedback(message, type = 'info') {
     // Supprimer tout message existant
@@ -839,6 +833,193 @@ function createGeolocationControls() {
     
     container.appendChild(infoText);
     container.appendChild(openGeoModalButton);
+    
+    return container;
+}
+
+// function createTreeControls() {
+//     const container = document.createElement('div');
+//     container.style.padding = '15px';
+//     container.innerHTML = '<p>Paramètres de l\'arbre à venir...</p>';
+//     return container;
+// }
+
+// 2. Modifier la fonction createTreeControls() pour inclure le sélecteur de prénoms
+function createTreeControls() {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '15px';
+    container.style.padding = '15px';
+    
+    // Section pour le nombre de prénoms (déplacée depuis createTargetAncestorControls)
+    const prenomsSection = createControlSection(translateSettings('firstNameCount'));
+    
+    const prenomsSelector = document.createElement('select');
+    prenomsSelector.id = 'prenoms';
+    prenomsSelector.style.width = '100%';
+    prenomsSelector.style.padding = '8px 12px';
+    prenomsSelector.style.border = '1px solid #ccc';
+    prenomsSelector.style.borderRadius = '4px';
+    prenomsSelector.style.fontSize = '14px';
+    
+    for (let i = 1; i <= 4; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        if (i === parseInt(localStorage.getItem('nombre_prenoms') || 2)) {
+            option.selected = true;
+        }
+        prenomsSelector.appendChild(option);
+    }
+    
+    prenomsSelector.addEventListener('change', () => {
+        updatePrenoms(prenomsSelector.value);
+        showFeedback(translateSettings('firstNameCountUpdated'), 'success');
+    });
+    
+    prenomsSection.appendChild(prenomsSelector);
+    container.appendChild(prenomsSection);
+    
+    // Vous pouvez ajouter d'autres contrôles liés à l'arbre ici
+    // Par exemple :
+    
+    // Message informatif pour les futurs paramètres
+    const infoText = document.createElement('p');
+    infoText.textContent = 'Autres paramètres de l\'arbre à venir...';
+    infoText.style.margin = '10px 0';
+    infoText.style.fontSize = '14px';
+    infoText.style.color = '#666';
+    infoText.style.fontStyle = 'italic';
+    
+    container.appendChild(infoText);
+    
+    return container;
+}
+
+
+function createRadarControls() {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '0px';
+    
+    // Style du radar (en ligne)
+    const radarStyleSection = createControlSection('Style du radar', true);
+    
+    const radarStyleSelector = createRadarStyleSelect({
+        style: localStorage.getItem('radarStyle') || 'styleBleu'
+    });
+    
+    radarStyleSection.appendChild(radarStyleSelector);
+    container.appendChild(radarStyleSection);
+    
+    return container;
+}
+
+function createRadarStyleSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = ['Style bleu', 'Style vert', 'Style orange', 'Style H/F bleu/rouge'];
+    const styleValues = ['styleBleu', 'styleVert', 'styleOrange', 'styleHF'];
+    
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+    
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: ' #4361ee',    // Bleu nameCloudUI
+        options: ' #38b000', // Vert nameCloudUI
+        hover: ' #2e9800',   // Vert plus foncé nameCloudUI 
+        selected: ' #1a4d00' // Vert encore plus foncé nameCloudUI
+    };
+    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '120px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+        // onChange: (value) => {
+        //     localStorage.setItem('radarStyle', value);
+        //     console.log('Style radar sélectionné:', value);
+        //     // Ici vous pourrez ajouter la logique pour appliquer le style
+        // }
+        onChange: (value) => {
+            // Convertir la valeur en index numérique
+            const styleMap = {
+                'styleBleu': 0,
+                'styleVert': 1, 
+                'styleOrange': 2,
+                'styleHF': 3
+            };
+            
+            // Configurer la variable globale
+            state.radarStyle = styleMap[value];
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('radarStyle', value);
+            
+            // Lancer l'action
+            state.isRadarEnabled = false;
+            toggleTreeRadar();
+            
+            console.log('Style radar configuré:', state.radarStyle);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+                }
+            });
+}
+
+
+function createNuageControls() {
+    const container = document.createElement('div');
+    container.style.padding = '15px';
+    container.style.textAlign = 'center';
+    
+    // Contenu minimal informatif
+    const infoText = document.createElement('p');
+    infoText.textContent = 'Paramètres du nuage de mots';
+    infoText.style.margin = '10px 0';
+    infoText.style.fontSize = '14px';
+    infoText.style.color = '#666';
+    
+    container.appendChild(infoText);
     
     return container;
 }
@@ -1468,6 +1649,7 @@ function createSlider(value, min, max, step, isCompact = false) {
     return sliderContainer;
 }
 
+
 function createTabContainer() {
     const tabContainer = document.createElement('div');
     tabContainer.className = 'tabs-container';
@@ -1476,62 +1658,184 @@ function createTabContainer() {
     tabContainer.style.gap = '0px';
     tabContainer.style.marginTop = '-10px';
     
-    // Onglets - Supprimer l'onglet Animation
+    // Onglets avec scroll horizontal
     const tabHeaders = document.createElement('div');
     tabHeaders.className = 'tab-headers';
     tabHeaders.style.display = 'flex';
-    tabHeaders.style.borderBottom = '1px solid #ddd';
-    tabHeaders.style.backgroundColor = 'white';
+    tabHeaders.style.overflowX = 'auto';
+    tabHeaders.style.overflowY = 'hidden';
+    tabHeaders.style.borderBottom = '2px solid #e0e6ff';
+    tabHeaders.style.backgroundColor = '#f8faff';
     tabHeaders.style.borderTopLeftRadius = '10px';
-    tabHeaders.style.borderTopRightRadius = '10px';  
+    tabHeaders.style.borderTopRightRadius = '10px';
+    tabHeaders.style.padding = '5px 5px 0 5px';
+    tabHeaders.style.minHeight = '45px';
+    
+    // Style de scrollbar (invisible mais fonctionnel)
+    const scrollbarStyle = document.createElement('style');
+    scrollbarStyle.textContent = `
+        .tab-headers {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE et Edge */
+        }
+        .tab-headers::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    `;
+    if (!document.getElementById('tab-scrollbar-style')) {
+        scrollbarStyle.id = 'tab-scrollbar-style';
+        document.head.appendChild(scrollbarStyle);
+    }
     
     // const tabs = [
-    //     { id: 'background-tab', label: 'Fond d\'écran', active: true },
-    //     // Animation retiré
-    //     { id: 'target-ancestor-tab', label: 'Divers', active: false },
-    //     { id: 'geolocation-tab', label: 'Géoloc', active: false }
+    //     { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
+    //     { id: 'export-tab', label: translateSettings('exportTab'), active: false },
+    //     { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
+    //     { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
+    //     { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
+    //     { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
+    //     { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
     // ];
     const tabs = [
+    // { id: 'background-tab', label: 'Fond\nd\'écran', active: true },
+    // { id: 'export-tab', label: 'Export\npng/pdf', active: false },
     { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
+    { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
+    { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
+    { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
     { id: 'export-tab', label: translateSettings('exportTab'), active: false },
     { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
     { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
 ];
     
-    // Conserver le même code pour la création des onglets
-    tabs.forEach(tab => {
+    // Couleurs plus vives
+    const tabColors = [
+        { bg: '#FF6B35', hover: '#FF8566', active: '#FF4500' }, // Orange vif
+        { bg: '#00B4D8', hover: '#33C4E8', active: '#0096C7' }, // Cyan vif
+        { bg: '#7209B7', hover: '#8A2BE2', active: '#6A0DAD' }, // Violet vif
+        { bg: '#DC2626', hover: '#EF4444', active: '#B91C1C' }, // Rouge vif
+        { bg: '#059669', hover: '#10B981', active: '#047857' }, // Vert vif
+        { bg: '#F59E0B', hover: '#FBBF24', active: '#D97706' }, // Jaune/Orange vif
+        { bg: '#EC4899', hover: '#F472B6', active: '#DB2777' }  // Rose vif
+    ];
+    
+    tabs.forEach((tab, index) => {
         const tabHeader = document.createElement('div');
         tabHeader.className = 'tab-header';
         tabHeader.id = `${tab.id}-header`;
-        tabHeader.textContent = tab.label;
-        tabHeader.style.padding = '8px 15px';
+        
+        // Gérer le texte sur 2 lignes
+        if (tab.label.includes('\n')) {
+            const lines = tab.label.split('\n');
+            tabHeader.innerHTML = `${lines[0]}<br>${lines[1]}`;
+        } else {
+            tabHeader.textContent = tab.label;
+        }
+        
+        const color = tabColors[index % tabColors.length];
+        
+        // Style navigateur avec arrondis - MODIFIÉ pour être plus compact
+        tabHeader.style.padding = '6px 2px'; // Réduit de 8px 16px
         tabHeader.style.cursor = 'pointer';
-        tabHeader.style.borderBottom = tab.active ? '2px solid #4361ee' : '2px solid transparent';
-        tabHeader.style.color = tab.active ? '#4361ee' : '#666';
-        tabHeader.style.fontWeight = tab.active ? 'bold' : 'normal';
+        tabHeader.style.fontSize = '14px'; // Réduit de 13px
+        tabHeader.style.fontWeight = '500';
+        tabHeader.style.position = 'relative';
+        tabHeader.style.minWidth = '50px'; // Réduit de 70px
+        tabHeader.style.maxWidth = '65px'; // Nouvelle limite
+        tabHeader.style.textAlign = 'center';
+        tabHeader.style.whiteSpace = 'normal'; // Changé de 'nowrap' à 'normal'
+        tabHeader.style.lineHeight = '1.1'; // Nouveau: espacement des lignes
+        tabHeader.style.flexShrink = '0';
+        tabHeader.style.marginRight = '2px'; // Réduit de 3px
+        tabHeader.style.transition = 'all 0.2s ease';
+        tabHeader.style.color = 'white';
+        tabHeader.style.border = 'none';
         
-        tabHeader.style.backgroundColor = tab.active ? '#f0f4ff' : 'white';
+        // Forme arrondie comme Chrome/Edge
+        if (tab.active) {
+            tabHeader.style.background = color.bg;
+            tabHeader.style.borderRadius = '12px 12px 0 0';
+            tabHeader.style.fontWeight = '600';
+            tabHeader.style.transform = 'translateY(0px)';
+            tabHeader.style.boxShadow = `0 -3px 8px ${color.bg}40, inset 0 1px 0 rgba(255,255,255,0.2)`;
+            tabHeader.style.zIndex = '10';
+        } else {
+            tabHeader.style.background = `${color.bg}B3`;
+            tabHeader.style.borderRadius = '8px 8px 0 0';
+            tabHeader.style.fontWeight = '500';
+            tabHeader.style.transform = 'translateY(2px)';
+            tabHeader.style.boxShadow = `0 2px 4px ${color.bg}30`;
+            tabHeader.style.zIndex = '5';
+        }
         
-        // Conserver le gestionnaire d'événements
+        // Effets au survol
+        tabHeader.addEventListener('mouseenter', () => {
+            if (!tab.active) {
+                tabHeader.style.background = color.hover;
+                tabHeader.style.transform = 'translateY(1px)';
+                tabHeader.style.boxShadow = `0 4px 8px ${color.bg}50`;
+                tabHeader.style.borderRadius = '10px 10px 0 0';
+            }
+        });
+        
+        tabHeader.addEventListener('mouseleave', () => {
+            if (!tab.active) {
+                tabHeader.style.background = `${color.bg}B3`;
+                tabHeader.style.transform = 'translateY(2px)';
+                tabHeader.style.boxShadow = `0 2px 4px ${color.bg}30`;
+                tabHeader.style.borderRadius = '8px 8px 0 0';
+            }
+        });
+        
+        // Gestionnaire de clic
         tabHeader.addEventListener('click', () => {
-            // Désactiver tous les onglets
-            document.querySelectorAll('.tab-header').forEach(header => {
-                header.style.borderBottom = '2px solid transparent';
-                header.style.color = '#666';
-                header.style.fontWeight = 'normal';
-                header.style.backgroundColor = 'white';
+            // Code existant pour réinitialiser tous les onglets...
+            document.querySelectorAll('.tab-header').forEach((header, idx) => {
+                const headerColor = tabColors[idx % tabColors.length];
+                header.style.background = `${headerColor.bg}B3`;
+                header.style.borderRadius = '8px 8px 0 0';
+                header.style.transform = 'translateY(2px)';
+                header.style.boxShadow = `0 2px 4px ${headerColor.bg}30`;
+                header.style.fontWeight = '500';
+                header.style.zIndex = '5';
             });
             
-            // Activer l'onglet cliqué
-            tabHeader.style.borderBottom = '2px solid #4361ee';
-            tabHeader.style.color = '#4361ee';
-            tabHeader.style.fontWeight = 'bold';
-            tabHeader.style.backgroundColor = '#f0f4ff';
+            // Code existant pour activer l'onglet cliqué...
+            tabHeader.style.background = color.bg;
+            tabHeader.style.borderRadius = '12px 12px 0 0';
+            tabHeader.style.transform = 'translateY(0px)';
+            tabHeader.style.boxShadow = `0 -3px 8px ${color.bg}40, inset 0 1px 0 rgba(255,255,255,0.2)`;
+            tabHeader.style.fontWeight = '600';
+            tabHeader.style.zIndex = '10';
             
+            // Auto-scroll et changement de contenu
+            tabHeader.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+            
+            // NOUVEAU : Logique spéciale pour le tab Nuage
+            if (tab.id === 'nuage-tab') {
+                // Fermer d'abord la modal des settings avancés
+                const enhancedModal = document.getElementById('enhanced-settings-modal');
+                if (enhancedModal) {
+                    document.body.removeChild(enhancedModal);
+                }
+                
+                // Ouvrir immédiatement la modal des paramètres du nuage
+                setTimeout(() => {
+                    const modal = createSettingsModal((settings) => {
+                        console.log('Settings saved:', settings);
+
+                        processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })
+                    });
+                    document.body.appendChild(modal);
+                }, 100); // Petit délai pour éviter les conflits
+                
+                return; // Sortir de la fonction pour éviter l'affichage normal du contenu
+            }
+            
+            // Code existant pour les autres tabs...
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.style.display = 'none';
             });
-            
             document.getElementById(tab.id).style.display = 'block';
         });
         
@@ -1539,6 +1843,7 @@ function createTabContainer() {
     });
     
     tabContainer.appendChild(tabHeaders);
+    
     
     // Contenu des onglets
     const tabContents = document.createElement('div');
@@ -1551,12 +1856,6 @@ function createTabContainer() {
     backgroundTab.className = 'tab-content';
     backgroundTab.style.display = tabs[0].active ? 'block' : 'none';
     
-    // Onglet Export
-    const exportTab = document.createElement('div');
-    exportTab.id = 'export-tab';
-    exportTab.className = 'tab-content';
-    exportTab.style.display = tabs[3].active ? 'block' : 'none';
-
     // Onglet Ancêtre Cible
     const targetAncestorTab = document.createElement('div');
     targetAncestorTab.id = 'target-ancestor-tab';
@@ -1568,11 +1867,43 @@ function createTabContainer() {
     geolocationTab.id = 'geolocation-tab';
     geolocationTab.className = 'tab-content';
     geolocationTab.style.display = tabs[2].active ? 'block' : 'none';
-    
+
+
+    // onglet arbre
+    const treeTab = document.createElement('div');
+    treeTab.id = 'tree-tab';
+    treeTab.className = 'tab-content';
+    treeTab.style.display = 'none';
+
+    // onglet radar
+    const radarTab = document.createElement('div');
+    radarTab.id = 'radar-tab';
+    radarTab.className = 'tab-content';
+    radarTab.style.display = 'none';
+
+    // onglet nuage
+    const nuageTab = document.createElement('div');
+    nuageTab.id = 'nuage-tab';
+    nuageTab.className = 'tab-content';
+    nuageTab.style.display = 'none';
+
+
+    // Onglet Export
+    const exportTab = document.createElement('div');
+    exportTab.id = 'export-tab';
+    exportTab.className = 'tab-content';
+    exportTab.style.display = tabs[3].active ? 'block' : 'none';
+
+
     tabContents.appendChild(backgroundTab);
+    tabContents.appendChild(treeTab);
+    tabContents.appendChild(radarTab);
+    tabContents.appendChild(nuageTab);
     tabContents.appendChild(exportTab);
     tabContents.appendChild(targetAncestorTab);
     tabContents.appendChild(geolocationTab);
+
+
     
     tabContainer.appendChild(tabContents);
     
@@ -1580,28 +1911,34 @@ function createTabContainer() {
     return { 
         tabContainer, 
         backgroundTab,
-        exportTab, 
+        treeTab,
+        radarTab, 
+        nuageTab,
+        exportTab,
         targetAncestorTab, 
         geolocationTab 
     };
+
+
 }
+
 
 function initializeControls(modalContent) {
     // Créer le conteneur d'onglets
-    const { tabContainer, backgroundTab, exportTab, targetAncestorTab, geolocationTab } = createTabContainer();
-    
+    const { tabContainer, backgroundTab, treeTab, radarTab, nuageTab, exportTab, targetAncestorTab, geolocationTab } = createTabContainer();
+
     // Ajouter les contrôles à chaque onglet
     backgroundTab.appendChild(createBackgroundControls());
+    treeTab.appendChild(createTreeControls());
+    radarTab.appendChild(createRadarControls());
+    nuageTab.appendChild(createNuageControls());
     exportTab.appendChild(createExportControls());
     targetAncestorTab.appendChild(createTargetAncestorControls());
     geolocationTab.appendChild(createGeolocationControls());
-    
+
     // Ajouter le conteneur d'onglets au contenu de la modal
     modalContent.appendChild(tabContainer);
 }
-
-
-
 
 
 // 5. Ajouter la fonction createExportControls() :

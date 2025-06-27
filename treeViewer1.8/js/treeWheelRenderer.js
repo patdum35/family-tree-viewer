@@ -55,10 +55,8 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
             window.speechSynthesis.cancel();
         }
-
-
         selectVoice();
-
+        state.isVoiceSelected = true;
     }
 
     // DIAGNOSTIC SUPPLÉMENTAIRE
@@ -554,6 +552,31 @@ export function setMaxGenerationsInit(max) {
 
 export function getGenerationColor(generation, sex = 'M') {
     
+    // palette homme / nuances de bleu
+    const maleColorsV0 = [
+        '#e6f3ff', // gen 1 - bleu très clair
+        '#c1e1ff', // gen 2 - légèrement plus saturé
+        '#9bceff', // gen 3 - bleu ciel doux
+        '#72b8ff', // gen 4 - bleu ciel vibrant
+        '#4da2ff', // gen 5 - bleu franc
+        '#2b8fff', // gen 6 - bleu électrique
+        '#0a7cff', // gen 7 - bleu profond
+        '#005ce6'  // gen 8 - bleu nuit
+    ];
+
+    const femaleColorsV0 = [
+        '#e6f3ff', // gen 1 - bleu très clair
+        '#c1e1ff', // gen 2 - légèrement plus saturé
+        '#9bceff', // gen 3 - bleu ciel doux
+        '#72b8ff', // gen 4 - bleu ciel vibrant
+        '#4da2ff', // gen 5 - bleu franc
+        '#2b8fff', // gen 6 - bleu électrique
+        '#0a7cff', // gen 7 - bleu profond
+        '#005ce6'  // gen 8 - bleu nuit
+    ];
+
+
+
     // PALETTE HARMONIEUSE - OPTION 1 : Bleu/Rose doux
     // const maleColorsV1 = [
     //     '#f0f8ff', // gen 1 - bleu alice très clair
@@ -647,11 +670,15 @@ export function getGenerationColor(generation, sex = 'M') {
     ];
 
     // SÉLECTION DE LA PALETTE (changez le numéro pour tester)
-    const paletteVersion = 1; // Changez ça pour tester : 1, 2 ou 3
+    const paletteVersion = state.radarStyle; // Changez ça pour tester : 1, 2 ou 3
     
     let maleColors, femaleColors;
     
     switch(paletteVersion) {
+        case 0:
+            maleColors = maleColorsV0;
+            femaleColors = femaleColorsV0;
+            break;
         case 1:
             maleColors = maleColorsV1;
             femaleColors = femaleColorsV1;
@@ -872,7 +899,8 @@ function drawSegmentText(group, person, innerRadius, outerRadius, startAngle, en
     
     const textGroup = group.append("g")
         .attr("class", "segment-text-group")
-        .attr("transform", `translate(${textX}, ${textY}) rotate(${rotation})`);
+        .attr("transform", `translate(${textX}, ${textY}) rotate(${rotation})`)
+        .style("pointer-events", "none"); // pour éviter que le texte intercepte les clics sur le segment
     
     // Utiliser la même logique que l'arbre normal
     const match = person.name?.match(/(.*?)\/(.*?)\//);

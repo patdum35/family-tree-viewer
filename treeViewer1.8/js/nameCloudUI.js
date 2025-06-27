@@ -8,7 +8,7 @@ import { ensureStatsExist, addStatsButton, updateStatsButtons, removeAllStatsEle
 import { createImprovedHeatmap  } from './geoHeatMapUI.js';
 import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
-import { showHamburgerButtonForcefully } from './hamburgerMenu.js';
+import { showHamburgerButtonForcefully, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { enableFortuneMode } from './treeWheelAnimation.js';
 
@@ -833,6 +833,7 @@ function closeCloudName(modal) {
     // Supprimer toutes les stats modals avant de fermer la CloudMap
     removeAllStatsElements(); 
     document.body.removeChild(modal);
+    resetHamburgerButtonPosition();
     showHamburgerButtonForcefully();
 
     // Pour désactiver le fond d'écran
@@ -919,6 +920,12 @@ export function updateTitleText(element, cfg) {
     }
 
     element.innerHTML = titleText;
+}
+
+
+export function generateNameCloudExport() {
+    
+   
 }
 
 

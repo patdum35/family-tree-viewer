@@ -6,8 +6,9 @@ import { nameCloudState } from './nameCloud.js';
 import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPersonLocations, createLocationMap } from './mapUtils.js';
 import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
-import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
+import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
+import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
 
 
 
@@ -44,7 +45,9 @@ export const translations = {
       'notes': 'Notes',
       'sources': 'Sources',
       'historicalContext': 'Contexte historique',
-      'setAsRoot': 'Définir comme point de départ de l\'arbre',
+      'setAsRoot': 'Définir comme racine de l\'arbre',
+      'quiz': 'Quiz',
+      'readPersonDetails' : 'Lire la fiche',
       'atTimeOf': 'Au moment de ',
       
       // Modificateurs de dates GEDCOM
@@ -78,6 +81,8 @@ export const translations = {
       'sources': 'Sources',
       'historicalContext': 'Historical Context',
       'setAsRoot': 'Set as tree root',
+      'quiz': 'Quiz',
+      'readPersonDetails' : 'Read details',
       'atTimeOf': 'At time of ',
       
       // Modificateurs de dates GEDCOM
@@ -111,6 +116,8 @@ export const translations = {
       'sources': 'Fuentes',
       'historicalContext': 'Contexto histórico',
       'setAsRoot': 'Establecer como raíz del árbol',
+      'quiz': 'Cuestionario',
+      'readPersonDetails' : 'Leer detalles',
       'atTimeOf': 'En el momento del ',
       
       // Modificateurs de dates GEDCOM
@@ -144,6 +151,8 @@ export const translations = {
       'sources': 'Források',
       'historicalContext': 'Történelmi környezet',
       'setAsRoot': 'Beállítás a fa gyökereként',
+      'quiz': 'Kvíz',
+      'readPersonDetails' : 'Részletek olvasása',
       'atTimeOf': 'abban az időben ',
       
       // Modificateurs de dates GEDCOM
@@ -427,16 +436,34 @@ export function displayPersonDetails(personId) {
         .details-section.sources { background-color: #F3E5F5; font-size: 85%; }
         .details-section.context { background-color: #E0F2F1; }
         .details-section.actions { background-color: #ECEFF1; text-align: center; }
-        .set-root-btn {
-            background-color: #4361ee;
+
+        .action-btn {
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
-            margin-top: 2px;
+            font-size: 10px;
+            margin: 2px 2px 0 0;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+        .btn-blue { background-color: #4361ee; flex: 2.3; }
+        .btn-orange { background-color: #ff8500; flex: 0.4; }
+        .btn-purple { background-color: #8e44ad; }
+
+
+
+        .details-section.actions { 
+            background-color: #ECEFF1; 
+            text-align: center; 
+            display: flex;
+            gap: 3px;
+        }
+
         .sources-link {
             color: #3f51b5;
             text-decoration: underline;
@@ -726,12 +753,27 @@ export function displayPersonDetails(personId) {
     }
 
     // Ajouter un bouton pour définir comme racine de l'arbre
+    // detailsHTML += `
+    //     <div class="details-section actions">
+    //         <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
+    //         ${translate('setAsRoot')}
+    //         </button>
+    //     </div>
+    // `;
+
+    // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
     detailsHTML += `
-        <div class="details-section actions">
-            <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
+    <div class="details-section actions">
+        <button onclick="setAsRootPerson('${personId}')" class="action-btn btn-blue">
             ${translate('setAsRoot')}
-            </button>
-        </div>
+        </button>
+        <button onclick="startQuiz('${personId}')" class="action-btn btn-orange">
+            ${translate('quiz')}
+        </button>
+        <button onclick="readPersonSheet('${personId}')" class="action-btn btn-purple">
+            🗣️${translate('readPersonDetails')}
+        </button>
+    </div>
     `;
 
 
@@ -774,6 +816,61 @@ export function displayPersonDetails(personId) {
         displayEnhancedLocationMap(personId);
     }, 150);
 }
+
+
+
+
+async function startQuiz(personId)
+{
+    const personData = state.gedcomData.individuals[personId];
+    const person = [];
+    person.id = personData.id;
+    person.name = personData.name;
+    person.sex = personData.sex;
+
+    if (!state.isVoiceSelected && state.isSpeechEnabled2)
+    {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
+        selectVoice();
+        state.isVoiceSelected = true;
+    }
+    showQuizMessage(person);
+}
+window.startQuiz = startQuiz; 
+
+
+async function readPersonSheet(personId) {
+    const personData = state.gedcomData.individuals[personId];
+    const person = [];
+    person.id = personData.id;
+    person.name = personData.name;
+    person.sex = personData.sex;
+
+    if (!state.isVoiceSelected && state.isSpeechEnabled2)
+    {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
+        selectVoice();
+        state.isVoiceSelected = true;
+    }
+    readPersonDetails(person);  
+}
+window.readPersonSheet = readPersonSheet; 
    
 // makeModalDraggable pour fonctionner en tactile    
 function makeModalDraggable() {

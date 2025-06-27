@@ -11,8 +11,6 @@ import { speakPersonName} from './treeAnimation.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
 
 
-
-
 let leverStartTime = 0;
 let lastWinner = null;
 
@@ -380,7 +378,6 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
     state.currentAnimationTimeouts.push(timeoutId2);
 }
 
-
 // Recentrer le radar chart (avec préservation du zoom initial)
 function resetRadarToCenter() {
     const radarGroup = d3.select("#tree-svg").selectAll("g").filter(function() {
@@ -405,7 +402,6 @@ function resetRadarToCenter() {
         console.log("🎯 Radar recentré avec zoom préservé");
     }
 }
-
 
 function highlightWinnerSegment(segmentIndex, generation, sex) {
     // Reset de l'ancien gagnant
@@ -642,7 +638,6 @@ function highlightWinnerSegment(segmentIndex, generation, sex) {
     }
 }
 
-
 function resetLastWinnerHighlightAsync() {
     if (!lastWinner ) return;
         
@@ -691,7 +686,6 @@ function resetLastWinnerHighlightAsync() {
         lastWinner = null;
     });
 }
-
 
 // Détection du gagnant basée sur l'angle avec tirage aléatoire entre les géneration
 function detectWinner(finalAngle) {
@@ -1320,12 +1314,27 @@ function getFortuneText(textType) {
             "es": "Ver ganador en árbol",
             "hu": "Nyertes mutatása a fán"
         },
+        showInTreeShort: {
+            "fr": "Voir gagnant \ndans arbre",
+            "en": "Show winner \nin tree", 
+            "es": "Ver ganador \nen árbol",
+            "hu": "Nyertes \nmutatása a fán"
+        },
+
         centerWinner: {
             "fr": "Gagnant au centre de la roue",
             "en": "Winner at center of wheel",
             "es": "Ganador al centro de la rueda", 
             "hu": "Nyertes a kerék közepén"
         },
+
+        centerWinnerShort: {
+            "fr": "Gagnant au \ncentre roue",
+            "en": "Winner at \nwheel center ",
+            "es": "Ganador al \ncentro rueda", 
+            "hu": "Nyertes a \nkerék közepén"
+        },
+
         winnerContinue: {
             fr: "Continuer",
             en: "Continue",
@@ -1488,6 +1497,18 @@ function getFortuneText(textType) {
             "es": "El nombre de mi madre es",
             "hu": "Anyám neve"
         },
+        cluePere2: {
+            "fr": "Mon père est",
+            "en": "My father is",
+            "es": "Mi padre es",
+            "hu": "Az apám"
+        },
+        clueMere2: {
+            "fr": "Ma mère est",
+            "en": "My mother is",
+            "es": "Mi madre es",
+            "hu": "Az anyám"
+        },
         cluePrenom: {
             "fr": "Mon prénom est",
             "en": "My first name is",
@@ -1596,6 +1617,12 @@ function getFortuneText(textType) {
             "es": "una hermana", 
             "hu": "egy lánytestvér"
         },
+        showDetails: {
+            "fr": "Voir la fiche",
+            "en": "Show details",
+            "es": "Ver ficha", 
+            "hu": "Részletek mutatása"
+        }
     };
 
     // AJOUT : Vérification de sécurité
@@ -1905,7 +1932,7 @@ function closeWinnerMessage() {
 window.closeWinnerMessage = closeWinnerMessage;
 
 
-// Fonction showWinnerMessage modifiée avec 5 boutons
+// Fonction showWinnerMessage modifiée avec 6 boutons
 function showWinnerMessage(winner) {
     const message = document.createElement("div");
     message.style.cssText = `
@@ -2026,7 +2053,24 @@ function showWinnerMessage(winner) {
                onmouseout="this.style.background='rgba(255,255,255,0.2)'">
                 🎯 ${getFortuneText('centerWinner')}
             </button>
-            
+
+            <!-- : Bouton voir la fiche -->
+            <button id="showDetailsBtn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 10px 18px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+            onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                📋 ${getFortuneText('showDetails')}
+            </button>  
+
             <button id="continueBtn" style="
                 background: rgba(255, 255, 255, 0.2);
                 border: 2px solid white;
@@ -2057,6 +2101,7 @@ function showWinnerMessage(winner) {
     const quizBtn = message.querySelector('#quizBtn');
     const showInTreeBtn = message.querySelector('#showInTreeBtn');
     const centerWinnerBtn = message.querySelector('#centerWinnerBtn');
+    const showDetailsBtn = message.querySelector('#showDetailsBtn'); 
     const continueBtn = message.querySelector('#continueBtn');
     const winnerNameDisplay = message.querySelector('#winnerNameDisplay');
     
@@ -2121,15 +2166,29 @@ function showWinnerMessage(winner) {
         }
         resetLastWinnerHighlightAsync();
     };
+
+    // Bouton 5 : Voir la fiche
+    showDetailsBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeWinnerMessage(message);
+        resetLastWinnerHighlightAsync();
+        
+        // Lancer displayPersonDetails
+        if (typeof displayPersonDetails === 'function') {
+            displayPersonDetails(winner.id);
+        } else if (typeof window.displayPersonDetails === 'function') {
+            window.displayPersonDetails(winner.id);
+        }
+        
+    };
     
-    // Bouton 5 : Continuer (fermer)
+    // Bouton 6 : Continuer (fermer)
     continueBtn.onclick = (e) => {
         e.stopPropagation();
         closeWinnerMessage(message);
         resetLastWinnerHighlightAsync();
     };
 }
-
 
 
 function cleanClueForSpeech(clueText, personSex = null) {
@@ -2162,7 +2221,7 @@ function cleanClueForSpeech(clueText, personSex = null) {
 
 
 // Fonction pour afficher le quiz progressif
-function showQuizMessage(winner) {
+export function showQuizMessage(winner) {
     const quizMessage = document.createElement("div");
     quizMessage.style.cssText = `
         position: fixed;
@@ -2467,7 +2526,7 @@ function showQuizMessage(winner) {
         resultContainer.style.cssText = `
             background: ${bgColor};
             border-radius: 10px;
-            padding: 20px;
+            padding: 20px 5px 20px 5px; 
             margin: 15px 0;
             display: block;
             animation: fadeIn 0.5s ease;
@@ -2491,35 +2550,74 @@ function showQuizMessage(winner) {
     // Fonction pour créer les boutons d'action
     function createActionButtons() {
         return `
-            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+            <div style="display: flex; gap: 4px; margin-top: 15px; justify-content: stretch; width: 100%; margin-left: 0; margin-right: 0;">
                 <button id="showInTreeBtn" style="
                     background: rgba(33, 150, 243, 0.8);
                     border: 1px solid #2196f3;
                     color: white;
-                    padding: 8px 16px;
-                    border-radius: 8px;
-                    font-size: 14px;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
                 " onmouseover="this.style.background='rgba(33, 150, 243, 1)'" 
                 onmouseout="this.style.background='rgba(33, 150, 243, 0.8)'">
-                    🌳 ${getFortuneText('showInTree')}
+                    🌳 ${getFortuneText('showInTreeShort')}
                 </button>
                 
                 <button id="centerWinnerBtn" style="
-                    background: rgba(255, 152, 0, 0.8);
-                    border: 1px solid #ff9800;
+                    background: rgba(156, 39, 176, 0.8);
+                    border: 1px solid #9c27b0;
                     color: white;
-                    padding: 8px 16px;
-                    border-radius: 8px;
-                    font-size: 14px;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
+                " onmouseover="this.style.background='rgba(156, 39, 176, 1)'" 
+                onmouseout="this.style.background='rgba(156, 39, 176, 0.8)'">
+                    🎯 ${getFortuneText('centerWinnerShort')}
+                </button>
+
+                <button id="showDetailsBtn" style="
+                    background: rgba(255, 152, 0, 0.8);
+                    border: 1px solid #ff9800;
+                    color: white;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
                 " onmouseover="this.style.background='rgba(255, 152, 0, 1)'" 
                 onmouseout="this.style.background='rgba(255, 152, 0, 0.8)'">
-                    🎯 ${getFortuneText('centerWinner')}
+                    📋 ${getFortuneText('showDetails')}
                 </button>
             </div>
         `;
@@ -2529,6 +2627,7 @@ function showQuizMessage(winner) {
     function setupActionButtonsEvents() {
         const showInTreeBtn = document.getElementById('showInTreeBtn');
         const centerWinnerBtn = document.getElementById('centerWinnerBtn');
+        const showDetailsBtn = document.getElementById('showDetailsBtn');
         
         if (showInTreeBtn) {
             showInTreeBtn.onclick = (e) => {
@@ -2564,6 +2663,24 @@ function showQuizMessage(winner) {
                     // Rester en mode roue mais changer la racine
                     if (typeof displayGenealogicTree === 'function') {
                         displayGenealogicTree(winner.id, false, false, false, 'WheelAncestors');
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+
+        // Gestionnaire pour voir la fiche
+        if (showDetailsBtn) {
+            showDetailsBtn.onclick = (e) => {
+                e.stopPropagation();
+                               
+                // Optionnel : fermer le quiz
+                closeQuizWindow(() => {
+                    // Lancer displayPersonDetails
+                    if (typeof displayPersonDetails === 'function') {
+                        displayPersonDetails(winner.id);
+                    } else if (typeof window.displayPersonDetails === 'function') {
+                        window.displayPersonDetails(winner.id);
                     }
                     resetLastWinnerHighlightAsync();
                 });
@@ -2649,6 +2766,529 @@ function showQuizMessage(winner) {
 }
 
 
+// Fonction pour afficher le quiz progressif
+export async function readPersonDetails(winner) {
+    const quizMessage = document.createElement("div");
+    quizMessage.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        color: white;
+        padding: 15px;
+        border-radius: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        z-index: 10000;
+        transition: transform 0.5s ease;
+        min-width: 280px;
+        max-width: 95vw;
+        max-height: 85vh;
+        overflow-y: auto;
+        @media (max-width: 600px) {
+            font-size: 16px !important;
+            padding: 20px !important;
+            min-width: 280px !important;
+        }
+        @media (max-width: 400px) {
+            font-size: 14px !important;
+            padding: 15px !important;
+            min-width: 250px !important;
+        }
+    `;
+    
+    // Préparer les indices dans l'ordre spécifié
+    const clues = prepareDetailsForReading(winner);
+    console.log("Indices préparés pour", winner.name, ":", clues);
+    
+
+    quizMessage.innerHTML = `
+        <div style="font-size: 32px; margin: 5px 0;">🧠</div>
+  
+        <!-- Boutons de contrôle en haut -->
+        <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 15px;">
+            <button id="toggle-play-pause-btn" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: 8px 6px;
+                border-radius: 8px;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+                flex: 1;
+                max-width: 110px;
+            ">⏸️ ${getFortuneText('pause') || 'Pause'}</button>
+            
+            <button id="toggle-mute-btn" style="
+                background: rgba(255, 165, 0, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 8px 6px;
+                border-radius: 8px;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+                flex: 1;
+                max-width: 80px;
+            ">🔊 ${getFortuneText('sound') || 'Son'}</button>
+            
+            <button id="close-quiz-btn" style="
+                background: rgba(255, 0, 0, 0.3);
+                border: 2px solid white;
+                color: white;
+                padding: 0;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 40px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">❌</button>
+        </div>
+
+        <!-- Zone de résultat (initialement cachée, sera déplacée ici quand solution affichée) -->
+        <div id="result-container" style="margin: 15px 0; display: none;"></div>
+
+        <!-- Zone des indices -->
+        <div id="clues-container" style="
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 0 15px 0;
+            text-align: left;
+            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+        ">
+            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 14px;">
+                ${getFortuneText('readingInProgress') || 'Lecture en cours...'}
+            </div>
+        </div>
+        
+    `;
+    
+    document.body.appendChild(quizMessage);
+    
+    // Animation d'apparition
+    setTimeout(() => {
+        quizMessage.style.transform = "translate(-50%, -50%) scale(1)";
+    }, 100);
+    
+    // État du quiz
+    let currentClueIndex = -1;
+    let gameFinished = false;
+    let isPaused = false;
+    let isMuted = false;
+    let isReading = false;
+    
+    // Éléments DOM
+    const cluesContainer = quizMessage.querySelector('#clues-container');
+    const togglePlayPauseBtn = quizMessage.querySelector('#toggle-play-pause-btn');
+    const toggleMuteBtn = quizMessage.querySelector('#toggle-mute-btn');
+    const closeQuizBtn = quizMessage.querySelector('#close-quiz-btn');
+    const resultContainer = quizMessage.querySelector('#result-container');
+
+    // Démarrer par la solution puis les indices
+    playAllCluesSequentially();
+
+    async function playAllCluesSequentially() {
+        isReading = true;
+        
+        // Afficher la solution en premier
+        await showSolutionAsync();
+        
+        // Puis afficher les indices un par un
+        for (let i = 0; i < clues.length; i++) {
+            if (isPaused) {
+                // Attendre que la lecture reprenne
+                await waitForResume();
+            }
+            
+            const clue = clues[i];
+            console.log("🧩 Indice ajouté:", clue);
+            await showNextClueAsync();
+            
+            // Petite pause entre chaque indice si pas en pause
+            if (!isPaused) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        isReading = false;
+    }
+    
+    // Fonction pour attendre la reprise de lecture
+    function waitForResume() {
+        return new Promise(resolve => {
+            const checkResume = () => {
+                if (!isPaused) {
+                    resolve();
+                } else {
+                    setTimeout(checkResume, 100);
+                }
+            };
+            checkResume();
+        });
+    }
+    
+    // Fonction pour afficher l'indice suivant
+    async function showNextClueAsync() {
+        console.log("showNextClue appelée - currentClueIndex:", currentClueIndex, "clues.length:", clues.length, "gameFinished:", gameFinished);
+
+        if (currentClueIndex < clues.length - 1 && !gameFinished) {
+            currentClueIndex++;
+            const clue = clues[currentClueIndex];
+            
+            const clueDiv = document.createElement('div');
+            clueDiv.style.cssText = `
+                background: rgba(255, 255, 255, 0.15);
+                padding: 10px;
+                margin: 5px 0;
+                border-radius: 5px;
+                border-left: 4px solid white;
+                animation: slideIn 0.5s ease;
+            `;
+
+            const displayClue = cleanClueForSpeech(clue, winner.sex);
+            clueDiv.innerHTML = `${displayClue}`;
+            
+            // Remplacer le contenu de placeholder s'il existe
+            if (cluesContainer.children.length === 1 && 
+                cluesContainer.firstChild.textContent.includes(getFortuneText('readingInProgress') || 'Lecture en cours...')) {
+                cluesContainer.innerHTML = '';
+            }
+            
+            cluesContainer.appendChild(clueDiv);
+            cluesContainer.scrollTop = cluesContainer.scrollHeight;
+
+            // Lecture vocale de l'indice seulement si pas en mute
+            if (!isMuted) {
+                const cleanedClue = cleanClueForSpeech(clue, winner.sex);
+                console.log('🧹 Indice nettoyé:', cleanedClue);
+                const speakClueFast = true;
+                await speakClue(cleanedClue, speakClueFast);
+            }
+        }
+    }
+    
+    // Fonction pour afficher la solution
+    async function showSolutionAsync() {
+        // Jouer un son si disponible et pas en mute
+        if (typeof fortuneSounds !== 'undefined' && !isMuted) {
+            fortuneSounds.play('winner');
+        }
+        showResult('solution', winner.name.replace(/\//g, ''));
+        
+        if (!isMuted) {
+            await speakClue(winner.name.replace(/\//g, ''));
+        }
+        
+        if (typeof fortuneSounds !== 'undefined') {
+            fortuneSounds.stopTicking();
+        }
+    }
+    
+    // Fonction pour afficher le résultat
+    function showResult(type, correctName) {
+        let resultHTML = '';
+        let bgColor = '';
+        
+        switch(type) {
+            case true:
+                resultHTML = `
+                    <div style="font-size: 24px;">🎉</div>
+                    <div>${getFortuneText('correctGuess')}</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
+                `;
+                bgColor = 'rgba(0, 255, 0, 0.2)';
+                break;
+            case false:
+                resultHTML = `
+                    <div style="font-size: 24px;">😔</div>
+                    <div>${getFortuneText('wrongGuess')}</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
+                `;
+                bgColor = 'rgba(255, 0, 0, 0.2)';
+                break;
+            case 'solution':
+                resultHTML = `
+                    <div style="font-size: 24px;">💡</div>
+                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    ${createActionButtons()}
+                `;
+                bgColor = 'rgba(255, 165, 0, 0.2)';
+                break;
+        }
+        
+        resultContainer.style.cssText = `
+            background: ${bgColor};
+            border-radius: 10px;
+            padding: 20px 5px 20px 5px; 
+            margin: 15px 0;
+            display: block;
+            animation: fadeIn 0.5s ease;
+        `;
+        resultContainer.innerHTML = resultHTML;
+        
+        // Ajouter les gestionnaires d'événements pour les nouveaux boutons
+        setupActionButtonsEvents();
+        
+        // Ne pas marquer le jeu comme fini si on est en train de lire les indices
+        if (type !== 'solution' || !isReading) {
+            gameFinished = true;
+        }
+    }
+
+    // Fonction pour créer les boutons d'action
+    function createActionButtons() {
+        return `
+            <div style="display: flex; gap: 4px; margin-top: 15px; justify-content: stretch; width: 100%; margin-left: 0; margin-right: 0;">
+                <button id="showInTreeBtn" style="
+                    background: rgba(33, 150, 243, 0.8);
+                    border: 1px solid #2196f3;
+                    color: white;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
+                " onmouseover="this.style.background='rgba(33, 150, 243, 1)'" 
+                onmouseout="this.style.background='rgba(33, 150, 243, 0.8)'">
+                    🌳 ${getFortuneText('showInTreeShort')}
+                </button>
+                
+                <button id="centerWinnerBtn" style="
+                    background: rgba(156, 39, 176, 0.8);
+                    border: 1px solid #9c27b0;
+                    color: white;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
+                " onmouseover="this.style.background='rgba(156, 39, 176, 1)'" 
+                onmouseout="this.style.background='rgba(156, 39, 176, 0.8)'">
+                    🎯 ${getFortuneText('centerWinnerShort')}
+                </button>
+
+                <button id="showDetailsBtn" style="
+                    background: rgba(255, 152, 0, 0.8);
+                    border: 1px solid #ff9800;
+                    color: white;
+                    padding: 6px 2px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    flex: 1;
+                    height: 45px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    line-height: 1.2;
+                    margin: 0;
+                " onmouseover="this.style.background='rgba(255, 152, 0, 1)'" 
+                onmouseout="this.style.background='rgba(255, 152, 0, 0.8)'">
+                    📋 ${getFortuneText('showDetails')}
+                </button>
+            </div>
+        `;
+    }
+
+    // Fonction pour configurer les événements des boutons
+    function setupActionButtonsEvents() {
+        const showInTreeBtn = document.getElementById('showInTreeBtn');
+        const centerWinnerBtn = document.getElementById('centerWinnerBtn');
+        const showDetailsBtn = document.getElementById('showDetailsBtn');
+        
+        if (showInTreeBtn) {
+            showInTreeBtn.onclick = (e) => {
+                e.stopPropagation();
+                
+                // Fermer la fenêtre quiz avec la même logique
+                closeQuizWindow(() => {
+                    // Passer en mode arbre et centrer sur le gagnant
+                    if (typeof displayGenealogicTree === 'function') {
+                        // Basculer l'état du tree/radar
+                        state.isRadarEnabled = !state.isRadarEnabled;  
+                        updateRadarButtonText(); 
+                        state.treeModeReal = 'ancestors';
+                        state.treeMode = 'ancestors';
+                        updateTreeModeSelector(state.treeMode);
+
+                        state.nombre_generation = 4; // Réinitialiser à 4 générations
+                        updateGenerationSelector(state.nombre_generation)
+
+                        displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+        
+        if (centerWinnerBtn) {
+            centerWinnerBtn.onclick = (e) => {
+                e.stopPropagation();
+                
+                // Fermer la fenêtre quiz avec la même logique
+                closeQuizWindow(() => {
+                    // Rester en mode roue mais changer la racine
+                    if (typeof displayGenealogicTree === 'function') {
+                        displayGenealogicTree(winner.id, false, false, false, 'WheelAncestors');
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+
+        // Gestionnaire pour voir la fiche
+        if (showDetailsBtn) {
+            showDetailsBtn.onclick = (e) => {
+                e.stopPropagation();
+                               
+                // Optionnel : fermer le quiz
+                closeQuizWindow(() => {
+                    // Lancer displayPersonDetails
+                    if (typeof displayPersonDetails === 'function') {
+                        displayPersonDetails(winner.id);
+                    } else if (typeof window.displayPersonDetails === 'function') {
+                        window.displayPersonDetails(winner.id);
+                    }
+                    resetLastWinnerHighlightAsync();
+                });
+            };
+        }
+    }
+
+    // Fonction pour fermer la fenêtre quiz 
+    function closeQuizWindow(callback) {
+        // Utiliser directement la variable quizMessage qui existe déjà !
+        quizMessage.style.transform = "translate(-50%, -50%) scale(0)";
+        setTimeout(() => {
+            if (quizMessage.parentNode) {
+                document.body.removeChild(quizMessage);
+            }
+            
+            // Appeler les fonctions de nettoyage
+            if (typeof hideWinnerText === 'function') {
+                hideWinnerText();
+            }
+            if (typeof resetLastWinnerHighlightAsync === 'function') {
+                resetLastWinnerHighlightAsync();
+            }
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.stopTicking();
+            }
+            
+            // Exécuter le callback
+            if (callback) {
+                callback();
+            }
+        }, 300);
+    }
+    
+    // Gestionnaires d'événements pour les nouveaux boutons
+    
+    // Bouton Play/Pause
+    togglePlayPauseBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        isPaused = !isPaused;
+        
+        if (isPaused) {
+            togglePlayPauseBtn.innerHTML = `▶️ ${getFortuneText('play') || 'Lecture'}`;
+            // Arrêter la synthèse vocale si elle est en cours
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        } else {
+            togglePlayPauseBtn.innerHTML = `⏸️ ${getFortuneText('pause') || 'Pause'}`;
+            // Reprendre la lecture si elle était en cours
+            if (isReading && currentClueIndex < clues.length - 1) {
+                // La boucle playAllCluesSequentially va reprendre automatiquement
+            }
+        }
+    };
+
+    // Bouton Mute/Unmute
+    toggleMuteBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        isMuted = !isMuted;
+        
+        if (isMuted) {
+            toggleMuteBtn.innerHTML = `🔇 ${getFortuneText('muted') || 'Muet'}`;
+            // Arrêter la synthèse vocale
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            // Arrêter les sons
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.stopTicking();
+            }
+        } else {
+            toggleMuteBtn.innerHTML = `🔊 ${getFortuneText('sound') || 'Son'}`;
+        }
+    };
+    
+    // Fermer le quiz
+    closeQuizBtn.onclick = () => {
+        isPaused = true
+        // Arrêter la synthèse vocale
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        
+        quizMessage.style.transform = "translate(-50%, -50%) scale(0)";
+        setTimeout(() => {
+            if (quizMessage.parentNode) {
+                document.body.removeChild(quizMessage);
+            }
+            hideWinnerText();
+            resetLastWinnerHighlightAsync();
+            if (typeof fortuneSounds !== 'undefined') {
+                fortuneSounds.stopTicking();
+            }
+        }, 300);
+    };
+}
+
+
+
+
 function formatDateForClue(dateString) {
     if (!dateString) return '';
     
@@ -2668,10 +3308,9 @@ function formatDateForClue(dateString) {
 }
 
 
-
-export function speakClue(clueText) {
-    console.log('🔊 Lecture de phrase complète:', clueText);
-    return speakPersonName(clueText, true);
+export function speakClue(clueText, speakClueFast = false) {
+    console.log('🔊 Lecture de phrase complète:', clueText, speakClueFast);
+    return speakPersonName(clueText, true, speakClueFast);
 }
 
 
@@ -3008,6 +3647,234 @@ function prepareProgressiveClues(person) {
         clues.push(`${getFortuneText('cluePrenom')} ${firstName}`);
     }
     
+    // 12. Contexte historique
+    const historicalContext = findContextualHistoricalFigures(person.id);
+    if (historicalContext) {
+        const contexts = [historicalContext.birthContext, historicalContext.marriageContext, historicalContext.deathContext]
+            .filter(ctx => ctx && (ctx.governmentType || (ctx.rulers && ctx.rulers.length > 0)));
+        
+        if (contexts.length > 0) {
+            const context = contexts[0];
+            let contextClue = getFortuneText('clueContexte');
+            
+            if (context.rulers && context.rulers.length > 0) {
+                contextClue += ` ${context.rulers[0].name}`;
+            } else if (context.governmentType) {
+                contextClue += ` ${context.governmentType.type}`;
+            }
+            
+            clues.push(contextClue);
+        }
+    }
+    
+    return clues;
+}
+
+
+
+// Fonction pour préparer les indices progressifs
+function prepareDetailsForReading(person) {
+    const clues = [];
+    console.log("prepareProgressiveClues - person:", person);
+    console.log("person.id:", person.id);
+    console.log("state.gedcomData.individuals[person.id]:", state.gedcomData.individuals[person.id]);
+    
+    const personData = state.gedcomData.individuals[person.id];
+    
+    if (!personData) {
+        console.log("❌ PersonData introuvable pour", person.id);
+        return clues;
+    }
+    console.log("✅ PersonData trouvée:", personData);
+
+    // 1. Premier indice : sexe
+    if (personData.sex) {
+        const sexClue = personData.sex === 'M' 
+            ? getFortuneText('clueSexMale') 
+            : getFortuneText('clueSexFemale');
+        clues.push(sexClue);
+    }
+    
+    // 2. Date et lieu de naissance
+    if (personData.birthDate) {
+        let clue = `${getFortuneText('clueNaissance')} ${formatDateForClue(personData.birthDate)}`;
+        if (personData.birthPlace) {
+            clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.birthPlace)}`;
+        }
+        clues.push(clue);
+    }
+    
+    // 3. Date et lieu de décès
+    if (personData.deathDate) {
+        let clue = `${getFortuneText('clueDeces')} ${formatDateForClue(personData.deathDate)}`;
+        if (personData.deathPlace) {
+            clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.deathPlace)}`;
+        }
+        clues.push(clue);
+    }
+    
+    // 4. Métier
+    if (personData.occupation) {
+        const cleanedProfessions = cleanProfession(personData.occupation);
+        cleanedProfessions.forEach(prof => {
+            if (prof) {
+                const translatedProf = translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr');
+                clues.push(`${getFortuneText('clueMetier')} ${translatedProf}`);
+            }
+        });
+    }
+    
+    // 5. Lieu de résidence
+    const residences = [
+        { place: personData.residPlace1, date: personData.residDate1 },
+        { place: personData.residPlace2, date: personData.residDate2 },
+        { place: personData.residPlace3, date: personData.residDate3 }
+    ].filter(r => r.place);
+    
+    if (residences.length > 0) {
+        residences.forEach(residence => {
+            clues.push(`${getFortuneText('clueResidence')} ${cleanLocation(residence.place)}`);
+        });
+    }
+    
+    // 6. Enfants
+    if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
+        const family = state.gedcomData.families[personData.spouseFamilies[0]];
+        if (family && family.children && family.children.length > 0) {
+            // Prénoms des enfants
+            const childNames = family.children
+                .map(childId => {
+                    const child = state.gedcomData.individuals[childId];
+                    return child ? child.name.replace(/\//g, '').split(' ')[0] : null;
+                })
+                .filter(name => name)
+                .join(', ');
+            
+            if (childNames) {
+                clues.push(`${getFortuneText('clueEnfants')} ${family.children.length} ${getFortuneText('enfants')} : ${childNames}`);
+            }
+        }
+    }
+    
+    // 7. Père - chercher dans les familles où la personne est enfant
+    const parentFamilies = personData.families ? personData.families.filter(famId => {
+        const family = state.gedcomData.families[famId];
+        return family && family.children && family.children.includes(person.id);
+    }) : [];
+
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.husband) {
+            const father = state.gedcomData.individuals[family.husband];
+            if (father) {
+                const fatherName = father.name.replace(/\//g, '');
+                clues.push(`${getFortuneText('cluePere2')} ${fatherName}`);
+            }
+        }
+    }
+
+    // 8. Mère - même logique
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.wife) {
+            const mother = state.gedcomData.individuals[family.wife];
+            if (mother) {
+                const motherName = mother.name.replace(/\//g, '');
+                clues.push(`${getFortuneText('clueMere2')} ${motherName}`);
+            }
+        }
+    }
+
+    // 9. Frères et sœurs
+    if (parentFamilies.length > 0) {
+        const family = state.gedcomData.families[parentFamilies[0]];
+        if (family && family.children && family.children.length > 1) {
+            // Récupérer tous les enfants sauf la personne actuelle
+            const siblings = family.children
+                .filter(childId => childId !== person.id)
+                .map(siblingId => {
+                    const sibling = state.gedcomData.individuals[siblingId];
+                    return sibling ? {
+                        id: siblingId,
+                        name: sibling.name.replace(/\//g, ''),
+                        firstName: sibling.name.replace(/\//g, '').split(' ')[0],
+                        sex: sibling.sex
+                    } : null;
+                })
+                .filter(sibling => sibling);
+
+            if (siblings.length > 0) {
+                // Indice sur le nombre de frères et sœurs
+                const siblingsCount = siblings.length;
+                const brothersCount = siblings.filter(s => s.sex === 'M').length;
+                const sistersCount = siblings.filter(s => s.sex === 'F').length;
+                
+                let siblingClue = '';
+                if (brothersCount > 0 && sistersCount > 0) {
+                    // Frères ET sœurs
+                    if (brothersCount > 1 && sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('freres')} ${getFortuneText('et')} ${getFortuneText('uneSoeur')}`;
+                    } else if (brothersCount === 1 && sistersCount > 1) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('frere')} ${getFortuneText('et')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    } else if (brothersCount === 1 && sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('frere')} ${getFortuneText('et')} ${getFortuneText('uneSoeur')}`;
+                    } else if (brothersCount > 1 && sistersCount > 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsMixed')} ${brothersCount} ${getFortuneText('freres')} ${getFortuneText('et')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    }
+                } else if (brothersCount > 0) {
+                    // Que des frères
+                    siblingClue = `${getFortuneText('clueSiblingsOnly')} ${brothersCount} ${getFortuneText(brothersCount > 1 ? 'freres' : 'frere')}`;
+                } else if (sistersCount > 0) {
+                    // Que des sœurs
+                    if (sistersCount === 1 ) {
+                        siblingClue = `${getFortuneText('clueSiblingsOnly')} ${getFortuneText('uneSoeur')}`;
+                    } else {
+                        siblingClue = `${getFortuneText('clueSiblingsOnly')} ${sistersCount} ${getFortuneText('soeurs')}`;
+                    }
+                } else {
+                    // Fallback général
+                    siblingClue = `${getFortuneText('clueSiblingsGeneral')} ${siblingsCount} ${getFortuneText(siblingsCount > 1 ? 'freressoeurs' : 'freresoeur')}`;
+                }
+                
+                // Ajouter les prénoms si pas trop nombreux
+                if (siblings.length <= 5) {
+                    const siblingNames = siblings
+                        .map(s => s.firstName)
+                        .filter(name => name)
+                        .join(', ');
+                    
+                    if (siblingNames) {
+                        siblingClue += ` : ${siblingNames}`;
+                    }
+                }
+                
+                clues.push(siblingClue);
+            }
+        }
+    }
+
+    // 10. Mariage (conjoint, date, lieu)
+    if (personData.spouseFamilies && personData.spouseFamilies.length > 0) {
+        const family = state.gedcomData.families[personData.spouseFamilies[0]];
+        if (family) {
+            // Trouver le conjoint
+            const spouseId = family.husband === person.id ? family.wife : family.husband;
+            if (spouseId) {
+                const spouse = state.gedcomData.individuals[spouseId];
+                if (spouse) {
+                    let clue = `${getFortuneText('clueMariage')} ${spouse.name.replace(/\//g, '')}`;
+                    if (family.marriageDate) {
+                        clue += `${formatDateForClue(family.marriageDate)}`;
+                    }
+                    if (family.marriagePlace) {
+                        clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(family.marriagePlace)}`;
+                    }
+                    clues.push(clue);
+                }
+            }
+        }
+    }
+        
     // 12. Contexte historique
     const historicalContext = findContextualHistoricalFigures(person.id);
     if (historicalContext) {

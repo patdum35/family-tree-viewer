@@ -1287,7 +1287,7 @@ export function selectVoice() {
 }
 
 /* */
-export function speakPersonName(personName, isFullText = false) {
+export function speakPersonName(personName, isFullText = false, isFast = false) {
     // Initialiser la synthèse vocale si ce n'est pas déjà fait
     if (!state.speechSynthesisInitialized) {
         console.log("🔄 Premier appel à la synthèse vocale - initialisation... avec french voice");
@@ -1298,7 +1298,7 @@ export function speakPersonName(personName, isFullText = false) {
             return new Promise(resolve => {
                 setTimeout(() => {
                     // Réappeler la fonction après initialisation
-                    speakPersonName(personName, isFullText).then(resolve);
+                    speakPersonName(personName, isFullText, isFast).then(resolve);
                 }, 200);
             });
         }
@@ -1349,6 +1349,8 @@ export function speakPersonName(personName, isFullText = false) {
         // Ajustement dynamique du timeout en fonction de la longueur du nom
         let timeOutDuration = Math.max(1800, textToSpeak.length * 150); // Base de 150ms par lettre, minimum 1800ms
 
+
+
         // Ajustements spéciaux pour les noms (pas pour le texte complet)
         if (!isFullText) {
         
@@ -1367,6 +1369,13 @@ export function speakPersonName(personName, isFullText = false) {
             timeOutDuration = Math.max(4000, textToSpeak.length * 120);
             optimalSpeechRate = 1.0; // Vitesse normale pour le texte
         }
+
+
+        if (isFast) {
+            timeOutDuration = Math.max(500, textToSpeak.length * 80); // Base de 100ms par lettre, minimum 1200ms
+            optimalSpeechRate = 1.2;
+        }
+
 
 
         // contournement pour Chrome qui ne fonctionne pas bien avec la synthèse vocale
@@ -1404,7 +1413,7 @@ export function speakPersonName(personName, isFullText = false) {
 
                 utterance.onend = () => {
                     const duration = Date.now() - startTime;
-                    console.log(`✅ Fin utterance après ${duration}ms`);
+                    console.log(`✅ Fin utterance après ${duration}ms , rate: ${utterance.rate }, safetyTimeout :${safetyTimeout}, isFast: ${isFast}`);
                     
                     innerResolve({ 
                         rate: rate, 
@@ -1413,7 +1422,7 @@ export function speakPersonName(personName, isFullText = false) {
                 };
 
                 utterance.onerror = (event) => {
-                    console.log(`❌ Erreur utterance: ${event.error}`);
+                    console.log(`❌ Erreur utterance: ${event.error} , rate: ${utterance.rate }, safetyTimeout :${safetyTimeout}, isFast: ${isFast}`);
                 
                     // Si l'erreur est 'interrupted', utiliser une durée estimée plutôt que Infinity
                     if (event.error === 'interrupted') {
@@ -1614,6 +1623,7 @@ export async function startAncestorAnimation() {
 
     if (state.isSpeechEnabled2) {
         selectVoice();
+        state.isVoiceSelected = true;
     }
 
     let horizontalShift = 0;

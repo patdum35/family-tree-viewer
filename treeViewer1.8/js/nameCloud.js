@@ -4,7 +4,7 @@ import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfession, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { hideHamburgerButtonForcefully } from './hamburgerMenu.js';
+import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
@@ -73,7 +73,8 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
 
     // Masquer le menu hamburger
     console.log("Masquer le menu hamburger");
-    hideHamburgerButtonForcefully();
+    // hideHamburgerButtonForcefully();
+    offsetHamburgerButtonDown();
    
     // Réinitialiser les positions seulement à la première initialisation
     if (!nameCloudState.initialized) {
