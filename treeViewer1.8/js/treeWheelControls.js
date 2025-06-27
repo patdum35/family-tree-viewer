@@ -4,7 +4,7 @@
 import { state } from './main.js';
 // import { changeTreeMode } from './treeRenderer.js';
 import { resetWheelView } from './treeWheelRenderer.js';
-import { exportToPNG, exportToPDF, exportWithOptions, exportVisibleArea, exportHighResPNG } from './exportManager.js';
+import { exportToPNG, exportToPDF, exportWithOptions, exportVisibleArea, exportHighResPNG, exportFullTreePNG } from './exportManager.js';
 
 
 /**
@@ -886,7 +886,7 @@ async function executeEnhancedExportWithOptions(modal) {
         // Utiliser la fonction d'export haute résolution
         if (pageSize === 'auto') {
             // await exportHighResPNG(scaleFactor);
-            await exportFullTreePNG(scaleFactor);  /
+            await exportFullTreePNG(scaleFactor);
         } else {
             await exportMultiPageFormat(options);
         }
