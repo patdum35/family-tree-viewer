@@ -1,7 +1,7 @@
 // ====================================
 // Gestionnaires d'événements
 // ====================================
-import { getZoom } from './treeRenderer.js';
+import { getZoom, getLastTransform } from './treeRenderer.js';
 import { state, displayGenealogicTree, hideMap } from './main.js';
 import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.js';
 import { setupElegantBackground } from './backgroundManager.js';
@@ -12,6 +12,8 @@ import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
 import { drawWheelTree, setMaxGenerations, resetWheelView, removeSpinningImage } from './treeWheelRenderer.js'
 import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { enableBackground } from './backgroundManager.js';
+import { calculateFullTreeDimensions } from './exportManager.js';
 
 
 /**
@@ -356,6 +358,76 @@ export function resetView() {
             .call(zoom.transform, transform);
     }
 }
+
+
+export function resetViewZoomBeforeExport() {
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+
+    state.isAnimationLaunched = false;
+    
+    if (zoom) {
+
+        // Récupérer la transformation actuelle
+        const currentTransform = getLastTransform() || d3.zoomIdentity;
+        
+        // Extraire le scale et la position Y actuels
+        state.currentScale = currentTransform.k;
+        state.currentX = currentTransform.x;
+        state.currentY = currentTransform.y;
+
+
+
+        let transform = d3.zoomIdentity;
+        if (state.treeMode === 'descendants' || state.treeMode === 'directDescendants') {
+            // Pour les descendants, commencer du côté droit
+            transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
+        } else {
+            // Pour les ascendants, commencer du côté gauche
+            transform = transform.translate(state.boxWidth, height / 2);
+        }
+        transform = transform.scale(0.97);
+
+        // enableBackground(false);
+        if (state.backgroundEnabled) {
+            const svgForExport = document.querySelector('#tree-svg');
+            const fullDimensions = calculateFullTreeDimensions(svgForExport);
+            console.log( "new dimension pour the background with png export", fullDimensions)
+            setupElegantBackground(svg, fullDimensions, true);
+        }
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform);
+    }
+}
+
+
+
+export function resetViewZoomAfterExport() {
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+
+    state.isAnimationLaunched = false;
+    
+    if (zoom) {
+
+        // Récupérer la transformation actuelle
+        let transform = d3.zoomIdentity;
+        transform = transform.translate(state.currentX, state.currentY).scale(state.currentScale);
+
+        if (state.backgroundEnabled) {
+            enableBackground(true);
+        }
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform);
+    }
+}
+
 
 /**
  * Réinitialise le niveau de zoom et la position de l'arbre

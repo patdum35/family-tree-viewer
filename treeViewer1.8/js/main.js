@@ -16,7 +16,8 @@ import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
 
-import { cleanupWheelControls } from './treeWheelControls.js';
+import { cleanupExportControls } from './exportSettings.js';
+
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
@@ -147,6 +148,9 @@ export const state = {
     isSpeechInGoodHealth: false,
     frenchVoice: null,
     currentNameCloudModal: null, // Pour stocker le modal du nuage de mots
+    currentScale: 1.0,
+    currentX: 0,
+    currentY: 0,
 
 
 };
@@ -236,22 +240,6 @@ export function toggleSpeech() {
     speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
 
 
-    // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
-    // state.backgroundEnabled = !state.backgroundEnabled;
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-    // if (state.backgroundEnabled) {
-    //     // enableBackground(true);
-    //     // Pour monitorer setupElegantBackground
-    //     restartBackgroundMonitoring();
-    // }
-    // else {
-    //     // enableBackground(false);
-    //     stopBackgroundMonitoring();
-    // }
-
 }
 
 // Fonction pour desactiver complètement le son dans l'animation
@@ -275,21 +263,6 @@ export function toggleSpeech2() {
     }
 
 
-    // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
-    // state.backgroundEnabled = !state.backgroundEnabled;
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-    // if (state.backgroundEnabled) {
-    //     // enableBackground(true);
-    //     // Pour monitorer setupElegantBackground
-    //     restartBackgroundMonitoring();
-    // }
-    // else {
-    //     // enableBackground(false);
-    //     stopBackgroundMonitoring();
-    // }
 
 }
 
@@ -450,13 +423,6 @@ export async function loadData() {
 
 
 
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-
-    // // Pour monitorer setupElegantBackground
-    // stopMonitoring = monitorFunction(window, 'setupElegantBackground', 1000);
 
 
     // Utilisation
@@ -525,12 +491,17 @@ export async function loadData() {
 
         let ancestor = null;
         let cousin = null;
-        if (state.treeOwner ===2 ) {
+        if (state.treeOwner === 3 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('hugues cap');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } if (state.treeOwner === 2 ) {
             // state.targetAncestorId = "@I1152@";
             ancestor = searchRootPersonId('guillaume ducl');
             cousin = null; 
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===1 ){              
+        } else if (state.treeOwner === 1 ){              
             // state.targetAncestorId = "@I739@" 
             ancestor = searchRootPersonId('alain ii goyon de matignon');  
             cousin = null; 
@@ -646,15 +617,27 @@ async function loadGedcomContent(fileInput, passwordInput) {
                     console.log("Fichier arbreX.enc ouvert avec succès. Owner: 2");
                     return content;
                 } catch (secondError) {
-                    // Si le mot de passe est également incorrect pour arbreX.enc
-                    if (window.CURRENT_LANGUAGE === 'fr') {
-                        throw new Error('Mot de passe incorrect pour les deux fichiers');
-                    } else if (window.CURRENT_LANGUAGE === 'en') {
-                        throw new Error('Incorrect password for both files');
-                    } else if (window.CURRENT_LANGUAGE === 'es') {
-                        throw new Error('Contraseña incorrecta para ambos archivos');
-                    } else if (window.CURRENT_LANGUAGE === 'hu') {
-                        throw new Error('Helytelen jelszó mindkét fájlhoz');
+                    // Si le mot de passe est incorrect pour arbre.enc, essayer avec arbreB.enc
+                    if (secondError.message === 'Mot de passe incorrect') {
+                        console.log("Tentative d'ouverture du fichier arbreB.enc...");
+                        try {
+                            const content = await loadEncryptedContent(passwordInput.value, 'arbreB.enc');
+                            // Si succès avec arbreB.enc, définir treeOwner = 3
+                            state.treeOwner = 3;
+                            console.log("Fichier arbreB.enc ouvert avec succès. Owner: 3");
+                            return content;
+                        } catch (secondError) {
+                            // Si le mot de passe est également incorrect pour arbreX.enc
+                            if (window.CURRENT_LANGUAGE === 'fr') {
+                                throw new Error('Mot de passe incorrect pour les deux fichiers');
+                            } else if (window.CURRENT_LANGUAGE === 'en') {
+                                throw new Error('Incorrect password for both files');
+                            } else if (window.CURRENT_LANGUAGE === 'es') {
+                                throw new Error('Contraseña incorrecta para ambos archivos');
+                            } else if (window.CURRENT_LANGUAGE === 'hu') {
+                                throw new Error('Helytelen jelszó mindkét fájlhoz');
+                            }
+                        }
                     }
                 }
             } else {
@@ -916,6 +899,16 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('alonso de ');
             }
             state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner ===3 ) {
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('hugues c');
+            } //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('hugues c ');
+            }
+            state.targetAncestorId = ancestor.id;
         } else {
             if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
                 // state.targetAncestorId = "@I739@" 
@@ -1096,7 +1089,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // Nettoyer les contrôles existants
-    cleanupWheelControls();
+    cleanupExportControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];

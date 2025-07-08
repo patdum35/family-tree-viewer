@@ -1562,7 +1562,8 @@ export async function startAncestorAnimation() {
 
             if (state.treeOwner ===2 ) {
                 state.rootPersonId = searchRootPersonId('faustine d');
-
+            } else if (state.treeOwner ===3 ) {
+                state.rootPersonId = searchRootPersonId('laurence m');
             } else {
                 state.rootPersonId = searchRootPersonId('emma a');
             }

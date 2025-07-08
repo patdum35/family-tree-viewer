@@ -1335,6 +1335,8 @@ function createDemoSelector() {
     // Adapter les textes en fonction de l'état
     if (state.treeOwner === 2) {
       typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
+    } else if (state.treeOwner === 3) {
+      typeOptionsExpanded = ['Capet', 'Capet'];
     } else {
       typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
       typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];

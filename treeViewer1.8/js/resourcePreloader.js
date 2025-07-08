@@ -14,11 +14,13 @@ const RESOURCES_TO_CACHE = [
   // Fichiers critiques .enc
   './arbre.enc',
   './arbreX.enc',
+  './arbreB.enc',
   
   // Fichiers JSON
   './geolocalisation.json',
   './geolocalisationX.json',
-  
+  './geolocalisationB.json',
+
   // Images
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
@@ -262,7 +264,7 @@ async function preloadAppResources() {
  * Vérifier spécifiquement que les fichiers .enc sont bien en cache
  */
 async function verifyEncFiles(cache) {
-    const encFiles = ['./arbre.enc', './arbreX.enc'];
+    const encFiles = ['./arbre.enc', './arbreX.enc', './arbreB.enc'];
     
     log("🔍 Vérification des fichiers .enc en cache:", 'info');
     
@@ -472,7 +474,7 @@ export async function verifyResourceCache() {
         }
         
         // Vérifier spécifiquement arbre.enc et arbreX.enc
-        for (const file of ['arbre.enc', 'arbreX.enc']) {
+        for (const file of ['arbre.enc', 'arbreX.enc', './arbreB.enc']) {
             const isInCache = entries.some(req => req.url.includes(file));
             log(`${file}: ${isInCache ? '✅ En cache' : '❌ Absent'}`, isInCache ? 'success' : 'error');
         }

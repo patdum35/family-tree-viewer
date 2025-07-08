@@ -5,12 +5,9 @@ import { nameCloudState } from './nameCloud.js';
 import { setTargetAncestorId } from './treeAnimation.js';
 import { state, updatePrenoms, toggleTreeRadar } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
-import { initializeAllWheelControls } from './treeWheelControls.js';
+import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
-import { generateNameCloudExport } from './nameCloudUI.js'
-
-
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -76,6 +73,11 @@ const settingsTranslations = {
         'treeTab': 'Arbre',
         'radarTab': 'Radar', 
         'nuageTab': 'Nuage',
+        'radarStyle': 'Style du radar',
+        'blueStyle': 'Style bleu', 
+        'greenStyle': 'Style vert', 
+        'orangeStyle': 'Style orange', 
+        'blueRedStyle':'Style H/F bleu/rouge'
     },
     'en': {
         'settingsTitle': 'Advanced Settings',
@@ -138,6 +140,11 @@ const settingsTranslations = {
         'treeTab': 'Tree',
         'radarTab': 'Radar',
         'nuageTab': 'Cloud',
+        'radarStyle': 'Radar style',
+        'blueStyle': 'Blue style', 
+        'greenStyle': 'Green style', 
+        'orangeStyle': 'Orange style', 
+        'blueRedStyle':'M/F blue/red style'
     },
     'es': {
         'settingsTitle': 'Configuración Avanzada',
@@ -200,6 +207,11 @@ const settingsTranslations = {
         'treeTab': 'Árbol',
         'radarTab': 'Radar',
         'nuageTab': 'Nube',
+        'radarStyle': 'Estilo del radar',
+        'blueStyle': 'Estilo azul', 
+        'greenStyle': 'Estilo verde', 
+        'orangeStyle': 'Estilo naranja', 
+        'blueRedStyle':'Estilo H/M azul/rojo'
     },
     'hu': {
         'settingsTitle': 'Speciális Beállítások',
@@ -262,11 +274,13 @@ const settingsTranslations = {
         'treeTab': 'Fa',
         'radarTab': 'Radar',
         'nuageTab': 'Felhő',
+        'radarStyle': 'Radar stílusa',
+        'blueStyle': 'Kék stílus', 
+        'greenStyle': 'Zöld stílus', 
+        'orangeStyle': 'Narancs stílus', 
+        'blueRedStyle': 'Nő/Férfi kék/piros stílus'
     }
 };
-
-
-
 
 // Fonction pour obtenir le texte traduit selon la langue actuelle
 function translateSettings(key) {
@@ -290,14 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // État des paramètres de fond d'écran avec vérification stricte des valeurs
 const backgroundSettings = {
-    // type: localStorage.getItem('preferredBackground') || 'growingTree',
-    // opacity: getNumericValue('backgroundOpacity', 0.5),
-    // patternVisibility: getNumericValue('patternVisibility', 1.0),
-    // animation: localStorage.getItem('backgroundAnimation') === 'true' || false,
-    // animationSpeed: getNumericValue('animationSpeed', 0.3),
-    // customColor: localStorage.getItem('backgroundCustomColor') || '#F5F0E6'
-    
-    
     type: localStorage.getItem('preferredBackground') || 'poppingBubbles', //'growingTree',
     opacity: getNumericValue('backgroundOpacity', 1.0) || 1.0, //0.5),
     patternVisibility: getNumericValue('patternVisibility', 1.0) || 1.0 ,
@@ -307,8 +313,7 @@ const backgroundSettings = {
     animationSpeed: getNumericValue('animationSpeed', 2.0) || 2.0, //0.3),
     customColor: localStorage.getItem('backgroundCustomColor') || '#B5D9A7' //'#F5F0E6'
 };
-
-    
+   
 // Fonction d'aide pour obtenir une valeur numérique valide depuis localStorage
 // Version corrigée de la fonction getNumericValue
 function getNumericValue(key, defaultValue) {
@@ -403,7 +408,12 @@ function createTypeSelect(config) {
         'Kandinsky', 
         'Miró', 
         'Mondrian', 
-        translateSettings('art')
+        'treeRings', 
+        translateSettings('art'),
+        'artDeco', 
+        'organicPattern', 
+        'curvedLines', 
+        'simpleBackground'
     ];
     
     const typeOptionsExpanded = [
@@ -422,7 +432,11 @@ function createTypeSelect(config) {
         'Kandinsky', 
         'Miró', 
         'Mondrian',
-        translateSettings('art')
+        'treeRings', 
+        translateSettings('art'),
+        'organicPattern', 
+        'curvedLines', 
+        'simpleBackground'
     ];
 
     const typeValues = ['none', 'customImage', 'bubbles', 'poppingBubbles', 'treeBranches', 'fallingLeaves', 'growingTree', 'parchment', 'grid', 'paperTexture', 'fractal', 'pollock', 'kandinsky', 'miro', 'mondrian','treeRings', 'artDeco', 'organicPattern', 'curvedLines', 'simpleBackground' ];
@@ -594,7 +608,6 @@ function createModalContent() {
     return content;
 }
 
-
 function createTargetAncestorControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -650,10 +663,6 @@ function createTargetAncestorControls() {
     
     return container;
 }
-
-
-
-
 
 function showFeedback(message, type = 'info') {
     // Supprimer tout message existant
@@ -837,14 +846,7 @@ function createGeolocationControls() {
     return container;
 }
 
-// function createTreeControls() {
-//     const container = document.createElement('div');
-//     container.style.padding = '15px';
-//     container.innerHTML = '<p>Paramètres de l\'arbre à venir...</p>';
-//     return container;
-// }
-
-// 2. Modifier la fonction createTreeControls() pour inclure le sélecteur de prénoms
+// Modifier la fonction createTreeControls() pour inclure le sélecteur de prénoms
 function createTreeControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -897,7 +899,6 @@ function createTreeControls() {
     return container;
 }
 
-
 function createRadarControls() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -905,7 +906,7 @@ function createRadarControls() {
     container.style.gap = '0px';
     
     // Style du radar (en ligne)
-    const radarStyleSection = createControlSection('Style du radar', true);
+    const radarStyleSection = createControlSection(translateSettings('radarStyle'), true);
     
     const radarStyleSelector = createRadarStyleSelect({
         style: localStorage.getItem('radarStyle') || 'styleBleu'
@@ -919,12 +920,12 @@ function createRadarControls() {
 
 function createRadarStyleSelect(config) {
     // Options du sélecteur radar
-    const styleOptions = ['Style bleu', 'Style vert', 'Style orange', 'Style H/F bleu/rouge'];
-    const styleValues = ['styleBleu', 'styleVert', 'styleOrange', 'styleHF'];
+    const styleOptions = [translateSettings('blueStyle'), translateSettings('greenStyle'), translateSettings('orangeStyle'), translateSettings('blueRedStyle')];
+    const styleValues = ['blueStyle', 'greenStyle', 'orangeStyle', 'blueRedStyle'];
     
     // Créer les options avec createOptionsFromLists
     const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
-    
+
     // Couleurs pour le sélecteur personnalisé - style nameCloudUI
     const colors = {
         main: ' #4361ee',    // Bleu nameCloudUI
@@ -1005,7 +1006,6 @@ function createRadarStyleSelect(config) {
                 }
             });
 }
-
 
 function createNuageControls() {
     const container = document.createElement('div');
@@ -1206,9 +1206,6 @@ function createBackgroundControls() {
     typeAndImageContainer.appendChild(customImageButton);
 
     typeSection.appendChild(typeAndImageContainer);
-
-
-
 
     
     // Opacité (en ligne avec slider plus petit)
@@ -1687,18 +1684,7 @@ function createTabContainer() {
         document.head.appendChild(scrollbarStyle);
     }
     
-    // const tabs = [
-    //     { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
-    //     { id: 'export-tab', label: translateSettings('exportTab'), active: false },
-    //     { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
-    //     { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
-    //     { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
-    //     { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
-    //     { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
-    // ];
     const tabs = [
-    // { id: 'background-tab', label: 'Fond\nd\'écran', active: true },
-    // { id: 'export-tab', label: 'Export\npng/pdf', active: false },
     { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
     { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
     { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
@@ -1831,7 +1817,24 @@ function createTabContainer() {
                 
                 return; // Sortir de la fonction pour éviter l'affichage normal du contenu
             }
-            
+
+            if (tab.id === 'export-tab') {
+                // Fermer d'abord la modal des settings avancés
+                const enhancedModal = document.getElementById('enhanced-settings-modal');
+                if (enhancedModal) {
+                    document.body.removeChild(enhancedModal);
+                }
+                
+                // Ouvrir immédiatement la modal d'export
+                setTimeout(() => {
+                    initializeAllExportControls();
+                }, 100); // Petit délai pour éviter les conflits
+                
+                return; // Sortir de la fonction pour éviter l'affichage normal du contenu
+            }            
+
+
+
             // Code existant pour les autres tabs...
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.style.display = 'none';
@@ -1918,10 +1921,7 @@ function createTabContainer() {
         targetAncestorTab, 
         geolocationTab 
     };
-
-
 }
-
 
 function initializeControls(modalContent) {
     // Créer le conteneur d'onglets
@@ -1940,44 +1940,16 @@ function initializeControls(modalContent) {
     modalContent.appendChild(tabContainer);
 }
 
-
-// 5. Ajouter la fonction createExportControls() :
 function createExportControls() {
     const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '15px';
-    
-    // Message d'information
+    container.style.padding = '15px';
+    container.style.textAlign = 'center';
     const infoText = document.createElement('p');
-    infoText.textContent = translateSettings('exportInfo');
+    infoText.textContent = 'Redirection automatique vers les paramètres d\'export...';
     infoText.style.margin = '10px 0';
-    
-    // Bouton pour ouvrir l'interface d'export
-    const openExportButton = document.createElement('button');
-    openExportButton.textContent = translateSettings('openExportInterface');
-    openExportButton.style.padding = '12px 20px';
-    openExportButton.style.backgroundColor = '#4361ee';
-    openExportButton.style.color = 'white';
-    openExportButton.style.border = 'none';
-    openExportButton.style.borderRadius = '4px';
-    openExportButton.style.cursor = 'pointer';
-    openExportButton.style.fontSize = '14px';
-    openExportButton.style.fontWeight = 'bold';
-    openExportButton.style.margin = '10px 0';
-    
-    // Gestionnaire d'événements pour ouvrir l'interface d'export
-    openExportButton.addEventListener('click', () => {
-        initializeAllWheelControls();
-        // Fermer la modal de settings
-        const enhancedModal = document.getElementById('enhanced-settings-modal');
-        if (enhancedModal) {
-            document.body.removeChild(enhancedModal);
-        }
-    });
-    
+    infoText.style.fontSize = '14px';
+    infoText.style.color = '#666';
+    infoText.style.fontStyle = 'italic';
     container.appendChild(infoText);
-    container.appendChild(openExportButton);
-    
     return container;
 }

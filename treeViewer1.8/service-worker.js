@@ -108,7 +108,7 @@ self.addEventListener('install', (event) => {
       swConsole.log(`📊 Bilan de mise en cache: ${successCount} ajoutés, ${existingCount} existants, ${failedCount} échecs`);
       
       // Vérification spécifique pour arbre.enc et arbreX.enc
-      const verifyFiles = ['arbre.enc', 'arbreX.enc'];
+      const verifyFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc'];
       for (const file of verifyFiles) {
         const response = await cache.match(file);
         if (response) {
@@ -332,6 +332,7 @@ self.addEventListener('activate', (event) => {
         './js/treeWheelRenderer.js',
         './js/treeWheelAnimation.js',
         './js/exportManager.js',
+        './js/exportSettings.js',
         './js/UIutils.js',
         './js/utils.js',
         './js/occupations.js',
