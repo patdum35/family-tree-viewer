@@ -24,7 +24,7 @@ const RESOURCES_TO_CACHE = [
   // Images
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
-  './background_images/lichen-rouge.jpg',
+  './background_images/bois.jpg',
   './background_images/contemporain.jpx',
   './background_images/republique.jpg',
   './background_images/fort_lalatte.jpx',
