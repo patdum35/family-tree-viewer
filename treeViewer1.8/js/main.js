@@ -5,10 +5,12 @@ import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
+    toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions, updateGenerationSelectorValue } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
+    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js'; 
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
@@ -83,7 +85,6 @@ export const state = {
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
-    treeMode_backup: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'    
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
@@ -213,15 +214,26 @@ export function toggleTreeRadar() {
     updateRadarButtonText();  
 
     if (state.isRadarEnabled) {
-        state.treeMode_backup = state.treeMode;
-        state.treeModeReal_backup = state.treeModeReal;
+        state.treeModeReal_backup = state.treeMode;        
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+
     } else {
-        state.treeMode = state.treeMode_backup;
-        state.treeModeReal = state.treeModeReal_backup;        
+
+        if ((state.treeModeReal_backup.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
+            state.treeMode = 'ancestors';
+            state.treeModeReal = 'ancestors';
+            state.treeModeReal_backup = 'ancestors';
+
+        } else if ((state.treeModeReal_backup.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
+            state.treeMode = 'descendants';
+            state.treeModeReal = 'descendants';
+            state.treeModeReal_backup = 'descendants';
+        } else {
+            state.treeMode = state.treeModeReal_backup;
+            state.treeModeReal = state.treeModeReal_backup;  
+        }      
         displayGenealogicTree(null, true, false);
     }
-
 }
 
 
@@ -281,28 +293,27 @@ function stopBackgroundMonitoring() {
     }
   }
   
-  // Pour redémarrer le monitoring si nécessaire
-  function restartBackgroundMonitoring() {
-    // D'abord arrêter s'il est en cours
-    if (window._monitoringStopFunction) {
-      stopBackgroundMonitoring();
-    }
-    
-    // Puis redémarrer avec la fonction originale
-    if (window._originalSetupElegantBackground) {
-      console.log("Redémarrage du monitoring du fond d'écran");
-      import('./performanceMonitor.js').then(module => {
-        window._monitoringStopFunction = module.monitorFunction(
-          window, 
-          '_originalSetupElegantBackground', 
-          1000
-        );
-      });
-    } else {
-      console.log("Impossible de redémarrer, fonction originale non trouvée");
-    }
-  }
+// Pour redémarrer le monitoring si nécessaire
+function restartBackgroundMonitoring() {
+// D'abord arrêter s'il est en cours
+if (window._monitoringStopFunction) {
+    stopBackgroundMonitoring();
+}
 
+// Puis redémarrer avec la fonction originale
+if (window._originalSetupElegantBackground) {
+    console.log("Redémarrage du monitoring du fond d'écran");
+    import('./performanceMonitor.js').then(module => {
+    window._monitoringStopFunction = module.monitorFunction(
+        window, 
+        '_originalSetupElegantBackground', 
+        1000
+    );
+    });
+} else {
+    console.log("Impossible de redémarrer, fonction originale non trouvée");
+}
+}
 
 export function toggleFullScreen() {
     if (!document.fullscreenElement) {
@@ -392,6 +403,8 @@ export async function loadData() {
     audio.preload = 'auto';
     audio.volume = 1;
 
+    state.treeMode = 'ancestors';
+    state.treeModeReal = 'ancestors';
 
 
     // 💡 Débloque l'audio à ce moment-là pour IOS
@@ -421,8 +434,7 @@ export async function loadData() {
     state.nombre_generation = 4;
     updateGenerationSelectorValue(state.nombre_generation);
 
-
-
+    updateTreeModeSelector(state.treeMode);
 
 
     // Utilisation
@@ -1102,15 +1114,23 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         if (['WheelAncestors', 'WheelDescendants'].includes(mode)) {
             console.log('🌟 Mode éventail détecté:', mode);
             // state.treeModeReal = mode;
-            state.treeMode = 'directAncestors';
-            state.treeModeReal = 'directAncestors';
-            // state.treeMode = 'ancestors';
-            // state.treeModeReal = 'ancestors';
-            state.currentTree = buildAncestorTree(person.id);
+
+            if (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' ) {
+                state.treeMode = 'directAncestors';
+                state.treeModeReal = 'directAncestors';
+                state.currentTree = buildAncestorTree(person.id);
+            } else {
+                state.treeMode = 'directDescendants';
+                state.treeModeReal = 'directDescendants';
+                state.currentTree = buildDescendantTree(person.id);
+
+            }
+            updateTreeModeSelector(state.treeMode);
+            state.treeModeReal_backup = state.treeModeReal;
             state.treeModeReal = mode;
             setMaxGenerationsInit(state.nombre_generation);
-            // initializeAllWheelControls();
         } else {
+            updateTreeModeSelector(state.treeMode);
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
             // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
             state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
@@ -1123,8 +1143,14 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         }
     }
 
+
+    updateGenerationSelectorValue(state.nombre_generation);
+
+
     // drawTree(isZoomRefresh);
     drawTree(isZoomRefresh, false); // with WheelAncestors
+
+    // drawWheelTree(true, false);
 
     // Ne pas faire resetView() en mode both
     if (state.treeModeReal !== 'both') {
@@ -1181,8 +1207,9 @@ export function updateTreeMode(mode) {
     resetAnimationState();
 
     if (state.isRadarEnabled) {
-        state.treeMode = 'directAncestors';
-        mode = 'directAncestors';
+        // state.treeMode = 'directAncestors';
+        // mode = 'directAncestors';
+        state.treeMode = mode;
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
     } else {
         state.treeMode = mode;

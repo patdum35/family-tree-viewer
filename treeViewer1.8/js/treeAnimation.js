@@ -1124,17 +1124,18 @@ export async function testSpeechSynthesisHealth(timeout = 1000) {
 export function selectVoice() {
     // Sélectionner une voix française si possible
     let voices = window.speechSynthesis.getVoices();
-    console.log("Voix disponibles:",voices);
+    
+    // console.log("Voix disponibles:",voices);
 
-    debugLog("=== Liste des voix disponibles ===");
-    voices.forEach(voice => {
-        debugLog(`Voix: ${voice.name}
-        - Langue: ${voice.lang}
-        - Local: ${voice.localService}
-        - Par défaut: ${voice.default}
-        - URI: ${voice.voiceURI}
-        ---------------------`);
-    });
+    // debugLog("=== Liste des voix disponibles ===");
+    // voices.forEach(voice => {
+    //     debugLog(`Voix: ${voice.name}
+    //     - Langue: ${voice.lang}
+    //     - Local: ${voice.localService}
+    //     - Par défaut: ${voice.default}
+    //     - URI: ${voice.voiceURI}
+    //     ---------------------`);
+    // });
 
     // Trouver les voix françaises disponibles
     // let frenchVoices = voices.filter(voice => 

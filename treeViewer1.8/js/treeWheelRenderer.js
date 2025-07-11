@@ -5,6 +5,7 @@ import { state, displayGenealogicTree } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
 import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
+import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;
@@ -44,6 +45,9 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
         return;
     }
 
+    // console.log('🌳 Structure de l\'arbre descendant:');
+    // console.log(JSON.stringify(state.currentTree, null, 2));
+
     if (state.isSpeechEnabled2)
     {
         state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
@@ -61,8 +65,8 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
 
     // DIAGNOSTIC SUPPLÉMENTAIRE
     console.log('🚨 ÉTAT COMPLET AVANT DRAWWheelTREE');
-    console.log('state.WheelZoom existant:', !!state.WheelZoom);
-    console.log('Propriétés du zoom existant:', state.WheelZoom ? Object.keys(state.WheelZoom) : 'N/A');
+    // console.log('state.WheelZoom existant:', !!state.WheelZoom);
+    // console.log('Propriétés du zoom existant:', state.WheelZoom ? Object.keys(state.WheelZoom) : 'N/A');
     
     // Si state.WheelZoom existe, essayez de le réinitialiser complètement
     if (state.WheelZoom) {
@@ -71,21 +75,21 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
         state.WheelZoom = null;  // Forcer une réinitialisation complète
     }
     
-    console.log('🌟 Début du rendu éventail 360°...');
-    console.log('📊 Arbre reçu:', state.currentTree);
+    // console.log('🌟 Début du rendu éventail 360°...');
+    // console.log('📊 Arbre reçu:', state.currentTree);
     
-    console.log('🔍 DIAGNOSTIC DÉBUT drawWheelTree');
-    console.log('🔍 isZoomRefresh:', isZoomRefresh);
-    console.log('🔍 isAnimation:', isAnimation);
+    // console.log('🔍 DIAGNOSTIC DÉBUT drawWheelTree');
+    // console.log('🔍 isZoomRefresh:', isZoomRefresh);
+    // console.log('🔍 isAnimation:', isAnimation);
     
     const svg = setupWheelSVG();
     
     const initialD3Transform = d3.zoomTransform(svg.node());
-    console.log('🔍 Zoom D3 initial:', {
-        k: initialD3Transform.k,
-        x: initialD3Transform.x,
-        y: initialD3Transform.y
-    });
+    // console.log('🔍 Zoom D3 initial:', {
+    //     k: initialD3Transform.k,
+    //     x: initialD3Transform.x,
+    //     y: initialD3Transform.y
+    // });
     
     if (window.initialWheelTransform) {
         console.log('🔍 window.initialWheelTransform:', window.initialWheelTransform);
@@ -96,8 +100,7 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
     configureWheelMode();
     
     const generationsData = organizeByGenerations(state.currentTree);
-    console.log('📊 Données par génération:', generationsData);
-    
+   
     createSVGFilters(svg);
     
     drawCenterPerson(mainGroup, state.currentTree);
@@ -109,11 +112,11 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
     setupWheelResizeHandler();
     
     const afterD3Transform = d3.zoomTransform(svg.node());
-    console.log('🔍 Zoom D3 APRÈS setupWheelZoom:', {
-        k: afterD3Transform.k,
-        x: afterD3Transform.x,
-        y: afterD3Transform.y
-    });
+    // console.log('🔍 Zoom D3 APRÈS setupWheelZoom:', {
+    //     k: afterD3Transform.k,
+    //     x: afterD3Transform.x,
+    //     y: afterD3Transform.y
+    // });
 
     if (isZoomRefresh) {
         resetWheelView();
@@ -189,7 +192,9 @@ function setupWheelResizeHandler() {
             setTimeout(() => {
                 if (typeof displayGenealogicTree === 'function') {
                     console.log('🔄 Reconstruction via displayGenealogicTree');
-                    displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+                    // displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+                    // state.currentTree = buildAncestorTree(state.rootPersonId);
+                    drawWheelTree(false, false);
 
                     createWinnerRedArrowIndicator();
 
@@ -311,7 +316,15 @@ export const calculateOptimalZoom = () => {
     const height = window.innerHeight;
     
     // Rayon total du radar
-    const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
+    // const totalRadius = state.WheelConfig.innerRadius + (state.WheelConfig.maxGenerations * state.WheelConfig.generationWidth);   
+
+
+    // NOUVEAU : calculer le rayon total avec les largeurs variables
+    let totalRadius = state.WheelConfig.innerRadius;
+    for (let gen = 1; gen <= state.WheelConfig.maxGenerations; gen++) {
+        totalRadius += calculateGenerationWidth(gen);
+    }
+
 
     // Calcul du zoom pour que le radar tienne dans la fenêtre
     // On laisse une marge de 10% de chaque côté
@@ -319,15 +332,28 @@ export const calculateOptimalZoom = () => {
     let heightZoom = (height * 0.8) / (2 * totalRadius);
 
     if (state.WheelConfig.maxGenerations > 10) {
-        widthZoom = widthZoom * 1.4;
-        heightZoom = heightZoom * 1.4;
+        widthZoom = widthZoom * 1.2;
+        heightZoom = heightZoom * 1.2;
     } else if (state.WheelConfig.maxGenerations > 5 ) {
-        widthZoom = widthZoom * 1.4;
-        heightZoom = heightZoom * 1.4;
+        widthZoom = widthZoom * 1.1;
+        heightZoom = heightZoom * 1.1;
     }
-    if ((state.WheelConfig.maxGenerations > 2  && state.WheelConfig.maxGenerations < 6)  && (window.innerHeight < 400  || window.innerWidth < 400)) {
-        widthZoom = widthZoom * 1.4;
-        heightZoom = heightZoom * 1.4;
+    // if ((state.WheelConfig.maxGenerations > 2  && state.WheelConfig.maxGenerations < 6)  && (window.innerHeight < 400  || window.innerWidth < 400)) {
+    //     widthZoom = widthZoom * 1.4;
+    //     heightZoom = heightZoom * 1.4;
+    // }
+
+    if (window.innerHeight < 400  || window.innerWidth < 400) {
+
+        if (state.WheelConfig.maxGenerations > 2  && state.WheelConfig.maxGenerations < 6) {
+            widthZoom = widthZoom * 1.4;
+            heightZoom = heightZoom * 1.4;
+        } else {
+            widthZoom = widthZoom * 1.1;
+            heightZoom = heightZoom * 1.1;            
+        }
+
+
     }
 
 
@@ -379,13 +405,13 @@ function setupWheelZoom(svg, mainGroup) {
     
     // Transformation initiale optimale
     const initialZoom = calculateOptimalZoom();
-    console.log('🔍 Zoom optimal calculé:', initialZoom);
-    console.log('🔍 Nombre générations:', state.WheelConfig.maxGenerations);
+    // console.log('🔍 Zoom optimal calculé:', initialZoom);
+    // console.log('🔍 Nombre générations:', state.WheelConfig.maxGenerations);
 
     const initialTransform = d3.zoomIdentity
         .translate(state.WheelConfig.centerX, state.WheelConfig.centerY)
         .scale(initialZoom);
-    console.log('🔍 Transform à appliquer:', initialTransform);
+    // console.log('🔍 Transform à appliquer:', initialTransform);
 
 
     // CAPTURER le vrai zoom AVANT que D3.js fasse ses ajustements
@@ -394,18 +420,18 @@ function setupWheelZoom(svg, mainGroup) {
         x: state.WheelConfig.centerX,
         y: state.WheelConfig.centerY
     };
-    console.log('VRAI Transform initial capturé:', window.initialWheelTransform);
+    // console.log('VRAI Transform initial capturé:', window.initialWheelTransform);
 
     // État AVANT application
     const beforeTransform = d3.zoomTransform(svg.node());
-    console.log('🔍 Transform AVANT application:', beforeTransform);
+    // console.log('🔍 Transform AVANT application:', beforeTransform);
     
     svg.call(state.WheelZoom.transform, initialTransform);
 
 
     // État APRÈS application
     const afterTransform = d3.zoomTransform(svg.node());
-    console.log('🔍 Transform APRÈS application:', afterTransform);
+    // console.log('🔍 Transform APRÈS application:', afterTransform);
 
 
     setTimeout(() => {
@@ -456,9 +482,13 @@ function changeRootPerson(personId) {
     
     if (typeof window.displayGenealogicTree === 'function') {
         window.displayGenealogicTree(personId, false, false, false, state.treeModeReal);
+        
     } else {
         console.error('❌ displayGenealogicTree non trouvée');
     }
+    displayGenealogicTree(personId, false, false, false, state.treeModeReal);
+    // state.currentTree = buildAncestorTree(state.rootPersonId);
+    // drawWheelTree(true, false);
 }
 
 /**
@@ -491,7 +521,14 @@ export function setMaxGenerations(max) {
         setTimeout(() => {
             if (typeof displayGenealogicTree === 'function') {
                 console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setMaxGenerations  ################# ')
-                displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+                // displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
+                if (state.treeModeReal_backup  === 'directAncestors') {
+                    state.currentTree = buildAncestorTree(state.rootPersonId);
+                } else { 
+                    state.currentTree = buildDescendantTree(state.rootPersonId);
+                }
+                
+                drawWheelTree(false, false);
             }
         }, 100);
     }
@@ -696,6 +733,19 @@ export function getGenerationColor(generation, sex = 'M') {
             femaleColors = femaleColorsV1;
     }
     
+
+    // NOUVEAU : fond blanc semi-transparent pour gen 9+
+    if (generation > 8) {
+
+        if (sex = 'M') { 
+            return "rgba(193, 225, 255, 0.5)"; // Bleu légèrement plus saturé        
+        } else {
+            return "rgba(255, 230, 243, 0.5)"; // rose alice très clair       
+        }
+        // return "rgba(255, 255, 255, 0.5)"; // Blanc semi-transparent
+    }
+
+
     const colors = sex === 'F' ? femaleColors : maleColors;
     return colors[Math.min(generation - 1, colors.length - 1)] || colors[0];
 }
@@ -725,6 +775,17 @@ Pour tester une palette, changez juste le numéro dans "paletteVersion = 1"
 function getAdaptiveTextColors(generation, sex = 'M') {
     if (generation <= 2 || sex === 'F') {
         // Générations claires (0-4) : texte foncé avec contour blanc
+
+        if (generation > 8) { 
+            return {
+                firstName: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" },
+                lastName: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" },
+                date: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" }
+            };
+       }
+
+
+
         return {
             firstName: { fill: "#1a1a1a", stroke: "white", strokeWidth: "1.5px", fontWeight: "bold" },
             lastName: { fill: "#0d47a1", stroke: "white", strokeWidth: "1.5px", fontWeight: "bold" },
@@ -744,23 +805,29 @@ function getAdaptiveTextColors(generation, sex = 'M') {
             lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "600"  },
             date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "400"  }  // Jaune pour les dates
         };
-    } else if (generation <= 12){
-        // Générations foncées 
-        return {
-            firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
-            lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
-            date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "100"  }  // Jaune pour les dates
-        };
+    // } else if (generation <= 12){
+    //     // Générations foncées 
+    //     return {
+    //         firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
+    //         lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "200"  },
+    //         date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "100"  }  // Jaune pour les dates
+    //     };
     } else {
         // Générations foncées 
+        // return {
+        //     firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
+        //     lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
+        //     date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "50"  }  // Jaune pour les dates
+        // };
+
+    // NOUVEAU : style minimaliste pour gen 9+
         return {
-            firstName: { fill: "#ffffff", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
-            lastName: { fill: "#e3f2fd", stroke: "none", strokeWidth: "0", fontWeight: "50"  },
-            date: { fill: "#ffeb3b", stroke: "none", strokeWidth: "0", fontWeight: "50"  }  // Jaune pour les dates
+            firstName: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" },
+            lastName: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" },
+            date: { fill: "#000000", stroke: "none", strokeWidth: "0", fontWeight: "normal" }
         };
     }
 }
-
 
 
 // Fonction pour calculer l'épaisseur du contour des segments et le style selon la génération
@@ -778,11 +845,32 @@ function getSegmentStyle(generation) {
             filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.2))"  // Ombre légère
         };
     } else {
+        // return { 
+        //     stroke: "none", 
+        //     width: "0",
+        //     filter: "none"                        // Segments nets sans ombre
+        // };
+
         return { 
-            stroke: "none", 
-            width: "0",
-            filter: "none"                        // Segments nets sans ombre
+            stroke: "rgba(200,200,200,0.3)",  // Ligne très discrète
+            width: "0.1",                     // Ligne la plus fine possible
+            filter: "none"                    // Aucun effet
         };
+
+    }
+}
+
+function organizeByGenerations(rootTree) {
+    // console.log('📋 Organisation par génération...');
+    
+    // Détection du mode et appel de la fonction appropriée
+    // if (state.treeModeReal === 'ancestors') {
+    console.log('\n\n DEBUG : state.treeModeReal_backup ', state.treeModeReal_backup)
+    if (state.treeModeReal_backup  === 'directAncestors') {
+    // if (true) {
+        return organizeByGenerationsAscendant(rootTree);
+    } else {
+        return organizeByGenerationsDescendant(rootTree);
     }
 }
 
@@ -790,7 +878,7 @@ function getSegmentStyle(generation) {
  * Organisation par génération avec positionnement généalogique CORRECT
  * Convention: segment 0 en bas, sens horaire, père toujours à gauche de la mère
  */
-function organizeByGenerations(rootTree) {
+function organizeByGenerationsAscendant(rootTree) {
     console.log('📋 Organisation par génération GÉNÉALOGIQUE...');
     // console.log('🌟 Arbre racine:', rootTree);
     
@@ -851,34 +939,163 @@ function organizeByGenerations(rootTree) {
     return generations;
 }
 
+// Nouvelle fonction descendante
+function organizeByGenerationsDescendant(rootTree) {
+    console.log('📋 Organisation DESCENDANTE - algorithme custom...');
+    
+    // ÉTAPE 1 : Calculer le poids (nombre de feuilles) pour chaque personne
+    function calculateLeafCount(person) {
+        if (!person.children || person.children.length === 0) {
+            person.leafCount = 1; // Feuille = 1
+            return 1;
+        }
+        
+        person.leafCount = person.children.reduce((sum, child) => {
+            return sum + calculateLeafCount(child);
+        }, 0);
+        
+        return person.leafCount;
+    }
+    
+    calculateLeafCount(rootTree);
+    // console.log(`🔢 Nombre total de feuilles: ${rootTree.leafCount}`);
+    
+    // ÉTAPE 2 : Répartir les angles selon les proportions
+    function assignAngles(person, startAngle, endAngle, generation) {
+        person.startAngle = startAngle;
+        person.endAngle = endAngle;
+        person.generation = generation;
+        
+        // console.log(`📐 ${person.name}: gen ${generation}, ${person.leafCount} feuilles, angles ${startAngle.toFixed(1)}° → ${endAngle.toFixed(1)}°`);
+        
+        if (person.children && person.children.length > 0) {
+            let currentAngle = startAngle;
+            const totalAngleSpan = endAngle - startAngle;
+            
+            person.children.forEach(child => {
+                // Proportion de l'espace pour cet enfant
+                const proportion = child.leafCount / person.leafCount;
+                const childAngleSpan = totalAngleSpan * proportion;
+                const childEndAngle = currentAngle + childAngleSpan;
+                
+                assignAngles(child, currentAngle, childEndAngle, generation + 1);
+                currentAngle = childEndAngle;
+            });
+        }
+    }
+    
+    // Répartir sur le cercle complet (0° à 360°)
+    assignAngles(rootTree, 0, 360, 0);
+    
+    // ÉTAPE 3 : Organiser par génération
+    const generations = new Map();
+    
+    function collectByGeneration(person) {
+        const generation = person.generation;
+        
+        if (generation <= state.WheelConfig.maxGenerations) {
+            if (!generations.has(generation)) {
+                generations.set(generation, []);
+            }
+            
+            // Ajouter le sexe
+            const fullPersonData = state.gedcomData.individuals[person.id];
+            person.sex = fullPersonData ? fullPersonData.sex : 'M';
+            
+            // Convertir les degrés en radians pour d3
+            // const startAngleRad = (person.startAngle * Math.PI) / 180;
+            // const endAngleRad = (person.endAngle * Math.PI) / 180;
+            
+            const startAngleRad = (person.startAngle * Math.PI) / 180 - Math.PI/2;
+            const endAngleRad = (person.endAngle * Math.PI) / 180 - Math.PI/2;
+
+            generations.get(generation).push({
+                person: person,
+                generation: generation,
+                startAngle: startAngleRad,
+                endAngle: endAngleRad,
+                position: generations.get(generation).length
+            });
+        }
+        
+        if (person.children) {
+            person.children.forEach(child => collectByGeneration(child));
+        }
+    }
+    
+    collectByGeneration(rootTree);
+    
+    console.log('🚨 Générations organisées:', generations);
+    return generations;
+}
+
+
 /**
  * Dessine une génération avec positionnement généalogique correct
  * Convention : position 0 en bas (-90°), sens horaire
  * le 0° en angle est en haut du cercle
  */
 function drawGeneration(mainGroup, people, generation) {
-    // console.log(`🎨 Dessin génération ${generation} avec ${people.length} personnes`);
+    console.log(`🎨 Dessin génération ${generation} avec ${people.length} personnes`);
 
-    const innerRadius = state.WheelConfig.innerRadius + ((generation - 1) * state.WheelConfig.generationWidth);
-    const outerRadius = innerRadius + state.WheelConfig.generationWidth - 5;
+    const innerRadius = calculateInnerRadius(generation);
+    const generationWidth = calculateGenerationWidth(generation);
+    let spacing;
+    if (generation <= 4) {
+        spacing = 2;    // Espacement normal pour gen 1-4
+    } else if (generation <= 8) {
+        spacing = 1;    // Espacement réduit pour gen 5-8
+    } else if (generation <= 12) {
+        spacing = 0.5;    // Espacement minimal pour gen 9-12
+    } else {
+        spacing = 0.1;  // Espacement ultra-minimal pour gen 13+
+    }
+    
+    const outerRadius = innerRadius + generationWidth - spacing;
 
-    const maxSegments = Math.pow(2, generation);
-    const anglePerSegment = (2 * Math.PI) / maxSegments;
-    
-    const positionArray = new Array(maxSegments).fill(null);
-    
-    people.forEach(personData => {
-        if (personData.position < maxSegments) {
-            positionArray[personData.position] = personData.person;
-        }
-    });
-    
-    people.forEach(personData => {
-        const startAngle = -Math.PI + (personData.position * anglePerSegment);
-        const endAngle = startAngle + anglePerSegment;
-        drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, startAngle, endAngle, generation, personData.position);
-    });
+    if (state.treeModeReal_backup === 'directAncestors') {
+        // MODE ASCENDANT : positions binaires (0, 1, 2, 3...)
+        const maxSegments = Math.pow(2, generation);
+        const anglePerSegment = (2 * Math.PI) / maxSegments;
+        
+        const positionArray = new Array(maxSegments).fill(null);
+        
+        people.forEach(personData => {
+            if (personData.position < maxSegments) {
+                positionArray[personData.position] = personData.person;
+            }
+        });
+        
+        people.forEach(personData => {
+            const startAngle = -Math.PI + (personData.position * anglePerSegment);
+            const endAngle = startAngle + anglePerSegment;
+            drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, 
+                             startAngle, endAngle, generation, personData.position);
+        });
+        
+    } else {       
+        // MODE DESCENDANT avec angles pré-calculés
+        people.forEach((personData, index) => {
+            // NOUVEAU : Calculer nos propres rayons au lieu d'utiliser d3.partition
+            const innerRadius = calculateInnerRadius(generation);
+            const generationWidth = calculateGenerationWidth(generation);
+            const outerRadius = innerRadius + generationWidth - spacing;
+            
+            // Utiliser les angles calculés par notre algorithme
+            const startAngle = personData.startAngle - Math.PI/2; // Ajuster pour commencer en haut
+            const endAngle = personData.endAngle - Math.PI/2;
+            
+            // console.log(`🚨 Segment ${personData.person.name}: r=${innerRadius}-${outerRadius}, a=${startAngle}-${endAngle}`);
+            
+            drawPersonSegment(mainGroup, personData.person, innerRadius, outerRadius, 
+                            startAngle, endAngle, generation, index);
+        });
+
+
+    }
 }
+
+
 
 /**
  * Dessine le texte d'un segment avec le même style que l'arbre normal
@@ -905,7 +1122,9 @@ function drawSegmentText(group, person, innerRadius, outerRadius, startAngle, en
     // Utiliser la même logique que l'arbre normal
     const match = person.name?.match(/(.*?)\/(.*?)\//);
     if (match) {
-        drawWheelPersonDetails(textGroup, match, person, generation);
+        // drawWheelPersonDetails(textGroup, match, person, generation);
+        drawWheelPersonDetails(textGroup, match, person, generation, startAngle, endAngle);
+
     } else {
         // Nom simple sans format GEDCOM
         textGroup.append("text")
@@ -982,13 +1201,15 @@ const Wheel_TEXT_CONFIG = {
         5: 14,
         6: 12,
         7: 12,
-        8: 11,   // Gen 8+
+        8: 9,   // Gen 8+
         9: 8,
         10: 5,
         11: 2,
-        12: 1,
-        13: 0.5,
-        default: 1
+        12: 2, // 1
+        13: 1, // 0.5
+        14: 1, // 0.5
+        14: 1, // 0.5
+        default: 0.5 //1
     },
     
     // Réduction de police si texte trop long
@@ -1038,6 +1259,11 @@ function calculateAdaptiveFontSize(text, baseSize, generation, isLastName = fals
     } else if (!isLastName && text.length > config.fontReduction.threshold) {
         // Pour les prénoms : réduction de police classique
         adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor);
+        if (generation > 7)
+        {
+            adjustedSize = Math.round(baseSize * config.fontReduction.reductionFactor*0.6);            
+        }
+
     }
     if (isLastName && generation >= 9) {
         transformedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
@@ -1080,104 +1306,455 @@ function formatFirstNamesForWheel(firstNames, generation) {
 /**
  * Dessine les détails d'une personne dans l'éventail avec centrage correct
  */
-function drawWheelPersonDetails(textGroup, match, person, generation) {
-    const [_, firstNames, lastName] = match;
-    const formattedFirstNames = formatFirstNamesForWheel(firstNames, generation);
-    const formattedLastName = formatLastNames(lastName);
+// function drawWheelPersonDetails(textGroup, match, person, generation) {
+//     const [_, firstNames, lastName] = match;
+//     const formattedFirstNames = formatFirstNamesForWheel(firstNames, generation);
+//     const formattedLastName = formatLastNames(lastName);
     
-    // Récupérer les paramètres pour cette génération
-    const config = Wheel_TEXT_CONFIG;
-    const baseSize = config.baseFontSize[generation] || config.baseFontSize.default;
-    const lineSpacing = baseSize * (generation <= 4 ? config.lineSpacingFactor : config.lineSpacingFactor*0.8); // Plus serré pour les petites générations
+//     // Récupérer les paramètres pour cette génération
+//     const config = Wheel_TEXT_CONFIG;
+//     const baseSize = config.baseFontSize[generation] || config.baseFontSize.default;
+//     const lineSpacing = baseSize * (generation <= 4 ? config.lineSpacingFactor : config.lineSpacingFactor*0.8); // Plus serré pour les petites générations
 
-    const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
+//     const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
     
-    // Préparer les éléments à dessiner
-    const firstNamesList = formattedFirstNames.split(' ').slice(0, maxNames);
-    const hasDate = generation <= 6 && formatWheelDates(person);
+//     // Préparer les éléments à dessiner
+//     const firstNamesList = formattedFirstNames.split(' ').slice(0, maxNames);
+//     const hasDate = generation <= 6 && formatWheelDates(person);
     
-    // Calculer la hauteur totale
-    const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0); // prénoms + nom + date éventuelle
-    const totalHeight = (totalLines - 1) * lineSpacing;
+//     // Calculer la hauteur totale
+//     const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0); // prénoms + nom + date éventuelle
+//     const totalHeight = (totalLines - 1) * lineSpacing;
     
-    // Position de départ (pour centrer le nom au milieu)
-    let startY;
-    if (firstNamesList.length === 1) {
-        startY = -lineSpacing*0.3;
-    } else {
-        startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
-    }
+//     // Position de départ (pour centrer le nom au milieu)
+//     let startY;
+//     if (firstNamesList.length === 1) {
+//         startY = -lineSpacing*0.3;
+//     } else {
+//         startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
+//     }
     
 
 
-    const textColors = getAdaptiveTextColors(generation, person.sex);
+//     const textColors = getAdaptiveTextColors(generation, person.sex);
 
-    // Dessiner les prénoms SEULEMENT pour gen ≤ 6
-    if (generation <= 6) {
-        // Dessiner les prénoms (au-dessus du nom)
-        firstNamesList.forEach((firstName, index) => {
-            const firstNameResult = calculateAdaptiveFontSize(firstName, baseSize, generation, false);
-            const y = startY - lineSpacing * (firstNamesList.length - index);
+//     // Dessiner les prénoms SEULEMENT pour gen ≤ 6
+//     if (generation <= 7) {
+//         // Dessiner les prénoms (au-dessus du nom)
+//         firstNamesList.forEach((firstName, index) => {
+//             const firstNameResult = calculateAdaptiveFontSize(firstName, baseSize, generation, false);
+//             let y = startY - lineSpacing * (firstNamesList.length - index);
+
+//             if ( generation === 7) { y = y + 8; }
             
+//             textGroup.append("text")
+//                 .attr("x", 0)
+//                 .attr("y", y)
+//                 .attr("text-anchor", "middle")
+//                 .attr("dominant-baseline", "middle")
+//                 .style("font-size", `${firstNameResult.fontSize}px`)
+//                 .style("font-weight", "bold")
+//                 .style("fill", textColors.firstName.fill)
+//                 .style("stroke", textColors.firstName.stroke)
+//                 .style("stroke-width", textColors.firstName.strokeWidth)
+//                 .style("font-weight", textColors.firstName.fontWeight)
+
+//                 .style("paint-order", "stroke fill")
+//                 .text(firstName);
+//         });
+//     }    
+
+
+
+    
+//     // Dessiner le nom (centré au milieu)
+//     // Pour centrer le nom quand pas de prénom (gen > 6)
+//     let nameY = generation > 6 ? 0 : 0; // Reste à 0 car déjà centré
+
+//     if (generation === 7) { nameY = 9; }
+
+    
+//     // NOUVEAU : Pour les générations > 7, prénom + nom sur même ligne
+//     if (generation > 7) {
+//             const nbLettersToKeep = generation === 8 ? 5 : generation === 9 ?  6 : generation < 11 ? 8 : 20;
+//             let shortFirstName = firstNamesList[0] ? firstNamesList[0].substring(0, nbLettersToKeep) : '';
+//             if (firstNamesList[0].length > shortFirstName.length) { shortFirstName = shortFirstName + '.';}
+//             const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
+//             let firstNameSize = Math.max(0.1, nameResult.fontSize * 0.7);
+//             if (generation >= 10)  {
+//                 firstNameSize = Math.max(0.1, nameResult.fontSize);
+//             } else {
+//                 firstNameSize = Math.max(0.1, nameResult.fontSize * 0.7);
+//             }
+            
+//             // Créer un élément text unique centré
+//             const textElement = textGroup.append("text")
+//                 .attr("x", 0)
+//                 .attr("y", 0)
+//                 .attr("text-anchor", "middle")
+//                 .attr("dominant-baseline", "middle")
+//                 .style("fill", textColors.lastName.fill)
+//                 .style("stroke", textColors.lastName.stroke)
+//                 .style("stroke-width", textColors.lastName.strokeWidth)
+//                 .style("font-weight", textColors.lastName.fontWeight)
+//                 .style("paint-order", "stroke fill");
+            
+//             // Ajouter le prénom avec sa propre police
+//             if (shortFirstName) {
+//                 textElement.append("tspan")
+//                     .style("font-size", `${firstNameSize}px`)
+//                     .style("font-weight", "normal")
+//                     .text(shortFirstName + " ");
+//             }
+            
+//             // Ajouter le nom avec sa police
+//             textElement.append("tspan")
+//                 .style("font-size", `${nameResult.fontSize}px`)
+//                 .style("font-weight", "bold")
+//                 .text(nameResult.text);
+
+
+//     } else {
+//         const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
+//         textGroup.append("text")
+//             .attr("x", 0)
+//             .attr("y", nameY) // Position du nom
+//             .attr("text-anchor", "middle")
+//             .attr("dominant-baseline", "middle")
+//             .style("font-size", `${nameResult.fontSize}px`)
+//             .style("font-weight", "bold")
+//             .style("fill", textColors.lastName.fill)
+//             .style("stroke", textColors.lastName.stroke)
+//             .style("stroke-width", textColors.lastName.strokeWidth)
+//             .style("font-weight", textColors.lastName.fontWeight)
+//             .style("paint-order", "stroke fill")
+//             // .text(formattedLastName.toUpperCase());
+//             .text(nameResult.text);
+        
+//         // Dessiner la date (sous le nom)
+//         if (hasDate) {
+//             const dateText = formatWheelDates(person);
+//             const baseDateSize = (config.baseFontSize[generation] || config.baseFontSize.default);
+//             const dateFontSize = Math.max(12, baseDateSize - 2);
+            
+//             textGroup.append("text")
+//                 .attr("x", 0)
+//                 .attr("y", lineSpacing)
+//                 .attr("text-anchor", "middle")
+//                 .attr("dominant-baseline", "middle")
+//                 .style("font-size", `${dateFontSize}px`)
+//                 .style("font-weight", "normal")
+//                 .style("fill", textColors.date.fill)
+//                 .style("stroke", textColors.date.stroke)
+//                 .style("stroke-width", textColors.date.strokeWidth)
+//                 .style("font-weight", textColors.date.fontWeight)
+//                 .style("paint-order", "stroke fill")
+//                 .text(dateText);
+//         }
+
+//     }
+// }
+
+/**
+ * Calcule l'espace disponible dans un segment descendant
+ */
+function calculateDescendantSegmentSpace(startAngle, endAngle, generation) {
+
+    // console.log( ' debug calculateDescendantSegmentSpace')
+    // Largeur angulaire du segment
+    const angleSpan = endAngle - startAngle;
+    
+    // Rayon moyen pour ce segment
+    const innerRadius = calculateInnerRadius(generation);
+    const generationWidth = calculateGenerationWidth(generation);
+    const midRadius = innerRadius + (generationWidth / 2);
+    
+    // Largeur approximative du segment (arc = angle × rayon)
+    const segmentWidth = angleSpan * midRadius;
+    
+    return {
+        angleSpan: angleSpan,
+        angleDegrees: (angleSpan * 180) / Math.PI,
+        segmentWidth: segmentWidth
+    };
+}
+
+
+/**
+ * Dessine les détails d'une personne dans l'éventail avec centrage correct
+ */
+function drawWheelPersonDetails(textGroup, match, person, generation, startAngle = null, endAngle = null) {
+    const [_, firstNames, lastName] = match;
+    
+    // console.log( ' debug drawWheelPersonDetails ',state.treeModeReal_backup, startAngle, endAngle)
+
+
+    // MODE DESCENDANT : adapter selon l'espace disponible
+    if (state.treeModeReal_backup  != 'directAncestors' && startAngle !== null && endAngle !== null) {
+        const space = calculateDescendantSegmentSpace(startAngle, endAngle, generation);
+        
+        // UN SEUL prénom, adapté selon l'espace
+        let formattedFirstName = '';
+        // if (firstNames) {
+        //     const firstWord = firstNames.trim().split(' ')[0];
+        //     if (space.segmentWidth > 60) {
+        //         formattedFirstName = firstWord.substring(0, 8); // Prénom normal
+        //     } else if (space.segmentWidth > 30) {
+        //         formattedFirstName = firstWord.substring(0, 4); // Prénom court
+        //     } else {
+        //         formattedFirstName = firstWord.substring(0, 2); // Initiales
+        //     }
+        // }
+
+        if (firstNames) {
+            const firstWord = firstNames.trim().split(' ')[0];
+            formattedFirstName= firstWord;
+        }
+        
+        // Nom adapté selon l'espace
+        let formattedLastName = formatLastNames(lastName);
+        // if (space.segmentWidth < 60) {
+        //     formattedLastName = formattedLastName.substring(0, Math.max(4, Math.floor(space.segmentWidth / 8)));
+        // }
+        
+        // Taille de police adaptée
+        let baseFontSize;
+        if (space.segmentWidth > 80) baseFontSize = 14;
+        else if (space.segmentWidth > 50) baseFontSize = 12;
+        else if (space.segmentWidth > 30) baseFontSize = 10;
+        else baseFontSize = 8;
+        
+
+        // console.log(`📏 ${person.name}: ${space.angleDegrees.toFixed(1)}°, ${space.segmentWidth.toFixed(1)}px → police ${baseFontSize}, prénom "${formattedFirstName}"`);
+        
+        // RENDU ADAPTATIF POUR MODE DESCENDANT
+        const lineSpacing = baseFontSize * 1.2;
+        const textColors = getAdaptiveTextColors(generation, person.sex);
+
+        let firstNameY = 0;
+        if (space.segmentWidth <= 80) {
+            // Si espace réduit : décaler le prenom vers le bas, vers le nom
+            firstNameY = -lineSpacing * 0.6;
+        } else {
+            firstNameY = -lineSpacing * 1;
+        }
+
+
+        // Prénom (s'il y en a un)
+        if (formattedFirstName) {
             textGroup.append("text")
                 .attr("x", 0)
-                .attr("y", y)
+                .attr("y", firstNameY)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .style("font-size", `${firstNameResult.fontSize}px`)
+                .style("font-size", `${baseFontSize}px`)
                 .style("font-weight", "bold")
                 .style("fill", textColors.firstName.fill)
                 .style("stroke", textColors.firstName.stroke)
                 .style("stroke-width", textColors.firstName.strokeWidth)
-                .style("font-weight", textColors.firstName.fontWeight)
-
                 .style("paint-order", "stroke fill")
-                .text(firstName);
-        });
-    }    
-
-
-
-    
-    // Dessiner le nom (centré au milieu)
-    // Pour centrer le nom quand pas de prénom (gen > 6)
-    const nameY = generation > 6 ? 0 : 0; // Reste à 0 car déjà centré
-
-    const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
-    textGroup.append("text")
-        .attr("x", 0)
-        .attr("y", nameY) // Position du nom
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", `${nameResult.fontSize}px`)
-        .style("font-weight", "bold")
-        .style("fill", textColors.lastName.fill)
-        .style("stroke", textColors.lastName.stroke)
-        .style("stroke-width", textColors.lastName.strokeWidth)
-        .style("font-weight", textColors.lastName.fontWeight)
-        .style("paint-order", "stroke fill")
-        // .text(formattedLastName.toUpperCase());
-        .text(nameResult.text);
-    
-    // Dessiner la date (sous le nom)
-    if (hasDate) {
-        const dateText = formatWheelDates(person);
-        const baseDateSize = (config.baseFontSize[generation] || config.baseFontSize.default);
-        const dateFontSize = Math.max(12, baseDateSize - 2);
+                .text(formattedFirstName);
+        }
+        
+        // Nom de famille
+        // const nameY = formattedFirstName ? 0 : 0; // Centré s'il n'y a pas de prénom
+        let nameY = 0;
+        if (formattedFirstName) {
+            // Si prénom présent : nom légèrement en dessous
+            nameY = lineSpacing * 0.3;
+        } else if (space.segmentWidth <= 80) {
+            // Si pas de date et espace réduit : décaler le nom vers le bas
+            nameY = lineSpacing * 0.4;
+        }
         
         textGroup.append("text")
             .attr("x", 0)
-            .attr("y", lineSpacing)
+            .attr("y", nameY)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
-            .style("font-size", `${dateFontSize}px`)
-            .style("font-weight", "normal")
-            .style("fill", textColors.date.fill)
-            .style("stroke", textColors.date.stroke)
-            .style("stroke-width", textColors.date.strokeWidth)
-            .style("font-weight", textColors.date.fontWeight)
+            .style("font-size", `${baseFontSize}px`)
+            .style("font-weight", "bold")
+            .style("fill", textColors.lastName.fill)
+            .style("stroke", textColors.lastName.stroke)
+            .style("stroke-width", textColors.lastName.strokeWidth)
             .style("paint-order", "stroke fill")
-            .text(dateText);
+            .text(formattedLastName.toUpperCase());
+        
+        // Date (seulement si assez d'espace)
+        // if (space.segmentWidth > 80 && generation <= 6) {
+        // if (space.segmentWidth > 80 && generation <= 6) {
+        if (true) {
+            const dateText = formatWheelDates(person);
+            if (dateText) {
+                textGroup.append("text")
+                    .attr("x", 0)
+                    .attr("y", lineSpacing)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "middle")
+                    .style("font-size", `${Math.max(8, baseFontSize - 2)}px`)
+                    .style("font-weight", "normal")
+                    .style("fill", textColors.date.fill)
+                    .style("stroke", textColors.date.stroke)
+                    .style("stroke-width", textColors.date.strokeWidth)
+                    .style("paint-order", "stroke fill")
+                    .text(dateText);
+            }
+        }
+
+
+        
+    } else {
+        // MODE ASCENDANT : code existant inchangé
+
+        const formattedFirstNames = formatFirstNamesForWheel(firstNames, generation);
+        const formattedLastName = formatLastNames(lastName);
+        
+        // Récupérer les paramètres pour cette génération
+        const config = Wheel_TEXT_CONFIG;
+        const baseSize = config.baseFontSize[generation] || config.baseFontSize.default;
+        const lineSpacing = baseSize * (generation <= 4 ? config.lineSpacingFactor : config.lineSpacingFactor*0.8); // Plus serré pour les petites générations
+
+        const maxNames = config.maxFirstNames[generation] || config.maxFirstNames.default;
+        
+        // Préparer les éléments à dessiner
+        const firstNamesList = formattedFirstNames.split(' ').slice(0, maxNames);
+        const hasDate = generation <= 6 && formatWheelDates(person);
+        
+        // Calculer la hauteur totale
+        const totalLines = firstNamesList.length + 1 + (hasDate ? 1 : 0); // prénoms + nom + date éventuelle
+        const totalHeight = (totalLines - 1) * lineSpacing;
+        
+        // Position de départ (pour centrer le nom au milieu)
+        let startY;
+        if (firstNamesList.length === 1) {
+            startY = -lineSpacing*0.3;
+        } else {
+            startY = -lineSpacing*0.3; //-((firstNamesList.length - 1) * lineSpacing / 2);// - lineSpacing;  
+        }
+        
+
+
+        const textColors = getAdaptiveTextColors(generation, person.sex);
+
+        // Dessiner les prénoms SEULEMENT pour gen ≤ 6
+        if (generation <= 7) {
+            // Dessiner les prénoms (au-dessus du nom)
+            firstNamesList.forEach((firstName, index) => {
+                const firstNameResult = calculateAdaptiveFontSize(firstName, baseSize, generation, false);
+                let y = startY - lineSpacing * (firstNamesList.length - index);
+
+                if ( generation === 7) { y = y + 8; }
+                
+                textGroup.append("text")
+                    .attr("x", 0)
+                    .attr("y", y)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "middle")
+                    .style("font-size", `${firstNameResult.fontSize}px`)
+                    .style("font-weight", "bold")
+                    .style("fill", textColors.firstName.fill)
+                    .style("stroke", textColors.firstName.stroke)
+                    .style("stroke-width", textColors.firstName.strokeWidth)
+                    .style("font-weight", textColors.firstName.fontWeight)
+
+                    .style("paint-order", "stroke fill")
+                    .text(firstName);
+            });
+        }    
+
+
+
+        
+        // Dessiner le nom (centré au milieu)
+        // Pour centrer le nom quand pas de prénom (gen > 6)
+        let nameY = generation > 6 ? 0 : 0; // Reste à 0 car déjà centré
+
+        if (generation === 7) { nameY = 9; }
+
+        
+        // NOUVEAU : Pour les générations > 7, prénom + nom sur même ligne
+        if (generation > 7) {
+                const nbLettersToKeep = generation === 8 ? 5 : generation === 9 ?  6 : generation < 11 ? 8 : 20;
+                let shortFirstName = firstNamesList[0] ? firstNamesList[0].substring(0, nbLettersToKeep) : '';
+                if (firstNamesList[0].length > shortFirstName.length) { shortFirstName = shortFirstName + '.';}
+                const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
+                let firstNameSize = Math.max(0.1, nameResult.fontSize * 0.7);
+                if (generation >= 10)  {
+                    firstNameSize = Math.max(0.1, nameResult.fontSize);
+                } else {
+                    firstNameSize = Math.max(0.1, nameResult.fontSize * 0.7);
+                }
+                
+                // Créer un élément text unique centré
+                const textElement = textGroup.append("text")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "middle")
+                    .style("fill", textColors.lastName.fill)
+                    .style("stroke", textColors.lastName.stroke)
+                    .style("stroke-width", textColors.lastName.strokeWidth)
+                    .style("font-weight", textColors.lastName.fontWeight)
+                    .style("paint-order", "stroke fill");
+                
+                // Ajouter le prénom avec sa propre police
+                if (shortFirstName) {
+                    textElement.append("tspan")
+                        .style("font-size", `${firstNameSize}px`)
+                        .style("font-weight", "normal")
+                        .text(shortFirstName + " ");
+                }
+                
+                // Ajouter le nom avec sa police
+                textElement.append("tspan")
+                    .style("font-size", `${nameResult.fontSize}px`)
+                    .style("font-weight", "bold")
+                    .text(nameResult.text);
+
+
+        } else {
+            const nameResult = calculateAdaptiveFontSize(formattedLastName, baseSize, generation, true);
+            textGroup.append("text")
+                .attr("x", 0)
+                .attr("y", nameY) // Position du nom
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .style("font-size", `${nameResult.fontSize}px`)
+                .style("font-weight", "bold")
+                .style("fill", textColors.lastName.fill)
+                .style("stroke", textColors.lastName.stroke)
+                .style("stroke-width", textColors.lastName.strokeWidth)
+                .style("font-weight", textColors.lastName.fontWeight)
+                .style("paint-order", "stroke fill")
+                // .text(formattedLastName.toUpperCase());
+                .text(nameResult.text);
+            
+            // Dessiner la date (sous le nom)
+            if (hasDate) {
+                const dateText = formatWheelDates(person);
+                const baseDateSize = (config.baseFontSize[generation] || config.baseFontSize.default);
+                const dateFontSize = Math.max(12, baseDateSize - 2);
+                
+                textGroup.append("text")
+                    .attr("x", 0)
+                    .attr("y", lineSpacing)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "middle")
+                    .style("font-size", `${dateFontSize}px`)
+                    .style("font-weight", "normal")
+                    .style("fill", textColors.date.fill)
+                    .style("stroke", textColors.date.stroke)
+                    .style("stroke-width", textColors.date.strokeWidth)
+                    .style("font-weight", textColors.date.fontWeight)
+                    .style("paint-order", "stroke fill")
+                    .text(dateText);
+            }
+
+        }
+
+
+
+
     }
 }
 
@@ -1271,21 +1848,19 @@ function drawAllGenerations(mainGroup, generationsData) {
     console.log('🎨 Début du dessin des générations...');
     
     // Debug de la structure reçue
-    console.log('📊 Données reçues:', generationsData);
-    generationsData.forEach((people, gen) => {
-        console.log(`  Gen ${gen}: ${people.length} personnes }`);
-    });
+    // console.log('📊 Données reçues:', generationsData);
+    // generationsData.forEach((people, gen) => {
+    //     console.log(`  Gen ${gen}: ${people.length} personnes }`);
+    // });
     
     generationsData.forEach((people, generation) => {
         if (generation > 0 && generation <= state.WheelConfig.maxGenerations) {
-            console.log(`🖊️ Génération ${generation}: ${people.length} personnes`);
+            // console.log(`🖊️ Génération ${generation}: ${people.length} personnes`);
             drawGeneration(mainGroup, people, generation);
         }
     });
 
 }
-
-
 
 function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAngle, endAngle, generation, position) {
     if (!person || !person.name) {
@@ -1413,11 +1988,11 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
                     const svg = d3.select("#tree-svg");
                     const currentTransform = d3.zoomTransform(svg.node());
                     
-                    console.log('🔍 Transform avant modal:', {
-                        k: currentTransform.k,
-                        x: currentTransform.x,
-                        y: currentTransform.y
-                    });
+                    // console.log('🔍 Transform avant modal:', {
+                    //     k: currentTransform.k,
+                    //     x: currentTransform.x,
+                    //     y: currentTransform.y
+                    // });
 
                     // Stocker le transform actuel
                     window.lastTransformBeforeModal = currentTransform;
@@ -1479,10 +2054,8 @@ function drawPersonSegment(mainGroup, person, innerRadius, outerRadius, startAng
     // console.log(`✅ Segment créé pour ${person.name} avec données liées`);
 }
 
-
-
 function drawCenterPerson(mainGroup, person) {
-    console.log('🎯 Dessin personne centrale:', person.name);
+    // console.log('🎯 Dessin personne centrale:', person.name);
     
     const centerGroup = mainGroup.append("g")
         .attr("class", "center-person-group")
@@ -1508,5 +2081,52 @@ function drawCenterPerson(mainGroup, person) {
     // Contenu textuel
     drawCenterPersonText(centerGroup, person);
 }
-
 window.drawSegmentText = drawSegmentText;
+
+/**
+ * Calcule la largeur d'un anneau selon sa génération
+ * Les générations proches du centre sont plus épaisses
+ */
+function calculateGenerationWidth(generation) {
+    const baseWidth = state.WheelConfig.generationWidth;
+    
+    // if (generation <= 2) {
+    //     return baseWidth; // Largeur complète pour gen 1-2
+    // } else if (generation <= 4) {
+    //     return baseWidth * 0.8; // 80% pour gen 3-4
+    // } else if (generation <= 6) {
+    //     return baseWidth * 0.6; // 60% pour gen 5-6
+    // } else if (generation <= 8) {
+    //     return baseWidth * 0.4; // 40% pour gen 7-8
+    // } else {
+    //     return baseWidth * 0.3; // 30% pour gen 9+
+    // }
+
+    if (generation <= 8) {
+        return baseWidth; // Largeur complète pour gen 1-2
+    } else if (generation <= 10) {
+        return baseWidth * 0.7; // 80% pour gen 9-10
+    } else if (generation <= 16) {
+        return baseWidth * 0.15; // 60% pour gen 5-6
+    } else if (generation <= 20) {
+        return baseWidth * 0.07; // 40% pour gen 7-8
+    } else {
+        return baseWidth * 0.05; // 30% pour gen 9+
+    }
+
+
+
+}
+
+/**
+ * Calcule le rayon intérieur pour une génération donnée
+ */
+function calculateInnerRadius(generation) {
+    let radius = state.WheelConfig.innerRadius;
+    
+    for (let gen = 1; gen < generation; gen++) {
+        radius += calculateGenerationWidth(gen);
+    }
+    
+    return radius;
+}

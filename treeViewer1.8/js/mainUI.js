@@ -172,8 +172,6 @@ export function updateGenerationSelector(newValue) {
     console.log(`Sélecteur générations mis à jour: ${newValue}`);
 }
 
-
-
 // Fonction pour remplacer le sélecteur TreeMode
 function replaceTreeModeSelector() {
     const originalSelect = document.getElementById('treeMode');
@@ -278,6 +276,7 @@ function replaceTreeModeSelector() {
         }
     });
     
+    
     // IMPORTANT: Conserver l'ID original
     customSelector.id = 'treeMode';
 
@@ -312,41 +311,14 @@ function replaceTreeModeSelector() {
 }
 
 
-
-
 // Fonction pour mettre à jour l'affichage du sélecteur
 export function updateTreeModeSelector(newValue) {
-    const customSelector = document.getElementById('treeMode');
-    if (!customSelector) return;
+    // Mettre à jour l'état global AVANT la reconstruction
+    state.treeMode = newValue;
     
-    // Trouver l'élément d'affichage (le bouton principal)
-    const displayElement = customSelector.querySelector('div[style*="background"]');
-    if (!displayElement) return;
-    
-    // Trouver l'option correspondante à la nouvelle valeur
-    const typeValues = ['directAncestors', 'ancestors', 'directDescendants', 'descendants', 'both'];
-    let typeOptions = ['Ascd', 'Asc.', 'Desd', 'Desc.', 'A+D'];
-    
-    // Adapter selon la langue
-    if (window.CURRENT_LANGUAGE === 'en') {  
-        typeOptions = ['dAnc', 'Anc.', 'dDes', 'Desc.', 'A+D'];
-    } else if (window.CURRENT_LANGUAGE === 'es') {
-        typeOptions = ['Antd', 'Ant.', 'Desd', 'Desc.', 'A+D'];
-    } else if (window.CURRENT_LANGUAGE === 'hu') {
-        typeOptions = ['k.őse', 'Őse.', 'k.Les', 'Les.', 'Ő+L'];
-    }
-    
-    // Trouver l'index de la nouvelle valeur
-    const valueIndex = typeValues.indexOf(newValue);
-    if (valueIndex !== -1) {
-        // Mettre à jour le texte affiché
-        displayElement.textContent = typeOptions[valueIndex];
-        
-        // Mettre à jour l'attribut data-value du sélecteur
-        customSelector.setAttribute('data-selected-value', newValue);
-    }
+    // Reconstruire complètement le sélecteur avec la nouvelle valeur
+    replaceTreeModeSelector();
 }
-
 
 /**
  * Tronque un texte à un certain nombre de caractères,
@@ -414,18 +386,7 @@ export function updateSelectorDisplayText(selector, text) {
 export function updateGenerationSelectorValue(value) {
     // Mettre à jour l'état global
     state.nombre_generation = value;
-    
-    // Mettre à jour le sélecteur
-    const generationSelector = document.getElementById('generations');
-    if (generationSelector) {
-      generationSelector.setAttribute('data-value', value.toString());
-      
-      // Mettre à jour l'affichage
-      const displayElement = generationSelector.querySelector('div span');
-      if (displayElement) {
-        displayElement.textContent = value.toString();
-      }
-    }
+    replaceGenerationSelector();
   }
 
 // Ajout d'un état global pour suivre le mode du sélecteur
@@ -1270,7 +1231,38 @@ export function createImageSelectorDialog(onSelect) {
         // de lister le contenu du répertoire
         const potentialImages = [
             'contemporain.jpg',
-            'republique.jpg'
+            'republique.jpg',
+            'angelot.jpg',
+            'ange.jpg',
+            'cupidon.jpg',
+            "brick-wall.jpg",
+            "small-circles.png",
+            "ai-lambris.jpg",
+            "crocodile-skin.jpg",
+            "ecorce-chene.jpg",
+            "bois.jpg",
+            "glass.jpg",
+            "galets.jpg",
+            "circles.jpg",
+            "dry-soil.jpg",
+            "rock.jpg",
+            "traits.jpg",
+            "lichen-red.jpg",
+            "lichen-blue.jpg",
+            "jeans.jpg",
+            "ecorce.jpg",
+            "dry-ground.jpg",
+            "marble.jpg",
+            "texture-peiture_colorée.jpg",
+            "silk.jpg",
+            "elephant-skin.jpg",
+            "aluminum-foil.jpg",
+            "wood-lambris-vertical.jpg",
+            "texture-ciment.jpg",
+            "roses.jpg",
+            "flowers.png",
+            "feuilles.jpg",
+            "parquet.jpg"
         ];
         
         // Créer une vignette pour chaque image potentielle

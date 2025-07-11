@@ -55,8 +55,8 @@ async function loadBackgroundImageFromCache() {
             for (const cacheName of cacheNames) {
                 try {
                     const cache = await caches.open(cacheName);
-                    const cachedResponse = await cache.match('background_images/fort_lalatte.jpg');
-                    
+                    // const cachedResponse = await cache.match('background_images/fort_lalatte.jpg');
+                    const cachedResponse = await cache.match('background_images/lichen-red.jpg');                    
                     if (cachedResponse) {
                         // Image trouvée dans ce cache !
                         const blob = await cachedResponse.blob();
@@ -91,7 +91,8 @@ async function loadBackgroundImageFromCache() {
     console.log('[Background Loader] Fallback - chargement normal de l\'image');
     const existingImage = document.querySelector('.login-background-image');
     if (existingImage) {
-        existingImage.src = 'background_images/fort_lalatte.jpg';
+        // existingImage.src = 'background_images/fort_lalatte.jpg';
+        existingImage.src = 'background_images/lichen-red.jpg';
         console.log('[Background Loader] Image chargée avec URL normale');
         return true;
     }
@@ -138,7 +139,8 @@ function setupBackgroundDebugFunctions() {
             
             for (const cacheName of cacheNames) {
                 const cache = await caches.open(cacheName);
-                const hasImage = await cache.match('background_images/fort_lalatte.jpg');
+                // const hasImage = await cache.match('background_images/fort_lalatte.jpg');
+                const hasImage = await cache.match('background_images/lichen-red.jpg');
                 console.log(`📦 ${cacheName}: ${hasImage ? '✅ HAS IMAGE' : '❌ no image'}`);
             }
         } catch (error) {

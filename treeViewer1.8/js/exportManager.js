@@ -4,6 +4,9 @@
 import { state } from './main.js';
 import { getZoom } from './treeRenderer.js';
 
+
+let flipV = false;
+
 class ExportProgressManager {
     constructor() {
         this.progressDiv = null;
@@ -343,7 +346,7 @@ export function downloadCanvas(canvas, filename, quality = 0.9, format = 'png') 
 }
 
 /**
- * Crée un PDF à partir d'un canvas
+ * Crée un PDF à partir d'un canvas - VERSION CORRIGÉE
  */
 async function createPDFFromCanvas(canvas, filename, quality = 0.9, pageFormat = null, pageLayout = null) {
     if (typeof window.jsPDF === 'undefined') {
@@ -365,7 +368,9 @@ async function createPDFFromCanvas(canvas, filename, quality = 0.9, pageFormat =
         orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
     }
     
-    // Créer le PDF
+    console.log(`📄 Création PDF: format=${format}, orientation=${orientation}`);
+    
+    // Créer le PDF avec les bons paramètres
     const pdf = new jsPDF({
         orientation: orientation,
         unit: 'mm',
@@ -373,16 +378,44 @@ async function createPDFFromCanvas(canvas, filename, quality = 0.9, pageFormat =
         compress: true
     });
     
-    // SUPPRESSION DES MARGES : Utiliser toute la page
+    // Obtenir les dimensions de la page PDF
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // AJOUT : Utiliser le paramètre quality pour la compression JPEG
+    console.log(`📐 Dimensions page PDF: ${pageWidth}mm × ${pageHeight}mm`);
+    console.log(`📐 Dimensions canvas: ${canvas.width}px × ${canvas.height}px`);
+    
+    // IMPORTANT : Calculer le ratio pour conserver les proportions
+    const canvasRatio = canvas.width / canvas.height;
+    const pageRatio = pageWidth / pageHeight;
+    
+    let imgWidth, imgHeight, imgX, imgY;
+    
+    // VERSION SANS BANDES BLANCHES - Remplir toute la page
+    if (canvasRatio > pageRatio) {
+        // Canvas plus large que la page proportionnellement
+        // On remplit toute la hauteur et on déborde sur les côtés
+        imgHeight = pageHeight;
+        imgWidth = pageHeight * canvasRatio;
+        imgX = -(imgWidth - pageWidth) / 2; // Centrer (parties coupées sur les côtés)
+        imgY = 0;
+    } else {
+        // Canvas plus haut que la page proportionnellement
+        // On remplit toute la largeur et on déborde en haut/bas
+        imgWidth = pageWidth;
+        imgHeight = pageWidth / canvasRatio;
+        imgX = 0;
+        imgY = -(imgHeight - pageHeight) / 2; // Centrer (parties coupées en haut/bas)
+    }
+    
+    console.log(`🖼️ Image dans PDF: ${imgWidth}mm × ${imgHeight}mm à position (${imgX}, ${imgY})`);
+    
+    // Utiliser le paramètre quality pour la compression JPEG
     const pdfQuality = Math.max(0.1, Math.min(1.0, quality));
     const imgData = canvas.toDataURL('image/jpeg', pdfQuality);
     
-    // Remplir toute la page sans marges
-    pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+    // Ajouter l'image en respectant les proportions
+    pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
     
     // Métadonnées
     const rootPersonName = state.currentTree?.name || 'Arbre généalogique';
@@ -394,7 +427,7 @@ async function createPDFFromCanvas(canvas, filename, quality = 0.9, pageFormat =
     });
     
     pdf.save(filename);
-    console.log(`📄 PDF généré: ${filename} (${format} ${orientation}, qualité ${Math.round(pdfQuality*100)}%)`);
+    console.log(`✅ PDF généré: ${filename} (${format} ${orientation}, qualité ${Math.round(pdfQuality*100)}%)`);
 }
 
 /**
@@ -451,10 +484,16 @@ function inlineStylesOriginal(svgElement) {
             'stroke': '#333',
             'stroke-width': '2px'
         },
-        '.person-segment': {
-            'stroke': 'white',
-            'stroke-width': '1.5px'
-        },
+        // '.person-segment': {
+        //     'stroke': 'white',
+        //     'stroke-width': '1.5px'
+        // },
+        //     // NOUVEAU : styles minimalistes pour générations élevées
+        // '.generation-9, .generation-10, .generation-11, .generation-12': {
+        //     'stroke': 'rgba(200,200,200,0.3)',
+        //     'stroke-width': '0.001px',
+        //     'filter': 'none'
+        // },
         // PAS de couleurs fixes pour les générations - on garde les vraies couleurs
         'text': {
             'font-family': 'Arial, sans-serif',
@@ -484,6 +523,34 @@ function inlineStylesOriginal(svgElement) {
                 });
             }
         });
+
+
+        // NOUVEAU : Gestion dynamique des générations
+        const generationClass = classList.find(cls => cls.startsWith('generation-'));
+        if (generationClass) {
+            const generation = parseInt(generationClass.replace('generation-', ''));
+            
+            // Appliquer les styles selon la génération
+            if (generation <= 8) {
+                // Style normal pour gen <= 8 (géré par getSegmentStyle)
+                // Ne rien faire ici, laisser les styles originaux
+                element.style.setProperty('stroke', 'white');
+                element.style.setProperty('stroke-width', '1.5px');          
+
+            } else if (generation <= 12) {
+                // Style minimaliste pour gen 9-12
+                element.style.setProperty('stroke', 'rgba(200,200,200,0.3)');
+                element.style.setProperty('stroke-width', '0.1px');
+                element.style.setProperty('filter', 'none');
+            } else {
+                // Style ultra-minimaliste pour gen 13+
+                element.style.setProperty('stroke', 'none');
+                element.style.setProperty('stroke-width', '0');
+                element.style.setProperty('filter', 'none');
+            }
+        }
+
+
         
         // Capturer et appliquer les couleurs réelles
         const computedStyle = window.getComputedStyle(element);
@@ -497,6 +564,112 @@ function inlineStylesOriginal(svgElement) {
     });
     
     console.log('✅ Styles originaux appliqués (mode radar) avec couleurs réelles');
+
+
+
+
+    // Appliquer les styles fixes
+    svgElements.forEach(element => {
+        const classList = Array.from(element.classList);
+        
+        // Appliquer les styles basés sur les classes fixes
+        classList.forEach(className => {
+            const selector = '.' + className;
+            if (defaultStyles[selector]) {
+                Object.entries(defaultStyles[selector]).forEach(([prop, value]) => {
+                    element.style.setProperty(prop, value);
+                });
+            }
+        });
+        
+        // NOUVEAU : Gestion dynamique des générations
+        const generationClass = classList.find(cls => cls.startsWith('generation-'));
+        if (generationClass) {
+            const generation = parseInt(generationClass.replace('generation-', ''));
+            
+            // Appliquer les styles selon la génération
+            if (generation <= 8) {
+                // Style normal pour gen <= 8 (géré par getSegmentStyle)
+                // Ne rien faire ici, laisser les styles originaux
+            } else if (generation <= 12) {
+                // Style minimaliste pour gen 9-12
+                element.style.setProperty('stroke', 'rgba(200,200,200,0.3)');
+                element.style.setProperty('stroke-width', '0.1px');
+                element.style.setProperty('filter', 'none');
+            } else {
+                // Style ultra-minimaliste pour gen 13+
+                element.style.setProperty('stroke', 'none');
+                element.style.setProperty('stroke-width', '0');
+                element.style.setProperty('filter', 'none');
+            }
+        }
+        
+        // Capturer et appliquer les couleurs réelles
+        const computedStyle = window.getComputedStyle(element);
+        const importantStyles = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'text-anchor'];
+        importantStyles.forEach(prop => {
+            const value = computedStyle.getPropertyValue(prop);
+            if (value && value !== 'none') {
+                element.style.setProperty(prop, value);
+            }
+        });
+    });
+    
+    console.log('✅ Styles appliqués avec gestion dynamique des générations');
+}
+
+/**
+ * Nettoie et prépare spécifiquement les boîtes en préservant leurs couleurs exactes
+ */
+function fixBoxesForExport(svgElement) {
+    console.log('🔧 Correction des boîtes avec préservation des couleurs exactes...');
+    
+    const boxes = svgElement.querySelectorAll('rect');
+    
+    boxes.forEach((box, index) => {
+        try {
+            // Trouver l'élément correspondant dans le SVG original (non cloné)
+            const originalSvg = document.querySelector('#tree-svg');
+            if (originalSvg) {
+                const originalBoxes = originalSvg.querySelectorAll('rect');
+                if (originalBoxes[index]) {
+                    // Copier les styles exacts de l'original
+                    copyExactStyles(originalBoxes[index], box);
+                }
+            }
+        } catch (error) {
+            console.warn(`Erreur lors de la correction de la boîte ${index}:`, error);
+        }
+    });
+    
+    console.log(`✅ ${boxes.length} boîtes corrigées avec couleurs exactes`);
+}
+
+/**
+ * Nettoie et prépare spécifiquement les textes en préservant leurs polices exactes
+ */
+function fixTextsForExport(svgElement) {
+    console.log('🔤 Correction des textes avec préservation des polices exactes...');
+    
+    const texts = svgElement.querySelectorAll('text, tspan');
+    
+    texts.forEach((text, index) => {
+        try {
+            // Trouver l'élément correspondant dans le SVG original
+            const originalSvg = document.querySelector('#tree-svg');
+            if (originalSvg) {
+                const originalTexts = originalSvg.querySelectorAll('text, tspan');
+                if (originalTexts[index]) {
+                    // Copier les styles exacts de l'original
+                    copyExactStyles(originalTexts[index], text);
+                }
+            }
+        } catch (error) {
+            console.warn(`Erreur lors de la correction du texte ${index}:`, error);
+        }
+    });
+    
+    console.log(`✅ ${texts.length} textes corrigés avec polices exactes`);
 }
 
 /**
@@ -637,59 +810,7 @@ function copyExactStyles(sourceElement, targetElement) {
     }
 }
 
-/**
- * Nettoie et prépare spécifiquement les boîtes en préservant leurs couleurs exactes
- */
-function fixBoxesForExport(svgElement) {
-    console.log('🔧 Correction des boîtes avec préservation des couleurs exactes...');
-    
-    const boxes = svgElement.querySelectorAll('rect');
-    
-    boxes.forEach((box, index) => {
-        try {
-            // Trouver l'élément correspondant dans le SVG original (non cloné)
-            const originalSvg = document.querySelector('#tree-svg');
-            if (originalSvg) {
-                const originalBoxes = originalSvg.querySelectorAll('rect');
-                if (originalBoxes[index]) {
-                    // Copier les styles exacts de l'original
-                    copyExactStyles(originalBoxes[index], box);
-                }
-            }
-        } catch (error) {
-            console.warn(`Erreur lors de la correction de la boîte ${index}:`, error);
-        }
-    });
-    
-    console.log(`✅ ${boxes.length} boîtes corrigées avec couleurs exactes`);
-}
 
-/**
- * Nettoie et prépare spécifiquement les textes en préservant leurs polices exactes
- */
-function fixTextsForExport(svgElement) {
-    console.log('🔤 Correction des textes avec préservation des polices exactes...');
-    
-    const texts = svgElement.querySelectorAll('text, tspan');
-    
-    texts.forEach((text, index) => {
-        try {
-            // Trouver l'élément correspondant dans le SVG original
-            const originalSvg = document.querySelector('#tree-svg');
-            if (originalSvg) {
-                const originalTexts = originalSvg.querySelectorAll('text, tspan');
-                if (originalTexts[index]) {
-                    // Copier les styles exacts de l'original
-                    copyExactStyles(originalTexts[index], text);
-                }
-            }
-        } catch (error) {
-            console.warn(`Erreur lors de la correction du texte ${index}:`, error);
-        }
-    });
-    
-    console.log(`✅ ${texts.length} textes corrigés avec polices exactes`);
-}
 
 /**
  * Nettoie et prépare spécifiquement les liens pour l'export
@@ -936,7 +1057,7 @@ function drawBackgroundImageSmartTiling(ctx, img, canvasWidth, canvasHeight, opa
     console.log(`🎨 Stratégie D - Image: ${img.width}x${img.height}, Canvas: ${canvasWidth}x${canvasHeight}, globalOffset: ${globalOffsetX}x${globalOffsetY}`);
     
     // 1. CALCUL DU SCALE OPTIMAL (identique)
-    const baseScale = Math.min(Math.max(canvasWidth / img.width, canvasHeight / img.height), MAX_SCALE);
+    const baseScale = Math.min(Math.min(canvasWidth / img.width, canvasHeight / img.height), MAX_SCALE);
     let scaledWidth = img.width * baseScale;
     let scaledHeight = img.height * baseScale;
     
@@ -969,61 +1090,66 @@ function drawBackgroundImageSmartTiling(ctx, img, canvasWidth, canvasHeight, opa
 
     console.log('🔄 Tiling avec continuité globale', 'nbTilesX', tilesX, canvasWidth / scaledWidth, 'nbTilesY', tilesY );
 
+    let flipH = false;
+    let isBackGroundImageFullyUsed = true;
+
     for (let tileY = 0; tileY < tilesY; tileY++) {
+        flipH = false;
+        let sourceY = 0;
+        let sourceHeight = img.height;
+        let destHeight = scaledHeight;
+        scaledHeightVariable = scaledHeight;
+        // const globalY = globalOffsetY + y;
+
+        // TRAITEMENT SPÉCIAL : première tuile verticale peut être coupée
+        if (tileY === 0 && globalOffsetY > 0) {
+            // PREMIÈRE TUILE : calculer où commencer dans l'image
+            const offsetInImage = globalOffsetY % scaledHeight;
+            destHeight = scaledHeight - offsetInImage;
+            scaledHeightVariable = destHeight;
+            sourceHeight = destHeight / baseScale;
+            sourceY = offsetInImage / baseScale;
+            if (flipV) { sourceY = 0; }  
+        }
+
+
+        // TRAITEMENT SPÉCIAL : dernière tuile verticale peut être coupée
+        if (destY + scaledHeightVariable > canvasHeight) {
+            destHeight = canvasHeight - destY ;  // Couper la dernière tuile
+            sourceHeight = destHeight / baseScale;
+            if (flipV) { sourceY = (scaledHeight - destHeight) / baseScale; }
+            lastTileIsComputed = true;
+            if (tileY === 0) { isBackGroundImageFullyUsed = false;}
+        }
+
+        let display_log = false;
+        let log_text = null;
+        if (tileY === 0 && globalOffsetY === 0) { log_text = ' Première tuile entière'; display_log = true; }
+        else if (tileY === 0 && globalOffsetY > 0) {log_text = ' Première tuile non entière'; display_log = true; }
+        else if (destY + scaledHeightVariable > canvasHeight) { log_text = ' Dernière tuile non entière '; display_log = true;}
+
+
         for (let tileX = 0; tileX < tilesX; tileX++) {
             const x = tileX * scaledWidth;
             const y = tileY * scaledHeight;
             
             // Position globale de cette tuile
-            const globalX = globalOffsetX + x;
-            const globalY = globalOffsetY + y;
-            
-            const globalMosaicX = Math.floor(globalX / scaledWidth);
-            const globalMosaicY = Math.floor(globalY / scaledHeight);
-            const flipH = globalMosaicX % 2 === 1;
-            const flipV = globalMosaicY % 2 === 1;
-            
-            
-            let sourceY = 0;
-            let sourceHeight = img.height;
-            let destHeight = scaledHeight;
-            scaledHeightVariable = scaledHeight;
-            
-            // TRAITEMENT SPÉCIAL : première tuile verticale peut être coupée
-            if (tileY === 0 && globalOffsetY > 0) {
-                // PREMIÈRE TUILE : calculer où commencer dans l'image
-                const offsetInImage = globalOffsetY % scaledHeight;
-                destHeight = scaledHeight - offsetInImage;
-                scaledHeightVariable = destHeight;
-                sourceHeight = destHeight / baseScale;
-                sourceY = offsetInImage / baseScale;
-                if (flipV) { sourceY = 0; }  
-            }
+            // const globalX = globalOffsetX + x;           
+            // const globalMosaicX = Math.floor(globalX / scaledWidth);
 
-            // TRAITEMENT SPÉCIAL : dernière tuile verticale peut être coupée
-            if (destY + scaledHeightVariable > canvasHeight) {
-                destHeight = canvasHeight - destY ;  // Couper la dernière tuile
-                sourceHeight = destHeight / baseScale;
-                if (flipV) { sourceY = (scaledHeight - destHeight) / baseScale; }
-                lastTileIsComputed = true;
-            }
-            
+            // const flipH = globalMosaicX % 2 === 1;
+            // const flipV = globalMosaicY % 2 === 1;
+         
+                              
             ctx.save();
-            
-            let display_log = false;
-            let log_text = null;
-            if (tileX === 0 && tileY === 0 && globalOffsetY === 0) { log_text = ' Première tuile entière'; display_log = true; }
-            else if (tileX === 0 && tileY === 0 && globalOffsetY > 0) {log_text = ' Première tuile non entière'; display_log = true; }
-            else if (tileX === 0 && destY + scaledHeightVariable > canvasHeight) { log_text = ' Dernière tuile non entière '; display_log = true;}
-
-            
+                       
             if (flipH || flipV) {
                 ctx.translate(x + scaledWidth / 2, destY + destHeight / 2);
                 if (flipH) ctx.scale(-1, 1);
                 if (flipV) ctx.scale(1, -1);
                 ctx.drawImage(img, 0, sourceY, img.width, sourceHeight, 
                              -scaledWidth / 2, -destHeight / 2, scaledWidth, destHeight);
-                if (display_log) {
+                if (tileX === 0 && display_log) {
                     console.log(`🎯 ${log_text} inversée, drawImage(img, srcX, srcY, srcW, srcH, dstX, destY, dstW, dstH); srcX=${0}, srcY=${sourceY}, srcW=${img.width}, srcH=${sourceHeight}, dstX=${-scaledWidth / 2}, dstY=${-destHeight / 2}, dstW=${scaledWidth}, dstH=${destHeight}, baseScale=${baseScale}`);
                 }
 
@@ -1031,14 +1157,21 @@ function drawBackgroundImageSmartTiling(ctx, img, canvasWidth, canvasHeight, opa
                 ctx.drawImage(img, 0, sourceY, img.width, sourceHeight, 
                              x, destY, scaledWidth, destHeight);
 
-                if (display_log) {
+                if (tileX === 0 && display_log) {
                     console.log(`🎯 ${log_text} normale, drawImage(img, srcX, srcY, srcW, srcH, dstX, destY, dstW, dstH); srcX=${0}, srcY=${sourceY}, srcW=${img.width}, srcH=${sourceHeight}, dstX=${x}, dstY=${destY}, dstW=${scaledWidth}, dstH=${destHeight}, baseScale=${baseScale}`);
                 }
             }
 
             ctx.restore();
+            flipH = !flipH;
         }
         destY = destY + scaledHeightVariable;
+
+        if ( destHeight === scaledHeight ||  (tileY === 0 && isBackGroundImageFullyUsed) ) {
+            // on commute le flipV si on a fini une tile avec image entière
+            // on vérifie aussi si il y avait une seule Tile (tileY === 0 ) si toute l'image est entièrement utilisée (isBackGroundImageFullyUsed)
+            flipV = !flipV;
+        }
 
         if (lastTileIsComputed) break;
     }
@@ -1886,6 +2019,8 @@ Image complète: ${Math.round(tileInfo.finalWidth)}×${Math.round(tileInfo.final
 export async function exportAllTiles(targetDPI, customTileInfo = null, quality = 90, format = 'png', pageSize, pageLayout) {
 
     try {
+
+        flipV = false;
         // Afficher le progress
         exportProgress.show(`Export ${targetDPI} DPI`);
         exportProgress.update(10, 'Préparation...');
@@ -1937,11 +2072,37 @@ export async function exportAllTiles(targetDPI, customTileInfo = null, quality =
         let completedTiles = 0;
 
         // Initialiser PDF si nécessaire
+        // let pdf = null;
+        // if (format === 'pdf') {
+        //     const { jsPDF } = window.jspdf;
+        //     pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        // }
+
+        // Initialiser PDF si nécessaire
         let pdf = null;
         if (format === 'pdf') {
             const { jsPDF } = window.jspdf;
-            pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            // NOUVEAU : Déterminer format et orientation depuis pageSize
+            let pdfFormat = 'a4';
+            let pdfOrientation = 'portrait';
+            
+            if (pageSize && pageSize !== 'auto') {
+                // Extraire format et orientation
+                if (pageSize.includes('a3')) pdfFormat = 'a3';
+                if (pageSize.includes('landscape')) pdfOrientation = 'landscape';
+            }
+            
+            console.log(`📄 Création PDF multi-pages: format=${pdfFormat}, orientation=${pdfOrientation}`);
+            
+            pdf = new jsPDF({ 
+                orientation: pdfOrientation, 
+                unit: 'mm', 
+                format: pdfFormat,
+                compress: true
+            });
         }
+
 
         for (let tileY = 0; tileY < tileInfo.tilesY; tileY++) {
             for (let tileX = 0; tileX < tileInfo.tilesX; tileX++) {
@@ -1959,14 +2120,36 @@ export async function exportAllTiles(targetDPI, customTileInfo = null, quality =
                     if (format === 'pdf') {
                         if (tileIndex > 1) pdf.addPage();
                         
+                        // Récupérer les dimensions de la page
+                        const pageWidth = pdf.internal.pageSize.getWidth();
+                        const pageHeight = pdf.internal.pageSize.getHeight();
+                        
+                        // Calculer le ratio pour conserver les proportions
+                        const canvasRatio = canvas.width / canvas.height;
+                        const pageRatio = pageWidth / pageHeight;
+                        
+                        let imgWidth, imgHeight, imgX, imgY;
+                        
+                        // Remplir toute la page sans bandes blanches
+                        if (canvasRatio > pageRatio) {
+                            imgHeight = pageHeight;
+                            imgWidth = pageHeight * canvasRatio;
+                            imgX = -(imgWidth - pageWidth) / 2;
+                            imgY = 0;
+                        } else {
+                            imgWidth = pageWidth;
+                            imgHeight = pageWidth / canvasRatio;
+                            imgX = 0;
+                            imgY = -(imgHeight - pageHeight) / 2;
+                        }
+                        
                         // Utiliser le paramètre quality
                         const pdfQuality = Math.max(0.1, Math.min(1.0, quality));
                         const imgData = canvas.toDataURL('image/jpeg', pdfQuality);
                         
-                        // Remplir toute la page sans marges
-                        pdf.addImage(imgData, 'JPEG', 0, 0, 
-                            pdf.internal.pageSize.getWidth(), 
-                            pdf.internal.pageSize.getHeight());
+                        // Ajouter l'image avec les bonnes dimensions
+                        pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+
                     } else {
                         // Télécharger cette tuile avec gestion quality
                         let filename = `arbre_tuile_${String(tileX).padStart(2, '0')}_${String(tileY).padStart(2, '0')}_${targetDPI}dpi.${format}`;
@@ -2056,6 +2239,7 @@ export async function exportSinglePage(params, format, filename, quality, pageSi
     
     // Utiliser la logique existante avec les paramètres calculés
     const svg = document.querySelector('#tree-svg');
+    flipV = false;
 
     // Passer le format cible à svgToCanvasFullTree
     const targetFormat = {
@@ -2388,6 +2572,7 @@ export async function exportWithPagePrintingParams(pageSize, pageLayout, dpi, fo
     } else {
         console.log('📄 Export page unique...');
         // Export page unique
+        flipV = false;
         await exportSinglePage(params, format, filename, quality, pageSize, pageLayout);
     }
 }
