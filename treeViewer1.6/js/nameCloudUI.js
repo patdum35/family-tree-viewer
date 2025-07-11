@@ -8,8 +8,9 @@ import { ensureStatsExist, addStatsButton, updateStatsButtons, removeAllStatsEle
 import { createImprovedHeatmap  } from './geoHeatMapUI.js';
 import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 import { attachFilterListeners  } from './geoHeatMapInteractions.js';
-import { showHamburgerButtonForcefully } from './hamburgerMenu.js';
+import { showHamburgerButtonForcefully, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
+import { enableFortuneMode } from './treeWheelAnimation.js';
 
 
 
@@ -827,28 +828,46 @@ function createSettingsButton() {
     return settingsButton;
 }
 
+
+function closeCloudName(modal) {
+    // Supprimer toutes les stats modals avant de fermer la CloudMap
+    removeAllStatsElements(); 
+    document.body.removeChild(modal);
+    resetHamburgerButtonPosition();
+    showHamburgerButtonForcefully();
+
+    // Pour désactiver le fond d'écran
+    console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
+    enableBackground(true);
+    state.backgroundEnabled = true;
+    if (state.isRadarEnabled) {
+        enableFortuneMode();
+    }
+}
+
+
+
+// // Fonction pour fermer depuis l'extérieur
+// export function closeCurrentNameCloud() {
+//     if (state.currentNameCloudModal) {
+//         closeCloudName(state.currentNameCloudModal);
+//         state.currentNameCloudModal = null;
+//     }
+// }
+
+
+
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
     closeButton.addEventListener('click', () => {
-        // Supprimer toutes les stats modals avant de fermer la CloudMap
-        removeAllStatsElements(); 
-        document.body.removeChild(modal);
-        showHamburgerButtonForcefully();
-
-        // Pour désactiver le fond d'écran
-        console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
-        enableBackground(true);
-        state.backgroundEnabled = true;
+        closeCloudName(modal);
 
     });
 
     // Événement pour la touche Échap
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
-            removeAllStatsElements(); 
-            document.body.removeChild(modal);
-            document.removeEventListener('keydown', handleEscape);
-            showHamburgerButtonForcefully();
+            closeCloudName(modal);
         }
     };
     document.addEventListener('keydown', handleEscape);
@@ -901,6 +920,12 @@ export function updateTitleText(element, cfg) {
     }
 
     element.innerHTML = titleText;
+}
+
+
+export function generateNameCloudExport() {
+    
+   
 }
 
 
@@ -1260,6 +1285,9 @@ function showNameCloud(nameData, config) {
     container.appendChild(optionsContainer);
     modal.appendChild(container);
     document.body.appendChild(modal);
+
+    // STOCKER LE MODAL GLOBALEMENT
+    state.currentNameCloudModal = modal;
 
 
 

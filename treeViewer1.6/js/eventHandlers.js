@@ -1,7 +1,7 @@
 // ====================================
 // Gestionnaires d'événements
 // ====================================
-import { getZoom } from './treeRenderer.js';
+import { getZoom, getLastTransform } from './treeRenderer.js';
 import { state, displayGenealogicTree, hideMap } from './main.js';
 import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.js';
 import { setupElegantBackground } from './backgroundManager.js';
@@ -10,6 +10,10 @@ import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
+import { drawWheelTree, setMaxGenerations, resetWheelView, removeSpinningImage } from './treeWheelRenderer.js'
+import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { enableBackground } from './backgroundManager.js';
+import { calculateFullTreeDimensions } from './exportManager.js';
 
 
 /**
@@ -79,6 +83,12 @@ export function handleWindowResize() {
     //  };
 
 
+
+
+
+    /* */
+
+    // if (state.isRadarEnabled) {  resetWheelView() } ;// drawWheelTree(true, false); }
 
 
 }
@@ -160,6 +170,7 @@ export function selectRootPerson() {
         }
 
         state.rootPersonId = selectedPersonId;
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in selectRootPerson ################# ')
         displayGenealogicTree(selectedPersonId, true);
         
         resultsSelect.style.display = 'block';
@@ -226,7 +237,14 @@ export function selectFoundPerson(personId) {
     }
     
     // Afficher la personne comme racine
-    displayGenealogicTree(personId, true);
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
+    // displayGenealogicTree(personId, true);
+    if (state.isRadarEnabled) {
+        displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
+    } else {
+        displayGenealogicTree(personId, true, false);
+    }
+
     
     // Attendre que l'arbre soit affiché et que l'historique soit mis à jour
     setTimeout(() => {
@@ -278,7 +296,11 @@ export function updateLettersInNames(value) {
  */
 export function updateGenerations(value) {
     state.nombre_generation = parseInt(value);
-    displayGenealogicTree(null, true, false);
+    if (state.isRadarEnabled) {
+        setMaxGenerations(state.nombre_generation);
+    } else {
+        displayGenealogicTree(null, true, false);
+    }
 }
 
 /**
@@ -336,6 +358,76 @@ export function resetView() {
             .call(zoom.transform, transform);
     }
 }
+
+
+export function resetViewZoomBeforeExport() {
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+
+    state.isAnimationLaunched = false;
+    
+    if (zoom) {
+
+        // Récupérer la transformation actuelle
+        const currentTransform = getLastTransform() || d3.zoomIdentity;
+        
+        // Extraire le scale et la position Y actuels
+        state.currentScale = currentTransform.k;
+        state.currentX = currentTransform.x;
+        state.currentY = currentTransform.y;
+
+
+
+        let transform = d3.zoomIdentity;
+        if (state.treeMode === 'descendants' || state.treeMode === 'directDescendants') {
+            // Pour les descendants, commencer du côté droit
+            transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
+        } else {
+            // Pour les ascendants, commencer du côté gauche
+            transform = transform.translate(state.boxWidth, height / 2);
+        }
+        transform = transform.scale(0.97);
+
+        // enableBackground(false);
+        if (state.backgroundEnabled) {
+            const svgForExport = document.querySelector('#tree-svg');
+            const fullDimensions = calculateFullTreeDimensions(svgForExport);
+            console.log( "new dimension pour the background with png export", fullDimensions)
+            setupElegantBackground(svg, fullDimensions, true);
+        }
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform);
+    }
+}
+
+
+
+export function resetViewZoomAfterExport() {
+    const svg = d3.select("#tree-svg");
+    const height = window.innerHeight;
+    const zoom = getZoom();
+
+    state.isAnimationLaunched = false;
+    
+    if (zoom) {
+
+        // Récupérer la transformation actuelle
+        let transform = d3.zoomIdentity;
+        transform = transform.translate(state.currentX, state.currentY).scale(state.currentScale);
+
+        if (state.backgroundEnabled) {
+            enableBackground(true);
+        }
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform);
+    }
+}
+
 
 /**
  * Réinitialise le niveau de zoom et la position de l'arbre
@@ -469,7 +561,15 @@ export async function returnToLogin() {
 
     // Masquer la carte
     hideMap();
-    
+
+    state.isRadarEnabled = false;
+    disableFortuneModeWithLever();
+    state.isRadarEnabled = false;
+    state.treeMode = 'ancestors';
+    state.treeModeReal = 'ancestors';
+    removeSpinningImage();
+
+    // updateRadarButtonText();
     
     // Restaurer le fond d'écran de connexion s'il a été supprimé
     const loginBackground = document.querySelector('.login-background');
@@ -486,12 +586,18 @@ export async function returnToLogin() {
 
         // Utiliser getCachedResourceUrl pour obtenir l'URL de l'image (si disponible)
         try {
-            const imagePath = 'background_images/fort_lalatte.jpx';
+            // const imagePath = 'background_images/fort_lalatte.jpx';
+            // const imagePath = 'background_images/lichen-red.jpg';
+            // const imagePath = 'background_images/bois.jpg';
+            backgroundImage.src = 'background_images/tree-log.jpg';
             backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
             // Fallback en cas d'erreur
-            backgroundImage.src = 'background_images/fort_lalatte.jpg';
+            // backgroundImage.src = 'background_images/fort_lalatte.jpg';
+            // backgroundImage.src = 'background_images/lichen-red.jpg';
+            // backgroundImage.src = 'background_images/bois.jpg';
+            backgroundImage.src = 'background_images/tree-log.jpg';
         }
     }
     

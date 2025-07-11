@@ -388,6 +388,7 @@ function createNumberInput(defaultValue, onChange) {
 
 export function createSettingsModal(onSave) {
     // Conteneur principal de la modale (code existant reste inchangé)
+    console.log('Creating settings modal...'); // Debugging line
     const modal = document.createElement('div');
     modal.className = 'settings-modal';
     modal.style.position = 'fixed';

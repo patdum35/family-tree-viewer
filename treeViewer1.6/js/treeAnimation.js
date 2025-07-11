@@ -22,7 +22,7 @@ let optimalSpeechRate = 1.0; //1.1;
 let animationMap = null;
 let animationMarker = null;
 
-let frenchVoice = null;
+// let frenchVoice = null;
 let localVoice = null;
 
 // Au début du fichier, après les imports
@@ -47,7 +47,7 @@ let initialAnimationMapPosition = {
 
 
 
-let isSpeechInGoodHealth = false;
+// let state.isSpeechInGoodHealth = false;
 let animationController = null;
 
 export let animationState = {
@@ -297,31 +297,6 @@ function addHighlightStyle() {
         console.error("Erreur lors de l'ajout du style:", e);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export async function testRealConnectivity() {
     try {
@@ -1073,14 +1048,17 @@ function simplifyName(fullName) {
     return `${firstFirstName} ${lastName}`;
 }
 
+
+
+
 /*  NOUVEAU CODE BON pour nouveau Chrome */
 // Variable globale pour suivre si la synthèse vocale a été initialisée
-let speechSynthesisInitialized = false;
+// let state.speechSynthesisInitialized = false;
 let errorInSpeechInit = false;
 
 // Fonction d'initialisation de la synthèse vocale à exécuter au chargement
 function initSpeechSynthesis(voice) {
-    if ('speechSynthesis' in window && !speechSynthesisInitialized) {
+    if ('speechSynthesis' in window && !state.speechSynthesisInitialized) {
         console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
         // Créer et jouer une utterance silencieuse pour initialiser le moteur
         const initUtterance = new SpeechSynthesisUtterance("");
@@ -1089,14 +1067,14 @@ function initSpeechSynthesis(voice) {
         initUtterance.voice = voice; // 
         initUtterance.onend = () => {
             console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
-            speechSynthesisInitialized = true;
+            state.speechSynthesisInitialized = true;
             
             // Tentative de déblocage audio HTML
             new Audio().play().catch(() => {});
         };
         initUtterance.onerror = (err) => {
             console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
-            speechSynthesisInitialized = true; // Considérer comme initialisé quand même
+            state.speechSynthesisInitialized = true; // Considérer comme initialisé quand même
             errorInSpeechInit = true;
         };
         
@@ -1109,7 +1087,7 @@ function initSpeechSynthesis(voice) {
 }
 /* */
 
-async function testSpeechSynthesisHealth(timeout = 1000) {
+export async function testSpeechSynthesisHealth(timeout = 1000) {
     // console.log("🔍 Test de la santé de la synthèse vocale...");
     return new Promise((resolve) => {
       let ok = false;
@@ -1143,20 +1121,21 @@ async function testSpeechSynthesisHealth(timeout = 1000) {
 }
 
 
-function selectVoice() {
+export function selectVoice() {
     // Sélectionner une voix française si possible
     let voices = window.speechSynthesis.getVoices();
-    console.log("Voix disponibles:",voices);
+    
+    // console.log("Voix disponibles:",voices);
 
-    debugLog("=== Liste des voix disponibles ===");
-    voices.forEach(voice => {
-        debugLog(`Voix: ${voice.name}
-        - Langue: ${voice.lang}
-        - Local: ${voice.localService}
-        - Par défaut: ${voice.default}
-        - URI: ${voice.voiceURI}
-        ---------------------`);
-    });
+    // debugLog("=== Liste des voix disponibles ===");
+    // voices.forEach(voice => {
+    //     debugLog(`Voix: ${voice.name}
+    //     - Langue: ${voice.lang}
+    //     - Local: ${voice.localService}
+    //     - Par défaut: ${voice.default}
+    //     - URI: ${voice.voiceURI}
+    //     ---------------------`);
+    // });
 
     // Trouver les voix françaises disponibles
     // let frenchVoices = voices.filter(voice => 
@@ -1256,33 +1235,33 @@ function selectVoice() {
     // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
     if (isOnline) {
         // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
-        frenchVoice = frenchVoices.find(voice => 
+        state.frenchVoice = frenchVoices.find(voice => 
             voice.name.includes('Google') || 
             voice.name.includes('Microsoft')
         );
         
-        if (frenchVoice) {
-            console.log("✅ Utilisation de la voix réseau haute qualité:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        if (state.frenchVoice) {
+            console.log("✅ Utilisation de la voix réseau haute qualité:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         } else if (frenchVoices.length != 0) {
             // Sélectionner la première voix française disponible
-            frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix  ?:", frenchVoice.name, ', localService=', frenchVoice.localService);
+            state.frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix  ?:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         }
 
     } else {
         if (frenchVoices.length != 0) {
             // Sélectionner la première voix française disponible
-            frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+            state.frenchVoice = frenchVoices[0];
+            console.log("ℹ️ Utilisation de la voix locale:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
         } else {
             console.log("⚠️ Aucune voix disponible hors ligne ");
         }
     }
 
 
-    if (frenchVoice) {
-        console.log("Voix  sélectionnée:", frenchVoice);
-        debugLog(`Version 1.6, Voix sélectionnée:, ${frenchVoice.name}, localService=, ${frenchVoice.localService}`);
+    if (state.frenchVoice) {
+        console.log("Voix  sélectionnée:", state.frenchVoice);
+        debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
     }
 
     
@@ -1309,42 +1288,29 @@ function selectVoice() {
 }
 
 /* */
-function speakPersonName(personName) {
-    // console.log(`⏱️ DÉBUT: speakPersonName pour ${personName}, vitesse initiale: ${optimalSpeechRate}`);
-    
+export function speakPersonName(personName, isFullText = false, isFast = false) {
     // Initialiser la synthèse vocale si ce n'est pas déjà fait
-    if (!speechSynthesisInitialized) {
+    if (!state.speechSynthesisInitialized) {
         console.log("🔄 Premier appel à la synthèse vocale - initialisation... avec french voice");
-        if (frenchVoice) {
-            initSpeechSynthesis(frenchVoice);
+        if (state.frenchVoice) {
+            initSpeechSynthesis(state.frenchVoice);
 
-            // if (!speechSynthesisInitialized) {
-            //     console.log("🔄 2ième appel à la synthèse vocale - initialisation.. avec local voice");
-            //     if (localVoice) {
-            //         initSpeechSynthesis(localVoice);
-            //         frenchVoice = localVoice;
-            //         speechSynthesisInitialized = true;
-            //     }   
-            // }
             // Ajouter un petit délai pour laisser le temps à l'initialisation
             return new Promise(resolve => {
                 setTimeout(() => {
                     // Réappeler la fonction après initialisation
-                    speakPersonName(personName).then(resolve);
+                    speakPersonName(personName, isFullText, isFast).then(resolve);
                 }, 200);
             });
         }
     }
     
-    // console.log("index animation =", animationState.currentIndex);
     
     // Vérifier si le son est activé
     if (!state.isSpeechEnabled) {
-        // console.log("🔇 Son désactivé - résolution immédiate");
         return new Promise(resolve => setTimeout(resolve, 1600));
     }
     
-
 
     return new Promise((resolve, reject) => {
 
@@ -1362,42 +1328,55 @@ function speakPersonName(personName) {
         }
 
 
-
         // Simplifier le nom avant lecture
-        const simplifiedName = simplifyName(personName);
-        console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
+        // const simplifiedName = simplifyName(personName);
+        // console.log(`📝 Nom simplifié: ${simplifiedName}, index : ${animationState.currentIndex}`);
 
 
 
-        // let timeOutDuration = 1800;
-        // if (animationState.currentIndex === 0) {
-        //     console.log("🔄 Premier nom - forçage taux initial à 1.2");
-        //     optimalSpeechRate = 1.2; // Commencer plus rapide pour le premier nom
-        //     if (isSpeechInGoodHealth) timeOutDuration = 3500;
-        //     else timeOutDuration = 2500;
-        // }
-        // if (animationState.currentIndex === 1) {
-        //     console.log("🔄 Premier nom - forçage taux initial à 1.0");
-        //     optimalSpeechRate = 1.2; //
-        //     if (isSpeechInGoodHealth) timeOutDuration = 2500; 
-        //     else timeOutDuration = 1600;
-        // }
-
+        let textToSpeak;
+        if (isFullText) {
+            // Pour les phrases complètes : pas de simplification
+            textToSpeak = personName.trim();
+            console.log(`📝 Texte complet à lire: ${textToSpeak}`);
+        } else {
+            // Pour les noms de personnes : utiliser simplifyName comme avant
+            textToSpeak = simplifyName(personName);
+            console.log(`📝 Nom simplifié: ${textToSpeak}, index : ${animationState.currentIndex}`);
+        }
 
 
 
         // Ajustement dynamique du timeout en fonction de la longueur du nom
-        let timeOutDuration = Math.max(1800, simplifiedName.length * 150); // Base de 150ms par lettre, minimum 1800ms
-        if (animationState.currentIndex === 0) {
-            console.log("🔄 Premier nom - forçage taux initial à 1.2");
-            optimalSpeechRate = 1.0;//1.2;
-            timeOutDuration = Math.max(isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
+        let timeOutDuration = Math.max(1800, textToSpeak.length * 150); // Base de 150ms par lettre, minimum 1800ms
+
+
+
+        // Ajustements spéciaux pour les noms (pas pour le texte complet)
+        if (!isFullText) {
+        
+            if (animationState.currentIndex === 0) {
+                console.log("🔄 Premier nom - forçage taux initial à 1.2");
+                optimalSpeechRate = 1.0;//1.2;
+                timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
+            }
+            if (animationState.currentIndex === 1) {
+                console.log("🔄 Deuxième nom - ajustement taux");
+                optimalSpeechRate = 1.0; //1.2;
+                timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
+            }
+        } else {
+            // Pour le texte complet : timeout plus généreux
+            timeOutDuration = Math.max(4000, textToSpeak.length * 120);
+            optimalSpeechRate = 1.0; // Vitesse normale pour le texte
         }
-        if (animationState.currentIndex === 1) {
-            console.log("🔄 Deuxième nom - ajustement taux");
-            optimalSpeechRate = 1.0; //1.2;
-            timeOutDuration = Math.max(isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
+
+
+        if (isFast) {
+            timeOutDuration = Math.max(500, textToSpeak.length * 80); // Base de 100ms par lettre, minimum 1200ms
+            optimalSpeechRate = 1.2;
         }
+
 
 
         // contournement pour Chrome qui ne fonctionne pas bien avec la synthèse vocale
@@ -1405,7 +1384,6 @@ function speakPersonName(personName) {
 
         //Ajouter un timeout de sécurité qui résoudra la promesse après 3 secondes quoi qu'il arrive
         safetyTimeout = setTimeout(() => {
-            // console.log("⚠️ TIMEOUT: Timeout de sécurité de la synthèse vocale déclenché");
             window.speechSynthesis.cancel(); // Annuler toute synthèse en cours
             resolve(); // Résoudre la promesse pour continuer l'animation
         }, timeOutDuration);
@@ -1416,29 +1394,27 @@ function speakPersonName(personName) {
         const maxRate = 2.7; // Vitesse maximale
         const minRate = 0.8; // Vitesse minimale
 
-
-
-
-
-
-
-
-        
+       
         
         async function measureSpeechDuration(rate) {
-            // console.log(`📏 DÉBUT mesure avec taux: ${rate}`);
             return new Promise((innerResolve) => {
-                const utterance = new SpeechSynthesisUtterance(simplifiedName);
+                // const utterance = new SpeechSynthesisUtterance(simplifiedName);
+
+
+
+                window.speechSynthesis.cancel();
+
+
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.rate = rate;
                 utterance.lang = 'fr-FR';
                 utterance.volume = 1.0;
 
                 const startTime = Date.now();
-                // console.log(`⏱️ Démarrage mesure à: ${startTime}`);
 
                 utterance.onend = () => {
                     const duration = Date.now() - startTime;
-                    console.log(`✅ Fin utterance après ${duration}ms`);
+                    console.log(`✅ Fin utterance après ${duration}ms , rate: ${utterance.rate }, safetyTimeout :${safetyTimeout}, isFast: ${isFast}`);
                     
                     innerResolve({ 
                         rate: rate, 
@@ -1447,7 +1423,7 @@ function speakPersonName(personName) {
                 };
 
                 utterance.onerror = (event) => {
-                    console.log(`❌ Erreur utterance: ${event.error}`);
+                    console.log(`❌ Erreur utterance: ${event.error} , rate: ${utterance.rate }, safetyTimeout :${safetyTimeout}, isFast: ${isFast}`);
                 
                     // Si l'erreur est 'interrupted', utiliser une durée estimée plutôt que Infinity
                     if (event.error === 'interrupted') {
@@ -1472,23 +1448,12 @@ function speakPersonName(personName) {
                 };
                 
 
-
-                // // Sélectionner une voix française si possible
-                // const voices = window.speechSynthesis.getVoices();
-                // const frenchVoice = voices.find(voice => 
-                //     voice.lang.startsWith('fr-') || 
-                //     voice.name.toLowerCase().includes('french')
-                // );
-
-                if (frenchVoice) {
-                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${frenchVoice.name}`);
-                    utterance.voice = frenchVoice;
+                if (state.frenchVoice) {
+                    console.log(`✅  🇫🇷 Voix française sélectionnée: ${state.frenchVoice.name}`);
+                    utterance.voice = state.frenchVoice;
                 }
 
-                // console.log(`🔊 Début synthèse pour ${simplifiedName} avec taux ${rate}`);
                 window.speechSynthesis.speak(utterance);
-
-                // speakAfterCancel(utterance);
             });
         }
 
@@ -1496,40 +1461,14 @@ function speakPersonName(personName) {
             try {
                 // console.log(`⚙️ DÉBUT adaptiveSpeech avec taux: ${optimalSpeechRate}`);
                 // pour bug de chrome
-                if (!isSpeechInGoodHealth) {
+                if (!state.isSpeechInGoodHealth) {
                     const silentUtterance = new SpeechSynthesisUtterance(' ');
                     window.speechSynthesis.speak(silentUtterance);
                     window.speechSynthesis.cancel();
                 }
                 const result = await measureSpeechDuration(optimalSpeechRate);
-
-                // console.log(`📊 Résultat mesure:`, result);
-                
-
-
-
-                // // Ajuster la vitesse globale avec une approche plus symétrique
-                // if (result.duration > targetDuration + 200) {
-                //     // Si trop lent, augmenter progressivement
-                //     const oldRate = optimalSpeechRate;
-                //     optimalSpeechRate = Math.min(optimalSpeechRate + 0.2, maxRate);
-                //     console.log(`🐢 Trop LENT (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                // } else if (result.duration < targetDuration - 200) {
-                //     // Si trop rapide, diminuer progressivement
-                //     const oldRate = optimalSpeechRate;
-                //     optimalSpeechRate = Math.max(optimalSpeechRate - 0.2, minRate);
-                //     // console.log(`🐇 Trop RAPIDE (${result.duration}ms) - Ajustement taux: ${oldRate} → ${optimalSpeechRate}`);
-                // } else {
-                //     // console.log(`✅ Durée OPTIMALE (${result.duration}ms) - Maintien taux: ${optimalSpeechRate}`);
-                // }
-
-
-
-
                 
                 clearTimeout(safetyTimeout); // Annuler le timeout si tout s'est bien passé
-                // console.log(`✅ FIN: speakPersonName - promesse résolue`);
-                // resolve();
                 resolve();
             } catch (error) {
                 console.error(`❌ Erreur dans la synthèse vocale:`, error);
@@ -1541,8 +1480,6 @@ function speakPersonName(personName) {
         // Lancer la lecture adaptative
         return adaptiveSpeech();
     });
-
-
 
 }
 /* */
@@ -1580,8 +1517,8 @@ export async function startAncestorAnimation() {
 
     if (state.isSpeechEnabled2)
     {
-        isSpeechInGoodHealth = await testSpeechSynthesisHealth();
-        if (isSpeechInGoodHealth) {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
             // Chrome ou Edge est coopératif
             console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
         } else {
@@ -1626,7 +1563,8 @@ export async function startAncestorAnimation() {
 
             if (state.treeOwner ===2 ) {
                 state.rootPersonId = searchRootPersonId('faustine d');
-
+            } else if (state.treeOwner ===3 ) {
+                state.rootPersonId = searchRootPersonId('laurence m');
             } else {
                 state.rootPersonId = searchRootPersonId('emma a');
             }
@@ -1687,6 +1625,7 @@ export async function startAncestorAnimation() {
 
     if (state.isSpeechEnabled2) {
         selectVoice();
+        state.isVoiceSelected = true;
     }
 
     let horizontalShift = 0;

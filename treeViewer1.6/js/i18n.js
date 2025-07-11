@@ -46,8 +46,22 @@ window.i18n = {
       'resetError': 'Erreur lors de la réinitialisation des paramètres.',
       'SWUpdate': 'Mise à jour du logiciel',
       'parametresDefaut': '🔄 Paramètres par défaut',
-      'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server ou tablette Apple.',
-   
+      // 'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server ou tablette Apple.',
+      'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur local n\'a été détecté. La mise à jour du logiciel est impossible.\n\nPour le développement, veuillez utiliser VS Code avec Live Server.',
+      'noServerDetected2': '⚠️ ATTENTION ⚠️\n\nPas de connexion Internet détectée.\n\nLa mise à jour nécessite une connexion pour télécharger les nouvelles ressources depuis GitHub.',
+      'noServerDetected3': '⚠️ ATTENTION ⚠️\n\nLa mise à jour du logiciel n\'est pas possible dans cet environnement.',
+      'iosInstallTitle': 'Installer l\'application',
+      'iosInstallInstruction': 'Appuyez sur <span class="share-icon">📤</span> puis "Ajouter à l\'écran d\'accueil"',
+      'iosDetailsBtn': 'Détails',
+      'iosModalTitle': '📱 Installation sur iOS',
+      'iosStepsTitle': '📋 Étapes détaillées :',
+      'iosCloseBtn': 'Compris !',
+      'iosStep1': '<strong>Ouvrez Safari</strong> (l\'installation ne fonctionne que dans Safari)',
+      'iosStep2': '<strong>Appuyez sur l\'icône Partager</strong> 📤 en bas de l\'écran',
+      'iosStep3': '<strong>Faites défiler</strong> et trouvez "Ajouter à l\'écran d\'accueil" ➕',
+      'iosStep4': '<strong>Personnalisez le nom</strong> si souhaité',
+      'iosStep5': '<strong>Appuyez sur "Ajouter"</strong> ✅',
+
     },
     'en': {
       // Page password-form
@@ -89,8 +103,20 @@ window.i18n = {
       'resetError': 'Error while resetting settings.',
       'SWUpdate': 'Software Update',
       'parametresDefaut': '🔄 Default Settings',
-      'noServerDetected': '⚠️ WARNING ⚠️\n\nNo server detected. Software update is not possible.\n\nThis operation requires VS Code with Live Server.',
-
+      'noServerDetected': '⚠️ WARNING ⚠️\n\nNo server detected. Software update is not possible.\n\nFor development purpose, this operation requires VS Code with Live Server.',
+      'noServerDetected2': '⚠️ WARNING ⚠️\n\nNo Internet connection detected.\n\nThe update requires a connection to download new resources from GitHub.',
+      'noServerDetected3': '⚠️ WARNING ⚠️\n\nSoftware update is not possible in this environment.',
+      'iosInstallTitle': 'Install the app',
+      'iosInstallInstruction': 'Tap <span class="share-icon">📤</span> then "Add to Home Screen"',
+      'iosDetailsBtn': 'Details',
+      'iosModalTitle': '📱 iOS Installation',
+      'iosStepsTitle': '📋 Detailed steps:',
+      'iosCloseBtn': 'Got it!',
+      'iosStep1': '<strong>Open Safari</strong> (installation only works in Safari)',
+      'iosStep2': '<strong>Tap the Share icon</strong> 📤 at the bottom of the screen',
+      'iosStep3': '<strong>Scroll down</strong> and find "Add to Home Screen" ➕',
+      'iosStep4': '<strong>Customize the name</strong> if desired',
+      'iosStep5': '<strong>Tap "Add"</strong> ✅',
     },
     'es': {
       // Page password-form
@@ -132,8 +158,20 @@ window.i18n = {
       'resetError': 'Error al restablecer la configuración.',
       'SWUpdate': 'Actualización de Software',
       'parametresDefaut': '🔄 Configuración Predeterminada',
-      'noServerDetected': '⚠️ ADVERTENCIA ⚠️\n\nNo se ha detectado ningún servidor. La actualización del software no es posible.\n\nEsta operación requiere VS Code con Live Server.',
-
+      'noServerDetected': '⚠️ ADVERTENCIA ⚠️\n\nNo se detectó ningún servidor. La actualización del software no es posible.\n\nPara desarrollo, esta operación requiere VS Code con Live Server.',
+      'noServerDetected2': '⚠️ ADVERTENCIA ⚠️\n\nNo se detectó conexión a Internet.\n\nLa actualización requiere una conexión para descargar nuevos recursos desde GitHub.',
+      'noServerDetected3': '⚠️ ADVERTENCIA ⚠️\n\nLa actualización del software no es posible en este entorno.',
+      'iosInstallTitle': 'Instalar la aplicación',
+      'iosInstallInstruction': 'Toca <span class="share-icon">📤</span> luego "Añadir a pantalla de inicio"',
+      'iosDetailsBtn': 'Detalles',
+      'iosModalTitle': '📱 Instalación en iOS',
+      'iosStepsTitle': '📋 Pasos detallados:',
+      'iosCloseBtn': '¡Entendido!',
+      'iosStep1': '<strong>Abre Safari</strong> (la instalación solo funciona en Safari)',
+      'iosStep2': '<strong>Toca el icono Compartir</strong> 📤 en la parte inferior de la pantalla',
+      'iosStep3': '<strong>Desplázate hacia abajo</strong> y encuentra "Añadir a pantalla de inicio" ➕',
+      'iosStep4': '<strong>Personaliza el nombre</strong> si lo deseas',
+      'iosStep5': '<strong>Toca "Añadir"</strong> ✅',
 
     },
     'hu': {
@@ -176,7 +214,20 @@ window.i18n = {
       'resetError': 'Hiba a beállítások visszaállításakor.',
       'SWUpdate': 'Szoftver Frissítés',
       'parametresDefaut': '🔄 Alapértelmezett Beállítások',
-      'noServerDetected': '⚠️ FIGYELEM ⚠️\n\nNem észlelhető szerver. A szoftverfrissítés nem lehetséges.\n\nEhhez a művelethez VS Code szükséges Live Server kiegészítővel.'
+      'noServerDetected': '⚠️ FIGYELEM ⚠️\n\nNem észlelhető szerver. A szoftverfrissítés nem lehetséges.\n\nEhhez a művelethez VS Code szükséges Live Server kiegészítővel.',
+      'noServerDetected2': '⚠️ FIGYELEM ⚠️\n\nNincs internetkapcsolat.\n\nA frissítéshez kapcsolat szükséges az új erőforrások GitHub-ról történő letöltéséhez.',
+      'noServerDetected3': '⚠️ FIGYELEM ⚠️\n\nA szoftverfrissítés nem lehetséges ebben a környezetben.',
+      'iosInstallTitle': 'Alkalmazás telepítése',
+      'iosInstallInstruction': 'Érintse meg a <span class="share-icon">📤</span> majd "Hozzáadás a kezdőképernyőhöz"',
+      'iosDetailsBtn': 'Részletek',
+      'iosModalTitle': '📱 iOS telepítés',
+      'iosStepsTitle': '📋 Részletes lépések:',
+      'iosCloseBtn': 'Értem!',
+      'iosStep1': '<strong>Nyissa meg a Safarit</strong> (a telepítés csak Safariban működik)',
+      'iosStep2': '<strong>Érintse meg a Megosztás ikont</strong> 📤 a képernyő alján',
+      'iosStep3': '<strong>Görgessen le</strong> és keresse meg a "Hozzáadás a kezdőképernyőhöz" ➕',
+      'iosStep4': '<strong>Személyre szabhatja a nevet</strong> ha szeretné',
+      'iosStep5': '<strong>Érintse meg a "Hozzáadás" gombot</strong> ✅'
     }
   },
   

@@ -409,10 +409,24 @@ class PWAInstaller {
         setTimeout(closeModal, 15000);
     }
 
+    // isAppInstalled() {
+    //     // Vérifier si l'app est lancée en mode standalone
+    //     return window.matchMedia('(display-mode: standalone)').matches ||
+    //            window.navigator.standalone === true;
+    // }
+
     isAppInstalled() {
-        // Vérifier si l'app est lancée en mode standalone
-        return window.matchMedia('(display-mode: standalone)').matches ||
-               window.navigator.standalone === true;
+        // Méthode standard
+        const standardCheck = window.matchMedia('(display-mode: standalone)').matches ||
+                            window.navigator.standalone === true;
+        
+        // Mode VS Code : Si pas de beforeinstallprompt + localhost = probablement installé
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1';
+        const vsCodeCheck = isLocalhost && !this.deferredPrompt;
+        
+        return standardCheck || vsCodeCheck;
+        // "Si on est en localhost ET qu'il n'y a pas d'événement d'installation, c'est que l'app est déjà installée."
     }
 
     checkInstallAvailability() {

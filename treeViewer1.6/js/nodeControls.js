@@ -71,6 +71,8 @@ export function handleRootChange(event, d) {
     
 
     event.stopPropagation();
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootChange  ################# ')
+
     displayGenealogicTree(d.data.id, true); 
 
     
@@ -236,6 +238,7 @@ function createPersonNode(personId, generation, options = {}) {
         children: [],
         birthDate: person.birthDate,
         deathDate: person.deathDate,
+        sex: person.sex,
         ...(options.isSpouse && { 
             isSpouse: true,
             spouseOf: options.spouseOf 
@@ -365,7 +368,7 @@ function findDescendantsForSibling(siblingId, isAnimation, nextNodeId) {
         });
     }
     
-    console.log("\n\n\n *** DEBUG in findDescendantsForSibling   *** Descendants trouvés pour", siblingId, ":", childrenIds, childrenData, isAnimation, nextNodeId);
+    // console.log("\n\n\n *** DEBUG in findDescendantsForSibling   *** Descendants trouvés pour", siblingId, ":", childrenIds, childrenData, isAnimation, nextNodeId);
     return {
         childrenIds: childrenIds,
         childrenData: childrenData
@@ -937,6 +940,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 generation: 0, // Même niveau que l'ancienne racine
                 birthDate: descendantData_all[i].birthDate || "",
                 deathDate: descendantData_all[i].deathDate || "",
+                sex: descendantData_all[i].sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother,
@@ -1049,6 +1053,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 generation: 0, // Les descendants seront à la génération 0
                 birthDate: descendantData.birthDate || "",
                 deathDate: descendantData.deathDate || "",
+                sex:descendantData.sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother,
@@ -1277,6 +1282,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 generation: descendantGeneration,
                 birthDate: descendantData_all[i].birthDate || "",
                 deathDate: descendantData_all[i].deathDate || "",
+                sex: descendantData_all[i].sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother, 
@@ -1755,6 +1761,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                 position: globalPositionIndex++,
                 isSpouse: !!node.isSpouse,
                 spouseOf: node.spouseOf || null,
+                sex: node.sex,
                 genealogicalParentId: node.genealogicalParentId,
                 genealogicalMotherId: node.genealogicalMotherId,
                 genealogicalFatherId: node.genealogicalFatherId
@@ -1806,6 +1813,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                         position: globalPositionIndex++,
                         isSpouse: true,
                         spouseOf: node.id,
+                        sex: spouse.sex,
                         // Utiliser le même parent que le nœud principal
                         genealogicalParentId: node.genealogicalParentId,
                         genealogicalMotherId: node.genealogicalMotherId,
@@ -2680,6 +2688,7 @@ function updateRootToClosestDescendant(descendant) {
     
     // Mettre à jour le sélecteur de personnes racines
     updateSelectorValue('root-person-results', descendant.id, displayName, { replaceOptions: true });
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateRootToClosestDescendant  ################# ')
 
     displayGenealogicTree(descendant.id);
 }
@@ -2983,6 +2992,7 @@ function buildNewAncestors(ddata) {
                     children: [],
                     birthDate: father.birthDate,
                     deathDate: father.deathDate,
+                    sex: father.sex,
                     hasParents: true,
                     genealogicalParentId: genealogicalParents.original,
                     genealogicalFatherId: genealogicalParents.father,
@@ -3012,6 +3022,7 @@ function buildNewAncestors(ddata) {
                     children: [],
                     birthDate: mother.birthDate,
                     deathDate: mother.deathDate,
+                    sex: mother.sex,
                     hasParents: true,
                     genealogicalParentId: genealogicalParents.original,
                     genealogicalFatherId: genealogicalParents.father,
@@ -3040,6 +3051,7 @@ function addSiblingsToNode(siblings, node, parentId, genealogicalParents) {
             children: [],
             birthDate: sibling.birthDate,
             deathDate: sibling.deathDate,
+            sex: sibling.sex,
             genealogicalParentId: genealogicalParents.original,
             genealogicalFatherId: genealogicalParents.father,
             genealogicalMotherId: genealogicalParents.mother,
@@ -3064,7 +3076,8 @@ function addOtherSpouses(personId, excludeSpouseId, node) {
                     isSpouse: true,
                     children: [],
                     birthDate: spouse.birthDate,
-                    deathDate: spouse.deathDate
+                    deathDate: spouse.deathDate,
+                    sex: spouse.sex
                 });
             }
         });

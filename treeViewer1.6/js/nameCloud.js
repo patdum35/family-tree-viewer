@@ -4,10 +4,11 @@ import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfession, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { hideHamburgerButtonForcefully } from './hamburgerMenu.js';
+import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
-import { translateOccupation } from './occupations.js'; // N
+import { translateOccupation } from './occupations.js'; 
+import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
 
 
 export const nameCloudState = {
@@ -56,10 +57,14 @@ export const nameCloudState = {
     animationStyle: "none",
 }
 
-export function processNamesCloudWithDate(config, containerElement = null) {
+export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
+    state.isWordCloudEnabled = true; // Activer le nuage de mots
+    
     // Pour désactiver le fond d'écran
     enableBackground(false);
+
+    disableFortuneModeWithLever();
 
     // Appeler la fonction au chargement du module
     loadSettingsFromLocalStorage();
@@ -68,7 +73,8 @@ export function processNamesCloudWithDate(config, containerElement = null) {
 
     // Masquer le menu hamburger
     console.log("Masquer le menu hamburger");
-    hideHamburgerButtonForcefully();
+    // hideHamburgerButtonForcefully();
+    offsetHamburgerButtonDown();
    
     // Réinitialiser les positions seulement à la première initialisation
     if (!nameCloudState.initialized) {

@@ -12,6 +12,12 @@
     <title>Arbre généalogique</title>
 
 
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="js/treeWheelStyles.css"> -->
+
+
+
+
     <script>
         // Définir la fonction openGedcomModal globalement avant de charger i18n.js
         window.openGedcomModal = function() {
@@ -71,7 +77,9 @@
 
 <body>
     <div class="login-background">
-        <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran">
+        <!-- <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran"> -->
+        <!-- <img src="background_images/bois.jpg" class="login-background-image" alt="Fond d'écran">         -->
+        <img src="background_images/tree-logjpg" class="login-background-image" alt="Fond d'écran">  
         <!-- <img class="login-background-image" alt="Fond d'écran"> -->
     </div>
 
@@ -180,15 +188,18 @@
                 <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>▶️</span></button>
                 <button onclick="openSettingsModal()" id="settingsBtn" data-text-key="openSettingsModal"><span>⚙️</span></button>
                 <!-- <button onclick="toggleFullScreen()" class="large-button" data-text-key="toggleFullScreen"><span>⛶</span></button> -->
-                <button onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
+                <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
                     <span class="wide-span">💖</span>
-                </button>          
+                </button>            
                 <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" >
                 <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults"  >
                     <option value="">Select</option>
                 </select>
-
+                <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
+                    <span class="wide-span">🎯</span>
+                </button> 
             </div>
+            
             <!-- <div class="controls-row-2" style="margin-top: -10px; gap: 5px;">   -->
             <div class="controls-row-2" style="position: fixed; top: 50px; left: 5px; gap: 5px;">                  
                 
@@ -203,6 +214,8 @@
                         <option value="both" data-text-key="treeModeBoth">A+D</option>
                     </select>
                 </select>
+                <!-- <button onclick="toggleFullScreen()" class="large-button" data-text-key="toggleFullScreen"><span>⛶</span></button> -->
+
                 <!-- <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)" data-text-key="search">      -->
             </div>                       
         </div>
@@ -295,10 +308,6 @@
     
 <!-- fenêtre toast pour faire un tooltip -->
 <div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
-
-
-
-
 
 
 </body>

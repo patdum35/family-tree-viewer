@@ -1,4 +1,4 @@
-import { state, displayGenealogicTree } from './main.js';
+import { state, displayGenealogicTree, updateRadarButtonText } from './main.js';
 import { historicalFigures } from './historicalData.js';
 import { extractYear } from './utils.js';
 import { geocodeLocation } from './geoLocalisation.js';
@@ -6,6 +6,11 @@ import { nameCloudState } from './nameCloud.js';
 import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPersonLocations, createLocationMap } from './mapUtils.js';
 import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
+import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
+import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
+import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
+
+
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne
@@ -30,9 +35,6 @@ import { cleanProfession} from './nameCloudUtils.js';
 */
 
 
-
-
-
 /**
  * Système de traduction pour l'application généalogique
  * Prend en charge le français (fr), l'anglais (en), l'espagnol (es) et le hongrois (hu)
@@ -43,7 +45,9 @@ export const translations = {
       'notes': 'Notes',
       'sources': 'Sources',
       'historicalContext': 'Contexte historique',
-      'setAsRoot': 'Définir comme point de départ de l\'arbre',
+      'setAsRoot': 'Définir comme racine de l\'arbre',
+      'quiz': 'Quiz',
+      'readPersonDetails' : 'Lire la fiche',
       'atTimeOf': 'Au moment de ',
       
       // Modificateurs de dates GEDCOM
@@ -77,6 +81,8 @@ export const translations = {
       'sources': 'Sources',
       'historicalContext': 'Historical Context',
       'setAsRoot': 'Set as tree root',
+      'quiz': 'Quiz',
+      'readPersonDetails' : 'Read details',
       'atTimeOf': 'At time of ',
       
       // Modificateurs de dates GEDCOM
@@ -110,6 +116,8 @@ export const translations = {
       'sources': 'Fuentes',
       'historicalContext': 'Contexto histórico',
       'setAsRoot': 'Establecer como raíz del árbol',
+      'quiz': 'Cuestionario',
+      'readPersonDetails' : 'Leer detalles',
       'atTimeOf': 'En el momento del ',
       
       // Modificateurs de dates GEDCOM
@@ -143,6 +151,8 @@ export const translations = {
       'sources': 'Források',
       'historicalContext': 'Történelmi környezet',
       'setAsRoot': 'Beállítás a fa gyökereként',
+      'quiz': 'Kvíz',
+      'readPersonDetails' : 'Részletek olvasása',
       'atTimeOf': 'abban az időben ',
       
       // Modificateurs de dates GEDCOM
@@ -280,9 +290,6 @@ export const translations = {
     // Supprimer le pays à la fin
     return place.replace(pattern, '');
   }
-
-
-
 
 export function displayPersonDetails(personId) {
     console.log("Affichage des détails de la personne :", personId);
@@ -429,16 +436,34 @@ export function displayPersonDetails(personId) {
         .details-section.sources { background-color: #F3E5F5; font-size: 85%; }
         .details-section.context { background-color: #E0F2F1; }
         .details-section.actions { background-color: #ECEFF1; text-align: center; }
-        .set-root-btn {
-            background-color: #4361ee;
+
+        .action-btn {
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
-            margin-top: 2px;
+            font-size: 10px;
+            margin: 2px 2px 0 0;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+        .btn-blue { background-color: #4361ee; flex: 2.3; }
+        .btn-orange { background-color: #ff8500; flex: 0.4; }
+        .btn-purple { background-color: #8e44ad; }
+
+
+
+        .details-section.actions { 
+            background-color: #ECEFF1; 
+            text-align: center; 
+            display: flex;
+            gap: 3px;
+        }
+
         .sources-link {
             color: #3f51b5;
             text-decoration: underline;
@@ -728,12 +753,27 @@ export function displayPersonDetails(personId) {
     }
 
     // Ajouter un bouton pour définir comme racine de l'arbre
+    // detailsHTML += `
+    //     <div class="details-section actions">
+    //         <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
+    //         ${translate('setAsRoot')}
+    //         </button>
+    //     </div>
+    // `;
+
+    // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
     detailsHTML += `
-        <div class="details-section actions">
-            <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
+    <div class="details-section actions">
+        <button onclick="setAsRootPerson('${personId}')" class="action-btn btn-blue">
             ${translate('setAsRoot')}
-            </button>
-        </div>
+        </button>
+        <button onclick="startQuiz('${personId}')" class="action-btn btn-orange">
+            ${translate('quiz')}
+        </button>
+        <button onclick="readPersonSheet('${personId}')" class="action-btn btn-purple">
+            🗣️${translate('readPersonDetails')}
+        </button>
+    </div>
     `;
 
 
@@ -741,11 +781,15 @@ export function displayPersonDetails(personId) {
     detailsContent.innerHTML = detailsHTML;
     modal.style.display = 'block';
 
-    // Position initiale centrée si pas de position sauvegardée
+
+    // Position initiale vers le haut si pas de position sauvegardée
     if (!state.modalSettings || !state.modalSettings.personDetailsModal) {
         // Définir d'abord les dimensions
-        const modalWidth = Math.min(600, window.innerWidth - 20); // Largeur initiale de 600px maximum
+        const modalWidth = Math.min(600, window.innerWidth - 20);
+        const modalHeight = Math.min(Math.max(500, window.innerHeight * 0.8), window.innerHeight - 60);
+        
         modal.style.width = `${modalWidth}px`;
+        modal.style.height = `${modalHeight}px`;
         modal.style.maxWidth = `${window.innerWidth - 20}px`;
         modal.style.maxHeight = `${window.innerHeight - 50}px`;
         
@@ -753,10 +797,10 @@ export function displayPersonDetails(personId) {
         modal.style.left = `${(window.innerWidth - modalWidth) / 2}px`;
         modal.style.right = 'auto';
         
-        // Centrer verticalement (optionnel)
-        const modalHeight = Math.min(400, window.innerHeight - 50); // Hauteur initiale estimée
-        modal.style.top = `${(window.innerHeight - modalHeight) / 2}px`;
+        // Positionner plus haut dans l'écran
+        modal.style.top = `${Math.max(10, window.innerHeight * 0.05)}px`;
     }
+
     // Rendre la modale déplaçable et resizable
     setTimeout(() => {
         makeModalDraggable();
@@ -772,9 +816,62 @@ export function displayPersonDetails(personId) {
         displayEnhancedLocationMap(personId);
     }, 150);
 }
-   
-   
 
+
+
+
+async function startQuiz(personId)
+{
+    const personData = state.gedcomData.individuals[personId];
+    const person = [];
+    person.id = personData.id;
+    person.name = personData.name;
+    person.sex = personData.sex;
+
+    if (!state.isVoiceSelected && state.isSpeechEnabled2)
+    {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
+        selectVoice();
+        state.isVoiceSelected = true;
+    }
+    showQuizMessage(person);
+}
+window.startQuiz = startQuiz; 
+
+
+async function readPersonSheet(personId) {
+    const personData = state.gedcomData.individuals[personId];
+    const person = [];
+    person.id = personData.id;
+    person.name = personData.name;
+    person.sex = personData.sex;
+
+    if (!state.isVoiceSelected && state.isSpeechEnabled2)
+    {
+        state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
+        if (state.isSpeechInGoodHealth) {
+            // Chrome ou Edge est coopératif
+            console.log("✅ La synthèse vocale est prête et fonctionne correctement.");
+        } else {
+            // Chrome est grognon il faut utiliser une méthode de secours
+            console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
+            window.speechSynthesis.cancel();
+        }
+        selectVoice();
+        state.isVoiceSelected = true;
+    }
+    readPersonDetails(person);  
+}
+window.readPersonSheet = readPersonSheet; 
+   
 // makeModalDraggable pour fonctionner en tactile    
 function makeModalDraggable() {
     const modal = document.getElementById('person-details-modal');
@@ -1120,8 +1217,6 @@ function addResizeHandles(modal) {
 
 }
 
-
-
 //Configuration des événements de redimensionnement pour la souris et le tactile
 function setupResizeEvents(handle, modal, pos) {
     let isResizing = false;
@@ -1305,10 +1400,6 @@ function setupResizeEvents(handle, modal, pos) {
     }
 }
 
-
-
-
-
 // Ajouter cette fonction à la fin du fichier
 function adjustModalOnResize() {
     const modal = document.getElementById('person-details-modal');
@@ -1444,7 +1535,24 @@ export function setAsRootPerson(personId) {
     document.getElementById('person-details-modal').style.display = 'none';
     
     // Redessiner l'arbre avec cette personne comme point de départ
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in setAsRootPerson  ################# ')
+
+    if (state.isRadarEnabled) {
+            // Basculer l'état du tree/radar
+            state.isRadarEnabled = !state.isRadarEnabled;  
+            updateRadarButtonText(); 
+            state.treeModeReal = 'ancestors';
+            state.treeMode = 'ancestors';
+            updateTreeModeSelector(state.treeMode);
+            state.nombre_generation = 4; // Réinitialiser à 4 générations
+            updateGenerationSelector(state.nombre_generation)
+            
+            disableFortuneModeWithLever();
+            // displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
+    }
+
     displayGenealogicTree(personId, true);
+
 }
 
 export function findContextualHistoricalFigures(personId) {
@@ -1511,7 +1619,8 @@ function createEnhancedLocationMap(locations) {
     mapContainer.id = 'multi-location-map';
     
     // Ajuster la hauteur selon la taille d'écran
-    const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
+    // const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
+    const mapHeight = window.innerHeight < 400 ? '180px' : '200px';
     mapContainer.style.height = mapHeight;
     
     mapContainer.style.width = '100%';

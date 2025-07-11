@@ -29,7 +29,8 @@ const RESOURCES_TO_CACHE = [
   './treeViewer1.6.html',
   './offline.html',
   './css/styles.css',
-  './cacheConfig.js', 
+  './cacheConfig.js',
+  './ios-install.html',
 
   // Fichiers JS principaux (seulement les plus critiques)
   './js/libraryLoader.js',
@@ -107,7 +108,7 @@ self.addEventListener('install', (event) => {
       swConsole.log(`📊 Bilan de mise en cache: ${successCount} ajoutés, ${existingCount} existants, ${failedCount} échecs`);
       
       // Vérification spécifique pour arbre.enc et arbreX.enc
-      const verifyFiles = ['arbre.enc', 'arbreX.enc'];
+      const verifyFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc'];
       for (const file of verifyFiles) {
         const response = await cache.match(file);
         if (response) {
@@ -160,7 +161,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && !cacheName.includes('map-tiles')) {
+          if (cacheName !== CACHE_NAME && !cacheName.includes('map-tiles') && !cacheName.includes('app-resources-cache')) {
             swConsole.log(`🗑️ Suppression de l'ancien cache ${cacheName}`);
             return caches.delete(cacheName);
           }
@@ -327,6 +328,11 @@ self.addEventListener('activate', (event) => {
         './js/treeOperations.js',
         './js/treeRenderer.js',
         './js/treeSettingsModal.js',
+        './js/treeWheelControls.js',
+        './js/treeWheelRenderer.js',
+        './js/treeWheelAnimation.js',
+        './js/exportManager.js',
+        './js/exportSettings.js',
         './js/UIutils.js',
         './js/utils.js',
         './js/occupations.js',

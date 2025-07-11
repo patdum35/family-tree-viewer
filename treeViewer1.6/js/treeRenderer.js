@@ -6,18 +6,22 @@ import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
 import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
+import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
 
 let zoom;
 let lastTransform = null;
 
 /**
- * Initialise et dessine l'arbre
+ * Initialise et dessine l'arbre selon le mode sélectionné
  */
 export function drawTree(isZoomRefresh = false, isAnimation = false) {
     if (!state.currentTree) return;
     
-    // Extraire l'arbre réel (ignorer le super-root)
-    let treeToRender = state.currentTree;
+    // Modes éventail
+    if (isWheelMode(state.treeModeReal)) {
+        drawWheelTree(isZoomRefresh, isAnimation);
+        return;
+    }
     
     // Mode both : on crée deux arbres distincts
     if (state.treeModeReal === 'both') {
@@ -26,14 +30,12 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
     }
 
     // Logique existante pour les modes descendants et ascendants
-    const rootHierarchy = d3.hierarchy(treeToRender, node => node.children);   
+    const rootHierarchy = d3.hierarchy(state.currentTree, node => node.children);   
     
     processSiblings(rootHierarchy);
     processSpouses(rootHierarchy);
 
     const svg = setupSVG();
-    
-    
     const mainGroup = createMainGroup(svg);
     const treeLayout = createTreeLayout();
     
@@ -46,7 +48,6 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
         nodesByLevel[node.depth] = nodesByLevel[node.depth] || [];
         nodesByLevel[node.depth].push(node);
     });
-
 
     // Structure pour mémoriser les infos par niveau
     const levelMetrics = {};
@@ -63,42 +64,28 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
             };
 
             levelNodes.forEach(node => {
-                // Garder les positions originales pour la deuxième passe
                 node.originalX = node.x;
             });
         }
     });
-
 
     // Deuxième passe : ajustement des positions
     Object.entries(nodesByLevel).forEach(([depth, levelNodes]) => {
         if (depth > 0) {
             const metrics = levelMetrics[depth];
             let offset = 0;
-            // if (metrics.minPos > 0) { offset = - metrics.minPos -state.boxHeight }
-            // offset = -(metrics.maxPos - metrics.minPos)/2- metrics.minPos; // -state.boxHeight 
-            // levelNodes.forEach(node => {
-            //     // TODO: Utiliser metrics pour ajuster node.x
-            //     // Pour l'instant, on garde le même comportement
-            //     // const deviation = node.originalX - metrics.avgPos;
-            //     // node.x = metrics.avgPos + (deviation * 0.5);
-
-            //     node.x = node.x + offset
-
-            // });
+            // Logique d'ajustement commentée - à développer si nécessaire
         }
     });
 
     drawNodes(mainGroup, layoutResult, isZoomRefresh);
-    
-    // Dessiner les liens selon le mode
     drawLinks(mainGroup, layoutResult);
     
-    if (state.treeModeReal  !== 'descendants' && state.treeModeReal  !== 'directDescendants') {
+    if (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants') {
         adjustLevel0SiblingsPosition(mainGroup);
     }
 
-    if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
+    if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants') {
         drawSpouseLinks(mainGroup, layoutResult);
     } else {
         drawSiblingLinks(mainGroup, layoutResult);
@@ -107,29 +94,64 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
 
     setupZoom(svg, mainGroup);
 
-    // Détecter si nous avons une racine virtuelle masquée, mais ne pas appliquer en mode animation
+    // Gestion des racines virtuelles
     if (!isAnimation) {
-        if (treeToRender.isVirtualRoot && treeToRender.children && treeToRender.children.length > 0) {
-            let rootOffsetX = -state.boxWidth*1.1; // On décale l'affichage vers la gauche pour gagner la place de la virtual root masquée
-            // console.log( "\n\n   VIRTUAL ROOT detected offset = ", rootOffsetX, "  \n\n")
+        if (state.currentTree.isVirtualRoot && state.currentTree.children && state.currentTree.children.length > 0) {
+            let rootOffsetX = -state.boxWidth * 1.1;
             resetViewVirtualRoot(svg, mainGroup, rootOffsetX);
         } 
     }
 
-    
+    // Gestion du fond
     if (state.initialTreeDisplay) {
-        // Premier affichage de l'arbre - appliquer le fond avec délai
-        state.initialTreeDisplay = false; // Marquer que ce n'est plus l'affichage initial
+        state.initialTreeDisplay = false;
         setTimeout(() => {
             setupElegantBackground(svg);
-        }, 100); // délai de 300ms        
+        }, 100);        
     } else {
-        // Ce n'est pas le premier affichage - appliquer le fond immédiatement
         setupElegantBackground(svg);
     }  
-    
 }
+
+/**
+ * Vérifie si le mode est un mode éventail
+ */
+function isWheelMode(mode) {
+    return ['WheelAncestors', 'WheelDescendants'].includes(mode);
+}
+
+/**
+ * Réinitialise la vue selon le mode
+ */
+export function resetTreeView() {
+    if (isWheelMode(state.treeModeReal)) {
+        resetWheelView();
+    } else {
+        resetView();
+    }
+}
+
+/**
+ * Anime la transition entre les modes
+ */
+function animateTreeModeTransition(fromMode, toMode) {
+    const svg = d3.select("#tree-svg");
     
+    // Fade out
+    svg.transition()
+        .duration(300)
+        .style("opacity", 0)
+        .on("end", () => {
+            // Redessiner avec le nouveau mode
+            drawTree(false, true);
+            
+            // Fade in
+            svg.transition()
+                .duration(300)
+                .style("opacity", 1);
+        });
+}
+
 function drawBothModeTree(isZoomRefresh = false) {
     const rootPerson = state.currentTree;
     const descendants = rootPerson.descendants || [];
@@ -283,6 +305,15 @@ function drawBothModeTree(isZoomRefresh = false) {
         resetZoomBoth(mainGroup, svg, -leftmostPositionX + 150, window.innerHeight/2 );
     }
 
+    if (state.initialTreeDisplay) {
+        state.initialTreeDisplay = false;
+        setTimeout(() => {
+            setupElegantBackground(svg);
+        }, 100);        
+    } else {
+        setupElegantBackground(svg);
+    }
+
 }
 
 /**
@@ -300,7 +331,6 @@ export function resetZoomBoth(mainGroup,svg, x, y) {
         .duration(750)
         .call(zoom.transform, newTransform);
 }
-
 
 /**
  * Ajuste la position des siblings de niveau 0 pour les rapprocher de la racine
@@ -408,11 +438,12 @@ function drawLevel0SiblingLinks(mainGroup, rootHierarchy) {
                 .attr("d", `M${siblingX  + (state.boxWidth/2)},${siblingY}
                            H${(siblingX   + fatherX)/2}
                            V${fatherY}
-                           H${fatherX  - state.boxWidth/2}`);
+                           H${fatherX  - state.boxWidth/2}`)
+                .style("stroke", getSiblingLinkColor)
+                .style("stroke-width", getLinkWidth);    
                            
         });
  }
-
 
 /**
  * Configure le SVG initial
@@ -496,8 +527,6 @@ function createTreeLayout() {
     return layout;
 }
 
-
-
 /**
  * Crée le groupe principal pour le contenu
  * @private
@@ -506,8 +535,6 @@ function createMainGroup(svg) {
     return svg.append("g")
         .attr("transform", `translate(${state.boxWidth},${window.innerHeight/2})`);
 }
-
-
 
 /**
  * Dessine les liens entre les nœuds en tenant compte des deux parents généalogiques
@@ -608,10 +635,11 @@ function drawLinks(group, layout) {
                 return "link hidden";
             }
         })
-        .attr("d", createLinkPath);
+        .attr("d", createLinkPath)
+        .style("stroke", getLinkColor)
+        .style("stroke-width", getLinkWidth)
+        .style("fill", "none");
 }
-
-
 
 /**
  * Trouve les parents d'une personne dans les données GEDCOM
@@ -713,7 +741,9 @@ function drawSpouseLinks(group, layout) {
         .data(spouseLinks)
         .join("path")
         .attr("class", "link spouse-link")
-        .attr("d", createLinkPath);
+        .attr("d", createLinkPath)
+        .style("stroke", getLinkColor)    
+        .style("stroke-width", getLinkWidth);
 }
 
 
@@ -862,7 +892,9 @@ function drawSiblingLinks(group, root) {
             if (isNodeHidden(d.source) || isNodeHidden(d.target)) return "";
             
             return createSiblingLinkPath(d);
-        });
+        })
+        .style("stroke", getSiblingLinkColor)
+        .style("stroke-width", getLinkWidth);
 }
 
 
@@ -976,3 +1008,78 @@ function resetViewVirtualRoot(svg, mainGroup, offsetX = 0) {
 // Export des variables et fonctions nécessaires pour d'autres modules
 export const getZoom = () => zoom;
 export const getLastTransform = () => lastTransform;
+
+
+
+
+
+/**
+ * Retourne la couleur selon le style
+ */
+function getLinkColor(d) {
+    const [thickness, color] = state.linkStyle.split('-');
+    
+    switch(color) {
+        case 'dark':
+            return "#333333";
+        case 'light': 
+            return "#CCCCCC";
+        case 'colored':
+            // Différencier selon le type de lien
+            if (!d.source || !d.target) return "#666666";
+            
+            // Liens vers spouses : bleu
+            if (d.target.data && d.target.data.isSpouse) {
+                return "#4169E1"; // Bleu
+            }
+            
+            // Liens vers siblings : orange
+            if (d.target.data && d.target.data.isSibling) {
+                return "#FF8C00"; // Orange
+            }
+            
+            // Liens parents-enfants normaux : vert
+            return "#228B22"; // Vert
+            
+        default:
+            return "#666666";
+    }
+}
+
+/**
+ * Retourne l'épaisseur selon le style
+ */
+function getLinkWidth(d) {
+    const [thickness] = state.linkStyle.split('-');
+    
+    switch(thickness) {
+        case 'thin':
+            return "1px";
+        case 'normal':
+            return "2px"; 
+        case 'thick':
+            return "4px";
+        case 'veryThick':
+            return "6px";
+        default:
+            return "2px";
+    }
+}
+
+/**
+ * Couleur spéciale pour les liens siblings (vert plus ou moins foncé)
+ */
+function getSiblingLinkColor() {
+    const [thickness, color] = state.linkStyle.split('-');
+    
+    switch(color) {
+        case 'dark':
+            return "#2E7D32";  // Vert foncé
+        case 'light': 
+            return "#81C784";  // Vert clair
+        case 'colored':
+            return "#4CAF50";  // Vert original
+        default:
+            return "#4CAF50";  // Vert par défaut
+    }
+}

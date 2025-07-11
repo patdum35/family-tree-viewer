@@ -45,12 +45,12 @@ if ('serviceWorker' in navigator) {
                             registration.active.postMessage({action: 'claimClients'});
                         }
                         
-                        // Écouter les changements d'état
-                        navigator.serviceWorker.addEventListener('controllerchange', function() {
-                            console.log('ServiceWorker a pris le contrôle, rechargement de la page');
-                            // Recharger la page pour s'assurer que le SW la contrôle
-                            window.location.reload();
-                        });
+                        // // Écouter les changements d'état
+                        // navigator.serviceWorker.addEventListener('controllerchange', function() {
+                        //     console.log('ServiceWorker a pris le contrôle, rechargement de la page');
+                        //     // Recharger la page pour s'assurer que le SW la contrôle
+                        //     window.location.reload();
+                        // });
                     }
                 } else {
                     console.log('ServiceWorker contrôle déjà cette page');
@@ -385,3 +385,188 @@ window.clearAppCache = async function() {
         return false;
     }
 };
+
+
+
+// ===== MODULE iOS INSTALLATION =====
+// Chargement dynamique et gestion de l'installation sur iOS
+
+// Détection des capacités de l'appareil
+const iOSCapabilities = {
+    isIOS: () => /iPad|iPhone|iPod/.test(navigator.userAgent),
+    isSafari: () => /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+    isStandalone: () => window.navigator.standalone === true || 
+                       window.matchMedia('(display-mode: standalone)').matches,
+    shouldShowGuide: () => {
+        const lastDismissed = localStorage.getItem('ios-install-dismissed');
+        const daysSinceRefusal = lastDismissed ? 
+            (Date.now() - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24) : 999;
+        
+        return iOSCapabilities.isIOS() && 
+               !iOSCapabilities.isStandalone() && 
+               daysSinceRefusal > 7; // Réafficher après 7 jours
+    }
+};
+
+// Chargeur de composant iOS
+class IOSInstallationManager {
+    constructor() {
+        this.componentLoaded = false;
+        this.componentUrl = './ios-install.html';
+    }
+
+    async loadComponent() {
+        if (this.componentLoaded) {
+            console.log('Composant iOS déjà chargé');
+            return true;
+        }
+
+        try {
+            console.log('🔄 Chargement du composant iOS...');
+            
+            const response = await fetch(this.componentUrl, {
+                cache: 'no-cache' // S'assurer d'avoir la dernière version
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const htmlContent = await response.text();
+            
+            // Parser le contenu HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            
+            // Extraire et injecter les styles
+            const styles = doc.querySelectorAll('style');
+            styles.forEach(style => {
+                document.head.appendChild(style.cloneNode(true));
+            });
+            
+            // Extraire et injecter les éléments du body
+            const banner = doc.querySelector('#ios-install-banner');
+            const modal = doc.querySelector('#ios-instructions-modal');
+            
+            if (banner) {
+                document.body.appendChild(banner.cloneNode(true));
+                console.log('✅ Banner iOS injecté');
+            }
+            
+            if (modal) {
+                document.body.appendChild(modal.cloneNode(true));
+                console.log('✅ Modal iOS injectée');
+            }
+            
+            // Extraire et exécuter les scripts
+            const scripts = doc.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                if (script.src) {
+                    newScript.src = script.src;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                document.head.appendChild(newScript);
+            });
+            
+            // Appliquer les traductions du système i18n principal
+            setTimeout(() => {
+                if (window.i18n && typeof window.i18n.updateUI === 'function') {
+                    console.log('Applying i18n translations to iOS component...');
+                    window.i18n.updateUI();
+                    console.log('Traductions iOS appliquées');
+                }
+                
+                // Forcer l'application sur les éléments iOS spécifiquement
+                document.querySelectorAll('#ios-install-banner [data-text-key], #ios-instructions-modal [data-text-key]').forEach(element => {
+                    const key = element.getAttribute('data-text-key');
+                    const translation = window.i18n ? window.i18n.getText(key) : element.textContent;
+                    
+                    if (element.tagName === 'INPUT') {
+                        element.placeholder = translation;
+                    } else if (key === 'iosInstallInstruction' || key.startsWith('iosStep')) {
+                        element.innerHTML = translation;
+                    } else {
+                        element.textContent = translation;
+                    }
+                });
+            }, 200);
+            
+            this.componentLoaded = true;
+            console.log('🎉 Composant iOS chargé avec succès');
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement du composant iOS:', error);
+            return false;
+        }
+    }
+
+    showInstallationGuide() {
+        const banner = document.getElementById('ios-install-banner');
+        if (banner) {
+            banner.classList.add('show');
+            console.log('📱 Guide d\'installation iOS affiché');
+            
+            // Masquer automatiquement après 12 secondes
+            setTimeout(() => {
+                if (banner.classList.contains('show')) {
+                    banner.classList.remove('show');
+                    console.log('⏰ Banner iOS masqué automatiquement');
+                }
+            }, 12000);
+        } else {
+            console.warn('⚠️ Banner iOS non trouvé dans le DOM');
+        }
+    }
+
+    async initialize() {
+        // Vérifier si on doit afficher le guide
+        if (!iOSCapabilities.shouldShowGuide()) {
+            console.log('📱 iOS non détecté,  guide non nécessaire');
+            return false;
+        }
+
+        console.log('🍎 iOS détecté - Initialisation du guide d\'installation');
+        
+        // Charger le composant
+        const loaded = await this.loadComponent();
+        
+        if (loaded) {
+            // Afficher le guide après un délai
+            setTimeout(() => {
+                this.showInstallationGuide();
+            }, 3000); // 3 secondes après le chargement
+            
+            return true;
+        } else {
+            console.error('❌ Impossible de charger le composant iOS');
+            return false;
+        }
+    }
+}
+
+// Instance globale du gestionnaire iOS
+const iosManager = new IOSInstallationManager();
+
+// Fonction d'initialisation à appeler depuis votre code existant
+window.initializeIOSInstallation = async function() {
+    return await iosManager.initialize();
+};
+
+// Fonctions utilitaires pour le debugging
+window.iOSDebug = {
+    capabilities: iOSCapabilities,
+    manager: iosManager,
+    forceShow: () => iosManager.showInstallationGuide(),
+    reload: async () => {
+        iosManager.componentLoaded = false;
+        return await iosManager.initialize();
+    }
+};
+
+// Auto-initialisation si iOS détecté
+if (iOSCapabilities.isIOS()) {
+    console.log('🍎 Appareil iOS détecté - Module d\'installation prêt');
+}

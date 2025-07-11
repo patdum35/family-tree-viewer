@@ -1,6 +1,7 @@
 
-import { state } from './main.js';
+import { state, updateRadarButtonText } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
+
 
   // Variables pour garder une référence aux éléments
   let hamburgerMenu, sideMenu, menuOverlay;
@@ -25,7 +26,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animation et audio',
         'section_root': 'Racine',
         'section_modes': 'Modes',
-        'section_namecloud': 'Nuage de mots',
+        'section_namecloud': 'Nuage / radar / arbre',
+        'section_radar': 'radar',
         'section_settings': 'Fonds d\'écran',
         'section_search': 'Recherche dans l\'arbre',
         'zoomIn': 'Zoom avant',
@@ -60,7 +62,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animation and audio',
         'section_root': 'Root',
         'section_modes': 'Modes',
-        'section_namecloud': 'Word cloud',
+        'section_namecloud': 'Cloud / radar / tree',
+        'section_radar': 'radar chart',
         'section_settings': 'Backgrounds',
         'section_search': 'Tree search',
         'zoomIn': 'Zoom in',
@@ -93,7 +96,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animación y audio',
         'section_root': 'Raíz',
         'section_modes': 'Modos',
-        'section_namecloud': 'Nube de palabras',
+        'section_namecloud': 'Nube / radar / árbol',
+        'section_radar': 'gráfico de radar',
         'section_settings': 'Fondos de pantalla',
         'section_search': 'Búsqueda en el árbol',
         'zoomIn': 'Acercar',
@@ -126,7 +130,8 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
         'section_audio': 'Animáció és hang',
         'section_root': 'Gyökér',
         'section_modes': 'Módok',
-        'section_namecloud': 'Szófelhő',
+        'section_namecloud': 'Szófelhő / radar / fa',
+        'section_radar': 'radardiagram',
         'section_settings': 'Hátterek',
         'section_search': 'Fa keresés',
         'zoomIn': 'Nagyítás',
@@ -1090,20 +1095,42 @@ function createSection(title, index = 0) {
   }
 
 
+
+
   // Créer la section Name Cloud
   function createNameCloudSection() {
     const height = window.innerHeight;
     // const section = createSection('Nuage de mots', 0);
     const section = createSection(getMenuTranslation('section_namecloud'), 0);
     
+
+    function enableRadarAndDisplay() {
+        state.isRadarEnabled = true;
+        updateRadarButtonText();
+        displayGenealogicTree(null, false, false, false, 'WheelAncestors');
+    }
+    window.enableRadarAndDisplay = enableRadarAndDisplay;
+
     const buttons = [
       { 
         id: 'menu-nameCloudBtn',
-        onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })', 
+        onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
         title: getMenuTranslation('section_namecloud'), //'Nuage de noms', 
-        text: '💖🔠💗' // '👥'
+        text: '💖🔠💗' 
+      },
+      { 
+        id: 'menu-nameTreeRadarBtn',
+        // onclick: 'enableRadarAndDisplay()',
+        onclick: 'toggleTreeRadar()',
+        title: getMenuTranslation('section_radar'), //'Nuage de noms', 
+        text: (window.innerHeight < 800) ? '  -  🕸️🎯' : '🕸️🎯'
       }
+
     ];
+
+
+
+
     
     buttons.forEach(buttonData => {
       const button = document.createElement('button');
@@ -1128,8 +1155,7 @@ function createSection(title, index = 0) {
       if (height < 400) {
         // Créer un conteneur pour le label + bouton
         const container = document.createElement('span');
-        // container.textContent = "Nuage de mots";
-        container.textContent = getMenuTranslation('nameCloudLabel');
+
         container.style.fontSize = '13px';
         container.appendChild(button);
         section.content.appendChild(container);
@@ -1141,6 +1167,88 @@ function createSection(title, index = 0) {
     
     sideMenu.appendChild(section.container);
   }
+
+
+
+
+  // // Créer la section Name Cloud
+  // function createNameCloudSection() {
+  //     const height = window.innerHeight;
+  //     const section = createSection(getMenuTranslation('section_namecloud'), 0);
+      
+  //     function enableRadarAndDisplay() {
+  //         state.isRadarEnabled = true;
+  //         updateRadarButtonText();
+  //         displayGenealogicTree(null, false, false, false, 'WheelAncestors');
+  //     }
+  //     window.enableRadarAndDisplay = enableRadarAndDisplay;
+
+  //     const buttons = [
+  //         { 
+  //             id: 'menu-nameCloudBtn',
+  //             onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
+  //             title: getMenuTranslation('section_namecloud'),
+  //             text: '💖🔠💗' 
+  //         },
+  //         { 
+  //             id: 'menu-nameTreeRadarBtn',
+  //             onclick: 'toggleTreeRadar()',
+  //             title: getMenuTranslation('section_radar'),
+  //             text: '🕸️🎯' 
+  //         }
+  //     ];
+
+  //     // INVERSER L'ORDRE POUR LES PETITS ÉCRANS
+  //     const orderedButtons = height < 400 ? buttons.reverse() : buttons;
+      
+  //     orderedButtons.forEach((buttonData, index) => {
+  //         const button = document.createElement('button');
+  //         button.setAttribute('onclick', buttonData.onclick);
+  //         if (buttonData.id) button.id = buttonData.id;
+  //         button.title = buttonData.title;
+          
+  //         const span = document.createElement('span');
+  //         span.textContent = buttonData.text;
+          
+  //         // Adapter uniquement pour les petits écrans
+  //         if (height < 400) {
+  //             span.style.fontSize = '16px';
+  //             button.style.padding = '1px';
+  //         } else if (height < 800) {
+  //             span.style.fontSize = '16px';
+  //             button.style.padding = '2px';
+  //         }
+          
+  //         button.appendChild(span);
+          
+  //         if (height < 400) {
+  //             // AJOUTER LE SÉPARATEUR ENTRE LES BOUTONS
+  //             if (index > 0) {
+  //                 const separator = document.createElement('span');
+  //                 separator.textContent = ' - ';
+  //                 separator.style.fontSize = '13px';
+  //                 separator.style.margin = '0 5px';
+  //                 section.content.appendChild(separator);
+  //             }
+              
+  //             // Créer un conteneur pour le label + bouton
+  //             const container = document.createElement('span');
+  //             container.textContent = getMenuTranslation('nameCloudLabel');
+  //             container.style.fontSize = '13px';
+  //             container.appendChild(button);
+  //             section.content.appendChild(container);
+  //         } else {
+  //             section.content.appendChild(button);
+  //         }
+  //     });
+
+
+
+
+
+      
+  //     sideMenu.appendChild(section.container);
+  // }
 
   // Créer la section Paramètres
   function createSettingsSection() {
@@ -1227,6 +1335,8 @@ function createDemoSelector() {
     // Adapter les textes en fonction de l'état
     if (state.treeOwner === 2) {
       typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
+    } else if (state.treeOwner === 3) {
+      typeOptionsExpanded = ['Capet', 'Capet'];
     } else {
       typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
       typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
@@ -2386,6 +2496,47 @@ function syncCustomSelectors() {
     });
     
     console.log("Masquage forcé appliqué au bouton hamburger");
+  }
+
+  /**
+   * Fonction pour décaler le bouton hamburger de 20px vers le bas
+   * Approche minimaliste pour éviter les conflits
+   */
+  export function offsetHamburgerButtonDown() {
+    console.log("Tentative de décalage du bouton hamburger vers le bas");
+    
+    // Récupérer l'élément bouton
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    
+    if (!hamburgerButton) {
+      console.error("Le bouton hamburger n'existe pas dans le DOM");
+      return;
+    }
+    
+    // Appliquer UNIQUEMENT le décalage, sans toucher aux autres propriétés
+    hamburgerButton.style.setProperty('margin-top', '50px', 'important');
+    
+    console.log("Décalage de 20px vers le bas appliqué au bouton hamburger");
+  }
+
+  /**
+   * Fonction pour remettre le bouton hamburger à sa position initiale
+   */
+  export function resetHamburgerButtonPosition() {
+    console.log("Remise à zéro de la position du bouton hamburger");
+    
+    // Récupérer l'élément bouton
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    
+    if (!hamburgerButton) {
+      console.error("Le bouton hamburger n'existe pas dans le DOM");
+      return;
+    }
+    
+    // Remettre le margin-top à zéro
+    hamburgerButton.style.setProperty('margin-top', '0px', 'important');
+    
+    console.log("Position initiale restaurée pour le bouton hamburger");
   }
 
   /**

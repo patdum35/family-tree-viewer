@@ -190,10 +190,2435 @@ export function updateBackgroundImage(year) {
     
 }
 
-// Fond avec branches d'arbre élégantes - COULEURS RENFORCÉES
-function setupTreeBranchesBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+
+// // Fond avec branches d'arbre élégantes - ADAPTÉ POUR EXPORT PNG
+// function setupTreeBranchesBackground(svg, customDimensions = null, forExport = false) {
+//     // Utiliser les dimensions personnalisées ou celles de l'écran
+//     const width = customDimensions ? customDimensions.width : window.innerWidth;
+//     const height = customDimensions ? customDimensions.height : window.innerHeight;
+//     const offsetX = customDimensions ? customDimensions.minX : 0;
+//     const offsetY = customDimensions ? customDimensions.minY : 0;
+ 
+    
+//     // Calculer la densité adaptative pour l'export
+//     let densityMultiplier = 1;
+//     let sizeMultiplier = 1;
+
+//     if (forExport) {
+//         // Référence : écran 1920x1080 = zone de base
+//         const baseArea = 1920 * 1080;
+//         const currentArea = width * height;
+//         const areaRatio = currentArea / baseArea;
+        
+//         // Augmenter la densité proportionnellement à la surface
+//         densityMultiplier = Math.sqrt(areaRatio) * 0.8; // 0.8 pour éviter la surcharge
+        
+//         // Augmenter légèrement la taille des éléments pour la lisibilité
+//         sizeMultiplier = Math.min(3, Math.max(1.5, areaRatio * 0.1));
+        
+//         console.log(`📊 Export - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+//     }
+
+//     console.log(`🎨 Setup tree branches background: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
+//     const defs = svg.append("defs");
+    
+//     // Nettoyer tout fond existant
+//     svg.selectAll(".background-element").remove();
+    
+//     // Créer un groupe pour le fond
+//     const bgGroup = svg.append("g")
+//         .attr("class", "background-element")
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Récupérer les paramètres depuis le localStorage
+//     const settings = {
+//         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
+//         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
+//         animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true', // Pas d'animation en export
+//         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
+//         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
+//     };
+    
+//     // Appliquer l'opacité globale au groupe
+//     bgGroup.style("opacity", settings.opacity);
+    
+//     // Créer un gradient subtil pour le fond
+//     const gradientId = `branches-bg-gradient-${Date.now()}`;
+//     const bgGradient = defs.append("linearGradient")
+//         .attr("id", gradientId)
+//         .attr("x1", "0%")
+//         .attr("y1", "0%")
+//         .attr("x2", "100%")
+//         .attr("y2", "100%");
+    
+//     // Utiliser la couleur personnalisée pour le gradient
+//     const baseColor = d3.rgb(settings.customColor);
+//     const lighterColor = d3.rgb(baseColor).brighter(1.5);
+//     const darkerColor = d3.rgb(baseColor).darker(0.2);
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "0%")
+//         .attr("stop-color", lighterColor.toString());
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "100%")
+//         .attr("stop-color", darkerColor.toString());
+    
+//     // Rectangle de fond avec offset
+//     bgGroup.append("rect")
+//         .attr("x", offsetX)
+//         .attr("y", offsetY)
+//         .attr("width", width)
+//         .attr("height", height)
+//         .attr("fill", `url(#${gradientId})`)
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Définition des couleurs pour les branches et les feuilles
+//     const branchColor = d3.rgb(settings.customColor).darker(0.5);
+    
+//     // Les feuilles auront principalement des teintes vertes, indépendamment de la couleur personnalisée
+//     const leafColors = [
+//         d3.rgb(50, 150, 50), // Vert vif
+//         d3.rgb(70, 130, 40), // Vert olive
+//         d3.rgb(100, 160, 60), // Vert clair
+//         d3.rgb(30, 110, 30), // Vert foncé
+//         d3.rgb(120, 180, 80) // Vert-jaune
+//     ];
+    
+//     // Fonction pour dessiner des branches
+//     function drawBranch(startX, startY, length, angle, width, depth, parentGroup) {
+//         if (depth <= 0 || length < 5) return;
+        
+//         // Utiliser le groupe parent si fourni, sinon utiliser le groupe principal
+//         const branchGroup = parentGroup || bgGroup.append("g");
+        
+//         // Ajuster la densité des branches selon le paramètre de détail
+//         if (!parentGroup && Math.random() > settings.patternVisibility && depth < 4) return;
+        
+//         // Calculer le point final avec une légère variation pour plus de naturel
+//         const angleVariation = (Math.random() * 0.1 - 0.05);
+//         const finalAngle = angle + angleVariation;
+//         const endX = startX + Math.cos(finalAngle) * length;
+//         const endY = startY + Math.sin(finalAngle) * length;
+        
+//         // Couleur de branche avec variation naturelle
+//         const branchRgb = d3.rgb(branchColor);
+//         branchRgb.opacity = 0.15 + (depth * 0.02);
+        
+//         // Dessiner la branche
+//         const branch = branchGroup.append("line")
+//             .attr("class", "background-branch") 
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", branchRgb.toString())
+//             .attr("stroke-width", width * settings.patternVisibility)
+//             .attr("stroke-linecap", "round")
+//             .attr("stroke-linejoin", "round");
+        
+//         // Ajouter des feuilles avec plus de probabilité aux extrémités
+//         if (Math.random() < 0.4 * settings.patternVisibility && depth < 5) {
+//             drawLeaf(branchGroup, endX, endY, length * 0.6, finalAngle, depth);
+//         }
+        
+//         // Animation si activée et si c'est une branche principale (pas de parent)
+//         if (settings.animation && !parentGroup && depth > 3) {
+//             // Uniquement animer les branches principales pour éviter les déconnexions
+//             branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+            
+//             const duration = (7 + Math.random() * 5) / settings.animationSpeed;
+//             const delay = Math.random() * 3;
+            
+//             branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+        
+//         // Paramètres pour les sous-branches
+//         const newLength = length * (0.65 + Math.random() * 0.1);
+//         const newWidth = width * 0.7;
+        
+//         // Angle de divergence pour les sous-branches
+//         const divergence = Math.PI / (4 + Math.random() * 4);
+        
+//         // Récursion pour les branches enfants - toujours dans le même groupe pour garder les connexions
+//         drawBranch(endX, endY, newLength, finalAngle + divergence, newWidth, depth - 1, branchGroup);
+//         drawBranch(endX, endY, newLength * 0.8, finalAngle - divergence * 1.2, newWidth * 0.8, depth - 1, branchGroup);
+        
+//         // Occasionnellement ajouter une branche centrale pour une meilleure continuité
+//         if (Math.random() < 0.2 * settings.patternVisibility && depth > 2) {
+//             drawBranch(endX, endY, newLength * 0.9, finalAngle + angleVariation, newWidth * 0.9, depth - 1, branchGroup);
+//         }
+        
+//         // Occasionnellement ajouter une branche latérale
+//         if (Math.random() < 0.3 * settings.patternVisibility && depth > 2) {
+//             const thirdAngle = finalAngle + (Math.random() < 0.5 ? 0.8 : -0.8) * divergence;
+//             drawBranch(endX, endY, newLength * 0.7, thirdAngle, newWidth * 0.7, depth - 2, branchGroup);
+//         }
+        
+//         // Ajouter des branches de connexion aux jonctions pour éviter les "sauts" visuels
+//         if (depth > 1 && Math.random() < 0.3) {
+//             const junctionX = startX + Math.cos(finalAngle) * (length * 0.4);
+//             const junctionY = startY + Math.sin(finalAngle) * (length * 0.4);
+            
+//             // Petite branche de connexion
+//             const connectAngle = finalAngle + Math.PI * (Math.random() * 0.5 + 0.5);
+//             const connectLength = length * (0.2 + Math.random() * 0.2);
+            
+//             drawBranch(junctionX, junctionY, connectLength, connectAngle, width * 0.6, 2, branchGroup);
+//         }
+//     }
+        
+//     // Fonction améliorée pour dessiner des feuilles plus vertes et qui tombent
+//     function drawLeaf(parentGroup, x, y, size, angle, depth) {
+//         // Taille de la feuille ajustée selon le niveau de détail
+//         const leafSize = size * (0.4 + Math.random() * 0.3) * settings.patternVisibility;
+        
+//         // Choisir une couleur de feuille verte aléatoire
+//         const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+//         leafColor.opacity = 0.15 + (Math.random() * 0.1);
+        
+//         // Angle légèrement varié pour un aspect plus naturel
+//         const leafAngle = angle + (Math.random() - 0.5) * Math.PI / 2;
+        
+//         // Créer un groupe pour la feuille
+//         const leaf = parentGroup.append("path")
+//             .attr("class", "background-leaf")
+//             .attr("d", `M ${x} ${y} 
+//                     Q ${x + Math.cos(leafAngle) * leafSize * 0.5} ${y + Math.sin(leafAngle) * leafSize * 0.5}, 
+//                       ${x + Math.cos(leafAngle) * leafSize} ${y + Math.sin(leafAngle) * leafSize}
+//                     Q ${x + Math.cos(leafAngle + 0.5) * leafSize * 0.7} ${y + Math.sin(leafAngle + 0.5) * leafSize * 0.7},
+//                       ${x} ${y}`)
+//             .attr("fill", leafColor.toString())
+//             .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+//             .attr("stroke-width", 0.5);
+        
+//         // Ajouter animation de chute si activée
+//         if (settings.animation) {
+//             // Animer soit la chute, soit un mouvement d'oscillation
+//             if (Math.random() < 0.3) {
+//                 // Animation de feuille qui tombe
+//                 const fallDuration = (8 + Math.random() * 7) / settings.animationSpeed;
+//                 const fallDelay = Math.random() * 5;
+//                 const fallDistance = 100 + Math.random() * 200;
+//                 const swayAmount = 50 + Math.random() * 80;
+                
+//                 leaf.style("animation", `leafFall ${fallDuration}s infinite ease-in-out ${fallDelay}s`);
+//                 leaf.style("--fall-distance", `${fallDistance}px`);
+//                 leaf.style("--sway-amount", `${swayAmount}px`);
+//             } else {
+//                 // Animation d'oscillation sur place
+//                 const swayDuration = (5 + Math.random() * 4) / settings.animationSpeed;
+//                 const swayDelay = Math.random() * 3;
+                
+//                 leaf.style("transform-origin", `${x}px ${y}px`);
+//                 leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${swayDelay}s`);
+//             }
+//         }
+//     }
+    
+//     // Créer des feuilles qui tombent supplémentaires (indépendantes des branches)
+//     function createFallingLeaves() {
+//         // const numLeaves = Math.floor(20 * settings.patternVisibility);
+//         const numLeaves = Math.floor(20 * settings.patternVisibility * densityMultiplier);
+
+        
+//         for (let i = 0; i < numLeaves; i++) {
+//             const x = offsetX + Math.random() * width;
+//             const y = offsetY + Math.random() * height * 0.7; // Commencer dans la partie supérieure
+//             // const size = 15 + Math.random() * 25;
+//             const size = (15 + Math.random() * 25) * sizeMultiplier;
+//             const angle = Math.random() * Math.PI * 2;
+            
+//             // Choisir une couleur verte aléatoire
+//             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+//             leafColor.opacity = 0.15 + (Math.random() * 0.1);
+            
+//             // Créer la feuille
+//             const leaf = bgGroup.append("path")
+//                 .attr("class", "background-leaf background-falling-leaf") 
+//                 .attr("d", `M ${x} ${y} 
+//                         Q ${x + Math.cos(angle) * size * 0.5} ${y + Math.sin(angle) * size * 0.5}, 
+//                           ${x + Math.cos(angle) * size} ${y + Math.sin(angle) * size}
+//                         Q ${x + Math.cos(angle + 0.5) * size * 0.7} ${y + Math.sin(angle + 0.5) * size * 0.7},
+//                           ${x} ${y}`)
+//                 .attr("fill", leafColor.toString())
+//                 .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+//                 .attr("stroke-width", 0.5);
+            
+//             // Ajouter l'animation de chute si activée
+//             if (settings.animation) {
+//                 const fallDuration = (10 + Math.random() * 15) / settings.animationSpeed;
+//                 const fallDelay = Math.random() * 10;
+//                 const fallDistance = height - y + 100;
+//                 const swayAmount = 100 + Math.random() * 150;
+                
+//                 leaf.style("animation", `leafFall ${fallDuration}s infinite ease-in-out ${fallDelay}s`);
+//                 leaf.style("--fall-distance", `${fallDistance}px`);
+//                 leaf.style("--sway-amount", `${swayAmount}px`);
+//             }
+//         }
+//     }
+    
+//     // Créer une définition CSS pour les animations (seulement si pas en export)
+//     if (!forExport && !document.getElementById('branch-animations-css')) {
+//         const styleElement = document.createElement('style');
+//         styleElement.id = 'branch-animations-css';
+//         styleElement.textContent = `
+//             @keyframes branchSway {
+//                 0% { transform: rotate(0deg); }
+//                 100% { transform: rotate(3deg); }
+//             }
+            
+//             @keyframes leafSway {
+//                 0% { transform: rotate(-5deg); }
+//                 100% { transform: rotate(5deg); }
+//             }
+            
+//             @keyframes leafFall {
+//                 0% {
+//                     transform: translate(0, 0) rotate(0deg);
+//                 }
+//                 33% {
+//                     transform: translate(calc(var(--sway-amount) * 0.3), calc(var(--fall-distance) * 0.33)) rotate(120deg);
+//                 }
+//                 66% {
+//                     transform: translate(calc(var(--sway-amount) * -0.3), calc(var(--fall-distance) * 0.66)) rotate(240deg);
+//                 }
+//                 100% {
+//                     transform: translate(calc(var(--sway-amount) * 0.1), calc(var(--fall-distance))) rotate(360deg);
+//                 }
+//             }
+//         `;
+//         document.head.appendChild(styleElement);
+//     }
+    
+//     // Ajuster la densité des branches selon le paramètre de détail
+//     // const branchCount = Math.ceil(6 * settings.patternVisibility);
+
+//     // Ajuster la densité des branches selon le paramètre de détail ET l'export
+//     const baseBranchCount = Math.ceil(6 * settings.patternVisibility);
+//     const branchCount = Math.ceil(baseBranchCount * densityMultiplier);
+
+//     console.log(`🌲 Nombre de systèmes de branches: ${branchCount} (base: ${baseBranchCount})`);
+    
+//     // Dessiner plusieurs systèmes de branches avec offset
+//     // drawBranch(offsetX, offsetY + height, height * 0.5, -Math.PI/4, 5, 6);
+//     // drawBranch(offsetX, offsetY + height, height * 0.4, -Math.PI/3, 4, 6);
+    
+//     // if (branchCount > 2) {
+//     //     drawBranch(offsetX + width, offsetY + height, height * 0.5, -Math.PI*3/4, 5, 6);
+//     //     drawBranch(offsetX + width, offsetY + height, height * 0.4, -Math.PI*2/3, 4, 6);
+//     // }
+
+//     // Remplacer tous les drawBranch par des versions avec sizeMultiplier :
+//     // Dessiner plusieurs systèmes de branches avec offset
+//     drawBranch(offsetX, offsetY + height, height * 0.5, -Math.PI/4, 5 * sizeMultiplier, 6);
+//     drawBranch(offsetX, offsetY + height, height * 0.4, -Math.PI/3, 4 * sizeMultiplier, 6);
+
+//     if (branchCount > 2) {
+//         drawBranch(offsetX + width, offsetY + height, height * 0.5, -Math.PI*3/4, 5 * sizeMultiplier, 6);
+//         drawBranch(offsetX + width, offsetY + height, height * 0.4, -Math.PI*2/3, 4 * sizeMultiplier, 6);
+//     }
+    
+//     if (branchCount > 4) {
+//         drawBranch(offsetX + width * 0.3, offsetY + height, height * 0.4, -Math.PI/2, 4 * sizeMultiplier, 5);
+//         drawBranch(offsetX + width * 0.7, offsetY + height, height * 0.4, -Math.PI/2, 4 * sizeMultiplier, 5);
+//     }
+    
+//     if (branchCount > 6) {
+//         drawBranch(offsetX, offsetY + height * 0.3, width * 0.3, 0, 3 * sizeMultiplier, 5);
+//         drawBranch(offsetX, offsetY + height * 0.7, width * 0.3, -Math.PI/6, 3 * sizeMultiplier, 5);
+//     }
+    
+//     if (branchCount > 8) {
+//         drawBranch(offsetX + width, offsetY + height * 0.3, width * 0.3, Math.PI, 3 * sizeMultiplier, 5);
+//         drawBranch(offsetX + width, offsetY + height * 0.7, width * 0.3, Math.PI + Math.PI/6, 3 * sizeMultiplier, 5);
+//     }
+
+//     // Et ajouter plus de systèmes pour l'export :
+//     if (branchCount > 10) {
+//         // Branches supplémentaires pour remplir l'espace en export
+//         for (let i = 0; i < Math.floor(branchCount / 10); i++) {
+//             const randomX = offsetX + Math.random() * width;
+//             const randomY = offsetY + height * (0.5 + Math.random() * 0.5);
+//             const randomAngle = -Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//             drawBranch(randomX, randomY, height * (0.3 + Math.random() * 0.2), randomAngle, 3 * sizeMultiplier, 5);
+//         }
+//     }
+    
+//     // Ajouter des feuilles qui tombent (indépendantes des branches)
+//     createFallingLeaves();
+    
+//     // Appliquer un léger flou pour adoucir l'ensemble
+//     const filter = defs.append("filter")
+//         .attr("id", "branches-blur")
+//         .attr("x", "-10%")
+//         .attr("y", "-10%")
+//         .attr("width", "120%")
+//         .attr("height", "120%");
+    
+//     filter.append("feGaussianBlur")
+//         .attr("in", "SourceGraphic")
+//         .attr("stdDeviation", 0.5 / settings.patternVisibility);
+    
+//     bgGroup.attr("filter", "url(#branches-blur)");
+// }
+
+
+
+
+
+
+
+
+/* */
+
+
+
+
+
+
+// Plutôt BIEN :  Fond avec branches logiques - VERSION CORRIGÉE
+// function setupTreeBranchesBackground(svg, customDimensions = null, forExport = false) {
+
+//     /**
+//      * Branches LONGUES qui traversent l'image pour couvrir le centre
+//      */
+//     function drawLongCanopyBranch(group, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport) {
+//         // Longueur garantie + extension aléatoire
+//         const mainBranchLength = minLength + Math.random() * 200 * sizeMultiplier;
+//         const mainBranchWidth = (3 + Math.random() * 3) * sizeMultiplier;
+        
+//         // BRANCHE PRINCIPALE LONGUE
+//         const endX = startX + Math.cos(direction) * mainBranchLength;
+//         const endY = startY + Math.sin(direction) * mainBranchLength;
+        
+//         // Dessiner branche principale
+//         group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", "rgba(139, 115, 85, 0.6)")
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // PLUS de petites branches sur toute la longueur
+//         const nombrePetitesBranches = 12 + Math.floor(Math.random() * 16); // 12-27 branches
+        
+//         for (let i = 0; i < nombrePetitesBranches; i++) {
+//             // Répartition sur TOUTE la longueur (10% à 90%)
+//             const position = 0.1 + (i / nombrePetitesBranches) * 0.8;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction perpendiculaire avec variation
+//             const branchDirection = direction + (Math.random() < 0.5 ? 1 : -1) * (Math.PI/2 + (Math.random() - 0.5) * Math.PI/4);
+//             const branchLength = (50 + Math.random() * 100) * sizeMultiplier;
+//             const branchWidth = (1.5 + Math.random() * 1.5) * sizeMultiplier;
+            
+//             // Bout de la petite branche
+//             const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner petite branche
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", smallEndX)
+//                 .attr("y2", smallEndY)
+//                 .attr("stroke", "rgba(89, 125, 65, 0.7)")
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // PLUS de feuilles par branche
+//             const nombreFeuilles = 4 + Math.floor(Math.random() * 6); // 4-9 feuilles
+            
+//             for (let j = 0; j < nombreFeuilles; j++) {
+//                 const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/2;
+//                 const leafSize = (12 + Math.random() * 25) * sizeMultiplier;
+//                 const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+//                 const leafX = smallEndX + (Math.random() - 0.5) * 20;
+//                 const leafY = smallEndY + (Math.random() - 0.5) * 20;
+                
+//                 drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//             }
+//         }
+        
+//         // Feuilles au bout de la branche principale
+//         const endLeaves = 6 + Math.floor(Math.random() * 10);
+//         for (let k = 0; k < endLeaves; k++) {
+//             const leafAngle = direction + (Math.random() - 0.5) * Math.PI/2;
+//             const leafSize = (15 + Math.random() * 30) * sizeMultiplier;
+//             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            
+//             const leafX = endX + (Math.random() - 0.5) * 30;
+//             const leafY = endY + (Math.random() - 0.5) * 30;
+            
+//             drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//         }
+//     }
+
+//     /**
+//      * Dessine une feuille de canopée
+//      */
+//     function drawCanopyLeaf(group, x, y, size, angle, leafColor, settings, forExport) {
+//         const angleRad = angle;
+        
+//         // Forme de feuille naturelle
+//         const leaf = group.append("path")
+//             .attr("class", "background-leaf")
+//             .attr("d", `M ${x} ${y} 
+//                     Q ${x + Math.cos(angleRad) * size * 0.5} ${y + Math.sin(angleRad) * size * 0.5}, 
+//                         ${x + Math.cos(angleRad) * size} ${y + Math.sin(angleRad) * size}
+//                     Q ${x + Math.cos(angleRad + 0.5) * size * 0.7} ${y + Math.sin(angleRad + 0.5) * size * 0.7},
+//                         ${x} ${y}`)
+//             .attr("fill", leafColor.toString())
+//             .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+//             .attr("stroke-width", "0.5");
+        
+//         // Animation si activée
+//         if (settings.animation && !forExport && Math.random() < 0.3) {
+//             const swayDuration = (4 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 2;
+            
+//             leaf.style("transform-origin", `${x}px ${y}px`);
+//             leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+
+
+//     /**
+//      * EFFET CANOPÉE : branches qui partent des bords et s'arrêtent n'importe où
+//      */
+//     function drawCanopyBranchSystem(group, startX, startY, initialDirection, settings, leafColors, sizeMultiplier, forExport, width, height, offsetX, offsetY) {
+//         // Longueur aléatoire - peut s'arrêter n'importe où !
+//         const mainBranchLength = (150 + Math.random() * 400) * sizeMultiplier; // Plus de variation
+//         const mainBranchWidth = (3 + Math.random() * 3) * sizeMultiplier;
+        
+//         // ÉTAPE 1 : Branche principale - direction ALÉATOIRE
+//         const endX = startX + Math.cos(initialDirection) * mainBranchLength;
+//         const endY = startY + Math.sin(initialDirection) * mainBranchLength;
+        
+//         // Dessiner branche principale
+//         const mainBranch = group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", "rgba(139, 115, 85, 0.6)")
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // ÉTAPE 2 : Petites branches - PLUS NATURELLES
+//         const nombrePetitesBranches = 6 + Math.floor(Math.random() * 10); // 6-15 petites branches
+        
+//         for (let i = 0; i < nombrePetitesBranches; i++) {
+//             // Position le long de la branche principale
+//             const position = 0.2 + (i / nombrePetitesBranches) * 0.8;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction ALÉATOIRE pour chaque petite branche (effet naturel)
+//             const branchDirection = Math.random() * Math.PI * 2;
+//             const branchLength = (40 + Math.random() * 80) * sizeMultiplier;
+//             const branchWidth = (1.5 + Math.random() * 1.5) * sizeMultiplier;
+            
+//             // Bout de la petite branche
+//             const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner petite branche
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", smallEndX)
+//                 .attr("y2", smallEndY)
+//                 .attr("stroke", "rgba(89, 125, 65, 0.7)")
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // ÉTAPE 3 : Feuilles AU BOUT de chaque petite branche
+//             const nombreFeuilles = 3 + Math.floor(Math.random() * 5); // 3-7 feuilles par bout
+            
+//             for (let j = 0; j < nombreFeuilles; j++) {
+//                 const leafAngle = Math.random() * Math.PI * 2; // Direction ALÉATOIRE
+//                 const leafSize = (12 + Math.random() * 25) * sizeMultiplier;
+//                 const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+//                 // Position de la feuille près du bout
+//                 const leafX = smallEndX + (Math.random() - 0.5) * 20;
+//                 const leafY = smallEndY + (Math.random() - 0.5) * 20;
+                
+//                 drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//             }
+//         }
+        
+//         // ÉTAPE 4 : Feuilles au bout de la branche principale
+//         const endLeaves = 4 + Math.floor(Math.random() * 8);
+//         for (let k = 0; k < endLeaves; k++) {
+//             const leafAngle = Math.random() * Math.PI * 2; // Direction ALÉATOIRE
+//             const leafSize = (15 + Math.random() * 30) * sizeMultiplier;
+//             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            
+//             const leafX = endX + (Math.random() - 0.5) * 25;
+//             const leafY = endY + (Math.random() - 0.5) * 25;
+            
+//             drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//         }
+//     }
+
+//     // Utiliser les dimensions personnalisées ou celles de l'écran
+//     const width = customDimensions ? customDimensions.width : window.innerWidth;
+//     const height = customDimensions ? customDimensions.height : window.innerHeight;
+//     const offsetX = customDimensions ? customDimensions.minX : 0;
+//     const offsetY = customDimensions ? customDimensions.minY : 0;
+
+//     // Calculer la densité adaptative pour l'export
+//     let densityMultiplier = 1;
+//     let sizeMultiplier = 1;
+
+//     if (forExport) {
+//         const baseArea = 1920 * 1080;
+//         const currentArea = width * height;
+//         const areaRatio = currentArea / baseArea;
+        
+//         densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+//         sizeMultiplier = Math.min(3, Math.max(1.5, areaRatio * 0.1));
+        
+//         console.log(`📊 Export branches - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+//     }
+
+//     console.log(`🌿 Setup branches logiques: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
+//     const defs = svg.append("defs");
+    
+//     // Nettoyer tout fond existant
+//     svg.selectAll(".background-element").remove();
+    
+//     // Créer un groupe pour le fond
+//     const bgGroup = svg.append("g")
+//         .attr("class", "background-element")
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Récupérer les paramètres
+//     const settings = {
+//         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
+//         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
+//         animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
+//         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
+//         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
+//     };
+    
+//     // Appliquer l'opacité globale
+//     bgGroup.style("opacity", settings.opacity);
+    
+//     // Gradient de fond
+//     const gradientId = `branches-bg-gradient-${Date.now()}`;
+//     const bgGradient = defs.append("linearGradient")
+//         .attr("id", gradientId)
+//         .attr("x1", "0%")
+//         .attr("y1", "0%")
+//         .attr("x2", "100%")
+//         .attr("y2", "100%");
+    
+//     const baseColor = d3.rgb(settings.customColor);
+//     const lighterColor = d3.rgb(baseColor).brighter(1.5);
+//     const darkerColor = d3.rgb(baseColor).darker(0.2);
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "0%")
+//         .attr("stop-color", lighterColor.toString());
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "100%")
+//         .attr("stop-color", darkerColor.toString());
+    
+//     // Rectangle de fond
+//     bgGroup.append("rect")
+//         .attr("x", offsetX)
+//         .attr("y", offsetY)
+//         .attr("width", width)
+//         .attr("height", height)
+//         .attr("fill", `url(#${gradientId})`)
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Couleurs pour branches et feuilles
+//     const branchColor = d3.rgb(settings.customColor).darker(0.5);
+//     const leafColors = [
+//         d3.rgb(50, 150, 50),   // Vert vif
+//         d3.rgb(70, 130, 40),   // Vert olive
+//         d3.rgb(100, 160, 60),  // Vert clair
+//         d3.rgb(30, 110, 30),   // Vert foncé
+//         d3.rgb(120, 180, 80)   // Vert-jaune
+//     ];
+    
+//     // EFFET CANOPÉE AMÉLIORÉ - Couverture garantie du centre
+//     const nombreBranchesPrincipales = Math.ceil(24 * settings.patternVisibility * densityMultiplier);
+//     const nombreBranchesRemplissage = Math.ceil(12 * settings.patternVisibility * densityMultiplier);
+    
+//     console.log(`🌿 Canopée améliorée: ${nombreBranchesPrincipales} principales + ${nombreBranchesRemplissage} remplissage`);
+    
+//     // PARTIE 1 : BRANCHES PRINCIPALES - distribution déterministe
+//     const branchesParBord = Math.ceil(nombreBranchesPrincipales / 4);
+    
+//     for (let bord = 0; bord < 4; bord++) {
+//         for (let i = 0; i < branchesParBord; i++) {
+//             let startX, startY, direction, minLength;
+            
+//             // Position DÉTERMINISTE sur chaque bord
+//             const position = (i + 1) / (branchesParBord + 1); // Répartition équidistante
+//             const variation = 0.05; // Très petite variation pour naturel
+//             const pos = position + (Math.random() - 0.5) * variation;
+            
+//             switch (bord) {
+//                 case 0: // Bord gauche
+//                     startX = offsetX;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-droit avec variation
+//                     direction = -Math.PI/4 + Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 1: // Bord haut  
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY;
+//                     // Direction vers le centre-bas avec variation
+//                     direction = Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//                 case 2: // Bord droit
+//                     startX = offsetX + width;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-gauche avec variation
+//                     direction = Math.PI - Math.PI/4 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 3: // Bord bas
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY + height;
+//                     // Direction vers le centre-haut avec variation
+//                     direction = -Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//             }
+            
+//             // Créer branche principale longue
+//             const branchGroup = bgGroup.append("g")
+//                 .attr("class", "branch-system main-branch");
+            
+//             drawLongCanopyBranch(branchGroup, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport);
+            
+//             // Animation
+//             if (settings.animation && !forExport) {
+//                 const duration = (6 + Math.random() * 4) / settings.animationSpeed;
+//                 const delay = Math.random() * 3;
+                
+//                 branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+//                 branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//             }
+//         }
+//     }
+    
+//     // PARTIE 2 : BRANCHES DE REMPLISSAGE POUR LE CENTRE
+//     for (let i = 0; i < nombreBranchesRemplissage; i++) {
+//         // Positions dans la zone centrale (30-70% de l'image)
+//         const centerX = offsetX + width * (0.3 + Math.random() * 0.4);
+//         const centerY = offsetY + height * (0.3 + Math.random() * 0.4);
+        
+//         // Direction aléatoire
+//         const direction = Math.random() * Math.PI * 2;
+//         const length = (100 + Math.random() * 200) * sizeMultiplier;
+        
+//         // Créer branche de remplissage
+//         const fillBranchGroup = bgGroup.append("g")
+//             .attr("class", "branch-system fill-branch");
+        
+//         drawCanopyBranchSystem(fillBranchGroup, centerX, centerY, direction, settings, leafColors, sizeMultiplier, forExport, width, height, offsetX, offsetY);
+        
+//         // Animation
+//         if (settings.animation && !forExport) {
+//             const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 4;
+            
+//             fillBranchGroup.style("transform-origin", `${centerX}px ${centerY}px`);
+//             fillBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+    
+//     // CSS animations
+//     if (!forExport && !document.getElementById('branch-animations-css')) {
+//         const styleElement = document.createElement('style');
+//         styleElement.id = 'branch-animations-css';
+//         styleElement.textContent = `
+//             @keyframes branchSway {
+//                 0% { transform: rotate(0deg); }
+//                 100% { transform: rotate(1deg); }
+//             }
+            
+//             @keyframes leafSway {
+//                 0% { transform: rotate(-3deg); }
+//                 100% { transform: rotate(3deg); }
+//             }
+//         `;
+//         document.head.appendChild(styleElement);
+//     }
+// }
+
+
+
+/* */
+
+
+
+
+// // Pas mal : Fond avec branches logiques - VERSION CORRIGÉE
+// function setupTreeBranchesBackground(svg, customDimensions = null, forExport = false) {
+
+//     /**
+//      * Branches LONGUES avec couleurs discrètes et espacement naturel des feuilles
+//      */
+//     function drawLongCanopyBranch(group, startX, startY, direction, minLength, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport) {
+//         // Longueur garantie + extension aléatoire
+//         const mainBranchLength = minLength + Math.random() * 200 * sizeMultiplier;
+//         const mainBranchWidth = (2 + Math.random() * 2) * sizeMultiplier; // Un peu plus fin
+        
+//         // BRANCHE PRINCIPALE VERTE DISCRÈTE
+//         const endX = startX + Math.cos(direction) * mainBranchLength;
+//         const endY = startY + Math.sin(direction) * mainBranchLength;
+        
+//         // Dessiner branche principale en vert discret
+//         group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", `rgba(${mainBranchColor.r}, ${mainBranchColor.g}, ${mainBranchColor.b}, 0.5)`) // Plus discret
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // Grille d'occupation pour éviter chevauchement des feuilles
+//         const leafGrid = new Set();
+//         const gridSize = 40; // Taille de cellule pour éviter chevauchement
+        
+//         // PETITES BRANCHES avec espacement naturel
+//         const nombrePetitesBranches = 10 + Math.floor(Math.random() * 12); // 10-21 branches
+        
+//         for (let i = 0; i < nombrePetitesBranches; i++) {
+//             // Répartition sur TOUTE la longueur (15% à 85%)
+//             const position = 0.15 + (i / nombrePetitesBranches) * 0.7;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction perpendiculaire avec variation PLUS NATURELLE
+//             const basePerpendicular = direction + Math.PI/2;
+//             const side = Math.random() < 0.5 ? 1 : -1;
+//             const branchDirection = basePerpendicular * side + (Math.random() - 0.5) * Math.PI/6; // ±30° variation
+            
+//             const branchLength = (40 + Math.random() * 80) * sizeMultiplier;
+//             const branchWidth = (1 + Math.random() * 1) * sizeMultiplier; // Plus discret
+            
+//             // Bout de la petite branche
+//             const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner petite branche PLUS DISCRÈTE
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", smallEndX)
+//                 .attr("y2", smallEndY)
+//                 .attr("stroke", `rgba(${smallBranchColor.r}, ${smallBranchColor.g}, ${smallBranchColor.b}, 0.4)`) // Plus discret
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // FEUILLES avec ESPACEMENT NATUREL (éviter chevauchement)
+//             const nombreFeuilles = 3 + Math.floor(Math.random() * 4); // 3-6 feuilles (moins pour éviter surcharge)
+            
+//             for (let j = 0; j < nombreFeuilles; j++) {
+//                 const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/3; // Variation plus naturelle
+//                 const leafSize = (10 + Math.random() * 20) * sizeMultiplier; // Un peu plus petites
+//                 const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+//                 // Position avec ÉVITEMENT DE CHEVAUCHEMENT
+//                 let leafX, leafY, attempts = 0;
+//                 let validPosition = false;
+                
+//                 do {
+//                     leafX = smallEndX + (Math.random() - 0.5) * 25;
+//                     leafY = smallEndY + (Math.random() - 0.5) * 25;
+                    
+//                     // Vérifier la grille d'occupation
+//                     const gridX = Math.floor(leafX / gridSize);
+//                     const gridY = Math.floor(leafY / gridSize);
+//                     const gridKey = `${gridX},${gridY}`;
+                    
+//                     if (!leafGrid.has(gridKey)) {
+//                         leafGrid.add(gridKey);
+//                         validPosition = true;
+//                     } else {
+//                         attempts++;
+//                     }
+//                 } while (!validPosition && attempts < 5); // Max 5 tentatives
+                
+//                 // Dessiner la feuille seulement si position valide
+//                 if (validPosition) {
+//                     drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                 }
+//             }
+//         }
+        
+//         // Feuilles au bout de la branche principale (avec espacement)
+//         const endLeaves = 4 + Math.floor(Math.random() * 6); // Moins de feuilles
+//         for (let k = 0; k < endLeaves; k++) {
+//             const leafAngle = direction + (Math.random() - 0.5) * Math.PI/3;
+//             const leafSize = (12 + Math.random() * 25) * sizeMultiplier;
+//             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            
+//             // Position avec espacement
+//             let leafX, leafY, attempts = 0;
+//             let validPosition = false;
+            
+//             do {
+//                 leafX = endX + (Math.random() - 0.5) * 40;
+//                 leafY = endY + (Math.random() - 0.5) * 40;
+                
+//                 const gridX = Math.floor(leafX / gridSize);
+//                 const gridY = Math.floor(leafY / gridSize);
+//                 const gridKey = `${gridX},${gridY}`;
+                
+//                 if (!leafGrid.has(gridKey)) {
+//                     leafGrid.add(gridKey);
+//                     validPosition = true;
+//                 } else {
+//                     attempts++;
+//                 }
+//             } while (!validPosition && attempts < 5);
+            
+//             if (validPosition) {
+//                 drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//             }
+//         }
+//     }
+
+//     /**
+//      * Système de branches de remplissage avec espacement naturel
+//      */
+//     function drawCanopyBranchSystem(group, startX, startY, initialDirection, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport, width, height, offsetX, offsetY) {
+//         // Longueur plus modérée pour les branches de remplissage
+//         const mainBranchLength = (100 + Math.random() * 250) * sizeMultiplier;
+//         const mainBranchWidth = (1.5 + Math.random() * 1.5) * sizeMultiplier; // Plus discret
+        
+//         // BRANCHE PRINCIPALE
+//         const endX = startX + Math.cos(initialDirection) * mainBranchLength;
+//         const endY = startY + Math.sin(initialDirection) * mainBranchLength;
+        
+//         // Dessiner branche principale verte discrète
+//         group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", `rgba(${mainBranchColor.r}, ${mainBranchColor.g}, ${mainBranchColor.b}, 0.4)`) // Plus discret
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // Grille d'espacement pour les feuilles
+//         const leafGrid = new Set();
+//         const gridSize = 35;
+        
+//         // Petites branches plus naturelles
+//         const nombrePetitesBranches = 4 + Math.floor(Math.random() * 6); // Moins de branches pour éviter surcharge
+        
+//         for (let i = 0; i < nombrePetitesBranches; i++) {
+//             const position = 0.3 + (i / nombrePetitesBranches) * 0.6;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction plus naturelle
+//             const basePerpendicular = initialDirection + Math.PI/2;
+//             const side = Math.random() < 0.5 ? 1 : -1;
+//             const branchDirection = basePerpendicular * side + (Math.random() - 0.5) * Math.PI/4;
+            
+//             const branchLength = (30 + Math.random() * 60) * sizeMultiplier;
+//             const branchWidth = (0.8 + Math.random() * 0.8) * sizeMultiplier; // Plus discret
+            
+//             const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner petite branche discrète
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", smallEndX)
+//                 .attr("y2", smallEndY)
+//                 .attr("stroke", `rgba(${smallBranchColor.r}, ${smallBranchColor.g}, ${smallBranchColor.b}, 0.3)`) // Très discret
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // Feuilles avec espacement
+//             const nombreFeuilles = 2 + Math.floor(Math.random() * 3); // 2-4 feuilles seulement
+            
+//             for (let j = 0; j < nombreFeuilles; j++) {
+//                 const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/4;
+//                 const leafSize = (8 + Math.random() * 15) * sizeMultiplier; // Plus petites
+//                 const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+//                 // Position avec évitement de chevauchement
+//                 let leafX, leafY, attempts = 0;
+//                 let validPosition = false;
+                
+//                 do {
+//                     leafX = smallEndX + (Math.random() - 0.5) * 20;
+//                     leafY = smallEndY + (Math.random() - 0.5) * 20;
+                    
+//                     const gridX = Math.floor(leafX / gridSize);
+//                     const gridY = Math.floor(leafY / gridSize);
+//                     const gridKey = `${gridX},${gridY}`;
+                    
+//                     if (!leafGrid.has(gridKey)) {
+//                         leafGrid.add(gridKey);
+//                         validPosition = true;
+//                     } else {
+//                         attempts++;
+//                     }
+//                 } while (!validPosition && attempts < 3);
+                
+//                 if (validPosition) {
+//                     drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                 }
+//             }
+//         }
+//     }
+
+
+//     /**
+//      * Dessine une feuille de canopée
+//      */
+//     function drawCanopyLeaf(group, x, y, size, angle, leafColor, settings, forExport) {
+//         const angleRad = angle;
+        
+//         // Forme de feuille naturelle
+//         const leaf = group.append("path")
+//             .attr("class", "background-leaf")
+//             .attr("d", `M ${x} ${y} 
+//                     Q ${x + Math.cos(angleRad) * size * 0.5} ${y + Math.sin(angleRad) * size * 0.5}, 
+//                         ${x + Math.cos(angleRad) * size} ${y + Math.sin(angleRad) * size}
+//                     Q ${x + Math.cos(angleRad + 0.5) * size * 0.7} ${y + Math.sin(angleRad + 0.5) * size * 0.7},
+//                         ${x} ${y}`)
+//             .attr("fill", leafColor.toString())
+//             .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+//             .attr("stroke-width", "0.5");
+        
+//         // Animation si activée
+//         if (settings.animation && !forExport && Math.random() < 0.3) {
+//             const swayDuration = (4 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 2;
+            
+//             leaf.style("transform-origin", `${x}px ${y}px`);
+//             leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+
+//     // Utiliser les dimensions personnalisées ou celles de l'écran
+//     const width = customDimensions ? customDimensions.width : window.innerWidth;
+//     const height = customDimensions ? customDimensions.height : window.innerHeight;
+//     const offsetX = customDimensions ? customDimensions.minX : 0;
+//     const offsetY = customDimensions ? customDimensions.minY : 0;
+
+//     // Calculer la densité adaptative pour l'export
+//     let densityMultiplier = 1;
+//     let sizeMultiplier = 1;
+
+//     if (forExport) {
+//         const baseArea = 1920 * 1080;
+//         const currentArea = width * height;
+//         const areaRatio = currentArea / baseArea;
+        
+//         densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+//         sizeMultiplier = Math.min(3, Math.max(1.5, areaRatio * 0.1));
+        
+//         console.log(`📊 Export branches - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+//     }
+
+//     console.log(`🌿 Setup branches logiques: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
+//     const defs = svg.append("defs");
+    
+//     // Nettoyer tout fond existant
+//     svg.selectAll(".background-element").remove();
+    
+//     // Créer un groupe pour le fond
+//     const bgGroup = svg.append("g")
+//         .attr("class", "background-element")
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Récupérer les paramètres
+//     const settings = {
+//         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
+//         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
+//         animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
+//         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
+//         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
+//     };
+    
+//     // Appliquer l'opacité globale
+//     bgGroup.style("opacity", settings.opacity);
+    
+//     // Gradient de fond
+//     const gradientId = `branches-bg-gradient-${Date.now()}`;
+//     const bgGradient = defs.append("linearGradient")
+//         .attr("id", gradientId)
+//         .attr("x1", "0%")
+//         .attr("y1", "0%")
+//         .attr("x2", "100%")
+//         .attr("y2", "100%");
+    
+//     const baseColor = d3.rgb(settings.customColor);
+//     const lighterColor = d3.rgb(baseColor).brighter(1.5);
+//     const darkerColor = d3.rgb(baseColor).darker(0.2);
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "0%")
+//         .attr("stop-color", lighterColor.toString());
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "100%")
+//         .attr("stop-color", darkerColor.toString());
+    
+//     // Rectangle de fond
+//     bgGroup.append("rect")
+//         .attr("x", offsetX)
+//         .attr("y", offsetY)
+//         .attr("width", width)
+//         .attr("height", height)
+//         .attr("fill", `url(#${gradientId})`)
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Couleurs DISCRÈTES pour branches et feuilles
+//     const mainBranchColor = d3.rgb(89, 125, 65); // Vert discret au lieu de marron
+//     const smallBranchColor = d3.rgb(109, 140, 85); // Vert clair discret
+//     const leafColors = [
+//         d3.rgb(50, 150, 50),   // Vert vif
+//         d3.rgb(70, 130, 40),   // Vert olive
+//         d3.rgb(100, 160, 60),  // Vert clair
+//         d3.rgb(30, 110, 30),   // Vert foncé
+//         d3.rgb(120, 180, 80)   // Vert-jaune
+//     ];
+    
+//     // EFFET CANOPÉE AMÉLIORÉ - Couverture garantie du centre
+//     const nombreBranchesPrincipales = Math.ceil(24 * settings.patternVisibility * densityMultiplier);
+//     const nombreBranchesRemplissage = Math.ceil(12 * settings.patternVisibility * densityMultiplier);
+    
+//     console.log(`🌿 Canopée améliorée: ${nombreBranchesPrincipales} principales + ${nombreBranchesRemplissage} remplissage`);
+    
+//     // PARTIE 1 : BRANCHES PRINCIPALES - distribution déterministe
+//     const branchesParBord = Math.ceil(nombreBranchesPrincipales / 4);
+    
+//     for (let bord = 0; bord < 4; bord++) {
+//         for (let i = 0; i < branchesParBord; i++) {
+//             let startX, startY, direction, minLength;
+            
+//             // Position DÉTERMINISTE sur chaque bord
+//             const position = (i + 1) / (branchesParBord + 1); // Répartition équidistante
+//             const variation = 0.05; // Très petite variation pour naturel
+//             const pos = position + (Math.random() - 0.5) * variation;
+            
+//             switch (bord) {
+//                 case 0: // Bord gauche
+//                     startX = offsetX;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-droit avec variation
+//                     direction = -Math.PI/4 + Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 1: // Bord haut  
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY;
+//                     // Direction vers le centre-bas avec variation
+//                     direction = Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//                 case 2: // Bord droit
+//                     startX = offsetX + width;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-gauche avec variation
+//                     direction = Math.PI - Math.PI/4 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 3: // Bord bas
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY + height;
+//                     // Direction vers le centre-haut avec variation
+//                     direction = -Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//             }
+            
+//             // Créer branche principale longue
+//             const branchGroup = bgGroup.append("g")
+//                 .attr("class", "branch-system main-branch");
+            
+//             drawLongCanopyBranch(branchGroup, startX, startY, direction, minLength, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport);
+            
+//             // Animation
+//             if (settings.animation && !forExport) {
+//                 const duration = (6 + Math.random() * 4) / settings.animationSpeed;
+//                 const delay = Math.random() * 3;
+                
+//                 branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+//                 branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//             }
+//         }
+//     }
+    
+//     // PARTIE 2 : BRANCHES DE REMPLISSAGE POUR LE CENTRE
+//     for (let i = 0; i < nombreBranchesRemplissage; i++) {
+//         // Positions dans la zone centrale (30-70% de l'image)
+//         const centerX = offsetX + width * (0.3 + Math.random() * 0.4);
+//         const centerY = offsetY + height * (0.3 + Math.random() * 0.4);
+        
+//         // Direction aléatoire
+//         const direction = Math.random() * Math.PI * 2;
+//         const length = (100 + Math.random() * 200) * sizeMultiplier;
+        
+//         // Créer branche de remplissage
+//         const fillBranchGroup = bgGroup.append("g")
+//             .attr("class", "branch-system fill-branch");
+        
+//         drawCanopyBranchSystem(fillBranchGroup, centerX, centerY, direction, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport, width, height, offsetX, offsetY);
+        
+//         // Animation
+//         if (settings.animation && !forExport) {
+//             const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 4;
+            
+//             fillBranchGroup.style("transform-origin", `${centerX}px ${centerY}px`);
+//             fillBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+    
+//     // CSS animations
+//     if (!forExport && !document.getElementById('branch-animations-css')) {
+//         const styleElement = document.createElement('style');
+//         styleElement.id = 'branch-animations-css';
+//         styleElement.textContent = `
+//             @keyframes branchSway {
+//                 0% { transform: rotate(0deg); }
+//                 100% { transform: rotate(1deg); }
+//             }
+            
+//             @keyframes leafSway {
+//                 0% { transform: rotate(-3deg); }
+//                 100% { transform: rotate(3deg); }
+//             }
+//         `;
+//         document.head.appendChild(styleElement);
+//     }
+// }
+
+
+
+
+
+
+
+
+// // Très bien : Fond avec branches logiques - VERSION CORRIGÉE
+// function setupTreeBranchesBackground(svg, customDimensions = null, forExport = false) {
+
+
+//     /**
+//      * Branches avec NIVEAUX HIÉRARCHIQUES comme un vrai arbre
+//      */
+//     function drawLongCanopyBranch(group, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport) {
+//         // Longueur garantie + extension aléatoire
+//         const mainBranchLength = minLength + Math.random() * 200 * sizeMultiplier;
+//         const mainBranchWidth = (3 + Math.random() * 3) * sizeMultiplier;
+        
+//         // TRONC PRINCIPAL - vert discret
+//         const endX = startX + Math.cos(direction) * mainBranchLength;
+//         const endY = startY + Math.sin(direction) * mainBranchLength;
+        
+//         // Dessiner tronc principal en vert discret
+//         group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             // .attr("stroke", "rgba(89, 125, 65, 0.4)") // Vert discret pour tronc
+//             .attr("stroke", "rgba(139, 115, 85, 0.6)") // marrondiscret pour tronc
+            
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // NIVEAU 1 : Branches principales (grosses)
+//         const nombreBranchesPrincipales = 8 + Math.floor(Math.random() * 8); // 8-15 branches principales
+        
+//         for (let i = 0; i < nombreBranchesPrincipales; i++) {
+//             // Position le long du tronc (20% à 80%)
+//             const position = 0.2 + (i / nombreBranchesPrincipales) * 0.6;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction perpendiculaire avec variation
+//             const branchDirection = direction + (Math.random() < 0.5 ? 1 : -1) * (Math.PI/2 + (Math.random() - 0.5) * Math.PI/4);
+//             const branchLength = (60 + Math.random() * 120) * sizeMultiplier; // Branches moyennes
+//             const branchWidth = (2 + Math.random() * 2) * sizeMultiplier;
+            
+//             // Bout de la branche principale
+//             const branch1EndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const branch1EndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner branche principale (NIVEAU 1)
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", branch1EndX)
+//                 .attr("y2", branch1EndY)
+//                 .attr("stroke", "rgba(139, 115, 85, 0.6)") // Marron comme avant
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // QUELQUES FEUILLES sur branche principale (NIVEAU 1)
+//             if (Math.random() < 0.4) { // 40% de chance d'avoir des feuilles sur niveau 1
+//                 const nombreFeuillesNiv1 = 1 + Math.floor(Math.random() * 3); // 1-3 feuilles
+//                 for (let f = 0; f < nombreFeuillesNiv1; f++) {
+//                     const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/3;
+//                     const leafSize = (12 + Math.random() * 18) * sizeMultiplier;
+//                     const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                    
+//                     const leafX = branch1EndX + (Math.random() - 0.5) * 15;
+//                     const leafY = branch1EndY + (Math.random() - 0.5) * 15;
+                    
+//                     drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                 }
+//             }
+            
+//             // NIVEAU 2 : Sous-branches (plus petites)
+//             const nombreSousBranches = 3 + Math.floor(Math.random() * 5); // 3-7 sous-branches
+            
+//             for (let j = 0; j < nombreSousBranches; j++) {
+//                 // Position le long de la branche principale (30% à 90%)
+//                 const subPosition = 0.3 + (j / nombreSousBranches) * 0.6;
+//                 const subBranchX = branchX + (branch1EndX - branchX) * subPosition;
+//                 const subBranchY = branchY + (branch1EndY - branchY) * subPosition;
+                
+//                 // Direction avec plus de variation pour naturel
+//                 const subBranchDirection = branchDirection + (Math.random() - 0.5) * Math.PI/2;
+//                 const subBranchLength = (30 + Math.random() * 60) * sizeMultiplier; // Plus petites
+//                 const subBranchWidth = (1 + Math.random() * 1.5) * sizeMultiplier;
+                
+//                 // Bout de la sous-branche
+//                 const branch2EndX = subBranchX + Math.cos(subBranchDirection) * subBranchLength;
+//                 const branch2EndY = subBranchY + Math.sin(subBranchDirection) * subBranchLength;
+                
+//                 // Dessiner sous-branche (NIVEAU 2)
+//                 group.append("line")
+//                     .attr("class", "background-branch")
+//                     .attr("x1", subBranchX)
+//                     .attr("y1", subBranchY)
+//                     .attr("x2", branch2EndX)
+//                     .attr("y2", branch2EndY)
+//                     .attr("stroke", "rgba(89, 125, 65, 0.7)") // Vert comme avant
+//                     .attr("stroke-width", subBranchWidth)
+//                     .attr("stroke-linecap", "round");
+                
+//                 // FEUILLES sur sous-branches (NIVEAU 2) - PLUS DE FEUILLES ICI
+//                 const nombreFeuillesNiv2 = 3 + Math.floor(Math.random() * 5); // 3-7 feuilles
+                
+//                 for (let k = 0; k < nombreFeuillesNiv2; k++) {
+//                     const leafAngle = subBranchDirection + (Math.random() - 0.5) * Math.PI/2;
+//                     const leafSize = (10 + Math.random() * 20) * sizeMultiplier;
+//                     const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                    
+//                     const leafX = branch2EndX + (Math.random() - 0.5) * 20;
+//                     const leafY = branch2EndY + (Math.random() - 0.5) * 20;
+                    
+//                     drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                 }
+                
+//                 // NIVEAU 3 : Rameaux (optionnel pour plus de complexité)
+//                 if (Math.random() < 0.6) { // 60% de chance d'avoir niveau 3
+//                     const nombreRameaux = 1 + Math.floor(Math.random() * 3); // 1-3 rameaux
+                    
+//                     for (let r = 0; r < nombreRameaux; r++) {
+//                         const rameauPosition = 0.5 + Math.random() * 0.4; // Plutôt vers le bout
+//                         const rameauX = subBranchX + (branch2EndX - subBranchX) * rameauPosition;
+//                         const rameauY = subBranchY + (branch2EndY - subBranchY) * rameauPosition;
+                        
+//                         const rameauDirection = subBranchDirection + (Math.random() - 0.5) * Math.PI/3;
+//                         const rameauLength = (15 + Math.random() * 30) * sizeMultiplier; // Très petites
+//                         const rameauWidth = (0.5 + Math.random() * 1) * sizeMultiplier;
+                        
+//                         const rameauEndX = rameauX + Math.cos(rameauDirection) * rameauLength;
+//                         const rameauEndY = rameauY + Math.sin(rameauDirection) * rameauLength;
+                        
+//                         // Dessiner rameau (NIVEAU 3)
+//                         group.append("line")
+//                             .attr("class", "background-branch")
+//                             .attr("x1", rameauX)
+//                             .attr("y1", rameauY)
+//                             .attr("x2", rameauEndX)
+//                             .attr("y2", rameauEndY)
+//                             .attr("stroke", "rgba(89, 125, 65, 0.5)") // Vert fin
+//                             .attr("stroke-width", rameauWidth)
+//                             .attr("stroke-linecap", "round");
+                        
+//                         // FEUILLES sur rameaux (NIVEAU 3)
+//                         const nombreFeuillesNiv3 = 1 + Math.floor(Math.random() * 3); // 1-3 feuilles
+                        
+//                         for (let l = 0; l < nombreFeuillesNiv3; l++) {
+//                             const leafAngle = rameauDirection + (Math.random() - 0.5) * Math.PI/4;
+//                             const leafSize = (8 + Math.random() * 15) * sizeMultiplier; // Plus petites
+//                             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                            
+//                             const leafX = rameauEndX + (Math.random() - 0.5) * 10;
+//                             const leafY = rameauEndY + (Math.random() - 0.5) * 10;
+                            
+//                             drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+        
+//         // Feuilles au bout du tronc principal
+//         const endLeaves = 4 + Math.floor(Math.random() * 6);
+//         for (let e = 0; e < endLeaves; e++) {
+//             const leafAngle = direction + (Math.random() - 0.5) * Math.PI/3;
+//             const leafSize = (15 + Math.random() * 25) * sizeMultiplier;
+//             const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            
+//             const leafX = endX + (Math.random() - 0.5) * 25;
+//             const leafY = endY + (Math.random() - 0.5) * 25;
+            
+//             drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//         }
+//     }
+
+//     /**
+//      * Système de branches de remplissage avec espacement naturel
+//      */
+//     function drawCanopyBranchSystem(group, startX, startY, initialDirection, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport, width, height, offsetX, offsetY) {
+//         // Longueur plus modérée pour les branches de remplissage
+//         const mainBranchLength = (100 + Math.random() * 250) * sizeMultiplier;
+//         const mainBranchWidth = (1.5 + Math.random() * 1.5) * sizeMultiplier; // Plus discret
+        
+//         // BRANCHE PRINCIPALE
+//         const endX = startX + Math.cos(initialDirection) * mainBranchLength;
+//         const endY = startY + Math.sin(initialDirection) * mainBranchLength;
+        
+//         // Dessiner branche principale verte discrète
+//         group.append("line")
+//             .attr("class", "background-branch")
+//             .attr("x1", startX)
+//             .attr("y1", startY)
+//             .attr("x2", endX)
+//             .attr("y2", endY)
+//             .attr("stroke", `rgba(${mainBranchColor.r}, ${mainBranchColor.g}, ${mainBranchColor.b}, 0.4)`) // Plus discret
+//             .attr("stroke-width", mainBranchWidth)
+//             .attr("stroke-linecap", "round");
+        
+//         // Grille d'espacement pour les feuilles
+//         const leafGrid = new Set();
+//         const gridSize = 35;
+        
+//         // Petites branches plus naturelles
+//         const nombrePetitesBranches = 4 + Math.floor(Math.random() * 6); // Moins de branches pour éviter surcharge
+        
+//         for (let i = 0; i < nombrePetitesBranches; i++) {
+//             const position = 0.3 + (i / nombrePetitesBranches) * 0.6;
+//             const branchX = startX + (endX - startX) * position;
+//             const branchY = startY + (endY - startY) * position;
+            
+//             // Direction plus naturelle
+//             const basePerpendicular = initialDirection + Math.PI/2;
+//             const side = Math.random() < 0.5 ? 1 : -1;
+//             const branchDirection = basePerpendicular * side + (Math.random() - 0.5) * Math.PI/4;
+            
+//             const branchLength = (30 + Math.random() * 60) * sizeMultiplier;
+//             const branchWidth = (0.8 + Math.random() * 0.8) * sizeMultiplier; // Plus discret
+            
+//             const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+//             const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+//             // Dessiner petite branche discrète
+//             group.append("line")
+//                 .attr("class", "background-branch")
+//                 .attr("x1", branchX)
+//                 .attr("y1", branchY)
+//                 .attr("x2", smallEndX)
+//                 .attr("y2", smallEndY)
+//                 .attr("stroke", `rgba(${smallBranchColor.r}, ${smallBranchColor.g}, ${smallBranchColor.b}, 0.3)`) // Très discret
+//                 .attr("stroke-width", branchWidth)
+//                 .attr("stroke-linecap", "round");
+            
+//             // Feuilles avec espacement
+//             const nombreFeuilles = 2 + Math.floor(Math.random() * 3); // 2-4 feuilles seulement
+            
+//             for (let j = 0; j < nombreFeuilles; j++) {
+//                 const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/4;
+//                 const leafSize = (8 + Math.random() * 15) * sizeMultiplier; // Plus petites
+//                 const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+//                 // Position avec évitement de chevauchement
+//                 let leafX, leafY, attempts = 0;
+//                 let validPosition = false;
+                
+//                 do {
+//                     leafX = smallEndX + (Math.random() - 0.5) * 20;
+//                     leafY = smallEndY + (Math.random() - 0.5) * 20;
+                    
+//                     const gridX = Math.floor(leafX / gridSize);
+//                     const gridY = Math.floor(leafY / gridSize);
+//                     const gridKey = `${gridX},${gridY}`;
+                    
+//                     if (!leafGrid.has(gridKey)) {
+//                         leafGrid.add(gridKey);
+//                         validPosition = true;
+//                     } else {
+//                         attempts++;
+//                     }
+//                 } while (!validPosition && attempts < 3);
+                
+//                 if (validPosition) {
+//                     drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+//                 }
+//             }
+//         }
+//     }
+
+//     /**
+//      * Dessine une feuille de canopée
+//      */
+//     function drawCanopyLeaf(group, x, y, size, angle, leafColor, settings, forExport) {
+//         const angleRad = angle;
+        
+//         // Forme de feuille naturelle
+//         const leaf = group.append("path")
+//             .attr("class", "background-leaf")
+//             .attr("d", `M ${x} ${y} 
+//                     Q ${x + Math.cos(angleRad) * size * 0.5} ${y + Math.sin(angleRad) * size * 0.5}, 
+//                         ${x + Math.cos(angleRad) * size} ${y + Math.sin(angleRad) * size}
+//                     Q ${x + Math.cos(angleRad + 0.5) * size * 0.7} ${y + Math.sin(angleRad + 0.5) * size * 0.7},
+//                         ${x} ${y}`)
+//             .attr("fill", leafColor.toString())
+//             .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+//             .attr("stroke-width", "0.5");
+        
+//         // Animation si activée
+//         if (settings.animation && !forExport && Math.random() < 0.3) {
+//             const swayDuration = (4 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 2;
+            
+//             leaf.style("transform-origin", `${x}px ${y}px`);
+//             leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+
+
+//     // Utiliser les dimensions personnalisées ou celles de l'écran
+//     const width = customDimensions ? customDimensions.width : window.innerWidth;
+//     const height = customDimensions ? customDimensions.height : window.innerHeight;
+//     const offsetX = customDimensions ? customDimensions.minX : 0;
+//     const offsetY = customDimensions ? customDimensions.minY : 0;
+
+//     // Calculer la densité adaptative pour l'export
+//     let densityMultiplier = 1;
+//     let sizeMultiplier = 1;
+
+//     if (forExport) {
+//         const baseArea = 1920 * 1080;
+//         const currentArea = width * height;
+//         const areaRatio = currentArea / baseArea;
+        
+//         densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+//         sizeMultiplier = Math.min(3, Math.max(1.5, areaRatio * 0.1));
+        
+//         console.log(`📊 Export branches - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+//     }
+
+//     console.log(`🌿 Setup branches logiques: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
+//     const defs = svg.append("defs");
+    
+//     // Nettoyer tout fond existant
+//     svg.selectAll(".background-element").remove();
+    
+//     // Créer un groupe pour le fond
+//     const bgGroup = svg.append("g")
+//         .attr("class", "background-element")
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Récupérer les paramètres
+//     const settings = {
+//         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
+//         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
+//         animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
+//         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
+//         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
+//     };
+    
+//     // Appliquer l'opacité globale
+//     bgGroup.style("opacity", settings.opacity);
+    
+//     // Gradient de fond
+//     const gradientId = `branches-bg-gradient-${Date.now()}`;
+//     const bgGradient = defs.append("linearGradient")
+//         .attr("id", gradientId)
+//         .attr("x1", "0%")
+//         .attr("y1", "0%")
+//         .attr("x2", "100%")
+//         .attr("y2", "100%");
+    
+//     const baseColor = d3.rgb(settings.customColor);
+//     const lighterColor = d3.rgb(baseColor).brighter(1.5);
+//     const darkerColor = d3.rgb(baseColor).darker(0.2);
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "0%")
+//         .attr("stop-color", lighterColor.toString());
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "100%")
+//         .attr("stop-color", darkerColor.toString());
+    
+//     // Rectangle de fond
+//     bgGroup.append("rect")
+//         .attr("x", offsetX)
+//         .attr("y", offsetY)
+//         .attr("width", width)
+//         .attr("height", height)
+//         .attr("fill", `url(#${gradientId})`)
+//         .attr("pointer-events", "none")
+//         .lower();
+    
+//     // Couleurs pour branches et feuilles
+//     const leafColors = [
+//         d3.rgb(50, 150, 50),   // Vert vif
+//         d3.rgb(70, 130, 40),   // Vert olive
+//         d3.rgb(100, 160, 60),  // Vert clair
+//         d3.rgb(30, 110, 30),   // Vert foncé
+//         d3.rgb(120, 180, 80)   // Vert-jaune
+//     ];
+    
+//     // EFFET CANOPÉE AMÉLIORÉ - Couverture garantie du centre
+//     const nombreBranchesPrincipales = Math.ceil(24 * settings.patternVisibility * densityMultiplier);
+//     const nombreBranchesRemplissage = Math.ceil(12 * settings.patternVisibility * densityMultiplier);
+    
+//     console.log(`🌿 Canopée améliorée: ${nombreBranchesPrincipales} principales + ${nombreBranchesRemplissage} remplissage`);
+    
+//     // PARTIE 1 : BRANCHES PRINCIPALES - distribution déterministe
+//     const branchesParBord = Math.ceil(nombreBranchesPrincipales / 4);
+    
+//     for (let bord = 0; bord < 4; bord++) {
+//         for (let i = 0; i < branchesParBord; i++) {
+//             let startX, startY, direction, minLength;
+            
+//             // Position DÉTERMINISTE sur chaque bord
+//             const position = (i + 1) / (branchesParBord + 1); // Répartition équidistante
+//             const variation = 0.05; // Très petite variation pour naturel
+//             const pos = position + (Math.random() - 0.5) * variation;
+            
+//             switch (bord) {
+//                 case 0: // Bord gauche
+//                     startX = offsetX;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-droit avec variation
+//                     direction = -Math.PI/4 + Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 1: // Bord haut  
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY;
+//                     // Direction vers le centre-bas avec variation
+//                     direction = Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//                 case 2: // Bord droit
+//                     startX = offsetX + width;
+//                     startY = offsetY + pos * height;
+//                     // Direction vers le centre-gauche avec variation
+//                     direction = Math.PI - Math.PI/4 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = width * 0.6; // Au moins 60% de largeur
+//                     break;
+//                 case 3: // Bord bas
+//                     startX = offsetX + pos * width;
+//                     startY = offsetY + height;
+//                     // Direction vers le centre-haut avec variation
+//                     direction = -Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+//                     minLength = height * 0.6; // Au moins 60% de hauteur
+//                     break;
+//             }
+            
+//             // Créer branche principale longue
+//             const branchGroup = bgGroup.append("g")
+//                 .attr("class", "branch-system main-branch");
+            
+//             drawLongCanopyBranch(branchGroup, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport);
+            
+//             // Animation
+//             if (settings.animation && !forExport) {
+//                 const duration = (6 + Math.random() * 4) / settings.animationSpeed;
+//                 const delay = Math.random() * 3;
+                
+//                 branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+//                 branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//             }
+//         }
+//     }
+    
+//     // PARTIE 2 : BRANCHES DE REMPLISSAGE POUR LE CENTRE
+//     for (let i = 0; i < nombreBranchesRemplissage; i++) {
+//         // Positions dans la zone centrale (30-70% de l'image)
+//         const centerX = offsetX + width * (0.3 + Math.random() * 0.4);
+//         const centerY = offsetY + height * (0.3 + Math.random() * 0.4);
+        
+//         // Direction aléatoire
+//         const direction = Math.random() * Math.PI * 2;
+//         const length = (100 + Math.random() * 200) * sizeMultiplier;
+        
+//         // Créer branche de remplissage
+//         const fillBranchGroup = bgGroup.append("g")
+//             .attr("class", "branch-system fill-branch");
+        
+//         drawCanopyBranchSystem(fillBranchGroup, centerX, centerY, direction, settings, leafColors, sizeMultiplier, forExport, width, height, offsetX, offsetY);
+        
+//         // Animation
+//         if (settings.animation && !forExport) {
+//             const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+//             const delay = Math.random() * 4;
+            
+//             fillBranchGroup.style("transform-origin", `${centerX}px ${centerY}px`);
+//             fillBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+//         }
+//     }
+    
+//     // CSS animations
+//     if (!forExport && !document.getElementById('branch-animations-css')) {
+//         const styleElement = document.createElement('style');
+//         styleElement.id = 'branch-animations-css';
+//         styleElement.textContent = `
+//             @keyframes branchSway {
+//                 0% { transform: rotate(0deg); }
+//                 100% { transform: rotate(1deg); }
+//             }
+            
+//             @keyframes leafSway {
+//                 0% { transform: rotate(-3deg); }
+//                 100% { transform: rotate(3deg); }
+//             }
+//         `;
+//         document.head.appendChild(styleElement);
+//     }
+// }
+
+
+
+
+
+// // Très bien : Fond avec branches logiques - VERSION CORRIGÉE
+async function setupTreeBranchesBackground(svg, customDimensions = null, forExport = false) {
+
+
+    /**
+     * Branches avec NIVEAUX HIÉRARCHIQUES comme un vrai arbre
+     */
+    function drawLongCanopyBranch(group, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport) {
+        // Longueur garantie + extension aléatoire
+        const mainBranchLength = minLength + Math.random() * 200 * sizeMultiplier;
+        const mainBranchWidth = (3 + Math.random() * 3) * sizeMultiplier;
+        
+        // TRONC PRINCIPAL - vert discret
+        const endX = startX + Math.cos(direction) * mainBranchLength;
+        const endY = startY + Math.sin(direction) * mainBranchLength;
+        
+        // Dessiner tronc principal en vert discret
+        group.append("line")
+            .attr("class", "background-branch")
+            .attr("x1", startX)
+            .attr("y1", startY)
+            .attr("x2", endX)
+            .attr("y2", endY)
+            // .attr("stroke", "rgba(89, 125, 65, 0.4)") // Vert discret pour tronc
+            .attr("stroke", "rgba(139, 115, 85, 0.6)") // marrondiscret pour tronc
+            
+            .attr("stroke-width", mainBranchWidth)
+            .attr("stroke-linecap", "round");
+        
+        // NIVEAU 1 : Branches principales (grosses)
+        const nombreBranchesPrincipales = 8 + Math.floor(Math.random() * 8); // 8-15 branches principales
+        
+        for (let i = 0; i < nombreBranchesPrincipales; i++) {
+            // Position le long du tronc (20% à 80%)
+            const position = 0.2 + (i / nombreBranchesPrincipales) * 0.6;
+            const branchX = startX + (endX - startX) * position;
+            const branchY = startY + (endY - startY) * position;
+            
+            // Direction perpendiculaire avec variation
+            const branchDirection = direction + (Math.random() < 0.5 ? 1 : -1) * (Math.PI/2 + (Math.random() - 0.5) * Math.PI/4);
+            const branchLength = (60 + Math.random() * 120) * sizeMultiplier; // Branches moyennes
+            const branchWidth = (2 + Math.random() * 2) * sizeMultiplier;
+            
+            // Bout de la branche principale
+            const branch1EndX = branchX + Math.cos(branchDirection) * branchLength;
+            const branch1EndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+            // Dessiner branche principale (NIVEAU 1)
+            group.append("line")
+                .attr("class", "background-branch")
+                .attr("x1", branchX)
+                .attr("y1", branchY)
+                .attr("x2", branch1EndX)
+                .attr("y2", branch1EndY)
+                .attr("stroke", "rgba(139, 115, 85, 0.6)") // Marron comme avant
+                .attr("stroke-width", branchWidth)
+                .attr("stroke-linecap", "round");
+            
+            // QUELQUES FEUILLES sur branche principale (NIVEAU 1)
+            if (Math.random() < 0.4) { // 40% de chance d'avoir des feuilles sur niveau 1
+                const nombreFeuillesNiv1 = 1 + Math.floor(Math.random() * 3); // 1-3 feuilles
+                for (let f = 0; f < nombreFeuillesNiv1; f++) {
+                    const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/3;
+                    const leafSize = (12 + Math.random() * 18) * sizeMultiplier;
+                    const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                    
+                    const leafX = branch1EndX + (Math.random() - 0.5) * 15;
+                    const leafY = branch1EndY + (Math.random() - 0.5) * 15;
+                    
+                    drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+                }
+            }
+            
+            // NIVEAU 2 : Sous-branches (plus petites)
+            const nombreSousBranches = 3 + Math.floor(Math.random() * 5); // 3-7 sous-branches
+            
+            for (let j = 0; j < nombreSousBranches; j++) {
+                // Position le long de la branche principale (30% à 90%)
+                const subPosition = 0.3 + (j / nombreSousBranches) * 0.6;
+                const subBranchX = branchX + (branch1EndX - branchX) * subPosition;
+                const subBranchY = branchY + (branch1EndY - branchY) * subPosition;
+                
+                // Direction avec plus de variation pour naturel
+                const subBranchDirection = branchDirection + (Math.random() - 0.5) * Math.PI/2;
+                const subBranchLength = (30 + Math.random() * 60) * sizeMultiplier; // Plus petites
+                const subBranchWidth = (1 + Math.random() * 1.5) * sizeMultiplier;
+                
+                // Bout de la sous-branche
+                const branch2EndX = subBranchX + Math.cos(subBranchDirection) * subBranchLength;
+                const branch2EndY = subBranchY + Math.sin(subBranchDirection) * subBranchLength;
+                
+                // Dessiner sous-branche (NIVEAU 2)
+                group.append("line")
+                    .attr("class", "background-branch")
+                    .attr("x1", subBranchX)
+                    .attr("y1", subBranchY)
+                    .attr("x2", branch2EndX)
+                    .attr("y2", branch2EndY)
+                    .attr("stroke", "rgba(89, 125, 65, 0.7)") // Vert comme avant
+                    .attr("stroke-width", subBranchWidth)
+                    .attr("stroke-linecap", "round");
+                
+                // FEUILLES sur sous-branches (NIVEAU 2) - PLUS DE FEUILLES ICI
+                const nombreFeuillesNiv2 = 3 + Math.floor(Math.random() * 5); // 3-7 feuilles
+                
+                for (let k = 0; k < nombreFeuillesNiv2; k++) {
+                    const leafAngle = subBranchDirection + (Math.random() - 0.5) * Math.PI/2;
+                    const leafSize = (10 + Math.random() * 20) * sizeMultiplier;
+                    const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                    
+                    const leafX = branch2EndX + (Math.random() - 0.5) * 20;
+                    const leafY = branch2EndY + (Math.random() - 0.5) * 20;
+                    
+                    drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+                }
+                
+                // NIVEAU 3 : Rameaux (optionnel pour plus de complexité)
+                if (Math.random() < 0.6) { // 60% de chance d'avoir niveau 3
+                    const nombreRameaux = 1 + Math.floor(Math.random() * 3); // 1-3 rameaux
+                    
+                    for (let r = 0; r < nombreRameaux; r++) {
+                        const rameauPosition = 0.5 + Math.random() * 0.4; // Plutôt vers le bout
+                        const rameauX = subBranchX + (branch2EndX - subBranchX) * rameauPosition;
+                        const rameauY = subBranchY + (branch2EndY - subBranchY) * rameauPosition;
+                        
+                        const rameauDirection = subBranchDirection + (Math.random() - 0.5) * Math.PI/3;
+                        const rameauLength = (15 + Math.random() * 30) * sizeMultiplier; // Très petites
+                        const rameauWidth = (0.5 + Math.random() * 1) * sizeMultiplier;
+                        
+                        const rameauEndX = rameauX + Math.cos(rameauDirection) * rameauLength;
+                        const rameauEndY = rameauY + Math.sin(rameauDirection) * rameauLength;
+                        
+                        // Dessiner rameau (NIVEAU 3)
+                        group.append("line")
+                            .attr("class", "background-branch")
+                            .attr("x1", rameauX)
+                            .attr("y1", rameauY)
+                            .attr("x2", rameauEndX)
+                            .attr("y2", rameauEndY)
+                            .attr("stroke", "rgba(89, 125, 65, 0.5)") // Vert fin
+                            .attr("stroke-width", rameauWidth)
+                            .attr("stroke-linecap", "round");
+                        
+                        // FEUILLES sur rameaux (NIVEAU 3)
+                        const nombreFeuillesNiv3 = 1 + Math.floor(Math.random() * 3); // 1-3 feuilles
+                        
+                        for (let l = 0; l < nombreFeuillesNiv3; l++) {
+                            const leafAngle = rameauDirection + (Math.random() - 0.5) * Math.PI/4;
+                            const leafSize = (8 + Math.random() * 15) * sizeMultiplier; // Plus petites
+                            const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                            
+                            const leafX = rameauEndX + (Math.random() - 0.5) * 10;
+                            const leafY = rameauEndY + (Math.random() - 0.5) * 10;
+                            
+                            drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Feuilles au bout du tronc principal
+        const endLeaves = 4 + Math.floor(Math.random() * 6);
+        for (let e = 0; e < endLeaves; e++) {
+            const leafAngle = direction + (Math.random() - 0.5) * Math.PI/3;
+            const leafSize = (15 + Math.random() * 25) * sizeMultiplier;
+            const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            
+            const leafX = endX + (Math.random() - 0.5) * 25;
+            const leafY = endY + (Math.random() - 0.5) * 25;
+            
+            drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+        }
+    }
+
+    /**
+     * Système de branches de remplissage avec espacement naturel
+     */
+    function drawCanopyBranchSystem(group, startX, startY, initialDirection, settings, leafColors, mainBranchColor, smallBranchColor, sizeMultiplier, forExport, width, height, offsetX, offsetY) {
+        // Longueur plus modérée pour les branches de remplissage
+        const mainBranchLength = (100 + Math.random() * 250) * sizeMultiplier;
+        const mainBranchWidth = (1.5 + Math.random() * 1.5) * sizeMultiplier; // Plus discret
+        
+        // BRANCHE PRINCIPALE
+        const endX = startX + Math.cos(initialDirection) * mainBranchLength;
+        const endY = startY + Math.sin(initialDirection) * mainBranchLength;
+        
+        // Dessiner branche principale verte discrète
+        group.append("line")
+            .attr("class", "background-branch")
+            .attr("x1", startX)
+            .attr("y1", startY)
+            .attr("x2", endX)
+            .attr("y2", endY)
+            .attr("stroke", `rgba(${mainBranchColor.r}, ${mainBranchColor.g}, ${mainBranchColor.b}, 0.4)`) // Plus discret
+            .attr("stroke-width", mainBranchWidth)
+            .attr("stroke-linecap", "round");
+        
+        // Grille d'espacement pour les feuilles
+        const leafGrid = new Set();
+        const gridSize = 35;
+        
+        // Petites branches plus naturelles
+        const nombrePetitesBranches = 4 + Math.floor(Math.random() * 6); // Moins de branches pour éviter surcharge
+        
+        for (let i = 0; i < nombrePetitesBranches; i++) {
+            const position = 0.3 + (i / nombrePetitesBranches) * 0.6;
+            const branchX = startX + (endX - startX) * position;
+            const branchY = startY + (endY - startY) * position;
+            
+            // Direction plus naturelle
+            const basePerpendicular = initialDirection + Math.PI/2;
+            const side = Math.random() < 0.5 ? 1 : -1;
+            const branchDirection = basePerpendicular * side + (Math.random() - 0.5) * Math.PI/4;
+            
+            const branchLength = (30 + Math.random() * 60) * sizeMultiplier;
+            const branchWidth = (0.8 + Math.random() * 0.8) * sizeMultiplier; // Plus discret
+            
+            const smallEndX = branchX + Math.cos(branchDirection) * branchLength;
+            const smallEndY = branchY + Math.sin(branchDirection) * branchLength;
+            
+            // Dessiner petite branche discrète
+            group.append("line")
+                .attr("class", "background-branch")
+                .attr("x1", branchX)
+                .attr("y1", branchY)
+                .attr("x2", smallEndX)
+                .attr("y2", smallEndY)
+                .attr("stroke", `rgba(${smallBranchColor.r}, ${smallBranchColor.g}, ${smallBranchColor.b}, 0.3)`) // Très discret
+                .attr("stroke-width", branchWidth)
+                .attr("stroke-linecap", "round");
+            
+            // Feuilles avec espacement
+            const nombreFeuilles = 2 + Math.floor(Math.random() * 3); // 2-4 feuilles seulement
+            
+            for (let j = 0; j < nombreFeuilles; j++) {
+                const leafAngle = branchDirection + (Math.random() - 0.5) * Math.PI/4;
+                const leafSize = (8 + Math.random() * 15) * sizeMultiplier; // Plus petites
+                const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                
+                // Position avec évitement de chevauchement
+                let leafX, leafY, attempts = 0;
+                let validPosition = false;
+                
+                do {
+                    leafX = smallEndX + (Math.random() - 0.5) * 20;
+                    leafY = smallEndY + (Math.random() - 0.5) * 20;
+                    
+                    const gridX = Math.floor(leafX / gridSize);
+                    const gridY = Math.floor(leafY / gridSize);
+                    const gridKey = `${gridX},${gridY}`;
+                    
+                    if (!leafGrid.has(gridKey)) {
+                        leafGrid.add(gridKey);
+                        validPosition = true;
+                    } else {
+                        attempts++;
+                    }
+                } while (!validPosition && attempts < 3);
+                
+                if (validPosition) {
+                    drawCanopyLeaf(group, leafX, leafY, leafSize, leafAngle, leafColor, settings, forExport);
+                }
+            }
+        }
+    }
+
+    /**
+     * Dessine une feuille de canopée
+     */
+    function drawCanopyLeaf(group, x, y, size, angle, leafColor, settings, forExport) {
+        const angleRad = angle;
+        
+        // Forme de feuille naturelle
+        const leaf = group.append("path")
+            .attr("class", "background-leaf")
+            .attr("d", `M ${x} ${y} 
+                    Q ${x + Math.cos(angleRad) * size * 0.5} ${y + Math.sin(angleRad) * size * 0.5}, 
+                        ${x + Math.cos(angleRad) * size} ${y + Math.sin(angleRad) * size}
+                    Q ${x + Math.cos(angleRad + 0.5) * size * 0.7} ${y + Math.sin(angleRad + 0.5) * size * 0.7},
+                        ${x} ${y}`)
+            .attr("fill", leafColor.toString())
+            .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
+            .attr("stroke-width", "0.5");
+        
+        // Animation si activée
+        if (settings.animation && !forExport && Math.random() < 0.3) {
+            const swayDuration = (4 + Math.random() * 3) / settings.animationSpeed;
+            const delay = Math.random() * 2;
+            
+            leaf.style("transform-origin", `${x}px ${y}px`);
+            leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${delay}s`);
+        }
+    }
+
+
+    /**
+     * Gestionnaire de densité simple pour les passes d'optimisation
+     */
+    class DensityChecker {
+        constructor(width, height, cellSize = 60) {
+            this.width = width;
+            this.height = height;
+            this.cellSize = cellSize;
+            this.cols = Math.ceil(width / cellSize);
+            this.rows = Math.ceil(height / cellSize);
+            this.grid = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+        }
+
+        // Compter les feuilles dans une zone
+        countLeavesInRadius(centerX, centerY, radius, bgGroup) {
+            let count = 0;
+            const elements = bgGroup.selectAll('.background-leaf').nodes();
+            
+            elements.forEach(leaf => {
+                const leafData = leaf.getAttribute('d');
+                if (leafData) {
+                    // Extraire les coordonnées x,y du path
+                    const match = leafData.match(/M\s*([\d.-]+)\s*([\d.-]+)/);
+                    if (match) {
+                        const leafX = parseFloat(match[1]);
+                        const leafY = parseFloat(match[2]);
+                        const distance = Math.sqrt((leafX - centerX) ** 2 + (leafY - centerY) ** 2);
+                        if (distance <= radius) {
+                            count++;
+                        }
+                    }
+                }
+            });
+            return count;
+        }
+    }
+
+    /**
+     * PASSE 2 : Suppression des branches dans les zones trop denses
+     */
+    function secondPass(bgGroup, width, height) {
+        console.log("🔍 PASSE 2: Détection et suppression des zones trop denses...");
+        
+        const densityChecker = new DensityChecker(width, height);
+        
+        // Analyser toutes les branches existantes
+        const allBranches = bgGroup.selectAll('.branch-system').nodes();
+        let branchesRemoved = 0;
+
+        allBranches.forEach(branchElement => {
+            // Récupérer la position de la branche (première ligne de la branche)
+            const firstLine = d3.select(branchElement).select('line');
+            if (!firstLine.empty()) {
+                const x1 = parseFloat(firstLine.attr('x1'));
+                const y1 = parseFloat(firstLine.attr('y1'));
+                
+                // Compter les feuilles dans un rayon de 80px autour de cette branche
+                const localDensity = densityChecker.countLeavesInRadius(x1, y1, 80, bgGroup);
+                
+                // Si trop de feuilles (> 25), supprimer cette branche
+                if (localDensity > 25) {
+                    d3.select(branchElement).remove();
+                    branchesRemoved++;
+                }
+            }
+        });
+
+        console.log(`❌ Supprimé ${branchesRemoved} branches dans les zones trop denses`);
+        return branchesRemoved;
+    }
+
+    // /**
+    //  * PASSE 3 : Ajout de petites branches dans les zones vides
+    //  */
+    // function thirdPass(bgGroup, width, height, offsetX, offsetY, settings, leafColors, sizeMultiplier, forExport, drawCanopyBranchSystem) {
+    //     console.log("🌱 PASSE 3: Détection des zones vides et ajout de petites branches...");
+        
+    //     const densityChecker = new DensityChecker(width, height);
+        
+    //     // Diviser l'écran en zones pour vérifier la couverture
+    //     const zoneSize = Math.min(width, height) / 4; // Zones de 1/4 de la taille de l'écran
+    //     const zonesX = Math.ceil(width / zoneSize);
+    //     const zonesY = Math.ceil(height / zoneSize);
+
+    //     let zonesAdded = 0;
+
+    //     // Couleurs pour les nouvelles branches (reprendre les couleurs existantes)
+    //     const mainBranchColor = {r: 89, g: 125, b: 65};
+    //     const smallBranchColor = {r: 89, g: 125, b: 65};
+
+    //     for (let zx = 0; zx < zonesX; zx++) {
+    //         for (let zy = 0; zy < zonesY; zy++) {
+    //             const zoneCenterX = offsetX + (zx + 0.5) * zoneSize;
+    //             const zoneCenterY = offsetY + (zy + 0.5) * zoneSize;
+                
+    //             // Vérifier si cette zone est dans les limites
+    //             if (zoneCenterX < offsetX + width && zoneCenterY < offsetY + height) {
+                    
+    //                 // Compter les feuilles dans cette zone
+    //                 const zoneRadius = zoneSize * 0.4; // 40% de la zone
+    //                 const leafCount = densityChecker.countLeavesInRadius(zoneCenterX, zoneCenterY, zoneRadius, bgGroup);
+                    
+    //                 // Si moins de 8 feuilles, c'est une zone vide
+    //                 if (leafCount < 8) {
+                        
+    //                     // Ajouter 1-2 petites branches dans cette zone
+    //                     const numberOfSmallBranches = 1 + Math.floor(Math.random() * 2);
+                        
+    //                     for (let i = 0; i < numberOfSmallBranches; i++) {
+    //                         // Position aléatoire dans la zone
+    //                         const branchX = zoneCenterX + (Math.random() - 0.5) * zoneSize * 0.6;
+    //                         const branchY = zoneCenterY + (Math.random() - 0.5) * zoneSize * 0.6;
+                            
+    //                         // Direction aléatoire
+    //                         const direction = Math.random() * Math.PI * 2;
+                            
+    //                         // Créer groupe pour cette petite branche
+    //                         const smallBranchGroup = bgGroup.append("g")
+    //                             .attr("class", "branch-system fill-branch-small");
+                            
+    //                         // RÉUTILISER LA FONCTION EXISTANTE drawCanopyBranchSystem
+    //                         // avec des paramètres adaptés pour une petite branche
+    //                         const smallSizeMultiplier = sizeMultiplier * 0.6; // 60% de la taille normale
+                            
+    //                         drawCanopyBranchSystem(
+    //                             smallBranchGroup, 
+    //                             branchX, 
+    //                             branchY, 
+    //                             direction, 
+    //                             settings, 
+    //                             leafColors, 
+    //                             mainBranchColor, 
+    //                             smallBranchColor, 
+    //                             smallSizeMultiplier, 
+    //                             forExport, 
+    //                             width, 
+    //                             height, 
+    //                             offsetX, 
+    //                             offsetY
+    //                         );
+                            
+    //                         // Animation pour les nouvelles branches
+    //                         if (settings.animation && !forExport) {
+    //                             const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+    //                             const delay = Math.random() * 2;
+                                
+    //                             smallBranchGroup.style("transform-origin", `${branchX}px ${branchY}px`);
+    //                             smallBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+    //                         }
+    //                     }
+                        
+    //                     zonesAdded++;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     console.log(`✅ Ajouté ${zonesAdded} zones de petites branches dans les zones vides`);
+    //     return zonesAdded;
+    // }
+
+
+    // PASSE 3 AMÉLIORÉE - Détection et ajout dans les zones vides
+
+    /**
+     * Détecteur de densité amélioré avec logs détaillés
+     */
+    class ImprovedDensityChecker {
+        constructor(width, height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        // Compter TOUTES les feuilles dans un rayon donné avec logs détaillés
+        countLeavesInRadius(centerX, centerY, radius, bgGroup, debug = false) {
+            let count = 0;
+            const elements = bgGroup.selectAll('.background-leaf').nodes();
+            
+            if (debug) {
+                console.log(`🔍 Vérification zone (${centerX.toFixed(0)}, ${centerY.toFixed(0)}) rayon ${radius}px`);
+                console.log(`📊 Total feuilles dans bgGroup: ${elements.length}`);
+            }
+            
+            const foundLeaves = [];
+            
+            elements.forEach((leaf, index) => {
+                const leafData = leaf.getAttribute('d');
+                if (leafData) {
+                    // Plusieurs patterns pour extraire les coordonnées selon le format du path
+                    let match = leafData.match(/M\s*([\d.-]+)[,\s]+([\d.-]+)/);
+                    if (!match) {
+                        // Essayer d'autres formats
+                        match = leafData.match(/M\s*([\d.-]+)\s+([\d.-]+)/);
+                    }
+                    
+                    if (match) {
+                        const leafX = parseFloat(match[1]);
+                        const leafY = parseFloat(match[2]);
+                        const distance = Math.sqrt((leafX - centerX) ** 2 + (leafY - centerY) ** 2);
+                        
+                        if (distance <= radius) {
+                            count++;
+                            if (debug && count <= 5) { // Montrer les 5 premières
+                                foundLeaves.push({x: leafX, y: leafY, dist: distance.toFixed(1)});
+                            }
+                        }
+                    }
+                }
+            });
+            
+            if (debug) {
+                console.log(`✅ Feuilles trouvées: ${count}`);
+                if (foundLeaves.length > 0) {
+                    console.log(`📍 Exemples:`, foundLeaves);
+                }
+            }
+            
+            return count;
+        }
+
+        // Analyser TOUTE la grille pour voir la répartition
+        analyzeFullGrid(bgGroup, cellSize = 100) {
+            console.log(`🗺️  ANALYSE COMPLÈTE DE LA GRILLE (cellules de ${cellSize}px)`);
+            
+            const cols = Math.ceil(this.width / cellSize);
+            const rows = Math.ceil(this.height / cellSize);
+            
+            const densityMap = [];
+            
+            for (let row = 0; row < rows; row++) {
+                const rowData = [];
+                for (let col = 0; col < cols; col++) {
+                    const centerX = (col + 0.5) * cellSize;
+                    const centerY = (row + 0.5) * cellSize;
+                    
+                    const count = this.countLeavesInRadius(centerX, centerY, cellSize * 0.7, bgGroup);
+                    rowData.push(count);
+                }
+                densityMap.push(rowData);
+            }
+            
+            // Afficher la carte de densité
+            console.log("📊 CARTE DE DENSITÉ (nombre de feuilles par zone):");
+            densityMap.forEach((row, rowIndex) => {
+                const rowStr = row.map(count => {
+                    if (count === 0) return "  .";
+                    if (count < 5) return `  ${count}`;
+                    if (count < 10) return ` ${count}`;
+                    return `${count}`;
+                }).join(" ");
+                console.log(`Ligne ${rowIndex}: [${rowStr}]`);
+            });
+            
+            return densityMap;
+        }
+    }
+
+    /**
+     * PASSE 3 AMÉLIORÉE : Ajout de petites branches dans les zones vides
+     */
+    function thirdPass(bgGroup, width, height, offsetX, offsetY, settings, leafColors, sizeMultiplier, forExport, drawCanopyBranchSystem) {
+        console.log("🌱 PASSE 3 AMÉLIORÉE: Analyse détaillée et ajout dans les zones vides...");
+        console.log(`📐 Dimensions: ${width}x${height}, offset: (${offsetX}, ${offsetY})`);
+        
+        const densityChecker = new ImprovedDensityChecker(width, height);
+        
+        // 1. ANALYSE GLOBALE FIRST
+        const densityMap = densityChecker.analyzeFullGrid(bgGroup, 80);
+        
+        // 2. ZONES PRIORITAIRES - Se concentrer sur les bords et coins
+        const priorityZones = [
+            // Coins
+            { name: "Coin haut-gauche", x: offsetX + width * 0.1, y: offsetY + height * 0.1, size: Math.min(width, height) * 0.25 },
+            { name: "Coin haut-droite", x: offsetX + width * 0.9, y: offsetY + height * 0.1, size: Math.min(width, height) * 0.25 },
+            { name: "Coin bas-gauche", x: offsetX + width * 0.1, y: offsetY + height * 0.9, size: Math.min(width, height) * 0.25 },
+            { name: "Coin bas-droite", x: offsetX + width * 0.9, y: offsetY + height * 0.9, size: Math.min(width, height) * 0.25 },
+            
+            // Bords
+            { name: "Bord gauche", x: offsetX + width * 0.05, y: offsetY + height * 0.5, size: Math.min(width, height) * 0.2 },
+            { name: "Bord droit", x: offsetX + width * 0.95, y: offsetY + height * 0.5, size: Math.min(width, height) * 0.2 },
+            { name: "Bord haut", x: offsetX + width * 0.5, y: offsetY + height * 0.05, size: Math.min(width, height) * 0.2 },
+            { name: "Bord bas", x: offsetX + width * 0.5, y: offsetY + height * 0.95, size: Math.min(width, height) * 0.2 },
+        ];
+
+        let zonesAdded = 0;
+        const mainBranchColor = {r: 89, g: 125, b: 65};
+        const smallBranchColor = {r: 89, g: 125, b: 65};
+
+        // 3. ANALYSER CHAQUE ZONE PRIORITAIRE
+        priorityZones.forEach(zone => {
+            console.log(`\n🎯 Test zone: ${zone.name}`);
+            
+            const leafCount = densityChecker.countLeavesInRadius(zone.x, zone.y, zone.size, bgGroup, true);
+            
+            // Seuil adapté à la taille de la zone
+            const expectedLeaves = Math.floor((zone.size / 30) ** 2); // Densité attendue
+            const threshold = Math.max(3, expectedLeaves * 0.3); // Au moins 30% de la densité attendue
+            
+            console.log(`📊 Feuilles: ${leafCount}, Seuil: ${threshold}, Attendu: ${expectedLeaves}`);
+            
+            if (leafCount < threshold) {
+                console.log(`🟢 Zone vide détectée ! Ajout de branches...`);
+                
+                // Ajouter 1-2 branches dans cette zone
+                const numberOfBranches = 1 + Math.floor(Math.random() * 2);
+                
+                for (let i = 0; i < numberOfBranches; i++) {
+                    // Position dans la zone avec un peu de randomisation
+                    const branchX = zone.x + (Math.random() - 0.5) * zone.size * 0.4;
+                    const branchY = zone.y + (Math.random() - 0.5) * zone.size * 0.4;
+                    
+                    // S'assurer que c'est dans les limites
+                    const finalX = Math.max(offsetX + 20, Math.min(offsetX + width - 20, branchX));
+                    const finalY = Math.max(offsetY + 20, Math.min(offsetY + height - 20, branchY));
+                    
+                    const direction = Math.random() * Math.PI * 2;
+                    
+                    console.log(`  🌿 Ajout branche ${i+1} en (${finalX.toFixed(0)}, ${finalY.toFixed(0)})`);
+                    
+                    // Créer groupe pour cette branche
+                    const smallBranchGroup = bgGroup.append("g")
+                        .attr("class", "branch-system fill-branch-zone");
+                    
+                    // Utiliser la fonction existante avec une taille adaptée
+                    const adaptedSizeMultiplier = sizeMultiplier * 0.8; // 80% de la taille normale
+                    
+                    drawCanopyBranchSystem(
+                        smallBranchGroup, 
+                        finalX, 
+                        finalY, 
+                        direction, 
+                        settings, 
+                        leafColors, 
+                        mainBranchColor, 
+                        smallBranchColor, 
+                        adaptedSizeMultiplier, 
+                        forExport, 
+                        width, 
+                        height, 
+                        offsetX, 
+                        offsetY
+                    );
+                    
+                    // Animation
+                    if (settings.animation && !forExport) {
+                        const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+                        const delay = Math.random() * 2;
+                        
+                        smallBranchGroup.style("transform-origin", `${finalX}px ${finalY}px`);
+                        smallBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+                    }
+                }
+                
+                zonesAdded++;
+            } else {
+                console.log(`🔴 Zone suffisamment fournie`);
+            }
+        });
+
+        console.log(`\n✅ PASSE 3 terminée: ${zonesAdded} zones remplies sur ${priorityZones.length} testées`);
+        return zonesAdded;
+    }
+
+
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+        sizeMultiplier = Math.min(3, Math.max(1.5, areaRatio * 0.1));
+        
+        console.log(`📊 Export branches - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
+
+    console.log(`🌿 Setup branches logiques: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
     const defs = svg.append("defs");
     
     // Nettoyer tout fond existant
@@ -205,19 +2630,19 @@ function setupTreeBranchesBackground(svg) {
         .attr("pointer-events", "none")
         .lower();
     
-    // Récupérer les paramètres depuis le localStorage
+    // Récupérer les paramètres
     const settings = {
         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
-        animation: localStorage.getItem('backgroundAnimation') === 'true',
+        animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
     };
     
-    // Appliquer l'opacité globale au groupe
+    // Appliquer l'opacité globale
     bgGroup.style("opacity", settings.opacity);
     
-    // Créer un gradient subtil pour le fond
+    // Gradient de fond
     const gradientId = `branches-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -226,7 +2651,6 @@ function setupTreeBranchesBackground(svg) {
         .attr("x2", "100%")
         .attr("y2", "100%");
     
-    // Utiliser la couleur personnalisée pour le gradient
     const baseColor = d3.rgb(settings.customColor);
     const lighterColor = d3.rgb(baseColor).brighter(1.5);
     const darkerColor = d3.rgb(baseColor).darker(0.2);
@@ -241,275 +2665,175 @@ function setupTreeBranchesBackground(svg) {
     
     // Rectangle de fond
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`)
         .attr("pointer-events", "none")
         .lower();
     
-    // Définition des couleurs pour les branches et les feuilles
-    const branchColor = d3.rgb(settings.customColor).darker(0.5);
-    
-    // Les feuilles auront principalement des teintes vertes, indépendamment de la couleur personnalisée
+    // Couleurs pour branches et feuilles
     const leafColors = [
-        d3.rgb(50, 150, 50), // Vert vif
-        d3.rgb(70, 130, 40), // Vert olive
-        d3.rgb(100, 160, 60), // Vert clair
-        d3.rgb(30, 110, 30), // Vert foncé
-        d3.rgb(120, 180, 80) // Vert-jaune
+        d3.rgb(50, 150, 50),   // Vert vif
+        d3.rgb(70, 130, 40),   // Vert olive
+        d3.rgb(100, 160, 60),  // Vert clair
+        d3.rgb(30, 110, 30),   // Vert foncé
+        d3.rgb(120, 180, 80)   // Vert-jaune
     ];
     
-    // Fonction pour dessiner des branches
-    function drawBranch(startX, startY, length, angle, width, depth, parentGroup) {
-        if (depth <= 0 || length < 5) return;
-        
-        // Utiliser le groupe parent si fourni, sinon utiliser le groupe principal
-        const branchGroup = parentGroup || bgGroup.append("g");
-        
-        // Ajuster la densité des branches selon le paramètre de détail
-        if (!parentGroup && Math.random() > settings.patternVisibility && depth < 4) return;
-        
-        // Calculer le point final avec une légère variation pour plus de naturel
-        const angleVariation = (Math.random() * 0.1 - 0.05);
-        const finalAngle = angle + angleVariation;
-        const endX = startX + Math.cos(finalAngle) * length;
-        const endY = startY + Math.sin(finalAngle) * length;
-        
-        // Couleur de branche avec variation naturelle
-        const branchRgb = d3.rgb(branchColor);
-        branchRgb.opacity = 0.15 + (depth * 0.02);
-        
-        // Dessiner la branche
-        const branch = branchGroup.append("line")
-            .attr("x1", startX)
-            .attr("y1", startY)
-            .attr("x2", endX)
-            .attr("y2", endY)
-            .attr("stroke", branchRgb.toString())
-            .attr("stroke-width", width * settings.patternVisibility)
-            .attr("stroke-linecap", "round")
-            .attr("stroke-linejoin", "round"); // Ajout pour mieux connecter les branches
-        
-        // Ajouter des feuilles avec plus de probabilité aux extrémités
-        if (Math.random() < 0.4 * settings.patternVisibility && depth < 5) {
-            drawLeaf(branchGroup, endX, endY, length * 0.6, finalAngle, depth);
-        }
-        
-        // Animation si activée et si c'est une branche principale (pas de parent)
-        if (settings.animation && !parentGroup && depth > 3) {
-            // Uniquement animer les branches principales pour éviter les déconnexions
-            branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+    // EFFET CANOPÉE AMÉLIORÉ - Couverture garantie du centre
+    const nombreBranchesPrincipales = Math.ceil(24 * settings.patternVisibility * densityMultiplier);
+    const nombreBranchesRemplissage = Math.ceil(12 * settings.patternVisibility * densityMultiplier);
+    
+    console.log(`🌿 Canopée améliorée: ${nombreBranchesPrincipales} principales + ${nombreBranchesRemplissage} remplissage`);
+    
+    // PARTIE 1 : BRANCHES PRINCIPALES - distribution déterministe
+    const branchesParBord = Math.ceil(nombreBranchesPrincipales / 4);
+    
+    for (let bord = 0; bord < 4; bord++) {
+        for (let i = 0; i < branchesParBord; i++) {
+            let startX, startY, direction, minLength;
             
-            const duration = (7 + Math.random() * 5) / settings.animationSpeed;
-            const delay = Math.random() * 3;
+            // Position DÉTERMINISTE sur chaque bord
+            const position = (i + 1) / (branchesParBord + 1); // Répartition équidistante
+            const variation = 0.05; // Très petite variation pour naturel
+            const pos = position + (Math.random() - 0.5) * variation;
             
-            branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
-        }
-        
-        // Paramètres pour les sous-branches
-        const newLength = length * (0.65 + Math.random() * 0.1);
-        const newWidth = width * 0.7;
-        
-        // Angle de divergence pour les sous-branches
-        const divergence = Math.PI / (4 + Math.random() * 4);
-        
-        // Récursion pour les branches enfants - toujours dans le même groupe pour garder les connexions
-        drawBranch(endX, endY, newLength, finalAngle + divergence, newWidth, depth - 1, branchGroup);
-        drawBranch(endX, endY, newLength * 0.8, finalAngle - divergence * 1.2, newWidth * 0.8, depth - 1, branchGroup);
-        
-        // Occasionnellement ajouter une branche centrale pour une meilleure continuité
-        if (Math.random() < 0.2 * settings.patternVisibility && depth > 2) {
-            drawBranch(endX, endY, newLength * 0.9, finalAngle + angleVariation, newWidth * 0.9, depth - 1, branchGroup);
-        }
-        
-        // Occasionnellement ajouter une branche latérale
-        if (Math.random() < 0.3 * settings.patternVisibility && depth > 2) {
-            const thirdAngle = finalAngle + (Math.random() < 0.5 ? 0.8 : -0.8) * divergence;
-            drawBranch(endX, endY, newLength * 0.7, thirdAngle, newWidth * 0.7, depth - 2, branchGroup);
-        }
-        
-        // Ajouter des branches de connexion aux jonctions pour éviter les "sauts" visuels
-        if (depth > 1 && Math.random() < 0.3) {
-            const junctionX = startX + Math.cos(finalAngle) * (length * 0.4);
-            const junctionY = startY + Math.sin(finalAngle) * (length * 0.4);
+            switch (bord) {
+                case 0: // Bord gauche
+                    startX = offsetX;
+                    startY = offsetY + pos * height;
+                    // Direction vers le centre-droit avec variation
+                    direction = -Math.PI/4 + Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+                    minLength = width * 0.6; // Au moins 60% de largeur
+                    break;
+                case 1: // Bord haut  
+                    startX = offsetX + pos * width;
+                    startY = offsetY;
+                    // Direction vers le centre-bas avec variation
+                    direction = Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+                    minLength = height * 0.6; // Au moins 60% de hauteur
+                    break;
+                case 2: // Bord droit
+                    startX = offsetX + width;
+                    startY = offsetY + pos * height;
+                    // Direction vers le centre-gauche avec variation
+                    direction = Math.PI - Math.PI/4 + (Math.random() - 0.5) * Math.PI/3;
+                    minLength = width * 0.6; // Au moins 60% de largeur
+                    break;
+                case 3: // Bord bas
+                    startX = offsetX + pos * width;
+                    startY = offsetY + height;
+                    // Direction vers le centre-haut avec variation
+                    direction = -Math.PI/2 + (Math.random() - 0.5) * Math.PI/3;
+                    minLength = height * 0.6; // Au moins 60% de hauteur
+                    break;
+            }
             
-            // Petite branche de connexion
-            const connectAngle = finalAngle + Math.PI * (Math.random() * 0.5 + 0.5);
-            const connectLength = length * (0.2 + Math.random() * 0.2);
+            // Créer branche principale longue
+            const branchGroup = bgGroup.append("g")
+                .attr("class", "branch-system main-branch");
             
-            drawBranch(junctionX, junctionY, connectLength, connectAngle, width * 0.6, 2, branchGroup);
-        }
-    }
-        
-    // Fonction améliorée pour dessiner des feuilles plus vertes et qui tombent
-    function drawLeaf(parentGroup, x, y, size, angle, depth) {
-        // Taille de la feuille ajustée selon le niveau de détail
-        const leafSize = size * (0.4 + Math.random() * 0.3) * settings.patternVisibility;
-        
-        // Choisir une couleur de feuille verte aléatoire
-        const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
-        leafColor.opacity = 0.15 + (Math.random() * 0.1);
-        
-        // Angle légèrement varié pour un aspect plus naturel
-        const leafAngle = angle + (Math.random() - 0.5) * Math.PI / 2;
-        
-        // Créer un groupe pour la feuille
-        const leaf = parentGroup.append("path")
-            .attr("d", `M ${x} ${y} 
-                    Q ${x + Math.cos(leafAngle) * leafSize * 0.5} ${y + Math.sin(leafAngle) * leafSize * 0.5}, 
-                      ${x + Math.cos(leafAngle) * leafSize} ${y + Math.sin(leafAngle) * leafSize}
-                    Q ${x + Math.cos(leafAngle + 0.5) * leafSize * 0.7} ${y + Math.sin(leafAngle + 0.5) * leafSize * 0.7},
-                      ${x} ${y}`)
-            .attr("fill", leafColor.toString())
-            .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
-            .attr("stroke-width", 0.5);
-        
-        // Ajouter animation de chute si activée
-        if (settings.animation) {
-            // Animer soit la chute, soit un mouvement d'oscillation
-            if (Math.random() < 0.3) {
-                // Animation de feuille qui tombe
-                const fallDuration = (8 + Math.random() * 7) / settings.animationSpeed;
-                const fallDelay = Math.random() * 5;
-                const fallDistance = 100 + Math.random() * 200;
-                const swayAmount = 50 + Math.random() * 80;
+            drawLongCanopyBranch(branchGroup, startX, startY, direction, minLength, settings, leafColors, sizeMultiplier, forExport);
+            
+            // Animation
+            if (settings.animation && !forExport) {
+                const duration = (6 + Math.random() * 4) / settings.animationSpeed;
+                const delay = Math.random() * 3;
                 
-                leaf.style("animation", `leafFall ${fallDuration}s infinite ease-in-out ${fallDelay}s`);
-                leaf.style("--fall-distance", `${fallDistance}px`);
-                leaf.style("--sway-amount", `${swayAmount}px`);
-            } else {
-                // Animation d'oscillation sur place
-                const swayDuration = (5 + Math.random() * 4) / settings.animationSpeed;
-                const swayDelay = Math.random() * 3;
-                
-                leaf.style("transform-origin", `${x}px ${y}px`);
-                leaf.style("animation", `leafSway ${swayDuration}s infinite alternate ease-in-out ${swayDelay}s`);
+                branchGroup.style("transform-origin", `${startX}px ${startY}px`);
+                branchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
             }
         }
     }
     
-    // Créer des feuilles qui tombent supplémentaires (indépendantes des branches)
-    function createFallingLeaves() {
-        const numLeaves = Math.floor(20 * settings.patternVisibility);
+    // // PARTIE 2 : BRANCHES DE REMPLISSAGE POUR LE CENTRE
+    // for (let i = 0; i < nombreBranchesRemplissage; i++) {
+    //     // Positions dans la zone centrale (30-70% de l'image)
+    //     const centerX = offsetX + width * (0.3 + Math.random() * 0.4);
+    //     const centerY = offsetY + height * (0.3 + Math.random() * 0.4);
         
-        for (let i = 0; i < numLeaves; i++) {
-            const x = Math.random() * width;
-            const y = Math.random() * height * 0.7; // Commencer dans la partie supérieure
-            const size = 15 + Math.random() * 25;
-            const angle = Math.random() * Math.PI * 2;
+    //     // Direction aléatoire
+    //     const direction = Math.random() * Math.PI * 2;
+    //     const length = (100 + Math.random() * 200) * sizeMultiplier;
+        
+    //     // Créer branche de remplissage
+    //     const fillBranchGroup = bgGroup.append("g")
+    //         .attr("class", "branch-system fill-branch");
+        
+    //     drawCanopyBranchSystem(fillBranchGroup, centerX, centerY, direction, settings, leafColors, sizeMultiplier, forExport, width, height, offsetX, offsetY);
+        
+    //     // Animation
+    //     if (settings.animation && !forExport) {
+    //         const duration = (5 + Math.random() * 3) / settings.animationSpeed;
+    //         const delay = Math.random() * 4;
             
-            // Choisir une couleur verte aléatoire
-            const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
-            leafColor.opacity = 0.15 + (Math.random() * 0.1);
-            
-            // Créer la feuille
-            const leaf = bgGroup.append("path")
-                .attr("d", `M ${x} ${y} 
-                        Q ${x + Math.cos(angle) * size * 0.5} ${y + Math.sin(angle) * size * 0.5}, 
-                          ${x + Math.cos(angle) * size} ${y + Math.sin(angle) * size}
-                        Q ${x + Math.cos(angle + 0.5) * size * 0.7} ${y + Math.sin(angle + 0.5) * size * 0.7},
-                          ${x} ${y}`)
-                .attr("fill", leafColor.toString())
-                .attr("stroke", d3.rgb(leafColor).darker(0.5).toString())
-                .attr("stroke-width", 0.5);
-            
-            // Ajouter l'animation de chute si activée
-            if (settings.animation) {
-                const fallDuration = (10 + Math.random() * 15) / settings.animationSpeed;
-                const fallDelay = Math.random() * 10;
-                const fallDistance = height - y + 100;
-                const swayAmount = 100 + Math.random() * 150;
-                
-                leaf.style("animation", `leafFall ${fallDuration}s infinite ease-in-out ${fallDelay}s`);
-                leaf.style("--fall-distance", `${fallDistance}px`);
-                leaf.style("--sway-amount", `${swayAmount}px`);
-            }
-        }
-    }
+    //         fillBranchGroup.style("transform-origin", `${centerX}px ${centerY}px`);
+    //         fillBranchGroup.style("animation", `branchSway ${duration}s infinite alternate ease-in-out ${delay}s`);
+    //     }
+    // }
+
+
+
+
+
+    // // PASSE 2 : Supprimer les zones trop denses
+    // const branchesRemoved = secondPass(bgGroup, width, height);
+
+    // PASSE 3 : Ajouter des petites branches dans les zones vides
+    // const zonesAdded = thirdPass(bgGroup, width, height, offsetX, offsetY, settings, leafColors, sizeMultiplier, forExport, drawCanopyBranchSystem);
+
+    // console.log(`🎯 Optimisation terminée: -${branchesRemoved} branches denses, +${zonesAdded} zones remplies`);
+
+
+
     
-    // Créer une définition CSS pour les animations
-    if (!document.getElementById('branch-animations-css')) {
+    // CSS animations
+    if (!forExport && !document.getElementById('branch-animations-css')) {
         const styleElement = document.createElement('style');
         styleElement.id = 'branch-animations-css';
         styleElement.textContent = `
             @keyframes branchSway {
                 0% { transform: rotate(0deg); }
-                100% { transform: rotate(3deg); }
+                100% { transform: rotate(1deg); }
             }
             
             @keyframes leafSway {
-                0% { transform: rotate(-5deg); }
-                100% { transform: rotate(5deg); }
-            }
-            
-            @keyframes leafFall {
-                0% {
-                    transform: translate(0, 0) rotate(0deg);
-                }
-                33% {
-                    transform: translate(calc(var(--sway-amount) * 0.3), calc(var(--fall-distance) * 0.33)) rotate(120deg);
-                }
-                66% {
-                    transform: translate(calc(var(--sway-amount) * -0.3), calc(var(--fall-distance) * 0.66)) rotate(240deg);
-                }
-                100% {
-                    transform: translate(calc(var(--sway-amount) * 0.1), calc(var(--fall-distance))) rotate(360deg);
-                }
+                0% { transform: rotate(-3deg); }
+                100% { transform: rotate(3deg); }
             }
         `;
         document.head.appendChild(styleElement);
     }
-    
-    // Ajuster la densité des branches selon le paramètre de détail
-    const branchCount = Math.ceil(6 * settings.patternVisibility);
-    
-    // Dessiner plusieurs systèmes de branches
-    drawBranch(0, height, height * 0.5, -Math.PI/4, 5, 6);
-    drawBranch(0, height, height * 0.4, -Math.PI/3, 4, 6);
-    
-    if (branchCount > 2) {
-        drawBranch(width, height, height * 0.5, -Math.PI*3/4, 5, 6);
-        drawBranch(width, height, height * 0.4, -Math.PI*2/3, 4, 6);
-    }
-    
-    if (branchCount > 4) {
-        drawBranch(width * 0.3, height, height * 0.4, -Math.PI/2, 4, 5);
-        drawBranch(width * 0.7, height, height * 0.4, -Math.PI/2, 4, 5);
-    }
-    
-    if (branchCount > 6) {
-        drawBranch(0, height * 0.3, width * 0.3, 0, 3, 5);
-        drawBranch(0, height * 0.7, width * 0.3, -Math.PI/6, 3, 5);
-    }
-    
-    if (branchCount > 8) {
-        drawBranch(width, height * 0.3, width * 0.3, Math.PI, 3, 5);
-        drawBranch(width, height * 0.7, width * 0.3, Math.PI + Math.PI/6, 3, 5);
-    }
-    
-    // Ajouter des feuilles qui tombent (indépendantes des branches)
-    createFallingLeaves();
-    
-    // Appliquer un léger flou pour adoucir l'ensemble
-    const filter = defs.append("filter")
-        .attr("id", "branches-blur")
-        .attr("x", "-10%")
-        .attr("y", "-10%")
-        .attr("width", "120%")
-        .attr("height", "120%");
-    
-    filter.append("feGaussianBlur")
-        .attr("in", "SourceGraphic")
-        .attr("stdDeviation", 0.5 / settings.patternVisibility);
-    
-    bgGroup.attr("filter", "url(#branches-blur)");
+
+        console.log("Génération du setupTreeBranchesBackground terminée.");
 }
 
-// Fond avec feuilles tombantes - COULEURS RENFORCÉES
-function setupFallingLeavesBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond avec feuilles tombantes adaptée pour l'export PNG grand format
+async function setupFallingLeavesBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.9;
+        sizeMultiplier = Math.min(2.2, Math.max(1.1, areaRatio * 0.08));
+        
+        console.log(`📊 Export Falling Leaves - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -524,15 +2848,17 @@ function setupFallingLeavesBackground(svg) {
     const settings = {
         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
-        animation: localStorage.getItem('backgroundAnimation') === 'true',
+        animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
     };
     
+    console.log(`🍃 Falling Leaves: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+    
     // Appliquer l'opacité globale au groupe
     bgGroup.style("opacity", settings.opacity);
     
-    // Fond de base avec gradient personnalisé
+    // Fond de base avec gradient personnalisé AVEC OFFSET
     const gradientId = `leaves-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -554,55 +2880,60 @@ function setupFallingLeavesBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", darkerColor.toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`)
         .attr("pointer-events", "none")
         .lower();
     
-    // Fonction pour créer différentes formes de feuilles
+    // Fonction pour créer différentes formes de feuilles AVEC TAILLE ADAPTATIVE
     function createLeafPath(type, size) {
+        const adaptedSize = size * sizeMultiplier;
+        
         switch (type) {
             case 0: // Feuille simple arrondie
                 return `M 0,0 
-                        Q ${size*0.5},${-size*0.5} ${size},0 
-                        Q ${size*0.5},${size*0.5} 0,0`;
+                        Q ${adaptedSize*0.5},${-adaptedSize*0.5} ${adaptedSize},0 
+                        Q ${adaptedSize*0.5},${adaptedSize*0.5} 0,0`;
             case 1: // Feuille ovale
                 return `M 0,0 
-                        Q ${size*0.4},${-size*0.7} ${size},0 
-                        Q ${size*0.4},${size*0.7} 0,0`;
+                        Q ${adaptedSize*0.4},${-adaptedSize*0.7} ${adaptedSize},0 
+                        Q ${adaptedSize*0.4},${adaptedSize*0.7} 0,0`;
             case 2: // Feuille pointue
                 return `M 0,0 
-                        L ${size*0.5},${-size*0.6} 
-                        L ${size},0 
-                        L ${size*0.5},${size*0.6} 
+                        L ${adaptedSize*0.5},${-adaptedSize*0.6} 
+                        L ${adaptedSize},0 
+                        L ${adaptedSize*0.5},${adaptedSize*0.6} 
                         Z`;
             case 3: // Feuille de chêne simplifiée
                 let path = `M 0,0 `;
                 const numLobes = 4;
                 for (let i = 0; i < numLobes; i++) {
                     const t = i / (numLobes - 1);
-                    const x = size * t;
-                    const y1 = -size * 0.3 * Math.sin(t * Math.PI);
+                    const x = adaptedSize * t;
+                    const y1 = -adaptedSize * 0.3 * Math.sin(t * Math.PI);
                     
-                    path += `Q ${x-size*0.1},${y1*1.5} ${x},${y1} `;
+                    path += `Q ${x-adaptedSize*0.1},${y1*1.5} ${x},${y1} `;
                 }
                 
-                path += `L ${size},0 `;
+                path += `L ${adaptedSize},0 `;
                 
                 for (let i = numLobes - 1; i >= 0; i--) {
                     const t = i / (numLobes - 1);
-                    const x = size * t;
-                    const y2 = size * 0.3 * Math.sin(t * Math.PI);
+                    const x = adaptedSize * t;
+                    const y2 = adaptedSize * 0.3 * Math.sin(t * Math.PI);
                     
-                    path += `Q ${x-size*0.1},${y2*1.5} ${x},${y2} `;
+                    path += `Q ${x-adaptedSize*0.1},${y2*1.5} ${x},${y2} `;
                 }
                 
                 path += "Z";
                 return path;
             default:
-                return `M 0,0 Q ${size*0.5},${-size*0.5} ${size},0 Q ${size*0.5},${size*0.5} 0,0`;
+                return `M 0,0 Q ${adaptedSize*0.5},${-adaptedSize*0.5} ${adaptedSize},0 Q ${adaptedSize*0.5},${adaptedSize*0.5} 0,0`;
         }
     }
     
@@ -612,11 +2943,11 @@ function setupFallingLeavesBackground(svg) {
         
         // Favoriser les teintes vertes pour les feuilles
         const leafColors = [
-            d3.rgb(50, 150, 50, 0.12), // Vert vif
-            d3.rgb(70, 130, 40, 0.12), // Vert olive
-            d3.rgb(100, 160, 60, 0.12), // Vert clair
-            d3.rgb(30, 110, 30, 0.12), // Vert foncé
-            d3.rgb(120, 180, 80, 0.12) // Vert-jaune
+            d3.rgb(50, 150, 50, 0.12),
+            d3.rgb(70, 130, 40, 0.12),
+            d3.rgb(100, 160, 60, 0.12),
+            d3.rgb(30, 110, 30, 0.12),
+            d3.rgb(120, 180, 80, 0.12)
         ];
         
         // Ajouter quelques feuilles dérivées de la couleur personnalisée
@@ -628,12 +2959,16 @@ function setupFallingLeavesBackground(svg) {
     
     const leafColors = generateLeafColors();
     
-    // Dessiner les feuilles statiques d'abord (celles qui ne tombent pas)
-    const numStaticLeaves = Math.floor(width * height / 20000 * settings.patternVisibility);
+    // Dessiner les feuilles statiques AVEC DENSITÉ ET TAILLE ADAPTATIVES
+    const baseStaticLeaves = Math.floor(width * height / 20000 * settings.patternVisibility);
+    const numStaticLeaves = Math.floor(baseStaticLeaves * densityMultiplier);
+    
+    console.log(`🍂 ${numStaticLeaves} feuilles statiques`);
     
     for (let i = 0; i < numStaticLeaves; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
         const size = (Math.random() * 30 + 10) * settings.patternVisibility;
         const rotation = Math.random() * 360;
         const leafType = Math.floor(Math.random() * 4);
@@ -648,25 +2983,23 @@ function setupFallingLeavesBackground(svg) {
             .attr("transform", `translate(${x},${y}) rotate(${rotation})`)
             .attr("fill", leafColor.toString())
             .attr("stroke", `rgba(100, 100, 80, 0.1)`)
-            .attr("stroke-width", 0.5);
+            .attr("stroke-width", 0.5 * sizeMultiplier);
         
-        // Ajouter une nervure centrale à certaines feuilles
+        // Ajouter une nervure centrale AVEC TAILLE ADAPTATIVE
         if (Math.random() < 0.7) {
             leafGroup.append("path")
-                .attr("d", `M 0,0 L ${size},0`)
+                .attr("d", `M 0,0 L ${size * sizeMultiplier},0`)
                 .attr("transform", `translate(${x},${y}) rotate(${rotation})`)
-                .attr("fill", "none")
+                .attr("fill", "transparent")
                 .attr("stroke", `rgba(100, 90, 80, 0.15)`)
-                .attr("stroke-width", 0.7);
+                .attr("stroke-width", 0.7 * sizeMultiplier);
         }
         
-        // Ajouter seulement une légère oscillation si animation activée
+        // Animation légère (désactivée pour export)
         if (settings.animation) {
-            // Créer une animation simple pour les feuilles statiques
             const dur = (5 + Math.random() * 5) / settings.animationSpeed;
             const delay = Math.random() * 5;
             
-            // Ajouter une animation avec des attributs SVG natifs (pas de CSS)
             const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             anim.setAttribute("attributeName", "transform");
             anim.setAttribute("attributeType", "XML");
@@ -682,15 +3015,17 @@ function setupFallingLeavesBackground(svg) {
         }
     }
     
-    // Maintenant, créer les feuilles tombantes
+    // Créer les feuilles tombantes (désactivées pour export)
     if (settings.animation) {
-        const numFallingLeaves = Math.floor(width * height / 25000 * settings.patternVisibility);
+        const baseFallingLeaves = Math.floor(width * height / 25000 * settings.patternVisibility);
+        const numFallingLeaves = Math.floor(baseFallingLeaves * densityMultiplier);
+        
+        console.log(`🍃 ${numFallingLeaves} feuilles tombantes`);
         
         for (let i = 0; i < numFallingLeaves; i++) {
-            // Répartir sur toute la largeur
-            const x = Math.random() * width;
-            // Démarrer à des hauteurs différentes au-dessus de l'écran
-            const y = -100 - Math.random() * height;
+            // Position AVEC OFFSET
+            const x = offsetX + Math.random() * width;
+            const y = offsetY - 100 - Math.random() * height;
             const size = (Math.random() * 30 + 10) * settings.patternVisibility;
             const rotation = Math.random() * 360;
             const leafType = Math.floor(Math.random() * 4);
@@ -701,34 +3036,32 @@ function setupFallingLeavesBackground(svg) {
             const leafGroup = bgGroup.append("g")
                 .attr("transform", `translate(${x},${y}) rotate(${rotation})`);
             
-            // Dessiner la feuille
+            // Dessiner la feuille AVEC TAILLE ADAPTATIVE
             leafGroup.append("path")
                 .attr("d", createLeafPath(leafType, size))
                 .attr("fill", leafColor.toString())
                 .attr("stroke", `rgba(100, 100, 80, 0.1)`)
-                .attr("stroke-width", 0.5);
+                .attr("stroke-width", 0.5 * sizeMultiplier);
             
-            // Ajouter une nervure centrale
+            // Ajouter une nervure centrale AVEC TAILLE ADAPTATIVE
             if (Math.random() < 0.7) {
                 leafGroup.append("path")
-                    .attr("d", `M 0,0 L ${size},0`)
-                    .attr("fill", "none")
+                    .attr("d", `M 0,0 L ${size * sizeMultiplier},0`)
+                    .attr("fill", "transparent")
                     .attr("stroke", `rgba(100, 90, 80, 0.15)`)
-                    .attr("stroke-width", 0.7);
+                    .attr("stroke-width", 0.7 * sizeMultiplier);
             }
             
-            // Paramètres de l'animation
+            // Paramètres de l'animation AVEC ADAPTATION
             const fallDuration = (10 + Math.random() * 15) / settings.animationSpeed;
-            const delay = Math.random() * 15; // Délai varié
+            const delay = Math.random() * 15;
             
-            // Distance de chute totale
-            const fallDistance = height + 200;
-            // Amplitude de l'oscillation latérale
-            const swayAmount = 50 + Math.random() * 100;
-            // Direction de l'oscillation aléatoire
+            // Distance de chute adaptée
+            const fallDistance = height + 200 * sizeMultiplier;
+            const swayAmount = (50 + Math.random() * 100) * sizeMultiplier;
             const swayDirection = Math.random() < 0.5 ? 1 : -1;
             
-            // Points de contrôle pour le chemin de chute
+            // Points de contrôle pour le chemin de chute AVEC ADAPTATION
             const cp1x = x + (swayAmount * swayDirection * 0.5);
             const cp1y = y + (fallDistance * 0.33);
             const cp2x = x + (swayAmount * swayDirection * -0.5);
@@ -743,8 +3076,8 @@ function setupFallingLeavesBackground(svg) {
             const motionPath = defs.append("path")
                 .attr("id", animId)
                 .attr("d", `M ${x},${y} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${endx},${endy}`)
-                .attr("fill", "none")
-                .attr("stroke", "none");
+                .attr("fill", "transparent")
+                .attr("stroke", "transparent");
             
             // Animation le long du chemin
             const motionAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
@@ -770,7 +3103,7 @@ function setupFallingLeavesBackground(svg) {
         }
     }
     
-    // Appliquer un léger flou
+    // Appliquer un léger flou AVEC ADAPTATION
     const filter = defs.append("filter")
         .attr("id", "leaves-blur")
         .attr("x", "-10%")
@@ -780,16 +3113,48 @@ function setupFallingLeavesBackground(svg) {
     
     filter.append("feGaussianBlur")
         .attr("in", "SourceGraphic")
-        .attr("stdDeviation", 0.3 / settings.patternVisibility);
+        .attr("stdDeviation", (0.3 / settings.patternVisibility) * sizeMultiplier);
     
     bgGroup.attr("filter", "url(#leaves-blur)");
+    
+    console.log("✅ Génération du fond feuilles tombantes terminée.");
 }
 
-// Fond avec arbre qui pousse dans le coin - COULEURS RENFORCÉES
-function setupGrowingTreeBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond avec arbre qui pousse dans le coin adaptée pour l'export PNG grand format
+async function setupGrowingTreeBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export - CORRECTION POUR FORMATS ALLONGÉS
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        // Correction pour les formats très allongés
+        const aspectRatio = Math.max(width / height, height / width);
+        const aspectCorrection = Math.min(1.5, Math.max(0.7, 2 - aspectRatio * 0.3));
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85 * aspectCorrection;
+        
+        // Limiter sizeMultiplier pour éviter des éléments trop grands
+        const maxDimension = Math.max(width, height);
+        const baseDimension = Math.max(1920, 1080);
+        const dimensionRatio = maxDimension / baseDimension;
+        sizeMultiplier = Math.min(2, Math.max(1, Math.sqrt(dimensionRatio) * 0.8));
+        
+        console.log(`📊 Export Growing Tree - Format: ${width}x${height}`);
+        console.log(`📊 Aspect: ${aspectRatio.toFixed(2)}, Correction: x${aspectCorrection.toFixed(2)}`);
+        console.log(`📊 Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -804,61 +3169,55 @@ function setupGrowingTreeBackground(svg) {
     const settings = {
         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
-        animation: localStorage.getItem('backgroundAnimation') === 'true',
+        animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
     };
     
+    console.log(`🌳 Growing Tree: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
 
-    // =====================================================================
-    // PARAMÈTRES DE TUNING - Version équilibrée pour de bonnes performances
-    // =====================================================================
-    const patternDetail = settings.patternVisibility; // Raccourci pour faciliter la lecture
+    // PARAMÈTRES DE TUNING adaptés à l'export
+    const patternDetail = settings.patternVisibility;
     
-    // Fonction pour ajuster les paramètres en fonction du niveau de détail
     function scaleWithDetail(min, max) {
         return min + (max - min) * patternDetail;
     }
     
     const TUNING = {
-        // Nombre d'éléments - limité à 600 maximum pour de bonnes performances
-        MAX_SVG_ELEMENTS: Math.round(200 + 400 * patternDetail),
+        // Nombre d'éléments adapté à la densité - AUGMENTÉ pour grands formats
+        MAX_SVG_ELEMENTS: Math.round((400 + 800 * patternDetail) * densityMultiplier),
         
-        // Profondeur de récursion - valeurs modérées
-        MAX_ITERATIONS: Math.round(scaleWithDetail(4, 6)),    // Maximum 6 est raisonnable
-        MIN_ITERATIONS: Math.round(scaleWithDetail(3, 4)),    // Maximum 4 est suffisant
+        // Profondeur de récursion adaptée - LIMITÉE pour éviter explosion
+        MAX_ITERATIONS: Math.min(8, Math.round(scaleWithDetail(5, 7) * Math.min(densityMultiplier, 1.5))),
+        MIN_ITERATIONS: Math.min(6, Math.round(scaleWithDetail(4, 5) * Math.min(densityMultiplier, 1.3))),
         
-        // Probabilités de branches - valeurs équilibrées
-        CENTER_BRANCH_PROBABILITY: scaleWithDetail(0.15, 0.35),  // Maximum 0.35 est raisonnable
-        SIDE_BRANCH_PROBABILITY: scaleWithDetail(0.1, 0.3),    // Maximum 0.3 est raisonnable
+        // Probabilités de branches - AUGMENTÉES pour compenser
+        CENTER_BRANCH_PROBABILITY: Math.min(0.5, scaleWithDetail(0.2, 0.45)),
+        SIDE_BRANCH_PROBABILITY: Math.min(0.4, scaleWithDetail(0.15, 0.35)),
         
-        // Seuils pour la génération - valeurs équilibrées
-        MAIN_BRANCH_THRESHOLD: scaleWithDetail(0.7, 0.85),    // Raisonnable pour limiter la récursion
-        SIDE_BRANCH_THRESHOLD: scaleWithDetail(0.8, 0.9),     // Raisonnable pour limiter les branches
+        // Seuils pour la génération - ASSOUPLIS
+        MAIN_BRANCH_THRESHOLD: scaleWithDetail(0.6, 0.8),
+        SIDE_BRANCH_THRESHOLD: scaleWithDetail(0.7, 0.85),
         
-        // Probabilité de feuilles - valeurs équilibrées
-        LEAF_PROBABILITY: scaleWithDetail(0.2, 0.4),          // Maximum 0.4 est suffisant
+        // Probabilité de feuilles - AUGMENTÉE significativement
+        LEAF_PROBABILITY: Math.min(0.7, scaleWithDetail(0.3, 0.6) * densityMultiplier),
         
-        // Nombre d'arbres - raisonnable même au maximum
-        MAX_MAIN_TREES: Math.max(1, Math.round(scaleWithDetail(1, 3))),       // Maximum 3 arbres principaux
-        MAX_SECONDARY_TREES: Math.round(scaleWithDetail(1, 4)),               // Maximum 4 arbres secondaires
-        MAX_SPROUTS: Math.round(scaleWithDetail(2, 5)),                       // Maximum 5 pousses
+        // Nombre d'arbres adapté à la densité - AUGMENTÉ
+        MAX_MAIN_TREES: Math.max(2, Math.round(scaleWithDetail(2, 5) * densityMultiplier)),
+        MAX_SECONDARY_TREES: Math.max(3, Math.round(scaleWithDetail(2, 6) * densityMultiplier)),
+        MAX_SPROUTS: Math.max(4, Math.round(scaleWithDetail(3, 8) * densityMultiplier)),
         
-        // Espacement - valeurs raisonnables
-        TREE_SPACING: Math.round(scaleWithDetail(400, 300)),                  // Espacement minimum 300px
-        SPROUT_SPACING: Math.round(scaleWithDetail(450, 350))                 // Espacement minimum 350px
+        // Espacement adapté à la taille - CORRECTION pour formats allongés
+        TREE_SPACING: Math.max(200, Math.round(scaleWithDetail(300, 200) * Math.min(sizeMultiplier, 1.5))),
+        SPROUT_SPACING: Math.max(180, Math.round(scaleWithDetail(280, 180) * Math.min(sizeMultiplier, 1.5)))
     };
     
-    // Log des paramètres générés en fonction du niveau de détail
-    console.log(`Détail des motifs: ${patternDetail.toFixed(2)}`);
-    console.log(`Paramètres de tuning:`, TUNING);
-    // ====================================================================
+    console.log(`🎯 Paramètres: ${TUNING.MAX_SVG_ELEMENTS} éléments max, ${TUNING.MAX_MAIN_TREES} arbres principaux`);
         
-    
     // Appliquer l'opacité globale au groupe
     bgGroup.style("opacity", settings.opacity);
     
-    // Fond de base avec gradient subtil
+    // Fond de base avec gradient subtil AVEC OFFSET
     const gradientId = `growing-tree-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -880,7 +3239,10 @@ function setupGrowingTreeBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", darkerColor.toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`)
@@ -890,12 +3252,12 @@ function setupGrowingTreeBackground(svg) {
     // Définir les couleurs pour les branches et les feuilles
     const branchBaseColor = d3.rgb(settings.customColor).darker(0.5);
     
-    // Palette de couleurs vertes pour les feuilles, indépendamment de la couleur personnalisée
+    // Palette de couleurs vertes pour les feuilles
     const leafColors = [
-        d3.rgb(50, 150, 50), // Vert vif
-        d3.rgb(70, 130, 40), // Vert olive
-        d3.rgb(100, 160, 60), // Vert clair
-        d3.rgb(30, 110, 30)  // Vert foncé
+        d3.rgb(50, 150, 50),
+        d3.rgb(70, 130, 40),
+        d3.rgb(100, 160, 60),
+        d3.rgb(30, 110, 30)
     ];
     
     // Fonction pour créer une variante naturelle de la couleur
@@ -911,29 +3273,34 @@ function setupGrowingTreeBackground(svg) {
     // OPTIMISATION: Limiter le nombre maximal d'éléments SVG
     let svgElementCount = 0;
     
-    // Fonction pour dessiner un arbre généré procéduralement avec limites d'éléments
+    // Fonction pour dessiner un arbre AVEC OFFSET ET TAILLE ADAPTATIVE
     function drawTree(startX, startY, trunkLength, trunkWidth, parentGroup) {
-        // Tous les arbres sont maintenant verticaux
         const lean = 0;
         
-        // Utiliser le groupe parent si fourni, sinon créer un nouveau groupe
+        // Adapter les positions avec offset
+        const actualX = offsetX + startX;
+        const actualY = offsetY + startY;
+        
+        // Adapter les tailles
+        const adaptedTrunkLength = trunkLength * sizeMultiplier;
+        const adaptedTrunkWidth = trunkWidth * sizeMultiplier;
+        
         const treeGroup = parentGroup || bgGroup.append("g");
         
-        // Définir la hauteur des itérations
         const iterations = Math.min(TUNING.MAX_ITERATIONS, 
                                   TUNING.MIN_ITERATIONS + Math.floor(Math.random() * 2)); 
         
-        // Fonction récursive pour dessiner les branches avec limitation de nombre
+        // Fonction récursive pour dessiner les branches
         function branch(x, y, length, angle, width, depth, parent) {
-            if (depth <= 0 || length < 2 || width < 0.2) return;
+            if (depth <= 0 || length < 2 * sizeMultiplier || width < 0.2 * sizeMultiplier) return;
             if (svgElementCount >= TUNING.MAX_SVG_ELEMENTS) return;
             
-            // Ajuster la densité des branches en fonction de patternVisibility
-            if (!parent && Math.random() > settings.patternVisibility && depth < 4) return;
+            // CORRECTION: Réduire la dépendance à patternVisibility pour les grands formats
+            const visibilityThreshold = forExport ? Math.max(0.3, settings.patternVisibility * 0.7) : settings.patternVisibility;
+            if (!parent && Math.random() > visibilityThreshold && depth < 4) return;
             
-            // Calculer le point final avec une légère variation pour aspect naturel
+            // Calculer le point final avec adaptation de taille
             const lengthVariation = 1 + (Math.random() * 0.1 - 0.05);
-            // Variation d'angle moins prononcée pour des arbres plus verticaux
             const angleVariation = (Math.random() * 0.05 - 0.025);
             const finalLength = length * lengthVariation;
             const finalAngle = angle + angleVariation;
@@ -941,36 +3308,35 @@ function setupGrowingTreeBackground(svg) {
             const endX = x + Math.cos(finalAngle) * finalLength;
             const endY = y + Math.sin(finalAngle) * finalLength;
             
-            // Groupe pour cette branche et ses sous-branches
             const branchGroup = parent || treeGroup.append("g");
             
             // Couleur avec variation naturelle
             const branchColor = naturalVariant(branchBaseColor, 30);
             branchColor.opacity = 0.1 + (depth * 0.02);
             
-            // Dessiner la branche
+            // Dessiner la branche AVEC TAILLE ADAPTATIVE LIMITÉE
             const branchLine = branchGroup.append("line")
                 .attr("x1", x)
                 .attr("y1", y)
                 .attr("x2", endX)
                 .attr("y2", endY)
                 .attr("stroke", branchColor.toString())
-                .attr("stroke-width", width * settings.patternVisibility)
+                .attr("stroke-width", Math.min(width * settings.patternVisibility, 15 * sizeMultiplier))
                 .attr("stroke-linecap", "round");
             
             svgElementCount++;
             
-            // Ajouter des feuilles avec plus de probabilité vers les extrémités
-            if (Math.random() < TUNING.LEAF_PROBABILITY * settings.patternVisibility && depth < 3) {
+            // Ajouter des feuilles AVEC TAILLE ADAPTATIVE - PROBABILITÉ AUGMENTÉE
+            const leafProbability = forExport ? 
+                Math.min(0.8, TUNING.LEAF_PROBABILITY * 1.5) : 
+                TUNING.LEAF_PROBABILITY;
+                
+            if (Math.random() < leafProbability * settings.patternVisibility && depth < 4) {
                 drawLeaf(branchGroup, endX, endY, length * 0.7, finalAngle, depth);
             }
             
-            // Animation subtile pour les branches principales si activée
-            if (settings.animation && !parent && depth > 3 && depth % 2 === 0) { // Animation réduite
-                // Définir le point d'origine de la rotation
-                const animId = `branch-anim-${Math.random().toString(36).substring(2, 9)}`;
-                
-                // Créer une animation SVG native
+            // Animation subtile pour les branches principales (désactivée pour export)
+            if (settings.animation && !parent && depth > 3 && depth % 2 === 0) {
                 const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 anim.setAttribute("attributeName", "transform");
                 anim.setAttribute("attributeType", "XML");
@@ -985,14 +3351,13 @@ function setupGrowingTreeBackground(svg) {
                 branchGroup.node().appendChild(anim);
             }
             
-            // Paramètres pour les sous-branches
+            // Paramètres pour les sous-branches AVEC ADAPTATION
             const newLength = length * (0.65 + Math.random() * 0.1);
             const newWidth = width * 0.7;
             
-            // Angle de divergence pour les sous-branches - plus modéré pour arbres verticaux
             const divergence = Math.PI / (6 + Math.random() * 4);
             
-            // Récursion pour les branches enfants seulement si pas trop d'éléments
+            // Récursion pour les branches enfants
             if (svgElementCount < TUNING.MAX_SVG_ELEMENTS * TUNING.MAIN_BRANCH_THRESHOLD) {
                 branch(endX, endY, newLength, finalAngle + divergence, newWidth, depth - 1, branchGroup);
                 branch(endX, endY, newLength * 0.8, finalAngle - divergence, newWidth * 0.8, depth - 1, branchGroup);
@@ -1004,7 +3369,7 @@ function setupGrowingTreeBackground(svg) {
                 branch(endX, endY, newLength * 0.9, finalAngle, newWidth * 0.9, depth - 1, branchGroup);
             }
             
-            // Occasionnellement ajouter une branche latérale supplémentaire
+            // Branche latérale supplémentaire
             if (Math.random() < TUNING.SIDE_BRANCH_PROBABILITY * settings.patternVisibility && 
                 depth > 2 && svgElementCount < TUNING.MAX_SVG_ELEMENTS * TUNING.SIDE_BRANCH_THRESHOLD) {
                 const thirdAngle = finalAngle + (Math.random() < 0.5 ? 1 : -1) * divergence * 0.7;
@@ -1012,26 +3377,25 @@ function setupGrowingTreeBackground(svg) {
             }
         }
         
-        // Fonction pour dessiner une feuille (optimisée)
+        // Fonction pour dessiner une feuille AVEC TAILLE ADAPTATIVE LIMITÉE
         function drawLeaf(parentGroup, x, y, size, angle, depth) {
             if (svgElementCount >= TUNING.MAX_SVG_ELEMENTS) return;
             
-            // Simplifier: un seul style de feuille
             const leafAngle = angle + (Math.random() - 0.5) * Math.PI / 3;
-            const leafSize = size * (0.3 + Math.random() * 0.2) * settings.patternVisibility;
+            // CORRECTION: Limiter la taille des feuilles pour les grands formats
+            const baseLeafSize = size * (0.3 + Math.random() * 0.2) * settings.patternVisibility;
+            const leafSize = Math.min(baseLeafSize * sizeMultiplier, 50); // Max 50px
             
-            // Choisir une couleur aléatoire dans la palette de verts
             const leafColor = naturalVariant(leafColors[Math.floor(Math.random() * leafColors.length)], 30);
             leafColor.opacity = 0.12 + (Math.random() * 0.08);
             
             const strokeColor = d3.rgb(leafColor).darker(0.3);
             strokeColor.opacity = 0.1;
             
-            // Créer un groupe pour la feuille
             const leafGroup = parentGroup.append("g");
             svgElementCount++;
             
-            // Corps de la feuille
+            // Corps de la feuille AVEC TAILLE LIMITÉE
             const leaf = leafGroup.append("path")
                 .attr("d", `M ${x} ${y} 
                       Q ${x + Math.cos(leafAngle) * leafSize * 0.5} ${y + Math.sin(leafAngle) * leafSize * 0.5}, 
@@ -1040,10 +3404,10 @@ function setupGrowingTreeBackground(svg) {
                         ${x} ${y}`)
                 .attr("fill", leafColor.toString())
                 .attr("stroke", strokeColor.toString())
-                .attr("stroke-width", 0.5);
+                .attr("stroke-width", Math.min(0.5 * sizeMultiplier, 2)); // Max 2px
             svgElementCount++;
             
-            // Animation subtile si activée - moins d'animations pour la performance
+            // Animation subtile (désactivée pour export)
             if (settings.animation && Math.random() < 0.5) {
                 const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 anim.setAttribute("attributeName", "transform");
@@ -1062,93 +3426,90 @@ function setupGrowingTreeBackground(svg) {
             return leafGroup;
         }
         
-        // Démarrer l'arbre avec le tronc - angle exactement vertical (-Math.PI/2)
-        branch(startX, startY, trunkLength, -Math.PI/2 + lean, trunkWidth, iterations);
+        // Démarrer l'arbre avec le tronc
+        branch(actualX, actualY, adaptedTrunkLength, -Math.PI/2 + lean, adaptedTrunkWidth, iterations);
         
         return treeGroup;
     }
     
-    // Ajuster la densité des arbres selon patternVisibility
+    // Ajuster la densité des arbres
     const treeDensity = Math.max(0.5, settings.patternVisibility);
     
-    // Déterminer le nombre d'arbres principaux en fonction de la taille d'écran
-    const maxMainTrees = Math.min(Math.floor(width / 400) + 1, TUNING.MAX_MAIN_TREES);
+    // Déterminer le nombre d'arbres principaux AVEC ADAPTATION
+    const maxMainTrees = Math.min(Math.floor(width / (400 * sizeMultiplier)) + 1, TUNING.MAX_MAIN_TREES);
     
-    // Arbre principal au centre (toujours présent)
+    // Arbre principal au centre AVEC TAILLE ADAPTATIVE
     drawTree(width * 0.5, height * 0.95, height * 0.2 * treeDensity, 6 * treeDensity);
     
-    // Arbres secondaires (nombre réduit)
+    // Arbres secondaires
     if (maxMainTrees > 1) {
-        // Arbre au coin inférieur gauche
         drawTree(width * 0.15, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
     }
     
     if (maxMainTrees > 2) {
-        // Arbre au coin inférieur droit
         drawTree(width * 0.85, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
     }
     
-    // Arbres plus petits répartis
+    // Arbres plus petits répartis AVEC ESPACEMENT ADAPTATIF
     const numSmallerTrees = Math.min(Math.floor(width / TUNING.TREE_SPACING), TUNING.MAX_SECONDARY_TREES);
     if (svgElementCount < TUNING.MAX_SVG_ELEMENTS * 0.7) {
         for (let i = 0; i < numSmallerTrees; i++) {
-            const x = 0.2 + (i+1) * (0.6 / (numSmallerTrees+1)); // Répartition plus espacée
+            const x = 0.2 + (i+1) * (0.6 / (numSmallerTrees+1));
             drawTree(width * x, height * 0.93, height * 0.1 * treeDensity, 3 * treeDensity);
         }
     }
     
-    // Quelques petites pousses ou branches isolées
+    // Petites pousses AVEC ESPACEMENT ADAPTATIF
     const numSprouts = Math.min(Math.floor(width / TUNING.SPROUT_SPACING), TUNING.MAX_SPROUTS);
     if (svgElementCount < TUNING.MAX_SVG_ELEMENTS * 0.9) {
         for (let i = 0; i < numSprouts; i++) {
             const x = Math.random() * width * 0.7 + width * 0.15;
-            const y = Math.random() * height * 0.15 + height * 0.8; // Plus près du bas de l'écran
+            const y = Math.random() * height * 0.15 + height * 0.8;
             const size = height * (0.03 + Math.random() * 0.04) * treeDensity;
             
-            // Angle toujours vertical
             drawTree(x, y, size, (1 + Math.random() * 1.5) * treeDensity);
         }
     }
     
-    // Ajouter quelques fleurs/plantes au sol pour plus de détail
+    // Fleurs/plantes au sol AVEC TAILLE ADAPTATIVE
     if (settings.patternVisibility > 0.5 && svgElementCount < TUNING.MAX_SVG_ELEMENTS * 0.95) {
-        const numFlowers = Math.min(Math.floor(width / 200), 8);
+        const numFlowers = Math.min(Math.floor(width / (200 * sizeMultiplier)), 8);
         
         for (let i = 0; i < numFlowers; i++) {
-            const x = Math.random() * width;
-            const y = height - Math.random() * 20;
-            const size = 5 + Math.random() * 15;
+            // Position AVEC OFFSET
+            const x = offsetX + Math.random() * width;
+            const y = offsetY + height - Math.random() * 20 * sizeMultiplier;
+            const size = (5 + Math.random() * 15) * sizeMultiplier;
             
             const flowerGroup = bgGroup.append("g");
             svgElementCount++;
             
-            // Tige - toujours verticale
+            // Tige AVEC TAILLE ADAPTATIVE
             flowerGroup.append("path")
-                .attr("d", `M ${x} ${y} C ${x + 2} ${y - 10}, ${x - 2} ${y - 20}, ${x} ${y - 30 * treeDensity}`)
-                .attr("fill", "none")
+                .attr("d", `M ${x} ${y} C ${x + 2 * sizeMultiplier} ${y - 10 * sizeMultiplier}, ${x - 2 * sizeMultiplier} ${y - 20 * sizeMultiplier}, ${x} ${y - 30 * treeDensity * sizeMultiplier}`)
+                .attr("fill", "transparent")
                 .attr("stroke", d3.rgb(30, 100, 30, 0.15).toString())
-                .attr("stroke-width", 1 * treeDensity);
+                .attr("stroke-width", 1 * treeDensity * sizeMultiplier);
             svgElementCount++;
             
-            // Fleur/feuilles
+            // Fleur/feuilles AVEC TAILLE ADAPTATIVE
             const petalColor = naturalVariant(leafColors[Math.floor(Math.random() * leafColors.length)], 30);
             petalColor.opacity = 0.12;
             
-            // Quelques petites feuilles ou pétales - juste 2 au lieu de 3
             for (let j = 0; j < 2; j++) {
                 const angle = Math.PI/2 + (j * Math.PI) - Math.PI/4;
                 flowerGroup.append("path")
-                    .attr("d", `M ${x} ${y - 30 * treeDensity} 
-                               Q ${x + Math.cos(angle) * size * 0.7} ${(y - 30 * treeDensity) + Math.sin(angle) * size * 0.7}, 
-                                 ${x + Math.cos(angle) * size} ${(y - 30 * treeDensity) + Math.sin(angle) * size}`)
-                    .attr("fill", "none")
+                    .attr("d", `M ${x} ${y - 30 * treeDensity * sizeMultiplier} 
+                               Q ${x + Math.cos(angle) * size * 0.7} ${(y - 30 * treeDensity * sizeMultiplier) + Math.sin(angle) * size * 0.7}, 
+                                 ${x + Math.cos(angle) * size} ${(y - 30 * treeDensity * sizeMultiplier) + Math.sin(angle) * size}`)
+                    .attr("fill", "transparent")
                     .attr("stroke", petalColor.toString())
-                    .attr("stroke-width", 2 * treeDensity);
+                    .attr("stroke-width", 2 * treeDensity * sizeMultiplier);
                 svgElementCount++;
             }
             
-            // Animation subtile si activée
-            if (settings.animation && i % 2 === 0) { // Animer seulement la moitié des fleurs
+            // Animation subtile (désactivée pour export)
+            if (settings.animation && i % 2 === 0) {
                 const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 anim.setAttribute("attributeName", "transform");
                 anim.setAttribute("attributeType", "XML");
@@ -1164,7 +3525,7 @@ function setupGrowingTreeBackground(svg) {
         }
     }
     
-    // Appliquer un léger flou pour adoucir l'ensemble
+    // Appliquer un léger flou pour adoucir l'ensemble AVEC ADAPTATION
     const filter = defs.append("filter")
         .attr("id", "growing-tree-blur")
         .attr("x", "-10%")
@@ -1174,27 +3535,46 @@ function setupGrowingTreeBackground(svg) {
     
     filter.append("feGaussianBlur")
         .attr("in", "SourceGraphic")
-        .attr("stdDeviation", 0.5 / treeDensity);
+        .attr("stdDeviation", (0.5 / treeDensity) * sizeMultiplier);
     
     bgGroup.attr("filter", "url(#growing-tree-blur)");
     
-    // console.log(`Éléments SVG générés pour le fond: ${svgElementCount} (max: ${TUNING.MAX_SVG_ELEMENTS})`);
+    console.log(`✅ Éléments SVG générés: ${svgElementCount} (max: ${TUNING.MAX_SVG_ELEMENTS})`);
 }
 
-// Fond avec motifs divers pour arbre généalogique 
-// Simple fond dégradé amélioré avec tous les paramètres de l'interface utilisateur
-function setupSimpleBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond avec motifs divers pour arbre généalogique adapté pour l'export PNG grand format
+async function setupSimpleBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85;
+        sizeMultiplier = Math.min(2.5, Math.max(1.1, areaRatio * 0.09));
+        
+        console.log(`📊 Export Simple Background - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer TOUS les paramètres depuis le localStorage
     const settings = {
         opacity: parseFloat(localStorage.getItem('backgroundOpacity') || 0.15),
         patternVisibility: parseFloat(localStorage.getItem('patternVisibility') || 1.0),
-        animation: localStorage.getItem('backgroundAnimation') === 'true',
+        animation: forExport ? false : localStorage.getItem('backgroundAnimation') === 'true',
         animationSpeed: parseFloat(localStorage.getItem('animationSpeed') || 1.0),
         customColor: localStorage.getItem('backgroundCustomColor') || '#3F51B5'
     };
+    
+    console.log(`🎨 Simple Background: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Paramètres liés au niveau de détail
     const patternDetail = settings.patternVisibility;
@@ -1203,14 +3583,15 @@ function setupSimpleBackground(svg) {
         return min + (max - min) * patternDetail;
     }
     
+    // Paramètres adaptés à la densité d'export
     const TUNING = {
-        // Nombre d'éléments décoratifs
-        NUM_CIRCLES: Math.round(scaleWithDetail(3, 12)),
-        NUM_LINES: Math.round(scaleWithDetail(5, 15)),
+        // Nombre d'éléments décoratifs AVEC densité adaptative
+        NUM_CIRCLES: Math.round(scaleWithDetail(3, 12) * densityMultiplier),
+        NUM_LINES: Math.round(scaleWithDetail(5, 15) * densityMultiplier),
         
-        // Taille des éléments
-        CIRCLE_SIZE_MIN: scaleWithDetail(30, 50),
-        CIRCLE_SIZE_MAX: scaleWithDetail(50, 100),
+        // Taille des éléments AVEC taille adaptative
+        CIRCLE_SIZE_MIN: scaleWithDetail(30, 50) * sizeMultiplier,
+        CIRCLE_SIZE_MAX: scaleWithDetail(50, 100) * sizeMultiplier,
         
         // Opacité des éléments - déjà géré par le paramètre global d'opacité
         CIRCLE_OPACITY_MIN: 0.7,
@@ -1218,9 +3599,9 @@ function setupSimpleBackground(svg) {
         LINE_OPACITY_MIN: 0.6,
         LINE_OPACITY_MAX: 0.9,
         
-        // Épaisseur des lignes
-        LINE_WIDTH_MIN: scaleWithDetail(0.5, 1),
-        LINE_WIDTH_MAX: scaleWithDetail(1, 1.5)
+        // Épaisseur des lignes AVEC taille adaptative
+        LINE_WIDTH_MIN: scaleWithDetail(0.5, 1) * sizeMultiplier,
+        LINE_WIDTH_MAX: scaleWithDetail(1, 1.5) * sizeMultiplier
     };
     
     // Supprimer l'ancien fond s'il existe
@@ -1258,18 +3639,23 @@ function setupSimpleBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", darkerColor.toString());
     
-    // Appliquer le dégradé comme fond avec l'ID unique
+    // Appliquer le dégradé comme fond AVEC OFFSET
     bgGroup.append("rect")
-        .attr("width", "100%")
-        .attr("height", "100%")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
+        .attr("width", width)
+        .attr("height", height)
         .attr("fill", `url(#${gradientId})`)
         .attr("pointer-events", "none");
     
-    // Ajouter des cercles décoratifs
+    // Ajouter des cercles décoratifs AVEC OFFSET ET TAILLE ADAPTATIVE
     const circles = [];
+    
+    console.log(`⭕ ${TUNING.NUM_CIRCLES} cercles décoratifs`);
+    
     for (let i = 0; i < TUNING.NUM_CIRCLES; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
         const size = TUNING.CIRCLE_SIZE_MIN + Math.random() * (TUNING.CIRCLE_SIZE_MAX - TUNING.CIRCLE_SIZE_MIN);
         const opacity = TUNING.CIRCLE_OPACITY_MIN + Math.random() * (TUNING.CIRCLE_OPACITY_MAX - TUNING.CIRCLE_OPACITY_MIN);
         
@@ -1279,19 +3665,22 @@ function setupSimpleBackground(svg) {
             .attr("r", size)
             .attr("fill", "none")
             .attr("stroke", baseColor.toString())
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 1.5 * sizeMultiplier)
             .attr("stroke-opacity", opacity);
         
         circles.push({ element: circle, x, y, size });
     }
     
-    // Ajouter quelques lignes décoratives
+    // Ajouter quelques lignes décoratives AVEC OFFSET ET TAILLE ADAPTATIVE
     const lines = [];
+    
+    console.log(`📏 ${TUNING.NUM_LINES} lignes décoratives`);
+    
     for (let i = 0; i < TUNING.NUM_LINES; i++) {
-        const x1 = Math.random() * width;
-        const y1 = Math.random() * height;
-        const x2 = x1 + (Math.random() - 0.5) * 200;
-        const y2 = y1 + (Math.random() - 0.5) * 200;
+        const x1 = offsetX + Math.random() * width;
+        const y1 = offsetY + Math.random() * height;
+        const x2 = x1 + (Math.random() - 0.5) * 200 * sizeMultiplier;
+        const y2 = y1 + (Math.random() - 0.5) * 200 * sizeMultiplier;
         const opacity = TUNING.LINE_OPACITY_MIN + Math.random() * (TUNING.LINE_OPACITY_MAX - TUNING.LINE_OPACITY_MIN);
         const lineWidth = TUNING.LINE_WIDTH_MIN + Math.random() * (TUNING.LINE_WIDTH_MAX - TUNING.LINE_WIDTH_MIN);
         
@@ -1307,7 +3696,7 @@ function setupSimpleBackground(svg) {
         lines.push({ element: line, x1, y1, x2, y2 });
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (settings.animation) {
         // Animations pour les cercles - pulsation douce
         circles.forEach((circle, i) => {
@@ -1331,8 +3720,8 @@ function setupSimpleBackground(svg) {
             const duration = (4 + Math.random() * 4) / settings.animationSpeed;
             
             // Pour la simplicité, on ne fait qu'une légère translation
-            const dx = 5 + Math.random() * 10;
-            const dy = 5 + Math.random() * 10;
+            const dx = (5 + Math.random() * 10) * settings.patternVisibility;
+            const dy = (5 + Math.random() * 10) * settings.patternVisibility;
             
             const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             anim.setAttribute("attributeName", "transform");
@@ -1346,7 +3735,7 @@ function setupSimpleBackground(svg) {
         });
     }
     
-    console.log(`Fond simple généré avec tous les paramètres GUI:`);
+    console.log(`✅ Fond simple généré avec tous les paramètres:`);
     console.log(`- Niveau de détail: ${patternDetail.toFixed(2)}`);
     console.log(`- Opacité: ${settings.opacity.toFixed(2)}`);
     console.log(`- Animation: ${settings.animation ? 'activée' : 'désactivée'}`);
@@ -1354,229 +3743,41 @@ function setupSimpleBackground(svg) {
     console.log(`- Couleur personnalisée: ${settings.customColor} (Gradient ID: ${gradientId})`);
 }
 
-// Fond de grille amélioré avec couleurs visibles
-function setupGridBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const defs = svg.append("defs");
-    
-    // Fond de base
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("fill", "#f0f0f5") // Fond légèrement bleuté
-        .attr("pointer-events", "none")
-        .lower();
-    
-    // Créer un motif de grille plus élégant et visible
-    const pattern = defs.append("pattern")
-        .attr("id", "grid-pattern")
-        .attr("patternUnits", "userSpaceOnUse")
-        .attr("width", 50)
-        .attr("height", 50);
-    
-    // Lignes horizontales et verticales plus visibles
-    pattern.append("line")
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 50)
-        .attr("y2", 0)
-        .attr("stroke", "#c8d0e0") // Bleu-gris plus visible
-        .attr("stroke-width", 1);
-    
-    pattern.append("line")
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", 50)
-        .attr("stroke", "#c8d0e0") // Bleu-gris plus visible
-        .attr("stroke-width", 1);
-    
-    // Petit point aux intersections
-    pattern.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", 1.5)
-        .attr("fill", "#a8b8d0"); // Bleu plus visible
-    
-    // Appliquer le motif
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("fill", "url(#grid-pattern)")
-        .attr("pointer-events", "none")
-        .lower();
-    
-    // Ajouter quelques rectangles décoratifs
-    const decorGroup = svg.append("g")
-        .attr("pointer-events", "none")
-        .lower();
-    
-    for (let i = 0; i < 8; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 150 + 50;
-        
-        decorGroup.append("rect")
-            .attr("x", x - size/2)
-            .attr("y", y - size/2)
-            .attr("width", size)
-            .attr("height", size)
-            .attr("transform", `rotate(${Math.random() * 45}, ${x}, ${y})`)
-            .attr("fill", "none")
-            .attr("stroke", `rgba(120, 140, 180, 0.15)`) // Bleu plus visible
-            .attr("stroke-width", 1.5);
-    }
-}
-
 // Texture papier améliorée avec couleurs visibles
-// function setupPaperTextureBackground(svg) {
-//     const width = window.innerWidth;
-//     const height = window.innerHeight;
-//     const defs = svg.append("defs");
+async function setupPaperTextureBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
     
-//     // Nettoyer tout fond existant
-//     svg.selectAll(".background-element").remove();
-    
-//     // Créer un groupe pour le fond
-//     const bgGroup = svg.append("g")
-//         .attr("class", "background-element")
-//         .attr("pointer-events", "none")
-//         .lower();
-    
-//     // Fond de base avec gradient subtil mais visible
-//     const bgGradient = defs.append("linearGradient")
-//         .attr("id", "paper-bg-gradient")
-//         .attr("x1", "0%")
-//         .attr("y1", "0%")
-//         .attr("x2", "100%")
-//         .attr("y2", "100%");
-        
-//     bgGradient.append("stop")
-//         .attr("offset", "0%")
-//         .attr("stop-color", "#f7f7f7");
-        
-//     bgGradient.append("stop")
-//         .attr("offset", "100%")
-//         .attr("stop-color", "#efefef");
-    
-//     bgGroup.append("rect")
-//         .attr("width", width)
-//         .attr("height", height)
-//         .attr("fill", "url(#paper-bg-gradient)");
-    
-//     // Créer une texture de papier visible
-//     const noisePattern = defs.append("pattern")
-//         .attr("id", "noise-pattern")
-//         .attr("patternUnits", "userSpaceOnUse")
-//         .attr("width", 200)
-//         .attr("height", 200);
-    
-//     // Fond du motif
-//     noisePattern.append("rect")
-//         .attr("width", 200)
-//         .attr("height", 200)
-//         .attr("fill", "transparent");
-    
-//     // Créer une texture plus visible
-//     for (let i = 0; i < 5000; i++) {
-//         const x = Math.random() * 200;
-//         const y = Math.random() * 200;
-//         const size = Math.random() * 1.2 + 0.3;
-//         const opacity = Math.random() * 0.1 + 0.04; // Opacité plus élevée
-        
-//         noisePattern.append("circle")
-//             .attr("cx", x)
-//             .attr("cy", y)
-//             .attr("r", size)
-//             .attr("fill", i % 5 === 0 ? "#aaaaaa" : "#707070") // Couleurs plus visibles
-//             .attr("opacity", opacity);
-//     }
-    
-//     // Ajouter quelques lignes/fibres de papier
-//     for (let i = 0; i < 50; i++) {
-//         const x1 = Math.random() * 200;
-//         const y1 = Math.random() * 200;
-//         const length = Math.random() * 30 + 10;
-//         const angle = Math.random() * Math.PI * 2;
-//         const x2 = x1 + Math.cos(angle) * length;
-//         const y2 = y1 + Math.sin(angle) * length;
-        
-//         noisePattern.append("line")
-//             .attr("x1", x1)
-//             .attr("y1", y1)
-//             .attr("x2", x2)
-//             .attr("y2", y2)
-//             .attr("stroke", "#bbbbbb") // Couleur plus visible
-//             .attr("stroke-width", 0.7)
-//             .attr("opacity", 0.4); // Opacité plus élevée
-//     }
-    
-//     // Appliquer le motif de texture
-//     bgGroup.append("rect")
-//         .attr("width", width)
-//         .attr("height", height)
-//         .attr("fill", "url(#noise-pattern)")
-//         .attr("pointer-events", "none");
-    
-//     // Ajouter quelques taches de papier plus grandes
-//     for (let i = 0; i < 20; i++) {
-//         const x = Math.random() * width;
-//         const y = Math.random() * height;
-//         const size = Math.random() * 40 + 20;
-        
-//         bgGroup.append("circle")
-//             .attr("cx", x)
-//             .attr("cy", y)
-//             .attr("r", size)
-//             .attr("fill", "#e8e8e8")
-//             .attr("opacity", Math.random() * 0.2 + 0.1);
-//     }
-    
-//     // Ajouter une vignette légère
-//     const vignetteGradient = defs.append("radialGradient")
-//         .attr("id", "paper-vignette")
-//         .attr("cx", "50%")
-//         .attr("cy", "50%")
-//         .attr("r", "70%")
-//         .attr("fx", "50%")
-//         .attr("fy", "50%");
-        
-//     vignetteGradient.append("stop")
-//         .attr("offset", "0%")
-//         .attr("stop-color", "#00000000");
-        
-//     vignetteGradient.append("stop")
-//         .attr("offset", "100%")
-//         .attr("stop-color", "#00000033"); // Plus visible
-        
-//     bgGroup.append("rect")
-//         .attr("width", width)
-//         .attr("height", height)
-//         .attr("fill", "url(#paper-vignette)")
-//         .attr("pointer-events", "none");
-// }
-
-// Texture papier améliorée avec tous les paramètres de l'interface utilisateur
-function setupPaperTextureBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+    let patternSizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+        sizeMultiplier = Math.min(3, Math.max(1.2, areaRatio * 0.1));
+        patternSizeMultiplier = Math.min(2, Math.max(1, Math.sqrt(areaRatio) * 0.5));
+        
+        console.log(`📊 Export texture papier - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}, Pattern: x${patternSizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES TEXTURE PAPIER:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Texture papier: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -1612,7 +3813,7 @@ function setupPaperTextureBackground(svg) {
         Math.max(0, baseColor.b * 0.4 + 100)
     );
     
-    // Fond de base avec gradient subtil
+    // Fond de base avec gradient subtil - AVEC OFFSET
     const gradientId = `paper-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -1629,33 +3830,37 @@ function setupPaperTextureBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", d3.rgb(paperBaseColor).darker(0.05).toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`);
     
-    // Créer un pattern pour la texture de bruit (adapté au niveau de détail)
+    // Créer un pattern pour la texture de bruit - TAILLE ADAPTATIVE
     const noisePatternId = `noise-pattern-${Date.now()}`;
+    const patternSize = Math.floor(200 * patternSizeMultiplier);
     const noisePattern = defs.append("pattern")
         .attr("id", noisePatternId)
         .attr("patternUnits", "userSpaceOnUse")
-        .attr("width", 200)
-        .attr("height", 200);
+        .attr("width", patternSize)
+        .attr("height", patternSize);
     
     // Fond du motif
     noisePattern.append("rect")
-        .attr("width", 200)
-        .attr("height", 200)
+        .attr("width", patternSize)
+        .attr("height", patternSize)
         .attr("fill", "transparent");
     
-    // Nombre de points basé sur le niveau de détail
-    const numNoisePoints = Math.floor(2000 + 3000 * patternVisibility);
+    // Nombre de points basé sur le niveau de détail ET densité adaptative
+    const numNoisePoints = Math.floor((2000 + 3000 * patternVisibility) * densityMultiplier);
     
-    // Créer la texture de bruit
+    // Créer la texture de bruit AVEC TAILLE ADAPTATIVE
     for (let i = 0; i < numNoisePoints; i++) {
-        const x = Math.random() * 200;
-        const y = Math.random() * 200;
-        const size = Math.random() * 1.2 + 0.3;
+        const x = Math.random() * patternSize;
+        const y = Math.random() * patternSize;
+        const size = (Math.random() * 1.2 + 0.3) * sizeMultiplier;
         const opacity = Math.random() * 0.1 + 0.04;
         
         noisePattern.append("circle")
@@ -1666,14 +3871,14 @@ function setupPaperTextureBackground(svg) {
             .attr("opacity", opacity);
     }
     
-    // Ajouter quelques lignes/fibres de papier (basé sur le niveau de détail)
-    const numFibers = Math.floor(20 + 50 * patternVisibility);
+    // Ajouter quelques lignes/fibres de papier AVEC TAILLE ADAPTATIVE
+    const numFibers = Math.floor((20 + 50 * patternVisibility) * densityMultiplier);
     const fibers = [];
     
     for (let i = 0; i < numFibers; i++) {
-        const x1 = Math.random() * 200;
-        const y1 = Math.random() * 200;
-        const length = Math.random() * 30 + 10;
+        const x1 = Math.random() * patternSize;
+        const y1 = Math.random() * patternSize;
+        const length = (Math.random() * 30 + 10) * sizeMultiplier;
         const angle = Math.random() * Math.PI * 2;
         const x2 = x1 + Math.cos(angle) * length;
         const y2 = y1 + Math.sin(angle) * length;
@@ -1684,27 +3889,29 @@ function setupPaperTextureBackground(svg) {
             .attr("x2", x2)
             .attr("y2", y2)
             .attr("stroke", fiberColor.toString())
-            .attr("stroke-width", 0.7)
+            .attr("stroke-width", 0.7 * sizeMultiplier)
             .attr("opacity", 0.4);
         
         fibers.push({ element: fiber, x1, y1, x2, y2 });
     }
     
-    // Appliquer le motif de texture
+    // Appliquer le motif de texture AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${noisePatternId})`)
         .attr("pointer-events", "none");
     
-    // Ajouter quelques taches de papier plus grandes (basé sur le niveau de détail)
-    const numStains = Math.floor(10 + 20 * patternVisibility);
+    // Ajouter quelques taches de papier plus grandes AVEC OFFSET ET TAILLE ADAPTATIVE
+    const numStains = Math.floor((10 + 20 * patternVisibility) * densityMultiplier);
     const stains = [];
     
     for (let i = 0; i < numStains; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 40 + 20;
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 40 + 20) * sizeMultiplier;
         
         const stain = bgGroup.append("circle")
             .attr("cx", x)
@@ -1716,7 +3923,7 @@ function setupPaperTextureBackground(svg) {
         stains.push({ element: stain, x, y, size });
     }
     
-    // Ajouter une vignette légère
+    // Ajouter une vignette légère AVEC OFFSET
     const vignetteId = `paper-vignette-${Date.now()}`;
     const vignetteGradient = defs.append("radialGradient")
         .attr("id", vignetteId)
@@ -1735,18 +3942,20 @@ function setupPaperTextureBackground(svg) {
         .attr("stop-color", "rgba(0, 0, 0, 0.33)");
         
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${vignetteId})`)
         .attr("pointer-events", "none");
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
         console.log("ANIMATIONS DE TEXTURE PAPIER ACTIVÉES");
         
         // Animation pour les taches
         stains.forEach((stain, i) => {
-            if (i % 2 === 0) { // Animer une partie des taches
+            if (i % 2 === 0) {
                 const delay = i * 0.2;
                 const duration = (10 + Math.random() * 8) / animationSpeed;
                 
@@ -1764,8 +3973,7 @@ function setupPaperTextureBackground(svg) {
         });
         
         // Animation globale très subtile pour le fond entier
-        // Simule le léger mouvement du papier
-        if (patternVisibility > 0.5) { // Animation plus complexe seulement si détail élevé
+        if (patternVisibility > 0.5) {
             const bgAnimation = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             bgAnimation.setAttribute("attributeName", "transform");
             bgAnimation.setAttribute("type", "skewX");
@@ -1778,137 +3986,42 @@ function setupPaperTextureBackground(svg) {
         }
     }
     
-    console.log("Génération de la texture papier terminée.");
+    console.log("✅ Génération de la texture papier terminée.");
 }
 
-// Fond avec lignes courbes élégantes et couleurs visibles
-// function setupCurvedLinesBackground(svg) {
-//     const width = window.innerWidth;
-//     const height = window.innerHeight;
-//     const defs = svg.append("defs");
+// Fond avec lignes courbes élégantes adaptée pour l'export PNG grand format
+async function setupCurvedLinesBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
     
-//     // Nettoyer tout fond existant
-//     svg.selectAll(".background-element").remove();
-    
-//     // Créer un groupe pour le fond
-//     const bgGroup = svg.append("g")
-//         .attr("class", "background-element")
-//         .attr("pointer-events", "none")
-//         .lower();
-    
-//     // Fond de base avec gradient doux mais visible
-//     const bgGradient = defs.append("linearGradient")
-//         .attr("id", "bg-curved-gradient")
-//         .attr("x1", "0%")
-//         .attr("y1", "0%")
-//         .attr("x2", "100%")
-//         .attr("y2", "100%");
-    
-//     bgGradient.append("stop")
-//         .attr("offset", "0%")
-//         .attr("stop-color", "#f5f5f8"); // Légèrement bleuté
-    
-//     bgGradient.append("stop")
-//         .attr("offset", "100%")
-//         .attr("stop-color", "#ebebf0"); // Légèrement bleuté
-    
-//     bgGroup.append("rect")
-//         .attr("width", width)
-//         .attr("height", height)
-//         .attr("fill", "url(#bg-curved-gradient)");
-    
-//     // Générer plusieurs courbes élégantes avec opacité visible
-//     const curves = [];
-//     const numCurves = 8;
-    
-//     // Créer une courbe de Bézier complexe
-//     function createComplexCurve(startX, startY, width, height, complexity) {
-//         let path = `M ${startX} ${startY}`;
-        
-//         for (let i = 0; i < complexity; i++) {
-//             const cp1x = startX + Math.random() * width;
-//             const cp1y = startY + Math.random() * height;
-//             const cp2x = startX + Math.random() * width;
-//             const cp2y = startY + Math.random() * height;
-//             const x = startX + (i + 1) * (width / complexity);
-//             const y = startY + Math.random() * height;
-            
-//             path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
-//         }
-        
-//         return path;
-//     }
-    
-//     // Créer des courbes élégantes traversant l'écran avec couleurs plus visibles
-//     for (let i = 0; i < numCurves; i++) {
-//         const startY = (height / (numCurves + 1)) * (i + 1);
-//         const curveHeight = height * 0.4;
-        
-//         curves.push({
-//             path: createComplexCurve(0, startY, width, curveHeight, 4),
-//             color: `rgba(160, 160, 190, ${0.2 + (i * 0.04)})`, // Bleu plus visible
-//             strokeWidth: 1.5 + Math.random() * 2
-//         });
-//     }
-    
-//     // Ajouter quelques courbes verticales pour créer une grille organique
-//     for (let i = 0; i < numCurves / 2; i++) {
-//         const startX = (width / ((numCurves / 2) + 1)) * (i + 1);
-//         const curveWidth = width * 0.2;
-        
-//         curves.push({
-//             path: createComplexCurve(startX, 0, curveWidth, height, 4)
-//                 .replace(/M (\d+) (\d+)/g, `M ${startX} 0`)
-//                 .replace(/C/g, " C")
-//                 .replace(/,/g, ", "),
-//             color: `rgba(140, 160, 190, ${0.15 + (i * 0.04)})`, // Bleu plus visible
-//             strokeWidth: 1.5 + Math.random() * 1.5
-//         });
-//     }
-    
-//     // Dessiner les courbes
-//     curves.forEach(curve => {
-//         bgGroup.append("path")
-//             .attr("d", curve.path)
-//             .attr("fill", "none")
-//             .attr("stroke", curve.color)
-//             .attr("stroke-width", curve.strokeWidth)
-//             .attr("stroke-linecap", "round");
-//     });
-    
-//     // Ajouter quelques petits cercles décoratifs aux intersections - plus visibles
-//     for (let i = 0; i < 40; i++) {
-//         const x = Math.random() * width;
-//         const y = Math.random() * height;
-        
-//         bgGroup.append("circle")
-//             .attr("cx", x)
-//             .attr("cy", y)
-//             .attr("r", Math.random() * 4 + 2) // Plus grand
-//             .attr("fill", `rgba(130, 150, 190, ${Math.random() * 0.2 + 0.1})`); // Plus visible
-//     }
-// }
-
-// Fond avec lignes courbes élégantes avec tous les paramètres utilisateur
-function setupCurvedLinesBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85;
+        sizeMultiplier = Math.min(2.5, Math.max(1.1, areaRatio * 0.09));
+        
+        console.log(`📊 Export Curved Lines - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES LIGNES COURBES:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🌊 Curved Lines: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -1920,7 +4033,7 @@ function setupCurvedLinesBackground(svg) {
         .style("opacity", opacity)
         .lower();
     
-    // Fond de base avec gradient doux influencé par la couleur personnalisée
+    // Fond de base avec gradient doux influencé par la couleur personnalisée AVEC OFFSET
     const baseColor = d3.rgb(customColor);
     
     // Couleurs pour le gradient de fond
@@ -1952,7 +4065,10 @@ function setupCurvedLinesBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", bgColorDark.toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`);
@@ -1967,20 +4083,26 @@ function setupCurvedLinesBackground(svg) {
     // Générer plusieurs courbes élégantes avec opacité adaptée au niveau de détail
     const curves = [];
     
-    // Nombre de courbes basé sur le niveau de détail
-    const numCurves = Math.max(4, Math.round(8 * patternVisibility));
+    // Nombre de courbes basé sur le niveau de détail ET la densité d'export
+    const baseNumCurves = Math.max(4, Math.round(8 * patternVisibility));
+    const numCurves = Math.floor(baseNumCurves * densityMultiplier);
     
-    // Créer une courbe de Bézier complexe
-    function createComplexCurve(startX, startY, width, height, complexity) {
-        let path = `M ${startX} ${startY}`;
+    // Créer une courbe de Bézier complexe AVEC OFFSET ET TAILLE ADAPTATIVE
+    function createComplexCurve(startX, startY, curveWidth, curveHeight, complexity) {
+        const adaptedStartX = offsetX + startX;
+        const adaptedStartY = offsetY + startY;
+        const adaptedWidth = curveWidth * sizeMultiplier;
+        const adaptedHeight = curveHeight * sizeMultiplier;
+        
+        let path = `M ${adaptedStartX} ${adaptedStartY}`;
         
         for (let i = 0; i < complexity; i++) {
-            const cp1x = startX + Math.random() * width;
-            const cp1y = startY + Math.random() * height;
-            const cp2x = startX + Math.random() * width;
-            const cp2y = startY + Math.random() * height;
-            const x = startX + (i + 1) * (width / complexity);
-            const y = startY + Math.random() * height;
+            const cp1x = adaptedStartX + Math.random() * adaptedWidth;
+            const cp1y = adaptedStartY + Math.random() * adaptedHeight;
+            const cp2x = adaptedStartX + Math.random() * adaptedWidth;
+            const cp2y = adaptedStartY + Math.random() * adaptedHeight;
+            const x = adaptedStartX + (i + 1) * (adaptedWidth / complexity);
+            const y = adaptedStartY + Math.random() * adaptedHeight;
             
             path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
         }
@@ -1990,6 +4112,8 @@ function setupCurvedLinesBackground(svg) {
     
     // Créer des courbes élégantes traversant l'écran
     // Opacité et épaisseur basées sur le niveau de détail
+    console.log(`🌊 ${numCurves} courbes horizontales`);
+    
     for (let i = 0; i < numCurves; i++) {
         const startY = (height / (numCurves + 1)) * (i + 1);
         const curveHeight = height * 0.4;
@@ -2007,13 +4131,16 @@ function setupCurvedLinesBackground(svg) {
         curves.push({
             path: createComplexCurve(0, startY, width, curveHeight, complexity),
             color: `rgba(${Math.round(curveColor.r)}, ${Math.round(curveColor.g)}, ${Math.round(curveColor.b)}, ${0.1 + 0.1 * patternVisibility})`,
-            strokeWidth: 1.5 + Math.random() * 2 * patternVisibility
+            strokeWidth: (1.5 + Math.random() * 2 * patternVisibility) * sizeMultiplier
         });
     }
     
     // Ajouter quelques courbes verticales pour créer une grille organique
-    // Nombre basé sur le niveau de détail
-    const numVerticalCurves = Math.max(2, Math.round(numCurves / 2 * patternVisibility));
+    // Nombre basé sur le niveau de détail ET la densité d'export
+    const baseNumVerticalCurves = Math.max(2, Math.round(numCurves / 2 * patternVisibility));
+    const numVerticalCurves = Math.floor(baseNumVerticalCurves * densityMultiplier);
+    
+    console.log(`📏 ${numVerticalCurves} courbes verticales`);
     
     for (let i = 0; i < numVerticalCurves; i++) {
         const startX = (width / (numVerticalCurves + 1)) * (i + 1);
@@ -2029,15 +4156,27 @@ function setupCurvedLinesBackground(svg) {
         // Complexité basée sur le niveau de détail
         const complexity = Math.max(3, Math.round(3 + patternVisibility * 3));
         
-        const verticalPath = createComplexCurve(startX, 0, curveWidth, height, complexity)
-            .replace(/M (\d+) (\d+)/g, `M ${startX} 0`)
-            .replace(/C/g, " C")
-            .replace(/,/g, ", ");
+        // Créer la courbe verticale AVEC OFFSET ET TAILLE ADAPTATIVE
+        const adaptedStartX = offsetX + startX;
+        const adaptedWidth = curveWidth * sizeMultiplier;
+        
+        let verticalPath = `M ${adaptedStartX} ${offsetY}`;
+        
+        for (let j = 0; j < complexity; j++) {
+            const cp1x = adaptedStartX + Math.random() * adaptedWidth;
+            const cp1y = offsetY + (j + 0.5) * (height / complexity);
+            const cp2x = adaptedStartX + Math.random() * adaptedWidth;
+            const cp2y = offsetY + (j + 0.5) * (height / complexity);
+            const x = adaptedStartX + Math.random() * adaptedWidth;
+            const y = offsetY + (j + 1) * (height / complexity);
+            
+            verticalPath += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
+        }
         
         curves.push({
             path: verticalPath,
             color: `rgba(${Math.round(curveColor.r)}, ${Math.round(curveColor.g)}, ${Math.round(curveColor.b)}, ${0.1 + 0.05 * patternVisibility})`,
-            strokeWidth: 1.5 + Math.random() * 1.5 * patternVisibility
+            strokeWidth: (1.5 + Math.random() * 1.5 * patternVisibility) * sizeMultiplier
         });
     }
     
@@ -2059,14 +4198,17 @@ function setupCurvedLinesBackground(svg) {
     });
     
     // Ajouter quelques petits cercles décoratifs aux intersections
-    // Nombre basé sur le niveau de détail
-    const numCircles = Math.max(20, Math.round(40 * patternVisibility));
+    // Nombre basé sur le niveau de détail ET la densité d'export
+    const baseNumCircles = Math.max(20, Math.round(40 * patternVisibility));
+    const numCircles = Math.floor(baseNumCircles * densityMultiplier);
     const circleElements = [];
     
+    console.log(`⭕ ${numCircles} cercles décoratifs`);
+    
     for (let i = 0; i < numCircles; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 4 + 2 + 2 * patternVisibility;
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 4 + 2 + 2 * patternVisibility) * sizeMultiplier;
         
         // Variation de couleur subtile
         const circleColor = d3.rgb(
@@ -2089,7 +4231,7 @@ function setupCurvedLinesBackground(svg) {
         });
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
         // Animation pour les courbes - ondulation subtile
         curveElements.forEach((curve, i) => {
@@ -2151,29 +4293,42 @@ function setupCurvedLinesBackground(svg) {
         });
     }
     
-    console.log("Génération du fond lignes courbes terminée.");
+    console.log("✅ Génération du fond lignes courbes terminée.");
 }
 
-// Fond avec motif inspiré des anneaux des arbres - adapté à tous les paramètres
-function setupTreeRingsBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond avec motif inspiré des anneaux des arbres adaptée pour l'export PNG grand format
+async function setupTreeRingsBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.9;
+        sizeMultiplier = Math.min(2.2, Math.max(1.1, areaRatio * 0.09));
+        
+        console.log(`📊 Export Tree Rings - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES ANNEAUX D'ARBRE:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🌳 Tree Rings: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -2202,49 +4357,53 @@ function setupTreeRingsBackground(svg) {
         Math.max(0, baseColor.b * 0.5 + 92)
     );
     
-    // Fond de base avec une couleur légèrement beige
+    // Fond de base avec offset
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", bgColor.toString());
     
-    // Nombre de centres d'anneaux basé sur le niveau de détail
-    const numCenters = Math.floor(2 + patternVisibility * 3);
+    // Nombre de centres d'anneaux basé sur le niveau de détail ET la densité
+    const numCenters = Math.floor((2 + patternVisibility * 3) * densityMultiplier);
     
-    // Créer plusieurs centres d'anneaux
+    console.log(`🎯 ${numCenters} centres d'anneaux`);
+    
+    // Créer plusieurs centres d'anneaux AVEC OFFSET ET TAILLE ADAPTATIVE
     const centers = [];
     
-    // Positionner les centres en dehors de l'écran pour n'avoir que des portions d'anneaux visibles
+    // Centres de base repositionnés avec offset
     centers.push({ 
-        x: -width * 0.2, 
-        y: height * 0.7, 
-        maxRadius: width * 0.8, 
+        x: offsetX - width * 0.2, 
+        y: offsetY + height * 0.7, 
+        maxRadius: width * 0.8 * sizeMultiplier, 
         color: ringColor,
         element: null
     });
     
     centers.push({ 
-        x: width * 1.1, 
-        y: height * 0.4, 
-        maxRadius: width * 0.6, 
+        x: offsetX + width * 1.1, 
+        y: offsetY + height * 0.4, 
+        maxRadius: width * 0.6 * sizeMultiplier, 
         color: d3.rgb(ringColor).darker(0.1),
         element: null
     });
     
     centers.push({ 
-        x: width * 0.4, 
-        y: -height * 0.2, 
-        maxRadius: width * 0.7, 
+        x: offsetX + width * 0.4, 
+        y: offsetY - height * 0.2, 
+        maxRadius: width * 0.7 * sizeMultiplier, 
         color: d3.rgb(ringColor).brighter(0.1),
         element: null
     });
     
-    // Ajouter des centres supplémentaires si le niveau de détail est élevé
+    // Centres supplémentaires avec offset
     if (numCenters > 3) {
         centers.push({ 
-            x: width * 1.2, 
-            y: height * 1.1, 
-            maxRadius: width * 0.7, 
+            x: offsetX + width * 1.2, 
+            y: offsetY + height * 1.1, 
+            maxRadius: width * 0.7 * sizeMultiplier, 
             color: d3.rgb(ringColor).darker(0.2),
             element: null
         });
@@ -2252,13 +4411,37 @@ function setupTreeRingsBackground(svg) {
     
     if (numCenters > 4) {
         centers.push({ 
-            x: -width * 0.1, 
-            y: -height * 0.3, 
-            maxRadius: width * 0.9, 
+            x: offsetX - width * 0.1, 
+            y: offsetY - height * 0.3, 
+            maxRadius: width * 0.9 * sizeMultiplier, 
             color: d3.rgb(ringColor).brighter(0.2),
             element: null
         });
     }
+    
+    // Centres additionnels pour grands formats
+    if (numCenters > 5) {
+        centers.push({ 
+            x: offsetX + width * 0.8, 
+            y: offsetY + height * 1.3, 
+            maxRadius: width * 0.6 * sizeMultiplier, 
+            color: d3.rgb(ringColor).darker(0.15),
+            element: null
+        });
+    }
+    
+    if (numCenters > 6) {
+        centers.push({ 
+            x: offsetX - width * 0.3, 
+            y: offsetY + height * 0.1, 
+            maxRadius: width * 0.8 * sizeMultiplier, 
+            color: d3.rgb(ringColor).brighter(0.15),
+            element: null
+        });
+    }
+    
+    // Limiter aux centres demandés
+    centers.splice(numCenters);
     
     // Créer des groupes pour chaque centre d'anneaux
     const centerGroups = centers.map((center, index) => {
@@ -2270,20 +4453,23 @@ function setupTreeRingsBackground(svg) {
     
     // Générer les anneaux pour chaque centre
     centers.forEach((center, centerIndex) => {
-        // Nombre d'anneaux variable selon le centre et le niveau de détail
-        const numRings = Math.floor(30 + Math.random() * 20 + patternVisibility * 40);
+        // Nombre d'anneaux adapté à la densité et à la taille
+        const baseNumRings = Math.floor(30 + Math.random() * 20 + patternVisibility * 40);
+        const numRings = Math.floor(baseNumRings * densityMultiplier);
+        
+        console.log(`🌊 Centre ${centerIndex}: ${numRings} anneaux`);
         
         // Grouper les anneaux pour les animations
         const ringsGroup = center.element;
         
-        // Variation aléatoire de l'épaisseur et des espaces pour un effet naturel
-        let currentRadius = 10;
+        // Variation aléatoire de l'épaisseur et des espaces AVEC TAILLE ADAPTATIVE
+        let currentRadius = 10 * sizeMultiplier;
         const rings = [];
         
         for (let i = 0; i < numRings; i++) {
-            // Épaisseur et espace influencés par le niveau de détail
-            const ringWidth = Math.random() * 3 * patternVisibility + 0.8;
-            const gapWidth = Math.random() * 2 * patternVisibility + 0.5;
+            // Épaisseur et espace influencés par le niveau de détail ET la taille
+            const ringWidth = (Math.random() * 3 * patternVisibility + 0.8) * sizeMultiplier;
+            const gapWidth = (Math.random() * 2 * patternVisibility + 0.5) * sizeMultiplier;
             
             if (currentRadius > center.maxRadius) break;
             
@@ -2294,7 +4480,7 @@ function setupTreeRingsBackground(svg) {
                 .attr("cx", center.x)
                 .attr("cy", center.y)
                 .attr("r", currentRadius)
-                .attr("fill", "none")
+                .attr("fill", "transparent")
                 .attr("stroke", center.color.toString())
                 .attr("stroke-width", ringWidth)
                 .attr("stroke-opacity", ringOpacity);
@@ -2308,9 +4494,9 @@ function setupTreeRingsBackground(svg) {
             currentRadius += ringWidth + gapWidth;
         }
         
-        // Ajouter des lignes radiales pour simuler les fissures - plus visibles
-        // Nombre basé sur le niveau de détail
-        const numLines = Math.floor(Math.random() * 5 + 3 + patternVisibility * 7);
+        // Ajouter des lignes radiales pour simuler les fissures AVEC TAILLE ADAPTATIVE
+        const baseNumLines = Math.floor(Math.random() * 5 + 3 + patternVisibility * 7);
+        const numLines = Math.floor(baseNumLines * densityMultiplier);
         const radialLines = [];
         
         for (let i = 0; i < numLines; i++) {
@@ -2324,7 +4510,7 @@ function setupTreeRingsBackground(svg) {
                 .attr("x2", endX)
                 .attr("y2", endY)
                 .attr("stroke", center.color.toString())
-                .attr("stroke-width", Math.random() * 2 * patternVisibility + 0.5)
+                .attr("stroke-width", (Math.random() * 2 * patternVisibility + 0.5) * sizeMultiplier)
                 .attr("stroke-opacity", 0.25);
             
             radialLines.push({
@@ -2333,8 +4519,10 @@ function setupTreeRingsBackground(svg) {
             });
         }
         
-        // Ajouter des animations si activées
+        // Ajouter des animations si activées (désactivées pour export)
         if (animation) {
+            console.log(`🎬 Animation centre ${centerIndex}`);
+            
             // Pulsation très subtile des anneaux
             const pulseAnimation = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             pulseAnimation.setAttribute("attributeName", "transform");
@@ -2375,29 +4563,303 @@ function setupTreeRingsBackground(svg) {
         }
     });
     
-    console.log("Génération du fond anneaux d'arbre terminée.");
+    console.log("✅ Génération du fond anneaux d'arbre terminée.");
 }
 
 // Fonction fractal améliorée avec tous les paramètres utilisateur
-function setupFractalBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// function setupFractalBackground(svg) {
+//     const width = window.innerWidth;
+//     const height = window.innerHeight;
+//     const defs = svg.append("defs");
+    
+//     // Récupérer tous les paramètres
+//     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
+//     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
+//     const animation = localStorage.getItem('backgroundAnimation') === 'true';
+//     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
+//     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
+    
+//     console.log("PARAMÈTRES FOND FRACTAL:", {
+//         opacity,
+//         patternVisibility,
+//         animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
+//         animationSpeed,
+//         customColor
+//     });
+    
+//     // Nettoyer tout fond existant
+//     svg.selectAll(".background-element").remove();
+    
+//     // Créer un groupe pour le fond
+//     const bgGroup = svg.append("g")
+//         .attr("class", "background-element")
+//         .attr("pointer-events", "none")
+//         .style("opacity", opacity)
+//         .lower();
+    
+//     // Fond de base avec gradient très léger
+//     const gradientId = `fractal-bg-gradient-${Date.now()}`;
+//     const bgGradient = defs.append("linearGradient")
+//         .attr("id", gradientId)
+//         .attr("x1", "0%")
+//         .attr("y1", "0%")
+//         .attr("x2", "100%")
+//         .attr("y2", "100%");
+    
+//     // Teinte légère basée sur la couleur personnalisée
+//     const baseColor = d3.rgb(customColor);
+    
+//     // Fond très clair basé sur la couleur personnalisée
+//     const bgColorLight = d3.rgb(
+//         Math.min(255, baseColor.r * 0.1 + 240),
+//         Math.min(255, baseColor.g * 0.1 + 240),
+//         Math.min(255, baseColor.b * 0.1 + 240)
+//     );
+    
+//     const bgColorDark = d3.rgb(
+//         Math.min(255, baseColor.r * 0.1 + 235),
+//         Math.min(255, baseColor.g * 0.1 + 235),
+//         Math.min(255, baseColor.b * 0.1 + 235)
+//     );
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "0%")
+//         .attr("stop-color", bgColorLight.toString());
+    
+//     bgGradient.append("stop")
+//         .attr("offset", "100%")
+//         .attr("stop-color", bgColorDark.toString());
+    
+//     bgGroup.append("rect")
+//         .attr("width", width)
+//         .attr("height", height)
+//         .attr("fill", `url(#${gradientId})`);
+    
+//     // Palette de couleurs basée sur la couleur personnalisée
+//     const colorPalette = [
+//         d3.rgb(baseColor.r * 0.4 + 60, baseColor.g * 0.4 + 60, baseColor.b * 0.8 + 40),   // Teinte principale 1
+//         d3.rgb(baseColor.r * 0.3 + 40, baseColor.g * 0.5 + 80, baseColor.b * 0.4 + 60),   // Teinte principale 2
+//         d3.rgb(baseColor.r * 0.6 + 40, baseColor.g * 0.3 + 40, baseColor.b * 0.5 + 50)    // Teinte principale 3
+//     ];
+    
+//     // Fonction pour dessiner un arbre fractal coloré
+//     function drawFractalTree(x, y, size, angle, depth, colorIndex) {
+//         if (depth === 0 || size < 2) return;
+        
+//         // Choisir la couleur avec une opacité basée sur la profondeur
+//         let opacity = 0.25 - (depth * 0.025);
+//         if (opacity < 0.07) opacity = 0.07;
+        
+//         const colorIdx = (colorIndex + depth) % colorPalette.length;
+//         const strokeColor = colorPalette[colorIdx].toString();
+        
+//         // Calculer la nouvelle position
+//         const newX = x + Math.cos(angle) * size * (0.95 + Math.random() * 0.1);
+//         const newY = y + Math.sin(angle) * size * (0.95 + Math.random() * 0.1);
+        
+//         // Dessiner une ligne
+//         const line = bgGroup.append("line")
+//             .attr("x1", x)
+//             .attr("y1", y)
+//             .attr("x2", newX)
+//             .attr("y2", newY)
+//             .attr("stroke", strokeColor)
+//             .attr("stroke-opacity", opacity)
+//             .attr("stroke-width", Math.max(1.2, depth * 0.8 * patternVisibility)); // Ajustement de la largeur selon le détail
+        
+//         // Angle de branchement ajusté par le niveau de détail
+//         // Plus de détail = branches plus écartées
+//         const splitAngle = Math.PI * (0.18 + patternVisibility * 0.05);
+        
+//         // Récursion avec des branches plus naturelles
+//         const nextSize = size * (0.65 + Math.random() * 0.15);
+        
+//         // Animation de "croissance" si activée
+//         if (animation) {
+//             const growAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+//             growAnim.setAttribute("attributeName", "stroke-dashoffset");
+//             const length = Math.sqrt(Math.pow(newX - x, 2) + Math.pow(newY - y, 2));
+            
+//             // Configurer le dash pour l'animation
+//             line.attr("stroke-dasharray", length);
+//             line.attr("stroke-dashoffset", length);
+            
+//             growAnim.setAttribute("from", length);
+//             growAnim.setAttribute("to", 0);
+//             growAnim.setAttribute("dur", `${Math.max(0.5, depth * 0.5) / animationSpeed}s`);
+//             growAnim.setAttribute("fill", "freeze");
+            
+//             // Retard proportionnel à la profondeur pour l'effet de croissance
+//             const delay = (6 - depth) * (0.5 / animationSpeed);
+//             growAnim.setAttribute("begin", `${delay}s`);
+            
+//             line.node().appendChild(growAnim);
+//         }
+        
+//         // Gauche
+//         drawFractalTree(
+//             newX, 
+//             newY, 
+//             nextSize * (0.9 + Math.random() * 0.2), 
+//             angle - splitAngle + (Math.random() * 0.1 - 0.05), 
+//             depth - 1,
+//             colorIndex
+//         );
+        
+//         // Droite
+//         drawFractalTree(
+//             newX, 
+//             newY, 
+//             nextSize * (0.9 + Math.random() * 0.2), 
+//             angle + splitAngle + (Math.random() * 0.1 - 0.05), 
+//             depth - 1,
+//             colorIndex
+//         );
+        
+//         // Parfois ajouter une branche centrale pour plus de densité
+//         // Probabilité ajustée selon le niveau de détail
+//         if (Math.random() < 0.4 * patternVisibility && depth > 3) {
+//             const centerAngle = angle + (Math.random() * 0.3 - 0.15);
+//             drawFractalTree(
+//                 newX, 
+//                 newY, 
+//                 nextSize * 0.8, 
+//                 centerAngle, 
+//                 depth - 2,
+//                 colorIndex
+//             );
+//         }
+        
+//         // Ajouter des "feuilles" ou terminaisons décoratives aux extrémités
+//         if (depth === 1 && Math.random() < 0.5 * patternVisibility) {
+//             // Couleur plus vive pour les feuilles
+//             const leafColor = colorPalette[(colorIndex + 1) % colorPalette.length].toString();
+            
+//             // Petit cercle décoratif au bout des branches
+//             bgGroup.append("circle")
+//                 .attr("cx", newX)
+//                 .attr("cy", newY)
+//                 .attr("r", 1.5 + Math.random() * patternVisibility)
+//                 .attr("fill", leafColor)
+//                 .attr("fill-opacity", opacity * 1.3);
+//         }
+//     }
+    
+//     // Ajuster les paramètres en fonction du niveau de détail
+//     // Profondeur et nombre d'arbres
+//     const maxDepth = 4 + Math.round(patternVisibility * 2); // 4-6 selon le niveau de détail
+    
+//     // 1. Arbres en bas
+//     const numTreesBottom = Math.max(2, Math.floor(width / 250) + Math.floor(patternVisibility * 3));
+//     const baseSize = 100 + 40 * patternVisibility;
+    
+//     for (let i = 0; i < numTreesBottom; i++) {
+//         // Position X répartie en bas de l'écran
+//         const startX = width * (i + 0.5) / numTreesBottom + (Math.random() * 40 - 20);
+//         const startY = height * 0.98 - (Math.random() * height * 0.05);
+        
+//         // Profondeur variable pour un effet plus naturel
+//         const treeDepth = maxDepth - Math.floor(Math.random() * 2);
+        
+//         // Légère variation d'angle - toujours vers le haut
+//         const baseAngle = -Math.PI/2 + (Math.random() * 0.12 - 0.06);
+        
+//         // Palette de couleur aléatoire
+//         const colorIndex = Math.floor(Math.random() * colorPalette.length);
+        
+//         // Taille variable
+//         const treeSize = baseSize * (0.8 + Math.random() * 0.4);
+        
+//         drawFractalTree(startX, startY, treeSize, baseAngle, treeDepth, colorIndex);
+//     }
+    
+//     // 2. Arbres sur les côtés - nombre ajusté par le niveau de détail
+//     const numSideTrees = Math.max(1, Math.floor(height / 300) + Math.floor(patternVisibility * 2));
+    
+//     // Côté gauche - orientation vers la droite
+//     if (patternVisibility > 0.3) { // Ne dessiner ces arbres que si le niveau de détail est suffisant
+//         for (let i = 0; i < numSideTrees; i++) {
+//             const startX = width * 0.02 + (Math.random() * width * 0.03);
+//             const startY = height * (i + 1) / (numSideTrees + 1) + (Math.random() * 50 - 25);
+            
+//             const treeDepth = maxDepth - 1 - Math.floor(Math.random() * 1);
+//             const baseAngle = 0 + (Math.random() * 0.4 - 0.2);
+//             const colorIndex = Math.floor(Math.random() * colorPalette.length);
+//             const treeSize = baseSize * (0.6 + Math.random() * 0.3);
+            
+//             drawFractalTree(startX, startY, treeSize, baseAngle, treeDepth, colorIndex);
+//         }
+//     }
+    
+//     // Côté droit - orientation vers la gauche
+//     if (patternVisibility > 0.3) { // Ne dessiner ces arbres que si le niveau de détail est suffisant
+//         for (let i = 0; i < numSideTrees; i++) {
+//             const startX = width * 0.98 - (Math.random() * width * 0.03);
+//             const startY = height * (i + 0.5) / (numSideTrees + 1) + (Math.random() * 50 - 25);
+            
+//             const treeDepth = maxDepth - 1 - Math.floor(Math.random() * 1);
+//             const baseAngle = Math.PI + (Math.random() * 0.4 - 0.2);
+//             const colorIndex = Math.floor(Math.random() * colorPalette.length);
+//             const treeSize = baseSize * (0.6 + Math.random() * 0.3);
+            
+//             drawFractalTree(startX, startY, treeSize, baseAngle, treeDepth, colorIndex);
+//         }
+//     }
+    
+//     // 3. Arbres éparpillés dans le fond - densité ajustée par le niveau de détail
+//     const numBackgroundTrees = Math.max(2, Math.floor((width * height) / 200000) + Math.floor(patternVisibility * 4));
+    
+//     if (patternVisibility > 0.5) { // Ne dessiner ces arbres que si le niveau de détail est élevé
+//         for (let i = 0; i < numBackgroundTrees; i++) {
+//             // Position aléatoire, distribution plus équilibrée
+//             const startX = width * 0.15 + Math.random() * width * 0.7;
+//             const startY = height * 0.1 + Math.random() * height * 0.6;
+            
+//             const treeDepth = maxDepth - 2; // Profondeur réduite pour le fond
+//             const baseAngle = Math.random() * Math.PI * 2;
+//             const colorIndex = Math.floor(Math.random() * colorPalette.length);
+//             const treeSize = baseSize * (0.35 + Math.random() * 0.25);
+            
+//             drawFractalTree(startX, startY, treeSize, baseAngle, treeDepth, colorIndex);
+//         }
+//     }
+    
+//     console.log("Génération du fond fractal terminée.");
+// }
+
+// Fonction fractal adaptée pour l'export PNG avec fond coloré amélioré
+async function setupFractalBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.9;
+        sizeMultiplier = Math.min(2.5, Math.max(1.3, areaRatio * 0.12));
+        
+        console.log(`📊 Export fractals - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES FOND FRACTAL:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🌿 Fractals: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -2409,7 +4871,7 @@ function setupFractalBackground(svg) {
         .style("opacity", opacity)
         .lower();
     
-    // Fond de base avec gradient très léger
+    // FOND COLORÉ AMÉLIORÉ - Influence plus forte de la couleur personnalisée
     const gradientId = `fractal-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -2418,20 +4880,27 @@ function setupFractalBackground(svg) {
         .attr("x2", "100%")
         .attr("y2", "100%");
     
-    // Teinte légère basée sur la couleur personnalisée
+    // Teinte BEAUCOUP plus prononcée basée sur la couleur personnalisée
     const baseColor = d3.rgb(customColor);
     
-    // Fond très clair basé sur la couleur personnalisée
+    // Fond avec influence de 30% de la couleur personnalisée (au lieu de 10%)
     const bgColorLight = d3.rgb(
-        Math.min(255, baseColor.r * 0.1 + 240),
-        Math.min(255, baseColor.g * 0.1 + 240),
-        Math.min(255, baseColor.b * 0.1 + 240)
+        Math.min(255, baseColor.r * 0.3 + 200),
+        Math.min(255, baseColor.g * 0.3 + 200),
+        Math.min(255, baseColor.b * 0.3 + 200)
     );
     
     const bgColorDark = d3.rgb(
-        Math.min(255, baseColor.r * 0.1 + 235),
-        Math.min(255, baseColor.g * 0.1 + 235),
-        Math.min(255, baseColor.b * 0.1 + 235)
+        Math.min(255, baseColor.r * 0.4 + 180),
+        Math.min(255, baseColor.g * 0.4 + 180),
+        Math.min(255, baseColor.b * 0.4 + 180)
+    );
+    
+    // Ajouter une couleur intermédiaire pour plus de richesse
+    const bgColorMid = d3.rgb(
+        Math.min(255, baseColor.r * 0.35 + 190),
+        Math.min(255, baseColor.g * 0.35 + 190),
+        Math.min(255, baseColor.b * 0.35 + 190)
     );
     
     bgGradient.append("stop")
@@ -2439,22 +4908,30 @@ function setupFractalBackground(svg) {
         .attr("stop-color", bgColorLight.toString());
     
     bgGradient.append("stop")
+        .attr("offset", "50%")
+        .attr("stop-color", bgColorMid.toString());
+    
+    bgGradient.append("stop")
         .attr("offset", "100%")
         .attr("stop-color", bgColorDark.toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`);
     
-    // Palette de couleurs basée sur la couleur personnalisée
+    // Palette de couleurs basée sur la couleur personnalisée - Plus contrastée
     const colorPalette = [
-        d3.rgb(baseColor.r * 0.4 + 60, baseColor.g * 0.4 + 60, baseColor.b * 0.8 + 40),   // Teinte principale 1
-        d3.rgb(baseColor.r * 0.3 + 40, baseColor.g * 0.5 + 80, baseColor.b * 0.4 + 60),   // Teinte principale 2
-        d3.rgb(baseColor.r * 0.6 + 40, baseColor.g * 0.3 + 40, baseColor.b * 0.5 + 50)    // Teinte principale 3
+        d3.rgb(baseColor.r * 0.7 + 60, baseColor.g * 0.7 + 60, baseColor.b * 0.9 + 40),   // Teinte principale 1
+        d3.rgb(baseColor.r * 0.6 + 40, baseColor.g * 0.8 + 80, baseColor.b * 0.7 + 60),   // Teinte principale 2
+        d3.rgb(baseColor.r * 0.9 + 40, baseColor.g * 0.6 + 40, baseColor.b * 0.8 + 50),   // Teinte principale 3
+        d3.rgb(baseColor.r * 0.5 + 80, baseColor.g * 0.9 + 30, baseColor.b * 0.6 + 70)    // Teinte principale 4
     ];
     
-    // Fonction pour dessiner un arbre fractal coloré
+    // Fonction pour dessiner un arbre fractal coloré AVEC OFFSET
     function drawFractalTree(x, y, size, angle, depth, colorIndex) {
         if (depth === 0 || size < 2) return;
         
@@ -2465,11 +4942,11 @@ function setupFractalBackground(svg) {
         const colorIdx = (colorIndex + depth) % colorPalette.length;
         const strokeColor = colorPalette[colorIdx].toString();
         
-        // Calculer la nouvelle position
+        // Calculer la nouvelle position AVEC OFFSET
         const newX = x + Math.cos(angle) * size * (0.95 + Math.random() * 0.1);
         const newY = y + Math.sin(angle) * size * (0.95 + Math.random() * 0.1);
         
-        // Dessiner une ligne
+        // Dessiner une ligne avec taille adaptative
         const line = bgGroup.append("line")
             .attr("x1", x)
             .attr("y1", y)
@@ -2477,10 +4954,9 @@ function setupFractalBackground(svg) {
             .attr("y2", newY)
             .attr("stroke", strokeColor)
             .attr("stroke-opacity", opacity)
-            .attr("stroke-width", Math.max(1.2, depth * 0.8 * patternVisibility)); // Ajustement de la largeur selon le détail
+            .attr("stroke-width", Math.max(1.2, depth * 0.8 * patternVisibility) * sizeMultiplier);
         
         // Angle de branchement ajusté par le niveau de détail
-        // Plus de détail = branches plus écartées
         const splitAngle = Math.PI * (0.18 + patternVisibility * 0.05);
         
         // Récursion avec des branches plus naturelles
@@ -2492,7 +4968,6 @@ function setupFractalBackground(svg) {
             growAnim.setAttribute("attributeName", "stroke-dashoffset");
             const length = Math.sqrt(Math.pow(newX - x, 2) + Math.pow(newY - y, 2));
             
-            // Configurer le dash pour l'animation
             line.attr("stroke-dasharray", length);
             line.attr("stroke-dashoffset", length);
             
@@ -2501,7 +4976,6 @@ function setupFractalBackground(svg) {
             growAnim.setAttribute("dur", `${Math.max(0.5, depth * 0.5) / animationSpeed}s`);
             growAnim.setAttribute("fill", "freeze");
             
-            // Retard proportionnel à la profondeur pour l'effet de croissance
             const delay = (6 - depth) * (0.5 / animationSpeed);
             growAnim.setAttribute("begin", `${delay}s`);
             
@@ -2529,7 +5003,6 @@ function setupFractalBackground(svg) {
         );
         
         // Parfois ajouter une branche centrale pour plus de densité
-        // Probabilité ajustée selon le niveau de détail
         if (Math.random() < 0.4 * patternVisibility && depth > 3) {
             const centerAngle = angle + (Math.random() * 0.3 - 0.15);
             drawFractalTree(
@@ -2544,55 +5017,46 @@ function setupFractalBackground(svg) {
         
         // Ajouter des "feuilles" ou terminaisons décoratives aux extrémités
         if (depth === 1 && Math.random() < 0.5 * patternVisibility) {
-            // Couleur plus vive pour les feuilles
             const leafColor = colorPalette[(colorIndex + 1) % colorPalette.length].toString();
             
-            // Petit cercle décoratif au bout des branches
+            // Petit cercle décoratif au bout des branches - TAILLE ADAPTATIVE
             bgGroup.append("circle")
                 .attr("cx", newX)
                 .attr("cy", newY)
-                .attr("r", 1.5 + Math.random() * patternVisibility)
+                .attr("r", (1.5 + Math.random() * patternVisibility) * sizeMultiplier)
                 .attr("fill", leafColor)
                 .attr("fill-opacity", opacity * 1.3);
         }
     }
     
-    // Ajuster les paramètres en fonction du niveau de détail
-    // Profondeur et nombre d'arbres
-    const maxDepth = 4 + Math.round(patternVisibility * 2); // 4-6 selon le niveau de détail
+    // Ajuster les paramètres en fonction du niveau de détail ET de l'export
+    const maxDepth = 4 + Math.round(patternVisibility * 2);
     
-    // 1. Arbres en bas
-    const numTreesBottom = Math.max(2, Math.floor(width / 250) + Math.floor(patternVisibility * 3));
-    const baseSize = 100 + 40 * patternVisibility;
+    // 1. Arbres en bas - AVEC OFFSET ET DENSITÉ ADAPTATIVE
+    const numTreesBottom = Math.max(2, Math.floor(width / 250) + Math.floor(patternVisibility * 3)) * densityMultiplier;
+    const baseSize = (100 + 40 * patternVisibility) * sizeMultiplier;
     
     for (let i = 0; i < numTreesBottom; i++) {
-        // Position X répartie en bas de l'écran
-        const startX = width * (i + 0.5) / numTreesBottom + (Math.random() * 40 - 20);
-        const startY = height * 0.98 - (Math.random() * height * 0.05);
+        // Position X répartie en bas de l'écran AVEC OFFSET
+        const startX = offsetX + width * (i + 0.5) / numTreesBottom + (Math.random() * 40 - 20);
+        const startY = offsetY + height * 0.98 - (Math.random() * height * 0.05);
         
-        // Profondeur variable pour un effet plus naturel
         const treeDepth = maxDepth - Math.floor(Math.random() * 2);
-        
-        // Légère variation d'angle - toujours vers le haut
         const baseAngle = -Math.PI/2 + (Math.random() * 0.12 - 0.06);
-        
-        // Palette de couleur aléatoire
         const colorIndex = Math.floor(Math.random() * colorPalette.length);
-        
-        // Taille variable
         const treeSize = baseSize * (0.8 + Math.random() * 0.4);
         
         drawFractalTree(startX, startY, treeSize, baseAngle, treeDepth, colorIndex);
     }
     
-    // 2. Arbres sur les côtés - nombre ajusté par le niveau de détail
-    const numSideTrees = Math.max(1, Math.floor(height / 300) + Math.floor(patternVisibility * 2));
+    // 2. Arbres sur les côtés - AVEC OFFSET ET DENSITÉ ADAPTATIVE
+    const numSideTrees = Math.max(1, Math.floor(height / 300) + Math.floor(patternVisibility * 2)) * densityMultiplier;
     
     // Côté gauche - orientation vers la droite
-    if (patternVisibility > 0.3) { // Ne dessiner ces arbres que si le niveau de détail est suffisant
+    if (patternVisibility > 0.3) {
         for (let i = 0; i < numSideTrees; i++) {
-            const startX = width * 0.02 + (Math.random() * width * 0.03);
-            const startY = height * (i + 1) / (numSideTrees + 1) + (Math.random() * 50 - 25);
+            const startX = offsetX + width * 0.02 + (Math.random() * width * 0.03);
+            const startY = offsetY + height * (i + 1) / (numSideTrees + 1) + (Math.random() * 50 - 25);
             
             const treeDepth = maxDepth - 1 - Math.floor(Math.random() * 1);
             const baseAngle = 0 + (Math.random() * 0.4 - 0.2);
@@ -2604,10 +5068,10 @@ function setupFractalBackground(svg) {
     }
     
     // Côté droit - orientation vers la gauche
-    if (patternVisibility > 0.3) { // Ne dessiner ces arbres que si le niveau de détail est suffisant
+    if (patternVisibility > 0.3) {
         for (let i = 0; i < numSideTrees; i++) {
-            const startX = width * 0.98 - (Math.random() * width * 0.03);
-            const startY = height * (i + 0.5) / (numSideTrees + 1) + (Math.random() * 50 - 25);
+            const startX = offsetX + width * 0.98 - (Math.random() * width * 0.03);
+            const startY = offsetY + height * (i + 0.5) / (numSideTrees + 1) + (Math.random() * 50 - 25);
             
             const treeDepth = maxDepth - 1 - Math.floor(Math.random() * 1);
             const baseAngle = Math.PI + (Math.random() * 0.4 - 0.2);
@@ -2618,16 +5082,16 @@ function setupFractalBackground(svg) {
         }
     }
     
-    // 3. Arbres éparpillés dans le fond - densité ajustée par le niveau de détail
-    const numBackgroundTrees = Math.max(2, Math.floor((width * height) / 200000) + Math.floor(patternVisibility * 4));
+    // 3. Arbres éparpillés dans le fond - AVEC OFFSET ET DENSITÉ ADAPTATIVE
+    const numBackgroundTrees = Math.max(2, Math.floor((width * height) / 200000) + Math.floor(patternVisibility * 4)) * densityMultiplier;
     
-    if (patternVisibility > 0.5) { // Ne dessiner ces arbres que si le niveau de détail est élevé
+    if (patternVisibility > 0.5) {
         for (let i = 0; i < numBackgroundTrees; i++) {
-            // Position aléatoire, distribution plus équilibrée
-            const startX = width * 0.15 + Math.random() * width * 0.7;
-            const startY = height * 0.1 + Math.random() * height * 0.6;
+            // Position aléatoire AVEC OFFSET
+            const startX = offsetX + width * 0.15 + Math.random() * width * 0.7;
+            const startY = offsetY + height * 0.1 + Math.random() * height * 0.6;
             
-            const treeDepth = maxDepth - 2; // Profondeur réduite pour le fond
+            const treeDepth = maxDepth - 2;
             const baseAngle = Math.random() * Math.PI * 2;
             const colorIndex = Math.floor(Math.random() * colorPalette.length);
             const treeSize = baseSize * (0.35 + Math.random() * 0.25);
@@ -2636,29 +5100,42 @@ function setupFractalBackground(svg) {
         }
     }
     
-    console.log("Génération du fond fractal terminée.");
+    console.log("✅ Génération du fond fractal terminée.");
 }
 
-// Fond avec motifs organiques et élégants - avec tous les paramètres utilisateur
-function setupOrganicPatternBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond avec motifs organiques et élégants adaptée pour l'export PNG grand format
+async function setupOrganicPatternBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85;
+        sizeMultiplier = Math.min(2.5, Math.max(1.1, areaRatio * 0.09));
+        
+        console.log(`📊 Export Organic Pattern - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES MOTIF ORGANIQUE:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🌿 Organic Pattern: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -2670,7 +5147,7 @@ function setupOrganicPatternBackground(svg) {
         .style("opacity", opacity)
         .lower();
     
-    // Fond de base avec gradient doux
+    // Fond de base avec gradient doux AVEC OFFSET
     const gradientId = `organic-bg-gradient-${Date.now()}`;
     const bgGradient = defs.append("linearGradient")
         .attr("id", gradientId)
@@ -2679,10 +5156,9 @@ function setupOrganicPatternBackground(svg) {
         .attr("x2", "100%")
         .attr("y2", "100%");
     
-    // Teinte basée sur la couleur personnalisée, mais très claire
+    // Teinte basée sur la couleur personnalisée
     const baseColor = d3.rgb(customColor);
     
-    // Couleurs pour le gradient de fond
     const bgColorLight = d3.rgb(
         Math.min(255, baseColor.r * 0.1 + 240),
         Math.min(255, baseColor.g * 0.1 + 245),
@@ -2703,48 +5179,54 @@ function setupOrganicPatternBackground(svg) {
         .attr("offset", "100%")
         .attr("stop-color", bgColorDark.toString());
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`);
     
     // Palette de couleurs végétales basée sur la couleur personnalisée
     const colors = [
-        d3.rgb(Math.min(255, baseColor.r * 0.3 + 60), Math.min(255, baseColor.g * 0.5 + 70), Math.min(255, baseColor.b * 0.3 + 40), 0.15),  // Teinte 1
-        d3.rgb(Math.min(255, baseColor.r * 0.2 + 40), Math.min(255, baseColor.g * 0.6 + 80), Math.min(255, baseColor.b * 0.2 + 30), 0.12),  // Teinte 2
-        d3.rgb(Math.min(255, baseColor.r * 0.4 + 50), Math.min(255, baseColor.g * 0.4 + 60), Math.min(255, baseColor.b * 0.4 + 50), 0.12),  // Teinte 3
-        d3.rgb(Math.min(255, baseColor.r * 0.3 + 70), Math.min(255, baseColor.g * 0.3 + 90), Math.min(255, baseColor.b * 0.3 + 60), 0.12)   // Teinte 4
+        d3.rgb(Math.min(255, baseColor.r * 0.3 + 60), Math.min(255, baseColor.g * 0.5 + 70), Math.min(255, baseColor.b * 0.3 + 40), 0.15),
+        d3.rgb(Math.min(255, baseColor.r * 0.2 + 40), Math.min(255, baseColor.g * 0.6 + 80), Math.min(255, baseColor.b * 0.2 + 30), 0.12),
+        d3.rgb(Math.min(255, baseColor.r * 0.4 + 50), Math.min(255, baseColor.g * 0.4 + 60), Math.min(255, baseColor.b * 0.4 + 50), 0.12),
+        d3.rgb(Math.min(255, baseColor.r * 0.3 + 70), Math.min(255, baseColor.g * 0.3 + 90), Math.min(255, baseColor.b * 0.3 + 60), 0.12)
     ];
     
-    // 1. Créer des formes de feuilles
+    // 1. Créer des formes de feuilles AVEC TAILLE ADAPTATIVE
     function drawLeaf(x, y, size, angle, type) {
-        // Type de feuille
+        const adaptedSize = size * sizeMultiplier;
+        const adaptedX = offsetX + x;
+        const adaptedY = offsetY + y;
+        
         if (type === 0) {
-            // Feuille simple ovale
+            // Feuille simple ovale AVEC TAILLE ADAPTATIVE
             const leaf = bgGroup.append("path")
-                .attr("d", `M ${x} ${y} 
-                           Q ${x + Math.cos(angle) * size * 0.5} ${y + Math.sin(angle) * size * 0.5}, 
-                             ${x + Math.cos(angle) * size} ${y + Math.sin(angle) * size}
-                           Q ${x + Math.cos(angle + 0.5) * size * 0.7} ${y + Math.sin(angle + 0.5) * size * 0.7},
-                             ${x} ${y}`)
+                .attr("d", `M ${adaptedX} ${adaptedY} 
+                           Q ${adaptedX + Math.cos(angle) * adaptedSize * 0.5} ${adaptedY + Math.sin(angle) * adaptedSize * 0.5}, 
+                             ${adaptedX + Math.cos(angle) * adaptedSize} ${adaptedY + Math.sin(angle) * adaptedSize}
+                           Q ${adaptedX + Math.cos(angle + 0.5) * adaptedSize * 0.7} ${adaptedY + Math.sin(angle + 0.5) * adaptedSize * 0.7},
+                             ${adaptedX} ${adaptedY}`)
                 .attr("fill", colors[Math.floor(Math.random() * colors.length)].toString())
                 .attr("stroke", "rgba(70, 100, 70, 0.08)")
-                .attr("stroke-width", 0.5);
+                .attr("stroke-width", 0.5 * sizeMultiplier);
                 
-            // Ajouter une nervure centrale
+            // Nervure centrale AVEC TAILLE ADAPTATIVE
             bgGroup.append("path")
-                .attr("d", `M ${x} ${y} L ${x + Math.cos(angle) * size}  ${y + Math.sin(angle) * size}`)
-                .attr("fill", "none")
+                .attr("d", `M ${adaptedX} ${adaptedY} L ${adaptedX + Math.cos(angle) * adaptedSize}  ${adaptedY + Math.sin(angle) * adaptedSize}`)
+                .attr("fill", "transparent")
                 .attr("stroke", "rgba(70, 100, 70, 0.1)")
-                .attr("stroke-width", 0.7);
+                .attr("stroke-width", 0.7 * sizeMultiplier);
             
-            // Ajouter une animation si activée
+            // Animation (désactivée pour export)
             if (animation) {
                 const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 anim.setAttribute("attributeName", "transform");
                 anim.setAttribute("type", "rotate");
-                anim.setAttribute("from", `0 ${x} ${y}`);
-                anim.setAttribute("to", `${(Math.random() < 0.5 ? 3 : -3) * patternVisibility} ${x} ${y}`);
+                anim.setAttribute("from", `0 ${adaptedX} ${adaptedY}`);
+                anim.setAttribute("to", `${(Math.random() < 0.5 ? 3 : -3) * patternVisibility} ${adaptedX} ${adaptedY}`);
                 anim.setAttribute("dur", `${(5 + Math.random() * 4) / animationSpeed}s`);
                 anim.setAttribute("repeatCount", "indefinite");
                 anim.setAttribute("additive", "sum");
@@ -2753,51 +5235,50 @@ function setupOrganicPatternBackground(svg) {
             }
         } 
         else if (type === 1) {
-            // Feuille composée (comme une feuille de fougère)
+            // Feuille composée AVEC TAILLE ADAPTATIVE
             const mainStem = bgGroup.append("path")
-                .attr("d", `M ${x} ${y} L ${x + Math.cos(angle) * size} ${y + Math.sin(angle) * size}`)
-                .attr("fill", "none")
+                .attr("d", `M ${adaptedX} ${adaptedY} L ${adaptedX + Math.cos(angle) * adaptedSize} ${adaptedY + Math.sin(angle) * adaptedSize}`)
+                .attr("fill", "transparent")
                 .attr("stroke", "rgba(70, 100, 70, 0.15)")
-                .attr("stroke-width", 0.8);
+                .attr("stroke-width", 0.8 * sizeMultiplier);
             
-            // Groupe pour faciliter l'animation
             const folioleGroup = bgGroup.append("g");
             
-            // Ajouter des folioles de chaque côté
-            const numFolioles = Math.floor(size / 15) + 3;
-            const folioleSize = size * 0.2;
+            // Folioles AVEC TAILLE ADAPTATIVE
+            const numFolioles = Math.floor(adaptedSize / (15 * sizeMultiplier)) + 3;
+            const folioleSize = adaptedSize * 0.2;
             
             for (let i = 1; i < numFolioles; i++) {
                 const stemPos = i / numFolioles;
-                const posX = x + Math.cos(angle) * size * stemPos;
-                const posY = y + Math.sin(angle) * size * stemPos;
+                const posX = adaptedX + Math.cos(angle) * adaptedSize * stemPos;
+                const posY = adaptedY + Math.sin(angle) * adaptedSize * stemPos;
                 
                 // Foliole gauche
                 folioleGroup.append("path")
                     .attr("d", `M ${posX} ${posY} 
                                Q ${posX + Math.cos(angle + Math.PI/2) * folioleSize * 0.5} ${posY + Math.sin(angle + Math.PI/2) * folioleSize * 0.5}, 
                                  ${posX + Math.cos(angle + Math.PI/2) * folioleSize} ${posY + Math.sin(angle + Math.PI/2) * folioleSize}`)
-                    .attr("fill", "none")
+                    .attr("fill", "transparent")
                     .attr("stroke", colors[Math.floor(Math.random() * colors.length)].toString())
-                    .attr("stroke-width", 0.8);
+                    .attr("stroke-width", 0.8 * sizeMultiplier);
                 
                 // Foliole droite
                 folioleGroup.append("path")
                     .attr("d", `M ${posX} ${posY} 
                                Q ${posX + Math.cos(angle - Math.PI/2) * folioleSize * 0.5} ${posY + Math.sin(angle - Math.PI/2) * folioleSize * 0.5}, 
                                  ${posX + Math.cos(angle - Math.PI/2) * folioleSize} ${posY + Math.sin(angle - Math.PI/2) * folioleSize}`)
-                    .attr("fill", "none")
+                    .attr("fill", "transparent")
                     .attr("stroke", colors[Math.floor(Math.random() * colors.length)].toString())
-                    .attr("stroke-width", 0.8);
+                    .attr("stroke-width", 0.8 * sizeMultiplier);
             }
             
-            // Ajouter une animation si activée
+            // Animation (désactivée pour export)
             if (animation) {
                 const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 anim.setAttribute("attributeName", "transform");
                 anim.setAttribute("type", "rotate");
-                anim.setAttribute("from", `0 ${x} ${y}`);
-                anim.setAttribute("to", `${(Math.random() < 0.5 ? 2 : -2) * patternVisibility} ${x} ${y}`);
+                anim.setAttribute("from", `0 ${adaptedX} ${adaptedY}`);
+                anim.setAttribute("to", `${(Math.random() < 0.5 ? 2 : -2) * patternVisibility} ${adaptedX} ${adaptedY}`);
                 anim.setAttribute("dur", `${(6 + Math.random() * 4) / animationSpeed}s`);
                 anim.setAttribute("repeatCount", "indefinite");
                 anim.setAttribute("additive", "sum");
@@ -2806,42 +5287,38 @@ function setupOrganicPatternBackground(svg) {
             }
         }
         else if (type === 2) {
-            // Type supplémentaire de feuille 
-            // (selon le niveau de détail)
+            // Feuille complexe (selon le niveau de détail)
             if (patternVisibility > 0.4) {
-                // Feuille plus complexe avec plusieurs lobes
                 const leafGroup = bgGroup.append("g");
-                
-                // Centre de la feuille
                 const leafColor = colors[Math.floor(Math.random() * colors.length)];
                 
-                // Forme principale
+                // Forme principale AVEC TAILLE ADAPTATIVE
                 const leaf = leafGroup.append("path")
-                    .attr("d", `M ${x} ${y} 
-                          C ${x + Math.cos(angle - 0.4) * size * 0.5} ${y + Math.sin(angle - 0.4) * size * 0.5},
-                            ${x + Math.cos(angle - 0.2) * size * 0.8} ${y + Math.sin(angle - 0.2) * size * 0.8},
-                            ${x + Math.cos(angle) * size} ${y + Math.sin(angle) * size}
-                          C ${x + Math.cos(angle + 0.2) * size * 0.8} ${y + Math.sin(angle + 0.2) * size * 0.8},
-                            ${x + Math.cos(angle + 0.4) * size * 0.5} ${y + Math.sin(angle + 0.4) * size * 0.5},
-                            ${x} ${y}`)
+                    .attr("d", `M ${adaptedX} ${adaptedY} 
+                          C ${adaptedX + Math.cos(angle - 0.4) * adaptedSize * 0.5} ${adaptedY + Math.sin(angle - 0.4) * adaptedSize * 0.5},
+                            ${adaptedX + Math.cos(angle - 0.2) * adaptedSize * 0.8} ${adaptedY + Math.sin(angle - 0.2) * adaptedSize * 0.8},
+                            ${adaptedX + Math.cos(angle) * adaptedSize} ${adaptedY + Math.sin(angle) * adaptedSize}
+                          C ${adaptedX + Math.cos(angle + 0.2) * adaptedSize * 0.8} ${adaptedY + Math.sin(angle + 0.2) * adaptedSize * 0.8},
+                            ${adaptedX + Math.cos(angle + 0.4) * adaptedSize * 0.5} ${adaptedY + Math.sin(angle + 0.4) * adaptedSize * 0.5},
+                            ${adaptedX} ${adaptedY}`)
                     .attr("fill", leafColor.toString())
                     .attr("stroke", "rgba(70, 100, 70, 0.08)")
-                    .attr("stroke-width", 0.5);
+                    .attr("stroke-width", 0.5 * sizeMultiplier);
                 
-                // Nervure centrale
+                // Nervure centrale AVEC TAILLE ADAPTATIVE
                 leafGroup.append("path")
-                    .attr("d", `M ${x} ${y} L ${x + Math.cos(angle) * size * 0.95} ${y + Math.sin(angle) * size * 0.95}`)
-                    .attr("fill", "none")
+                    .attr("d", `M ${adaptedX} ${adaptedY} L ${adaptedX + Math.cos(angle) * adaptedSize * 0.95} ${adaptedY + Math.sin(angle) * adaptedSize * 0.95}`)
+                    .attr("fill", "transparent")
                     .attr("stroke", "rgba(70, 100, 70, 0.1)")
-                    .attr("stroke-width", 0.7);
+                    .attr("stroke-width", 0.7 * sizeMultiplier);
                 
-                // Animation si activée
+                // Animation (désactivée pour export)
                 if (animation) {
                     const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                     anim.setAttribute("attributeName", "transform");
                     anim.setAttribute("type", "rotate");
-                    anim.setAttribute("from", `0 ${x} ${y}`);
-                    anim.setAttribute("to", `${(Math.random() < 0.5 ? 3 : -3) * patternVisibility} ${x} ${y}`);
+                    anim.setAttribute("from", `0 ${adaptedX} ${adaptedY}`);
+                    anim.setAttribute("to", `${(Math.random() < 0.5 ? 3 : -3) * patternVisibility} ${adaptedX} ${adaptedY}`);
                     anim.setAttribute("dur", `${(5 + Math.random() * 4) / animationSpeed}s`);
                     anim.setAttribute("repeatCount", "indefinite");
                     anim.setAttribute("additive", "sum");
@@ -2849,46 +5326,49 @@ function setupOrganicPatternBackground(svg) {
                     leafGroup.node().appendChild(anim);
                 }
             } else {
-                // Si niveau de détail faible, dessiner un type plus simple
+                // Fallback vers type simple
                 drawLeaf(x, y, size, angle, 0);
             }
         }
     }
     
-    // 2. Créer des petites structures végétales (fleurs, bourgeons)
+    // 2. Créer des petites structures végétales AVEC TAILLE ADAPTATIVE
     function drawFlower(x, y, size) {
+        const adaptedSize = size * sizeMultiplier;
+        const adaptedX = offsetX + x;
+        const adaptedY = offsetY + y;
+        
         const numPetals = 5 + Math.floor(Math.random() * 3);
         const color = colors[Math.floor(Math.random() * colors.length)];
         
-        // Groupe pour faciliter l'animation
         const flowerGroup = bgGroup.append("g");
         
-        // Centre de la fleur
+        // Centre de la fleur AVEC TAILLE ADAPTATIVE
         flowerGroup.append("circle")
-            .attr("cx", x)
-            .attr("cy", y)
-            .attr("r", size * 0.2)
+            .attr("cx", adaptedX)
+            .attr("cy", adaptedY)
+            .attr("r", adaptedSize * 0.2)
             .attr("fill", "rgba(180, 180, 140, 0.15)");
         
-        // Pétales
+        // Pétales AVEC TAILLE ADAPTATIVE
         for (let i = 0; i < numPetals; i++) {
             const angle = (i / numPetals) * Math.PI * 2;
-            const petalX = x + Math.cos(angle) * size * 0.5;
-            const petalY = y + Math.sin(angle) * size * 0.5;
+            const petalX = adaptedX + Math.cos(angle) * adaptedSize * 0.5;
+            const petalY = adaptedY + Math.sin(angle) * adaptedSize * 0.5;
             
             flowerGroup.append("circle")
                 .attr("cx", petalX)
                 .attr("cy", petalY)
-                .attr("r", size * 0.3)
+                .attr("r", adaptedSize * 0.3)
                 .attr("fill", color.toString());
         }
         
-        // Animation si activée
+        // Animation (désactivée pour export)
         if (animation) {
             const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             anim.setAttribute("attributeName", "transform");
             anim.setAttribute("type", "rotate");
-            anim.setAttribute("from", `0 ${x} ${y}`);
+            anim.setAttribute("from", `0 ${adaptedX} ${adaptedY}`);
             anim.setAttribute("to", `${(Math.random() < 0.5 ? 360 : -360)}`);
             anim.setAttribute("dur", `${(30 + Math.random() * 20) / animationSpeed}s`);
             anim.setAttribute("repeatCount", "indefinite");
@@ -2897,59 +5377,55 @@ function setupOrganicPatternBackground(svg) {
         }
     }
     
-    // 3. Créer des tiges et branches fines
+    // 3. Créer des tiges et branches fines AVEC TAILLE ADAPTATIVE
     function drawStem(x, y, length, angle) {
-        // Point de départ
-        let currentX = x;
-        let currentY = y;
+        const adaptedLength = length * sizeMultiplier;
         
-        // Groupe pour les éléments de la tige
+        let currentX = offsetX + x;
+        let currentY = offsetY + y;
+        
         const stemGroup = bgGroup.append("g");
         
-        // Créer la tige avec plusieurs segments pour une légère courbure
         let pathData = `M ${currentX} ${currentY}`;
         
-        const numSegments = Math.floor(length / 20) + 2;
-        const segmentLength = length / numSegments;
+        const numSegments = Math.floor(adaptedLength / (20 * sizeMultiplier)) + 2;
+        const segmentLength = adaptedLength / numSegments;
         
         for (let i = 1; i <= numSegments; i++) {
-            // Légère variation d'angle pour courber naturellement
             angle += (Math.random() - 0.5) * 0.2;
             
-            // Calculer le nouveau point
             currentX += Math.cos(angle) * segmentLength;
             currentY += Math.sin(angle) * segmentLength;
             
-            // Ajouter au chemin
             pathData += ` L ${currentX} ${currentY}`;
             
-            // Parfois ajouter une petite feuille ou fleur (selon le niveau de détail)
+            // Éléments sur la tige AVEC ADAPTATION
             const elementThreshold = 0.3 * patternVisibility;
             if (Math.random() < elementThreshold && i > 1) {
                 if (Math.random() < 0.7) {
-                    // Petite feuille
-                    const leafSize = 10 + Math.random() * 15;
+                    // Petite feuille SANS offset (déjà appliqué dans drawLeaf)
+                    const leafSize = (10 + Math.random() * 15);
                     const leafAngle = angle + (Math.random() < 0.5 ? Math.PI/2 : -Math.PI/2);
-                    drawLeaf(currentX, currentY, leafSize, leafAngle, Math.floor(Math.random() * 3));
+                    drawLeaf(currentX - offsetX, currentY - offsetY, leafSize, leafAngle, Math.floor(Math.random() * 3));
                 } else {
-                    // Petite fleur (seulement si niveau de détail suffisant)
+                    // Petite fleur
                     if (patternVisibility > 0.5) {
-                        const flowerSize = 8 + Math.random() * 10;
-                        drawFlower(currentX, currentY, flowerSize);
+                        const flowerSize = (8 + Math.random() * 10);
+                        drawFlower(currentX - offsetX, currentY - offsetY, flowerSize);
                     }
                 }
             }
         }
         
-        // Dessiner la tige
+        // Dessiner la tige AVEC TAILLE ADAPTATIVE
         const stem = stemGroup.append("path")
             .attr("d", pathData)
-            .attr("fill", "none")
+            .attr("fill", "transparent")
             .attr("stroke", "rgba(100, 120, 90, 0.15)")
-            .attr("stroke-width", 1.2)
+            .attr("stroke-width", 1.2 * sizeMultiplier)
             .attr("stroke-linecap", "round");
         
-        // Animation si activée
+        // Animation (désactivée pour export)
         if (animation) {
             const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
             anim.setAttribute("attributeName", "transform");
@@ -2962,10 +5438,13 @@ function setupOrganicPatternBackground(svg) {
         }
     }
     
-    // Disposer les éléments végétaux dans l'espace
+    // Disposer les éléments végétaux AVEC DENSITÉ ADAPTATIVE
     
-    // 1. Grandes feuilles éparses (densité liée au niveau de détail)
-    const numLargeLeaves = Math.floor((width * height) / 100000 * patternVisibility) + 5;
+    // 1. Grandes feuilles éparses
+    const baseLargeLeaves = Math.floor((width * height) / 100000 * patternVisibility) + 5;
+    const numLargeLeaves = Math.floor(baseLargeLeaves * densityMultiplier);
+    
+    console.log(`🍃 ${numLargeLeaves} grandes feuilles`);
     
     for (let i = 0; i < numLargeLeaves; i++) {
         const x = Math.random() * width;
@@ -2977,8 +5456,11 @@ function setupOrganicPatternBackground(svg) {
         drawLeaf(x, y, size, angle, leafType);
     }
     
-    // 2. Tiges avec petites feuilles et fleurs (densité liée au niveau de détail)
-    const numStems = Math.floor((width * height) / 70000 * patternVisibility) + 8;
+    // 2. Tiges avec petites feuilles et fleurs
+    const baseStems = Math.floor((width * height) / 70000 * patternVisibility) + 8;
+    const numStems = Math.floor(baseStems * densityMultiplier);
+    
+    console.log(`🌱 ${numStems} tiges`);
     
     for (let i = 0; i < numStems; i++) {
         const x = Math.random() * width;
@@ -2989,9 +5471,12 @@ function setupOrganicPatternBackground(svg) {
         drawStem(x, y, length, angle);
     }
     
-    // 3. Quelques fleurs isolées (seulement si niveau de détail suffisant)
+    // 3. Fleurs isolées
     if (patternVisibility > 0.3) {
-        const numFlowers = Math.floor((width * height) / 120000 * patternVisibility) + 5;
+        const baseFlowers = Math.floor((width * height) / 120000 * patternVisibility) + 5;
+        const numFlowers = Math.floor(baseFlowers * densityMultiplier);
+        
+        console.log(`🌸 ${numFlowers} fleurs`);
         
         for (let i = 0; i < numFlowers; i++) {
             const x = Math.random() * width;
@@ -3002,14 +5487,17 @@ function setupOrganicPatternBackground(svg) {
         }
     }
     
-    // 4. Ajouter un léger motif texturé pour simuler du papier
+    // 4. Motif texturé
     if (patternVisibility > 0.4) {
-        const textureDensity = Math.floor((width * height) / 1000 * patternVisibility);
+        const baseTexture = Math.floor((width * height) / 1000 * patternVisibility);
+        const textureDensity = Math.floor(baseTexture * densityMultiplier);
+        
+        console.log(`✨ ${textureDensity} éléments de texture`);
         
         for (let i = 0; i < textureDensity; i++) {
-            const x = Math.random() * width;
-            const y = Math.random() * height;
-            const length = Math.random() * 10 + 3;
+            const x = offsetX + Math.random() * width;
+            const y = offsetY + Math.random() * height;
+            const length = (Math.random() * 10 + 3) * sizeMultiplier;
             const angle = Math.random() * Math.PI;
             
             bgGroup.append("line")
@@ -3018,200 +5506,46 @@ function setupOrganicPatternBackground(svg) {
                 .attr("x2", x + Math.cos(angle) * length)
                 .attr("y2", y + Math.sin(angle) * length)
                 .attr("stroke", "rgba(140, 160, 130, 0.05)")
-                .attr("stroke-width", 0.5);
+                .attr("stroke-width", 0.5 * sizeMultiplier);
         }
     }
     
-    console.log("Génération du motif organique terminée.");
+    console.log("✅ Génération du motif organique terminée.");
 }
 
-// Fond avec motifs géométriques Art Déco modernes et élégants - couleurs visibles
-// function setupArtDecoBackground(svg) {
-//     const width = window.innerWidth;
-//     const height = window.innerHeight;
-//     const defs = svg.append("defs");
+// Fond avec motifs géométriques Art Déco adaptée pour l'export PNG grand format
+async function setupArtDecoBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
     
-//     // Nettoyer tout fond existant
-//     svg.selectAll(".background-element").remove();
-    
-//     // Créer un groupe pour le fond
-//     const bgGroup = svg.append("g")
-//         .attr("class", "background-element")
-//         .attr("pointer-events", "none")
-//         .lower();
-    
-//     // Fond de base ivoire très clair
-//     bgGroup.append("rect")
-//         .attr("width", width)
-//         .attr("height", height)
-//         .attr("fill", "#f5f5f0") // Ivoire légèrement visible
-//         .attr("pointer-events", "none")
-//         .lower();
-    
-//     // Définir des couleurs Art Déco visibles mais élégantes
-//     const colors = [
-//         "rgba(200, 200, 220, 0.25)", // Bleu-gris pâle
-//         "rgba(190, 190, 210, 0.2)", // Bleu-violet pâle
-//         "rgba(210, 200, 190, 0.2)", // Beige pâle
-//         "rgba(200, 210, 200, 0.2)"  // Vert pâle
-//     ];
-    
-//     // Créer une grille de formes Art Déco
-//     const gridSize = 150;
-//     const numRows = Math.ceil(height / gridSize) + 1;
-//     const numCols = Math.ceil(width / gridSize) + 1;
-    
-//     for (let row = -1; row < numRows; row++) {
-//         for (let col = -1; col < numCols; col++) {
-//             const centerX = col * gridSize;
-//             const centerY = row * gridSize;
-            
-//             // Choisir aléatoirement une forme et une couleur
-//             const shapeType = Math.floor(Math.random() * 5);
-//             const color = colors[Math.floor(Math.random() * colors.length)];
-            
-//             switch (shapeType) {
-//                 case 0: // Cercles concentriques
-//                     for (let i = 3; i > 0; i--) {
-//                         bgGroup.append("circle")
-//                             .attr("cx", centerX)
-//                             .attr("cy", centerY)
-//                             .attr("r", (gridSize / 3) * i * 0.7)
-//                             .attr("fill", "none")
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-//                     }
-//                     break;
-                
-//                 case 1: // Motif en éventail
-//                     const fanGroup = bgGroup.append("g")
-//                         .attr("transform", `translate(${centerX}, ${centerY})`);
-                    
-//                     const numRays = 12;
-//                     const rayLength = gridSize * 0.6;
-                    
-//                     for (let i = 0; i < numRays; i++) {
-//                         const angle = (i * Math.PI * 2) / numRays;
-//                         const x2 = Math.cos(angle) * rayLength;
-//                         const y2 = Math.sin(angle) * rayLength;
-                        
-//                         fanGroup.append("line")
-//                             .attr("x1", 0)
-//                             .attr("y1", 0)
-//                             .attr("x2", x2)
-//                             .attr("y2", y2)
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-//                     }
-//                     break;
-                
-//                 case 2: // Losanges emboîtés
-//                     for (let i = 3; i > 0; i--) {
-//                         const size = (gridSize / 3) * i * 0.7;
-                        
-//                         bgGroup.append("rect")
-//                             .attr("x", centerX - size)
-//                             .attr("y", centerY - size)
-//                             .attr("width", size * 2)
-//                             .attr("height", size * 2)
-//                             .attr("transform", `rotate(45, ${centerX}, ${centerY})`)
-//                             .attr("fill", "none")
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-//                     }
-//                     break;
-                
-//                 case 3: // Motif chevron
-//                     const chevronGroup = bgGroup.append("g")
-//                         .attr("transform", `translate(${centerX}, ${centerY})`);
-                    
-//                     for (let i = 0; i < 3; i++) {
-//                         const size = gridSize * 0.3 * (i + 1);
-                        
-//                         chevronGroup.append("path")
-//                             .attr("d", `M ${-size} ${0} L ${0} ${-size} L ${size} ${0}`)
-//                             .attr("fill", "none")
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-                        
-//                         chevronGroup.append("path")
-//                             .attr("d", `M ${-size} ${0} L ${0} ${size} L ${size} ${0}`)
-//                             .attr("fill", "none")
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-//                     }
-//                     break;
-                    
-//                 case 4: // Octogones concentriques
-//                     function createOctagon(cx, cy, radius) {
-//                         const points = [];
-//                         for (let i = 0; i < 8; i++) {
-//                             const angle = i * Math.PI / 4;
-//                             points.push([
-//                                 cx + radius * Math.cos(angle),
-//                                 cy + radius * Math.sin(angle)
-//                             ]);
-//                         }
-                        
-//                         return points.map((p, i) => 
-//                             (i === 0 ? "M" : "L") + p[0] + "," + p[1]
-//                         ).join(" ") + "Z";
-//                     }
-                    
-//                     for (let i = 3; i > 0; i--) {
-//                         bgGroup.append("path")
-//                             .attr("d", createOctagon(centerX, centerY, (gridSize / 3) * i * 0.6))
-//                             .attr("fill", "none")
-//                             .attr("stroke", color)
-//                             .attr("stroke-width", 2); // Plus épais
-//                     }
-//                     break;
-//             }
-//         }
-//     }
-    
-//     // Superposer quelques grandes formes géométriques plus visibles
-//     for (let i = 0; i < 5; i++) {
-//         const x = Math.random() * width;
-//         const y = Math.random() * height;
-//         const size = Math.random() * 300 + 200;
-        
-//         bgGroup.append("rect")
-//             .attr("x", x - size / 2)
-//             .attr("y", y - size / 2)
-//             .attr("width", size)
-//             .attr("height", size)
-//             .attr("transform", `rotate(${Math.random() * 45}, ${x}, ${y})`)
-//             .attr("fill", "none")
-//             .attr("stroke", "rgba(170, 170, 190, 0.2)") // Couleur plus visible
-//             .attr("stroke-width", 2.5); // Plus épais
-//     }
-    
-//     // Ne pas appliquer de flou pour une meilleure visibilité
-// }
-
-
-
-// Fond avec motifs géométriques Art Déco modernes et élégants avec tous les paramètres utilisateur
-function setupArtDecoBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+        sizeMultiplier = Math.min(2.5, Math.max(1.3, areaRatio * 0.1));
+        
+        console.log(`📊 Export Art Déco - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES ART DÉCO:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Art Déco: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -3223,7 +5557,7 @@ function setupArtDecoBackground(svg) {
         .style("opacity", opacity)
         .lower();
     
-    // Fond de base ivoire très clair, légèrement teinté par la couleur personnalisée
+    // Fond de base ivoire très clair, légèrement teinté par la couleur personnalisée AVEC OFFSET
     const baseColor = d3.rgb(customColor);
     
     const bgColor = d3.rgb(
@@ -3233,6 +5567,8 @@ function setupArtDecoBackground(svg) {
     );
     
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", bgColor.toString())
@@ -3241,25 +5577,28 @@ function setupArtDecoBackground(svg) {
     
     // Définir des couleurs Art Déco basées sur la couleur personnalisée
     const colors = [
-        d3.rgb(Math.min(255, baseColor.r * 0.8 + 40), Math.min(255, baseColor.g * 0.8 + 40), Math.min(255, baseColor.b * 0.8 + 60), 0.25), // Teinte principale 1
-        d3.rgb(Math.min(255, baseColor.r * 0.8 + 30), Math.min(255, baseColor.g * 0.8 + 30), Math.min(255, baseColor.b * 0.8 + 50), 0.2),  // Teinte principale 2
-        d3.rgb(Math.min(255, baseColor.r * 0.8 + 50), Math.min(255, baseColor.g * 0.8 + 40), Math.min(255, baseColor.b * 0.8 + 30), 0.2),  // Teinte principale 3
-        d3.rgb(Math.min(255, baseColor.r * 0.8 + 40), Math.min(255, baseColor.g * 0.8 + 50), Math.min(255, baseColor.b * 0.8 + 40), 0.2)   // Teinte principale 4
+        d3.rgb(Math.min(255, baseColor.r * 0.8 + 40), Math.min(255, baseColor.g * 0.8 + 40), Math.min(255, baseColor.b * 0.8 + 60), 0.25),
+        d3.rgb(Math.min(255, baseColor.r * 0.8 + 30), Math.min(255, baseColor.g * 0.8 + 30), Math.min(255, baseColor.b * 0.8 + 50), 0.2),
+        d3.rgb(Math.min(255, baseColor.r * 0.8 + 50), Math.min(255, baseColor.g * 0.8 + 40), Math.min(255, baseColor.b * 0.8 + 30), 0.2),
+        d3.rgb(Math.min(255, baseColor.r * 0.8 + 40), Math.min(255, baseColor.g * 0.8 + 50), Math.min(255, baseColor.b * 0.8 + 40), 0.2)
     ];
     
-    // Adapter la taille de la grille au niveau de détail
-    const gridSize = Math.max(100, 150 - patternVisibility * 50);
+    // Adapter la taille de la grille au niveau de détail ET à la taille
+    const baseGridSize = Math.max(100, 150 - patternVisibility * 50);
+    const gridSize = baseGridSize * sizeMultiplier;
     const numRows = Math.ceil(height / gridSize) + 1;
     const numCols = Math.ceil(width / gridSize) + 1;
+    
+    console.log(`📐 Grille: ${numCols}x${numRows}, taille cellule: ${gridSize.toFixed(0)}px`);
     
     // Tableau pour stocker les formes animables
     const animatableShapes = [];
     
-    // Créer une grille de formes Art Déco
+    // Créer une grille de formes Art Déco AVEC OFFSET
     for (let row = -1; row < numRows; row++) {
         for (let col = -1; col < numCols; col++) {
-            const centerX = col * gridSize;
-            const centerY = row * gridSize;
+            const centerX = offsetX + col * gridSize;
+            const centerY = offsetY + row * gridSize;
             
             // Choisir aléatoirement une forme et une couleur
             const shapeType = Math.floor(Math.random() * 5);
@@ -3273,7 +5612,7 @@ function setupArtDecoBackground(svg) {
             const shapeVisibility = Math.random();
             if (shapeVisibility > (1 - patternVisibility * 0.8)) {
                 switch (shapeType) {
-                    case 0: // Cercles concentriques
+                    case 0: // Cercles concentriques AVEC TAILLE ADAPTATIVE
                         const circles = [];
                         const numCircles = Math.max(1, Math.round(3 * patternVisibility));
                         
@@ -3282,9 +5621,9 @@ function setupArtDecoBackground(svg) {
                                 .attr("cx", 0)
                                 .attr("cy", 0)
                                 .attr("r", (gridSize / 3) * i * 0.7)
-                                .attr("fill", "none")
+                                .attr("fill", "transparent")
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             circles.push(circle);
                         }
@@ -3299,7 +5638,7 @@ function setupArtDecoBackground(svg) {
                         }
                         break;
                     
-                    case 1: // Motif en éventail
+                    case 1: // Motif en éventail AVEC TAILLE ADAPTATIVE
                         const rays = [];
                         const numRays = Math.max(4, Math.round(12 * patternVisibility));
                         const rayLength = gridSize * 0.6;
@@ -3315,7 +5654,7 @@ function setupArtDecoBackground(svg) {
                                 .attr("x2", x2)
                                 .attr("y2", y2)
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             rays.push(ray);
                         }
@@ -3330,7 +5669,7 @@ function setupArtDecoBackground(svg) {
                         }
                         break;
                     
-                    case 2: // Losanges emboîtés
+                    case 2: // Losanges emboîtés AVEC TAILLE ADAPTATIVE
                         const diamonds = [];
                         const numDiamonds = Math.max(1, Math.round(3 * patternVisibility));
                         
@@ -3343,9 +5682,9 @@ function setupArtDecoBackground(svg) {
                                 .attr("width", size * 2)
                                 .attr("height", size * 2)
                                 .attr("transform", "rotate(45)")
-                                .attr("fill", "none")
+                                .attr("fill", "transparent")
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             diamonds.push(diamond);
                         }
@@ -3360,7 +5699,7 @@ function setupArtDecoBackground(svg) {
                         }
                         break;
                     
-                    case 3: // Motif chevron
+                    case 3: // Motif chevron AVEC TAILLE ADAPTATIVE
                         const chevrons = [];
                         const numChevrons = Math.max(1, Math.round(3 * patternVisibility));
                         
@@ -3369,15 +5708,15 @@ function setupArtDecoBackground(svg) {
                             
                             const chevronUp = shapeGroup.append("path")
                                 .attr("d", `M ${-size} ${0} L ${0} ${-size} L ${size} ${0}`)
-                                .attr("fill", "none")
+                                .attr("fill", "transparent")
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             const chevronDown = shapeGroup.append("path")
                                 .attr("d", `M ${-size} ${0} L ${0} ${size} L ${size} ${0}`)
-                                .attr("fill", "none")
+                                .attr("fill", "transparent")
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             chevrons.push(chevronUp);
                             chevrons.push(chevronDown);
@@ -3393,7 +5732,7 @@ function setupArtDecoBackground(svg) {
                         }
                         break;
                         
-                    case 4: // Octogones concentriques
+                    case 4: // Octogones concentriques AVEC TAILLE ADAPTATIVE
                         function createOctagon(radius) {
                             const points = [];
                             for (let i = 0; i < 8; i++) {
@@ -3415,9 +5754,9 @@ function setupArtDecoBackground(svg) {
                         for (let i = numOctagons; i > 0; i--) {
                             const octagon = shapeGroup.append("path")
                                 .attr("d", createOctagon((gridSize / 3) * i * 0.6))
-                                .attr("fill", "none")
+                                .attr("fill", "transparent")
                                 .attr("stroke", color.toString())
-                                .attr("stroke-width", 2);
+                                .attr("stroke-width", 2 * sizeMultiplier);
                             
                             octagons.push(octagon);
                         }
@@ -3436,14 +5775,14 @@ function setupArtDecoBackground(svg) {
         }
     }
     
-    // Superposer quelques grandes formes géométriques plus visibles
-    // Nombre basé sur le niveau de détail
-    const numLargeShapes = Math.max(2, Math.round(5 * patternVisibility));
+    // Superposer quelques grandes formes géométriques AVEC TAILLE ADAPTATIVE
+    const numLargeShapes = Math.max(2, Math.round(5 * patternVisibility * densityMultiplier));
     
     for (let i = 0; i < numLargeShapes; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 300 + 200;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 300 + 200) * sizeMultiplier;
         
         // Utiliser une couleur plus visible
         const largeShapeColor = d3.rgb(
@@ -3459,9 +5798,9 @@ function setupArtDecoBackground(svg) {
             .attr("width", size)
             .attr("height", size)
             .attr("transform", `rotate(${Math.random() * 45}, ${x}, ${y})`)
-            .attr("fill", "none")
+            .attr("fill", "transparent")
             .attr("stroke", largeShapeColor.toString())
-            .attr("stroke-width", 2.5);
+            .attr("stroke-width", 2.5 * sizeMultiplier);
         
         if (animation) {
             animatableShapes.push({
@@ -3473,8 +5812,10 @@ function setupArtDecoBackground(svg) {
         }
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
+        console.log("🎬 Activation des animations Art Déco...");
+        
         animatableShapes.forEach((shape, index) => {
             const delay = index * 0.2;
             const duration = (10 + Math.random() * 15) / animationSpeed;
@@ -3494,7 +5835,6 @@ function setupArtDecoBackground(svg) {
                     scaleAnim.setAttribute("additive", "sum");
                     scaleAnim.setAttribute("begin", `${delay}s`);
                     
-                    // Appliquer l'animation au premier élément (groupe)
                     shape.elements[0].node().parentNode.appendChild(scaleAnim);
                     break;
                     
@@ -3508,18 +5848,16 @@ function setupArtDecoBackground(svg) {
                     rotateAnim.setAttribute("dur", `${duration * 3}s`);
                     rotateAnim.setAttribute("repeatCount", "indefinite");
                     
-                    // Appliquer l'animation au groupe
                     shape.elements[0].node().parentNode.appendChild(rotateAnim);
                     break;
                     
                 case "chevrons":
-                    // Déplacement vertical
+                    // Déplacement vertical avec taille adaptée
                     for (let i = 0; i < shape.elements.length; i += 2) {
-                        const moveY = 5 * patternVisibility;
+                        const moveY = 5 * patternVisibility * sizeMultiplier;
                         const moveAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
                         moveAnim.setAttribute("attributeName", "d");
                         
-                        // Calculer les chemins pour l'animation
                         const size = parseInt(shape.elements[i].attr("d").match(/M -(\d+)/)[1]);
                         
                         const pathUp = `M ${-size} ${0} L ${0} ${-size} L ${size} ${0}`;
@@ -3553,7 +5891,6 @@ function setupArtDecoBackground(svg) {
                     largShapeAnim.setAttribute("attributeName", "transform");
                     largShapeAnim.setAttribute("type", "rotate");
                     
-                    // Extraire l'angle actuel
                     const currentRotation = parseInt(shape.elements[0].attr("transform").match(/rotate\(([^,]+)/)[1]) || 0;
                     const newRotation = currentRotation + 45;
                     
@@ -3568,29 +5905,42 @@ function setupArtDecoBackground(svg) {
         });
     }
     
-    console.log("Génération du fond Art Déco terminée.");
+    console.log("✅ Génération du fond Art Déco terminée.");
 }
 
-// Fond inspiré de Jackson Pollock (dripping) avec tous les paramètres utilisateur
-function setupPollockBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond inspiré de Jackson Pollock adaptée pour l'export PNG grand format
+async function setupPollockBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85;
+        sizeMultiplier = Math.min(2.2, Math.max(1.4, areaRatio * 0.15));
+        
+        console.log(`📊 Export Pollock - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES POLLOCK:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Pollock: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -3611,7 +5961,10 @@ function setupPollockBackground(svg) {
         Math.min(255, 240 + (baseColor.b - 240) * 0.05)
     );
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", bgColor.toString());
@@ -3625,15 +5978,14 @@ function setupPollockBackground(svg) {
         `rgba(${Math.round(baseColor.r * 0.8 + 40)}, ${Math.round(baseColor.g * 0.7 + 50)}, ${Math.round(baseColor.b * 0.1 + 10)}, 0.08)`   // Jaune influencé
     ];
     
-    // Créer l'effet dripping - lignes fines
-    // Nombre basé sur le niveau de détail
-    const numLines = Math.floor(width / (20 - 5 * patternVisibility));
+    // Créer l'effet dripping - lignes fines AVEC DENSITÉ ADAPTATIVE
+    const numLines = Math.floor((width / (20 - 5 * patternVisibility)) * densityMultiplier);
     const drippingLines = [];
     
     for (let i = 0; i < numLines; i++) {
-        // Point de départ aléatoire
-        const startX = Math.random() * width;
-        const startY = Math.random() * height;
+        // Point de départ aléatoire AVEC OFFSET
+        const startX = offsetX + Math.random() * width;
+        const startY = offsetY + Math.random() * height;
         
         // Longueur et nombre de segments basés sur le niveau de détail
         const segments = 5 + Math.floor(Math.random() * 10 + 5 * patternVisibility);
@@ -3647,7 +5999,7 @@ function setupPollockBackground(svg) {
         for (let j = 0; j < segments; j++) {
             // Calculer le prochain point avec une déviation plus prononcée si détail élevé
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 50 + 10 + 20 * patternVisibility;
+            const distance = (Math.random() * 50 + 10 + 20 * patternVisibility) * sizeMultiplier;
             
             currentX += Math.cos(angle) * distance;
             currentY += Math.sin(angle) * distance;
@@ -3657,9 +6009,9 @@ function setupPollockBackground(svg) {
             points.push({x: currentX, y: currentY});
         }
         
-        // Dessiner le trait avec épaisseur variable
+        // Dessiner le trait avec épaisseur variable ADAPTATIVE
         const color = colors[Math.floor(Math.random() * colors.length)];
-        const thickness = Math.random() * 2 + 0.5 + patternVisibility;
+        const thickness = (Math.random() * 2 + 0.5 + patternVisibility) * sizeMultiplier;
         
         const line = bgGroup.append("path")
             .attr("d", pathData)
@@ -3676,15 +6028,15 @@ function setupPollockBackground(svg) {
         });
     }
     
-    // Créer l'effet dripping - éclaboussures
-    // Nombre basé sur le niveau de détail
-    const numSplatters = Math.floor(width / (80 - 20 * patternVisibility));
+    // Créer l'effet dripping - éclaboussures AVEC DENSITÉ ADAPTATIVE
+    const numSplatters = Math.floor((width / (80 - 20 * patternVisibility)) * densityMultiplier);
     const splatters = [];
     
     for (let i = 0; i < numSplatters; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 30 + 5 + 10 * patternVisibility;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 30 + 5 + 10 * patternVisibility) * sizeMultiplier;
         const color = colors[Math.floor(Math.random() * colors.length)];
         
         // Forme irrégulière pour l'éclaboussure
@@ -3700,7 +6052,7 @@ function setupPollockBackground(svg) {
             const dropDistance = Math.random() * (size * 0.8);
             const dropX = Math.cos(dropAngle) * dropDistance;
             const dropY = Math.sin(dropAngle) * dropDistance;
-            const dropSize = Math.random() * (size * 0.4) + (size * 0.1);
+            const dropSize = (Math.random() * (size * 0.4) + (size * 0.1)) * sizeMultiplier;
             
             const drop = splatter.append("circle")
                 .attr("cx", x + dropX)
@@ -3716,7 +6068,7 @@ function setupPollockBackground(svg) {
             });
         }
         
-        // Ajouter un cercle central
+        // Ajouter un cercle central AVEC TAILLE ADAPTATIVE
         const centralDrop = splatter.append("circle")
             .attr("cx", x)
             .attr("cy", y)
@@ -3738,11 +6090,11 @@ function setupPollockBackground(svg) {
         });
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
         // Animation pour les lignes de dripping
         drippingLines.forEach((line, index) => {
-            if (index % 3 === 0) { // Animer une partie des lignes seulement
+            if (index % 3 === 0) {
                 const delay = index * 0.05;
                 const duration = (8 + Math.random() * 7) / animationSpeed;
                 
@@ -3767,7 +6119,7 @@ function setupPollockBackground(svg) {
         
         // Animation pour les éclaboussures - pulsation subtile
         splatters.forEach((splatter, index) => {
-            if (index % 2 === 0) { // Animer une partie des éclaboussures seulement
+            if (index % 2 === 0) {
                 const delay = index * 0.1;
                 const duration = (5 + Math.random() * 5) / animationSpeed;
                 
@@ -3786,29 +6138,42 @@ function setupPollockBackground(svg) {
         });
     }
     
-    console.log("Génération du fond Pollock terminée.");
+    console.log("✅ Génération du fond Pollock terminée.");
 }
 
-// Fond inspiré de Wassily Kandinsky avec tous les paramètres utilisateur
-function setupKandinskyBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond inspiré de Wassily Kandinsky adaptée pour l'export PNG grand format
+async function setupKandinskyBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+        sizeMultiplier = Math.min(2.5, Math.max(1.3, areaRatio * 0.12));
+        
+        console.log(`📊 Export Kandinsky - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES KANDINSKY:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Kandinsky: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -3829,7 +6194,10 @@ function setupKandinskyBackground(svg) {
         Math.min(255, 247 + (baseColor.b - 247) * 0.05)
     );
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", bgColor.toString());
@@ -3872,26 +6240,26 @@ function setupKandinskyBackground(svg) {
     // Stocker les formes pour l'animation
     const animatableShapes = [];
     
-    // 1. Ajouter des cercles, cœur du style Kandinsky
-    // Nombre basé sur le niveau de détail
-    const numCircles = Math.floor(width / 120) + Math.floor(patternVisibility * 10);
+    // 1. Ajouter des cercles, cœur du style Kandinsky - AVEC DENSITÉ ADAPTATIVE
+    const numCircles = Math.floor((width / 120) + Math.floor(patternVisibility * 10)) * densityMultiplier;
     
     for (let i = 0; i < numCircles; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 80 + 20 + 40 * patternVisibility;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 80 + 20 + 40 * patternVisibility) * sizeMultiplier;
         
         // Groupe pour les éléments de ce cercle
         const circleGroup = bgGroup.append("g");
         
-        // Cercle principal
+        // Cercle principal AVEC TAILLE ADAPTATIVE
         const mainCircle = circleGroup.append("circle")
             .attr("cx", x)
             .attr("cy", y)
             .attr("r", size)
             .attr("fill", "none")
             .attr("stroke", colors[Math.floor(Math.random() * colors.length)])
-            .attr("stroke-width", Math.random() * 2 + 1 + patternVisibility);
+            .attr("stroke-width", (Math.random() * 2 + 1 + patternVisibility) * sizeMultiplier);
         
         // Parfois ajouter des cercles concentriques (selon le niveau de détail)
         if (Math.random() < 0.5 * patternVisibility) {
@@ -3901,7 +6269,7 @@ function setupKandinskyBackground(svg) {
                 .attr("r", size * 0.7)
                 .attr("fill", "none")
                 .attr("stroke", colors[Math.floor(Math.random() * colors.length)])
-                .attr("stroke-width", Math.random() * 1.5 + 0.5 + 0.5 * patternVisibility);
+                .attr("stroke-width", (Math.random() * 1.5 + 0.5 + 0.5 * patternVisibility) * sizeMultiplier);
         }
         
         // Parfois ajouter un petit cercle coloré au centre (selon le niveau de détail)
@@ -3922,21 +6290,20 @@ function setupKandinskyBackground(svg) {
         });
     }
     
-    // 2. Ajouter des lignes droites traversant l'espace
-    // Nombre basé sur le niveau de détail
-    const numLines = Math.floor(width / 150) + Math.floor(patternVisibility * 12);
+    // 2. Ajouter des lignes droites traversant l'espace - AVEC DENSITÉ ADAPTATIVE
+    const numLines = Math.floor((width / 150) + Math.floor(patternVisibility * 12)) * densityMultiplier;
     
     for (let i = 0; i < numLines; i++) {
-        // Lignes traversant tout l'écran
-        const y = Math.random() * height;
+        // Lignes traversant tout l'écran AVEC OFFSET
+        const y = offsetY + Math.random() * height;
         
         const line = bgGroup.append("line")
-            .attr("x1", 0)
+            .attr("x1", offsetX)
             .attr("y1", y)
-            .attr("x2", width)
+            .attr("x2", offsetX + width)
             .attr("y2", y + (Math.random() * height * 0.4 - height * 0.2))
             .attr("stroke", colors[Math.floor(Math.random() * colors.length)])
-            .attr("stroke-width", Math.random() * 1.5 + 0.5 + patternVisibility);
+            .attr("stroke-width", (Math.random() * 1.5 + 0.5 + patternVisibility) * sizeMultiplier);
         
         animatableShapes.push({
             type: "line",
@@ -3945,14 +6312,14 @@ function setupKandinskyBackground(svg) {
         });
     }
     
-    // 3. Ajouter quelques grilles et formes géométriques
-    // Nombre basé sur le niveau de détail
-    const numShapes = Math.floor(width / 250) + Math.floor(patternVisibility * 5);
+    // 3. Ajouter quelques grilles et formes géométriques - AVEC DENSITÉ ADAPTATIVE
+    const numShapes = Math.floor((width / 250) + Math.floor(patternVisibility * 5)) * densityMultiplier;
     
     for (let i = 0; i < numShapes; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 100 + 30 + 30 * patternVisibility;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 100 + 30 + 30 * patternVisibility) * sizeMultiplier;
         
         // Choisir une forme aléatoire
         const shapeType = Math.floor(Math.random() * 4);
@@ -3974,7 +6341,7 @@ function setupKandinskyBackground(svg) {
                     .attr("d", `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`)
                     .attr("fill", "none")
                     .attr("stroke", color)
-                    .attr("stroke-width", Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility);
+                    .attr("stroke-width", (Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility) * sizeMultiplier);
                 
                 animatableShapes.push({
                     type: "triangle",
@@ -3992,7 +6359,7 @@ function setupKandinskyBackground(svg) {
                     .attr("height", size)
                     .attr("fill", "none")
                     .attr("stroke", color)
-                    .attr("stroke-width", Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility);
+                    .attr("stroke-width", (Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility) * sizeMultiplier);
                 
                 animatableShapes.push({
                     type: "rect",
@@ -4014,7 +6381,7 @@ function setupKandinskyBackground(svg) {
                         .attr("x2", x + size/2)
                         .attr("y2", y - size/2 + j * cellSize)
                         .attr("stroke", color)
-                        .attr("stroke-width", Math.random() * 1 + 0.5 + 0.3 * patternVisibility);
+                        .attr("stroke-width", (Math.random() * 1 + 0.5 + 0.3 * patternVisibility) * sizeMultiplier);
                     
                     shapeGroup.append("line")
                         .attr("x1", x - size/2 + j * cellSize)
@@ -4022,7 +6389,7 @@ function setupKandinskyBackground(svg) {
                         .attr("x2", x - size/2 + j * cellSize)
                         .attr("y2", y + size/2)
                         .attr("stroke", color)
-                        .attr("stroke-width", Math.random() * 1 + 0.5 + 0.3 * patternVisibility);
+                        .attr("stroke-width", (Math.random() * 1 + 0.5 + 0.3 * patternVisibility) * sizeMultiplier);
                 }
                 
                 animatableShapes.push({
@@ -4052,7 +6419,7 @@ function setupKandinskyBackground(svg) {
                     .attr("d", starPoints + ' Z')
                     .attr("fill", "none")
                     .attr("stroke", color)
-                    .attr("stroke-width", Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility);
+                    .attr("stroke-width", (Math.random() * 1.5 + 0.8 + 0.5 * patternVisibility) * sizeMultiplier);
                 
                 animatableShapes.push({
                     type: "star",
@@ -4064,16 +6431,16 @@ function setupKandinskyBackground(svg) {
         }
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
         animatableShapes.forEach((shape, i) => {
             // Animation différente selon le type de forme
-            const delay = i * 0.1; // Décalage pour éviter que tout bouge en même temps
+            const delay = i * 0.1;
             
             switch (shape.type) {
                 case "circle":
                     // Pulsation lente
-                    if (i % 3 === 0) { // Animer seulement certains cercles
+                    if (i % 3 === 0) {
                         const scaleAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                         scaleAnim.setAttribute("attributeName", "transform");
                         scaleAnim.setAttribute("type", "scale");
@@ -4083,7 +6450,6 @@ function setupKandinskyBackground(svg) {
                         scaleAnim.setAttribute("repeatCount", "indefinite");
                         scaleAnim.setAttribute("additive", "sum");
                         
-                        // Appliquer la transformation relative au centre du cercle
                         shape.element.attr("transform-origin", `${shape.x}px ${shape.y}px`);
                         shape.element.node().appendChild(scaleAnim);
                     }
@@ -4091,7 +6457,7 @@ function setupKandinskyBackground(svg) {
                 
                 case "line":
                     // Mouvement vertical subtil
-                    if (i % 4 === 0) { // Animer seulement certaines lignes
+                    if (i % 4 === 0) {
                         const translateAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
                         translateAnim.setAttribute("attributeName", "y1");
                         translateAnim.setAttribute("values", `${shape.y1};${shape.y1 + 10 * patternVisibility};${shape.y1}`);
@@ -4116,12 +6482,12 @@ function setupKandinskyBackground(svg) {
                 case "grid":
                 case "star":
                     // Rotation très lente
-                    if (i % 2 === 0) { // Animer seulement certaines formes
+                    if (i % 2 === 0) {
                         const rotateAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                         rotateAnim.setAttribute("attributeName", "transform");
                         rotateAnim.setAttribute("type", "rotate");
                         rotateAnim.setAttribute("from", `0 ${shape.cx} ${shape.cy}`);
-                        rotateAnim.setAttribute("to", `${(Math.random() < 0.5 ? 360 : -360)}`);
+                        rotateAnim.setAttribute("to", `${(Math.random() < 0.5 ? 360 : -360)} ${shape.cx} ${shape.cy}`);
                         rotateAnim.setAttribute("dur", `${(40 + Math.random() * 20) / animationSpeed}s`);
                         rotateAnim.setAttribute("repeatCount", "indefinite");
                         
@@ -4132,29 +6498,42 @@ function setupKandinskyBackground(svg) {
         });
     }
     
-    console.log("Génération du fond Kandinsky terminée.");
+    console.log("✅ Génération du fond Kandinsky terminée.");
 }
 
-// Fond inspiré de Joan Miró avec tous les paramètres utilisateur
-function setupMiroBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond inspiré de Joan Miró adaptée pour l'export PNG grand format
+async function setupMiroBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.75;
+        sizeMultiplier = Math.min(2.8, Math.max(1.2, areaRatio * 0.14));
+        
+        console.log(`📊 Export Miró - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES MIRÓ:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Miró: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -4175,7 +6554,10 @@ function setupMiroBackground(svg) {
         Math.min(255, 247 + (baseColor.b - 247) * 0.05)
     );
     
+    // Rectangle de fond AVEC OFFSET
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", bgColor.toString())
@@ -4220,14 +6602,14 @@ function setupMiroBackground(svg) {
     // Stocker les formes pour l'animation
     const animatableShapes = [];
     
-    // 1. Formes organiques aléatoires - caractéristiques de Miró
-    // Nombre basé sur le niveau de détail
-    const numOrganic = Math.floor(width / 150) + Math.floor(patternVisibility * 8);
+    // 1. Formes organiques aléatoires - caractéristiques de Miró AVEC DENSITÉ ADAPTATIVE
+    const numOrganic = Math.floor((width / 150) + Math.floor(patternVisibility * 8)) * densityMultiplier;
     
     for (let i = 0; i < numOrganic; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 60 + 20 + 30 * patternVisibility;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 60 + 20 + 30 * patternVisibility) * sizeMultiplier;
         
         // Forme amoeba (blobby)
         const numPoints = Math.floor(Math.random() * 5) + 6;
@@ -4266,12 +6648,12 @@ function setupMiroBackground(svg) {
                 pathData: pathData
             });
         } else {
-            // Contour avec une autre couleur
+            // Contour avec une autre couleur AVEC ÉPAISSEUR ADAPTATIVE
             const shape = shapeGroup.append("path")
                 .attr("d", pathData)
                 .attr("fill", "none")
                 .attr("stroke", color)
-                .attr("stroke-width", Math.random() * 2 + 1 + patternVisibility);
+                .attr("stroke-width", (Math.random() * 2 + 1 + patternVisibility) * sizeMultiplier);
                 
             animatableShapes.push({
                 type: "outlineShape",
@@ -4282,14 +6664,14 @@ function setupMiroBackground(svg) {
         }
     }
     
-    // 2. Lignes fines - élément signature de Miró
-    // Nombre basé sur le niveau de détail
-    const numLines = Math.floor(width / 90) + Math.floor(patternVisibility * 12);
+    // 2. Lignes fines - élément signature de Miró AVEC DENSITÉ ADAPTATIVE
+    const numLines = Math.floor((width / 90) + Math.floor(patternVisibility * 12)) * densityMultiplier;
     
     for (let i = 0; i < numLines; i++) {
-        const x1 = Math.random() * width;
-        const y1 = Math.random() * height;
-        const length = Math.random() * 150 + 50 + 50 * patternVisibility;
+        // Position AVEC OFFSET
+        const x1 = offsetX + Math.random() * width;
+        const y1 = offsetY + Math.random() * height;
+        const length = (Math.random() * 150 + 50 + 50 * patternVisibility) * sizeMultiplier;
         const angle = Math.random() * Math.PI * 2;
         
         // Calculer le point final avec une légère courbure
@@ -4297,16 +6679,16 @@ function setupMiroBackground(svg) {
         const y2 = y1 + Math.sin(angle) * length;
         
         // Point de contrôle pour la courbe - plus varié avec niveau de détail élevé
-        const variation = 25 + 25 * patternVisibility;
+        const variation = (25 + 25 * patternVisibility) * sizeMultiplier;
         const cpx = (x1 + x2) / 2 + (Math.random() * variation - variation/2);
         const cpy = (y1 + y2) / 2 + (Math.random() * variation - variation/2);
         
-        // Dessiner une ligne courbe fine
+        // Dessiner une ligne courbe fine AVEC ÉPAISSEUR ADAPTATIVE
         const line = bgGroup.append("path")
             .attr("d", `M ${x1} ${y1} Q ${cpx} ${cpy}, ${x2} ${y2}`)
             .attr("fill", "none")
             .attr("stroke", colors[Math.floor(Math.random() * colors.length)])
-            .attr("stroke-width", Math.random() * 1.2 + 0.6 + 0.4 * patternVisibility);
+            .attr("stroke-width", (Math.random() * 1.2 + 0.6 + 0.4 * patternVisibility) * sizeMultiplier);
         
         animatableShapes.push({
             type: "line",
@@ -4315,14 +6697,14 @@ function setupMiroBackground(svg) {
         });
     }
     
-    // 3. Étoiles et formes solaires - motifs emblématiques de Miró
-    // Nombre basé sur le niveau de détail
-    const numSolars = Math.floor(width / 280) + Math.floor(patternVisibility * 5);
+    // 3. Étoiles et formes solaires - motifs emblématiques de Miró AVEC DENSITÉ ADAPTATIVE
+    const numSolars = Math.floor((width / 280) + Math.floor(patternVisibility * 5)) * densityMultiplier;
     
     for (let i = 0; i < numSolars; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 40 + 15 + 20 * patternVisibility;
+        // Position AVEC OFFSET
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const size = (Math.random() * 40 + 15 + 20 * patternVisibility) * sizeMultiplier;
         
         // Type de forme
         const shapeType = Math.floor(Math.random() * 3);
@@ -4340,17 +6722,17 @@ function setupMiroBackground(svg) {
                     const x1 = x + Math.cos(angle) * outer;
                     const y1 = y + Math.sin(angle) * outer;
                     
-                    // Dessiner une ligne simple pour chaque rayon
+                    // Dessiner une ligne simple pour chaque rayon AVEC ÉPAISSEUR ADAPTATIVE
                     shapeGroup.append("line")
                         .attr("x1", x)
                         .attr("y1", y)
                         .attr("x2", x1)
                         .attr("y2", y1)
                         .attr("stroke", colors[4]) // Noir pour les lignes
-                        .attr("stroke-width", Math.random() * 1.5 + 0.7 + 0.3 * patternVisibility);
+                        .attr("stroke-width", (Math.random() * 1.5 + 0.7 + 0.3 * patternVisibility) * sizeMultiplier);
                 }
                 
-                // Cercle central
+                // Cercle central AVEC TAILLE ADAPTATIVE
                 shapeGroup.append("circle")
                     .attr("cx", x)
                     .attr("cy", y)
@@ -4365,7 +6747,7 @@ function setupMiroBackground(svg) {
                 break;
                 
             case 1: // Forme soleil
-                // Disque central
+                // Disque central AVEC TAILLE ADAPTATIVE
                 shapeGroup.append("circle")
                     .attr("cx", x)
                     .attr("cy", y)
@@ -4381,13 +6763,14 @@ function setupMiroBackground(svg) {
                     const x2 = x + Math.cos(angle) * size;
                     const y2 = y + Math.sin(angle) * size;
                     
+                    // Rayons AVEC ÉPAISSEUR ADAPTATIVE
                     shapeGroup.append("line")
                         .attr("x1", x1)
                         .attr("y1", y1)
                         .attr("x2", x2)
                         .attr("y2", y2)
                         .attr("stroke", colors[4]) // Noir
-                        .attr("stroke-width", Math.random() * 1.2 + 0.6 + 0.3 * patternVisibility);
+                        .attr("stroke-width", (Math.random() * 1.2 + 0.6 + 0.3 * patternVisibility) * sizeMultiplier);
                 }
                 
                 animatableShapes.push({
@@ -4398,11 +6781,11 @@ function setupMiroBackground(svg) {
                 break;
                 
             case 2: // Points avec cercles concentriques
-                // Point central
+                // Point central AVEC TAILLE ADAPTATIVE
                 shapeGroup.append("circle")
                     .attr("cx", x)
                     .attr("cy", y)
-                    .attr("r", Math.random() * 5 + 2 + patternVisibility)
+                    .attr("r", (Math.random() * 5 + 2 + patternVisibility) * sizeMultiplier)
                     .attr("fill", colors[Math.floor(Math.random() * colors.length)]);
                 
                 // Cercles concentriques - nombre basé sur le niveau de détail
@@ -4410,13 +6793,14 @@ function setupMiroBackground(svg) {
                 for (let j = 0; j < numRings; j++) {
                     const ringRadius = size * (0.3 + j * 0.3);
                     
+                    // Cercles AVEC ÉPAISSEUR ADAPTATIVE
                     shapeGroup.append("circle")
                         .attr("cx", x)
                         .attr("cy", y)
                         .attr("r", ringRadius)
                         .attr("fill", "none")
                         .attr("stroke", colors[Math.floor(Math.random() * colors.length)])
-                        .attr("stroke-width", Math.random() * 1.5 + 0.5 + 0.3 * patternVisibility);
+                        .attr("stroke-width", (Math.random() * 1.5 + 0.5 + 0.3 * patternVisibility) * sizeMultiplier);
                 }
                 
                 animatableShapes.push({
@@ -4428,18 +6812,17 @@ function setupMiroBackground(svg) {
         }
     }
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
         animatableShapes.forEach((shape, index) => {
-            const delay = index * 0.05; // Décalage pour éviter que tout bouge en même temps
+            const delay = index * 0.05;
             const duration = (10 + Math.random() * 10) / animationSpeed;
             
             switch (shape.type) {
                 case "filledShape":
                 case "outlineShape":
                     // Animation subtile de déformation
-                    if (index % 4 === 0) { // Animer seulement certaines formes
-                        // Créer une transformation au centre de la forme
+                    if (index % 4 === 0) {
                         const scaleAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                         scaleAnim.setAttribute("attributeName", "transform");
                         scaleAnim.setAttribute("type", "scale");
@@ -4456,12 +6839,11 @@ function setupMiroBackground(svg) {
                     
                 case "line":
                     // Animation subtile d'ondulation
-                    if (index % 3 === 0) { // Animer seulement certaines lignes
+                    if (index % 3 === 0) {
                         const points = shape.points;
                         const originalCPY = points.cpy;
                         const variation = 5 * patternVisibility;
                         
-                        // Animation du point de contrôle vertical
                         const lineAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
                         lineAnim.setAttribute("attributeName", "d");
                         lineAnim.setAttribute("values", 
@@ -4479,7 +6861,7 @@ function setupMiroBackground(svg) {
                 case "star":
                 case "sun":
                     // Rotation très lente
-                    if (index % 2 === 0) { // Animer seulement certaines étoiles/soleils
+                    if (index % 2 === 0) {
                         const rotateAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                         rotateAnim.setAttribute("attributeName", "transform");
                         rotateAnim.setAttribute("type", "rotate");
@@ -4494,7 +6876,7 @@ function setupMiroBackground(svg) {
                     
                 case "concentricCircles":
                     // Pulsation subtile
-                    if (index % 2 === 0) { // Animer seulement certains cercles
+                    if (index % 2 === 0) {
                         const pulseAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                         pulseAnim.setAttribute("attributeName", "transform");
                         pulseAnim.setAttribute("type", "scale");
@@ -4512,29 +6894,42 @@ function setupMiroBackground(svg) {
         });
     }
     
-    console.log("Génération du fond Miró terminée.");
+    console.log("✅ Génération du fond Miró terminée.");
 }
 
-// Fond inspiré de Piet Mondrian avec tous les paramètres utilisateur
-function setupMondrianBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+// Fond inspiré de Piet Mondrian avec algorithme récursif corrigé + export PNG
+async function setupMondrianBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    
     const defs = svg.append("defs");
+    
+    // Calculer la densité adaptative pour l'export
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        densityMultiplier = Math.sqrt(areaRatio) * 0.85;
+        sizeMultiplier = Math.min(2, Math.max(1.2, areaRatio * 0.08));
+        
+        console.log(`📊 Export Mondrian - Densité: x${densityMultiplier.toFixed(2)}, Taille: x${sizeMultiplier.toFixed(2)}`);
+    }
     
     // Récupérer tous les paramètres
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES MONDRIAN:", {
-        opacity,
-        patternVisibility,
-        animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
-        animationSpeed,
-        customColor
-    });
+    console.log(`🎨 Mondrian: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
@@ -4546,43 +6941,39 @@ function setupMondrianBackground(svg) {
         .style("opacity", opacity)
         .lower();
     
-    // Fond de base blanc, caractéristique de Mondrian
+    // Fond de base blanc avec offset
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", "#f5f5f5");
     
-    // Préparer les couleurs primaires caractéristiques de Mondrian
-    // Influencées par la couleur personnalisée de façon subtile
+    // Préparer les couleurs primaires Mondrian avec influence de la couleur personnalisée
     const baseColor = d3.rgb(customColor);
     
-    // Rouge Mondrian - légèrement influencé par la couleur personnalisée
     const redColor = d3.rgb(
         Math.min(255, 230 + baseColor.r * 0.1),
         Math.max(0, baseColor.g * 0.1),
         Math.max(0, baseColor.b * 0.1)
     );
     
-    // Bleu Mondrian - légèrement influencé par la couleur personnalisée
     const blueColor = d3.rgb(
         Math.max(0, baseColor.r * 0.1),
         Math.max(0, baseColor.g * 0.2),
         Math.min(255, 200 + baseColor.b * 0.2)
     );
     
-    // Jaune Mondrian - légèrement influencé par la couleur personnalisée
     const yellowColor = d3.rgb(
         Math.min(255, 240 + baseColor.r * 0.06),
         Math.min(255, 220 + baseColor.g * 0.06),
         Math.max(0, baseColor.b * 0.05)
     );
     
-    // Blanc et noir - pour les zones neutres et les lignes
     const whiteColor = d3.rgb(255, 255, 255);
     const blackColor = d3.rgb(0, 0, 0);
     
-    // Convertir en rgba pour pouvoir ajuster l'opacité
-    // Opacité plus forte pour les couleurs primaires pour qu'elles ressortent bien
+    // Couleurs avec opacité plus forte pour qu'elles ressortent bien
     const colors = [
         redColor.toString().replace(')', ', 0.75)').replace('rgb', 'rgba'),
         blueColor.toString().replace(')', ', 0.75)').replace('rgb', 'rgba'),
@@ -4590,18 +6981,14 @@ function setupMondrianBackground(svg) {
         whiteColor.toString().replace(')', ', 0.75)').replace('rgb', 'rgba')
     ];
     
-    // Créer la grille Mondrian
-    // L'algorithme divise récursivement la toile en rectangles
-    // qui seront colorés selon les règles stylistiques de Mondrian
-    
-    // Structure pour stocker les rectangles
+    // ALGORITHME RÉCURSIF AMÉLIORÉ avec contrôle des ratios
     const rectangles = [];
     const animatableRectangles = [];
     
-    // Commencer avec un grand rectangle couvrant toute la zone
+    // Commencer avec un grand rectangle couvrant toute la zone AVEC OFFSET
     const initialRect = {
-        x: 0,
-        y: 0,
+        x: offsetX,
+        y: offsetY,
         width: width,
         height: height,
         filled: false
@@ -4610,21 +6997,43 @@ function setupMondrianBackground(svg) {
     // Liste de rectangles à diviser
     const rectsToDivide = [initialRect];
     
-    // Le nombre de divisions est influencé par le niveau de détail
-    const numDivisions = Math.floor(10 + patternVisibility * 20);
+    // Le nombre de divisions est influencé par le niveau de détail ET la densité
+    const numDivisions = Math.floor((10 + patternVisibility * 20) * densityMultiplier);
     
-    // Diviser récursivement
+    console.log(`🔄 ${numDivisions} divisions à effectuer`);
+    
+    // Diviser récursivement avec contrôle des ratios
     for (let i = 0; i < numDivisions && rectsToDivide.length > 0; i++) {
         // Choisir aléatoirement un rectangle non divisé
         const randomIndex = Math.floor(Math.random() * rectsToDivide.length);
         const rect = rectsToDivide.splice(randomIndex, 1)[0];
         
-        // Diviser horizontalement ou verticalement
-        const divideHorizontally = Math.random() < 0.5;
+        // CONTRÔLE DU RATIO - Éviter les rectangles trop longs/étroits
+        const ratio = rect.width / rect.height;
+        const minSize = 60 * sizeMultiplier; // Taille minimum adaptée
         
-        if (divideHorizontally && rect.width > 100) {
-            // Position de la division, légèrement décalée du centre
-            const divideAt = rect.width * (0.3 + Math.random() * 0.4);
+        // Décider de la direction de division selon le ratio
+        let shouldDivideHorizontally;
+        
+        if (ratio > 3.0) {
+            // Trop large -> forcer division verticale
+            shouldDivideHorizontally = true;
+        } else if (ratio < 0.33) {
+            // Trop haut -> forcer division horizontale  
+            shouldDivideHorizontally = false;
+        } else {
+            // Ratio acceptable -> décision aléatoire
+            shouldDivideHorizontally = Math.random() < 0.5;
+        }
+        
+        // Vérifier que la division est possible
+        const canDivideHorizontally = rect.width > minSize * 2;
+        const canDivideVertically = rect.height > minSize * 2;
+        
+        if (shouldDivideHorizontally && canDivideHorizontally) {
+            // Division verticale (ligne verticale)
+            // Position de la division plus équilibrée
+            const divideAt = rect.width * (0.35 + Math.random() * 0.3); // 35-65% au lieu de 30-70%
             
             // Créer deux nouveaux rectangles
             const leftRect = {
@@ -4656,9 +7065,10 @@ function setupMondrianBackground(svg) {
                 y2: rect.y + rect.height
             });
         } 
-        else if (!divideHorizontally && rect.height > 100) {
-            // Position de la division, légèrement décalée du centre
-            const divideAt = rect.height * (0.3 + Math.random() * 0.4);
+        else if (!shouldDivideHorizontally && canDivideVertically) {
+            // Division horizontale (ligne horizontale)
+            // Position de la division plus équilibrée
+            const divideAt = rect.height * (0.35 + Math.random() * 0.3); // 35-65% au lieu de 30-70%
             
             // Créer deux nouveaux rectangles
             const topRect = {
@@ -4699,9 +7109,11 @@ function setupMondrianBackground(svg) {
     // Ajouter les rectangles restants qui n'ont pas été divisés
     rectangles.push(...rectsToDivide);
     
-    // Sélectionner quelques rectangles pour être colorés (caractéristique de Mondrian)
-    // Le pourcentage de rectangles colorés dépend du niveau de détail
-    const coloredRectCount = Math.floor(rectangles.length * 0.15 * patternVisibility);
+    console.log(`📦 ${rectangles.length} éléments générés (rectangles + lignes)`);
+    
+    // Sélectionner quelques rectangles pour être colorés
+    // Augmenter le pourcentage pour avoir plus de couleurs
+    const coloredRectCount = Math.floor(rectangles.length * (0.15 + patternVisibility * 0.15)); // 15-30% colorés
     
     // Exclure les lignes de division
     const fillableRects = rectangles.filter(r => !r.isLine);
@@ -4712,18 +7124,20 @@ function setupMondrianBackground(svg) {
     // Sélectionner et marquer les rectangles à colorer
     for (let i = 0; i < coloredRectCount && i < shuffled.length; i++) {
         shuffled[i].filled = true;
-        // Sélectionner aléatoirement une couleur pour chaque rectangle
-        shuffled[i].fillColor = colors[Math.floor(Math.random() * colors.length)];
+        // Favoriser les couleurs primaires (rouge, bleu, jaune) par rapport au blanc
+        const colorIndex = Math.random() < 0.8 ? Math.floor(Math.random() * 3) : 3; // 80% couleurs primaires, 20% blanc
+        shuffled[i].fillColor = colors[colorIndex];
     }
+    
+    console.log(`🎨 ${coloredRectCount} rectangles colorés sur ${fillableRects.length} rectangles`);
     
     // Dessiner les rectangles et les lignes
     rectangles.forEach(rect => {
         if (rect.isLine) {
             // Dessiner une ligne de division
-            // Épaisseur basée sur le niveau de détail
-            const lineWidth = 2 + patternVisibility * 3;
+            const lineWidth = (2 + patternVisibility * 3) * sizeMultiplier;
             
-            const line = bgGroup.append("line")
+            bgGroup.append("line")
                 .attr("x1", rect.x1)
                 .attr("y1", rect.y1)
                 .attr("x2", rect.x2)
@@ -4740,7 +7154,7 @@ function setupMondrianBackground(svg) {
                 .attr("height", rect.height)
                 .attr("fill", rect.filled ? rect.fillColor : whiteColor.toString())
                 .attr("stroke", blackColor.toString())
-                .attr("stroke-width", 2 + patternVisibility * 3);
+                .attr("stroke-width", (2 + patternVisibility * 3) * sizeMultiplier);
             
             // Si le rectangle est coloré, l'ajouter à la liste des éléments animables
             if (rect.filled) {
@@ -4752,14 +7166,16 @@ function setupMondrianBackground(svg) {
         }
     });
     
-    // Ajouter des animations si activées
+    // Ajouter des animations si activées (désactivées pour export)
     if (animation) {
+        console.log("🎬 Activation des animations Mondrian...");
+        
         animatableRectangles.forEach((animRect, i) => {
             const delay = i * 0.1;
             const duration = (15 + Math.random() * 10) / animationSpeed;
             
             // Animation de couleur - transition lente entre différentes couleurs primaires
-            if (i % 3 === 0) { // Animer seulement certains rectangles
+            if (i % 3 === 0) {
                 const colorAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
                 colorAnim.setAttribute("attributeName", "fill");
                 colorAnim.setAttribute("values", `${animRect.rect.fillColor};${colors[(colors.indexOf(animRect.rect.fillColor) + 1) % colors.length]};${animRect.rect.fillColor}`);
@@ -4770,12 +7186,14 @@ function setupMondrianBackground(svg) {
                 animRect.element.node().appendChild(colorAnim);
             }
             
-            // Animation de léger déplacement - très subtile pour ne pas compromettre le style
+            // Animation de léger déplacement - très subtile
             if (i % 4 === 0 && patternVisibility > 0.5) {
+                const moveDistance = 2 * patternVisibility * sizeMultiplier;
+                
                 const moveAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
                 moveAnim.setAttribute("attributeName", "transform");
                 moveAnim.setAttribute("type", "translate");
-                moveAnim.setAttribute("values", `0,0; ${2 * patternVisibility},0; 0,0; ${-2 * patternVisibility},0; 0,0`);
+                moveAnim.setAttribute("values", `0,0; ${moveDistance},0; 0,0; ${-moveDistance},0; 0,0`);
                 moveAnim.setAttribute("dur", `${duration * 1.5}s`);
                 moveAnim.setAttribute("repeatCount", "indefinite");
                 moveAnim.setAttribute("begin", `${delay}s`);
@@ -4785,19 +7203,36 @@ function setupMondrianBackground(svg) {
         });
     }
     
-    console.log("Génération du fond Mondrian terminée.");
+    console.log("✅ Génération du fond Mondrian terminée.");
 }
 
-// Fonction pour créer un parchemin amélioré avec couleur et animation renforcées
-function setupParchmentBackgroundFixed(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+async function setupParchmentBackgroundFixed(svg, customDimensions = null, forExport = false) {
+    // Utiliser dimensions personnalisées ou écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+
+    let densityMultiplier = 1;
+    let sizeMultiplier = 1;
+
+    if (forExport) {
+        const baseArea = 1920 * 1080;
+        const currentArea = width * height;
+        const areaRatio = currentArea / baseArea;
+        
+        // Pour parchemin : adapter la densité et taille des éléments
+        densityMultiplier = Math.sqrt(areaRatio) * 0.8;
+        sizeMultiplier = Math.min(3, Math.max(1.2, areaRatio * 0.1));
+    }
+
+
     const defs = svg.append("defs");
     
     // Récupérer tous les paramètres et les afficher immédiatement
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
     const patternVisibility = parseFloat(localStorage.getItem('patternVisibility') || 1.0);
-    const animation = localStorage.getItem('backgroundAnimation') === 'true';
+    const animation = forExport ? false : localStorage.getItem('backgroundAnimation') === 'true';
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
@@ -4860,18 +7295,20 @@ function setupParchmentBackgroundFixed(svg) {
     
     // Fond de base avec couleur parchemin
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", parchmentBase.toString());
     
     // 1. Grandes variations de couleur - taches plus larges
-    const numLargeVariations = Math.floor(30 + 50 * patternVisibility);
+    const numLargeVariations = Math.floor((30 + 50 * patternVisibility) * densityMultiplier);
     const largeVariations = [];
     
     for (let i = 0; i < numLargeVariations; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const r = Math.random() * 100 + 30;
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
+        const r = (Math.random() * 100 + 30) * sizeMultiplier;
         
         const colorToUse = i % 2 === 0 ? parchmentLight : parchmentDark;
         
@@ -4886,12 +7323,12 @@ function setupParchmentBackgroundFixed(svg) {
     }
     
     // 2. Petites taches pour simuler les fibres du papier
-    const numSmallVariations = Math.floor(500 + 2500 * patternVisibility);
+    const numSmallVariations = Math.floor((500 + 2500 * patternVisibility) * densityMultiplier);
     
     for (let i = 0; i < numSmallVariations; i++) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const r = Math.random() * 2;
+        const r = Math.random() * 2 * sizeMultiplier;
         
         bgGroup.append("circle")
             .attr("cx", x)
@@ -4902,7 +7339,7 @@ function setupParchmentBackgroundFixed(svg) {
     }
     
     // 3. Ajouter quelques lignes pour simuler des plis
-    const numFolds = Math.floor(3 + 7 * patternVisibility);
+    const numFolds = Math.floor((3 + 7 * patternVisibility)* densityMultiplier);
     const folds = [];
     
     for (let i = 0; i < numFolds; i++) {
@@ -4919,20 +7356,20 @@ function setupParchmentBackgroundFixed(svg) {
             .attr("x2", x2)
             .attr("y2", y2)
             .attr("stroke", parchmentDark.toString())
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 1.5 * sizeMultiplier)
             .attr("opacity", 0.4);
         
         folds.push({ element, x1, y1, x2, y2 });
     }
     
     // 4. Ajouter quelques taches de vieillissement
-    const numStains = Math.floor(5 + 10 * patternVisibility);
+    const numStains = Math.floor((5 + 10 * patternVisibility)* densityMultiplier);
     const stains = [];
     
     for (let i = 0; i < numStains; i++) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const size = Math.random() * 60 + 20;
+        const size = Math.random() * 60 + 20 * sizeMultiplier;
         
         const element = bgGroup.append("circle")
             .attr("cx", x)
@@ -4967,6 +7404,8 @@ function setupParchmentBackgroundFixed(svg) {
         .attr("stop-color", "rgba(0, 0, 0, 0.25)");
         
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${vignetteId})`);
@@ -5057,54 +7496,62 @@ function setupParchmentBackgroundFixed(svg) {
 }
 
 // Fonction pour créer une grille améliorée qui fonctionne
-function setupGridBackgroundFixed(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const defs = svg.append("defs");
-    
+async function setupGridBackgroundFixed(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+
+    console.log(`🎨 Setup background: ${width}x${height} (offset: ${offsetX}, ${offsetY})`);
+
+    const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+
     // Nettoyer tout fond existant
     svg.selectAll(".background-element").remove();
-    
+
     // Créer un groupe pour le fond
     const bgGroup = svg.append("g")
         .attr("class", "background-element")
         .attr("pointer-events", "none")
         .lower();
-    
+
     // Fond de base légèrement bleuté
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", "#f0f0f5");
-    
+
     // Taille de la grille
     const gridSize = 50;
-    
+
     // Dessiner les lignes horizontales
-    for (let y = 0; y <= height; y += gridSize) {
+    for (let y = Math.floor(offsetY / gridSize) * gridSize; y <= offsetY + height; y += gridSize) {
         bgGroup.append("line")
-            .attr("x1", 0)
+            .attr("x1", offsetX)
             .attr("y1", y)
-            .attr("x2", width)
+            .attr("x2", offsetX + width)
             .attr("y2", y)
             .attr("stroke", "#c8d0e0")
             .attr("stroke-width", 1);
     }
-    
+
     // Dessiner les lignes verticales
-    for (let x = 0; x <= width; x += gridSize) {
+    for (let x = Math.floor(offsetX / gridSize) * gridSize; x <= offsetX + width; x += gridSize) {
         bgGroup.append("line")
             .attr("x1", x)
-            .attr("y1", 0)
+            .attr("y1", offsetY)
             .attr("x2", x)
-            .attr("y2", height)
+            .attr("y2", offsetY + height)
             .attr("stroke", "#c8d0e0")
             .attr("stroke-width", 1);
     }
-    
+
     // Ajouter un point aux intersections
-    for (let x = 0; x <= width; x += gridSize) {
-        for (let y = 0; y <= height; y += gridSize) {
+    for (let x = Math.floor(offsetX / gridSize) * gridSize; x <= offsetX + width; x += gridSize) {
+        for (let y = Math.floor(offsetY / gridSize) * gridSize; y <= offsetY + height; y += gridSize) {
             bgGroup.append("circle")
                 .attr("cx", x)
                 .attr("cy", y)
@@ -5112,29 +7559,18 @@ function setupGridBackgroundFixed(svg) {
                 .attr("fill", "#a8b8d0");
         }
     }
-    
-    // Ajouter quelques rectangles décoratifs
-    for (let i = 0; i < 8; i++) {
-        const x = Math.floor(Math.random() * (width / gridSize)) * gridSize;
-        const y = Math.floor(Math.random() * (height / gridSize)) * gridSize;
-        const w = Math.floor(Math.random() * 3 + 1) * gridSize;
-        const h = Math.floor(Math.random() * 3 + 1) * gridSize;
-        
-        bgGroup.append("rect")
-            .attr("x", x)
-            .attr("y", y)
-            .attr("width", w)
-            .attr("height", h)
-            .attr("fill", "none")
-            .attr("stroke", "rgba(120, 140, 180, 0.2)")
-            .attr("stroke-width", 1.5);
-    }
+
 }
 
 // Fond avec bulles transparentes et brillantes avec tous les paramètres utilisateur
-function setupBubblesBackground(svg) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+async function setupBubblesBackground(svg, customDimensions = null, forExport = false) {
+    // Utiliser les dimensions personnalisées ou celles de l'écran
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    console.log(`🎨 Setup background: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
+
     const defs = svg.append("defs");
     
     // Récupérer tous les paramètres
@@ -5144,7 +7580,7 @@ function setupBubblesBackground(svg) {
     const animationSpeed = parseFloat(localStorage.getItem('animationSpeed') || 1.0);
     const customColor = localStorage.getItem('backgroundCustomColor') || '#3F51B5';
     
-    console.log("PARAMÈTRES BULLES:", {
+    console.log("PARAMÈTRES BULLES de setupBubblesBackground :", {
         opacity,
         patternVisibility,
         animation: animation ? "ACTIVÉ" : "DÉSACTIVÉ",
@@ -5161,7 +7597,7 @@ function setupBubblesBackground(svg) {
         .attr("pointer-events", "none")
         .style("opacity", opacity)
         .lower();
-    
+   
     // Fond de base avec gradient subtil
     const baseColor = d3.rgb(customColor);
     
@@ -5198,6 +7634,8 @@ function setupBubblesBackground(svg) {
         .attr("stop-color", outerColor.toString());
     
     bgGroup.append("rect")
+        .attr("x", offsetX)
+        .attr("y", offsetY)
         .attr("width", width)
         .attr("height", height)
         .attr("fill", `url(#${gradientId})`);
@@ -5247,8 +7685,8 @@ function setupBubblesBackground(svg) {
     const numBubbles = Math.floor(20 + patternVisibility * 80);
     
     for (let i = 0; i < numBubbles; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
+        const x = offsetX + Math.random() * width;
+        const y = offsetY + Math.random() * height;
         const size = Math.random() * Math.random() * 100 + 10 + patternVisibility * 40;
         
         // Attribuer un z-index pour la profondeur (les petites bulles en arrière-plan)
@@ -5390,8 +7828,8 @@ function setupBubblesBackground(svg) {
             // Pour les bulles plus grandes, mouvement plus complexe
             if (bubble.r > 30 && i % 3 === 0) {
                 // Amplitudes proportionnelles à la taille mais limitées
-                const ampX = Math.min(width * 0.05, bubble.r * 2) * patternVisibility;
-                const ampY = Math.min(height * 0.05, bubble.r * 2) * patternVisibility;
+                const ampX = Math.min(Math.min(width, window.innerWidth) * 0.05, bubble.r * 2) * patternVisibility;
+                const ampY = Math.min(Math.min(height, window.innerHeight) * 0.05, bubble.r * 2) * patternVisibility;
                 
                 // Animation de la bulle principale
                 const mainAnimX = document.createElementNS("http://www.w3.org/2000/svg", "animate");
@@ -5449,7 +7887,7 @@ function setupBubblesBackground(svg) {
             }
             // Pour les bulles moyennes, flottement vertical plus simple
             else if (bubble.r > 15 && i % 2 === 0) {
-                const floatHeight = Math.min(50, bubble.r) * patternVisibility;
+                const floatHeight = Math.min(Math.min(50, Math.min(width, height) * 0.05), bubble.r) * patternVisibility;
                 
                 const mainAnimY = document.createElementNS("http://www.w3.org/2000/svg", "animate");
                 mainAnimY.setAttribute("attributeName", "cy");
@@ -5517,7 +7955,7 @@ function setupBubblesBackground(svg) {
 }
 
 // Fond avec bulles semi-transparentes qui éclatent - avec option d'animation configurable
-function setupPoppingBubblesBackground(svg) {
+async function setupPoppingBubblesBackground(svg) {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const defs = svg.append("defs");
@@ -6385,10 +8823,9 @@ function setupPoppingBubblesBackground(svg) {
     
     // console.log(`Génération du fond bulles terminée avec ${bubbles.length} bulles. Animation: ${animation ? "ACTIVÉE" : "DÉSACTIVÉE"}`);
 }
-
  
 // Mettre à jour la fonction setupElegantBackground pour inclure les nouveaux fonds
-export function setupElegantBackground(svg) {
+export async function setupElegantBackground(svg, customDimensions = null, forExport = false) {
 
     // console.log("#### Configuration du fond élégant... appel de  setupElegantBackground ######### : state.backgroundEnabled =", state.backgroundEnable );
 
@@ -6420,62 +8857,63 @@ export function setupElegantBackground(svg) {
             // Appliquer le fond sauvegardé
             switch (savedBackground) {
             case 'pollock':
-                setupPollockBackground(svg);
+                await setupPollockBackground(svg, customDimensions, forExport);
                 break;
             case 'kandinsky':
-                setupKandinskyBackground(svg);
+                await setupKandinskyBackground(svg, customDimensions, forExport);
                 break;
             case 'miro':
-                setupMiroBackground(svg);
+                await setupMiroBackground(svg, customDimensions, forExport);
                 break;
             case 'mondrian':
-                setupMondrianBackground(svg);
+                await setupMondrianBackground(svg, customDimensions, forExport);
                 break;
             case 'treeBranches':
-                setupTreeBranchesBackground(svg);
+                await setupTreeBranchesBackground(svg, customDimensions, forExport);
                 break;
             case 'fallingLeaves':
-                setupFallingLeavesBackground(svg);
+                await setupFallingLeavesBackground(svg, customDimensions, forExport);
                 break;
             case 'growingTree':
-                setupGrowingTreeBackground(svg);
+                await setupGrowingTreeBackground(svg, customDimensions, forExport);
                 break;
             case 'simpleBackground':
-                setupSimpleBackground(svg);
+                await setupSimpleBackground(svg, customDimensions, forExport);
                 break;
             case 'parchment':
-                setupParchmentBackgroundFixed(svg);
+                await setupParchmentBackgroundFixed(svg, customDimensions, forExport);
                 break;
             case 'grid':
-                setupGridBackgroundFixed(svg);
+                await setupGridBackgroundFixed(svg, customDimensions, forExport);
                 break;
             case 'paperTexture':
-                setupPaperTextureBackground(svg);
+                await setupPaperTextureBackground(svg, customDimensions, forExport);
                 break;
             case 'curvedLines':
-                setupCurvedLinesBackground(svg);
+                await setupCurvedLinesBackground(svg, customDimensions, forExport);
                 break;
             case 'treeRings':
-                setupTreeRingsBackground(svg);
+                await setupTreeRingsBackground(svg, customDimensions, forExport);
                 break;
             case 'fractal':
-                setupFractalBackground(svg);
+                await setupFractalBackground(svg, customDimensions, forExport);
                 break;
             case 'organicPattern':
-                setupOrganicPatternBackground(svg);
+                await setupOrganicPatternBackground(svg, customDimensions, forExport);
                 break;
             case 'artDeco':
-                setupArtDecoBackground(svg);
+                await setupArtDecoBackground(svg, customDimensions, forExport);
                 break;
             case 'bubbles':
-                setupBubblesBackground(svg);
+                await setupBubblesBackground(svg, customDimensions, forExport);
                 break;
             case 'poppingBubbles':
-                setupPoppingBubblesBackground(svg);
+                if (forExport) { await setupBubblesBackground(svg, customDimensions, forExport);}
+                else {await setupPoppingBubblesBackground(svg);}
                 break;
             case 'customImage':
                 const imagePath = localStorage.getItem('customImagePath');
-                setupCustomImageBackground(svg, imagePath);
+                await setupCustomImageBackground(svg, imagePath, customDimensions, forExport);
                 break;
             case 'none':
                 enableBackground(false);
@@ -6484,30 +8922,22 @@ export function setupElegantBackground(svg) {
             default:
                 // Fallback sur un fond par défaut
                 // setupPoppingBubblesBackground(svg);
-                setupGrowingTreeBackground(svg);
+                await setupGrowingTreeBackground(svg);
             }
         } else {
             // Comportement par défaut si aucune préférence n'est sauvegardée
-            setupTreeBranchesBackground(svg);
+            await setupTreeBranchesBackground(svg);
         }
     }
 }
 
-
-
-
-// // Ajoutez ce code pour monitorer juste après la définition
-// import { monitorFunction } from './performanceMonitor.js';
-// window._originalSetupElegantBackground = setupElegantBackground;
-// window._monitoringStopFunction = monitorFunction(window, '_originalSetupElegantBackground', 1000);
-// setupElegantBackground = window._originalSetupElegantBackground;
-
-
-
-export function setupCustomImageBackground(svg, imagePath) {
+export async function setupCustomImageBackground(svg, imagePath, customDimensions = null, forExport = false) {
     console.log("Configuration du fond avec une image personnalisée:", imagePath);
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = customDimensions ? customDimensions.width : window.innerWidth;
+    const height = customDimensions ? customDimensions.height : window.innerHeight;
+    const offsetX = customDimensions ? customDimensions.minX : 0;
+    const offsetY = customDimensions ? customDimensions.minY : 0;
+    console.log(`🎨 Setup image background: ${width}x${height} (offset: ${offsetX}, ${offsetY}) - Export: ${forExport}`);
     
     // Récupérer les paramètres depuis le localStorage
     const opacity = parseFloat(localStorage.getItem('backgroundOpacity') || 0.15);
@@ -6538,15 +8968,36 @@ export function setupCustomImageBackground(svg, imagePath) {
         .lower();
     
     // Trouver ou créer le conteneur de fond
-    let container = document.querySelector('.background-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'background-container';
-        document.body.insertBefore(container, document.body.firstChild);
+    // let container = document.querySelector('.background-container');
+    // if (!container) {
+    //     container = document.createElement('div');
+    //     container.className = 'background-container';
+    //     document.body.insertBefore(container, document.body.firstChild);
+    // } else {
+    //     // Vider le conteneur existant
+    //     container.innerHTML = '';
+    // }
+
+
+    // // Remplacer la section du conteneur par :
+    let container;
+    if (forExport) {
+        // Pour l'export, utiliser directement le SVG
+        container = svg.node();
     } else {
-        // Vider le conteneur existant
-        container.innerHTML = '';
+        // Pour l'affichage normal, utiliser le conteneur DOM
+        container = document.querySelector('.background-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'background-container';
+            document.body.insertBefore(container, document.body.firstChild);
+        } else {
+            container.innerHTML = '';
+        }
     }
+
+
+
     
     // Générer des chemins aléatoires pour les animations
     const generateRandomPath = () => {
@@ -6573,7 +9024,7 @@ export function setupCustomImageBackground(svg, imagePath) {
     };
     
     // Créer une feuille de style pour les animations
-    if (animation) {
+    if (animation && !forExport) {
         const styleSheet = document.createElement('style');
         styleSheet.id = 'background-animation-styles';
         
@@ -6704,7 +9155,7 @@ export function setupCustomImageBackground(svg, imagePath) {
     imgContainer.style.zIndex = "-1";
     
     // Si l'animation est activée, ajouter la classe appropriée et le zoom initial
-    if (animation) {
+    if (animation && !forExport) {
         // Ajouter l'animation de chemin aléatoire à la liste des animations disponibles
         const animationTypes = ['animated', 'animated-zoom', 'animated-float', 'animated-random'];
         
@@ -6724,41 +9175,138 @@ export function setupCustomImageBackground(svg, imagePath) {
         console.log("Animation sélectionnée:", selectedAnimation);
     }
     
-    // Créer un élément SVG qui contiendra l'image
-    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgElement.setAttribute("width", "100%");
-    svgElement.setAttribute("height", "100%");
-    svgElement.style.display = "block";
+
+
+
+
+
+
+
+
+
+    // // Créer un élément SVG qui contiendra l'image
+    // const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    // svgElement.setAttribute("width", "100%");
+    // svgElement.setAttribute("height", "100%");
+    // svgElement.style.display = "block";
     
-    // Créer l'élément image dans le SVG
-    const imgElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    imgElement.setAttribute("href", imagePath);
-    imgElement.setAttribute("width", "100%");
-    imgElement.setAttribute("height", "100%");
-    imgElement.setAttribute("preserveAspectRatio", "xMidYMid slice");
-    imgElement.style.opacity = opacity;
-    imgElement.setAttribute("filter", `url(#${filterId})`);
+    // // Créer l'élément image dans le SVG
+    // const imgElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    // imgElement.setAttribute("href", imagePath);
+    // imgElement.setAttribute("width", "100%");
+    // imgElement.setAttribute("height", "100%");
+    // imgElement.setAttribute("preserveAspectRatio", "xMidYMid slice");
+    // imgElement.style.opacity = opacity;
+    // imgElement.setAttribute("filter", `url(#${filterId})`);
     
-    // Gestionnaire d'événements pour l'image chargée
-    imgElement.onload = function() {
-        console.log("Image chargée avec succès:", imagePath);
-    };
+    // // Gestionnaire d'événements pour l'image chargée
+    // imgElement.onload = function() {
+    //     console.log("Image chargée avec succès:", imagePath);
+    // };
     
-    // Gestionnaire d'événements pour les erreurs de chargement
-    imgElement.onerror = function() {
-        console.error(`Impossible de charger l'image: ${imagePath}`);
-        imgElement.style.display = 'none';
+    // // Gestionnaire d'événements pour les erreurs de chargement
+    // imgElement.onerror = function() {
+    //     console.error(`Impossible de charger l'image: ${imagePath}`);
+    //     imgElement.style.display = 'none';
         
-        // Afficher un message à l'utilisateur
-        if (window.showToast) {
-            window.showToast(`Erreur: Impossible de charger l'image ${imagePath}`, 3000);
-        }
-    };
+    //     // Afficher un message à l'utilisateur
+    //     if (window.showToast) {
+    //         window.showToast(`Erreur: Impossible de charger l'image ${imagePath}`, 3000);
+    //     }
+    // };
     
-    // Ajouter l'image au SVG, le SVG au conteneur d'image, et le conteneur d'image au conteneur principal
-    svgElement.appendChild(imgElement);
-    imgContainer.appendChild(svgElement);
-    container.appendChild(imgContainer);
+    // // Ajouter l'image au SVG, le SVG au conteneur d'image, et le conteneur d'image au conteneur principal
+    // svgElement.appendChild(imgElement);
+    // imgContainer.appendChild(svgElement);
+    // container.appendChild(imgContainer);
+
+
+    if (forExport) {
+        // Pour l'export, créer directement dans le SVG
+        const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+        
+        // Créer le filtre directement dans le SVG
+        const filterId = `image-color-filter-${Date.now()}`;
+        const filter = defs.append("filter").attr("id", filterId);
+        
+        const rgb = hexToRgb(customColor);
+        filter.append("feColorMatrix")
+            .attr("type", "matrix")
+            .attr("values", `
+                ${0.7 + 0.3 * rgb.r} ${0.3 * rgb.g} ${0.3 * rgb.b} 0 0
+                ${0.3 * rgb.r} ${0.7 + 0.3 * rgb.g} ${0.3 * rgb.b} 0 0
+                ${0.3 * rgb.r} ${0.3 * rgb.g} ${0.7 + 0.3 * rgb.b} 0 0
+                0 0 0 1 0
+            `);
+        
+        filter.append("feGaussianBlur")
+            .attr("stdDeviation", "0.5");
+        
+        // Créer l'image dans le SVG avec les dimensions personnalisées
+        bgGroup.append("image")
+            .attr("href", imagePath)
+            .attr("x", offsetX)
+            .attr("y", offsetY)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("preserveAspectRatio", "xMidYMid slice")
+            .style("opacity", opacity)
+            .attr("filter", `url(#${filterId})`);
+        
+        // SOLUTION SIMPLE : Retourner true directement
+        // L'image se chargera automatiquement dans le SVG
+        return true;
+            
+    } else {
+
+
+        // Créer un élément SVG qui contiendra l'image
+        const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svgElement.setAttribute("width", "100%");
+        svgElement.setAttribute("height", "100%");
+        svgElement.style.display = "block";
+        
+        // Créer l'élément image dans le SVG
+        const imgElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
+        imgElement.setAttribute("href", imagePath);
+        imgElement.setAttribute("width", "100%");
+        imgElement.setAttribute("height", "100%");
+        imgElement.setAttribute("preserveAspectRatio", "xMidYMid slice");
+        imgElement.style.opacity = opacity;
+        imgElement.setAttribute("filter", `url(#${filterId})`);
+        
+        // Gestionnaire d'événements pour l'image chargée
+        imgElement.onload = function() {
+            console.log("Image chargée avec succès:", imagePath);
+        };
+        
+        // Gestionnaire d'événements pour les erreurs de chargement
+        imgElement.onerror = function() {
+            console.error(`Impossible de charger l'image: ${imagePath}`);
+            imgElement.style.display = 'none';
+            
+            // Afficher un message à l'utilisateur
+            if (window.showToast) {
+                window.showToast(`Erreur: Impossible de charger l'image ${imagePath}`, 3000);
+            }
+        };
+        
+        // Ajouter l'image au SVG, le SVG au conteneur d'image, et le conteneur d'image au conteneur principal
+        svgElement.appendChild(imgElement);
+        imgContainer.appendChild(svgElement);
+        container.appendChild(imgContainer);
+
+        return true;
+    }
+
+
+
+
+
+
+
+
+
     
     console.log("Image ajoutée au conteneur de fond d'écran avec:", {
         opacité: opacity,
@@ -6769,4 +9317,3 @@ export function setupCustomImageBackground(svg, imagePath) {
     
     return true; // Indiquer que l'opération a réussi
 }
-

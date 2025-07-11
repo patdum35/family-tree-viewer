@@ -5,18 +5,23 @@ import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
+    toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, applyTextDefinitions, updateGenerationSelectorValue } from './mainUI.js'; 
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
+    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js'; 
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
-// import { cleanupFanControls } from './treeFanControls.js';
-// import { setMaxGenerationsInit } from './treeFanRenderer.js';
+
+import { cleanupExportControls } from './exportSettings.js';
+
+import { setMaxGenerationsInit } from './treeWheelRenderer.js';
+import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 
 
@@ -80,10 +85,12 @@ export const state = {
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
+    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'    
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
     isSpeechEnabled2: true,
+    isVoiceSelected: false,
     isAnimationPaused: false,
     isAnimationLaunched: false,
     isAnimationMapInitialized: false,
@@ -111,12 +118,43 @@ export const state = {
     isOnLine: false,
     isDebugLog: false,
     isRadarEnabled: false,
-    fanMode: {
+    radarStyle: 0,
+    isWordCloudEnabled: false,
+    WheelMode: {
         maxGenerations: 5,
         showSpouses: true,
         showSiblings: true,
         animationsEnabled: true
-    }
+    },
+    currentRadarAngle: 0,
+    WheelZoom: null,
+    cachedRadarPNG: null,
+    isCacheValid: false,
+    userHasInteracted: false,
+    currentAnimationTimeouts: [],
+    WheelConfig: {
+        innerRadius: 80,
+        generationWidth: 80,
+        centerX: 0,
+        centerY: 0,
+        totalAngle: 2 * Math.PI, // 360° complet
+        startAngle: -Math.PI / 2, // Commencer en haut
+        maxGenerations: 4,
+        limitMaxGenerations: 26 
+    },
+    lastWheelTransform: null,
+    leverEnabled: true,
+    isSpinning: false,
+    speechSynthesisInitialized: false,
+    isSpeechInGoodHealth: false,
+    frenchVoice: null,
+    currentNameCloudModal: null, // Pour stocker le modal du nuage de mots
+    currentScale: 1.0,
+    currentX: 0,
+    currentY: 0,
+    nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
+
 };
 
 export { geocodeLocation };
@@ -149,22 +187,53 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
     });
 }
 
-
-export function toggleTreeRadar() {
+export function updateRadarButtonText() {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
-    // Basculer l'état du tree/radar
-    state.isRadarEnabled = !state.isRadarEnabled;  
-    // Mettre à jour le bouton
-    treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
-    // treeRadarToggleBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿' : '🎯';
-    
-
-    if (state.isRadarEnabled) {
-        displayGenealogicTree(null, false, false,  false, 'fanAncestors');
-    } else {
-        displayGenealogicTree(null, true, false);
+    const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
+    if (treeRadarToggleBtn) {
+        const span = treeRadarToggleBtn.querySelector('span');
+        if (span) {
+            span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
+        }
     }
 
+    if (menu_nameTreeRadarBtn) {
+        // Mettre à jour le bouton du menu hamburger
+        if (window.innerHeight < 800) {
+            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
+        } else {
+            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
+        }
+    }
+
+}
+
+export function toggleTreeRadar() {
+    // Basculer l'état du tree/radar
+    state.isRadarEnabled = !state.isRadarEnabled;  
+    updateRadarButtonText();  
+
+    if (state.isRadarEnabled) {
+        state.treeModeReal_backup = state.treeMode;        
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+
+    } else {
+
+        if ((state.treeModeReal_backup.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
+            state.treeMode = 'ancestors';
+            state.treeModeReal = 'ancestors';
+            state.treeModeReal_backup = 'ancestors';
+
+        } else if ((state.treeModeReal_backup.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
+            state.treeMode = 'descendants';
+            state.treeModeReal = 'descendants';
+            state.treeModeReal_backup = 'descendants';
+        } else {
+            state.treeMode = state.treeModeReal_backup;
+            state.treeModeReal = state.treeModeReal_backup;  
+        }      
+        displayGenealogicTree(null, true, false);
+    }
 }
 
 
@@ -182,22 +251,6 @@ export function toggleSpeech() {
     // Mettre à jour le bouton
     speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
 
-
-    // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
-    // state.backgroundEnabled = !state.backgroundEnabled;
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-    // if (state.backgroundEnabled) {
-    //     // enableBackground(true);
-    //     // Pour monitorer setupElegantBackground
-    //     restartBackgroundMonitoring();
-    // }
-    // else {
-    //     // enableBackground(false);
-    //     stopBackgroundMonitoring();
-    // }
 
 }
 
@@ -222,21 +275,6 @@ export function toggleSpeech2() {
     }
 
 
-    // console.log("\n\n ###########toggle du state.backgroundEnabled ################", state.backgroundEnabled, "\n\n");
-    // state.backgroundEnabled = !state.backgroundEnabled;
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-    // if (state.backgroundEnabled) {
-    //     // enableBackground(true);
-    //     // Pour monitorer setupElegantBackground
-    //     restartBackgroundMonitoring();
-    // }
-    // else {
-    //     // enableBackground(false);
-    //     stopBackgroundMonitoring();
-    // }
 
 }
 
@@ -255,28 +293,27 @@ function stopBackgroundMonitoring() {
     }
   }
   
-  // Pour redémarrer le monitoring si nécessaire
-  function restartBackgroundMonitoring() {
-    // D'abord arrêter s'il est en cours
-    if (window._monitoringStopFunction) {
-      stopBackgroundMonitoring();
-    }
-    
-    // Puis redémarrer avec la fonction originale
-    if (window._originalSetupElegantBackground) {
-      console.log("Redémarrage du monitoring du fond d'écran");
-      import('./performanceMonitor.js').then(module => {
-        window._monitoringStopFunction = module.monitorFunction(
-          window, 
-          '_originalSetupElegantBackground', 
-          1000
-        );
-      });
-    } else {
-      console.log("Impossible de redémarrer, fonction originale non trouvée");
-    }
-  }
+// Pour redémarrer le monitoring si nécessaire
+function restartBackgroundMonitoring() {
+// D'abord arrêter s'il est en cours
+if (window._monitoringStopFunction) {
+    stopBackgroundMonitoring();
+}
 
+// Puis redémarrer avec la fonction originale
+if (window._originalSetupElegantBackground) {
+    console.log("Redémarrage du monitoring du fond d'écran");
+    import('./performanceMonitor.js').then(module => {
+    window._monitoringStopFunction = module.monitorFunction(
+        window, 
+        '_originalSetupElegantBackground', 
+        1000
+    );
+    });
+} else {
+    console.log("Impossible de redémarrer, fonction originale non trouvée");
+}
+}
 
 export function toggleFullScreen() {
     if (!document.fullscreenElement) {
@@ -303,6 +340,11 @@ function initialize() {
     
     // Initialiser les gestionnaires d'événements
     initializeEventHandlers();
+
+    // 🎯 : Initialisation iOS très tôt
+    if (window.initializeIOSInstallation) {
+        initializeIOSInstallation();
+    }
     
     // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
     initializeCustomSelectors();
@@ -361,8 +403,16 @@ export async function loadData() {
     audio.preload = 'auto';
     audio.volume = 1;
 
+    state.treeMode = 'ancestors';
+    state.treeModeReal = 'ancestors';
+
+
     // 💡 Débloque l'audio à ce moment-là pour IOS
-    if (!audioUnlocked) {
+    // Pour le cas IOS qui bloque la musique si la musique n'est pas déclenchée par un clic
+    // or en mode démo la musique est lancée à la fin de l'animation , loin après le clic
+    // dans ce cas il faut faire un pré-init de la musique. L eproblème c'est qu'il faut déjà connaitre quel mp3 il faut jouer. 
+    // Il faudra sans doute déplacer cet init juste après le clic du mode démo qui définit quelle musique doit être jouée
+    if (isIOSDevice() && !audioUnlocked) {
         audio.play().then(() => {
             audio.pause();
             audio.currentTime = 0;
@@ -371,6 +421,8 @@ export async function loadData() {
         }).catch(e => {
             console.warn("🛑 iOS a bloqué l’audio :", e);
         });
+    } else {
+        audioUnlocked = true;
     }
     
 
@@ -382,15 +434,7 @@ export async function loadData() {
     state.nombre_generation = 4;
     updateGenerationSelectorValue(state.nombre_generation);
 
-
-
-    // // Débogage - ajoutez ce code juste avant de démarrer le monitoring
-    // console.log("Fonction setupElegantBackground existe ?", typeof window.setupElegantBackground);
-    // console.log("Fonction setupElegantBackground directement sur window ?", Object.keys(window).includes('setupElegantBackground'));
-
-
-    // // Pour monitorer setupElegantBackground
-    // stopMonitoring = monitorFunction(window, 'setupElegantBackground', 1000);
+    updateTreeModeSelector(state.treeMode);
 
 
     // Utilisation
@@ -459,12 +503,17 @@ export async function loadData() {
 
         let ancestor = null;
         let cousin = null;
-        if (state.treeOwner ===2 ) {
+        if (state.treeOwner === 3 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('hugues cap');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } if (state.treeOwner === 2 ) {
             // state.targetAncestorId = "@I1152@";
             ancestor = searchRootPersonId('guillaume ducl');
             cousin = null; 
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===1 ){              
+        } else if (state.treeOwner === 1 ){              
             // state.targetAncestorId = "@I739@" 
             ancestor = searchRootPersonId('alain ii goyon de matignon');  
             cousin = null; 
@@ -484,11 +533,14 @@ export async function loadData() {
         }
 
 
+        state.isRadarEnabled = false;
 
 
-
+        updateRadarButtonText();
 
         state.initialTreeDisplay = true;
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in loadData ################# ')
+
         displayGenealogicTree(null, true, true);  // Appel avec isInit = true
 
         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
@@ -577,15 +629,27 @@ async function loadGedcomContent(fileInput, passwordInput) {
                     console.log("Fichier arbreX.enc ouvert avec succès. Owner: 2");
                     return content;
                 } catch (secondError) {
-                    // Si le mot de passe est également incorrect pour arbreX.enc
-                    if (window.CURRENT_LANGUAGE === 'fr') {
-                        throw new Error('Mot de passe incorrect pour les deux fichiers');
-                    } else if (window.CURRENT_LANGUAGE === 'en') {
-                        throw new Error('Incorrect password for both files');
-                    } else if (window.CURRENT_LANGUAGE === 'es') {
-                        throw new Error('Contraseña incorrecta para ambos archivos');
-                    } else if (window.CURRENT_LANGUAGE === 'hu') {
-                        throw new Error('Helytelen jelszó mindkét fájlhoz');
+                    // Si le mot de passe est incorrect pour arbre.enc, essayer avec arbreB.enc
+                    if (secondError.message === 'Mot de passe incorrect') {
+                        console.log("Tentative d'ouverture du fichier arbreB.enc...");
+                        try {
+                            const content = await loadEncryptedContent(passwordInput.value, 'arbreB.enc');
+                            // Si succès avec arbreB.enc, définir treeOwner = 3
+                            state.treeOwner = 3;
+                            console.log("Fichier arbreB.enc ouvert avec succès. Owner: 3");
+                            return content;
+                        } catch (secondError) {
+                            // Si le mot de passe est également incorrect pour arbreX.enc
+                            if (window.CURRENT_LANGUAGE === 'fr') {
+                                throw new Error('Mot de passe incorrect pour les deux fichiers');
+                            } else if (window.CURRENT_LANGUAGE === 'en') {
+                                throw new Error('Incorrect password for both files');
+                            } else if (window.CURRENT_LANGUAGE === 'es') {
+                                throw new Error('Contraseña incorrecta para ambos archivos');
+                            } else if (window.CURRENT_LANGUAGE === 'hu') {
+                                throw new Error('Helytelen jelszó mindkét fájlhoz');
+                            }
+                        }
                     }
                 }
             } else {
@@ -847,6 +911,16 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('alonso de ');
             }
             state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner ===3 ) {
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('hugues c');
+            } //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('hugues c ');
+            }
+            state.targetAncestorId = ancestor.id;
         } else {
             if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
                 // state.targetAncestorId = "@I739@" 
@@ -936,6 +1010,8 @@ export function handleRootPersonChange(event) {
                
         
         // Redessiner l'arbre d'abord
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
+
         displayGenealogicTree(null, true, false, true);
         
         // Nettoyer tous les conteneurs de fond d'écran existants
@@ -978,13 +1054,24 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // Réinitialiser l'état de l'animation avant de changer l'arbre
     resetAnimationState();
 
+    if (state.isRadarEnabled) {
+        disableFortuneModeWithLever();
+        enableFortuneMode();
+        state.currentRadarAngle = 0;
+    } else {
+        disableFortuneModeWithLever();
+    }
+
     // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
     // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
 
 
-    let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
-    
-
+    let person; 
+    if (state.treeOwner === 3) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
+    } else {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+    }
     // Important : toujours sauvegarder l'ID de la personne courante
     if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
         state.rootPersonId = rootPersonId || person.id;
@@ -1017,37 +1104,53 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // Nettoyer les contrôles existants
-    // cleanupFanControls();
+    cleanupExportControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
         state.currentTree =  buildDescendantTree(tempPerson.id);
     }
     else {
-        if (['fanAncestors', 'fanDescendants'].includes(mode)) {
+        if (['WheelAncestors', 'WheelDescendants'].includes(mode)) {
             console.log('🌟 Mode éventail détecté:', mode);
             // state.treeModeReal = mode;
-            state.treeMode = 'directAncestors';
-            state.treeModeReal = 'directAncestors';
-            // state.treeMode = 'ancestors';
-            // state.treeModeReal = 'ancestors';
-            state.currentTree = buildAncestorTree(person.id);
+
+            if (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' ) {
+                state.treeMode = 'directAncestors';
+                state.treeModeReal = 'directAncestors';
+                state.currentTree = buildAncestorTree(person.id);
+            } else {
+                state.treeMode = 'directDescendants';
+                state.treeModeReal = 'directDescendants';
+                state.currentTree = buildDescendantTree(person.id);
+
+            }
+            updateTreeModeSelector(state.treeMode);
+            state.treeModeReal_backup = state.treeModeReal;
             state.treeModeReal = mode;
-            // setMaxGenerationsInit(state.nombre_generation);
-            // initializeAllFanControls();
+            setMaxGenerationsInit(state.nombre_generation);
         } else {
+            updateTreeModeSelector(state.treeMode);
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
             // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
             state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
                 ? buildDescendantTree(person.id)
                 : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
                 ? buildAncestorTree(person.id)
-                : buildCombinedTree(person.id); // Pour le mode 'both'
+                : (state.treeMode === 'both')
+                ? buildCombinedTree(person.id) // Pour le mode 'both'
+                : buildAncestorTree(person.id);
         }
     }
 
+
+    updateGenerationSelectorValue(state.nombre_generation);
+
+
     // drawTree(isZoomRefresh);
-    drawTree(isZoomRefresh, false); // with fanAncestors
+    drawTree(isZoomRefresh, false); // with WheelAncestors
+
+    // drawWheelTree(true, false);
 
     // Ne pas faire resetView() en mode both
     if (state.treeModeReal !== 'both') {
@@ -1102,8 +1205,21 @@ function updateBoxWidth() {
 export function updateTreeMode(mode) {
     // Réinitialiser l'état de l'animation avant de changer le mode
     resetAnimationState();
-    state.treeMode = mode;
-    displayGenealogicTree(null, true, false);
+
+    if (state.isRadarEnabled) {
+        // state.treeMode = 'directAncestors';
+        // mode = 'directAncestors';
+        state.treeMode = mode;
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+    } else {
+        state.treeMode = mode;
+        displayGenealogicTree(null, true, false);
+    }
+
+    // state.treeMode = mode;
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateTreeMode ################# ')
+
+    // displayGenealogicTree(null, true, false);
 
     // pour mettre à jour la description
     const description = document.getElementById('treeModeDescription');
@@ -1527,8 +1643,8 @@ function showErrorMessage(message) {
 /**
  * Configuration par défaut à adapter selon vos besoins
  */
-// export const fanConfig = {
-//     defaultMode: 'fanAncestors',
+// export const WheelConfig = {
+//     defaultMode: 'WheelAncestors',
 //     maxGenerations: 5,
 //     enableAnimations: true,
 //     exportFormat: 'png',
@@ -1536,8 +1652,8 @@ function showErrorMessage(message) {
 // };
 
 // Exemple d'utilisation :
-// displayPersonTree('PERSON_ID', 'fanAncestors');
-// switchTreeMode('fanDescendants');
+// displayPersonTree('PERSON_ID', 'WheelAncestors');
+// switchTreeMode('WheelDescendants');
 // exportToPDF();
 
 

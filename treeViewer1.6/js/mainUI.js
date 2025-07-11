@@ -149,6 +149,29 @@ function replaceGenerationSelector() {
     parentElement.replaceChild(customSelector, originalSelect);
 }
 
+
+// Fonction pour mettre à jour l'affichage du sélecteur de générations
+export function updateGenerationSelector(newValue) {
+    const customSelector = document.getElementById('generations');
+    if (!customSelector) return;
+    
+    // Mettre à jour la propriété value
+    customSelector.value = newValue.toString();
+    
+    // Mettre à jour l'attribut data-value
+    customSelector.setAttribute('data-value', newValue.toString());
+    
+    // Trouver et mettre à jour l'élément d'affichage
+    const displayElement = customSelector.querySelector('div span') || 
+                          customSelector.querySelector('div');
+    
+    if (displayElement) {
+        displayElement.textContent = newValue.toString();
+    }
+    
+    console.log(`Sélecteur générations mis à jour: ${newValue}`);
+}
+
 // Fonction pour remplacer le sélecteur TreeMode
 function replaceTreeModeSelector() {
     const originalSelect = document.getElementById('treeMode');
@@ -253,6 +276,7 @@ function replaceTreeModeSelector() {
         }
     });
     
+    
     // IMPORTANT: Conserver l'ID original
     customSelector.id = 'treeMode';
 
@@ -284,6 +308,16 @@ function replaceTreeModeSelector() {
     // Remplacer le sélecteur original par le sélecteur personnalisé
     const parentElement = originalSelect.parentElement;
     parentElement.replaceChild(customSelector, originalSelect);   
+}
+
+
+// Fonction pour mettre à jour l'affichage du sélecteur
+export function updateTreeModeSelector(newValue) {
+    // Mettre à jour l'état global AVANT la reconstruction
+    state.treeMode = newValue;
+    
+    // Reconstruire complètement le sélecteur avec la nouvelle valeur
+    replaceTreeModeSelector();
 }
 
 /**
@@ -352,18 +386,7 @@ export function updateSelectorDisplayText(selector, text) {
 export function updateGenerationSelectorValue(value) {
     // Mettre à jour l'état global
     state.nombre_generation = value;
-    
-    // Mettre à jour le sélecteur
-    const generationSelector = document.getElementById('generations');
-    if (generationSelector) {
-      generationSelector.setAttribute('data-value', value.toString());
-      
-      // Mettre à jour l'affichage
-      const displayElement = generationSelector.querySelector('div span');
-      if (displayElement) {
-        displayElement.textContent = value.toString();
-      }
-    }
+    replaceGenerationSelector();
   }
 
 // Ajout d'un état global pour suivre le mode du sélecteur
@@ -500,7 +523,13 @@ export function replaceRootPersonSelector(customOptions = null) {
                     }
                 } else {
                     // En mode historique, simplement afficher l'arbre
-                    displayGenealogicTree(value, true);
+                    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in replaceRootPersonSelector ################# ')
+                    // displayGenealogicTree(value, true);
+                    if (state.isRadarEnabled) {
+                        displayGenealogicTree(value, false, false,  false, 'WheelAncestors');
+                    } else {
+                        displayGenealogicTree(value, true, false);
+                    }
                 }
             }
             
@@ -731,6 +760,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                                 selectFoundPerson(option.value);
                             } else {
                                 // Fallback si la fonction n'est pas disponible
+                                console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateCustomSelectorOptions 1  ################# ')
                                 displayGenealogicTree(option.value, true);
                                 
                                 // Recharger le sélecteur après un court délai
@@ -743,6 +773,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                             }
                         } else {
                             // Si nous sommes en mode normal (historique), simplement afficher l'arbre
+                            console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateCustomSelectorOptions 1  ################# ')
                             displayGenealogicTree(option.value, true);
                             
                             // Désactiver le clignotement
@@ -1200,7 +1231,39 @@ export function createImageSelectorDialog(onSelect) {
         // de lister le contenu du répertoire
         const potentialImages = [
             'contemporain.jpg',
-            'republique.jpg'
+            'republique.jpg',
+            'tree-log.jpg',
+            'angelot.jpg',
+            'ange.jpg',
+            'cupidon.jpg',
+            "brick-wall.jpg",
+            "small-circles.png",
+            "ai-lambris.jpg",
+            "crocodile-skin.jpg",
+            "ecorce-chene.jpg",
+            "bois.jpg",
+            "glass.jpg",
+            "galets.jpg",
+            "circles.jpg",
+            "dry-soil.jpg",
+            "rock.jpg",
+            "traits.jpg",
+            "lichen-red.jpg",
+            "lichen-blue.jpg",
+            "jeans.jpg",
+            "ecorce.jpg",
+            "dry-ground.jpg",
+            "marble.jpg",
+            "texture-peiture_colorée.jpg",
+            "silk.jpg",
+            "elephant-skin.jpg",
+            "aluminum-foil.jpg",
+            "wood-lambris-vertical.jpg",
+            "texture-ciment.jpg",
+            "roses.jpg",
+            "flowers.png",
+            "feuilles.jpg",
+            "parquet.jpg"
         ];
         
         // Créer une vignette pour chaque image potentielle
