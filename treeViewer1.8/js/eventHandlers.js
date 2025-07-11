@@ -588,14 +588,16 @@ export async function returnToLogin() {
         try {
             // const imagePath = 'background_images/fort_lalatte.jpx';
             // const imagePath = 'background_images/lichen-red.jpg';
-            const imagePath = 'background_images/bois.jpg';
+            // const imagePath = 'background_images/bois.jpg';
+            backgroundImage.src = 'background_images/tree-log.jpg';
             backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
             // Fallback en cas d'erreur
             // backgroundImage.src = 'background_images/fort_lalatte.jpg';
             // backgroundImage.src = 'background_images/lichen-red.jpg';
-            backgroundImage.src = 'background_images/bois.jpg';
+            // backgroundImage.src = 'background_images/bois.jpg';
+            backgroundImage.src = 'background_images/tree-log.jpg';
         }
     }
     

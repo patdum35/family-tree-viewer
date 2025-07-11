@@ -1232,6 +1232,7 @@ export function createImageSelectorDialog(onSelect) {
         const potentialImages = [
             'contemporain.jpg',
             'republique.jpg',
+            'tree-log.jpg',
             'angelot.jpg',
             'ange.jpg',
             'cupidon.jpg',

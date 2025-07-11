@@ -57,7 +57,8 @@ async function loadBackgroundImageFromCache() {
                     const cache = await caches.open(cacheName);
                     // const cachedResponse = await cache.match('background_images/fort_lalatte.jpg');
                     // const cachedResponse = await cache.match('background_images/lichen-red.jpg');   
-                    const cachedResponse = await cache.match('background_images/bois.jpg');                    
+                    // const cachedResponse = await cache.match('background_images/bois.jpg');                    
+                    const cachedResponse = await cache.match('background_images/tree-log.jpg');  
                     if (cachedResponse) {
                         // Image trouvée dans ce cache !
                         const blob = await cachedResponse.blob();
@@ -94,7 +95,8 @@ async function loadBackgroundImageFromCache() {
     if (existingImage) {
         // existingImage.src = 'background_images/fort_lalatte.jpg';
         // existingImage.src = 'background_images/lichen-red.jpg';
-        existingImage.src = 'background_images/bois.jpg';
+        // existingImage.src = 'background_images/bois.jpg';
+        existingImage.src = 'background_images/tree-log.jpg';
         console.log('[Background Loader] Image chargée avec URL normale');
         return true;
     }
@@ -143,7 +145,8 @@ function setupBackgroundDebugFunctions() {
                 const cache = await caches.open(cacheName);
                 // const hasImage = await cache.match('background_images/fort_lalatte.jpg');
                 // const hasImage = await cache.match('background_images/lichen-red.jpg');
-                const hasImage = await cache.match('background_images/bois.jpg');
+                // const hasImage = await cache.match('background_images/bois.jpg');
+                const hasImage = await cache.match('background_images/tree-log.jpg');                
                 console.log(`📦 ${cacheName}: ${hasImage ? '✅ HAS IMAGE' : '❌ no image'}`);
             }
         } catch (error) {
