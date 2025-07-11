@@ -708,6 +708,10 @@ export function getGenerationColor(generation, sex = 'M') {
 
     // SÉLECTION DE LA PALETTE (changez le numéro pour tester)
     const paletteVersion = state.radarStyle; // Changez ça pour tester : 1, 2 ou 3
+
+
+    console.log('\n\n  DEBUG radarStyle in getGenerationColor = ', state.radarStyle)
+
     
     let maleColors, femaleColors;
     

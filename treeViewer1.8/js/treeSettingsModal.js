@@ -75,9 +75,9 @@ const settingsTranslations = {
         'nuageTab': 'Nuage',
         'radarStyle': 'Style du radar',
         'blueStyle': 'Style bleu', 
-        'greenStyle': 'Style vert', 
-        'orangeStyle': 'Style orange', 
-        'blueRedStyle':'Style H/F bleu/rouge'
+        'greenStyle': 'Style bleu/Rose', 
+        'orangeStyle': 'Style bleu/orange', 
+        'blueRedStyle':'Style bleu/rouge'
     },
     'en': {
         'settingsTitle': 'Advanced Settings',
@@ -141,10 +141,10 @@ const settingsTranslations = {
         'radarTab': 'Radar',
         'nuageTab': 'Cloud',
         'radarStyle': 'Radar style',
-        'blueStyle': 'Blue style', 
-        'greenStyle': 'Green style', 
-        'orangeStyle': 'Orange style', 
-        'blueRedStyle':'M/F blue/red style'
+        'blueStyle': 'blue style', 
+        'greenStyle': 'blue/pink style', 
+        'orangeStyle': 'blue/orange style', 
+        'blueRedStyle':'blue/red style'
     },
     'es': {
         'settingsTitle': 'Configuración Avanzada',
@@ -209,9 +209,9 @@ const settingsTranslations = {
         'nuageTab': 'Nube',
         'radarStyle': 'Estilo del radar',
         'blueStyle': 'Estilo azul', 
-        'greenStyle': 'Estilo verde', 
-        'orangeStyle': 'Estilo naranja', 
-        'blueRedStyle':'Estilo H/M azul/rojo'
+        'greenStyle': 'Estilo azul/rosa', 
+        'orangeStyle': 'Estilo azul/naranja', 
+        'blueRedStyle':'Estilo azul/rojo'
     },
     'hu': {
         'settingsTitle': 'Speciális Beállítások',
@@ -275,10 +275,10 @@ const settingsTranslations = {
         'radarTab': 'Radar',
         'nuageTab': 'Felhő',
         'radarStyle': 'Radar stílusa',
-        'blueStyle': 'Kék stílus', 
-        'greenStyle': 'Zöld stílus', 
-        'orangeStyle': 'Narancs stílus', 
-        'blueRedStyle': 'Nő/Férfi kék/piros stílus'
+        'blueStyle': 'Kék stílus',
+        'greenStyle': 'Kék/rózsaszín stílus',
+        'orangeStyle': 'Kék/narancs stílus',
+        'blueRedStyle': 'Kék/piros stílus',
     }
 };
 
@@ -948,7 +948,7 @@ function createRadarStyleSelect(config) {
         colors: colors,
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
-            width: '120px',
+            width: '180px',
             height: '25px',
             dropdownWidth: '170px',
             dropdownMaxHeight: dropdownHeight,
@@ -975,17 +975,19 @@ function createRadarStyleSelect(config) {
         onChange: (value) => {
             // Convertir la valeur en index numérique
             const styleMap = {
-                'styleBleu': 0,
-                'styleVert': 1, 
-                'styleOrange': 2,
-                'styleHF': 3
+                'blueStyle': 0,
+                'greenStyle': 1, 
+                'orangeStyle': 2,
+                'blueRedStyle': 3
             };
-            
+           
             // Configurer la variable globale
             state.radarStyle = styleMap[value];
             
             // Sauvegarder dans localStorage
             localStorage.setItem('radarStyle', value);
+
+            console.log('\n\n  DEBUG radarStyle in createRadarStyleSelect = ', state.radarStyle, value);
             
             // Lancer l'action
             state.isRadarEnabled = false;
