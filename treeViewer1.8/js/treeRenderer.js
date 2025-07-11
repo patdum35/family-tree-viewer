@@ -8,8 +8,6 @@ import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
 
-
-
 let zoom;
 let lastTransform = null;
 
@@ -133,7 +131,6 @@ export function resetTreeView() {
     }
 }
 
-
 /**
  * Anime la transition entre les modes
  */
@@ -154,9 +151,6 @@ function animateTreeModeTransition(fromMode, toMode) {
                 .style("opacity", 1);
         });
 }
-
-
-
 
 function drawBothModeTree(isZoomRefresh = false) {
     const rootPerson = state.currentTree;
@@ -338,7 +332,6 @@ export function resetZoomBoth(mainGroup,svg, x, y) {
         .call(zoom.transform, newTransform);
 }
 
-
 /**
  * Ajuste la position des siblings de niveau 0 pour les rapprocher de la racine
  * @private
@@ -445,11 +438,12 @@ function drawLevel0SiblingLinks(mainGroup, rootHierarchy) {
                 .attr("d", `M${siblingX  + (state.boxWidth/2)},${siblingY}
                            H${(siblingX   + fatherX)/2}
                            V${fatherY}
-                           H${fatherX  - state.boxWidth/2}`);
+                           H${fatherX  - state.boxWidth/2}`)
+                .style("stroke", getSiblingLinkColor)
+                .style("stroke-width", getLinkWidth);    
                            
         });
  }
-
 
 /**
  * Configure le SVG initial
@@ -533,8 +527,6 @@ function createTreeLayout() {
     return layout;
 }
 
-
-
 /**
  * Crée le groupe principal pour le contenu
  * @private
@@ -543,8 +535,6 @@ function createMainGroup(svg) {
     return svg.append("g")
         .attr("transform", `translate(${state.boxWidth},${window.innerHeight/2})`);
 }
-
-
 
 /**
  * Dessine les liens entre les nœuds en tenant compte des deux parents généalogiques
@@ -645,10 +635,11 @@ function drawLinks(group, layout) {
                 return "link hidden";
             }
         })
-        .attr("d", createLinkPath);
+        .attr("d", createLinkPath)
+        .style("stroke", getLinkColor)
+        .style("stroke-width", getLinkWidth)
+        .style("fill", "none");
 }
-
-
 
 /**
  * Trouve les parents d'une personne dans les données GEDCOM
@@ -750,7 +741,9 @@ function drawSpouseLinks(group, layout) {
         .data(spouseLinks)
         .join("path")
         .attr("class", "link spouse-link")
-        .attr("d", createLinkPath);
+        .attr("d", createLinkPath)
+        .style("stroke", getLinkColor)    
+        .style("stroke-width", getLinkWidth);
 }
 
 
@@ -899,7 +892,9 @@ function drawSiblingLinks(group, root) {
             if (isNodeHidden(d.source) || isNodeHidden(d.target)) return "";
             
             return createSiblingLinkPath(d);
-        });
+        })
+        .style("stroke", getSiblingLinkColor)
+        .style("stroke-width", getLinkWidth);
 }
 
 
@@ -1013,3 +1008,78 @@ function resetViewVirtualRoot(svg, mainGroup, offsetX = 0) {
 // Export des variables et fonctions nécessaires pour d'autres modules
 export const getZoom = () => zoom;
 export const getLastTransform = () => lastTransform;
+
+
+
+
+
+/**
+ * Retourne la couleur selon le style
+ */
+function getLinkColor(d) {
+    const [thickness, color] = state.linkStyle.split('-');
+    
+    switch(color) {
+        case 'dark':
+            return "#333333";
+        case 'light': 
+            return "#CCCCCC";
+        case 'colored':
+            // Différencier selon le type de lien
+            if (!d.source || !d.target) return "#666666";
+            
+            // Liens vers spouses : bleu
+            if (d.target.data && d.target.data.isSpouse) {
+                return "#4169E1"; // Bleu
+            }
+            
+            // Liens vers siblings : orange
+            if (d.target.data && d.target.data.isSibling) {
+                return "#FF8C00"; // Orange
+            }
+            
+            // Liens parents-enfants normaux : vert
+            return "#228B22"; // Vert
+            
+        default:
+            return "#666666";
+    }
+}
+
+/**
+ * Retourne l'épaisseur selon le style
+ */
+function getLinkWidth(d) {
+    const [thickness] = state.linkStyle.split('-');
+    
+    switch(thickness) {
+        case 'thin':
+            return "1px";
+        case 'normal':
+            return "2px"; 
+        case 'thick':
+            return "4px";
+        case 'veryThick':
+            return "6px";
+        default:
+            return "2px";
+    }
+}
+
+/**
+ * Couleur spéciale pour les liens siblings (vert plus ou moins foncé)
+ */
+function getSiblingLinkColor() {
+    const [thickness, color] = state.linkStyle.split('-');
+    
+    switch(color) {
+        case 'dark':
+            return "#2E7D32";  // Vert foncé
+        case 'light': 
+            return "#81C784";  // Vert clair
+        case 'colored':
+            return "#4CAF50";  // Vert original
+        default:
+            return "#4CAF50";  // Vert par défaut
+    }
+}

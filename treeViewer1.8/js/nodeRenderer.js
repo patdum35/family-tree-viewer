@@ -100,66 +100,6 @@ export function drawRootNode(mainGroup, rootData) {
 }
 
 /**
- * Dessine les rectangles des nœuds
- * @private
- */
-export function drawNodeBoxes(nodeGroups) {
-    // Définir un filtre pour l'ombre portée
-    const defs = d3.select("svg").append("defs");
-    
-    // Créer un filtre pour l'ombre
-    const filter = defs.append("filter")
-        .attr("id", "drop-shadow")
-        .attr("height", "125%"); // Légèrement réduit
-    
-    // Ajouter les composants du filtre
-    filter.append("feGaussianBlur")
-        .attr("in", "SourceAlpha")
-        .attr("stdDeviation", 2) // Ombre plus fine
-        .attr("result", "blur");
-        
-    filter.append("feOffset")
-        .attr("in", "blur")
-        .attr("dx", 2) // Décalage horizontal plus petit
-        .attr("dy", 2) // Décalage vertical plus petit
-        .attr("result", "offsetBlur");
-        
-    // Contrôler l'opacité de l'ombre
-    filter.append("feComponentTransfer")
-        .append("feFuncA")
-        .attr("type", "linear")
-        .attr("slope", "0.5"); // Opacité à 50%
-        
-    // Fusionner l'original avec l'ombre
-    const feMerge = filter.append("feMerge");
-    feMerge.append("feMergeNode")
-        .attr("in", "offsetBlur");
-    feMerge.append("feMergeNode")
-        .attr("in", "SourceGraphic");
-    
-    // Ajouter les rectangles avec effet d'ombre
-    nodeGroups.append("rect")
-        .attr("class", d => {
-            if (!d.data) return "person-box";
-            const classes = ["person-box"];
-            if (d.data.isSpouse) classes.push("spouse");
-            else if (d.data.isSibling) classes.push("sibling");
-            else if (d.data.duplicate) classes.push("duplicate");
-            else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
-            else classes.push("normal");
-            return classes.join(" ");
-        })
-        .attr("x", -state.boxWidth/2)
-        .attr("y", -state.boxHeight/2)
-        .attr("width", state.boxWidth)
-        .attr("height", state.boxHeight)
-        .attr("rx", 3) // Coins arrondis
-        .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
-        // Ne pas définir stroke et stroke-width ici pour préserver les styles CSS des classes
-}
-
-
-/**
  * Dessine le contenu des nœuds (nom, dates)
  * @param {Object} nodeGroups - Les groupes de nœuds
  */
@@ -287,5 +227,575 @@ function addControlButtons(nodeGroups) {
     addAncestorsControls(nodeGroups);
 }
 
-// Les fonctions pour les boutons de contrôle sont implémentées
-// dans le fichier nodeControls.js
+
+/**
+ * Dessine les rectangles des nœuds
+ * @private
+ */
+// export function drawNodeBoxes(nodeGroups) {
+//     // Définir un filtre pour l'ombre portée
+//     const defs = d3.select("svg").append("defs");
+    
+//     // Créer un filtre pour l'ombre
+//     const filter = defs.append("filter")
+//         .attr("id", "drop-shadow")
+//         .attr("height", "125%"); // Légèrement réduit
+    
+//     // Ajouter les composants du filtre
+//     filter.append("feGaussianBlur")
+//         .attr("in", "SourceAlpha")
+//         .attr("stdDeviation", 2) // Ombre plus fine
+//         .attr("result", "blur");
+        
+//     filter.append("feOffset")
+//         .attr("in", "blur")
+//         .attr("dx", 2) // Décalage horizontal plus petit
+//         .attr("dy", 2) // Décalage vertical plus petit
+//         .attr("result", "offsetBlur");
+        
+//     // Contrôler l'opacité de l'ombre
+//     filter.append("feComponentTransfer")
+//         .append("feFuncA")
+//         .attr("type", "linear")
+//         .attr("slope", "0.5"); // Opacité à 50%
+        
+//     // Fusionner l'original avec l'ombre
+//     const feMerge = filter.append("feMerge");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "offsetBlur");
+//     feMerge.append("feMergeNode")
+//         .attr("in", "SourceGraphic");
+    
+//     // Ajouter les rectangles avec effet d'ombre
+//     nodeGroups.append("rect")
+//         .attr("class", d => {
+//             if (!d.data) return "person-box";
+//             const classes = ["person-box"];
+//             if (d.data.isSpouse) classes.push("spouse");
+//             else if (d.data.isSibling) classes.push("sibling");
+//             else if (d.data.duplicate) classes.push("duplicate");
+//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//             else classes.push("normal");
+//             return classes.join(" ");
+//         })
+//         .attr("x", -state.boxWidth/2)
+//         .attr("y", -state.boxHeight/2)
+//         .attr("width", state.boxWidth)
+//         .attr("height", state.boxHeight)
+//         .attr("rx", 3) // Coins arrondis
+//         .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
+//         // Ne pas définir stroke et stroke-width ici pour préserver les styles CSS des classes
+// }
+
+/**
+ * Version modifiée de drawNodeBoxes - ÉTAPE 1 : Blasons seulement
+ */
+export function drawNodeBoxes(nodeGroups) {
+    // Votre code d'ombre existant (gardez-le tel quel)
+    const defs = d3.select("svg").append("defs");
+    
+    const filter = defs.append("filter")
+        .attr("id", "drop-shadow")
+        .attr("height", "125%");
+    
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha")
+        .attr("stdDeviation", 2)
+        .attr("result", "blur");
+        
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", 2)
+        .attr("dy", 2)
+        .attr("result", "offsetBlur");
+        
+    filter.append("feComponentTransfer")
+        .append("feFuncA")
+        .attr("type", "linear")
+        .attr("slope", "0.5");
+        
+    const feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode").attr("in", "offsetBlur");
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+    // NOUVELLE PARTIE : Choisir le style
+    if (state.nodeStyle === 'diamond') {
+        drawDiamond(nodeGroups);
+    } else if (state.nodeStyle === 'galaxy') {
+        drawGalaxy(nodeGroups);
+    } else if (state.nodeStyle === 'bubble') {
+        drawBubble(nodeGroups);
+    } else if (state.nodeStyle === 'hextech') {
+        drawHextech(nodeGroups);
+    } else if (state.nodeStyle === 'organic') {
+        drawOrganic(nodeGroups);
+    } else if (state.nodeStyle === 'heraldic') {
+        drawHeraldic(nodeGroups);
+    } else {
+        // Votre code rectangles existant (inchangé)
+        drawClassic(nodeGroups);
+    }
+}
+
+// /**
+//  * Votre style rectangles existant (inchangé)
+//  */
+// function drawClassic(nodeGroups) {
+//     nodeGroups.append("rect")
+//         .attr("class", d => {
+//             if (!d.data) return "person-box";
+//             const classes = ["person-box"];
+//             if (d.data.isSpouse) classes.push("spouse");
+//             else if (d.data.isSibling) classes.push("sibling");
+//             else if (d.data.duplicate) classes.push("duplicate");
+//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//             else classes.push("normal");
+//             return classes.join(" ");
+//         })
+//         .attr("x", -state.boxWidth/2)
+//         .attr("y", -state.boxHeight/2)
+//         .attr("width", state.boxWidth)
+//         .attr("height", state.boxHeight)
+//         .attr("rx", 3)
+//         .style("filter", "url(#drop-shadow)");
+// }
+
+
+
+/**
+ * Votre style rectangles avec couleurs pastels
+ */
+function drawClassic(nodeGroups) {
+    nodeGroups.append("rect")
+        .attr("class", d => {
+            if (!d.data) return "person-box";
+            const classes = ["person-box"];
+            if (d.data.isSpouse) classes.push("spouse");
+            else if (d.data.isSibling) classes.push("sibling");
+            else if (d.data.duplicate) classes.push("duplicate");
+            else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+            else classes.push("normal");
+            return classes.join(" ");
+        })
+        .attr("x", -state.boxWidth/2)
+        .attr("y", -state.boxHeight/2)
+        .attr("width", state.boxWidth)
+        .attr("height", state.boxHeight)
+        .attr("rx", 3)
+        .style("fill", d => {
+            // Couleurs pastels selon le type et le sexe
+            if (d.data.isSibling) {
+                return "#E8F5E8"; // Vert pastel pour siblings
+            } else if (d.data.sex === 'F') {
+                return "#FFE4E6"; // Rose pastel pour femmes
+            } else if (d.data.sex === 'M') {
+                return "#E3F2FD"; // Bleu pastel pour hommes
+            } else {
+                return "#F5F5F5"; // Gris clair pour non défini
+            }
+        })
+        .style("stroke", d => {
+            // Bordures légèrement plus foncées
+            if (d.data.isSibling) return "#81C784";
+            else if (d.data.sex === 'F') return "#F8BBD9";
+            else if (d.data.sex === 'M') return "#90CAF9";
+            else return "#E0E0E0";
+        })
+        .style("stroke-width", 1)
+        .style("filter", "url(#drop-shadow)");
+}
+
+
+
+// /**
+//  * NOUVEAU : Style blasons
+//  */
+// function drawHeraldic(nodeGroups) {
+//     // Créer les dégradés pour les blasons
+//     createHeraldcGradients();
+    
+//     nodeGroups.append("path")
+//         .attr("class", d => {
+//             if (!d.data) return "person-box heraldic";
+//             const classes = ["person-box", "heraldic"];
+//             if (d.data.isSpouse) classes.push("spouse");
+//             else if (d.data.isSibling) classes.push("sibling");
+//             else if (d.data.duplicate) classes.push("duplicate");
+//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+//             else classes.push("normal");
+//             return classes.join(" ");
+//         })
+//         .attr("d", () => {
+//             // Forme de blason améliorée
+//             const w = state.boxWidth;
+//             const h = state.boxHeight;
+//             const halfW = w / 2;
+//             const halfH = h / 2;
+            
+//             return `M ${-halfW} ${-halfH}
+//                     L ${halfW} ${-halfH}
+//                     L ${halfW} ${halfH * 0.2}
+//                     L ${halfW * 0.8} ${halfH * 0.6}
+//                     Q ${halfW * 0.5} ${halfH * 0.9} 0 ${halfH}
+//                     Q ${-halfW * 0.5} ${halfH * 0.9} ${-halfW * 0.8} ${halfH * 0.6}
+//                     L ${-halfW} ${halfH * 0.2}
+//                     Z`;
+//         })
+//         .style("fill", d => {
+//             // DEBUG : afficher les données disponibles
+//             console.log("Données personne:", d, d.data, d.data.name, "Gender:", d.data.gender, "Sex:", d.data.sex, "Sexe:", d.data.sexe);
+            
+//             // Couleurs selon le genre
+//             if (d.data.gender === 'F' || d.data.sex === 'F' || d.data.sexe === 'F') return "url(#heraldic-female)";
+//             if (d.data.gender === 'M' || d.data.sex === 'M' || d.data.sexe === 'M') return "url(#heraldic-male)";
+//             return "url(#heraldic-neutral)";
+//         })
+//         .style("stroke", "#B8860B") // Or terne au lieu d'or vif
+//         .style("stroke-width", 1.5) // Bordure plus fine
+//         .style("filter", "url(#drop-shadow)");
+// }
+
+
+// /**
+//  * Crée les dégradés pour les blasons
+//  */
+// function createHeraldcGradients() {
+//     // Éviter de recréer s'ils existent déjà
+//     if (d3.select("#heraldic-male").node()) return;
+    
+//     const defs = d3.select("svg defs").empty() ? 
+//         d3.select("svg").append("defs") : 
+//         d3.select("svg defs");
+    
+//     // Dégradé masculin (bleu clair vers or clair)
+//     const maleGrad = defs.append("linearGradient")
+//         .attr("id", "heraldic-male")
+//         .attr("x1", "0%").attr("y1", "0%")
+//         .attr("x2", "0%").attr("y2", "100%");
+//     maleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#87CEEB"); // Bleu ciel
+//     maleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F0E68C"); // Kaki clair
+    
+//     // Dégradé féminin (rose clair vers blanc rosé)
+//     const femaleGrad = defs.append("linearGradient")
+//         .attr("id", "heraldic-female")
+//         .attr("x1", "0%").attr("y1", "0%")
+//         .attr("x2", "0%").attr("y2", "100%");
+//     femaleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#FFB6C1"); // Rose clair
+//     femaleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#FFF0F5"); // Blanc lavande
+    
+//     // Dégradé neutre (gris très clair)
+//     const neutralGrad = defs.append("linearGradient")
+//         .attr("id", "heraldic-neutral")
+//         .attr("x1", "0%").attr("y1", "0%")
+//         .attr("x2", "0%").attr("y2", "100%");
+//     neutralGrad.append("stop").attr("offset", "0%").attr("stop-color", "#E6E6FA"); // Lavande
+//     neutralGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F5F5DC"); // Beige
+// }
+
+
+// /**
+//  * NOUVEAU : Style blasons
+//  */
+function drawHeraldic(nodeGroups) {
+    // Créer des dégradés plus subtils
+    createImprovedHeraldcGradients();
+    
+    nodeGroups.append("path")
+        .attr("class", d => {
+            if (!d.data) return "person-box heraldic";
+            const classes = ["person-box", "heraldic"];
+            if (d.data.isSpouse) classes.push("spouse");
+            else if (d.data.isSibling) classes.push("sibling");
+            else if (d.data.duplicate) classes.push("duplicate");
+            else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
+            else classes.push("normal");
+            return classes.join(" ");
+        })
+        .attr("d", () => {
+            // Forme de blason plus élégante
+            const w = state.boxWidth;
+            const h = state.boxHeight;
+            const halfW = w / 2;
+            const halfH = h / 2;
+            
+            return `M ${-halfW} ${-halfH}
+                    L ${halfW} ${-halfH}
+                    L ${halfW} ${halfH * 0.1}
+                    L ${halfW * 0.85} ${halfH * 0.5}
+                    Q ${halfW * 0.6} ${halfH * 0.85} 0 ${halfH}
+                    Q ${-halfW * 0.6} ${halfH * 0.85} ${-halfW * 0.85} ${halfH * 0.5}
+                    L ${-halfW} ${halfH * 0.1}
+                    Z`;
+        })
+        .style("fill", d => {
+            // if (d.data.sex === 'F') return "url(#heraldic-female-subtle)";
+            // if (d.data.sex === 'M') return "url(#heraldic-male-subtle)";
+            // return "url(#heraldic-neutral-subtle)";
+            // Couleur spéciale pour les siblings (vert)
+            if (d.data.isSibling) return "url(#heraldic-sibling-green)";
+            
+            // Couleurs normales selon le sexe
+            if (d.data.sex === 'F') return "url(#heraldic-female-subtle)";
+            if (d.data.sex === 'M') return "url(#heraldic-male-subtle)";
+            return "url(#heraldic-neutral-subtle)";
+        })
+        .style("stroke", "#8B7355") // Brun doré discret
+        .style("stroke-width", 1.5)
+        .style("filter", "url(#drop-shadow)");
+}
+
+// Nouvelle fonction pour des couleurs subtiles
+function createImprovedHeraldcGradients() {
+    const defs = d3.select("svg defs");
+    
+    // Supprimer les anciens
+    defs.selectAll("#heraldic-male-subtle, #heraldic-female-subtle, #heraldic-neutral-subtle").remove();
+    
+    // Masculin : bleu pâle vers beige très clair
+    const maleGrad = defs.append("linearGradient")
+        .attr("id", "heraldic-male-subtle")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+    // maleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#E6F3FF"); // Bleu très pâle
+    // maleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F5F5DC"); // Beige clair
+    
+    // Féminin : rose très pâle vers blanc cassé
+    const femaleGrad = defs.append("linearGradient")
+        .attr("id", "heraldic-female-subtle")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+    // femaleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#FFF0F5"); // Rose très pâle
+    // femaleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#FAFAFA"); // Blanc cassé
+    
+    // Neutre : gris perle
+    const neutralGrad = defs.append("linearGradient")
+        .attr("id", "heraldic-neutral-subtle")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+    // neutralGrad.append("stop").attr("offset", "0%").attr("stop-color", "#F8F8FF"); // Blanc fantôme
+    // neutralGrad.append("stop").attr("offset", "100%").attr("stop-color", "#E6E6FA"); // Lavande pâle
+
+    // Siblings : vert professionnel
+    const siblingGrad = defs.append("linearGradient")
+        .attr("id", "heraldic-sibling-green")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+    siblingGrad.append("stop").attr("offset", "0%").attr("stop-color", "#E8F5E8"); // Vert très pâle
+    siblingGrad.append("stop").attr("offset", "100%").attr("stop-color", "#D4EDDA"); // Vert menthe
+
+
+    // Masculin : bleu plus visible
+    maleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#D6E8FF"); // Au lieu de #E6F3FF
+    maleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F0E68C"); // Au lieu de #F5F5DC
+
+    // Féminin : rose plus visible  
+    femaleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#FFE4E6"); // Au lieu de #FFF0F5
+    femaleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F0F0F0"); // Au lieu de #FAFAFA
+
+    // Neutre : gris plus visible
+    neutralGrad.append("stop").attr("offset", "0%").attr("stop-color", "#F0F0FF"); // Au lieu de #F8F8FF
+    neutralGrad.append("stop").attr("offset", "100%").attr("stop-color", "#E0E0F0"); // Au lieu de #E6E6FA
+}
+
+
+
+
+
+
+/**
+ * Style Diamants cristallins - BLUFFANT !
+ */
+function drawDiamond(nodeGroups) {
+    createDiamondGradients();
+    
+    nodeGroups.append("path")
+        .attr("class", "person-box diamond")
+        .attr("d", () => {
+            const w = state.boxWidth * 0.8;
+            const h = state.boxHeight * 0.8;
+            return `M 0 ${-h/2}
+                    L ${w/3} ${-h/4}
+                    L ${w/2} 0
+                    L ${w/3} ${h/4}
+                    L 0 ${h/2}
+                    L ${-w/3} ${h/4}
+                    L ${-w/2} 0
+                    L ${-w/3} ${-h/4}
+                    Z`;
+        })
+        .style("fill", d => {
+            const hue = (d.depth * 60) % 360;
+            return `url(#diamond-gradient-${Math.floor(hue/60)})`;
+        })
+        .style("stroke", "#fff")
+        .style("stroke-width", 2)
+        .style("filter", "url(#diamond-glow)");
+        
+    // Reflets cristallins
+    nodeGroups.append("path")
+        .attr("d", () => {
+            const w = state.boxWidth * 0.6;
+            const h = state.boxHeight * 0.6;
+            return `M ${-w/4} ${-h/3} L ${w/6} ${-h/4} L ${w/4} ${h/6} L ${-w/6} ${h/4} Z`;
+        })
+        .style("fill", "rgba(255,255,255,0.4)")
+        .style("pointer-events", "none");
+}
+
+/**
+ * Style Galaxie
+ */
+function drawGalaxy(nodeGroups) {
+    createGalaxyGradients();
+    
+    nodeGroups.append("circle")
+        .attr("class", "person-box galaxy")
+        .attr("r", Math.min(state.boxWidth, state.boxHeight) / 2.5)
+        .style("fill", d => `url(#galaxy-${d.data.sex === 'F' ? 'pink' : d.data.sex === 'M' ? 'blue' : 'purple'})`)
+        .style("filter", "url(#galaxy-glow)");
+        
+    // Particules scintillantes
+    for(let i = 0; i < 8; i++) {
+        const angle = (i * 45) * Math.PI / 180;
+        const distance = state.boxWidth * 0.4;
+        nodeGroups.append("circle")
+            .attr("cx", Math.cos(angle) * distance)
+            .attr("cy", Math.sin(angle) * distance)
+            .attr("r", 2)
+            .style("fill", "#fff")
+            .style("opacity", Math.random() * 0.8 + 0.2)
+            .style("pointer-events", "none");
+    }
+}
+
+/**
+ * Style Bulles aquatiques
+ */
+function drawBubble(nodeGroups) {
+    createBubbleGradients();
+    
+    const bubbleSize = Math.min(state.boxWidth, state.boxHeight) / 2.2;
+    
+    nodeGroups.append("circle")
+        .attr("class", "person-box bubble")
+        .attr("r", bubbleSize)
+        .style("fill", d => `url(#bubble-${d.data.sex === 'F' ? 'pink' : d.data.sex === 'M' ? 'blue' : 'green'})`)
+        .style("stroke", "rgba(255,255,255,0.3)")
+        .style("stroke-width", 1)
+        .style("filter", "url(#bubble-glow)");
+        
+    // Reflet de bulle
+    nodeGroups.append("ellipse")
+        .attr("cx", -bubbleSize * 0.3)
+        .attr("cy", -bubbleSize * 0.3)
+        .attr("rx", bubbleSize * 0.2)
+        .attr("ry", bubbleSize * 0.4)
+        .style("fill", "rgba(255,255,255,0.6)")
+        .style("pointer-events", "none");
+}
+
+/**
+ * Style Hexagones technologiques
+ */
+function drawHextech(nodeGroups) {
+    createHextechGradients();
+    
+    const size = Math.min(state.boxWidth, state.boxHeight) / 2.5;
+    const hexPath = `M ${size} 0 
+                     L ${size/2} ${size * 0.866} 
+                     L ${-size/2} ${size * 0.866} 
+                     L ${-size} 0 
+                     L ${-size/2} ${-size * 0.866} 
+                     L ${size/2} ${-size * 0.866} 
+                     Z`;
+    
+    nodeGroups.append("path")
+        .attr("class", "person-box hextech")
+        .attr("d", hexPath)
+        .style("fill", d => `url(#hextech-${d.data.sex === 'F' ? 'magenta' : d.data.sex === 'M' ? 'cyan' : 'yellow'})`)
+        .style("stroke", "#00ffff")
+        .style("stroke-width", 2)
+        .style("filter", "url(#hextech-glow)");
+        
+    // Circuits internes
+    nodeGroups.append("path")
+        .attr("d", `M 0 ${-size*0.6} L 0 ${size*0.6} M ${-size*0.5} 0 L ${size*0.5} 0`)
+        .style("stroke", "rgba(0,255,255,0.6)")
+        .style("stroke-width", 1)
+        .style("fill", "none")
+        .style("pointer-events", "none");
+}
+
+// Fonctions pour créer les dégradés et effets
+function createDiamondGradients() {
+    const defs = d3.select("svg defs");
+    if (defs.select("#diamond-gradient-0").node()) return;
+    
+    for(let i = 0; i < 6; i++) {
+        const grad = defs.append("radialGradient").attr("id", `diamond-gradient-${i}`);
+        const hue = i * 60;
+        grad.append("stop").attr("offset", "0%").attr("stop-color", `hsl(${hue}, 80%, 90%)`);
+        grad.append("stop").attr("offset", "50%").attr("stop-color", `hsl(${hue}, 60%, 70%)`);
+        grad.append("stop").attr("offset", "100%").attr("stop-color", `hsl(${hue}, 40%, 50%)`);
+    }
+    
+    const filter = defs.append("filter").attr("id", "diamond-glow");
+    filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
+    const merge = filter.append("feMerge");
+    merge.append("feMergeNode").attr("in", "coloredBlur");
+    merge.append("feMergeNode").attr("in", "SourceGraphic");
+}
+
+function createGalaxyGradients() {
+    const defs = d3.select("svg defs");
+    if (defs.select("#galaxy-pink").node()) return;
+    
+    const colors = {pink: "#ff1493", blue: "#4169e1", purple: "#8a2be2"};
+    Object.entries(colors).forEach(([name, color]) => {
+        const grad = defs.append("radialGradient").attr("id", `galaxy-${name}`);
+        grad.append("stop").attr("offset", "0%").attr("stop-color", "#000");
+        grad.append("stop").attr("offset", "70%").attr("stop-color", color);
+        grad.append("stop").attr("offset", "100%").attr("stop-color", "#000");
+    });
+    
+    const filter = defs.append("filter").attr("id", "galaxy-glow");
+    filter.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "glow");
+    const merge = filter.append("feMerge");
+    merge.append("feMergeNode").attr("in", "glow");
+    merge.append("feMergeNode").attr("in", "SourceGraphic");
+}
+
+function createBubbleGradients() {
+    const defs = d3.select("svg defs");
+    if (defs.select("#bubble-pink").node()) return;
+    
+    const colors = {pink: "#ffb6c1", blue: "#87ceeb", green: "#98fb98"};
+    Object.entries(colors).forEach(([name, color]) => {
+        const grad = defs.append("radialGradient").attr("id", `bubble-${name}`);
+        grad.append("stop").attr("offset", "0%").attr("stop-color", color).attr("stop-opacity", "0.3");
+        grad.append("stop").attr("offset", "70%").attr("stop-color", color).attr("stop-opacity", "0.7");
+        grad.append("stop").attr("offset", "100%").attr("stop-color", color).attr("stop-opacity", "0.9");
+    });
+    
+    const filter = defs.append("filter").attr("id", "bubble-glow");
+    filter.append("feGaussianBlur").attr("stdDeviation", "2").attr("result", "glow");
+}
+
+function createHextechGradients() {
+    const defs = d3.select("svg defs");
+    if (defs.select("#hextech-cyan").node()) return;
+    
+    const colors = {magenta: "#ff00ff", cyan: "#00ffff", yellow: "#ffff00"};
+    Object.entries(colors).forEach(([name, color]) => {
+        const grad = defs.append("linearGradient").attr("id", `hextech-${name}`);
+        grad.append("stop").attr("offset", "0%").attr("stop-color", "#000");
+        grad.append("stop").attr("offset", "50%").attr("stop-color", color).attr("stop-opacity", "0.8");
+        grad.append("stop").attr("offset", "100%").attr("stop-color", "#000");
+    });
+    
+    const filter = defs.append("filter").attr("id", "hextech-glow");
+    filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "glow");
+    const merge = filter.append("feMerge");
+    merge.append("feMergeNode").attr("in", "glow");
+    merge.append("feMergeNode").attr("in", "SourceGraphic");
+}

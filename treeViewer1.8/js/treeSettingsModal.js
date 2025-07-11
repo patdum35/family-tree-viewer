@@ -987,8 +987,6 @@ function createRadarStyleSelect(config) {
             // Sauvegarder dans localStorage
             localStorage.setItem('radarStyle', value);
 
-            console.log('\n\n  DEBUG radarStyle in createRadarStyleSelect = ', state.radarStyle, value);
-            
             // Lancer l'action
             state.isRadarEnabled = false;
             toggleTreeRadar();

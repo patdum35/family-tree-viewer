@@ -152,7 +152,8 @@ export const state = {
     currentScale: 1.0,
     currentX: 0,
     currentY: 0,
-
+    nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
 
 };
 
@@ -185,7 +186,6 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
         });k
     });
 }
-
 
 export function updateRadarButtonText() {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
