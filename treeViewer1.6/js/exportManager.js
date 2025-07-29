@@ -2575,6 +2575,8 @@ export async function exportWithPagePrintingParams(pageSize, pageLayout, dpi, fo
         flipV = false;
         await exportSinglePage(params, format, filename, quality, pageSize, pageLayout);
     }
+
+    exportProgress.hide();
 }
 
 /**

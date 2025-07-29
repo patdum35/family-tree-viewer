@@ -2071,6 +2071,10 @@
     "lat": 48.560822,
     "lon": -2.376924
   },
+  "Ruca , Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5667727,
+    "lon": -2.338703
+  },
   "Ruca, 22268, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5667727,
     "lon": -2.338703
@@ -2363,6 +2367,14 @@
     "lat": 50.6402809,
     "lon": 4.6667145
   },
+  "Marsico, Italie": {
+    "lat": 40.423012,
+    "lon": 15.734868
+  },
+  "Barletta, Italie": {
+    "lat": 41.3214976,
+    "lon": 16.2868696
+  },
   "Saint-Eustache-la-Forêt, 76210, Seine-Maritime, Normandie, France": {
     "lat": 49.5524805,
     "lon": 0.4512736
@@ -2626,6 +2638,10 @@
   "Carnac, 56340, Morbihan, Bretagne, France": {
     "lat": 47.5836629,
     "lon": -3.0794428
+  },
+  "Martigné-Ferchaud, Ille-et-Vilaine, France": {
+    "lat": 47.8313035,
+    "lon": -1.317543
   },
   "Plouasne, 22208, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.3001245,
@@ -3583,6 +3599,10 @@
     "lat": 48.062281,
     "lon": -1.8694148
   },
+  "Bréal-sous-Montfort, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0513567,
+    "lon": -1.867686
+  },
   "la Nouaye (35)": {
     "lat": 48.1625529,
     "lon": -1.9795561
@@ -3623,9 +3643,13 @@
     "lat": 45.4641943,
     "lon": 9.1896346
   },
-  "Martigné-Ferchaud, Ille-et-Vilaine, France": {
-    "lat": 47.8313035,
-    "lon": -1.317543
+  "Gévezé 35": {
+    "lat": 48.2204891,
+    "lon": -1.7896366
+  },
+  "Langan \" les Ruisseaux \" (35)": {
+    "lat": 48.2567316,
+    "lon": -1.8729798
   },
   "Dinan, 22050, Côtes d'Armor, Bretagne": {
     "lat": 48.4539775,
@@ -3834,10 +3858,6 @@
   "La Mézière, 35177, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.2193772,
     "lon": -1.7557922
-  },
-  "Gévezé 35": {
-    "lat": 48.2204891,
-    "lon": -1.7896366
   },
   "LA MÉZIÈRE, 35177, ILLE-ET-VILAINE, BRETAGNE, France": {
     "lat": 48.2193772,
@@ -4338,5 +4358,165 @@
   "Marke, 8510,  BELGIQUE": {
     "lat": 50.8070452,
     "lon": 3.2336226
+  },
+  "Saint-Pôtan, 22 Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Hénanbihen, 22 Côtes d'Armor, Bretagne, France": {
+    "lat": 48.560822,
+    "lon": -2.376924
+  },
+  "Plévenon, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.6548909,
+    "lon": -2.3315588
+  },
+  "Saint- Pôtan ,  Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Pôtan, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint Pôtan, Côtes d'Armor,Bretagne,France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Ruca,  Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5667727,
+    "lon": -2.338703
+  },
+  "Vignoc, 35": {
+    "lat": 48.248742,
+    "lon": -1.7840405
+  },
+  "Hauteville-la-Guichard, Manche, France": {
+    "lat": 49.1261106,
+    "lon": -1.3026354
+  },
+  "Mileto, Italie": {
+    "lat": 38.6092238,
+    "lon": 16.0686322
+  },
+  "Patti, Italie": {
+    "lat": 38.1389007,
+    "lon": 14.9648163
+  },
+  "Sezzadio, Italie": {
+    "lat": 44.784849,
+    "lon": 8.572546
+  },
+  "Grazzano Badoglio, Italie": {
+    "lat": 45.0395818,
+    "lon": 8.3135527
+  },
+  "Palermo, Italie": {
+    "lat": 38.1112268,
+    "lon": 13.3524434
+  },
+  "la Cerlangue, 76169, Seine Maritime, Normandie, France, Saint-Jean-d'Abbetot": {
+    "lat": 49.4997231,
+    "lon": 0.3857928
+  },
+  "la Cerlangue, 76169, Seine Maritime, Normandie, France": {
+    "lat": 49.5071407,
+    "lon": 0.4148421
+  },
+  "L'Heure, 76, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.4947441,
+    "lon": 0.1059614
+  },
+  "Saint-Cyr-en-Pail, 53140, Mayenne, Pays de la Loire, FRANCE": {
+    "lat": 48.4414002,
+    "lon": -0.2429511
+  },
+  "La Cerlangue, 76430, Seine-Maritime, Normandie, France, saint-jean-d'abbetot": {
+    "lat": 49.4997231,
+    "lon": 0.3857928
+  },
+  "Saint-Vigor-d'Ymonville, 76430, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.49563,
+    "lon": 0.3599616
+  },
+  "Saint-Cyr-en-Pail, 53208, Mayenne, Pays de la Loire, France": {
+    "lat": 48.4414002,
+    "lon": -0.2429511
+  },
+  "Pré-en-Pail, 53140, Mayenne, Pays de la Loire, FRANCE": {
+    "lat": 48.4412753,
+    "lon": -0.178684
+  },
+  "La Remuée, 76430, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5262384,
+    "lon": 0.3992811
+  },
+  "La Cerlangue, 76430, Seine-Maritime, Normandie, France, Saint Jean d'Abbetot": {
+    "lat": 49.4997231,
+    "lon": 0.3857928
+  },
+  "La Remuée, 76522, Seine Maritime, Normandie, France": {
+    "lat": 49.5262384,
+    "lon": 0.3992811
+  },
+  "La Remuée (Seine Maritime)": {
+    "lat": 49.5262384,
+    "lon": 0.3992811
+  },
+  "Gommerville (Seine Maritime)": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "ANGERVILLE L ORCHER, SEINE MARITIME, FRANCE": {
+    "lat": 49.5881645,
+    "lon": 0.281906
+  },
+  "Gommerville, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Montivilliers, 76290, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5456435,
+    "lon": 0.192418
+  },
+  "Tennemare, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6245349,
+    "lon": 0.3117062
+  },
+  "Gommerville, Seine-Maritime, Normandie, France": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Écrainville, 76110, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6503748,
+    "lon": 0.3252411
+  },
+  "Saint Romain de Colbosc (76)": {
+    "lat": 49.5313601,
+    "lon": 0.3579164
+  },
+  "Manéglise, 76404, Seine Maritime, Normandie, France": {
+    "lat": 49.5658677,
+    "lon": 0.255913
+  },
+  "Saint-Romain-de-Colbosc, 76430, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5313601,
+    "lon": 0.3579164
+  },
+  "Sanvic - Le Havre, 76600, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5057242,
+    "lon": 0.1063322
+  },
+  "Pré-en-Pail, 53185, Mayenne, Pays de la Loire, France": {
+    "lat": 48.4412753,
+    "lon": -0.178684
+  },
+  "Pré-en-Pail, 53140, Mayenne, Pays de la Loire, France": {
+    "lat": 48.4412753,
+    "lon": -0.178684
+  },
+  "Saint-Vigor-d'Ymonville, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.49563,
+    "lon": 0.3599616
   }
 }

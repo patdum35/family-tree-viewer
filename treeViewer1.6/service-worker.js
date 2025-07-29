@@ -108,7 +108,7 @@ self.addEventListener('install', (event) => {
       swConsole.log(`📊 Bilan de mise en cache: ${successCount} ajoutés, ${existingCount} existants, ${failedCount} échecs`);
       
       // Vérification spécifique pour arbre.enc et arbreX.enc
-      const verifyFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc'];
+      const verifyFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc', 'arbreC.enc'];
       for (const file of verifyFiles) {
         const response = await cache.match(file);
         if (response) {

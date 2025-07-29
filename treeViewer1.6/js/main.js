@@ -503,12 +503,17 @@ export async function loadData() {
 
         let ancestor = null;
         let cousin = null;
-        if (state.treeOwner === 3 ) {
+       if (state.treeOwner === 4 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('guillaume sez');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 3 ) {
             // state.targetAncestorId = "@I1152@";
             ancestor = searchRootPersonId('hugues cap');
             cousin = null; 
             state.targetAncestorId = ancestor.id;
-        } if (state.treeOwner === 2 ) {
+        } else if (state.treeOwner === 2 ) {
             // state.targetAncestorId = "@I1152@";
             ancestor = searchRootPersonId('guillaume ducl');
             cousin = null; 
@@ -638,16 +643,29 @@ async function loadGedcomContent(fileInput, passwordInput) {
                             state.treeOwner = 3;
                             console.log("Fichier arbreB.enc ouvert avec succès. Owner: 3");
                             return content;
-                        } catch (secondError) {
-                            // Si le mot de passe est également incorrect pour arbreX.enc
-                            if (window.CURRENT_LANGUAGE === 'fr') {
-                                throw new Error('Mot de passe incorrect pour les deux fichiers');
-                            } else if (window.CURRENT_LANGUAGE === 'en') {
-                                throw new Error('Incorrect password for both files');
-                            } else if (window.CURRENT_LANGUAGE === 'es') {
-                                throw new Error('Contraseña incorrecta para ambos archivos');
-                            } else if (window.CURRENT_LANGUAGE === 'hu') {
-                                throw new Error('Helytelen jelszó mindkét fájlhoz');
+                        } catch (thirdError) {
+
+                            if (thirdError.message === 'Mot de passe incorrect') {
+                                console.log("Tentative d'ouverture du fichier arbreC.enc...");
+                                try {
+                                    const content = await loadEncryptedContent(passwordInput.value, 'arbreC.enc');
+                                    // Si succès avec arbreC.enc, définir treeOwner = 4
+                                    state.treeOwner = 4;
+                                    console.log("Fichier arbreC.enc ouvert avec succès. Owner: 4");
+                                    return content;
+                                } catch (fourthError) {
+
+                                    // Si le mot de passe est également incorrect pour arbreX.enc
+                                    if (window.CURRENT_LANGUAGE === 'fr') {
+                                        throw new Error('Mot de passe incorrect pour les deux fichiers');
+                                    } else if (window.CURRENT_LANGUAGE === 'en') {
+                                        throw new Error('Incorrect password for both files');
+                                    } else if (window.CURRENT_LANGUAGE === 'es') {
+                                        throw new Error('Contraseña incorrecta para ambos archivos');
+                                    } else if (window.CURRENT_LANGUAGE === 'hu') {
+                                        throw new Error('Helytelen jelszó mindkét fájlhoz');
+                                    }
+                                }
                             }
                         }
                     }
@@ -921,6 +939,24 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('hugues c ');
             }
             state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner ===4 ) {
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('guillaume sez');
+                cousin = null;
+            } else if (selectedValue === 'demo2'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('richard por');
+                cousin = null; 
+            } else if (selectedValue === 'demo3'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('catherine tymen (le)');
+                cousin = null; 
+            } else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('hugues c ');
+            }
+            state.targetAncestorId = ancestor.id;
         } else {
             if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
                 // state.targetAncestorId = "@I739@" 
@@ -1067,7 +1103,9 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
 
     let person; 
-    if (state.treeOwner === 3) {
+    if (state.treeOwner === 4) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 3) {
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
     } else {
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
