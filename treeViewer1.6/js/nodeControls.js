@@ -934,13 +934,16 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
             });
 
             const genealogicalParents  = findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
+            
+            
             const descendantNode = {
                 id: descendantData_all[i].id,
                 name: descendantData_all[i].name,
                 generation: 0, // Même niveau que l'ancienne racine
                 birthDate: descendantData_all[i].birthDate || "",
                 deathDate: descendantData_all[i].deathDate || "",
-                sex: descendantData_all[i].sex,
+                // sex: descendantData_all[i].sex,
+                sex: person.sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother,
@@ -952,8 +955,18 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
            
 
             newTree.push(descendantNode);
-            if (childSpouseNodes[i]) { newTree.push(...childSpouseNodes[i]) ; }
-            
+            if (childSpouseNodes[i]) { 
+                // newTree.push(...childSpouseNodes[i]) ; 
+
+                let spouse;
+                let index = 0;
+                childSpouseNodes[i].forEach(spouseFamId => {
+                    spouse = state.gedcomData.individuals[childSpouseNodes[i][index].id];
+                    childSpouseNodes[i][index].sex = spouse.sex; 
+                    index++;   
+                });
+                newTree.push(...childSpouseNodes[i]) ; 
+            }            
         }
 
 
@@ -1053,7 +1066,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 generation: 0, // Les descendants seront à la génération 0
                 birthDate: descendantData.birthDate || "",
                 deathDate: descendantData.deathDate || "",
-                sex:descendantData.sex,
+                // sex:descendantData.sex,
+                sex:person.sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother,
@@ -1266,6 +1280,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
         for (let i = 0; i < descendantData_all.length; i++) {
             // console.log("insertion du  descendant:", descendantData_all[i].id, descendantData_all[i].name, " parent:", parentSiblingId, parentName );
 
+            let spouseForSex;
             const person = state.gedcomData.individuals[descendantData_all[i].id];
             const familiesWithChildren = person.families.filter(famId => {
                 const family = state.gedcomData.families[famId];
@@ -1282,7 +1297,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 generation: descendantGeneration,
                 birthDate: descendantData_all[i].birthDate || "",
                 deathDate: descendantData_all[i].deathDate || "",
-                sex: descendantData_all[i].sex,
+                // sex: descendantData_all[i].sex,
+                sex:person.sex,
                 genealogicalParentId: genealogicalParents.original,
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother, 
@@ -1328,6 +1344,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 if (parentSpousesNodes.length > 0) {
                     parentSpousesNodes.forEach(spouse => {
                         // Vérifier si le spouse existe déjà dans la structure
+                        spouseForSex = state.gedcomData.individuals[spouse.id];
+                        spouse.sex = spouseForSex.sex;
                         spouse.isLeftDescendant = true;   
                         spouse.generation = parentInfo.parentArray[parentInfo.index].generation;   
                         if (parentInfo.parentArray[parentInfo.index].isSibling) { spouse.isSiblingSpouse = true; }
@@ -1395,6 +1413,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     if  (childSpouseNodes[i] )
                     {
                         for (let j = 0; j < childSpouseNodes[i].length; j++) {
+                            spouseForSex = state.gedcomData.individuals[childSpouseNodes[i][j].id];
+                            childSpouseNodes[i][j].sex = spouseForSex.sex;
                             childSpouseNodes[i][j].generation = 1;
                         }
                         originalTree.children[targetBranchIndex].children.splice(insertIndex+1, 0, ...childSpouseNodes[i]);
@@ -1426,6 +1446,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                         if (descendantIndex !== -1) {
                             // Insérer les spouses juste après le descendant
                             for (let j = 0; j < childSpouseNodes[i].length; j++) {
+                                spouseForSex = state.gedcomData.individuals[childSpouseNodes[i][j].id];
+                                childSpouseNodes[i][j].sex = spouseForSex.sex;
                                 childSpouseNodes[i][j].generation = descendantGeneration;
                             }
                             parentAnchorNode.children.splice(descendantIndex + 1, 0, ...childSpouseNodes[i]);
@@ -1802,6 +1824,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
             // Traiter les spouses de ce nœud
             if (node.spouses) {
                 const spouses = Array.isArray(node.spouses) ? node.spouses : [node.spouses];
+
                 spouses.forEach((spouse, spouseIndex) => {
                     // Créer les infos pour le spouse
                     const spouseInfo = {
@@ -3039,7 +3062,6 @@ function addSiblingsToNode(siblings, node, parentId, genealogicalParents) {
 
 
     // console.log("debug addSiblingsToNode for a sibling node =",node.id,node.name, ", genealogicalParentId=", genealogicalParentId, state.gedcomData.individuals[genealogicalParentId],  ", parentId =", parentId, state.gedcomData.individuals[parentId].name);
-
 
     siblings.forEach(siblingId => {
         const sibling = state.gedcomData.individuals[siblingId];
