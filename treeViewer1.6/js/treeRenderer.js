@@ -866,7 +866,8 @@ function processSpouses(root) {
                                 id: spouseId,
                                 name: spouse.name,
                                 birthDate: spouse.birthDate,
-                                deathDate: spouse.deathDate
+                                deathDate: spouse.deathDate,
+                                sex: spouse.sex,
                             });
                         }
                     }
