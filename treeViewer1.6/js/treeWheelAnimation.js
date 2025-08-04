@@ -3473,8 +3473,8 @@ function prepareProgressiveClues(person) {
     }
     
     // 4. Métier
-    if (personData.occupation) {
-        const cleanedProfessions = cleanProfession(personData.occupation);
+    if (personData.occupationFull) {
+        const cleanedProfessions = cleanProfession(personData.occupationFull);
         cleanedProfessions.forEach(prof => {
             if (prof) {
                 const translatedProf = translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr');
@@ -3666,6 +3666,40 @@ function prepareProgressiveClues(person) {
             clues.push(contextClue);
         }
     }
+
+
+    //  13. Notes + givn + surn
+    if (personData.notes && personData.notes.length > 0) {
+        const validNotes = personData.notes
+            .map(noteRef => {
+                const note = state.gedcomData.notes[noteRef];
+                return note && note.text && note.text.trim() !== '' ? note.text.trim() : null;
+            })
+            .filter(note => note !== null);
+
+            let noteTextInit = '';
+            if (person.givn !='') {
+               noteTextInit = personData.givn; 
+            }
+            if (person.surn !='') {
+               noteTextInit = noteTextInit + ' ' + personData.surn ; 
+            }
+            if (personData.givn !='' || personData.surn !='') {
+                noteTextInit = noteTextInit + ', '; 
+            }
+
+            if (validNotes.length > 0) {
+
+                clues.push(
+                    validNotes.map((noteText, idx) => 
+                                    idx === 0 
+                                        ? `${noteTextInit}${noteText}` // Ajoute ton texte à la première note
+                                        : `${noteText}`
+                                ).join('')
+                );
+        }
+    }
+
     
     return clues;
 }
@@ -3714,8 +3748,8 @@ function prepareDetailsForReading(person) {
     }
     
     // 4. Métier
-    if (personData.occupation) {
-        const cleanedProfessions = cleanProfession(personData.occupation);
+    if (personData.occupationFull) {
+        const cleanedProfessions = cleanProfession(personData.occupationFull);
         cleanedProfessions.forEach(prof => {
             if (prof) {
                 const translatedProf = translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr');
@@ -3723,6 +3757,7 @@ function prepareDetailsForReading(person) {
             }
         });
     }
+
     
     // 5. Lieu de résidence
     const residences = [
@@ -3894,6 +3929,44 @@ function prepareDetailsForReading(person) {
             clues.push(contextClue);
         }
     }
+
+
+
+    //  13. Notes + givn + surn
+    if (personData.notes && personData.notes.length > 0) {
+        const validNotes = personData.notes
+            .map(noteRef => {
+                const note = state.gedcomData.notes[noteRef];
+                return note && note.text && note.text.trim() !== '' ? note.text.trim() : null;
+            })
+            .filter(note => note !== null);
+
+            let noteTextInit = '';
+            if (person.givn !='') {
+               noteTextInit = personData.givn; 
+            }
+            if (person.surn !='') {
+               noteTextInit = noteTextInit + ' ' + personData.surn ; 
+            }
+            if (personData.givn !='' || personData.surn !='') {
+                noteTextInit = noteTextInit + ', '; 
+            }
+
+            if (validNotes.length > 0) {
+
+                clues.push(
+                    validNotes.map((noteText, idx) => 
+                                    idx === 0 
+                                        ? `${noteTextInit}${noteText}` // Ajoute ton texte à la première note
+                                        : `${noteText}`
+                                ).join('')
+                );
+        }
+    }
+
+
+
+
     
     return clues;
 }

@@ -18,7 +18,7 @@ let geolocalisationCache = null;
 export async function loadGeolocalisationFile() {
     try {
         // Déterminer le fichier à charger selon le propriétaire de l'arbre
-        const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : state.treeOwner === 3 ? 'geolocalisationB.json' : state.treeOwner === 4 ? 'geolocalisationC.json' : 'geolocalisation.json';
+        const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : state.treeOwner === 3 ? 'geolocalisationB.json' : state.treeOwner === 4 ? 'geolocalisationC.json' :  state.treeOwner === 5 ? 'geolocalisationG.json' : 'geolocalisation.json';
         
         console.log(`Chargement du fichier de géolocalisation: ${geoFileName} pour treeOwner=${state.treeOwner}`);
         debugLog(`🌍 Tentative de chargement: ${geoFileName}`, 'geoLocalisation');
@@ -368,7 +368,7 @@ async function generateGeocodeFileInternal() {
     const geolocalisationData = {};
 
     // Déterminer le nom de fichier à charger/générer
-    const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : state.treeOwner === 3 ? 'geolocalisationB.json' : state.treeOwner === 4 ? 'geolocalisationC.json' : 'geolocalisation.json';
+    const geoFileName = state.treeOwner === 2 ? 'geolocalisationX.json' : state.treeOwner === 3 ? 'geolocalisationB.json' : state.treeOwner === 4 ? 'geolocalisationC.json' : state.treeOwner === 5 ? 'geolocalisationG.json' :'geolocalisation.json';
 
     // Charger les données existantes si disponibles
     try {fapply

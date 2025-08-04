@@ -1349,6 +1349,8 @@ function createDemoSelector() {
         } else if (window.CURRENT_LANGUAGE === 'hu') {
           typeOptionsExpanded = ["az ügy", "a legrégebbi", "a legidősebb"];
         }
+    } else if (state.treeOwner === 5) {
+      typeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
     } else {
         typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
         typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];

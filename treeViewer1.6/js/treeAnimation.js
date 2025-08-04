@@ -969,27 +969,60 @@ function findAncestorPath(startId, targetAncestorId) {
     state.nombre_generation = savedGen;
     
     // Fonction pour trouver un nœud et son chemin dans l'arbre
-    function findNodeAndPath(node, targetId, currentPath = []) {
+    // function findNodeAndPath(node, targetId, currentPath = []) {
         
-        if (node.id === targetId) {
-            const finalPath = [...currentPath, node.id];
-            return finalPath;
+    //     if (node.id === targetId) {
+    //         const finalPath = [...currentPath, node.id];
+    //         return finalPath;
+    //     }
+        
+    //     if (node.children) {
+    //         for (const child of node.children) {
+    //             // Si le noeud est un spouse, on vérifie si on a déjà trouvé un chemin par l'autre branche
+    //             if (child.isSpouse) {
+    //                 continue;
+    //             }
+    //             const path = findNodeAndPath(child, targetId, [...currentPath, node.id]);
+    //             if (path) {
+    //                 return path;
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
+    function findNodeAndPath(node, targetId, currentPath = []) {
+        // Vérification explicite que le nœud existe
+        if (!node) {
+            return null;
         }
         
+        // Si le nœud courant correspond à la cible
+        if (node.id === targetId) {
+            return [...currentPath, node.id];
+        }
+        
+        // Si le nœud a des enfants, les parcourir récursivement
         if (node.children) {
             for (const child of node.children) {
-                // Si le noeud est un spouse, on vérifie si on a déjà trouvé un chemin par l'autre branche
-                if (child.isSpouse) {
-                    continue;
-                }
+                // Ignorer les nœuds "spouse"
+                if (child.isSpouse) continue;
+                
+                // Appel récursif avec mise à jour du chemin
                 const path = findNodeAndPath(child, targetId, [...currentPath, node.id]);
-                if (path) {
-                    return path;
-                }
+                
+                // Si un chemin est trouvé, le retourner
+                if (path) return path;
             }
         }
+        
+        // Aucun chemin trouvé
         return null;
     }
+
+
+
+
     
     // Trouver le chemin depuis l'ancêtre jusqu'à la racine actuelle
     const path = findNodeAndPath(descendantTree, startId);
@@ -1006,6 +1039,175 @@ function findAncestorPath(startId, targetAncestorId) {
         return [ null, null];
     }
 }
+
+
+
+/**
+ * Trouve le chemin entre une personne et son ancêtre, avec les conjoints
+ * @param {string} startId - ID de la personne de départ
+ * @param {string} targetAncestorId - ID de l'ancêtre cible
+ * @returns {Array} [finalPath, descendPath, pathWithSpouses] où pathWithSpouses contient les conjoints
+ */
+function findAncestorPathNew(startId, targetAncestorId) {
+    // Sauvegarder et modifier temporairement nombre_generation
+    const savedGen = state.nombre_generation;
+    // console.log("Nombre generation sauvé:", savedGen);
+    state.nombre_generation = 100; // Valeur temporaire élevée
+
+    // Construire l'arbre des descendants depuis l'ancêtre cible
+    const descendantTree = buildDescendantTree(targetAncestorId);
+    
+    // Restaurer nombre_generation
+    state.nombre_generation = savedGen;
+
+    // Fonction pour trouver un nœud et son chemin dans l'arbre, avec les infos complètes
+    function findNodeAndPath(node, targetId, currentPathIds = [], currentPathNodes = []) {
+        
+        if (node.id === targetId) {
+            const finalPath = [...currentPathIds, node.id];
+            const finalPathWithNodes = [...currentPathNodes, node];
+            return { path: finalPath, nodesPath: finalPathWithNodes };
+        }
+
+        if (node.children) {
+            for (const child of node.children) {
+                // Si le noeud est un spouse, on vérifie si on a déjà trouvé un chemin par l'autre branche
+                if (child.isSpouse) {
+                    continue;
+                }
+                const result = findNodeAndPath(
+                    child, 
+                    targetId, 
+                    [...currentPathIds, node.id],
+                    [...currentPathNodes, node]
+                );
+                if (result) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Trouver le chemin depuis l'ancêtre jusqu'à la racine actuelle
+    const result = findNodeAndPath(descendantTree, startId, [], []);
+    
+    if (result) {
+        const { path, nodesPath } = result;
+        const descendPath = [...path]; // Crée une copie du tableau
+
+        // Inverser le chemin pour aller de la racine vers l'ancêtre
+        const finalPath = path ? path.reverse() : [];
+        const finalNodesPath = [...nodesPath].reverse();
+        
+
+        // Construire le chemin avec les conjoints
+        const pathWithSpouses = buildPathWithSpouses(finalNodesPath, finalPath);
+
+        return [finalPath, descendPath, pathWithSpouses];
+    } else {
+        return [null, null, null];
+    }
+}
+
+/**
+ * Construit le chemin avec les informations des conjoints
+ * @param {Array} nodesPath - Chemin avec les nœuds complets de l'arbre
+ * @param {Array} idsPath - Chemin avec seulement les IDs
+ * @returns {Array} Tableau d'objets avec personne et conjoint
+ */
+function buildPathWithSpouses(nodesPath, idsPath) {
+    const pathWithSpouses = [];
+
+    for (let i = 0; i < idsPath.length; i++) {
+        const personId = idsPath[i];
+        const person = state.gedcomData.individuals[personId];
+        
+        if (!person) {
+            pathWithSpouses.push({
+                person: { id: personId, name: "Personne inconnue" },
+                spouse: null
+            });
+            continue;
+        }
+
+        let spouseInfo = null;
+
+        // Pour le premier nœud (l'ancêtre racine), vérifier s'il a des spouses dans le nœud
+        if (i === 0 && nodesPath[0] && nodesPath[0].spouses && nodesPath[0].spouses.length > 0) {
+            const firstSpouse = nodesPath[0].spouses[0];
+            spouseInfo = {
+                id: firstSpouse.id,
+                name: firstSpouse.name,
+                birthDate: firstSpouse.birthDate,
+                deathDate: firstSpouse.deathDate,
+                sex: firstSpouse.sex
+            };
+        } 
+        // Pour les autres nœuds, chercher le conjoint de cette personne
+        else if (i < idsPath.length - 1) {
+            // Trouver le conjoint de la personne actuelle en cherchant dans ses familles
+            if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+                const firstSpouseFamily = state.gedcomData.families[person.spouseFamilies[0]];
+                if (firstSpouseFamily) {
+                    const spouseId = firstSpouseFamily.husband === personId 
+                        ? firstSpouseFamily.wife 
+                        : firstSpouseFamily.husband;
+                    
+                    if (spouseId) {
+                        const spouse = state.gedcomData.individuals[spouseId];
+                        if (spouse) {
+                            spouseInfo = {
+                                id: spouseId,
+                                name: spouse.name,
+                                birthDate: spouse.birthDate,
+                                deathDate: spouse.deathDate,
+                                sex: spouse.sex
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        // Pour le dernier nœud (la personne de départ), chercher son conjoint principal
+        else {
+            if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+                const firstSpouseFamily = state.gedcomData.families[person.spouseFamilies[0]];
+                if (firstSpouseFamily) {
+                    const spouseId = firstSpouseFamily.husband === personId 
+                        ? firstSpouseFamily.wife 
+                        : firstSpouseFamily.husband;
+                    
+                    if (spouseId) {
+                        const spouse = state.gedcomData.individuals[spouseId];
+                        if (spouse) {
+                            spouseInfo = {
+                                id: spouseId,
+                                name: spouse.name,
+                                birthDate: spouse.birthDate,
+                                deathDate: spouse.deathDate,
+                                sex: spouse.sex
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        pathWithSpouses.push({
+            person: {
+                id: personId,
+                name: person.name,
+                birthDate: person.birthDate,
+                deathDate: person.deathDate,
+                sex: person.sex
+            },
+            spouse: spouseInfo
+        });
+    }
+    return pathWithSpouses;
+}
+
+
 
 /**
  * Trouve un nœud dans l'arbre D3 actuel
@@ -1548,25 +1750,33 @@ export async function startAncestorAnimation() {
     };
 
 
-   let treeModeBackup =  state.treeModeReal;
+    let treeModeBackup =  state.treeModeReal;
 
-
+    let rootId = state.rootPersonId.id;
+   
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
         [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
+       
+        console.log("\n\n\n DEBUG animationState.path avec", state.rootPersonId, "et ", state.targetAncestorId, animationState.path)
+        
+        rootId = state.rootPersonId;
+        //Pour affichage du path  : a supprimer en opérationnel
+        // console.log("Chemins trouvé et conjoints  avec", rootId, "et ", state.targetAncestorId, findAncestorPathNew(rootId, state.targetAncestorId));
+   
+        
 
-        
-        console.log("\n\n\n DEBUG animationState.path ", animationState.path)
-        
         // si la personne root ne permet pas de faire la démo, on change avec la personne root de base
         if (!animationState.path) {
 
-            if (state.treeOwner ===2 ) {
+            if (state.treeOwner === 2 ) {
                 state.rootPersonId = searchRootPersonId('faustine d');
-            } else if (state.treeOwner ===3 ) {
+            } else if (state.treeOwner === 3 ) {
                 state.rootPersonId = searchRootPersonId('laurence m');
-            } else if (state.treeOwner ===4 ) {
+            } else if (state.treeOwner === 4 ) {
                 state.rootPersonId = searchRootPersonId('nadine c');
+            } else if (state.treeOwner === 5 ) {
+                state.rootPersonId = searchRootPersonId('giovanna sa');
             } else {
                 state.rootPersonId = searchRootPersonId('emma a');
             }
@@ -1587,17 +1797,51 @@ export async function startAncestorAnimation() {
                 }
                 drawTree(); 
                 console.log("\n\n\n DEBUG findAncestorPath with ", state.rootPersonId , state.targetAncestorId, findAncestorPath(state.rootPersonId.id, state.targetAncestorId))
-                animationState.path =[];
-                animationState.descendpath =[];
+                animationState.path = [];
+                animationState.descendpath = [];
                 [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId.id, state.targetAncestorId);
                 console.log("\n\n\n DEBUG animationState.path  after  ", animationState.path)
+
+                 rootId = state.rootPersonId.id;
+                //Pour affichage du path  : a supprimer en opérationnel
+                // console.log("Chemins trouvé et conjoints  avec", rootId, "et ", state.targetAncestorId, findAncestorPathNew(rootId, state.targetAncestorId));
 
             }
         }
 
         if (animationState.path) {
         
+            /////////////////
+            //Pour affichage du path  : a supprimer en opérationnel
+            const [unused1, unused2, pathWithSpouses] = findAncestorPathNew(rootId, state.targetAncestorId);
+            if (pathWithSpouses) {
+                console.log("Chemin avec conjoints :", pathWithSpouses);
+                pathWithSpouses.forEach((entry, index) => {
+                    console.log(`${index + 1}. ${entry.person.name} (${entry.person.birthDate}-${entry.person.deathDate})  ${entry.spouse ? `+ ${entry.spouse.name} (${entry.spouse.birthDate}-${entry.spouse.deathDate})` : ''}`);
+                });
+            }
+            ////////////////////////////
+            
+
+
+            let pathWithName = [];
+            for (let i = 0; i < animationState.path.length; i++) {
+                const person = state.gedcomData.individuals[animationState.path[i]];
+                if (person) {
+                    const simplifiedName = simplifyName(person.name);
+                    // pathWithName.push(`${i + 1}. ${simplifiedName}`);
+                    pathWithName.push(`${person.name} (${person.birthDate}-${person.deathDate})`);
+                } else {
+                    pathWithName.push(`${i + 1}. Personne inconnue`);   
+                }
+            }
             console.log("Chemin trouvé:", animationState.path);
+            console.log("Chemin trouvé avec noms:", pathWithName);
+
+
+
+
+
             // console.log("Chemin trouvé descendant:", animationState.descendpath);
             if (state.targetCousinId != null) {
                 [animationState.cousinPath, animationState.cousinDescendantPath] = findAncestorPath(state.targetCousinId, state.targetAncestorId);

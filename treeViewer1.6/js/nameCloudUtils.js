@@ -73,17 +73,29 @@ export function isValidFamilyName(name) {
            /[a-zA-Z]/.test(name);
 }
 
+
 export function cleanProfession(profession) {
     if (!profession) return [];
-    
-    // Diviser la chaîne par les virgules et nettoyer chaque partie
+
     const professions = profession.split(',')
-        .map(p => p.trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' '))
-        .filter(p => p.length > 0); // Filtrer les chaînes vides
-    
-    // Retourner jusqu'à trois professions uniques
+        .map(p => {
+            const parts = p.split(':');
+            if (parts.length > 1) {
+                // Nettoyer la partie avant le ':'
+                const before = parts[0].trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' ');
+                // Garder la partie après le ':' telle quelle (trim seulement)
+                const after = parts.slice(1).join(':').trim().toLowerCase().replace(/from/, 'de').replace(/to/, 'à');
+                return before + ' : ' + after;
+            } else {
+                // Traitement habituel
+                return p.trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' ');
+            }
+        })
+        .filter(p => p.length > 0);
+
     return [...new Set(professions)].slice(0, 10);
 }
+
 
 const excludedLocations = new Set([
     '?', 
@@ -95,6 +107,57 @@ const excludedLocations = new Set([
     'non spécifié',
     'non renseigné'
 ]);
+
+
+
+
+// Liste extensible de professions à isoler si elles sont en début de chaîne
+const specialProfessions = [
+    'seigneur', 'sieur', 'sire', 'écuyer', 'chevalier', 'dame', 'demoiselle', 'prince', 'grand-prince', 'princesse', "compagnon d'armes", 'co-seigneur',
+    'châtelain', 'châtelaine',
+    'roi', 'reine', 'empereur', 'impératrice','régent', 'régente','archiduc', 'archiduchesse', 'infant', 'infante',
+    'duc', 'duchesse', 'marquis', 'marquise', 'comte', 'co-comte', 'comtesse', 'vicomte', 'vicomtesse', 'baron', 'baronne', 'comtesse consort',
+    'chambellan', 'connétable', 'grand connétable','ambassadeur', 'ambassadrice', 'ministre',
+    'abbesse', 'évêque', 'archevêque', 'cardinal', 'pape', 'prêtre', 'curé', 'chanoine', 'chanoinesse', 'moine', 'nonne', 'frère', 'abbé', 
+    'capitaine', 'colonel', 'général', 'maréchal', 'commandant', 'lieutenant-général', 'lieutenant', 'brigadier', "grand-maître de l'artillerie",
+    'gouverneur', 'sénéchal', 'bailli', 'prévôt', 'maire du palais','maire', 'échevin', 'conseiller', 'conseillère', 
+    'docteur', 'avocat', 'procureur-général','notaire', 'bourgmestre', 'juge', 'recteur', 'bourgeois', 'greffier', 'huissier', 'clerc', 
+    "maître d'hôtel", 'baillistre', 'stratège', 'domestique', 'trésorier', 'intendant', 'surintendant', 'commissaire', 'préfet', 'chambrier', 
+    'noble', 'noble dame', 'gentilhomme', 'gentilhomme de la chambre', 'gentilhomme ordinaire','héritier', 'héritière', 'prétendant',
+    'président', 'présidente', 
+    // Ajoutez ici autant de titres que nécessaire
+];
+
+
+
+// const specialProfRegex = new RegExp(`^(${specialProfessions.join('|')})\\b`, 'i');
+const specialProfRegex = new RegExp(`^(${specialProfessions.join('|')})(\\s|$)`, 'i');
+
+
+export function cleanProfessionForNameCloud(profession) {
+    if (!profession) return [];
+
+    // console.log('\ndebug before cleaning****', profession);
+    const professions = profession.split(',')
+        .map(p => {
+            let cleaned = p.trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' ');
+            // console.log('cleaned 1 ****', cleaned);
+            const match = cleaned.match(specialProfRegex);
+            if (match) {
+                // console.log('match found ****', match[1]);
+                return match[1];
+            }
+            return cleaned;
+        })
+        .filter(p => p.length > 0);
+
+    const unique = [...new Set(professions)].slice(0, 10);
+    // console.log('debug after cleaning****', unique);
+
+    return unique;
+}
+
+
 
 export function cleanLocation(location) {
     if (!location) return '';

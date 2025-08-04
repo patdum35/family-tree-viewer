@@ -86,7 +86,6 @@ function getPersonsListTitle(name, count, config) {
 
 export function showPersonsList(name, people, config) {
     
-    
     // Ajouter un style pour personnaliser les ascenseurs
     const style = document.createElement("style");
     style.textContent = `

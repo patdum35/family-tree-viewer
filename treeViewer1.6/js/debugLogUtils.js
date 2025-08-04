@@ -1050,7 +1050,7 @@ async function analyzeCache(cacheName, title) {
         if (title.includes("RESSOURCES") || title.includes("APP (SERVICE WORKER)")) {
             debugLog("=== VÉRIFICATION DES FICHIERS CRITIQUES ===", 'info');
             
-            const criticalFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc', 'arbreC.enc', 'pako.min.js', 'leaflet.js'];
+            const criticalFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc', 'arbreC.enc', 'arbreG.enc', 'pako.min.js', 'leaflet.js'];
             
             for (const criticalFile of criticalFiles) {
                 const found = entries.some(entry => entry.url.includes(criticalFile));

@@ -113,6 +113,11 @@ export function drawNodeContent(nodeGroups) {
 
             const text = d3.select(this);
             const match = d.data.name?.match(/(.*?)\/(.*?)\//);
+
+            if (!match) {
+                console.log("Nom de famille non trouvé pour", d.data.name, ":", d.data.id, d.data.name2, d.data.title, d.data.title2);
+
+            }
             
             if (match) {
                 drawPersonDetails(text, match, d.data, state.boxWidth);
@@ -127,7 +132,7 @@ function drawPersonDetails(text, match, data) {
     const [_, firstNames, lastName] = match;
     const formattedFirstNames = formatFirstNames(firstNames);
     const formattedLastNames = formatlastNames(lastName);
-    
+
     // Prénom(s)
     text.append("tspan")
         .attr("x", 0)

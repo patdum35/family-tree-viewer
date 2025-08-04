@@ -37,6 +37,8 @@ export function parseGEDCOM(gedcomText) {
     let currentNoteCounter = 1;
     let currentSourceCounter = 1;
     let residenceCounter = 0;
+    let nameCounter = 0;
+    // let titleCounter = 0;
 
     for (const line of lines) {
         const match = line.match(/^\s*(\d+)\s+(@\w+@)?\s*(\w+)?\s*(.*)?$/);
@@ -49,6 +51,9 @@ export function parseGEDCOM(gedcomText) {
                 individuals[id] = { 
                     id, 
                     name: "",
+                    name2: "",
+                    givn: "",
+                    surn: "",
                     sex: "", 
                     birthDate: "", 
                     birthPlace: "",
@@ -62,11 +67,13 @@ export function parseGEDCOM(gedcomText) {
                     residDate3: "",
                     residPlace3: "",
                     occupation: "",
+                    occupationFull: "",
                     families: [],
                     notes: [],
                     sources: []
                 };
-                currentEntity = individuals[id];
+                currentEntity = individuals[id];  
+                nameCounter = 0;
                 residenceCounter = 0;
             } else if (tag === "FAM") {
                 families[id] = { 
@@ -85,7 +92,14 @@ export function parseGEDCOM(gedcomText) {
             }
         } else if (currentEntity && level === "1") {
             if (tag === "NAME" && currentEntity.name !== undefined) {
-                currentEntity.name = data;
+                nameCounter++;
+                if (nameCounter === 1) {
+                    currentEntity.name = data;
+                } else if (nameCounter === 2) {
+                    currentEntity.name2 = data;
+                    currentEntity.name = currentEntity.name + ' ' + data;
+                }
+                // currentEntity.name = data;
             } else if (tag === "SEX" && currentEntity.sex !== undefined) {
                 currentEntity.sex = data;  // M ou F typiquement
             } else if (tag === "BIRT") {
@@ -102,6 +116,20 @@ export function parseGEDCOM(gedcomText) {
                 currentEntity._expectingMarriagePlace = true;
             } else if (tag === "OCCU") {
                 currentEntity.occupation = data;
+                if (currentEntity.occupationFull === '') {
+                    currentEntity.occupationFull = data;
+                } else {
+                    currentEntity.occupationFull = currentEntity.occupationFull + ', ' + data;
+                }
+            } else if (tag === "TITL") {
+                if (currentEntity.occupationFull === '') {
+                    currentEntity.occupationFull = data.replace(/,/g, '');
+                } else {
+                    currentEntity.occupationFull = currentEntity.occupationFull + ', ' + data.replace(/,/g, '');
+                }
+                currentEntity._expectingTitle = true;
+
+                                 
             } else if (tag === "HUSB" && currentEntity.husband !== undefined) {
                 currentEntity.husband = data;
             } else if (tag === "WIFE" && currentEntity.wife !== undefined) {
@@ -163,7 +191,11 @@ export function parseGEDCOM(gedcomText) {
 
 
         } else if (currentEntity && level === "2") {
-            if (tag === "PLAC") {
+            if (tag === "GIVN") {
+                currentEntity.givn = data;  // M ou F typiquement 
+            } else if (tag === "SURN") {
+                currentEntity.surn = data;  // M ou F typiquement
+            } else if (tag === "PLAC") {
                 if (currentEntity._expectingBirthPlace) {
                     currentEntity.birthPlace = data;
                     delete currentEntity._expectingBirthPlace;
@@ -204,7 +236,11 @@ export function parseGEDCOM(gedcomText) {
                 } else if (currentEntity._expectingResidDate3) {    
                     currentEntity.residDate3 = data;
                     delete currentEntity._expectingResidDate3;
-                }
+                } else if (currentEntity._expectingTitle) {    
+                    currentEntity.occupationFull = currentEntity.occupationFull + ' : ' + data;
+                    delete currentEntity._expectingTitle;
+                }                
+
             } else if (tag === "NOTE") {
                 const noteId = `NOTE_${currentNoteCounter++}`;
                 notes[noteId] = { text: data.trim() };
@@ -220,6 +256,15 @@ export function parseGEDCOM(gedcomText) {
                 const lastSourceId = currentEntity.sources[currentEntity.sources.length - 1];
                 sources[lastSourceId].text += (tag === "CONT" ? "\n" : "") + (data || '');
             }
+        } else if (currentEntity && level === "3") {
+            if ((tag === "CONT" || tag === "CONC") && currentEntity.notes.length > 0) {
+                const lastNoteId = currentEntity.notes[currentEntity.notes.length - 1];
+                notes[lastNoteId].text += (tag === "CONT" ? "\n" : "") + (data || '');
+            } else if ((tag === "CONT" || tag === "CONC") && currentEntity.sources.length > 0) {
+                const lastSourceId = currentEntity.sources[currentEntity.sources.length - 1];
+                sources[lastSourceId].text += (tag === "CONT" ? "\n" : "") + (data || '');
+            }
+
         }
     }
 

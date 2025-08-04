@@ -6,6 +6,7 @@ import { setupElegantBackground } from './backgroundManager.js';
 import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
 import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
+import { extractYear } from './utils.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;
@@ -1166,12 +1167,6 @@ function capitalizeFirstLetter(word) {
 function formatWheelDates(person) {
     if (!person.birthDate && !person.deathDate) return '';
     
-    const extractYear = (dateStr) => {
-        if (!dateStr) return null;
-        const match = dateStr.match(/(\d{4})/);
-        return match ? match[1] : null;
-    };
-    
     const birthYear = person.birthDate ? extractYear(person.birthDate) : '?';
     const deathYear = person.deathDate ? extractYear(person.deathDate) : '?';
     
@@ -1182,6 +1177,8 @@ function formatWheelDates(person) {
     
     return dateText;
 }
+
+
 
 /**
  * Configuration des paramètres d'affichage par génération

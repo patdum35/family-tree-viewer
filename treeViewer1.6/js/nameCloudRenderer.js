@@ -266,13 +266,10 @@ function drawNameCloud(svg, textGroup, words, color, config) {
         
         // Utiliser la fonction factoriséé
         const people = filterPeopleByText(d.text, config);
-        
+
         // Afficher la liste des personnes
         showPersonsList(d.text, people, config);
     }
-
-
-
 
 
     function createTempText(originalElement, d, props) {

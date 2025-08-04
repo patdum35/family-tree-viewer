@@ -1149,9 +1149,15 @@ const occupationTranslations = {
  */
 export function translateOccupation(occupation, targetLang = 'en') {
   // Vérifier si nous avons une traduction directe
+
+  // console.log("Profession à traduire :", occupation, targetLang)
+
   if (occupationTranslations[occupation] && occupationTranslations[occupation][targetLang]) {
     return occupationTranslations[occupation][targetLang];
   }
+
+
+  // console.log("Profession not found in  occupationTranslations :")
   
   // Pour les seigneurs, dames, sieurs et autres titres avec lieu
   // qui ne sont pas dans notre dictionnaire, essayons de traduire
@@ -1188,6 +1194,16 @@ export function translateOccupation(occupation, targetLang = 'en') {
       en: "Mayor of",
       es: "Alcalde de",
       hu: "Polgármestere"
+    },
+    "roi d'": {
+      en: "King of",
+      es: "Rey de",
+      hu: "Király"
+    },
+    "roi des": {
+      en: "King of",
+      es: "Rey de",
+      hu: "Király"
     },
     "roi de": {
       en: "King of",
@@ -1239,9 +1255,18 @@ export function translateOccupation(occupation, targetLang = 'en') {
   
   // Parcourir les termes génériques
   for (const [frTerm, translations] of Object.entries(genericTerms)) {
+
+    // console.log('debug:', frTerm, translations)
     if (occupation.toLowerCase().startsWith(frTerm.toLowerCase())) {
       const placeName = occupation.substring(frTerm.length).trim();
-      if (targetLang === 'hu') {
+      if (targetLang === 'fr') {
+        // return occupation; // Pas de traduction nécessaire pour le français
+        if (frTerm === "roi d'" || frTerm === "empereur d'") {
+          return `${frTerm}${placeName}`;
+        } else {
+          return `${frTerm} ${placeName}`;
+        }
+      } else if (targetLang === 'hu') {
         // En hongrois, l'ordre est inversé: "Placename Ura"
         return `${placeName} ${translations[targetLang]}`;
       } else {
@@ -1256,7 +1281,9 @@ export function translateOccupation(occupation, targetLang = 'en') {
     const parts = occupation.split(" de ");
     const mainOccupation = parts[0].trim();
     const location = parts.slice(1).join(" de ").trim();
-    
+    if (targetLang === 'fr') {
+      return occupation; // Pas de traduction nécessaire pour le français}
+    }
     if (occupationTranslations[mainOccupation] && occupationTranslations[mainOccupation][targetLang]) {
       if (targetLang === 'en') {
         return `${occupationTranslations[mainOccupation][targetLang]} of ${location}`;

@@ -3,7 +3,7 @@ import { state, showToast } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
-import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfession, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
+import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
 import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
@@ -229,9 +229,9 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             }
         }
     } else if (config.type === 'professions') {
-        if (person.occupation && hasDate) {
+        if ((person.occupationFull) && hasDate) {
             stats.inPeriod++;
-            const cleanedProfessions = cleanProfession(person.occupation);
+            const cleanedProfessions = cleanProfessionForNameCloud(person.occupationFull);
             
             cleanedProfessions.forEach(prof => {
                 if (prof) {
@@ -854,6 +854,8 @@ export function getPersonsFromTree(mode, rootPersonId = null) {
  */
 export function filterPeopleByText(text, config) {
     if (!state.gedcomData) return [];
+
+    console.log("filterPeopleByText called  with name:", text, "and ", config);
     
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
     const currentLang = window.CURRENT_LANGUAGE || 'fr';
@@ -871,7 +873,7 @@ export function filterPeopleByText(text, config) {
             } else if (config.type === 'noms') {
                 matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === text.toLowerCase());
             } else if (config.type === 'professions') {
-                const cleanedProfessions = cleanProfession(p.occupation);
+                const cleanedProfessions = cleanProfessionForNameCloud(p.occupationFull);
                 // matches = cleanedProfessions.includes(text.toLowerCase());
 
                 if (currentLang === 'fr') {
@@ -1027,14 +1029,14 @@ export function filterPeopleByText(text, config) {
             const isInTree = 
                 config.scope === 'all' || 
                 ((config.scope === 'descendants' || config.scope === 'directDescendants') && persons.some(descendant => descendant.id === p.id)) ||
-                ((config.scope === 'ancestors' || config.scope === 'ancestors') && persons.some(ancestor => ancestor.id === p.id));
+                ((config.scope === 'ancestors' || config.scope === 'directAncestors') && persons.some(ancestor => ancestor.id === p.id));
 
             return matches && isInTree && hasDateInRange(p, config);
         })
         .map(p => ({
             name: p.name.replace(/\//g, ''),
             id: p.id,
-            occupation: p.occupation || 'Non spécifiée'
+            occupation: p.occupationFull || 'Non spécifiée'
         }));
 }
 

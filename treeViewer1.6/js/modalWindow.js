@@ -201,6 +201,8 @@ export const translations = {
    * @returns {string} - Date formatée selon la langue actuelle
    */
   export function formatGedcomDate(dateStr) {
+
+    console.log("0- formatGedcomDate dateStr :", dateStr);
     if (!dateStr) return '';
     
     // Récupérer la langue actuelle
@@ -243,21 +245,35 @@ export const translations = {
     
     // Remplacer les préfixes
     let formattedDate = dateStr;
+
     
-    // Traiter les préfixes
-    Object.entries(prefixMap).forEach(([gedcomPrefix, translatedPrefix]) => {
-      const regExp = new RegExp(`^${gedcomPrefix}\\s+`, 'i');
-      formattedDate = formattedDate.replace(regExp, `${translatedPrefix} `);
-    });
-    
-    // Remplacer "AND" à l'intérieur de la chaîne (pour les périodes "BETWEEN x AND y")
-    formattedDate = formattedDate.replace(/\sAND\s/i, ` ${translate('et')} `);
-    
+
     // Remplacer les mois en anglais par leurs équivalents traduits
+
+    // Remplacer D'abord les mois (pour éviter d'écraser des lettres dans les préfixes comme "AFT" → "après")
     Object.entries(monthsMap).forEach(([englishMonth, translatedMonth]) => {
       const regExp = new RegExp(`\\b${englishMonth}\\b`, 'gi');
       formattedDate = formattedDate.replace(regExp, translatedMonth);
     });
+
+    console.log("1- formatGedcomDate dateStr :", formattedDate);
+
+
+
+    // Ensuite traiter les préfixes
+    Object.entries(prefixMap).forEach(([gedcomPrefix, translatedPrefix]) => {
+      const regExp = new RegExp(`^${gedcomPrefix}\\s+`, 'i');
+      formattedDate = formattedDate.replace(regExp, `${translatedPrefix} `);
+    });
+
+    console.log("2- formatGedcomDate dateStr :", formattedDate);
+    
+    // Remplacer "AND" à l'intérieur de la chaîne (pour les périodes "BETWEEN x AND y")
+    formattedDate = formattedDate.replace(/\sAND\s/i, ` ${translate('et')} `);
+
+    console.log("3- formatGedcomDate dateStr :", formattedDate);
+
+
     
     return formattedDate;
   }
@@ -576,20 +592,12 @@ export function displayPersonDetails(personId) {
     `;
 
     // Profession (si existante)
-    // if (person.occupation) {
-    //     detailsHTML += `
-    //         <div class="details-section">
-    //             <span class="details-icon">💼</span>
-    //             <span class="details-value">${person.occupation}</span>
-    //         </div>
-    //     `;
-    // }
-    if (person.occupation) {
+    if (person.occupationFull) {
+        const cleanedProfessions = cleanProfession(person.occupationFull);
 
-        const cleanedProfessions = cleanProfession(person.occupation);
-        
         cleanedProfessions.forEach(prof => {
             if (prof) {
+                // console.log("Profession à traduire :", prof);
                 detailsHTML += `
                 <div class="details-section">
                     <span class="details-icon">💼</span>
@@ -600,14 +608,6 @@ export function displayPersonDetails(personId) {
         });
     }
 
-    // if (person.occupation) {
-    // detailsHTML += `
-    //     <div class="details-section">
-    //         <span class="details-icon">💼</span>
-    //         <span class="details-value">${translateOccupation(person.occupation.toLowerCase(), window.CURRENT_LANGUAGE || 'fr')}</span>
-    //     </div>
-    // `;
-    // }
 
     // Naissance (si date ou lieu existants)
     if (person.birthDate || person.birthPlace) {
@@ -678,10 +678,28 @@ export function displayPersonDetails(personId) {
             })
             .filter(note => note !== null);
 
-        if (validNotes.length > 0) {
+            let noteTextInit = '';
+            if (person.givn !='') {
+               noteTextInit = person.givn; 
+            }
+            if (person.surn !='') {
+               noteTextInit = noteTextInit + ' ' + person.surn ; 
+            }
+            if (person.givn !='' || person.surn !='') {
+                noteTextInit = noteTextInit + ', '; 
+            }
+
+        
+            if (validNotes.length > 0) {
             detailsHTML += `
                 <div class="details-section notes">
-                    <small>${validNotes.map(noteText => `<p>${noteText}</p>`).join('')}</small>
+                    <small>
+                        ${validNotes.map((noteText, idx) => 
+                            idx === 0 
+                                ? `<p>${noteTextInit}${noteText}</p>` // Ajoute ton texte à la première note
+                                : `<p>${noteText}</p>`
+                        ).join('')}
+                    </small>
                 </div>
             `;
         }
@@ -751,15 +769,6 @@ export function displayPersonDetails(personId) {
             detailsHTML += contextHTML;
         }
     }
-
-    // Ajouter un bouton pour définir comme racine de l'arbre
-    // detailsHTML += `
-    //     <div class="details-section actions">
-    //         <button onclick="setAsRootPerson('${personId}')" class="set-root-btn">
-    //         ${translate('setAsRoot')}
-    //         </button>
-    //     </div>
-    // `;
 
     // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
     detailsHTML += `
