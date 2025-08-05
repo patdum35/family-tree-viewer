@@ -73,13 +73,25 @@ if ('serviceWorker' in navigator) {
 
   
 // for tracking with google Analytics
+// export function trackPageView(pagePath) {
+//   if (window.gtag) {
+//     gtag('config', 'G-HWT22W45CN', {
+//       'page_path': pagePath
+//     });
+//   }
+// }
+
 export function trackPageView(pagePath) {
-  if (window.gtag) {
-    gtag('config', 'G-HWT22W45CN', {
-      'page_path': pagePath
-    });
-  }
+    if (window.gtag) {
+        console.log(`📊 Suivi de la vue de page pour google Analytics: ${pagePath}`);
+        gtag('event', 'page_view', {
+            page_location: window.location.href,
+            page_title: pagePath
+        });
+    }
 }
+
+
 
 
 export const state = {
@@ -408,6 +420,9 @@ export let audioUnlocked = false;
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData() {
+
+
+    trackPageView('AccueilTreeViewer');
 
     audio = await createAudioElement();
     audio.preload = 'auto';
