@@ -1,7 +1,7 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state, updateRadarButtonText } from './main.js';
+import { state, updateRadarButtonText, trackPageView } from './main.js';
 import { needsReset, resetWheelView, getGenerationColor, calculateOptimalZoom } from './treeWheelRenderer.js';
 // import { historicalFigures } from './historicalData.js';
 import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow.js';
@@ -4154,6 +4154,9 @@ function hideWinnerText() {
 
 // fonction d'activation
 export function enableFortuneMode() {
+
+    trackPageView('enableFortuneMode');
+
     if (fortuneModeActive) return;
     
     console.log(getFortuneText('fortuneModeActive'));

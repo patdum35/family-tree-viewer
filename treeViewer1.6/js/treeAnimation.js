@@ -1,7 +1,7 @@
 // ====================================
 // Animation de l'arbre
 // ====================================
-import { state, searchRootPersonId } from './main.js';
+import { state, searchRootPersonId, trackPageView } from './main.js';
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
 import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
 import { buildDescendantTree, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
@@ -15,7 +15,6 @@ import { fetchTileWithCache } from './mapTilesPreloader.js';
 import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
 import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
 import { debugLog } from './debugLogUtils.js'
-
 
 let animationTimeouts = [];
 let optimalSpeechRate = 1.0; //1.1;
@@ -1690,6 +1689,8 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
 
 //#####################################################
 export async function startAncestorAnimation() {
+
+    trackPageView('treeAnimation');
     // playEndOfAnimationSound();
     
     // Vérifier que visitedNodeIds est bien un Set

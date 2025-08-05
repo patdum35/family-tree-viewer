@@ -72,6 +72,16 @@ if ('serviceWorker' in navigator) {
   }
 
   
+// for tracking with google Analytics
+export function trackPageView(pagePath) {
+  if (window.gtag) {
+    gtag('config', 'G-HWT22W45CN', {
+      'page_path': pagePath
+    });
+  }
+}
+
+
 export const state = {
     gedcomData: null,
     rootPersonId: null,

@@ -1,7 +1,7 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state, displayGenealogicTree } from './main.js';
+import { state, displayGenealogicTree, trackPageView } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
 import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
@@ -39,6 +39,8 @@ function cleanupWheelTreeState() {
  * Initialise et dessine l'arbre en éventail complet 360°
  */
 export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) {
+
+    trackPageView('wheelTree');
 
     if (!state.currentTree) {
         console.error('❌ Pas d\'arbre à dessiner');

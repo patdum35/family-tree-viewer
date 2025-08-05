@@ -1,5 +1,5 @@
 
-import { state, showToast } from './main.js';
+import { state, showToast, trackPageView } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
@@ -58,6 +58,8 @@ export const nameCloudState = {
 }
 
 export function processNamesCloudWithDate(config, containerElement = null) {onclick
+
+    trackPageView('wordCloud');
 
     state.isWordCloudEnabled = true; // Activer le nuage de mots
     
