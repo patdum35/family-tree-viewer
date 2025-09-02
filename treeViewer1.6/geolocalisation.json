@@ -311,6 +311,10 @@
     "lat": 48.523744,
     "lon": -2.2889406
   },
+  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
   "St-Germain-de-la-Mer, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6182513,
     "lon": -2.302739
@@ -319,6 +323,14 @@
     "lat": 48.5968982,
     "lon": -2.2922438
   },
+  "Pluduno, 22237, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.523744,
+    "lon": -2.2889406
+  },
+  "Ploubalay, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.5626446,
+    "lon": -2.123685
+  },
   "Saint-Potan (22)": {
     "lat": 48.5586158,
     "lon": -2.2902601
@@ -326,6 +338,10 @@
   "Notre-Dame-du-Guildo (22)": {
     "lat": 48.5792308,
     "lon": -2.2202534
+  },
+  "La Ville Mois - Saint-Pôtan, 22323, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.5703618,
+    "lon": -2.2613004
   },
   "St Potan": {
     "lat": 48.5586158,
@@ -423,6 +439,14 @@
     "lat": 49.523637,
     "lon": 0.5062186
   },
+  "L'Oiselière, 76430, Les Trois-Pierres, Seine-Maritime, Normandie, France": {
+    "lat": 49.5460507,
+    "lon": 0.387735
+  },
+  "Mélamare, 76170, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5388511,
+    "lon": 0.4510389
+  },
   "Saint-Antoine-la-Forêt, 76556, Seine-Maritime, Normandie, France": {
     "lat": 49.5371621,
     "lon": 0.4714405
@@ -503,6 +527,14 @@
     "lat": 49.5431014,
     "lon": 0.5537634
   },
+  "Notre-Dame-de-Gravenchon, 76476, Seine-Maritime, Normandie, France": {
+    "lat": 49.4898201,
+    "lon": 0.5680054
+  },
+  "La Trinité du Mont, Seine Maritime, Normandie, France": {
+    "lat": 49.5431014,
+    "lon": 0.5537634
+  },
   "Saint-Eustache-la-Forêt (76)": {
     "lat": 49.5524805,
     "lon": 0.4512736
@@ -519,13 +551,25 @@
     "lat": 49.526985,
     "lon": 0.571012
   },
-  "Bois-Himont, 76190, Seine-Maritime, Normandie, France": {
+  "Trouville, 76715, Seine Maritime, Normandie, France": {
+    "lat": 49.5732368,
+    "lon": 0.6010584
+  },
+  "Saint-Arnoult, 76557, Seine Maritime, Normandie, France": {
+    "lat": 49.5285282,
+    "lon": 0.6668956
+  },
+  "Bois-Himont, 76110, Seine Maritime, Normandie, France": {
     "lat": 49.5852765,
     "lon": 0.7039196
   },
   "Villequier, 76490, Seine-Maritime, Normandie, France": {
     "lat": 49.5073254,
     "lon": 0.6517826
+  },
+  "Bois-Himont, 76190, Seine-Maritime, Normandie, France": {
+    "lat": 49.5852765,
+    "lon": 0.7039196
   },
   "Touffreville-la-Cable, 76701, Seine-Maritime, Normandie, France": {
     "lat": 49.5213901,
@@ -635,13 +679,17 @@
     "lat": 49.6972383,
     "lon": 0.815775
   },
-  "Motteville, 76, Seine Maritime, Normandie, France": {
+  "Motteville, 76456, Seine Maritime, France": {
     "lat": 49.6347409,
     "lon": 0.8553001
   },
   "Bernières, 76, Seine Maritime, Normandie, France": {
     "lat": 49.6209373,
     "lon": 0.4762172
+  },
+  "Motteville, 76, Seine Maritime, Normandie, France": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
   },
   "Beaurepaire, 76064, Seine-Maritime, Normandie, France": {
     "lat": 49.6655571,
@@ -1123,10 +1171,6 @@
     "lat": 49.4349503,
     "lon": 0.9265069
   },
-  "? BARDOUVILLE, Seine Maritime, Normandie, France": {
-    "lat": 49.4349503,
-    "lon": 0.9265069
-  },
   "76190 Rives-en-Seine, Seine Maritime, Normandie, France": {
     "lat": 49.5266295,
     "lon": 0.7611546
@@ -1187,13 +1231,17 @@
     "lat": 49.8457822,
     "lon": 0.6727233
   },
-  "? Saint-Sylvain, 76": {
+  "Saint-Sylvain, 76": {
     "lat": 49.8457822,
     "lon": 0.6727233
   },
   "Néville, 76467, Seine-Maritime, Normandie, France": {
     "lat": 49.8236368,
     "lon": 0.7075316
+  },
+  "Mélamare, 76170, Seine-Maritime, Normandie, France": {
+    "lat": 49.5388511,
+    "lon": 0.4510389
   },
   "Saint-Vincent-Cramesnil, 76, Seine-Maritime, Normandie, France": {
     "lat": 49.5068234,
@@ -1867,10 +1915,6 @@
     "lat": 48.5586158,
     "lon": -2.2902601
   },
-  "Pluduno, 22237, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.523744,
-    "lon": -2.2889406
-  },
   "Bourseul 22130 côtes d'Armor Bretagne France": {
     "lat": 48.487358,
     "lon": -2.258746
@@ -2375,6 +2419,14 @@
     "lat": 41.3214976,
     "lon": 16.2868696
   },
+  "Ardevon, 50627, Manche, Normandie, France": {
+    "lat": 48.601358,
+    "lon": -1.4735804
+  },
+  "Saint Cast, 22, France": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
   "Saint-Eustache-la-Forêt, 76210, Seine-Maritime, Normandie, France": {
     "lat": 49.5524805,
     "lon": 0.4512736
@@ -2639,6 +2691,10 @@
     "lat": 47.5836629,
     "lon": -3.0794428
   },
+  "Eancé, 35103, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
   "Martigné-Ferchaud, Ille-et-Vilaine, France": {
     "lat": 47.8313035,
     "lon": -1.317543
@@ -2775,9 +2831,29 @@
     "lat": 48.0245814,
     "lon": -1.7471629
   },
+  "Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0432406,
+    "lon": -1.7082369
+  },
+  "Bruz, 35170, Ille et Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0245814,
+    "lon": -1.7471629
+  },
+  "La Chaussairie - Bruz, 35170, Ille et Vilaine, Bretagne, FRANCE": {
+    "lat": 48.029055,
+    "lon": -1.723094
+  },
   "Craon, 53400, Mayenne, Pays de la Loire, France": {
     "lat": 47.84831,
     "lon": -0.9518383
+  },
+  "Martigné-Ferchaud (Ille et Vilaine), , , ,": {
+    "lat": 47.8313035,
+    "lon": -1.317543
+  },
+  "Martigné-Ferchaud, , , ,": {
+    "lat": 47.8313035,
+    "lon": -1.317543
   },
   "La Chaussée, Moisdon-la-Rivière, 44520, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.6142753,
@@ -3327,13 +3403,17 @@
     "lat": 48.1459113,
     "lon": -1.8996064
   },
-  "?, 35, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.6278993,
-    "lon": -1.9942279
+  "Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1727681,
+    "lon": -1.6498092
   },
   "Combourg, 35085, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.4104391,
     "lon": -1.7500622
+  },
+  "35, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.6278993,
+    "lon": -1.9942279
   },
   "Cintré, 35310, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1058654,
@@ -3707,6 +3787,10 @@
     "lat": 47.6510682,
     "lon": -2.0842143
   },
+  "MONTERFIL (35)": {
+    "lat": 48.0652825,
+    "lon": -1.9793057
+  },
   "Monterfil, 35187, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0652825,
     "lon": -1.9793057
@@ -3726,10 +3810,6 @@
   "Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0733304,
     "lon": -1.8485204
-  },
-  "Le Patis - Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0907306,
-    "lon": -1.8700805
   },
   "L'Abbaye - Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0869867,
@@ -4503,6 +4583,10 @@
     "lat": 49.5313601,
     "lon": 0.3579164
   },
+  "Les Trois Pierres (Seine Maritime) France": {
+    "lat": 49.5472915,
+    "lon": 0.4151869
+  },
   "Sanvic - Le Havre, 76600, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.5057242,
     "lon": 0.1063322
@@ -4518,5 +4602,1733 @@
   "Saint-Vigor-d'Ymonville, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.49563,
     "lon": 0.3599616
+  },
+  "Limésy, Seine-Maritime, Normandie, France": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Pavilly, Seine-Maritime, Normandie, France": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Varneville-Bretteville, Seine-Maritime, Normandie, France": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Saint-Ouen-du-Breuil, Seine-Maritime, Normandie, France": {
+    "lat": 49.6384848,
+    "lon": 1.0086705
+  },
+  "Doudeville, Seine-Maritime, Normandie, France": {
+    "lat": 49.7229361,
+    "lon": 0.7835886
+  },
+  "Flamanville,76970,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.6348243,
+    "lon": 0.839636
+  },
+  "Limésy,76570,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "LIMESY, 76570, Seine-maritime, FRANCE": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Motteville,76970,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Motteville, 76456, Seine-Maritime, Normandie, France": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Pavilly, 76495, Seine-Maritime, Normandie, France": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Bouville,76360,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5605729,
+    "lon": 0.8937539
+  },
+  "Yerville,76760,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Pavilly,76570,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Yvecrique,76560,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.6879087,
+    "lon": 0.8094156
+  },
+  "Auffay,76720,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.718825,
+    "lon": 1.0990371
+  },
+  "Blacqueville, , 76, Seine Maritime, ,": {
+    "lat": 49.5632173,
+    "lon": 0.8660735
+  },
+  "Blacqueville,76190,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5632173,
+    "lon": 0.8660735
+  },
+  "Pavilly, , 76, Seine Maritime, ,": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Montville,76710,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5479845,
+    "lon": 1.0750949
+  },
+  "Montville, 76710, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5479845,
+    "lon": 1.0750949
+  },
+  "Pavilly, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Fontaine-le-Bourg,76690,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5626304,
+    "lon": 1.1623543
+  },
+  "Mont-Cauvaire, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.5707961,
+    "lon": 1.109253
+  },
+  "Eancé, 35103, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Forges-la-Forêt, 35114, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.8619159,
+    "lon": -1.2793479
+  },
+  "Eancé, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Drouges, 35130, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.9013296,
+    "lon": -1.266358
+  },
+  "Forges-la-Forêt,35640,Ille-et-Vilaine,Bretagne,FRANCE": {
+    "lat": 47.8619159,
+    "lon": -1.2793479
+  },
+  "Moutiers, 35200, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.9670665,
+    "lon": -1.2136646
+  },
+  "Drouges, Bretagne, France": {
+    "lat": 47.9013296,
+    "lon": -1.266358
+  },
+  "La Gautrais, Retiers, 35240, France": {
+    "lat": 47.8978707,
+    "lon": -1.345667
+  },
+  "Martigné-Ferchaud, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.8313035,
+    "lon": -1.317543
+  },
+  "Martigné-Ferchaud, 35167, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.8313035,
+    "lon": -1.317543
+  },
+  "Eancé, 35103, Ille et Vilaine": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Eancé": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Eancé, 35103, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Villepot, 44218, Loire-Atlantique, Pays de la Loire, France": {
+    "lat": 47.7756596,
+    "lon": -1.2778074
+  },
+  "Martigné-Ferchaud, 35167, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.8313035,
+    "lon": -1.317543
+  },
+  "Bouville, 76360, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5605729,
+    "lon": 0.8937539
+  },
+  "Envronville, 76640, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6621985,
+    "lon": 0.6687624
+  },
+  "La Fontelaye, 76890, Seine Maritime, FRANCE": {
+    "lat": 49.69571,
+    "lon": 0.95244
+  },
+  "Limésy, 76385, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "LIMÉSY, 76385, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Yvecrique, 76560, Seine-Maritime, FRANCE": {
+    "lat": 49.6879087,
+    "lon": 0.8094156
+  },
+  "Belleville-en-Caux, 76890, Seine-Maritime, FRANCE": {
+    "lat": 49.70796,
+    "lon": 0.9866
+  },
+  "Gueutteville, 76890, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.650704,
+    "lon": 1.0046347
+  },
+  "Grémonville, 76970, Seine Maritime, FRANCE": {
+    "lat": 49.6707917,
+    "lon": 0.8271945
+  },
+  "Imbleville, 76890, Seine Maritime, FRANCE": {
+    "lat": 49.7147439,
+    "lon": 0.9520001
+  },
+  "Etoutteville 76": {
+    "lat": 49.6765378,
+    "lon": 0.7854339
+  },
+  "Prétot-Vicquemare (76)": {
+    "lat": 49.7300816,
+    "lon": 0.8531536
+  },
+  "Brametot, 76140, Seine-Maritime, FRANCE": {
+    "lat": 49.7835011,
+    "lon": 0.8670226
+  },
+  "Grémonville, 76570, Seine Maritime, FRANCE": {
+    "lat": 49.6707917,
+    "lon": 0.8271945
+  },
+  "Canville-les-deux-églises, 76560, Seine Maritime, FRANCE": {
+    "lat": 49.7698389,
+    "lon": 0.841072
+  },
+  "Benesville, 76077, Seine-Maritime, FRANCE": {
+    "lat": 49.75513,
+    "lon": 0.8354166
+  },
+  "Hautot-l'Auvray, 76346, Seine-Maritime, FRANCE": {
+    "lat": 49.7616793,
+    "lon": 0.7519047
+  },
+  "Amfreville-les-Champs, 76006, Seine-Maritime, Normandie, France": {
+    "lat": 49.6972383,
+    "lon": 0.815775
+  },
+  "gremonville 76": {
+    "lat": 49.6707917,
+    "lon": 0.8271945
+  },
+  "Ectot-lès-Baons, 76228, Seine-Maritime, Normandie, France": {
+    "lat": 49.64282,
+    "lon": 0.80644
+  },
+  "Hautot-l'Auvray 76": {
+    "lat": 49.7616793,
+    "lon": 0.7519047
+  },
+  "doudeville 76": {
+    "lat": 49.7229361,
+    "lon": 0.7835886
+  },
+  "Hautot l'Auvray (76)": {
+    "lat": 49.7616793,
+    "lon": 0.7519047
+  },
+  "doudeville (76)": {
+    "lat": 49.7229361,
+    "lon": 0.7835886
+  },
+  "Anglesqueville-la-Bras-Long (76)": {
+    "lat": 49.7810234,
+    "lon": 0.7822055
+  },
+  "Biville la Baignarde (76)": {
+    "lat": 49.7209136,
+    "lon": 1.0487521
+  },
+  "Doudeville, 76219, Seine-Maritime, Normandie, France": {
+    "lat": 49.7229361,
+    "lon": 0.7835886
+  },
+  "fauville en caux (76)": {
+    "lat": 49.6556519,
+    "lon": 0.5889453
+  },
+  "etoutteville (76)": {
+    "lat": 49.6765378,
+    "lon": 0.7854339
+  },
+  "Anglesqueville, 76890 Val-de-Saâne, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.7065848,
+    "lon": 0.9643937
+  },
+  "Yerville, 76760, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Varneville-Bretteville, 76890, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Beautot, 76890, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6422659,
+    "lon": 1.0374288
+  },
+  "Varneville-Bretteville, 76890, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Houssaye-Béranger (La), 76690, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6317451,
+    "lon": 1.0828619
+  },
+  "Belleville-en-Caux, 76890, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.70796,
+    "lon": 0.9866
+  },
+  "Limésy, France": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Barentin, France": {
+    "lat": 49.5459699,
+    "lon": 0.9522586
+  },
+  "Auzouville-l'Esneval, Seine-Maritime, Normandie, France": {
+    "lat": 49.6432017,
+    "lon": 0.8862882
+  },
+  "Cideville, Seine-Maritime, Normandie, France": {
+    "lat": 49.6156864,
+    "lon": 0.8932818
+  },
+  "Bouville, Seine-Maritime, Normandie, France": {
+    "lat": 49.5605729,
+    "lon": 0.8937539
+  },
+  "Croix-Mare, 76203, Seine-Maritime, Normandie, France": {
+    "lat": 49.60033,
+    "lon": 0.8497964
+  },
+  "Bouville, 76135, Seine-Maritime, Normandie, France": {
+    "lat": 49.5605729,
+    "lon": 0.8937539
+  },
+  "Bertheauville, 76450, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7542104,
+    "lon": 0.597414
+  },
+  "Ectot-l'Auber, 76760, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6493462,
+    "lon": 0.928977
+  },
+  "Normanville, 76470, Seine-Maritime, Normandie, France": {
+    "lat": 49.6948768,
+    "lon": 0.5941406
+  },
+  "Normanville, 76640, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6948768,
+    "lon": 0.5941406
+  },
+  "Normanville, Seine-Maritime, Normandie, France": {
+    "lat": 49.6948768,
+    "lon": 0.5941406
+  },
+  "Mesnil-Panneville, 76433, Seine-Maritime, Normandie, France": {
+    "lat": 49.5899901,
+    "lon": 0.8921061
+  },
+  "Limésy, 76385, Seine-Maritime, Normandie, France": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Imbleville, 76890, Seine Maritime, Normandie, France": {
+    "lat": 49.7147439,
+    "lon": 0.9520001
+  },
+  "Varneville-Bretteville, 76721, Seine-Maritime, Normandie, France": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Beautôt, , , ,": {
+    "lat": 49.6422659,
+    "lon": 1.0374288
+  },
+  "Varneville-Bretteville, , , ,": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Rannée, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.924362,
+    "lon": -1.240552
+  },
+  "Moutiers, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.9670665,
+    "lon": -1.2136646
+  },
+  "La Charbonnière, Drouges, Bretagne, France": {
+    "lat": 47.9045719,
+    "lon": -1.2385657
+  },
+  "moussé": {
+    "lat": 47.9244804,
+    "lon": -1.2704183
+  },
+  "35130 Drouges, Bretagne, France": {
+    "lat": 47.9013296,
+    "lon": -1.266358
+  },
+  "Etrelles, 35109, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.0601694,
+    "lon": -1.1938644
+  },
+  "Héric, 44073, Loire-Atlantique, Pays de la Loire, France": {
+    "lat": 47.4144202,
+    "lon": -1.6523209
+  },
+  "Étrelles, 35370, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0601694,
+    "lon": -1.1938644
+  },
+  "Marcillé Robert, 35240, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.9513589,
+    "lon": -1.3559138
+  },
+  "Marcillé-Robert, 35165, Ille et Vilaine, Bretagne, France": {
+    "lat": 47.9513589,
+    "lon": -1.3559138
+  },
+  "Dompierre-du-Chemin, 35210, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.2677119,
+    "lon": -1.1428204
+  },
+  "Vitré, 35500, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1244503,
+    "lon": -1.214331
+  },
+  "Saint-Didier, 35220, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0950018,
+    "lon": -1.3713111
+  },
+  "Bais, 35680, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0102935,
+    "lon": -1.2905825
+  },
+  "Beauchêne, 61800, Orne, Normandie, FRANCE": {
+    "lat": 48.6794274,
+    "lon": -0.7243832
+  },
+  "Saint-Cast-le-Guildo, 22 FR": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
+  "Saint Potan, 22 FR": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Saint-Pôtan 22 FR": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Matignon, Bretagne, France": {
+    "lat": 48.5968982,
+    "lon": -2.2922438
+  },
+  "Matignon, 22": {
+    "lat": 48.608113,
+    "lon": -2.277326
+  },
+  "Rennes, , , ,": {
+    "lat": 48.1113387,
+    "lon": -1.6800198
+  },
+  "Le Lou-du-Lac, 35158, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.2024303,
+    "lon": -1.9978832
+  },
+  "Saint Jacques de la Lande": {
+    "lat": 48.0806436,
+    "lon": -1.7135029
+  },
+  "Rennes, 35,": {
+    "lat": 48.087414,
+    "lon": -1.529075
+  },
+  "Rennes , 35": {
+    "lat": 48.087414,
+    "lon": -1.529075
+  },
+  "Thourie (Ille et Vilaine), , , ,": {
+    "lat": 47.8554606,
+    "lon": -1.4800723
+  },
+  "Auverné (Loire-Inférieure), , , ,": {
+    "lat": 47.5917553,
+    "lon": -1.3300431
+  },
+  "Soudan, , , ,": {
+    "lat": 14.5844444,
+    "lon": 29.4917691
+  },
+  "Mesnil-Panneville, 76, France": {
+    "lat": 49.5899901,
+    "lon": 0.8921061
+  },
+  "Saint-Paër, 76631, Seine-Maritime, Normandie, France": {
+    "lat": 49.5161962,
+    "lon": 0.8803692
+  },
+  "Saint-Pierre-de-Varengeville, 76636, Seine-Maritime, Normandie, France": {
+    "lat": 49.5020498,
+    "lon": 0.9284353
+  },
+  "Auzouville-l'Esneval, 76045, Seine Maritime, Normandie, France": {
+    "lat": 49.6351055,
+    "lon": 0.8902949
+  },
+  "Emanville, 76234, Seine-Maritime, Normandie, France": {
+    "lat": 49.6227937,
+    "lon": 0.9593776
+  },
+  "Yerville, 76752, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Auzouville-l'Esneval, 76045, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6351055,
+    "lon": 0.8902949
+  },
+  "Émanville, 76234, Seine Maritime, Normandie, France": {
+    "lat": 49.6227937,
+    "lon": 0.9593776
+  },
+  "Limésy": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Bouville": {
+    "lat": 49.5605729,
+    "lon": 0.8937539
+  },
+  "Saint-Martin-aux-Arbres, 76760, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6498581,
+    "lon": 0.8926274
+  },
+  "Beaumont-le-Hareng, 76062, Seine-Maritime, Normandie, France": {
+    "lat": 49.6723789,
+    "lon": 1.2229978
+  },
+  "Etaimpuis, 76249, Seine-Maritime, Normandie, France": {
+    "lat": 49.6468591,
+    "lon": 1.1413236
+  },
+  "Montville, 76452, Seine-Maritime, Normandie, France": {
+    "lat": 49.5479845,
+    "lon": 1.0750949
+  },
+  "Ouville-l'Abbaye, 76760, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6947186,
+    "lon": 0.8597473
+  },
+  "Motteville, 76970, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Limésy, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Émanville, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6227937,
+    "lon": 0.9593776
+  },
+  "Brametot, 76140, Seine-Maritime, Normandie, France": {
+    "lat": 49.7835011,
+    "lon": 0.8670226
+  },
+  "Renfeugères - Goupillières, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5827975,
+    "lon": 0.9976856
+  },
+  "Goupillières, 76311, Seine-Maritime, Normandie, France": {
+    "lat": 49.5832391,
+    "lon": 0.9794989
+  },
+  "Fresquiennes, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5633687,
+    "lon": 1.0047394
+  },
+  "Berville, , , ,": {
+    "lat": 49.7076762,
+    "lon": 0.8325183
+  },
+  "Rouen, 76540, Seine-Maritime, Normandie, France": {
+    "lat": 49.4404591,
+    "lon": 1.0939658
+  },
+  "Pavilly, 76570, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Mont If, Seine-Maritime, Normandie, France": {
+    "lat": 49.5868961,
+    "lon": 0.8146738
+  },
+  "Fréville, Seine-Maritime, Normandie, France": {
+    "lat": 49.5638441,
+    "lon": 0.833594
+  },
+  "Fréville, Saint Martin, Seine-Maritime, Normandie, France": {
+    "lat": 49.5638441,
+    "lon": 0.833594
+  },
+  "Blacqueville, Seine-Maritime, Normandie, France": {
+    "lat": 49.5632173,
+    "lon": 0.8660735
+  },
+  "Berville en Caux, 76560, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7076762,
+    "lon": 0.8325183
+  },
+  "Ectot-l'Auber, 76227, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6493462,
+    "lon": 0.928977
+  },
+  "Vibeuf, 76737, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6933301,
+    "lon": 0.903621
+  },
+  "Region, Normandie, France": {
+    "lat": 49.8876641,
+    "lon": 1.0964386
+  },
+  "Ectot-l'Auber, 76227, Seine Maritime, Normandie, France": {
+    "lat": 49.6493462,
+    "lon": 0.928977
+  },
+  "Yerville, 76752, Seine Maritime, Normandie, France": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Sainte-Austreberthe, 76566, Seine Maritime, Normandie, France": {
+    "lat": 49.5971371,
+    "lon": 0.9746303
+  },
+  "Saussay, 76668, Seine Maritime, Normandie, France": {
+    "lat": 49.6345535,
+    "lon": 0.9398153
+  },
+  "Pavilly, 76495, Seine Maritime, Normandie, France": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Criquetot-sur-Longueville, 76197, Seine Maritime, Normandie, France": {
+    "lat": 49.7778018,
+    "lon": 1.0778882
+  },
+  "Limésy, 76385, Seine Maritime, Normandie, France": {
+    "lat": 49.6116823,
+    "lon": 0.9245242
+  },
+  "Vattetot-sur-Mer, 76726, Seine Maritime, Normandie, France": {
+    "lat": 49.7282797,
+    "lon": 0.2800862
+  },
+  "Saint-Martin-aux-Arbres, 76611, Seine Maritime, Normandie, France": {
+    "lat": 49.6498581,
+    "lon": 0.8926274
+  },
+  "Saint-Laurent en Caux, , , ,": {
+    "lat": 49.752549,
+    "lon": 0.8799089
+  },
+  "Cent-Acres, , , ,": {
+    "lat": 49.7667121,
+    "lon": 1.1416653
+  },
+  "Montville, , , ,": {
+    "lat": 49.5479845,
+    "lon": 1.0750949
+  },
+  "Varneville-Bretteville, 76721, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "Auzouville-sur-Saâne, 76047, Seine-Maritime, Normandie, France": {
+    "lat": 49.7450677,
+    "lon": 0.9362558
+  },
+  "Saint-Laurent en Caux, 76560, Seine Maritime, Normandie, France": {
+    "lat": 49.752549,
+    "lon": 0.8799089
+  },
+  "Auzouville-sur-Saâne ; 76730 ; Normandie ; France": {
+    "lat": 49.7450677,
+    "lon": 0.9362558
+  },
+  "Lindebeuf, 76760, Seine Maritime, Normandie, France": {
+    "lat": 49.7107011,
+    "lon": 0.9064449
+  },
+  "Gonnetot, 76306, Seine-Maritime, Normandie, France": {
+    "lat": 49.7661757,
+    "lon": 0.8963538
+  },
+  "Canville-les-deux-églises, 76560,Seine Maritime, FRANCE": {
+    "lat": 49.7698389,
+    "lon": 0.841072
+  },
+  "Bénesville, 76077, Seine-Maritime, Normandie, France": {
+    "lat": 49.75513,
+    "lon": 0.8354166
+  },
+  "Tourville-sur-Arques, , , ,": {
+    "lat": 49.8583687,
+    "lon": 1.1009024
+  },
+  "Notre Dame du Parc, , , ,": {
+    "lat": 49.7452349,
+    "lon": 1.1251007
+  },
+  "Notre-Dame-du-Parc, 76478, Seine-Maritime, Normandie, France": {
+    "lat": 49.7452349,
+    "lon": 1.1251007
+  },
+  "Longueville, , , ,": {
+    "lat": 50.7318957,
+    "lon": 1.8791461
+  },
+  "Reuville, , Seine-Maritime, Normandie, France": {
+    "lat": 49.7511787,
+    "lon": 0.8674962
+  },
+  "Auppegard, 76036, Seine-Maritime, Normandie, France": {
+    "lat": 49.8302575,
+    "lon": 1.0291987
+  },
+  "Ambrumesnil, 76004, Seine-Maritime, Normandie, France": {
+    "lat": 49.8579786,
+    "lon": 0.9954325
+  },
+  "Tourville-sur-Arques, 76707, Seine-Maritime, Normandie, France": {
+    "lat": 49.8583687,
+    "lon": 1.1009024
+  },
+  "Hautot-sur-Mer, 76349, Seine-Maritime, Normandie, France": {
+    "lat": 49.8958976,
+    "lon": 1.0341419
+  },
+  "Offranville, , Seine Maritime, Normandie, France": {
+    "lat": 49.8703506,
+    "lon": 1.0502415
+  },
+  "Longueil, 76395, Seine-Maritime, Normandie, France": {
+    "lat": 49.886782,
+    "lon": 0.9559305
+  },
+  "Bermonville, 76080, Seine-Maritime, Normandie, France": {
+    "lat": 49.6428449,
+    "lon": 0.6412314
+  },
+  "Bretteville, 76..., Seine-Maritime, Normandie, France": {
+    "lat": 49.7619022,
+    "lon": 0.8754054
+  },
+  "Saint-Denis-sur-Scie, 76574, Seine-Maritime, Normandie, France": {
+    "lat": 49.704481,
+    "lon": 1.0947367
+  },
+  "Gonneville-sur-Scie, 76308, Seine-Maritime, Normandie, France": {
+    "lat": 49.7547651,
+    "lon": 1.0755774
+  },
+  "Bretteville (Varneville-Bretteville), 76..., Seine-Maritime, Normandie, France": {
+    "lat": 49.6513816,
+    "lon": 1.0439724
+  },
+  "La Cerlangue,76430,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5071407,
+    "lon": 0.4148421
+  },
+  "La Remuée,76430,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5262384,
+    "lon": 0.3992811
+  },
+  "Villequier, 76490 Seine-Maritime, Normandie, France": {
+    "lat": 49.5073254,
+    "lon": 0.6517826
+  },
+  "Graimbouville, 76430, Seine-Maritime, Normandie, France": {
+    "lat": 49.5756882,
+    "lon": 0.3326565
+  },
+  "Saint-Vincent-Cramesnil, 76430, Seine-Maritime, Normandie, France": {
+    "lat": 49.5068234,
+    "lon": 0.360228
+  },
+  "Saint-Jean-de-Folleville, 76170, Seine-Maritime, Normandie, France": {
+    "lat": 49.523637,
+    "lon": 0.5062186
+  },
+  "Saint-Antoine-la-Forêt, 76170, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5371621,
+    "lon": 0.4714405
+  },
+  "Gommerville, 76430, Seine-Maritime, Normandie, France": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Graimbouville, 76430, Seine Maritime, Normandie, France, Seine Maritime,": {
+    "lat": 49.5756882,
+    "lon": 0.3326565
+  },
+  "Saint-Gilles-de-la-Neuville, 76170 Seine-Maritime, Normandie, France": {
+    "lat": 49.5721309,
+    "lon": 0.3625988
+  },
+  "Gommerville, 76303 Seine-Maritime, Normandie, Normandie, France": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Graimbouville, 76430, Seine-Maritime, FRANCE": {
+    "lat": 49.5756882,
+    "lon": 0.3326565
+  },
+  "Sandouville, 76430, Seine-Maritime, FRANCE": {
+    "lat": 49.4966218,
+    "lon": 0.3167449
+  },
+  "Gommerville, 76430, Seine-Maritime, FRANCE": {
+    "lat": 49.5565588,
+    "lon": 0.3683088
+  },
+  "Sainneville, 76430,Seine-Maritime,Normandie,FRANCE": {
+    "lat": 49.5566905,
+    "lon": 0.286551
+  },
+  "Angerville-l'Orcher, 76014, Seine-Maritime, Normandie, France": {
+    "lat": 49.5666929,
+    "lon": 0.2593385
+  },
+  "Graimbouville, 76314, Seine-Maritime, Normandie, France": {
+    "lat": 49.5756882,
+    "lon": 0.3326565
+  },
+  "Angerville-l'Orcher, 76280, Seine-Maritime, Normandie, France": {
+    "lat": 49.5881645,
+    "lon": 0.281906
+  },
+  "Sainneville, 76430, Seine-Maritime, FRANCE": {
+    "lat": 49.5566905,
+    "lon": 0.286551
+  },
+  "Octeville-sur-Mer, 76930, Seine-Maritime, FRANCE": {
+    "lat": 49.5553201,
+    "lon": 0.1161519
+  },
+  "Graimbouville, 76314 Seine-Maritime, Normandie, Normandie, France": {
+    "lat": 49.5756882,
+    "lon": 0.3326565
+  },
+  "Sainneville, 76551 Seine-Maritime, Normandie, Normandie, France": {
+    "lat": 49.5566905,
+    "lon": 0.286551
+  },
+  "Épretot, 76239 Seine-Maritime, Normandie, Normandie, France": {
+    "lat": 49.5403053,
+    "lon": 0.3130389
+  },
+  "Bréauté, 76141 Seine-Maritime, Normandie, Normandie, France": {
+    "lat": 49.6280806,
+    "lon": 0.4006336
+  },
+  "Saint-Aubin-Routot, 76430, Seine-Maritime, Normandie, France": {
+    "lat": 49.5240901,
+    "lon": 0.3253756
+  },
+  "Saint-Jean-de-la-Neuville, 76593, Seine-Maritime, Normandie, France": {
+    "lat": 49.574399,
+    "lon": 0.4210112
+  },
+  "Étainhus, 76250, Seine-Maritime, Normandie, France": {
+    "lat": 49.567389,
+    "lon": 0.3101189
+  },
+  "Cramesnil, Saint-Vincent-Cramesnil, 76658, Seine-Maritime, Normandie, France": {
+    "lat": 49.5132698,
+    "lon": 0.3790388
+  },
+  "Saint-Gilles-de-la-Neuville, 76586, Seine-Maritime, Normandie, France": {
+    "lat": 49.5721309,
+    "lon": 0.3625988
+  },
+  "Parc-d'Anxtot, 76494, Seine-Maritime, Normandie, France": {
+    "lat": 49.5825285,
+    "lon": 0.3896847
+  },
+  "Mélamare, 76421, Seine-Maritime, Normandie, France": {
+    "lat": 49.5388511,
+    "lon": 0.4510389
+  },
+  "Saint-Romain-de-Colbosc, 76647, Seine-Maritime, Normandie, France": {
+    "lat": 49.5313601,
+    "lon": 0.3579164
+  },
+  "Les Trois-Pierres, 76714, Seine-Maritime, France": {
+    "lat": 49.5472915,
+    "lon": 0.4151869
+  },
+  "Gromesnil, 76430, Seine-Maritime": {
+    "lat": 49.5183345,
+    "lon": 0.3467166
+  },
+  "Octeville-sur-Mer, 76481, Seine-Maritime, Normandie, France": {
+    "lat": 49.5553201,
+    "lon": 0.1161519
+  },
+  "Colleville, 76183, Seine-Maritime, Normandie, France": {
+    "lat": 49.7492373,
+    "lon": 0.452349
+  },
+  "Toussaint, 76708, Seine-Maritime, Normandie, France": {
+    "lat": 49.73688,
+    "lon": 0.42238
+  },
+  "Saint-Germain-du-Crioult, 14585, Calvados, Normandie, France": {
+    "lat": 48.8519027,
+    "lon": -0.606869
+  },
+  "Villainville, 76280, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6603362,
+    "lon": 0.2440325
+  },
+  "Gonneville-la-Mallet, 76280, Seine-Maritime, Normandie, FRANÇE": {
+    "lat": 49.6400396,
+    "lon": 0.2228718
+  },
+  "Criquetot-L'Esneval, 76280, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6449576,
+    "lon": 0.2661419
+  },
+  "Vassy, 14726, Calvados, Normandie, France": {
+    "lat": 48.8654183,
+    "lon": -0.658462
+  },
+  "Le Theil-Bocage, 14686, Calvados, Normandie, France": {
+    "lat": 48.880543,
+    "lon": -0.7153107
+  },
+  "Le-Theil-Bocage, Calvados, Normandie, France": {
+    "lat": 48.880543,
+    "lon": -0.7153107
+  },
+  "Sainte-Marie-Laumont, 14618, Calvados, Normandie, France": {
+    "lat": 48.9210096,
+    "lon": -0.9002383
+  },
+  "Le Theil-Bocage, Calvados, Normandie, France": {
+    "lat": 48.880543,
+    "lon": -0.7153107
+  },
+  "Vassy, Calvados, Normandie, France": {
+    "lat": 48.8654183,
+    "lon": -0.658462
+  },
+  "Daubeuf-Serville, 76110, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6951225,
+    "lon": 0.4769864
+  },
+  "Les Loges, 76790, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6991265,
+    "lon": 0.2827091
+  },
+  "Les Loges, 76390, Seine-Maritime, Normandie, France": {
+    "lat": 49.6991265,
+    "lon": 0.2827091
+  },
+  "Bordeaux Saint Clair, 76, seine maritime, Normandie, France": {
+    "lat": 49.7007871,
+    "lon": 0.2563417
+  },
+  "Bordeaux-Saint-Clair, 76117, Seine-Maritime, Normandie, France": {
+    "lat": 49.7007871,
+    "lon": 0.2563417
+  },
+  "Bordeaux Saint Clair, 76 seine maritime, Normandie, France": {
+    "lat": 49.7007871,
+    "lon": 0.2563417
+  },
+  "Vassy, 14, Calvados, Normandie, FRANCE": {
+    "lat": 48.855615,
+    "lon": -0.675931
+  },
+  "Vassy, 14410, Calvados, Normandie, FRANCE": {
+    "lat": 48.8654183,
+    "lon": -0.658462
+  },
+  "Lassy, Calvados, Normandie, France": {
+    "lat": 48.9164608,
+    "lon": -0.6899289
+  },
+  "Lassy, 14357, Calvados, Normandie, France": {
+    "lat": 48.9164608,
+    "lon": -0.6899289
+  },
+  "Montaigu la Brisette (Manche) France": {
+    "lat": 49.56417,
+    "lon": -1.42084
+  },
+  "St Germain de Tournebut (Manche) France": {
+    "lat": 49.53262,
+    "lon": -1.39738
+  },
+  "Petiville, 76499, Seine Maritime, Normandie, France": {
+    "lat": 49.4616499,
+    "lon": 0.5857132
+  },
+  "Foucart, 76279, Seine Maritime, Normandie, France": {
+    "lat": 49.6130366,
+    "lon": 0.5962335
+  },
+  "Saint-Nicolas-de-la-Haie, 76626, Seine Maritime, Normandie, France": {
+    "lat": 49.5557266,
+    "lon": 0.6187724
+  },
+  "Bolleville, 76115, Seine Maritime, Normandie, France": {
+    "lat": 49.5990967,
+    "lon": 0.5633254
+  },
+  "Alliquerville, Trouville, 76210, Seine Maritime, Normandie, France": {
+    "lat": 49.5911325,
+    "lon": 0.5957562
+  },
+  "Lillebonne, 76384, Seine Maritime, Normandie, France": {
+    "lat": 49.5188282,
+    "lon": 0.534411
+  },
+  "Radicatel, France": {
+    "lat": 49.5069708,
+    "lon": 0.5041748
+  },
+  "Saint-Nicolas-de-la-Taille, 76627, Seine Maritime, Normandie, France": {
+    "lat": 49.5097996,
+    "lon": 0.4723992
+  },
+  "Gruchet-le-Valasse, 76329, Seine Maritime, Normandie, France": {
+    "lat": 49.5569416,
+    "lon": 0.4866308
+  },
+  "Auberbosc - Auzouville-Auberbosc, 76640, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6271512,
+    "lon": 0.5711206
+  },
+  "Trouville, 76210, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5732368,
+    "lon": 0.6010584
+  },
+  "Bennetot, 76640, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6720105,
+    "lon": 0.5523447
+  },
+  "Thiergeville, 76540, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7189057,
+    "lon": 0.4966203
+  },
+  "Foucart, 76640, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6130366,
+    "lon": 0.5962335
+  },
+  "Ouville-L'Abbaye, 76760, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6947186,
+    "lon": 0.8597473
+  },
+  "Le Torp-Mesnil, 76560, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7178748,
+    "lon": 0.8995967
+  },
+  "Yerville (76) Thibermesnil": {
+    "lat": 49.6713037,
+    "lon": 0.8943742
+  },
+  "Motteville (76)": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Croix-Mare (76)": {
+    "lat": 49.60033,
+    "lon": 0.8497964
+  },
+  "La Cerlangue, 76430, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5071407,
+    "lon": 0.4148421
+  },
+  "Saint-Martin-aux-Arbres, 76611, Seine-Maritime, Normandie, France": {
+    "lat": 49.6498581,
+    "lon": 0.8926274
+  },
+  "Cideville, 76174, Seine Maritime, Normandie, France": {
+    "lat": 49.6156864,
+    "lon": 0.8932818
+  },
+  "Motteville, 76456, Seine Maritime, Normandie, France": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Saint-Martin-Aux-Arbres, Seine-Maritime, Normandie, France": {
+    "lat": 49.6498581,
+    "lon": 0.8926274
+  },
+  "Saint-Martin-aux-Arbres, Seine-Maritime, Normandie, France": {
+    "lat": 49.6498581,
+    "lon": 0.8926274
+  },
+  "Croix-Mare, 76203, Seine Maritime, Normandie, France": {
+    "lat": 49.60033,
+    "lon": 0.8497964
+  },
+  "Flamanville, 76264, Seine Maritime, Normandie, France": {
+    "lat": 49.6348243,
+    "lon": 0.839636
+  },
+  "Cidetot - Mesnil-Panneville, 76433, Seine Maritime, Normandie, France": {
+    "lat": 49.6077318,
+    "lon": 0.8681535
+  },
+  "Rouen, 76540, Seine Maritime, Normandie, France": {
+    "lat": 49.4404591,
+    "lon": 1.0939658
+  },
+  "Le Mesnil-Durdent, 76428, Seine Maritime, Normandie, France": {
+    "lat": 49.816042,
+    "lon": 0.7717656
+  },
+  "Amfreville-les-Champs, 76006, Seine Maritime, Normandie, France": {
+    "lat": 49.6972383,
+    "lon": 0.815775
+  },
+  "Criquetot-sur-Ouville, 76198, Seine Maritime, Normandie, France": {
+    "lat": 49.67588,
+    "lon": 0.84519
+  },
+  "Ectot-les-Baons, 76228, Seine Maritime, Normandie, France": {
+    "lat": 49.64282,
+    "lon": 0.80644
+  },
+  "Ourville-en-Caux, 76490, Seine Maritime, Normandie, France": {
+    "lat": 49.7291568,
+    "lon": 0.6020575
+  },
+  "Étoutteville, 76253, Seine Maritime, Normandie, France": {
+    "lat": 49.6765378,
+    "lon": 0.7854339
+  },
+  "Yvecrique, 76757, Seine Maritime, Normandie, France": {
+    "lat": 49.6879087,
+    "lon": 0.8094156
+  },
+  "Duclair, 76222, Seine Maritime, Normandie, France": {
+    "lat": 49.482563,
+    "lon": 0.8754968
+  },
+  "Saint-Paër, 76631, Seine Maritime, Normandie, France": {
+    "lat": 49.5161962,
+    "lon": 0.8803692
+  },
+  "La Croupte, 14210, Calvados, Normandie, France": {
+    "lat": 49.0233333,
+    "lon": 0.2872222
+  },
+  "Yerville, 76, Seine-Maritime, Normandie, F": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Valliquerville, 76718, Seine-Maritime, Normandie, France": {
+    "lat": 49.614002,
+    "lon": 0.6835353
+  },
+  "Bertreville, Seine-Maritime, Normandie, France": {
+    "lat": 49.7673564,
+    "lon": 0.5801703
+  },
+  "Goupillières, 76570, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5832391,
+    "lon": 0.9794989
+  },
+  "Auzouville L'esneval, 76760, Seine Maritime, FRANCE": {
+    "lat": 49.6432017,
+    "lon": 0.8862882
+  },
+  "Amfreville-les-Champs, 76560, Seine-Maritime, FRANCE": {
+    "lat": 49.6972383,
+    "lon": 0.815775
+  },
+  "Yerville, 76760, Seine maritime, FRANCE": {
+    "lat": 49.6688705,
+    "lon": 0.8974236
+  },
+  "Pavilly, 76570, Seine Maritime, FRANCE": {
+    "lat": 49.5677557,
+    "lon": 0.9534847
+  },
+  "Motteville, 76970, Seine Maritime, FRANCE": {
+    "lat": 49.6347409,
+    "lon": 0.8553001
+  },
+  "Sainte-Austreberthe, 76570, Seine Maritime, FRANCE": {
+    "lat": 49.5971371,
+    "lon": 0.9746303
+  },
+  "Ancretiéville-Saint-Victor, Seine maritime, FRANCE": {
+    "lat": 49.6521319,
+    "lon": 0.9698512
+  },
+  "Ancretieville-St-Victor, Seine maritime, FRANCE": {
+    "lat": 49.6521319,
+    "lon": 0.9698512
+  },
+  "Blacqueville, 76, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.5632173,
+    "lon": 0.8660735
+  },
+  "Panneville, 76, Seine Maritime, Normandie, FRANCE": {
+    "lat": 49.5899901,
+    "lon": 0.8921061
+  },
+  "Touffreville la Corbeline, , 76, Seine Maritime, ,": {
+    "lat": 49.5814283,
+    "lon": 0.7643983
+  },
+  "Ste Marguerite De Duclair, 76, Seine Maritime, FRANCE": {
+    "lat": 49.4890051,
+    "lon": 0.8649464
+  },
+  "Eancé, , , ,la Cour": {
+    "lat": 47.8201824,
+    "lon": -1.2458419
+  },
+  "Villepot, , , ,": {
+    "lat": 47.7756596,
+    "lon": -1.2778074
+  },
+  "Martigné-Ferchaud (Ille et Vilaine), , , ,St Morand": {
+    "lat": 47.8016735,
+    "lon": -1.2790125
+  },
+  "Eancé, , , ,": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Forges la Forêt, , , ,": {
+    "lat": 47.8619159,
+    "lon": -1.2793479
+  },
+  "Chelun, , , ,": {
+    "lat": 47.8538848,
+    "lon": -1.2234963
+  },
+  "La Rouaudière, 53": {
+    "lat": 48.234359,
+    "lon": -1.84403
+  },
+  "Eancé (35)": {
+    "lat": 47.822195,
+    "lon": -1.2443964
+  },
+  "Ste Gemmes d'Andigné 49": {
+    "lat": 47.6670831,
+    "lon": -0.8948534
+  },
+  "Senonnes, 53259, Mayenne, Pays de la Loire, France": {
+    "lat": 47.798134,
+    "lon": -1.203375
+  },
+  "Congrier, 53073, Mayenne, Pays de la Loire, France": {
+    "lat": 47.8094454,
+    "lon": -1.1174983
+  },
+  "Saint-Michel-De-La-Roë, 53350, Mayenne, Pays De La Loire, FRANCE": {
+    "lat": 47.879064,
+    "lon": -1.1277699
+  },
+  "La Rouaudière, 53390, Mayenne, Pays De La Loire, FRANCE": {
+    "lat": 47.8314372,
+    "lon": -1.1915092
+  },
+  "Moisdon la Rivière (Loire-Inférieure), , , ,": {
+    "lat": 47.6211147,
+    "lon": -1.3728134
+  },
+  "Saint Julien de Vouvantes, , , ,": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
+  },
+  "La Chapelle Glain": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "Erbray, , , ,": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "Juigné les Moutiers": {
+    "lat": 47.504597,
+    "lon": -2.1160997
+  },
+  "La Chapelle Glain 44": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "La Chapelle-Glain": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "Chazé-sur-Argos, 49089, Maine-et-Loire, Pays de la Loire, France": {
+    "lat": 47.6172265,
+    "lon": -0.8926005
+  },
+  "Noëllet, 49226, Maine-et-Loire, Pays de la Loire, France": {
+    "lat": 47.6974618,
+    "lon": -1.0848943
+  },
+  "Gené, 49148, Maine-et-Loire, Pays de la Loire, France": {
+    "lat": 47.6307355,
+    "lon": -0.8025682
+  },
+  "Noëllet, 49520, Maine-et-Loire, Pays de la Loire, FRANCE": {
+    "lat": 47.6974618,
+    "lon": -1.0848943
+  },
+  "La Chapelle-Heulin, 44330, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.1760091,
+    "lon": -1.3404289
+  },
+  "La Chapelle-Glain, 44031, Loire Atlantique, Pays de la Loire, France": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "Saint Julien de Vouvantes (44)": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
+  },
+  "La  Chapelle-glain": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "Riaillé, 44144, Loire-Atlantique, Pays de la Loire, France": {
+    "lat": 47.5171973,
+    "lon": -1.295781
+  },
+  "ERBRAY,44110,FR": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "DERVAL,44590,FR": {
+    "lat": 47.6673622,
+    "lon": -1.6702011
+  },
+  "Erbray Loire-Inférieure,": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "La Poterie - Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0419455,
+    "lon": -1.7043393
+  },
+  "Chatillon sur Seiche, 35": {
+    "lat": 48.0345442,
+    "lon": -1.6698114
+  },
+  "Bruz, 35170, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0245814,
+    "lon": -1.7471629
+  },
+  "Chatillon sur Seiche, 35, 35": {
+    "lat": 48.0345442,
+    "lon": -1.6698114
+  },
+  "LAUNAY - Chatillon sur Seiche, 35, 35": {
+    "lat": 48.054398,
+    "lon": -1.6862303
+  },
+  "Noyal-Châtillon-sur-Seiche, 35230, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0425725,
+    "lon": -1.6619865
+  },
+  "noyal sur Seiche - Noyal-Châtillon-sur-Seiche, 35230, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0542473,
+    "lon": -1.6574233
+  },
+  "Toussaint - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1149134,
+    "lon": -1.6795058
+  },
+  "Le Marais - Chatillon sur Seiche, 35, 35": {
+    "lat": 48.0529872,
+    "lon": -1.7051859
+  },
+  "Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1113387,
+    "lon": -1.6800198
+  },
+  "Toussaints - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1091321,
+    "lon": -1.6756264
+  },
+  "Saint-Jacques-de-la-Lande, 35136, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0806436,
+    "lon": -1.7135029
+  },
+  "toussaint - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1149134,
+    "lon": -1.6795058
+  },
+  "Québriac, 35190, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.3438911,
+    "lon": -1.826988
+  },
+  "Brécé, 35530, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1102058,
+    "lon": -1.4817649
+  },
+  "Noyal-sur-Vilaine, 35530, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1140789,
+    "lon": -1.5234735
+  },
+  "Mordelles, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0733304,
+    "lon": -1.8485204
+  },
+  "Le Rheu, 35650, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1006715,
+    "lon": -1.7937675
+  },
+  "Chavagne, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0539088,
+    "lon": -1.7881749
+  },
+  "noyal sur Seiche - Noyal sur Seiche, 35, 35, Bretagne, FRANCE": {
+    "lat": 48.0630855,
+    "lon": -1.6515622
+  },
+  "Noyal-Châtillon-sur-Seiche, 35206, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.0425725,
+    "lon": -1.6619865
+  },
+  "Burghill, Royaume-Uni": {
+    "lat": 52.0960708,
+    "lon": -2.7643597
+  },
+  "Saint-Jean-sur-Couesnon, 35282, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.2795483,
+    "lon": -1.3638626
+  },
+  "Brecknock Road, London, Royaume-Uni": {
+    "lat": 51.5535569,
+    "lon": -0.1342927
+  },
+  "Brecon, Royaume-Uni": {
+    "lat": 51.9472048,
+    "lon": -3.391696
+  },
+  "Ystradgynlais, Royaume-Uni": {
+    "lat": 51.777311,
+    "lon": -3.758499
+  },
+  "Glen, Wales": {
+    "lat": 51.4106441,
+    "lon": -3.2851826
+  },
+  "Talgarth, Brecon, Royaume-Uni": {
+    "lat": 51.996079,
+    "lon": -3.2323393
+  },
+  "Tretower, England": {
+    "lat": 50.4224259,
+    "lon": -4.1299898
+  },
+  "Bredwardine, Royaume-Uni": {
+    "lat": 52.0945207,
+    "lon": -2.9778651
+  },
+  "Agincourt, 54006, Meurthe et Moselle, Lorraine, France": {
+    "lat": 48.7323472,
+    "lon": 6.236384
+  },
+  "Hereford, Herefordshire, England": {
+    "lat": 52.0553813,
+    "lon": -2.7151735
+  },
+  "Leominster, England": {
+    "lat": 52.2273558,
+    "lon": -2.7375333
+  },
+  "Whitechurch, England": {
+    "lat": 53.7973595,
+    "lon": -1.4507693
+  },
+  "Brecon, England": {
+    "lat": 51.542246,
+    "lon": 0.7010928
+  },
+  "Castle Bytham, Lincolnshire, England": {
+    "lat": 52.754958,
+    "lon": -0.5362353
+  },
+  "By Sands, Cumberland, England": {
+    "lat": 54.9172083,
+    "lon": -3.0753992
+  },
+  "Woodbridge, Suffolk, England": {
+    "lat": 52.0941323,
+    "lon": 1.3199383
+  },
+  "Burgh by Sands, Royaume-Uni": {
+    "lat": 54.9172083,
+    "lon": -3.0753992
+  },
+  "Norfolk, England": {
+    "lat": 52.666667,
+    "lon": 1
+  },
+  "Evesham, Worcestershire, England": {
+    "lat": 52.0940158,
+    "lon": -1.9483083
+  },
+  "Lyonshall, Kington, Royaume-Uni": {
+    "lat": 52.1959619,
+    "lon": -2.9646306
+  },
+  "Jutland, Norvège": {
+    "lat": 58.8390063,
+    "lon": 5.6345712
+  },
+  "Lillestrom, Norvège": {
+    "lat": 59.9155395,
+    "lon": 11.2170354
+  },
+  "Tønsberg, Norvège": {
+    "lat": 59.3549795,
+    "lon": 10.2820491
+  },
+  "Lillestrøm, Norvège": {
+    "lat": 59.9155395,
+    "lon": 11.2170354
+  },
+  "Tjøllingvollen, Norvège": {
+    "lat": 59.0556397,
+    "lon": 10.1260468
+  },
+  "Danmark, Suède": {
+    "lat": 59.8322934,
+    "lon": 17.744172
+  },
+  "Uppsala, Suède": {
+    "lat": 59.8586126,
+    "lon": 17.6387436
+  },
+  "Saint-Riquier, 80716, Somme, Picardie, France": {
+    "lat": 50.1357818,
+    "lon": 1.9467999
+  },
+  "St Aubin - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.2630217,
+    "lon": -1.607077
+  },
+  "Pacé, 35740, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1465726,
+    "lon": -1.7728997
+  },
+  "Vezin-le-Coquet, 35132, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1195379,
+    "lon": -1.75711
+  },
+  "St-Grégoire, 35278, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1524129,
+    "lon": -1.685398
+  },
+  "Vezin-le-Coquet, 35353, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1195379,
+    "lon": -1.75711
+  },
+  "La Chapelle-des-Fougeretz, 35520, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.178066,
+    "lon": -1.7341163
+  },
+  "Saint-Grégoire, 35760, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1524129,
+    "lon": -1.685398
+  },
+  "Betton, 35024, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1817122,
+    "lon": -1.6414898
+  },
+  "Montgermont, 35189, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1557367,
+    "lon": -1.7162062
+  },
+  "La Chapelle-des-Fougeretz, 35059, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.178066,
+    "lon": -1.7341163
+  },
+  "Rennes (St Germain), 35238, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1105789,
+    "lon": -1.6762673
+  },
+  "Rennes (St Sauveur), 35238, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1084993,
+    "lon": -1.6731782
+  },
+  "Noyal sur Seiche, 35, 35, Bretagne, FRANCE": {
+    "lat": 48.0630855,
+    "lon": -1.6515622
+  },
+  "Auditoire - Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.0416478,
+    "lon": -1.7026221
+  },
+  "Cintré, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1058654,
+    "lon": -1.8712888
+  },
+  "Soudan, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.7376378,
+    "lon": -1.3069406
+  },
+  "Villepot, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.7756596,
+    "lon": -1.2778074
+  },
+  "Senonnes, 53390, Mayenne, Pays de la Loire, FRANCE": {
+    "lat": 47.798134,
+    "lon": -1.203375
+  },
+  "Pouancé, 49420, Maine-et-Loire, Pays de la Loire, FRANCE": {
+    "lat": 47.7403392,
+    "lon": -1.1729927
+  },
+  "Erbray, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.6552164,
+    "lon": -1.3179329
+  },
+  "La Chapelle-Glain, 44670, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.6219886,
+    "lon": -1.1960495
+  },
+  "le boulay - Erbray, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.6379108,
+    "lon": -1.3265482
+  },
+  "TREFFENDEL (35)": {
+    "lat": 48.041297,
+    "lon": -2.0090611
+  },
+  "IFFENDIC (35)": {
+    "lat": 48.1290768,
+    "lon": -2.0336601
+  },
+  "Saint PERAN (35)": {
+    "lat": 48.0545538,
+    "lon": -2.0564374
+  },
+  "Saint GONLAY (35)": {
+    "lat": 48.1133696,
+    "lon": -2.065623
+  },
+  "TALENSAC (35)": {
+    "lat": 48.1092798,
+    "lon": -1.9269063
+  },
+  "Saint MALON sur MEL (35)": {
+    "lat": 48.0933722,
+    "lon": -2.0976082
+  },
+  "Le VERGER (35)": {
+    "lat": 47.989681,
+    "lon": -1.777294
+  },
+  "La Selle-Guerchaise, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.9449058,
+    "lon": -1.1745286
+  },
+  "Rannée, 35130, Ille-Et-Vilaine, Bretagne": {
+    "lat": 47.924362,
+    "lon": -1.240552
+  },
+  "Rannée, 35235, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.924362,
+    "lon": -1.240552
+  },
+  "Corseul, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.4810524,
+    "lon": -2.1684565
+  },
+  "Pluduno, 22 Côtes d'Armor, Bretagne, France": {
+    "lat": 48.523744,
+    "lon": -2.2889406
+  },
+  "Etables-sur-Mer, 22055, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.6266514,
+    "lon": -2.8400063
+  },
+  "Brem-sur-Mer, 85243, Vendée, Pays de la Loire, France": {
+    "lat": 46.6055556,
+    "lon": -1.8297222
+  },
+  "Saint Potan, Côtes d'Armor, France": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Pléboulle, 22550, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.6089629,
+    "lon": -2.3376606
+  },
+  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "Pluduno, Côtes d'Armor, France": {
+    "lat": 48.523744,
+    "lon": -2.2889406
+  },
+  "22, Saint-Potan, Côtes d'Armor": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "22, Pluduno, Côtes d'Armor": {
+    "lat": 48.523744,
+    "lon": -2.2889406
+  },
+  "22, St-Potan, Côtes d'Armor": {
+    "lat": 48.5586158,
+    "lon": -2.2902601
+  },
+  "22, Ruca, Côtes d'Armor": {
+    "lat": 48.5667727,
+    "lon": -2.338703
+  },
+  "Pléhérel (Fréhel), 22179, Côtes d'Armor, Bretagne, FRANCE": {
+    "lat": 48.652384,
+    "lon": -2.3640432
+  },
+  "Pléhérel, 22178, Côtes d'Armor, Bretagne, France": {
+    "lat": 48.652384,
+    "lon": -2.3640432
   }
 }
