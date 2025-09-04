@@ -1927,7 +1927,9 @@ export function openSearchModal() {
             background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
-            align-items: center;
+            /* align-items: center; */
+            align-items: flex-start;  /* CHANGÉ */
+            padding-top: 2px;
             z-index: 10000;
         }
         
@@ -1936,7 +1938,9 @@ export function openSearchModal() {
             height: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
+            /* align-items: center; */
+            align-items: flex-start;  /* CHANGÉ */
+            padding-top: 2px;
         }
         
         .search-modal-content {
@@ -2153,6 +2157,16 @@ export function openSearchModal() {
  * Configure les événements de la modale
  */
 function setupModalEvents() {
+
+
+
+
+
+
+
+
+
+
     const searchType = document.getElementById('search-modal-search-type');
     const searchInput = document.getElementById('search-modal-search-input');
     const searchButton = document.getElementById('search-modal-search-button');
@@ -2203,6 +2217,7 @@ function setupModalEvents() {
             closeSearchModal();
         }
     });
+    
 }
 
 /**
