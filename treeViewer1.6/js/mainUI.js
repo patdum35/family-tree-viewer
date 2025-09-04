@@ -2158,6 +2158,23 @@ export function openSearchModal() {
                 margin-bottom: 4px !important; /* Réduire de 15px à 8px */
                 font-size: 12px !important;
             }
+
+
+            #search-modal-search-type {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-image: url('data:image/svg+xml;utf8,<svg fill="%23ff9800" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+                background-repeat: no-repeat;
+                background-position: right 8px center;
+                background-size: 16px;
+                padding-right: 30px !important;
+                border: 2px solid #ff9800 !important;
+                border-radius: 6px !important;
+                font-size: 16px !important; /* Évite le zoom sur iOS */
+            }
+
+
         }
 
 
