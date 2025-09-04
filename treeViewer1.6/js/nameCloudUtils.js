@@ -1,8 +1,8 @@
 import { state } from './main.js';
 
 export function extractYear(dateString) {
-    if (!dateString) return '0';
-
+    // if (!dateString) return '0';
+    if (!dateString) return null;
     // Test spécifique pour les entiers seuls (1, 12, 123, 1234, -50, etc.)
     if (/^-?\d+$/.test(dateString)) {
         return parseInt(dateString);
@@ -20,7 +20,8 @@ export function extractYear(dateString) {
     
     // Fallback sur la méthode originale si pas de match
     const year = parts[parts.length - 1];
-    return parseInt(year) || '0';
+    // return parseInt(year) || '0';
+    return parseInt(year) || null;
 }
 
 const excludedSurNames = new Set([
@@ -284,7 +285,7 @@ export function hasDateInRange(person, config, stats) {
     return { inRange: false, date: null };
 }
 
-function findDateForPerson(personId, stats) {
+export function findDateForPerson(personId, stats) {
     const person = state.gedcomData.individuals[personId];
     if (!person) return null;
 
@@ -377,6 +378,7 @@ function findDateForPerson(personId, stats) {
                 }
             }
         }
+        
     }
 
     // Fonction pour descendre aux descendants
@@ -437,7 +439,40 @@ function findDateForPerson(personId, stats) {
         }
     }
 
+    // remonter aux ancêtres
     checkAncestors(personId, 0, new Set());
+
+    // remonter au conjoint pour avoir une date
+    if (!dateFound) {
+        let spouseInfo = null;
+        let spouseId = null;
+        if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+            const firstSpouseFamily = state.gedcomData.families[person.spouseFamilies[0]];
+            if (firstSpouseFamily) {
+                spouseId = firstSpouseFamily.husband === personId 
+                    ? firstSpouseFamily.wife 
+                    : firstSpouseFamily.husband;
+                
+                if (spouseId) {
+                    const spouse = state.gedcomData.individuals[spouseId];
+                    if (spouse) {
+                        if (spouse.birthDate) {
+                            return { year: extractYear(spouse.birthDate), type: 'birth' };
+                        }
+                        if (spouse.deathDate) {
+                            return { year: extractYear(spouse.deathDate), type: 'birth' };
+                        }                        
+                    }
+                }
+            }
+        }
+
+        // remonter aux ancêtres du conjoint pour avoir une date
+        if (!dateFound && spouseId) {
+            checkAncestors(spouseId, 0, new Set());
+        }
+    }
+
 
     if (!dateFound) {
         checkDescendants(personId, 0, new Set());

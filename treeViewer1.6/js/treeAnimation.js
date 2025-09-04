@@ -15,6 +15,7 @@ import { fetchTileWithCache } from './mapTilesPreloader.js';
 import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
 import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
 import { debugLog } from './debugLogUtils.js'
+import { findYoungestPerson } from './utils.js';
 
 let animationTimeouts = [];
 let optimalSpeechRate = 1.0; //1.1;
@@ -1778,6 +1779,9 @@ export async function startAncestorAnimation() {
                 state.rootPersonId = searchRootPersonId('nadine c');
             } else if (state.treeOwner === 5 ) {
                 state.rootPersonId = searchRootPersonId('giovanna sa');
+            } else if (state.treeOwner === 6 ) {
+                // state.rootPersonId = searchRootPersonId('pierre le');
+                state.rootPersonId = findYoungestPerson();
             } else {
                 state.rootPersonId = searchRootPersonId('emma a');
             }

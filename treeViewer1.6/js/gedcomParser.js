@@ -111,6 +111,15 @@ export function parseGEDCOM(gedcomText) {
                 
                 currentEntity._expectingBirthDate = false;
                 currentEntity._expectingBirthPlace = false;
+            } else if (tag === "BAPM") {
+                currentEntity._expectingBirthDate = true;
+                currentEntity._expectingBirthPlace = true;
+            } else if (tag === "BURI") {
+                currentEntity._expectingDeathDate = true;
+                currentEntity._expectingDeathPlace = true;
+                
+                currentEntity._expectingBirthDate = false;
+                currentEntity._expectingBirthPlace = false;
             } else if (tag === "MARR") {
                 currentEntity._expectingMarriageDate = true;
                 currentEntity._expectingMarriagePlace = true;
@@ -218,10 +227,22 @@ export function parseGEDCOM(gedcomText) {
                 }   
             } else if (tag === "DATE") {
                 if (currentEntity._expectingBirthDate) {
-                    currentEntity.birthDate = data;
+                    // if birthDate is already set, do not overwrite it with a baptism date
+                    if (currentEntity.birthDate === '') { 
+                        currentEntity.birthDate = data;
+                    } 
+                    // else {
+                    //     console.log('in parseGedcom ignoring birthDate from bapteme= ',data,' already have ',currentEntity.birthDate, currentEntity.name);
+                    // }
                     delete currentEntity._expectingBirthDate;
                 } else if (currentEntity._expectingDeathDate) {
-                    currentEntity.deathDate = data;
+                    // if deathDate is already set, do not overwrite it with a burial date
+                    if (currentEntity.deathDate === '') { 
+                        currentEntity.deathDate = data;
+                    } 
+                    // else {
+                    //     console.log('in parseGedcom ignoring deathDate from burial= ',data,' already have ',currentEntity.deathDate, currentEntity.name);
+                    // }
                     delete currentEntity._expectingDeathDate;
                 } else if (currentEntity._expectingMarriageDate) {
                     currentEntity.marriageDate = data;

@@ -1351,6 +1351,18 @@ function createDemoSelector() {
         }
     } else if (state.treeOwner === 5) {
       typeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
+    } else if (state.treeOwner === 6) {
+        typeOptions = ['démo1', 'démo2', 'démo3'];
+        typeValues = ['demo1', 'demo2', 'demo3'];
+        if (window.CURRENT_LANGUAGE === 'fr') {
+          typeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet'];
+        } else if (window.CURRENT_LANGUAGE === 'en') {
+          typeOptionsExpanded = ['Our ancestor to all', 'Franks', 'Capet'];
+        } else if (window.CURRENT_LANGUAGE === 'es') {
+          typeOptionsExpanded = ['Nuestro antepasado de todos', 'Francs', 'Capet'];
+        } else if (window.CURRENT_LANGUAGE === 'hu') {
+          typeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet'];
+        }
     } else {
         typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
         typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
@@ -1359,7 +1371,7 @@ function createDemoSelector() {
         } else if (window.CURRENT_LANGUAGE === 'en') {
           typeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet'];
         } else if (window.CURRENT_LANGUAGE === 'es') {
-          typeOptionsExpanded = ['El castillo de Lalatte', '', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
+          typeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
         } else if (window.CURRENT_LANGUAGE === 'hu') {
           typeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet'];
         }

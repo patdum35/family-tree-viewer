@@ -10,7 +10,8 @@ import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPos
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
-    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js'; 
+    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector,
+    setupSearchFieldModal } from './mainUI.js'; 
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
@@ -23,6 +24,10 @@ import { cleanupExportControls } from './exportSettings.js';
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
+import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
+import { createImprovedHeatmap } from './geoHeatMapUI.js';
+
+import { getTranslation } from './nameCloudUI.js';
 
 
 import { 
@@ -73,14 +78,6 @@ if ('serviceWorker' in navigator) {
 
   
 // for tracking with google Analytics
-// export function trackPageView(pagePath) {
-//   if (window.gtag) {
-//     gtag('config', 'G-HWT22W45CN', {
-//       'page_path': pagePath
-//     });
-//   }
-// }
-
 export function trackPageView(pagePath) {
     if (window.gtag) {
         console.log(`📊 Suivi de la vue de page pour google Analytics: ${pagePath}`);
@@ -230,6 +227,95 @@ export function updateRadarButtonText() {
 
 }
 
+/**
+ * Extrait toutes les personnes contenues dans un rootHierarchy (d3.hierarchy)
+
+ * @returns {Array} Tableau de toutes les personnes (node.data)
+ */
+export function getPersonsFromTCurrenTree() {
+    const persons = [];
+    const rootHierarchy = d3.hierarchy(state.currentTree, node => node.children); 
+    console.log('getPersonsFromTCurrenTree rootHierarchy', rootHierarchy);    
+    function traverse(node) {
+        if (!node) return;
+        if (node.data) {
+            persons.push(state.gedcomData.individuals[node.data.id]);
+        }
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child));
+        }
+    }
+    traverse(rootHierarchy);
+    return persons;
+}
+
+export async function displayHeatMap() {
+   
+    // Création d'un indicateur de chargement
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.style.position = 'fixed';
+    loadingIndicator.style.top = '50%';
+    loadingIndicator.style.left = '50%';
+    loadingIndicator.style.transform = 'translate(-50%, -50%)';
+    loadingIndicator.style.backgroundColor = 'white';
+    loadingIndicator.style.padding = '20px';
+    loadingIndicator.style.borderRadius = '8px';
+    loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    loadingIndicator.style.zIndex = '9999';
+    // loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+    loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
+
+    document.body.appendChild(loadingIndicator);
+    
+    try {
+
+        // Récupérer les paramètres actuels de filtrage
+        const currentConfig = {
+            type: 'name', //state.treeMode,
+            startDate: -6000, //parseInt(startDateInput.value),
+            endDate: 3000, //parseInt(endDateInput.value),
+            scope: 'all',
+            rootPersonId:  null, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+        };
+
+        // const persons = getPersonsFromTCurrenTree();
+
+        // Générer les données pour la heatmap
+        const heatmapData = await createDataForHeatMap(currentConfig, true);       
+
+        // Supprimer l'indicateur de chargement
+        document.body.removeChild(loadingIndicator);
+        
+        // Créer la heatmap interactive
+        if (heatmapData && heatmapData.length > 0) {
+        // if (true) {
+            // Créer un titre pour la heatmap basé sur la configuration
+            let heatmapTitle;
+
+          
+            // Utiliser la fonction pour créer la heatmap
+            if (document.getElementById('namecloud-heatmap-wrapper')) {
+                createImprovedHeatmap(heatmapData, heatmapTitle, true, true);
+            } else {
+                createImprovedHeatmap(heatmapData, heatmapTitle, true, false, { top: window.innerHeight/2, left: 25, width: window.innerWidth-50, height: window.innerHeight/2-25 });
+            }
+            
+        } else {
+            // alert('Aucune donnée géographique disponible pour les personnes sélectionnées.');
+            // alert(getTranslation('noGeoData'));
+        }
+    } catch (error) {
+        console.error('Erreur lors de la génération de la heatmap:', error);
+        if (document.body.contains(loadingIndicator)) {
+            document.body.removeChild(loadingIndicator);
+        }
+        // alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
+        // alert(`${getTranslation('errorHeatmap')}: ${error.message}`);
+    }
+}
+
+
+
 export function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
@@ -257,7 +343,6 @@ export function toggleTreeRadar() {
         displayGenealogicTree(null, true, false);
     }
 }
-
 
 // Fonction pour basculer le son
 export function toggleSpeech() {
@@ -299,7 +384,6 @@ export function toggleSpeech2() {
 
 
 }
-
 
 // Pour arrêter le monitoring
 function stopBackgroundMonitoring() {
@@ -393,6 +477,8 @@ function initialize() {
         console.warn("Élément 'password' non trouvé lors de l'initialisation");
     }
 
+
+    setupSearchFieldModal();
 
     
 
@@ -528,7 +614,7 @@ export async function loadData() {
 
         let ancestor = null;
         let cousin = null;
-       if (state.treeOwner === 5 ) {
+       if ((state.treeOwner === 5 ) || (state.treeOwner === 6)) {
             // state.targetAncestorId = "@I1152@";
             ancestor = searchRootPersonId('charlem');
             cousin = null; 
@@ -695,15 +781,27 @@ async function loadGedcomContent(fileInput, passwordInput) {
                                             return content;
                                         } catch (fifthError) {
 
-                                            // Si le mot de passe est également incorrect pour arbreX.enc
-                                            if (window.CURRENT_LANGUAGE === 'fr') {
-                                                throw new Error('Mot de passe incorrect pour les deux fichiers');
-                                            } else if (window.CURRENT_LANGUAGE === 'en') {
-                                                throw new Error('Incorrect password for both files');
-                                            } else if (window.CURRENT_LANGUAGE === 'es') {
-                                                throw new Error('Contraseña incorrecta para ambos archivos');
-                                            } else if (window.CURRENT_LANGUAGE === 'hu') {
-                                                throw new Error('Helytelen jelszó mindkét fájlhoz');
+
+                                            if (fourthError.message === 'Mot de passe incorrect') {
+                                                console.log("Tentative d'ouverture du fichier arbreLE.enc...");
+                                                try {
+                                                    const content = await loadEncryptedContent(passwordInput.value, 'arbreLE.enc');
+                                                    // Si succès avec arbreLE.enc, définir treeOwner = 6
+                                                    state.treeOwner = 6;
+                                                    console.log("Fichier arbreG.enc ouvert avec succès. Owner: 6");
+                                                    return content;
+                                                } catch (fifthError) {
+                                                    // Si le mot de passe est également incorrect pour arbreX.enc
+                                                    if (window.CURRENT_LANGUAGE === 'fr') {
+                                                        throw new Error('Mot de passe incorrect pour les deux fichiers');
+                                                    } else if (window.CURRENT_LANGUAGE === 'en') {
+                                                        throw new Error('Incorrect password for both files');
+                                                    } else if (window.CURRENT_LANGUAGE === 'es') {
+                                                        throw new Error('Contraseña incorrecta para ambos archivos');
+                                                    } else if (window.CURRENT_LANGUAGE === 'hu') {
+                                                        throw new Error('Helytelen jelszó mindkét fájlhoz');
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -805,7 +903,6 @@ async function loadEncryptedContent(password, filename) {
         throw error;
     }
 }
-
 
 
 /**
@@ -1000,7 +1097,7 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('hugues c ');
             }
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===5 ) {
+        } else if (state.treeOwner ===5 || state.treeOwner ===6 ) {
             if (selectedValue === 'demo1'){ 
                 // state.targetAncestorId = "@I1152@";
                 ancestor = searchRootPersonId('charlemagne');
@@ -1134,8 +1231,6 @@ export function handleRootPersonChange(event) {
     }
 }
 
-
-
 /**
  * Affiche l'arbre généalogique
  * @param {string} rootPersonId - ID optionnel de la personne racine
@@ -1159,9 +1254,11 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
 
     let person; 
-    if (state.treeOwner === 5) {
+    if (state.treeOwner === 6) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? findYoungestPerson() : findYoungestPerson());
+    } else if (state.treeOwner === 5) {
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
-    }else if (state.treeOwner === 4) {
+    } else if (state.treeOwner === 4) {
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
     } else if (state.treeOwner === 3) {
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
@@ -1354,8 +1451,6 @@ export function openSettingsModal() {
     // Option 1: Utiliser directement la nouvelle modal
     createEnhancedSettingsModal();
 }
-
-
 
 
 export function closeSettingsModal() {
@@ -1644,8 +1739,6 @@ export function searchRootPersonId(searchStr, isAlert = true) {
 }
 
 
-
-
 // Gestionnaire des paramètres avec support multi-langues
 // Fonction pour réinitialiser les paramètres
 export function resetToDefaultSettings() {
@@ -1754,7 +1847,6 @@ function showErrorMessage(message) {
 
 
 function positionRadarButton() {
-    // Votre fonction existante
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
     
@@ -1766,6 +1858,7 @@ function positionRadarButton() {
         radarButton.style.zIndex = '1001';
     }
 }
+
 // Nouvelle fonction pour l'overlay
 function createAndPositionRadarOverlay() {
     // Trouver les boutons
@@ -1804,13 +1897,55 @@ function createAndPositionRadarOverlay() {
     overlay.style.height = `${radarButton.offsetHeight}px`;
 }
 
+function createAndPositionHeatMapOverlay() {
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    if (!heatMapBtn) return;
+
+    let overlay = document.getElementById('heatMapBtn-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'heatMapBtn-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.backgroundColor = 'transparent';
+        overlay.style.zIndex = '1002';
+        overlay.style.cursor = 'pointer';
+        overlay.addEventListener('click', () => {
+            heatMapBtn.click();
+        });
+        document.body.appendChild(overlay);
+    }
+
+    const rect = heatMapBtn.getBoundingClientRect();
+    overlay.style.top = `${rect.top - 10}px`;
+    overlay.style.left = `${rect.left - 10}px`;
+    overlay.style.width = `${rect.width + 20}px`;
+    overlay.style.height = `${rect.height + 20}px`;
+}
+
+function positionHeatMapButton() {
+    // const settingsBtn = document.getElementById('settingsBtn');
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    
+    if (settingsBtn && heatMapBtn) {
+        const settingRect = settingsBtn.getBoundingClientRect();
+        heatMapBtn.style.position = 'fixed';
+        heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
+        heatMapBtn.style.top = (settingRect.bottom + 5) + 'px';
+        heatMapBtn.style.zIndex = '1001';
+    }
+}
+
 // Modifier vos écouteurs existants
 document.addEventListener('DOMContentLoaded', () => {
     positionRadarButton();
+    positionHeatMapButton();
     createAndPositionRadarOverlay();
+    createAndPositionHeatMapOverlay();
 });
 
 window.addEventListener('resize', () => {
     positionRadarButton();
+    positionHeatMapButton();
     createAndPositionRadarOverlay();
+    createAndPositionHeatMapOverlay();
 });

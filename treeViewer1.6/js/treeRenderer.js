@@ -3,7 +3,7 @@
 // ====================================
 import { isNodeHidden } from './utils.js';
 import { drawNodes } from './nodeRenderer.js';
-import { state } from './main.js';
+import { state, displayHeatMap } from './main.js';
 import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
@@ -93,6 +93,13 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
     }
 
     setupZoom(svg, mainGroup);
+
+
+    // Vérifier si une heatmap est déjà affichée
+    if (document.getElementById('namecloud-heatmap-wrapper')) {
+        displayHeatMap();
+    }
+
 
     // Gestion des racines virtuelles
     if (!isAnimation) {

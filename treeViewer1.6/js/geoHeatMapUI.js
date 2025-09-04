@@ -2,6 +2,7 @@ import { nameCloudState } from './nameCloud.js';
 import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 import { createCachedTileLayer } from './mapUtils.js';
+import { displayHeatMap } from './main.js';
 
 
 
@@ -165,21 +166,52 @@ function getUITranslation(key) {
   }
 
 
-
-
-
 /**
- * Crée et affiche la heatmap avec son interface utilisateur
+ * Crée et affiche la heatmap avec son interface utilisateur, ou met à jour les données d'une heatmap existante
  * 
  * @param {Array} locationData - Données de localisation pour la heatmap
  * @param {String} heatmapTitle - Titre à afficher pour la heatmap
- * @returns {HTMLElement} - L'élément wrapper de la heatmap créée
+ * @param {Boolean} updateOnly - Si true, met à jour seulement les données sans recréer l'interface (défaut: false)
+ * @param {Object} initialPosition - Position et taille initiales optionnelles { top, left, width, height }
+ * @returns {HTMLElement} - L'élément wrapper de la heatmap créée ou mise à jour
  */
-export function createImprovedHeatmap(locationData, heatmapTitle) {
+export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = false, updateOnly = false, initialPosition = null) {
     
-    nameCloudState.isHeatmapVisible = true;
-    // Fermer toute carte existante d'abord
+    // Vérifier s'il existe déjà une heatmap
     const existingMap = document.getElementById('namecloud-heatmap-wrapper');
+    
+    // Mode mise à jour : mettre à jour les données d'une carte existante
+    if (updateOnly && existingMap && existingMap.map) {
+        console.log("Mode mise à jour : updating existing heatmap data");
+        
+        // Mettre à jour le titre si fourni
+        if (heatmapTitle) {
+            const titleElement = existingMap.querySelector('.title-text');
+            if (titleElement) {
+                titleElement.textContent = heatmapTitle;
+            }
+            // Mettre à jour aussi le titre de la carte
+            const mapTitle = existingMap.querySelector('.map-title');
+            if (mapTitle) {
+                mapTitle.textContent = heatmapTitle;
+            }
+        }
+        
+        // Rafraîchir les données de la carte en utilisant votre logique existante
+        refreshMapData(existingMap, locationData, isFromTree);
+        
+        return existingMap;
+    }
+    
+    // Mode mise à jour demandé mais aucune carte existante : créer une nouvelle carte
+    if (updateOnly && !existingMap) {
+        console.warn("Mode mise à jour demandé mais aucune heatmap existante trouvée. Création d'une nouvelle heatmap.");
+    }
+    
+    // Mode création : créer une nouvelle heatmap (comportement original)
+    nameCloudState.isHeatmapVisible = true;
+    
+    // Fermer toute carte existante d'abord
     if (existingMap) {
         document.body.removeChild(existingMap);
     }
@@ -187,7 +219,6 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     // Créer un conteneur principal (semi-transparent) qui ne couvre pas tout l'écran
     const heatmapWrapper = document.createElement('div');
     
-
     heatmapWrapper.id = 'namecloud-heatmap-wrapper';
     heatmapWrapper.style.position = 'fixed';
     heatmapWrapper.style.top = '60px'; // Remonté de 20px comme demandé
@@ -204,7 +235,28 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
     heatmapWrapper.style.minHeight = '50px'; //'300px';
 
     function applyHeatmapPosition() {
-        // Appliquer les dimensions et positions sauvegardées
+        // 1. Priorité aux paramètres passés directement à la fonction (pour création initiale)
+        if (initialPosition && typeof initialPosition === 'object') {
+            console.log("Application de la position initiale fournie:", initialPosition);
+            
+            // Appliquer les valeurs fournies (avec validation basique)
+            if (initialPosition.top !== undefined) {
+                heatmapWrapper.style.top = `${initialPosition.top}px`;
+            }
+            if (initialPosition.left !== undefined) {
+                heatmapWrapper.style.left = `${initialPosition.left}px`;
+            }
+            if (initialPosition.width !== undefined) {
+                heatmapWrapper.style.width = `${initialPosition.width}px`;
+            }
+            if (initialPosition.height !== undefined) {
+                heatmapWrapper.style.height = `${initialPosition.height}px`;
+            }
+            
+            return true;
+        }
+        
+        // 2. Sinon, utiliser les dimensions et positions sauvegardées (comportement original)
         if (nameCloudState.heatmapPosition) {
             
             const validPosition = 
@@ -478,15 +530,15 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
 
     // Initialiser la carte Leaflet
     setTimeout(() => {
-        initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle);
+        initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle, isFromTree);
     }, 100); // Petit délai pour s'assurer que le DOM est prêt
-
 
     // Stocker la référence du wrapper
     nameCloudState.heatmapWrapper = heatmapWrapper;
 
     return heatmapWrapper;
 }
+
 
 /**
  * Initialise la carte Leaflet et configure ses composants
@@ -496,7 +548,7 @@ export function createImprovedHeatmap(locationData, heatmapTitle) {
  * @param {Array} locationData - Données à afficher sur la carte
  * @param {Function} restoreOriginalZindexes - Fonction pour restaurer les z-index originaux
  */
-function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle) {
+function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle, isFromTree = false) {
     try {
         // Vérifier si un conteneur de carte existe déjà
         if (mapContainer._leaflet_id) {
@@ -619,28 +671,38 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             alert(getUITranslation('mapInitError'));
         }
 
-        // Gérer les événements des boutons avec restauration des z-index
-        document.getElementById('heatmap-close').addEventListener('click', () => {
-            // Restaurer le z-index original du conteneur nameCloud
-            const nameCloudContainer = document.getElementById('name-Cloud-Container');
-            if (nameCloudContainer) {
-                nameCloudContainer.style.zIndex = nameCloudContainer.dataset.originalZIndex;
-                delete nameCloudContainer.dataset.originalZIndex;
-            }
-            
-            // Restaurer les z-index originaux de tous les éléments
-            restoreOriginalZindexes();
-            
-            // Supprimer la heatmap
-            document.body.removeChild(heatmapWrapper);
-        });
+
+        // if (!isFromTree) {
+
+            // Gérer les événements des boutons avec restauration des z-index
+            document.getElementById('heatmap-close').addEventListener('click', () => {
+
+                // Restaurer le z-index original du conteneur nameCloud
+                const nameCloudContainer = document.getElementById('name-Cloud-Container');
+                if (nameCloudContainer) {
+                    nameCloudContainer.style.zIndex = nameCloudContainer.dataset.originalZIndex;
+                    delete nameCloudContainer.dataset.originalZIndex;
+                }
+                
+
+                // Restaurer les z-index originaux de tous les éléments
+                restoreOriginalZindexes();
+                
+                // Supprimer la heatmap
+
+                if (heatmapWrapper && document.body.contains(heatmapWrapper)) {
+                    document.body.removeChild(heatmapWrapper);
+                }
+            });
+        // }
+
 
         // Créer le titre intégré à la carte (toujours visible)
         createMapTitle(mapContainer, heatmapTitle);
-        
+
         // Créer les contrôles de carte
-        createMapControls(mapContainer, heatmapWrapper);
-        
+        createMapControls(mapContainer, heatmapWrapper, isFromTree);
+
         // Configurer les boutons de zoom Leaflet
         configureLeafletZoomControls();
         
@@ -665,6 +727,66 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         alert('Erreur lors de la création de la carte. Voir console pour détails.');
     }
 }
+
+/**
+ * Fonction simple pour rafraîchir les données d'une carte existante
+ * Réutilise directement initializeLeafletMap en préservant la vue actuelle
+ * 
+ * @param {HTMLElement} heatmapWrapper - Wrapper de la heatmap existante
+ * @param {Array} newLocationData - Nouvelles données de localisation
+ */
+function refreshMapData(heatmapWrapper, newLocationData, isFromTree = false) {
+    try {
+        const map = heatmapWrapper.map;
+        if (!map) {
+            console.error("Aucune carte trouvée dans le wrapper");
+            return;
+        }
+
+        console.log("Rafraîchissement des données avec", newLocationData.length, "nouveaux points");
+
+        // Sauvegarder la vue actuelle (centre et zoom)
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        console.log(`Sauvegarde de la vue actuelle: centre=${currentCenter.lat}, ${currentCenter.lng}, zoom=${currentZoom}`);
+
+        // Trouver le conteneur de carte
+        const mapContainer = heatmapWrapper.querySelector('#ancestors-heatmap');
+        if (!mapContainer) {
+            console.error("Conteneur de carte non trouvé");
+            return;
+        }
+
+        // Créer une fonction de restauration qui préserve la vue au lieu de fitBounds
+        const restoreOriginalZindexes = () => {
+            document.querySelectorAll('[data-original-z-index]').forEach(el => {
+                el.style.zIndex = el.dataset.originalZIndex;
+                delete el.dataset.originalZIndex;
+            });
+        };
+
+        // Obtenir le titre actuel
+        const currentTitle = heatmapWrapper.querySelector('.map-title')?.textContent || 
+                           heatmapWrapper.querySelector('.title-text')?.textContent || '';
+
+        // Réutiliser directement votre fonction existante
+        initializeLeafletMap(heatmapWrapper, mapContainer, newLocationData, restoreOriginalZindexes, currentTitle, isFromTree);
+
+        // Restaurer la vue après un court délai pour laisser la carte s'initialiser
+        setTimeout(() => {
+            if (heatmapWrapper.map) {
+                console.log(`Restauration de la vue: centre=${currentCenter.lat}, ${currentCenter.lng}, zoom=${currentZoom}`);
+                heatmapWrapper.map.setView(currentCenter, currentZoom, { animate: false });
+            }
+        }, 100);
+
+        console.log("Données de la carte mises à jour avec succès");
+
+    } catch (error) {
+        console.error("Erreur lors du rafraîchissement des données:", error);
+    }
+}
+
 
 /**
  * Crée le conteneur pour afficher les détails d'un point sur la carte
@@ -881,7 +1003,7 @@ function createMapTitle(mapContainer, heatmapTitle = 'Heatmap') {
  * @param {HTMLElement} mapContainer - Conteneur de la carte
  * @param {HTMLElement} heatmapWrapper - Conteneur principal de la heatmap
  */
-function createMapControls(mapContainer, heatmapWrapper) {
+function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
     const controlsContainer = document.createElement('div');
     controlsContainer.id = 'heatmap-map-controls';
     controlsContainer.style.position = 'absolute';
@@ -927,8 +1049,13 @@ function createMapControls(mapContainer, heatmapWrapper) {
     
     // Ajouter les écouteurs d'événements
     refreshBtn.addEventListener('click', () => {
-        if (typeof refreshHeatmap === 'function') {
-            refreshHeatmap();
+        if(!isFromTree) 
+        {
+            if (typeof refreshHeatmap === 'function') {
+                refreshHeatmap();
+            }
+        } else {
+            displayHeatMap();
         }
     });
     
@@ -1069,3 +1196,186 @@ function setupResizeHandlers(resizeHandle, heatmapWrapper) {
         }
     }
 }
+
+/**
+ * Met à jour les données de la heatmap existante avec désactivation temporaire des événements
+ * pour éviter la cascade de re-déclenchement
+ * 
+ * @param {Array} newLocationData - Nouvelles données de localisation
+ * @param {String} newTitle - Nouveau titre (optionnel)
+ * @returns {Promise<boolean>} - true si la mise à jour a réussi, false sinon
+ */
+export function updateHeatmapData(newLocationData, newTitle = null) {
+    return new Promise((resolve) => {
+        // Vérifier qu'une heatmap existe
+        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+        if (!heatmapWrapper || !heatmapWrapper.map) {
+            console.warn('Aucune heatmap existante trouvée');
+            resolve(false);
+            return;
+        }
+
+        const map = heatmapWrapper.map;
+        
+        try {
+            // 🔥 DÉSACTIVER TEMPORAIREMENT TOUS LES ÉVÉNEMENTS LEAFLET
+            const originalEvents = map._events ? { ...map._events } : {};
+            map._events = {}; // Couper tous les événements
+            
+            console.log('🚫 Événements Leaflet désactivés temporairement');
+
+            // 1. Supprimer SEULEMENT les couches de données (pas les tuiles)
+            map.eachLayer((layer) => {
+                if (!(layer instanceof L.TileLayer)) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // 2. Tempo pour s'assurer que la suppression est terminée
+            setTimeout(() => {
+                try {
+                    // 3. Vérifier les données (COPIÉ de createImprovedHeatmap)
+                    if (!newLocationData || !Array.isArray(newLocationData) || newLocationData.length === 0) {
+                        console.error(getUITranslation('invalidHeatmapData'), newLocationData);
+                        // Réactiver les événements avant de partir
+                        map._events = originalEvents;
+                        resolve(false);
+                        return;
+                    }
+
+                    // 4. Collecter les coordonnées valides (COPIÉ de createImprovedHeatmap)
+                    const coordinates = newLocationData
+                        .filter(loc => loc.coords && typeof loc.coords.lat === 'number' && typeof loc.coords.lon === 'number')
+                        .map(loc => [loc.coords.lat, loc.coords.lon]);
+
+                    if (coordinates.length === 0) {
+                        console.error(getUITranslation('noValidCoordinates'));
+                        // Réactiver les événements avant de partir
+                        map._events = originalEvents;
+                        resolve(false);
+                        return;
+                    }
+
+                    // 5. Créer la couche de chaleur (COPIÉ de createImprovedHeatmap)
+                    const heat = L.heatLayer(
+                        coordinates.map(coords => [...coords, 1]), 
+                        {
+                            radius: 25,
+                            blur: 15,
+                            maxZoom: 1,
+                        }
+                    ).addTo(map);
+
+                    // 6. Ajouter des marqueurs interactifs (COPIÉ de createImprovedHeatmap)
+                    newLocationData.forEach(location => {
+                        if (!location.coords || typeof location.coords.lat !== 'number' || typeof location.coords.lon !== 'number') {
+                            return;
+                        }
+
+                        const marker = L.circleMarker([location.coords.lat, location.coords.lon], {
+                            radius: 5,
+                            fillColor: 'white',
+                            color: '#000',
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+
+                        // Récupérer le conteneur de détails existant
+                        let detailsContainer = heatmapWrapper.querySelector('#heatmap-details');
+                        if (!detailsContainer) {
+                            detailsContainer = createDetailsContainer(heatmapWrapper);
+                        }
+                        
+                        configureMarkerInteractions(marker, detailsContainer, location);
+                    });
+
+                    // 7. Tempo pour s'assurer que les marqueurs sont ajoutés
+                    setTimeout(() => {
+                        try {
+                            // 8. Ajuster la vue EXACTEMENT comme dans createImprovedHeatmap
+                            // MAIS SANS ANIMATION pour éviter les événements
+                            if (coordinates.length > 0) {
+                                const bounds = L.latLngBounds(coordinates);
+                                if (bounds.isValid()) {
+                                    // Calculer le niveau de zoom idéal pour ces limites
+                                    const idealZoom = map.getBoundsZoom(bounds, false, [50, 50]);
+                                    
+                                    // Limiter le zoom maximum à 9 (≈ 100-150km de rayon)
+                                    const maxAllowedZoom = 9;
+                                    const finalZoom = Math.min(idealZoom, maxAllowedZoom);
+                                    
+                                    console.log(`Zoom calculé: ${idealZoom}, limité à : ${finalZoom}`);
+                                    
+                                    // Si on a dû limiter le zoom, utiliser le centre des limites
+                                    if (finalZoom < idealZoom) {
+                                        const center = bounds.getCenter();
+                                        map.setView(center, finalZoom, { animate: false }); // SANS ANIMATION
+                                    } else {
+                                        // Sinon, utiliser fitBounds classique SANS ANIMATION
+                                        map.fitBounds(bounds, {
+                                            padding: [50, 50],
+                                            maxZoom: maxAllowedZoom,
+                                            animate: false // SANS ANIMATION
+                                        });
+                                    }
+                                }
+                            }
+
+                            // 9. Mettre à jour le titre si fourni
+                            if (newTitle) {
+                                const titleText = heatmapWrapper.querySelector('.title-text');
+                                if (titleText) {
+                                    titleText.textContent = newTitle;
+                                }
+                                
+                                const mapTitle = heatmapWrapper.querySelector('#heatmap-map-title');
+                                if (mapTitle) {
+                                    mapTitle.textContent = newTitle.replace(/^Heatmap\s*-\s*/, '');
+                                }
+                            }
+
+                            // 10. Tempo finale pour s'assurer que tout est terminé PUIS réactiver les événements
+                            setTimeout(() => {
+                                // 🔥 RÉACTIVER LES ÉVÉNEMENTS LEAFLET
+                                map._events = originalEvents;
+                                console.log('✅ Événements Leaflet réactivés');
+                                
+                                // Invalider la taille de la carte pour le rafraîchissement final
+                                map.invalidateSize();
+                                
+                                console.log(`Données de heatmap mises à jour: ${newLocationData.length} éléments`);
+                                resolve(true);
+                            }, 100);
+
+                        } catch (error) {
+                            console.error('Erreur lors de l\'ajustement de la vue:', error);
+                            // Réactiver les événements même en cas d'erreur
+                            map._events = originalEvents;
+                            resolve(false);
+                        }
+                    }, 50); // Tempo après ajout des marqueurs
+
+                } catch (error) {
+                    console.error('Erreur lors de l\'ajout des données:', error);
+                    // Réactiver les événements même en cas d'erreur
+                    map._events = originalEvents;
+                    resolve(false);
+                }
+            }, 50); // Tempo après suppression des couches
+
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour des données:', error);
+            // Réactiver les événements même en cas d'erreur
+            if (map._events !== undefined) {
+                map._events = originalEvents;
+            }
+            resolve(false);
+        }
+    });
+}
+
+
+
+
+

@@ -1,11 +1,8 @@
-import { state } from './main.js';
+import { state , getPersonsFromTCurrenTree, displayHeatMap } from './main.js';
 import { nameCloudState, getPersonsFromTree, processPersonData, filterPeopleByText } from './nameCloud.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
 import { createImprovedHeatmap } from './geoHeatMapUI.js';
-
-
-
 
 
 /**
@@ -192,7 +189,15 @@ function getHeatmapTranslation(key) {
  * Rafraîchit la heatmap avec les données actuelles
  * Si une liste de personnes est visible, utilise uniquement ces personnes
  */
-export async function refreshHeatmap() {
+export async function refreshHeatmap(isFromTree = false) {
+   console.log('refreshHeatmap appelée depuis:', new Error().stack);
+
+
+    if (isFromTree) {
+        displayHeatMap();
+        return; // Si on vient de la carte 
+    }
+
     // Si aucune heatmap n'est affichée, ne rien faire
     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
     if (!heatmapWrapper) return;
@@ -200,7 +205,7 @@ export async function refreshHeatmap() {
     // Sauvegarder la position et taille actuelles avant de fermer
     saveHeatmapPosition();
     
-    // Afficher un indicateur de chargement
+     // Afficher un indicateur de chargement
     const loadingOverlay = document.createElement('div');
     loadingOverlay.id = 'heatmap-loading-overlay';
     loadingOverlay.style.position = 'absolute';
@@ -368,6 +373,8 @@ export async function refreshHeatmap() {
         
         // Fermer la heatmap actuelle
         const closeButton = document.getElementById('heatmap-close');
+        console.log("\n\ : DEBUG: if (closeButton) closeButton.click(), isFromTree=", isFromTree);
+
         if (closeButton) closeButton.click();
         
         // Un petit délai pour laisser la fermeture se terminer
@@ -572,24 +579,13 @@ export async function createHeatmapDataForPeople(people) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Crée les données pour la heatmap en utilisant les mêmes personnes et filtres que la CloudMap
  * 
  * @param {Object} config - Configuration contenant type, startDate, endDate, scope, rootPersonId
  * @returns {Promise<Array>} - Données formatées pour la heatmap
  */
-export async function createDataForHeatMap(config) {
+export async function createDataForHeatMap(config, isFromCurrentTree = false) {
     try {
         // Configuration pour extraire les lieux
         const locationConfig = {
@@ -598,9 +594,13 @@ export async function createDataForHeatMap(config) {
         };
         
         // Obtenir les personnes selon le même filtrage que la CloudMap
-        const persons = getPersonsFromTree(locationConfig.scope, locationConfig.rootPersonId);
-        console.log(`Nombre de personnes trouvées pour la heatmap : ${persons.length}`);
-        
+        let persons;
+        if (!isFromCurrentTree) {
+            persons = getPersonsFromTree(locationConfig.scope, locationConfig.rootPersonId);
+        } else {
+            persons = getPersonsFromTCurrenTree();
+        }
+
         // Collecter tous les lieux non nettoyés
         const locationData = {};
         const stats = { inPeriod: 0 }; // Stats minimal

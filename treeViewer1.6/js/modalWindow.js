@@ -202,7 +202,7 @@ export const translations = {
    */
   export function formatGedcomDate(dateStr) {
 
-    console.log("0- formatGedcomDate dateStr :", dateStr);
+    // console.log("0- formatGedcomDate dateStr :", dateStr);
     if (!dateStr) return '';
     
     // Récupérer la langue actuelle
@@ -256,7 +256,7 @@ export const translations = {
       formattedDate = formattedDate.replace(regExp, translatedMonth);
     });
 
-    console.log("1- formatGedcomDate dateStr :", formattedDate);
+    // console.log("1- formatGedcomDate dateStr :", formattedDate);
 
 
 
@@ -266,12 +266,12 @@ export const translations = {
       formattedDate = formattedDate.replace(regExp, `${translatedPrefix} `);
     });
 
-    console.log("2- formatGedcomDate dateStr :", formattedDate);
+    // console.log("2- formatGedcomDate dateStr :", formattedDate);
     
     // Remplacer "AND" à l'intérieur de la chaîne (pour les périodes "BETWEEN x AND y")
     formattedDate = formattedDate.replace(/\sAND\s/i, ` ${translate('et')} `);
 
-    console.log("3- formatGedcomDate dateStr :", formattedDate);
+    // console.log("3- formatGedcomDate dateStr :", formattedDate);
 
 
     
@@ -331,24 +331,24 @@ export function displayPersonDetails(personId) {
     } else {
         // Style standard pour les ascenseurs sur les appareils non-tactiles
         style.textContent = `
-            .custom-modal::-webkit-scrollbar {
+            modal-person-name .custom-modal::-webkit-scrollbar {
                 width: 10px;
                 height: 10px;
             }
 
-            .custom-modal::-webkit-scrollbar-button {
+            modal-person-name .custom-modal::-webkit-scrollbar-button {
                 height: 0px;
                 width: 0px;
                 display: none;
             }
 
-            .custom-modal::-webkit-scrollbar-thumb {
+            modal-person-name .custom-modal::-webkit-scrollbar-thumb {
                 background-color: #888;
                 border-radius: 6px; 
                 border: 3px solid transparent;
             }
 
-            .custom-modal::-webkit-scrollbar-track {
+            modal-person-name .custom-modal::-webkit-scrollbar-track {
                 background-color: #f1f1f1;
                 border-radius: 4px;
                 margin: 30px;
@@ -389,7 +389,7 @@ export function displayPersonDetails(personId) {
             /*left: 10px !important; */
         }
         
-        .modal-content {
+        #person-details-modal .modal-content {
             background-color: transparent !important;
             box-shadow: none !important;
             width: 100% !important;
@@ -413,7 +413,7 @@ export function displayPersonDetails(personId) {
             margin: 0 !important;
             line-height: 1.2 !important;
         }
-        .modal-header {
+        #modal-person-name .modal-header {
             padding: 4px !important;
             min-height: unset !important;
             background-color: rgba(248, 249, 250, 0.95) !important;
@@ -428,7 +428,7 @@ export function displayPersonDetails(personId) {
             /* Ajouter une ombre pour démarcation visuelle */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
         }
-        .details-section {
+        #modal-person-name .details-section {
             margin-bottom: 6px;
             padding: 6px;
             border-radius: 6px;
@@ -436,12 +436,12 @@ export function displayPersonDetails(personId) {
             background-color: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(3px);
         }
-        .details-icon {
+        #modal-person-name .details-icon {
             font-size: 1.8em;
             vertical-align: middle;
             margin-right: 4px;
         }
-        .details-value {
+        #modal-person-name .details-value {
             display: inline-block;
         }
         .details-section.birth { background-color: #E3F2FD; }

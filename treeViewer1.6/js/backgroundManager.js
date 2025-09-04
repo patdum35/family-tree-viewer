@@ -8,7 +8,7 @@ import { drawTree } from './treeRenderer.js';
  * @param {boolean} enable - true pour activer, false pour désactiver
  * @returns {boolean} - indique si l'opération a réussi
  */
-export function enableBackground(enable = false) {
+export function enableBackground(enable = false, isfromNameCloud = false) {
     console.log(`🔍 enableBackground appelé avec enable=${enable}`);
 
     
@@ -61,7 +61,9 @@ export function enableBackground(enable = false) {
     } else {
       // Pour une activation, on ne fait rien pour l'instant
       console.log("ℹ️ Activation : aucune action effectuée, utiliser initBackgroundContainer");
-      drawTree();
+      if (isfromNameCloud) {
+        drawTree();
+      }
     //  state.backgroundEnabled = true;
       return true;
     }
@@ -3274,7 +3276,7 @@ async function setupGrowingTreeBackground(svg, customDimensions = null, forExpor
     let svgElementCount = 0;
     
     // Fonction pour dessiner un arbre AVEC OFFSET ET TAILLE ADAPTATIVE
-    function drawTree(startX, startY, trunkLength, trunkWidth, parentGroup) {
+    function drawTreeLocal(startX, startY, trunkLength, trunkWidth, parentGroup) {
         const lean = 0;
         
         // Adapter les positions avec offset
@@ -3439,15 +3441,15 @@ async function setupGrowingTreeBackground(svg, customDimensions = null, forExpor
     const maxMainTrees = Math.min(Math.floor(width / (400 * sizeMultiplier)) + 1, TUNING.MAX_MAIN_TREES);
     
     // Arbre principal au centre AVEC TAILLE ADAPTATIVE
-    drawTree(width * 0.5, height * 0.95, height * 0.2 * treeDensity, 6 * treeDensity);
+    drawTreeLocal(width * 0.5, height * 0.95, height * 0.2 * treeDensity, 6 * treeDensity);
     
     // Arbres secondaires
     if (maxMainTrees > 1) {
-        drawTree(width * 0.15, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
+        drawTreeLocal(width * 0.15, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
     }
     
     if (maxMainTrees > 2) {
-        drawTree(width * 0.85, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
+        drawTreeLocal(width * 0.85, height * 0.93, height * 0.15 * treeDensity, 5 * treeDensity);
     }
     
     // Arbres plus petits répartis AVEC ESPACEMENT ADAPTATIF
@@ -3455,7 +3457,7 @@ async function setupGrowingTreeBackground(svg, customDimensions = null, forExpor
     if (svgElementCount < TUNING.MAX_SVG_ELEMENTS * 0.7) {
         for (let i = 0; i < numSmallerTrees; i++) {
             const x = 0.2 + (i+1) * (0.6 / (numSmallerTrees+1));
-            drawTree(width * x, height * 0.93, height * 0.1 * treeDensity, 3 * treeDensity);
+            drawTreeLocal(width * x, height * 0.93, height * 0.1 * treeDensity, 3 * treeDensity);
         }
     }
     
@@ -3467,7 +3469,7 @@ async function setupGrowingTreeBackground(svg, customDimensions = null, forExpor
             const y = Math.random() * height * 0.15 + height * 0.8;
             const size = height * (0.03 + Math.random() * 0.04) * treeDensity;
             
-            drawTree(x, y, size, (1 + Math.random() * 1.5) * treeDensity);
+            drawTreeLocal(x, y, size, (1 + Math.random() * 1.5) * treeDensity);
         }
     }
     

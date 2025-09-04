@@ -203,6 +203,9 @@
                 <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults"  >
                     <option value="">Select</option>
                 </select>
+                <button id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" > 
+                    <span class="wide-span">🌍</span>
+                </button> 
                 <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
                     <span class="wide-span">🎯</span>
                 </button> 
@@ -234,8 +237,6 @@
         </div>
  
     </div>
-
-
 
     <!-- Fenêtre modale pour les détails -->
     <div id="person-details-modal" class="modal">

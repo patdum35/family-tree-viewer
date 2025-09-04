@@ -204,12 +204,40 @@ function capitalizeFirstLetter(word) {
  * @private
  */
 function drawDates(text, data) {
-    if (!data.birthDate && !data.deathDate) return;
+
+    // if no birth or death dates, we look for marriage date
+    let marriageYear = false;
+    if (!data.birthDate && !data.deathDate)
+    {
+        const person = state.gedcomData.individuals[data.id];
+        if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+            // Pour chaque famille où la personne est un conjoint
+            
+            person.spouseFamilies.forEach(familyId => {
+                const family = state.gedcomData.families[familyId];
+                if (family && family.marriageDate) {
+                    marriageYear = extractYear(family.marriageDate);
+                }
+            });
+        }
+
+
+    }
+
+
+    if (!data.birthDate && !data.deathDate && !marriageYear) return;
     
     const birthYear = data.birthDate ? extractYear(data.birthDate) : '?';
     const deathYear = data.deathDate ? extractYear(data.deathDate) : '?';
     
+    
     let dateText = birthYear;
+
+    if (!data.birthDate && !data.deathDate && marriageYear) {
+        dateText = `💍 ${marriageYear}`;
+    }
+
+
     if (parseInt(birthYear) <= 1930 || deathYear !== '?') {
         dateText += ` - ${deathYear}`;
     }

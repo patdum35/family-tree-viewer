@@ -15,7 +15,7 @@ import { enableFortuneMode } from './treeWheelAnimation.js';
 
 
 // Fonction pour obtenir les traductions selon la langue actuelle
-function getTranslation(key) {
+export function getTranslation(key) {
     const translations = {
       'fr': {
         'titlePrenoms': 'Prénoms',
@@ -838,7 +838,7 @@ function closeCloudName(modal) {
 
     // Pour désactiver le fond d'écran
     console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
-    enableBackground(true);
+    enableBackground(true, true);
     state.backgroundEnabled = true;
     if (state.isRadarEnabled) {
         enableFortuneMode();

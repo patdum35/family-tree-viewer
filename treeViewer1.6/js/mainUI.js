@@ -4,6 +4,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { state, displayGenealogicTree, showToast } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { selectFoundPerson } from './eventHandlers.js';
+import { extractYear, findDateForPerson } from './nameCloudUtils.js';
 
 // Variable pour suivre si les sélecteurs ont été initialisés
 let selectorsInitialized = false;
@@ -1518,3 +1519,861 @@ export const texts = {
       }
     });
   }
+
+
+
+
+
+
+const searchModalTranslations = {
+    fr: {
+        title: "Recherche avancée",
+        nameOption: "par Nom/Prénom",
+        placeOption: "par Lieux", 
+        occupationOption: "par Profession",
+        searchPlaceholder: "🔍Tapez votre recherche...",
+        yearStartPlaceholder: "Année début",
+        yearEndPlaceholder: "Année fin",
+        searchButton: "GO",
+        dateFilterLabel: "filtrage<br>par dates",
+        helpName: "Recherche dans les noms et prénoms",
+        helpPlace: "Recherche dans les lieux de naissance, décès, résidence",
+        helpOccupation: "Recherche dans les professions, métiers, titres",
+        noSearchTerm: "Veuillez saisir un terme de recherche",
+        noResults: "Aucun résultat pour",
+        rootPersonSearch: '🔍racine',
+        person:'personne',
+        found:'trouvée',
+        withPlace: 'avec lieux',
+        withOccupation: 'avec métiers',
+        over: 'sur', 
+        pers: 'pers.',
+        m:'H',
+    },
+    en: {
+        title: "Advanced Search",
+        nameOption: "per Name/First name",
+        placeOption: "per Places",
+        occupationOption: "per Profession",
+        searchPlaceholder: "🔍Type your search...",
+        yearStartPlaceholder: "Start year",
+        yearEndPlaceholder: "End year", 
+        searchButton: "GO",
+        dateFilterLabel: "date<br>filtering",
+        helpName: "Search in names and first names",
+        helpPlace: "Search in birth, death, residence places",
+        helpOccupation: "Search in professions, jobs, titles",
+        noSearchTerm: "Please enter a search term",
+        noResults: "No results for",
+        rootPersonSearch: '🔍root',
+        person: 'person',
+        found: 'found',
+        withPlace: 'with places',
+        withOccupation: 'with occupations',
+        over: 'over',
+        pers: 'pers.',
+        m: 'M',
+    },
+    es: {
+        title: "Búsqueda avanzada",
+        nameOption: "por Nombre/Apellido",
+        placeOption: "por Lugares",
+        occupationOption: "por Profesión",
+        searchPlaceholder: "🔍Escriba su búsqueda...",
+        yearStartPlaceholder: "Año inicio",
+        yearEndPlaceholder: "Año fin",
+        searchButton: "Ir",
+        dateFilterLabel: "filtrado<br>por fechas",
+        helpName: "Búsqueda en nombres y apellidos",
+        helpPlace: "Búsqueda en lugares de nacimiento, muerte, residencia",
+        helpOccupation: "Búsqueda en profesiones, trabajos, títulos",
+        noSearchTerm: "Por favor ingrese un término de búsqueda",
+        noResults: "Sin resultados para",
+        rootPersonSearch: '🔍raíz',
+        person: 'persona',
+        found: 'encontrada',
+        withPlace: 'con lugares',
+        withOccupation: 'con profesiones',
+        over: 'de',
+        pers: 'pers.',
+        m: 'H',
+    },
+    hu: {
+        title: "Részletes keresés",
+        nameOption: "Név/Keresztnév szerint",
+        placeOption: "Helyek szerint",
+        occupationOption: "Foglalkozás szerint",
+        searchPlaceholder: "🔍Írja be a keresést...",
+        yearStartPlaceholder: "Kezdő év",
+        yearEndPlaceholder: "Befejező év",
+        searchButton: "Indul",
+        dateFilterLabel: "dátum<br>szűrés",
+        helpName: "Keresés nevekben és keresztnevekben",
+        helpPlace: "Keresés születési, halálozási, lakóhelyben",
+        helpOccupation: "Keresés foglalkozásokban, munkákban, címekben",
+        noSearchTerm: "Kérjük, adjon meg egy keresési kifejezést",
+        noResults: "Nincs találat a következőre:",
+        rootPersonSearch: '🔍gyökér',
+        person: 'személy',
+        found: 'találat',
+        withPlace: 'helyekkel',
+        withOccupation: 'foglalkozással',
+        over: 'közül',
+        pers: 'fő',
+        m: 'F',
+    }
+};
+
+
+/**
+ * Fonction de recherche étendue avec filtrage par dates
+ */
+export function findPersonsBy(searchTerm, searchType = 'name', startYear = null, endYear = null) {
+    if (!state.gedcomData || !state.gedcomData.individuals) {
+        return [];
+    }
+    
+    const searchStr = searchTerm.toLowerCase();
+    const results = [];
+    let personWithDate_counter = 0;
+    let personWithOccupation_counter = 0;
+    let personWithPlace_counter = 0;
+    let foundPpersonWithDate_counter = 0;
+    let foundPersonWithOccupation_counter = 0;
+    let foundPersonWithPlace_counter = 0;
+
+    let male_counter = 0;
+    let foundMale_counter = 0;
+
+    
+
+    Object.values(state.gedcomData.individuals).forEach(person => {
+
+        const matches = [];
+        const birthYear = extractYear(person.birthDate);
+        const deathYear = extractYear(person.deathDate);
+        let marriageYear = null;
+        let marriagePlace = null;
+        let relevantDate = null; // Pour stocker la date pertinente si trouvée
+        let isOccupation = false;
+        let isPlace = false;
+        let isMale = false;
+        // Les personnes ne stockent généralement pas directement leur date de mariage
+        // Il faut la récupérer via les familles où elles apparaissent comme conjoint
+        if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+            // Pour chaque famille où la personne est un conjoint
+            person.spouseFamilies.forEach(familyId => {
+                const family = state.gedcomData.families[familyId];
+                if (family && family.marriageDate) {
+                    marriageYear = extractYear(family.marriageDate);
+                    marriagePlace = family.marriagePlace; // On peut aussi récupérer le lieu de mariage
+                }
+            });
+        }
+        if (birthYear || deathYear || marriageYear) {
+            personWithDate_counter++;
+        } else {
+            const dateInfo = findDateForPerson(person.id);
+            if (dateInfo && dateInfo.year) {
+                relevantDate = dateInfo.year;
+                personWithDate_counter++;
+            }
+        }
+        if (person.sex=='M') {
+            male_counter++;
+            isMale = true;
+        } 
+
+
+        if (person.occupationFull) {
+            personWithOccupation_counter++;
+            isOccupation = true;
+        }
+        if (person.birthPlace || person.deathPlace || person.residPlace1 || person.residPlace2 || person.residPlace3 || marriagePlace) {
+            personWithPlace_counter++; 
+            isPlace = true;
+        }   
+
+        // console.log(" debug before 0 : Recherche pour la personne:", person.name, "avec le terme:", searchTerm, startYear, endYear, birthYear, deathYear, marriageYear);
+
+
+        // Filtrage par dates si spécifié
+        if (startYear || endYear) {
+
+            // Si on a une date de début et que la personne est née avant
+            if (startYear && birthYear && (birthYear < startYear)) return;
+            
+            // Si on a une date de fin et que la personne est née après
+            if (endYear && birthYear && (birthYear > endYear)) return;
+            
+            // filtrer aussi par date de décès
+            if (startYear && deathYear && (deathYear < startYear)) return;
+            if (endYear && deathYear && (deathYear > endYear)) return;
+
+            // filtrer aussi par date de marriage
+            if (startYear && marriageYear && (marriageYear < startYear)) return;
+            if (endYear && marriageYear && (marriageYear > endYear)) return;
+
+            // filtrer aussi par relevantDate
+            if (startYear && relevantDate && (relevantDate < startYear)) return;
+            if (endYear && relevantDate && (relevantDate > endYear)) return;            
+        
+            // console.log(" debug 0 : date is ok, Recherche pour la personne:", person.name, "avec le terme:", searchTerm, startYear, endYear, birthYear, deathYear, marriageYear, relevantDate);
+        }
+
+       
+       
+        // Recherche par nom
+        if (searchType === 'name') {
+            // console.log(" debug before :", person);
+
+            const fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + person.givn.toLowerCase().replace(/\//g, '') + ' ' + person.surn.toLowerCase().replace(/\//g, '');
+            const searchStrings = searchStr.split(' ').filter(s => s.trim() !== '');
+
+            if (fullName.includes(searchStr)) {
+                matches.push({
+                    type: 'name',
+                    field: 'Nom',
+                    value: person.name.replace(/\//g, '').trim()
+                });
+                // console.log("debug 0 : Recherche pour la personne:", fullName, person.name, "avec le terme:", searchTerm, startYear, endYear, birthYear, deathYear, marriageYear);
+            } else {
+                let isMatch = false
+                if (fullName.includes(searchStrings[0])) {
+                    isMatch = true;
+                    if (searchStrings.length > 1 && !fullName.includes(searchStrings[1])) {isMatch = false;}
+                    if (searchStrings.length > 2 && !fullName.includes(searchStrings[2]) && isMatch) {isMatch = false;}
+                    if (searchStrings.length > 3 && !fullName.includes(searchStrings[3]) && isMatch) {isMatch = false;}
+                    if (searchStrings.length > 4 && !fullName.includes(searchStrings[4]) && isMatch) {isMatch = false;}
+                    if (isMatch) {
+                        matches.push({
+                            type: 'name',
+                            field: 'Nom',
+                            value: person.name.replace(/\//g, '').trim()
+                        });
+                    }
+                //    console.log("debug 1 : Recherche pour la personne:", fullName, person.name, "avec le terme:", searchTerm, startYear, endYear, birthYear, deathYear, marriageYear);
+                }
+            }
+
+        }
+        
+        // Recherche par lieu
+        else if (searchType === 'place') {
+            // Lieux de naissance
+            if (person.birthPlace && person.birthPlace.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Lieu de naissance',
+                    value: person.birthPlace
+                });
+            }
+            
+            // Lieux de décès
+            if (person.deathPlace && person.deathPlace.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Lieu de décès',
+                    value: person.deathPlace
+                });
+            }
+            
+            // Lieux de résidence
+            if (person.residPlace1 && person.residPlace1.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Résidence',
+                    value: person.residPlace1
+                });
+            }
+            if (person.residPlace2 && person.residPlace2.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Résidence',
+                    value: person.residPlace2
+                });
+            }            
+            if (person.residPlace3 && person.residPlace3.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Résidence',
+                    value: person.residPlace3
+                });
+            }
+            if (marriagePlace && marriagePlace.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'place',
+                    field: 'Lieu de mariage',
+                    value: marriagePlace
+                });
+            }
+
+        }
+        
+        // Recherche par profession
+        else if (searchType === 'occupation') {
+            if (person.occupationFull && person.occupationFull.toLowerCase().includes(searchStr)) {
+                matches.push({
+                    type: 'occupation',
+                    field: 'Profession',
+                    value: person.occupationFull
+                });
+            }
+            
+        }
+        
+        if (matches.length > 0) {
+            results.push({
+                ...person,
+                matches: matches
+            });
+            if (isOccupation) foundPersonWithOccupation_counter++;
+            if (isPlace) foundPersonWithPlace_counter++;
+            if (isMale) foundMale_counter++;   
+
+        }
+    });
+
+    console.log("\n Recherche sur :", Object.keys(state.gedcomData.individuals).length, ' personnes. ', results.length, ' personnes trouvées.', ' withDate=',personWithDate_counter, ', withOccupation=',personWithOccupation_counter, ', withPlace=',personWithPlace_counter, ', homme=',male_counter,  ', FoundWithOccupation=',foundPersonWithOccupation_counter, ', foundWithPlace=',foundPersonWithPlace_counter, ', foundHomme=',foundMale_counter);
+
+    return {results, personWithDate_counter, personWithOccupation_counter, personWithPlace_counter, male_counter, foundPersonWithOccupation_counter, foundPersonWithPlace_counter, foundMale_counter};
+    // return (results);
+}
+
+// /**
+//  * Extrait l'année d'une date (gère différents formats GEDCOM)
+//  */
+// function extractYear(dateString) {
+//     if (!dateString) return null;
+    
+//     // Chercher un pattern d'année (4 chiffres)
+//     const yearMatch = dateString.match(/\b(\d{4})\b/);
+//     return yearMatch ? parseInt(yearMatch[1]) : null;
+// }
+
+/**
+ * Crée et affiche la modale de recherche
+ */
+export function openSearchModal() {
+
+    // Vérifier si la modale existe déjà
+    let existingModal = document.getElementById('search-modal');
+    if (existingModal) {
+        existingModal.style.display = 'flex';
+        // Vider les champs à la réouverture
+        document.getElementById('search-modal-search-input').value = '';
+        // document.getElementById('date-start').value = '';
+        // document.getElementById('date-end').value = '';
+        document.getElementById('search-modal-search-input').focus();
+        return;
+    }
+
+
+    // Créer la modale
+    const modal = document.createElement('div');
+    modal.id = 'search-modal';
+    modal.innerHTML = `
+        <div class="search-modal-overlay">
+            <div class="search-modal-content">
+                <div class="search-modal-header">
+                    <h3>${searchModalTranslations[window.CURRENT_LANGUAGE].title}</h3>
+                    <button class="search-modal-close" onclick="closeSearchModal()">&times;</button>
+                </div>
+                
+                <div class="search-modal-body">
+
+                    <div class="search-type-section">
+                        <select id="search-modal-search-type">
+                            <option value="name">${searchModalTranslations[window.CURRENT_LANGUAGE].nameOption}</option>
+                            <option value="place">${searchModalTranslations[window.CURRENT_LANGUAGE].placeOption}</option>
+                            <option value="occupation">${searchModalTranslations[window.CURRENT_LANGUAGE].occupationOption}</option>
+                        </select>
+
+                    </div>
+                    
+                    <div class="search-input-section">
+                        <input type="text" id="search-modal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
+                        <button id="search-modal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
+                    </div>
+                    
+                    <div class="date-filter-section">
+                        <input type="number" id="date-start" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearStartPlaceholder}" min="1000" max="2100">
+                        <span>- </span>
+                        <input type="number" id="date-end" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearEndPlaceholder}" min="1000" max="2100">
+                        <label>${searchModalTranslations[window.CURRENT_LANGUAGE].dateFilterLabel}</label>
+                        </div>
+                    
+                    <div class="search-help">
+                        <div id="search-help-text">${searchModalTranslations[window.CURRENT_LANGUAGE].helpName}</div>
+                    </div>
+                    
+                    <div class="search-results" id="search-modal-search-results">
+                        <!-- Les résultats apparaîtront ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter les styles CSS
+    const styles = `
+        <style>
+        #search-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .search-modal-overlay {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .search-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #ff9800;
+            color: white;
+        }
+        
+        .search-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .search-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .search-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+        
+        .search-modal-body {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .search-type-section, .search-input-section, .date-filter-section {
+            margin-bottom: 15px;
+        }
+        
+
+
+        .search-type-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-type-section label {
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            width: 120px; /* Même largeur que le bouton rechercher */
+            text-align: center;
+        }   
+
+        #search-modal-search-input {
+            width: 200px;
+            padding: 4px;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }        
+
+
+        #search-modal-search-type {
+            width: 200px;
+            padding: 4px;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+
+        .search-input-section {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .date-filter-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-filter-section label {
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            font-size: 15px;
+        }
+        
+        #date-start, #date-end {
+            padding: 4px;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        #date-start {
+            margin-left: 0px;
+            width: 95px;
+        }
+
+        #date-end {
+            margin-left: -2px;
+            width: 82px;
+        }
+
+        
+        #search-modal-search-button {
+            padding: 4px 4px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #search-modal-search-button:hover {
+            background: #f57c00;
+        }
+        
+        .search-help {
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .search-results {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            padding: 8px 10px;
+            margin: 4px 0;
+            background: rgba(255, 152, 0, 0.1);
+            border-left: 3px solid #ff9800;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .result-item:hover {
+            background: rgba(255, 152, 0, 0.2);
+        }
+        
+        .result-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+            font-size: 14px;
+        }
+        
+        .result-info {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .result-match {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+        </style>
+    `;
+    
+    // Ajouter les styles au document
+    if (!document.getElementById('search-modal-styles')) {
+        const styleElement = document.createElement('div');
+        styleElement.id = 'search-modal-styles';
+        styleElement.innerHTML = styles;
+        document.head.appendChild(styleElement);
+    }
+    
+    // Ajouter la modale au document
+    document.body.appendChild(modal);
+    
+    // Configurer les événements
+    setupModalEvents();
+    
+    // Donner le focus au champ de recherche
+    setTimeout(() => {
+        document.getElementById('search-modal-search-input').focus();
+    }, 100);
+
+}
+
+/**
+ * Configure les événements de la modale
+ */
+function setupModalEvents() {
+    const searchType = document.getElementById('search-modal-search-type');
+    const searchInput = document.getElementById('search-modal-search-input');
+    const searchButton = document.getElementById('search-modal-search-button');
+    const helpText = document.getElementById('search-help-text');
+    
+    // Textes d'aide selon le type de recherche
+    const helpTexts = {
+        'name': searchModalTranslations[window.CURRENT_LANGUAGE].helpName,
+        'place': searchModalTranslations[window.CURRENT_LANGUAGE].helpPlace,
+        'occupation': searchModalTranslations[window.CURRENT_LANGUAGE].helpOccupation
+    };
+    
+    // Changer le texte d'aide selon le type sélectionné
+    searchType.addEventListener('change', function() {
+        helpText.textContent = helpTexts[this.value];
+        // Vider le champ de recherche quand on change de type
+        document.getElementById('search-modal-search-input').value = '';
+        document.getElementById('search-modal-search-results').innerHTML = '';
+    });
+
+    
+    // Recherche en appuyant sur Entrée dans le champ de recherche
+    searchInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            performModalSearch();
+        }
+    });
+    
+    // Recherche en appuyant sur Entrée dans les champs de dates
+    document.getElementById('date-start').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            performModalSearch();
+        }
+    });
+    
+    document.getElementById('date-end').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            performModalSearch();
+        }
+    });
+    
+    // Recherche en cliquant sur le bouton
+    searchButton.addEventListener('click', performModalSearch);
+    
+    // Fermer la modale en cliquant à l'extérieur
+    document.getElementById('search-modal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeSearchModal();
+        }
+    });
+}
+
+/**
+ * Effectue la recherche dans la modale
+ */
+function performModalSearch() {
+    const searchType = document.getElementById('search-modal-search-type').value;
+    const searchTerm = document.getElementById('search-modal-search-input').value.trim();
+    const startYear = document.getElementById('date-start').value;
+    const endYear = document.getElementById('date-end').value;
+    const resultsContainer = document.getElementById('search-modal-search-results');
+    
+    // if (!searchTerm) {
+    //     resultsContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 10px;">Veuillez saisir un terme de recherche</div>';
+    //     return;
+    // }
+    
+    // Convertir les années en nombres ou null
+    const startYearNum = startYear ? parseInt(startYear) : null;
+    const endYearNum = endYear ? parseInt(endYear) : null;
+    
+    // Effectuer la recherche avec filtrage par dates
+    const res = findPersonsBy(searchTerm, searchType, startYearNum, endYearNum);
+    const results = res.results;
+
+    
+    // Afficher les résultats
+    if (results.length === 0) {
+        const dateInfo = (startYearNum || endYearNum) ? 
+            ` (période: ${startYearNum || '?'}-${endYearNum || '?'})` : '';
+        resultsContainer.innerHTML = `<div style="text-align: center; color: #666; padding: 10px;">${searchModalTranslations[window.CURRENT_LANGUAGE].noResults} "${searchTerm}"${dateInfo}</div>`;
+        return;
+    }
+    
+
+    // Construire l'HTML des résultats
+    let resultsHTML = '';
+
+
+    // console.log("\n\n\n\n DEBUG : Results ", results, "\n\n\n\n");
+
+
+    results.forEach(person => {
+        // Pour le type 'name', ne pas afficher le badge "Nom:"
+        let matchInfo = '';
+        if (searchType !== 'name') {
+            matchInfo = person.matches.map(match => 
+                `<span class="result-match">${match.field}: ${match.value}</span>`
+            ).join('');
+        }
+        
+        // Ajouter les dates avec icônes
+        const birthYear = extractYear(person.birthDate);
+        const deathYear = extractYear(person.deathDate);
+        let marriageYear = null;
+        let relevantDate = null; // Pour stocker la date pertinente si trouvée
+        // Les personnes ne stockent généralement pas directement leur date de mariage
+        // Il faut la récupérer via les familles où elles apparaissent comme conjoint
+        if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+            // Pour chaque famille où la personne est un conjoint
+            person.spouseFamilies.forEach(familyId => {
+                const family = state.gedcomData.families[familyId];
+                if (family && family.marriageDate) {
+                    marriageYear = extractYear(family.marriageDate);
+                }
+            });
+        }
+        if (!birthYear && !deathYear && !marriageYear) {
+            const dateInfo0 = findDateForPerson(person.id);
+            if (dateInfo0 && dateInfo0.year) {
+                relevantDate = dateInfo0.year;
+            }
+        }
+
+
+        let dateInfo = '';
+        
+        if (birthYear) {
+            dateInfo = ` (👶 ${birthYear})`;
+        } else if (deathYear) {
+            dateInfo = ` (✝️ ${deathYear})`;
+        } else if (marriageYear) {
+            dateInfo = ` (💍 ${marriageYear})`;
+        } else if (relevantDate) {
+            dateInfo = ` (~ ${relevantDate})`;
+        } 
+        
+        resultsHTML += `
+            <div class="result-item" onclick="selectPersonFromModal('${person.id}')">
+                <div class="result-name">${person.name.replace(/\//g, '').trim()}${dateInfo}</div>
+                ${matchInfo ? `<div class="result-info">${matchInfo}</div>` : ''}
+            </div>
+        `;
+    });
+
+
+    resultsContainer.innerHTML = resultsHTML;
+
+
+    // Mettre à jour le label avec le nombre de personnes trouvées
+    const helpText = document.getElementById('search-help-text');
+    if (helpText) {
+        helpText.textContent = `${results.length} ${searchModalTranslations[window.CURRENT_LANGUAGE].person}${results.length > 1 ? 's' : ''} 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].found}${results.length > 1 ? 's' : ''} 
+        (${searchModalTranslations[window.CURRENT_LANGUAGE].m}=${res.foundMale_counter}, 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].withPlace}=${res.foundPersonWithPlace_counter}, 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.foundPersonWithOccupation_counter}) 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].over} ${Object.keys(state.gedcomData.individuals).length} 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].pers} 
+        (${searchModalTranslations[window.CURRENT_LANGUAGE].m}=${res.male_counter}, 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].withPlace}=${res.personWithPlace_counter}, 
+        ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.personWithOccupation_counter})`;
+    }
+
+
+}
+
+/**
+ * Sélectionne une personne depuis la modale
+ */
+window.selectPersonFromModal = function(personId) {
+    // Fermer la modale
+    closeSearchModal();
+    
+    // Utiliser la fonction existante selectFoundPerson ou displayGenealogicTree
+    if (typeof selectFoundPerson === 'function') {
+        selectFoundPerson(personId);
+    } else {
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree from modal ################# ');
+        if (state.isRadarEnabled) {
+            displayGenealogicTree(personId, false, false, false, 'WheelAncestors');
+        } else {
+            displayGenealogicTree(personId, true, false);
+        }
+    }
+};
+
+/**
+ * Ferme la modale de recherche
+ */
+window.closeSearchModal = function() {
+    const modal = document.getElementById('search-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+/**
+ * Modifier la fonction d'événement du champ de recherche existant
+ */
+export function setupSearchFieldModal() {
+    const searchField = document.getElementById('root-person-search');
+    if (searchField) {
+        // Remplacer l'événement focus existant
+        searchField.addEventListener('focus', function(event) {
+            event.preventDefault();
+            this.blur(); // Enlever le focus
+            openSearchModal();
+        });
+        
+        // Empêcher la saisie directe
+        searchField.addEventListener('keydown', function(event) {
+            event.preventDefault();
+            openSearchModal();
+        });
+        
+        // Ajouter un placeholder informatif
+        searchField.placeholder = searchModalTranslations[window.CURRENT_LANGUAGE].rootPersonSearch;
+        searchField.style.cursor = "pointer";
+    }
+}
+
+
+

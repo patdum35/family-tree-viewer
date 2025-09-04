@@ -11,6 +11,7 @@ import {
     zoomIn, 
     zoomOut, 
     resetZoom,
+    displayHeatMap,
     toggleTreeRadar,
     toggleSpeech,
     toggleSpeech2,
@@ -171,6 +172,7 @@ function initializeAppFunctions() {
     window.zoomIn = zoomIn;
     window.zoomOut = zoomOut;
     window.resetZoom = resetZoom;
+    window.displayHeatMap = displayHeatMap;
     window.toggleTreeRadar = toggleTreeRadar;
     window.toggleSpeech = toggleSpeech;
     window.toggleSpeech2 = toggleSpeech2;
