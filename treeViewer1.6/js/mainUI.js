@@ -1882,14 +1882,21 @@ export function openSearchModal() {
                 
                 <div class="search-modal-body">
 
-                    <div class="search-type-section">
-                        <select id="search-modal-search-type">
-                            <option value="name">${searchModalTranslations[window.CURRENT_LANGUAGE].nameOption}</option>
-                            <option value="place">${searchModalTranslations[window.CURRENT_LANGUAGE].placeOption}</option>
-                            <option value="occupation">${searchModalTranslations[window.CURRENT_LANGUAGE].occupationOption}</option>
-                        </select>
+                    <!-- Section pour le type de recherche 
+                    // <div class="search-type-section">
+                    //     <select id="search-modal-search-type">
+                    //         <option value="name">${searchModalTranslations[window.CURRENT_LANGUAGE].nameOption}</option>
+                    //         <option value="place">${searchModalTranslations[window.CURRENT_LANGUAGE].placeOption}</option>
+                    //         <option value="occupation">${searchModalTranslations[window.CURRENT_LANGUAGE].occupationOption}</option>
+                    //     </select>
 
+                    // </div>
+                    -->
+
+                    <div class="search-type-section">
+                        <div id="search-modal-search-type-container"></div>
                     </div>
+
                     
                     <div class="search-input-section">
                         <input type="text" id="search-modal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
@@ -2017,17 +2024,13 @@ export function openSearchModal() {
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box;
-        }        
+        }      
 
 
-        #search-modal-search-type {
-            width: 200px;
-            padding: 4px;
-            border: 2px solid #ff9800;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
+
+        #search-modal-search-type{
+            margin-left: -10px;
+        } 
 
 
         .search-input-section {
@@ -2075,6 +2078,7 @@ export function openSearchModal() {
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            height: 28px !important;
         }
         
         #search-modal-search-button:hover {
@@ -2167,19 +2171,7 @@ export function openSearchModal() {
             }
 
 
-            #search-modal-search-type {
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-                background-image: url('data:image/svg+xml;utf8,<svg fill="%23ff9800" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-                background-repeat: no-repeat;
-                background-position: right 8px center;
-                background-size: 16px;
-                padding-right: 30px !important;
-                border: 2px solid #ff9800 !important;
-                border-radius: 6px !important;
-                font-size: 16px !important; /* Évite le zoom sur iOS */
-            }
+
 
 
 
@@ -2204,13 +2196,15 @@ export function openSearchModal() {
             
             #search-modal-search-type {
                 order: 2;
-                width: 180px !important;
+                width: 200px !important;
                 position: relative !important;
+                margin-left: 5px !important;
             }
             
             #search-modal-search-button {
                 order: 3;
                 width: 70px !important;
+                height: 28px !important;
                 font-size: 13px !important;
             }
         }
@@ -2228,7 +2222,7 @@ export function openSearchModal() {
     
     // Ajouter la modale au document
     document.body.appendChild(modal);
-    
+
     // Configurer les événements
     setupModalEvents();
     
@@ -2243,6 +2237,121 @@ export function openSearchModal() {
  * Configure les événements de la modale
  */
 function setupModalEvents() {
+
+    // Créer le sélecteur personnalisé
+    const customSelector = createCustomSelector({
+        options: [
+            { value: 'name', label: searchModalTranslations[window.CURRENT_LANGUAGE].nameOption },
+            { value: 'place', label: searchModalTranslations[window.CURRENT_LANGUAGE].placeOption },
+            { value: 'occupation', label: searchModalTranslations[window.CURRENT_LANGUAGE].occupationOption }
+        ],
+
+        selectedValue: 'name',
+        colors: {
+            main: '#ff9800',
+            options: '#ff9800',
+            hover: '#f57c00',
+            selected: '#e65100'
+        },
+        // dimensions: {
+        //     width: '200px',
+        //     height: '35px'
+        // },
+
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '200px',
+            height: '28px',
+            dropdownWidth: '200px',
+            dropdownHeight: '240px' 
+        },
+        onChange: (value) => {
+            // Vider le champ et la liste
+            document.getElementById('search-modal-search-input').value = '';
+            document.getElementById('search-modal-search-results').innerHTML = '';
+        }
+    });
+
+
+
+
+    // const customSelector = createCustomSelector({
+    //     options: options,
+    //     selectedValue: state.nombre_generation.toString() || "6",
+    //     colors: {
+    //         main: ' #4CAF50',    // Vert pour le sélecteur principal
+    //         options: ' #4361ee', // Bleu pour les options
+    //         hover: ' #4CAF50',   // Vert au survol
+    //         selected: ' #1a237e' // Bleu foncé pour l'option sélectionnée
+    //     },
+    //     isMobile: nameCloudState.mobilePhone,
+    //     dimensions: {
+    //         width: '35px',
+    //         height: '25px',
+    //         dropdownWidth: '45px',
+    //         dropdownHeight: '240px' 
+    //     },
+    //     // Padding très réduit pour maximiser la compacité
+    //     padding: {
+    //         display: { x: 8, y: 1 },    // Padding minimal pour le sélecteur
+    //         options: { x: 1, y: 2}     // Padding pour les options
+    //     },   
+    //     arrow: {
+    //         position: 'top-right',
+    //         size: 5.5,
+    //         offset: { x: -5, y: 1} // Décale 5px vers la gauche et 2px vers le bas
+    //     },
+    //     onChange: (value) => {
+    //         // Appeler la fonction de mise à jour des générations
+    //         window.updateGenerations(value);
+    //     },
+    //     // Personnalisation supplémentaire du sélecteur
+    //     onCreated: (selector) => {
+    //         // Enlever les bordures blanches et appliquer le style voulu immédiatement
+    //         const displayElement = selector.querySelector('div[style*="border"]');
+    //         if (displayElement) {
+    //             // Appliquer tous les styles en une seule fois pour éviter les reflows
+    //             Object.assign(displayElement.style, {
+    //                 border: 'none',  // Supprimer la bordure
+    //                 backgroundColor: 'rgba(76, 175, 80, 0.85)',  // Vert plus visible
+    //                 color: 'white',                               // Texte blanc pour meilleur contraste
+    //                 boxSizing: 'border-box',
+    //                 fontWeight: 'bold'                           // Texte en gras
+    //             });
+    //         }
+            
+    //         // Supprimer toute bordure blanche potentielle du conteneur
+    //         Object.assign(selector.style, {
+    //             border: 'none',
+    //             backgroundColor: 'transparent',
+    //             boxShadow: 'none',
+    //             outline: 'none'  // Supprimer également le outline
+    //         });
+            
+    //         // Force un repaint pour s'assurer que les styles sont appliqués immédiatement
+    //         selector.offsetHeight;
+    //     }
+    // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Ajouter l'ID pour la fonction moveSelector
+    customSelector.id = 'search-modal-search-type';
+
+    // L'insérer dans le conteneur
+    document.getElementById('search-modal-search-type-container').appendChild(customSelector);
+
 
     const searchType = document.getElementById('search-modal-search-type');
     const searchInput = document.getElementById('search-modal-search-input');
@@ -2348,7 +2457,7 @@ function setupModalEvents() {
         input.addEventListener('blur', function() {
             // Restaurer la position normale après un délai
             setTimeout(() => {
-                if (window.innerHeight <= 600) {
+                if (window.innerHeight < 500) {
                     modal.style.paddingTop = '5px';
                 }
             }, 300);
