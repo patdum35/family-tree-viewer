@@ -1534,7 +1534,7 @@ const searchModalTranslations = {
         searchPlaceholder: "🔍Tapez votre recherche...",
         yearStartPlaceholder: "Année début",
         yearEndPlaceholder: "Année fin",
-        searchButton: "GO",
+        searchButton: "Search",
         dateFilterLabel: "filtrage<br>par dates",
         helpName: "Recherche dans les noms et prénoms",
         helpPlace: "Recherche dans les lieux de naissance, décès, résidence",
@@ -1558,7 +1558,7 @@ const searchModalTranslations = {
         searchPlaceholder: "🔍Type your search...",
         yearStartPlaceholder: "Start year",
         yearEndPlaceholder: "End year", 
-        searchButton: "GO",
+        searchButton: "Search",
         dateFilterLabel: "date<br>filtering",
         helpName: "Search in names and first names",
         helpPlace: "Search in birth, death, residence places",
@@ -1948,7 +1948,7 @@ export function openSearchModal() {
             max-width: 600px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            max-height: calc(100vh - 15px) !important; /* Utiliser presque toute la hauteur */
+            max-height: calc(100vh - 5px) !important; /* Utiliser presque toute la hauteur */
             height: auto !important;
 
         }
@@ -1985,9 +1985,9 @@ export function openSearchModal() {
         
         .search-modal-body {
             padding: 20px;
-            max-height: calc(100vh - 15px) !important; /* Ajuster selon la hauteur du header */
+            max-height: calc(100vh - 100px) !important; /* Ajuster selon la hauteur du header */
             overflow-y: auto !important;
-            }
+        }
         
         .search-type-section, .search-input-section, .date-filter-section {
             margin-bottom: 15px;
@@ -2091,7 +2091,7 @@ export function openSearchModal() {
         
         .search-results {
             overflow-y: auto;
-            max-height: calc(100vh - 15px) !important; /* Utiliser presque toute la hauteur */
+            max-height: calc(100vh - 5px) !important; /* Utiliser presque toute la hauteur */
             height: auto !important;
         }
         
@@ -2145,8 +2145,9 @@ export function openSearchModal() {
             
             .search-modal-body {
                 padding: 5px 10px !important; /* Réduire de 20px à 10px */
+                max-height: calc(100vh - 60px) !important; /* Ajuster selon la hauteur du header */
             }
-            
+
             .search-type-section, 
             .search-input-section, 
             .date-filter-section {
@@ -2210,15 +2211,6 @@ export function openSearchModal() {
  */
 function setupModalEvents() {
 
-
-
-
-
-
-
-
-
-
     const searchType = document.getElementById('search-modal-search-type');
     const searchInput = document.getElementById('search-modal-search-input');
     const searchButton = document.getElementById('search-modal-search-button');
@@ -2269,6 +2261,40 @@ function setupModalEvents() {
             closeSearchModal();
         }
     });
+
+    // Gestion spéciale pour les champs de dates en mode paysage mobile
+    const dateInputs = [document.getElementById('date-start'), document.getElementById('date-end')];
+    const modal = document.getElementById('search-modal');
+
+    dateInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            // Détection mobile paysage
+            if (window.innerHeight <= 600) {
+                modal.style.paddingTop = '5px';
+                modal.style.alignItems = 'flex-start';
+                
+                // Faire défiler vers le haut
+                setTimeout(() => {
+                    this.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }, 300);
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            // Restaurer la position normale après un délai
+            setTimeout(() => {
+                if (window.innerHeight <= 600) {
+                    modal.style.paddingTop = '20px';
+                }
+            }, 300);
+        });
+    });
+
+
+
     
 }
 
