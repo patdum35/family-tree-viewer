@@ -2263,10 +2263,10 @@ function setupModalEvents() {
     });
 
     // Gestion spéciale pour les champs de dates en mode paysage mobile
-    const dateInputs = [document.getElementById('date-start'), document.getElementById('date-end')];
+    const inputs = [document.getElementById('search-modal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
     const modal = document.getElementById('search-modal');
 
-    dateInputs.forEach(input => {
+    inputs.forEach(input => {
         input.addEventListener('focus', function() {
             // Détection mobile paysage
             if (window.innerHeight <= 600) {
@@ -2287,7 +2287,7 @@ function setupModalEvents() {
             // Restaurer la position normale après un délai
             setTimeout(() => {
                 if (window.innerHeight <= 600) {
-                    modal.style.paddingTop = '20px';
+                    modal.style.paddingTop = '5px';
                 }
             }, 300);
         });
