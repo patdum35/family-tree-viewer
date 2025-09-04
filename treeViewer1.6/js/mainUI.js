@@ -1927,8 +1927,7 @@ export function openSearchModal() {
             background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
-            /* align-items: center; */
-            align-items: flex-start;  /* CHANGÉ */
+            align-items: flex-start; 
             padding-top: 2px;
             z-index: 10000;
         }
@@ -1938,8 +1937,7 @@ export function openSearchModal() {
             height: 100%;
             display: flex;
             justify-content: center;
-            /* align-items: center; */
-            align-items: flex-start;  /* CHANGÉ */
+            align-items: flex-start;  
             padding-top: 2px;
         }
         
@@ -1948,9 +1946,11 @@ export function openSearchModal() {
             border-radius: 8px;
             width: 90%;
             max-width: 600px;
-            max-height: 80%;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-height: calc(100vh - 15px) !important; /* Utiliser presque toute la hauteur */
+            height: auto !important;
+
         }
         
         .search-modal-header {
@@ -1985,9 +1985,9 @@ export function openSearchModal() {
         
         .search-modal-body {
             padding: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
+            max-height: calc(100vh - 15px) !important; /* Ajuster selon la hauteur du header */
+            overflow-y: auto !important;
+            }
         
         .search-type-section, .search-input-section, .date-filter-section {
             margin-bottom: 15px;
@@ -2090,8 +2090,9 @@ export function openSearchModal() {
         }
         
         .search-results {
-            max-height: 250px;
             overflow-y: auto;
+            max-height: calc(100vh - 15px) !important; /* Utiliser presque toute la hauteur */
+            height: auto !important;
         }
         
         .result-item {
@@ -2129,6 +2130,40 @@ export function openSearchModal() {
             margin-right: 8px;
             font-size: 11px;
         }
+
+
+        /* Styles pour mobile en mode paysage */
+        @media screen and (max-height: 500px)  {
+            .search-modal-header {
+                padding: 5px 10px !important; /* Réduire de 20px à 10px */
+            }
+            
+            .search-modal-header h3 {
+                font-size: 16px !important; /* Réduire la taille du titre */
+                margin: 0 !important;
+            }
+            
+            .search-modal-body {
+                padding: 5px 10px !important; /* Réduire de 20px à 10px */
+            }
+            
+            .search-type-section, 
+            .search-input-section, 
+            .date-filter-section {
+                margin-bottom: 4px !important; /* Réduire de 15px à 8px */
+            }
+            
+            .search-help {
+                padding: 4px !important; /* Réduire de 8px à 5px */
+                margin-bottom: 4px !important; /* Réduire de 15px à 8px */
+                font-size: 12px !important;
+            }
+        }
+
+
+
+
+
         </style>
     `;
     
