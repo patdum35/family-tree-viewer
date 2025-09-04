@@ -1896,6 +1896,7 @@ export function openSearchModal() {
                         <button id="search-modal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
                     </div>
                     
+
                     <div class="date-filter-section">
                         <input type="number" id="date-start" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearStartPlaceholder}" min="1000" max="2100">
                         <span>- </span>
@@ -2148,6 +2149,11 @@ export function openSearchModal() {
                 max-height: calc(100vh - 60px) !important; /* Ajuster selon la hauteur du header */
             }
 
+            .search-modal-content {
+                width: 100% !important; /* Utiliser plus de largeur */
+                max-width: 700px !important; /* Augmenter la largeur max */
+            }            
+
             .search-type-section, 
             .search-input-section, 
             .date-filter-section {
@@ -2176,11 +2182,38 @@ export function openSearchModal() {
             }
 
 
+
+            /* Réorganisation en mode paysage mobile */
+
+            .search-type-section {
+                display: none !important; /* Cacher la ligne originale du sélecteur */
+            }
+            
+            .search-input-section {
+                display: flex !important;
+                gap: 5px !important;
+                align-items: center !important;
+            }
+
+            #search-modal-search-input {
+                order: 1;
+                width: 200px !important;
+                margin-left: 0px !important;
+
+            }
+            
+            #search-modal-search-type {
+                order: 2;
+                width: 180px !important;
+                position: relative !important;
+            }
+            
+            #search-modal-search-button {
+                order: 3;
+                width: 70px !important;
+                font-size: 13px !important;
+            }
         }
-
-
-
-
 
         </style>
     `;
@@ -2262,6 +2295,35 @@ function setupModalEvents() {
         }
     });
 
+
+
+    function moveSelector() {
+        const selector = document.getElementById('search-modal-search-type');
+        const typeSection = document.querySelector('.search-type-section');
+        const inputSection = document.querySelector('.search-input-section');
+        const searchButton = document.getElementById('search-modal-search-button');
+        
+        if (window.innerHeight < 500) {
+            // Hauteur faible (mode paysage) : déplacer le sélecteur
+            inputSection.insertBefore(selector, searchButton);
+            typeSection.style.display = 'none';
+        } else {
+            // Hauteur normale (mode portrait) : remettre le sélecteur
+            typeSection.appendChild(selector);
+            typeSection.style.display = 'flex';
+        }
+    }
+
+    // Appliquer au chargement
+    moveSelector();
+
+    // Appliquer au redimensionnement
+    window.addEventListener('resize', () => {
+        moveSelector();
+    });
+
+
+
     // Gestion spéciale pour les champs de dates en mode paysage mobile
     const inputs = [document.getElementById('search-modal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
     const modal = document.getElementById('search-modal');
@@ -2292,8 +2354,6 @@ function setupModalEvents() {
             }, 300);
         });
     });
-
-
 
     
 }
