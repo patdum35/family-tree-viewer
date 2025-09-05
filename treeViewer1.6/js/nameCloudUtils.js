@@ -205,7 +205,8 @@ export function formatFamilyName(familyName) {
     // Diviser le nom en mots
     const words = familyName.trim()
         .split(' ')
-        .slice(0, 3)  // Limiter à 3 mots
+        // .slice(0, 3)  // Limiter à 3 mots
+        .slice(0, 4)  // Limiter à 4 mots
         .map(word => {
             // Mettre le mot en minuscules
             const lowercaseWord = word.toLowerCase();

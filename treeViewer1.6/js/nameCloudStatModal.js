@@ -927,20 +927,342 @@ export function createFrequencyStatsModal(nameData, type) {
     header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
 
     
+    // Container pour titre + bouton de tri
+    const titleContainer = document.createElement('div');
+    titleContainer.style.display = 'flex';
+    titleContainer.style.alignItems = 'center';
+    titleContainer.style.gap = '10px';
+
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
-        // title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
         title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${nameCloudState.currentConfig.startDate} ${getStatTranslation('and')} ${nameCloudState.currentConfig.endDate}`;
-
     } else {
         title.textContent = cfg.title;
     }
     title.style.margin = '0';
     title.style.fontSize = '16px';
-    
+
+    // // Bouton de tri alphabétique
+    // const sortButton = document.createElement('button');
+    // sortButton.innerHTML = '🔤';
+    // sortButton.style.background = 'none';
+    // sortButton.style.border = '1px solid #ccc';
+    // sortButton.style.borderRadius = '4px';
+    // sortButton.style.padding = '4px 8px';
+    // sortButton.style.cursor = 'pointer';
+    // sortButton.style.fontSize = '16px';
+    // sortButton.title = 'Trier par ordre alphabétique';
+
+
+    // // Variable pour suivre l'état du tri
+    // let isAlphabeticalSort = false;
+
+    // // GESTIONNAIRE DE CLIC COMPLET
+    // sortButton.onclick = (event) => {
+    //     console.log('=== CLIC DETECTÉ ===');
+    //     console.log('Clic sur bouton de tri, état actuel:', isAlphabeticalSort);
+        
+    //     isAlphabeticalSort = !isAlphabeticalSort;
+        
+    //     console.log('Nouveau état:', isAlphabeticalSort);
+        
+    //     // Changer l'apparence du bouton
+    //     if (isAlphabeticalSort) {
+    //         sortButton.style.backgroundColor = '#3182ce';
+    //         sortButton.style.color = 'white';
+    //         sortButton.style.border = '2px solid #3182ce';
+    //         sortButton.title = 'Trier par fréquence';
+    //     } else {
+    //         sortButton.style.backgroundColor = 'red'; // Garder rouge pour l'instant
+    //         sortButton.style.color = 'black';
+    //         sortButton.style.border = '2px solid black';
+    //         sortButton.title = 'Trier par ordre alphabétique';
+    //     }
+        
+    //     // Re-trier les données
+    //     const dataToSort = isAlphabeticalSort 
+    //         ? [...nameData].sort((a, b) => a.text.localeCompare(b.text))
+    //         : [...nameData].sort((a, b) => b.size - a.size);
+        
+    //     console.log('Données triées:', dataToSort.slice(0, 5)); // Log des 5 premiers éléments
+        
+    //     // Vider et reconstruire la liste
+    //     list.innerHTML = '';
+        
+    //     // Reconstruire tous les éléments de la liste
+    //     dataToSort.forEach((item, index) => {
+    //         const itemContainer = document.createElement('div');
+    //         itemContainer.style.display = 'flex';
+    //         itemContainer.style.justifyContent = 'space-between';
+    //         itemContainer.style.alignItems = 'center';
+    //         itemContainer.style.padding = '8px 10px';
+    //         itemContainer.style.borderBottom = index < dataToSort.length - 1 ? '1px solid #eee' : 'none';
+    //         itemContainer.style.cursor = 'pointer';
+            
+    //         // Définir des styles alternatifs pour les lignes
+    //         if (index % 2 === 0) {
+    //             itemContainer.style.backgroundColor = '#f9f9f9';
+    //         }
+            
+    //         // Appliquer un style spécial pour le premier élément
+    //         if (index === 0) {
+    //             itemContainer.style.backgroundColor = '#EBF8FF';
+    //             itemContainer.style.fontWeight = 'bold';
+    //         }
+            
+    //         // Texte de l'élément
+    //         const itemText = document.createElement('div');
+    //         itemText.textContent = item.text;
+    //         itemText.style.flex = '1';
+            
+    //         // Nombre d'occurrences
+    //         const itemCount = document.createElement('div');
+    //         itemCount.textContent = item.size;
+    //         itemCount.style.marginLeft = '10px';
+    //         itemCount.style.fontWeight = 'bold';
+    //         itemCount.style.color = '#3182ce';
+            
+    //         itemContainer.appendChild(itemText);
+    //         itemContainer.appendChild(itemCount);
+            
+    //         // Ajouter un effet de survol
+    //         itemContainer.onmouseover = () => {
+    //             itemContainer.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+    //         };
+            
+    //         itemContainer.onmouseout = () => {
+    //             itemContainer.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+    //         };
+            
+    //         // Ajouter un gestionnaire de clic pour afficher les personnes
+    //         itemContainer.onclick = () => {
+    //             document.body.removeChild(modal);
+    //             document.body.removeChild(overlay);
+                
+    //             // Trouver les personnes ayant ce nom/prénom/métier/lieu
+    //             const currentConfig = nameCloudState.currentConfig || { type };
+    //             showPersonsList(
+    //                 item.text, 
+    //                 findPeopleWithName(item.text, currentConfig), 
+    //                 currentConfig
+    //             );
+    //         };
+            
+    //         list.appendChild(itemContainer);
+    //     });
+        
+    //     console.log('Liste reconstruite avec', dataToSort.length, 'éléments');
+    // };
+
+    // // Test supplémentaire
+    // sortButton.addEventListener('mousedown', () => {
+    //     console.log('Mousedown détecté');
+    // });
+
+    // // Ajout au container
+    // titleContainer.appendChild(title);
+    // titleContainer.appendChild(sortButton);
+
+
+
+
+
+
+
+
+
+
+
+    // Bouton de tri alphabétique
+    const sortButton = document.createElement('button');
+    sortButton.innerHTML = '🔤';
+    sortButton.style.background = 'none';
+    sortButton.style.border = '1px solid #ccc';
+    sortButton.style.borderRadius = '4px';
+    sortButton.style.padding = '4px 8px';
+    sortButton.style.cursor = 'pointer';
+    sortButton.style.fontSize = '16px';
+    sortButton.style.minWidth = '32px';
+    sortButton.style.minHeight = '32px';
+    sortButton.title = 'Trier par ordre alphabétique';
+
+    // Bouton d'inversion
+    const reverseButton = document.createElement('button');
+    reverseButton.innerHTML = '🔄';
+    reverseButton.style.background = 'none';
+    reverseButton.style.border = '1px solid #ccc';
+    reverseButton.style.borderRadius = '4px';
+    reverseButton.style.padding = '4px 8px';
+    reverseButton.style.cursor = 'pointer';
+    reverseButton.style.fontSize = '16px';
+    reverseButton.style.minWidth = '32px';
+    reverseButton.style.minHeight = '32px';
+    reverseButton.title = 'Inverser l\'ordre';
+
+    // Variables pour suivre l'état du tri
+    let isAlphabeticalSort = false;
+    let isReversed = false;
+
+    // Fonction pour mettre à jour l'affichage des boutons
+    function updateButtonStyles() {
+        // Bouton alphabétique
+        if (isAlphabeticalSort) {
+            sortButton.style.backgroundColor = '#3182ce';
+            sortButton.style.color = 'white';
+            sortButton.style.borderColor = '#3182ce';
+            sortButton.title = 'Trier par fréquence';
+        } else {
+            sortButton.style.backgroundColor = 'transparent';
+            sortButton.style.color = 'black';
+            sortButton.style.borderColor = '#ccc';
+            sortButton.title = 'Trier par ordre alphabétique';
+        }
+        
+        // Bouton d'inversion
+        if (isReversed) {
+            reverseButton.style.backgroundColor = '#e53e3e';
+            reverseButton.style.color = 'white';
+            reverseButton.style.borderColor = '#e53e3e';
+            reverseButton.title = isAlphabeticalSort ? 'Ordre alphabétique normal (A→Z)' : 'Plus fréquent en premier';
+        } else {
+            reverseButton.style.backgroundColor = 'transparent';
+            reverseButton.style.color = 'black';
+            reverseButton.style.borderColor = '#ccc';
+            reverseButton.title = isAlphabeticalSort ? 'Ordre alphabétique inverse (Z→A)' : 'Moins fréquent en premier';
+        }
+    }
+
+    // Fonction pour retrier et afficher
+    function sortAndDisplayList() {
+        let dataToSort;
+        
+        if (isAlphabeticalSort) {
+            // Tri alphabétique
+            dataToSort = [...nameData].sort((a, b) => {
+                const comparison = a.text.localeCompare(b.text);
+                return isReversed ? -comparison : comparison;
+            });
+            console.log('Tri alphabétique', isReversed ? 'inverse (Z→A)' : 'normal (A→Z)');
+        } else {
+            // Tri par fréquence
+            dataToSort = [...nameData].sort((a, b) => {
+                const comparison = b.size - a.size;
+                return isReversed ? -comparison : comparison;
+            });
+            console.log('Tri par fréquence', isReversed ? '(moins fréquent en premier)' : '(plus fréquent en premier)');
+        }
+        
+        console.log('Données triées:', dataToSort.slice(0, 5));
+        
+        // Vider et reconstruire la liste
+        list.innerHTML = '';
+        
+        dataToSort.forEach((item, index) => {
+            const itemContainer = document.createElement('div');
+            itemContainer.style.display = 'flex';
+            itemContainer.style.justifyContent = 'space-between';
+            itemContainer.style.alignItems = 'center';
+            itemContainer.style.padding = '8px 10px';
+            itemContainer.style.borderBottom = index < dataToSort.length - 1 ? '1px solid #eee' : 'none';
+            itemContainer.style.cursor = 'pointer';
+            
+            // Définir des styles alternatifs pour les lignes
+            if (index % 2 === 0) {
+                itemContainer.style.backgroundColor = '#f9f9f9';
+            }
+            
+            // Appliquer un style spécial pour le premier élément
+            if (index === 0) {
+                itemContainer.style.backgroundColor = '#EBF8FF';
+                itemContainer.style.fontWeight = 'bold';
+            }
+            
+            // Texte de l'élément
+            const itemText = document.createElement('div');
+            itemText.textContent = item.text;
+            itemText.style.flex = '1';
+            
+            // Nombre d'occurrences
+            const itemCount = document.createElement('div');
+            itemCount.textContent = item.size;
+            itemCount.style.marginLeft = '10px';
+            itemCount.style.fontWeight = 'bold';
+            itemCount.style.color = '#3182ce';
+            
+            itemContainer.appendChild(itemText);
+            itemContainer.appendChild(itemCount);
+            
+            // Ajouter un effet de survol
+            itemContainer.onmouseover = () => {
+                itemContainer.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+            };
+            
+            itemContainer.onmouseout = () => {
+                itemContainer.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+            };
+            
+            // Ajouter un gestionnaire de clic pour afficher les personnes
+            itemContainer.onclick = () => {
+                document.body.removeChild(modal);
+                document.body.removeChild(overlay);
+                
+                const currentConfig = nameCloudState.currentConfig || { type };
+                showPersonsList(
+                    item.text, 
+                    findPeopleWithName(item.text, currentConfig), 
+                    currentConfig
+                );
+            };
+            
+            list.appendChild(itemContainer);
+        });
+        
+        console.log('Liste reconstruite avec', dataToSort.length, 'éléments');
+    }
+
+    // Gestionnaire du bouton alphabétique
+    sortButton.onclick = () => {
+        console.log('Clic bouton alphabétique');
+        isAlphabeticalSort = !isAlphabeticalSort;
+        updateButtonStyles();
+        sortAndDisplayList();
+    };
+
+    // Gestionnaire du bouton d'inversion
+    reverseButton.onclick = () => {
+        console.log('Clic bouton inversion');
+        isReversed = !isReversed;
+        updateButtonStyles();
+        sortAndDisplayList();
+    };
+
+    // Initialiser l'affichage des boutons
+    updateButtonStyles();
+
+    // Ajout au container
+    titleContainer.appendChild(title);
+    titleContainer.appendChild(sortButton);
+    titleContainer.appendChild(reverseButton);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const closeButton = document.createElement('button');
-    // closeButton.textContent = '×';
     closeButton.textContent = getStatTranslation('close');
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
@@ -951,15 +1273,55 @@ export function createFrequencyStatsModal(nameData, type) {
         document.body.removeChild(modal);
         document.body.removeChild(overlay);
     };
-    
-    header.appendChild(title);
+
+    header.appendChild(titleContainer);
     header.appendChild(closeButton);
+
+
+
+
+
+
+
+
+
+
+
+
     modal.appendChild(header);
     
-    // Créer une liste pour les occurrences
+
+    // Créer une liste pour les occurrences avec ascenseur personnalisé
     const list = document.createElement('div');
     list.style.maxHeight = '60vh';
     list.style.overflow = 'auto';
+    list.style.scrollbarWidth = 'thin'; // Firefox
+    list.style.scrollbarColor = '#3182ce #f0f0f0'; // Firefox
+
+    // Styles pour webkit (Chrome, Safari)
+    const style = document.createElement('style');
+    style.textContent = `
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar {
+            width: 12px;
+        }
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 6px;
+        }
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar-thumb {
+            background: #3182ce;
+            border-radius: 6px;
+            border: 2px solid #f0f0f0;
+        }
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar-thumb:hover {
+            background: #2c5aa0;
+        }
+    `;
+    document.head.appendChild(style);
+
+
+
+
     list.style.border = '1px solid #eee';
     list.style.borderRadius = '4px';
     list.style.padding = '5px';
@@ -988,6 +1350,9 @@ export function createFrequencyStatsModal(nameData, type) {
         // Texte de l'élément
         const itemText = document.createElement('div');
         itemText.textContent = item.text;
+
+        // console.log('debug item.text:', item.text);
+
         itemText.style.flex = '1';
         
         // Nombre d'occurrences
@@ -1073,21 +1438,6 @@ export function createFrequencyStatsModal(nameData, type) {
     makeModalDraggableAndResizable(modal, header);
 }
 
-// Fonction auxiliaire pour obtenir le libellé pour un type
-// function getTypeLabel(type, form = 'plural') {
-//     switch (type) {
-//         case 'prenoms':
-//             return form === 'plural' ? 'prénoms' : 'prénom';
-//         case 'noms':
-//             return form === 'plural' ? 'noms de famille' : 'nom de famille';
-//         case 'professions':
-//             return form === 'plural' ? 'métiers' : 'métier';
-//         case 'lieux':
-//             return form === 'plural' ? 'lieux' : 'lieu';
-//         default:
-//             return form === 'plural' ? 'éléments' : 'élément';
-//     }
-// }
 
 function getTypeLabel(type, form = 'plural') {
     const typeMapping = {
