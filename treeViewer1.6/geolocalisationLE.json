@@ -175,10 +175,6 @@
     "lat": 48.5305465,
     "lon": -4.451225
   },
-  "Plouvien,  Finistère, Bretagne, France": {
-    "lat": 48.5305465,
-    "lon": -4.451225
-  },
   "Plouvien": {
     "lat": 48.5305465,
     "lon": -4.451225
@@ -239,13 +235,13 @@
     "lat": 48.5718493,
     "lon": -4.3235917
   },
-  "Plouvien, 29, Finistère, France": {
-    "lat": 48.5305465,
-    "lon": -4.451225
-  },
   "Plouguerneau, 29195, Finistère, Bretagne, France": {
     "lat": 48.6063358,
     "lon": -4.506818
+  },
+  "Plouvien, 29, Finistère, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
   },
   "Ploudalmézeau, 29178, Finistère, Bretagne, France": {
     "lat": 48.5410278,
@@ -254,6 +250,10 @@
   "Lannilis, 29117, Finistère, Bretagne, France": {
     "lat": 48.569633,
     "lon": -4.5215472
+  },
+  "Landéda, 29101, Finistère, Bretagne, France": {
+    "lat": 48.5870031,
+    "lon": -4.5720236
   },
   "Plouguin, 29196, Finistère, Bretagne, France": {
     "lat": 48.5252677,
@@ -503,10 +503,6 @@
     "lat": 48.7255816,
     "lon": -3.9828983
   },
-  "Landéda, 29101, Finistère, Bretagne, France": {
-    "lat": 48.5870031,
-    "lon": -4.5720236
-  },
   "Plougoulm, 29250, Finistère, Bretagne, FRANCE": {
     "lat": 48.6640619,
     "lon": -4.04557
@@ -535,13 +531,13 @@
     "lat": 48.6849601,
     "lon": -3.9868641
   },
-  "Santec": {
-    "lat": 48.7031864,
-    "lon": -4.0260322
-  },
   "Sibiril, 29250, Finistère, Bretagne, FRANCE": {
     "lat": 48.6648843,
     "lon": -4.0633184
+  },
+  "Tréflaouénan, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6281024,
+    "lon": -4.0960192
   },
   "Sibiril": {
     "lat": 48.6648843,
@@ -667,6 +663,10 @@
     "lat": 48.3944624,
     "lon": -4.1975232
   },
+  "Ploudiry, 29180, Finistère, Bretagne, France": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
   "Saint-Thomas - Landerneau, 29103, Finistère, Bretagne, France": {
     "lat": 48.4489228,
     "lon": -4.2495087
@@ -678,10 +678,6 @@
   "St Thomas, Landerneau, 29103, Finistère, Bretagne, France": {
     "lat": 48.4489228,
     "lon": -4.2495087
-  },
-  "Ploudiry, 29180, Finistère, Bretagne, France": {
-    "lat": 48.4532343,
-    "lon": -4.1418753
   },
   "Pernaman - Loc-Eguiner, 29128, Finistère, Bretagne, France": {
     "lat": 48.4859611,
@@ -884,8 +880,8 @@
     "lon": -4.367119
   },
   "Bourg - Kernilis, 29260, Finistère, Bretagne, FRANCE": {
-    "lat": 48.5712387,
-    "lon": -4.4192146
+    "lat": 48.5713182,
+    "lon": -4.4193039
   },
   "Bourg-Blanc   29, , , , ,": {
     "lat": 48.5116293,
@@ -1311,6 +1307,10 @@
     "lat": 45.1882791,
     "lon": 4.2952521
   },
+  "Saint-Front, Haute-Loire, France": {
+    "lat": 44.9756854,
+    "lon": 4.1428766
+  },
   "Saint-Étienne-de-Serre, 07190, Ardèche, , FRANCE": {
     "lat": 44.80157,
     "lon": 4.5398122
@@ -1426,6 +1426,10 @@
   "Messines, 8957, Flandre Occidentale, Flandre, Belgique": {
     "lat": 50.7598269,
     "lon": 2.8998324
+  },
+  "Weißkirchen in Steiermark, Autriche": {
+    "lat": 47.1533213,
+    "lon": 14.7366379
   },
   "France": {
     "lat": 46.603354,
@@ -1739,17 +1743,25 @@
     "lat": 48.4719455,
     "lon": -4.2035505
   },
-  "Saint-Servais, 29400, Finistère, Bretagne, FRANCE": {
-    "lat": 48.5110375,
-    "lon": -4.1547375
-  },
   "Kervern - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
     "lat": 48.4487246,
     "lon": -4.188533
   },
+  "L'Isle - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4718024,
+    "lon": -4.1762094
+  },
+  "Saint-Servais, 29400, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5110375,
+    "lon": -4.1547375
+  },
   "La Martyre, 29144, Finistère, Bretagne, FRANCE": {
     "lat": 48.4483714,
     "lon": -4.1580155
+  },
+  "Sizun, 29450, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
   },
   "Plouider, 29260, Finistère, Bretagne, FRANCE": {
     "lat": 48.6079965,
@@ -1767,6 +1779,10 @@
     "lat": 48.569633,
     "lon": -4.5215472
   },
+  "Lothunou - Lannilis, 29117, Bretagne, FRANCE": {
+    "lat": 48.563729,
+    "lon": -4.5410791
+  },
   "?, 29, Finistère, Bretagne, FRANCE": {
     "lat": 48.0002283,
     "lon": -4.0410959
@@ -1774,6 +1790,10 @@
   "Kermadec - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
     "lat": 48.4654307,
     "lon": -4.2021993
+  },
+  "Roudouhir - Hanvec, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3406822,
+    "lon": -4.1375224
   },
   "Hanvec, 29460, Finistère, Bretagne, FRANCE": {
     "lat": 48.3271604,
@@ -1787,10 +1807,6 @@
     "lat": 48.3751696,
     "lon": -4.0085008
   },
-  "Sizun, 29450, Finistère, Bretagne, FRANCE": {
-    "lat": 48.4055412,
-    "lon": -4.0790475
-  },
   "Saint-Maudez - Sizun, 29450, Finistère, Bretagne, FRANCE": {
     "lat": 48.4045131,
     "lon": -4.0544932
@@ -1799,9 +1815,9 @@
     "lat": 48.3713824,
     "lon": -4.2110737
   },
-  "L'Isle - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
-    "lat": 48.4718024,
-    "lon": -4.1762094
+  "La Garenne - Brasparts, 29190, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3202177,
+    "lon": -3.9621655
   },
   "Penanrun - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
     "lat": 48.463315,
@@ -1811,17 +1827,21 @@
     "lat": 48.595965,
     "lon": -4.112168
   },
+  "Cadol, 29140, Finistère, Bretagne, FRANCE": {
+    "lat": 47.9402965,
+    "lon": -3.854843
+  },
   "Isle - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
     "lat": 48.4718024,
     "lon": -4.1762094
   },
-  "La Garenne - Brasparts, 29190, Finistère, Bretagne, FRANCE": {
-    "lat": 48.3202177,
-    "lon": -3.9621655
-  },
   "La Haie - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
     "lat": 48.4581074,
     "lon": -4.1782186
+  },
+  "Roudouguenvez - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4248904,
+    "lon": -4.1358224
   },
   "Le Cann - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
     "lat": 48.4257186,
@@ -1830,10 +1850,6 @@
   "Poulbroch - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
     "lat": 48.4362925,
     "lon": -4.1736313
-  },
-  "Roudouguenvez - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
-    "lat": 48.4248904,
-    "lon": -4.1358224
   },
   "Le Tréhou Stang (a)": {
     "lat": 48.3863541,
@@ -1883,6 +1899,10 @@
     "lat": 48.4471795,
     "lon": -4.005725
   },
+  "Kergreven - Lampaul Guimiliau, , Finistère, Bretagne,": {
+    "lat": 48.4756936,
+    "lon": -4.0328607
+  },
   "Stamadec, Commana, 29038, Finistère, Bretagne, France": {
     "lat": 48.3913969,
     "lon": -3.9993783
@@ -1895,6 +1915,10 @@
     "lat": 48.3913969,
     "lon": -3.9993783
   },
+  "Hengoat - Sizun, , Finistère, Bretagne,": {
+    "lat": 48.378951,
+    "lon": -4.0008976
+  },
   "Sizun - Finistère - Bretagne.": {
     "lat": 48.4055412,
     "lon": -4.0790475
@@ -1903,13 +1927,13 @@
     "lat": 48.4055412,
     "lon": -4.0790475
   },
-  "Hengoat - Sizun, , Finistère, Bretagne,": {
-    "lat": 48.378951,
-    "lon": -4.0008976
-  },
   "Kergudon - Sizun, , Finistère, Bretagne,": {
     "lat": 48.3743911,
     "lon": -4.0177183
+  },
+  "Guimiliau,, Finistère, Bretagne,": {
+    "lat": 48.4882362,
+    "lon": -3.9978134
   },
   "Sizun, , Finistère, Bretagne,": {
     "lat": 48.4055412,
@@ -1926,10 +1950,6 @@
   "Bodivy - Sizun, , Finistère, Bretagne,": {
     "lat": 48.404638,
     "lon": -4.0817264
-  },
-  "Guimiliau,, Finistère, Bretagne,": {
-    "lat": 48.4882362,
-    "lon": -3.9978134
   },
   "Locmelar, , Finistère, Bretagne,": {
     "lat": 48.4528938,
