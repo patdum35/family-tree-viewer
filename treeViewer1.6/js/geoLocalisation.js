@@ -97,12 +97,14 @@ export async function geocodeLocation(location) {
     // console.log(" DEBUG : in geocodeLocation ", location, geolocalisationCache, geolocalisationCache[location])
 
     if (geolocalisationCache && geolocalisationCache[location]) {
+        // console.log(" DEBUG : in geocodeLocation  location is found in the cache ... ", location, geolocalisationCache[location])        
+        
         return geolocalisationCache[location];
     }
 
     try {
 
-        console.log(" DEBUG : in geocodeLocation  SEARCH ... ", location)
+        console.log(" ************************ DEBUG : in geocodeLocation  SEARCH ... ", location)
 
         await delay(Math.random() * 500);
 

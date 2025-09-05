@@ -1,7 +1,7 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree, showToast } from './main.js';
+import { state, displayGenealogicTree, displayHeatMap, showToast } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
@@ -1544,11 +1544,18 @@ const searchModalTranslations = {
         rootPersonSearch: '🔍racine',
         person:'personne',
         found:'trouvée',
-        withPlace: 'avec lieux',
-        withOccupation: 'avec métiers',
+        withPlace: 'lieux',
+        withOccupation: 'métiers',
         over: 'sur', 
         pers: 'pers.',
         m:'H',
+        birthPlace: 'Lieu de naissance',
+        deathPlace: 'Lieu de décès',
+        residencePlace: 'Résidence',
+        weddingPlace: 'Lieu de mariage',
+        occupation: 'Profession',
+        // clickMessage: "Cliquer sur une pers. dans la liste comme nouvelle racine de l\'arbre, ou cliquer 🌍 pour afficher la carte de chaleur",
+        clickMessage: "Choisissez une nouvelle personne racine dans la liste ou cliquez 🌍 pour la carte de chaleur",
     },
     en: {
         title: "Advanced Search",
@@ -1573,6 +1580,13 @@ const searchModalTranslations = {
         over: 'over',
         pers: 'pers.',
         m: 'M',
+        birthPlace: 'Birth place',
+        deathPlace: 'Death place',
+        residencePlace: 'Residence',
+        weddingPlace: 'Wedding place',
+        occupation: 'Occupation',
+        // clickMessage: "Click on a person in the list to set as new tree root, or click 🌍 to show heatmap",
+        clickMessage: "Choose a new root person in the list or click 🌍 for the heatmap",
     },
     es: {
         title: "Búsqueda avanzada",
@@ -1597,6 +1611,13 @@ const searchModalTranslations = {
         over: 'de',
         pers: 'pers.',
         m: 'H',
+        birthPlace: 'Lugar de nacimiento',
+        deathPlace: 'Lugar de muerte',
+        residencePlace: 'Residencia',
+        weddingPlace: 'Lugar de boda',
+        occupation: 'Profesión',
+        // clickMessage: "Elige una persona como raíz o pulsa 🌍 para ver el mapa de calor",
+        clickMessage: "Elige una persona raíz o pulsa 🌍 para el mapa de calor",
     },
     hu: {
         title: "Részletes keresés",
@@ -1621,6 +1642,12 @@ const searchModalTranslations = {
         over: 'közül',
         pers: 'fő',
         m: 'F',
+        birthPlace: 'Születési hely',
+        deathPlace: 'Halálozási hely',
+        residencePlace: 'Lakóhely',
+        weddingPlace: 'Házasság helye',
+        occupation: 'Foglalkozás',
+        clickMessage: "Válasszon gyökérszemélyt vagy kattintson 🌍 a hőtérképhez",
     }
 };
 
@@ -1727,7 +1754,10 @@ export function findPersonsBy(searchTerm, searchType = 'name', startYear = null,
         if (searchType === 'name') {
             // console.log(" debug before :", person);
 
-            const fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + person.givn.toLowerCase().replace(/\//g, '') + ' ' + person.surn.toLowerCase().replace(/\//g, '');
+            let givn, surn;
+            if (person.givn) { givn=person.givn;} else {givn='';}
+            if (person.surn) { surn=person.surn;} else {surn='';}
+            const fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + givn.toLowerCase().replace(/\//g, '') + ' ' + surn.toLowerCase().replace(/\//g, '');
             const searchStrings = searchStr.split(' ').filter(s => s.trim() !== '');
 
             if (fullName.includes(searchStr)) {
@@ -1764,7 +1794,7 @@ export function findPersonsBy(searchTerm, searchType = 'name', startYear = null,
             if (person.birthPlace && person.birthPlace.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Lieu de naissance',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].birthPlace,
                     value: person.birthPlace
                 });
             }
@@ -1773,7 +1803,7 @@ export function findPersonsBy(searchTerm, searchType = 'name', startYear = null,
             if (person.deathPlace && person.deathPlace.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Lieu de décès',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].deathPlace,
                     value: person.deathPlace
                 });
             }
@@ -1782,28 +1812,28 @@ export function findPersonsBy(searchTerm, searchType = 'name', startYear = null,
             if (person.residPlace1 && person.residPlace1.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Résidence',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].residencePlace,
                     value: person.residPlace1
                 });
             }
             if (person.residPlace2 && person.residPlace2.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Résidence',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].residencePlace,
                     value: person.residPlace2
                 });
             }            
             if (person.residPlace3 && person.residPlace3.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Résidence',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].residencePlace,
                     value: person.residPlace3
                 });
             }
             if (marriagePlace && marriagePlace.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'place',
-                    field: 'Lieu de mariage',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].weddingPlace,
                     value: marriagePlace
                 });
             }
@@ -1815,7 +1845,7 @@ export function findPersonsBy(searchTerm, searchType = 'name', startYear = null,
             if (person.occupationFull && person.occupationFull.toLowerCase().includes(searchStr)) {
                 matches.push({
                     type: 'occupation',
-                    field: 'Profession',
+                    field: searchModalTranslations[window.CURRENT_LANGUAGE].occupation,
                     value: person.occupationFull
                 });
             }
@@ -1882,34 +1912,21 @@ export function openSearchModal() {
                 
                 <div class="search-modal-body">
 
-                    <!-- Section pour le type de recherche 
-                    // <div class="search-type-section">
-                    //     <select id="search-modal-search-type">
-                    //         <option value="name">${searchModalTranslations[window.CURRENT_LANGUAGE].nameOption}</option>
-                    //         <option value="place">${searchModalTranslations[window.CURRENT_LANGUAGE].placeOption}</option>
-                    //         <option value="occupation">${searchModalTranslations[window.CURRENT_LANGUAGE].occupationOption}</option>
-                    //     </select>
-
-                    // </div>
-                    -->
-
                     <div class="search-type-section">
                         <div id="search-modal-search-type-container"></div>
                     </div>
 
-                    
                     <div class="search-input-section">
                         <input type="text" id="search-modal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
                         <button id="search-modal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
                     </div>
-                    
 
                     <div class="date-filter-section">
                         <input type="number" id="date-start" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearStartPlaceholder}" min="1000" max="2100">
                         <span>- </span>
                         <input type="number" id="date-end" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearEndPlaceholder}" min="1000" max="2100">
                         <label>${searchModalTranslations[window.CURRENT_LANGUAGE].dateFilterLabel}</label>
-                        </div>
+                    </div>
                     
                     <div class="search-help">
                         <div id="search-help-text">${searchModalTranslations[window.CURRENT_LANGUAGE].helpName}</div>
@@ -1918,6 +1935,7 @@ export function openSearchModal() {
                     <div class="search-results" id="search-modal-search-results">
                         <!-- Les résultats apparaîtront ici -->
                     </div>
+
                 </div>
             </div>
         </div>
@@ -1937,7 +1955,7 @@ export function openSearchModal() {
             justify-content: center;
             align-items: flex-start; 
             padding-top: 2px;
-            z-index: 10000;
+            z-index: 9000;
         }
         
         .search-modal-overlay {
@@ -2090,9 +2108,10 @@ export function openSearchModal() {
             padding: 8px;
             border-radius: 4px;
             margin-bottom: 15px;
-            font-size: 13px;
+            font-size: 11px;
             color: #666;
         }
+
         
         .search-results {
             overflow-y: auto;
@@ -2467,6 +2486,16 @@ function setupModalEvents() {
     
 }
 
+
+window.showHeatmapFromSearch = function() {
+    if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+        // Fermer la modale de recherche
+        // closeSearchModal();
+        displayHeatMap(window.currentSearchResults);
+    }
+};
+
+
 /**
  * Effectue la recherche dans la modale
  */
@@ -2503,8 +2532,6 @@ function performModalSearch() {
     // Construire l'HTML des résultats
     let resultsHTML = '';
 
-
-    // console.log("\n\n\n\n DEBUG : Results ", results, "\n\n\n\n");
 
 
     results.forEach(person => {
@@ -2564,14 +2591,43 @@ function performModalSearch() {
     resultsContainer.innerHTML = resultsHTML;
 
 
+    // Ajouter le texte d'instruction au-dessus de la liste
+    if (results.length > 0) {
+
+        const instructionText = `
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #ff6600ff; font-weight: bold; font-size: 13px; margin-bottom: 10px; padding: 5px; background: #f9f9f9; border-radius: 3px;">
+                <span>${searchModalTranslations[window.CURRENT_LANGUAGE].clickMessage}</span>
+                <button id="heatmap-button" style="
+                    background:  #f9f9f9; 
+                    color: white; 
+                    border: none; 
+                    border-radius: 4px; 
+                    padding: 2px 2px; 
+                    cursor: pointer; 
+                    font-size: 18px;
+                    margin-left: 10px;
+                " onclick="showHeatmapFromSearch()">
+                    🌍
+                </button>
+            </div>
+        `;
+
+
+        resultsContainer.innerHTML = instructionText + resultsHTML;
+
+        // Stocker les résultats pour la heatmap
+        window.currentSearchResults = results;
+
+    } else {
+        heatmapButton.style.display = 'none';
+    }
+
+
     // Mettre à jour le label avec le nombre de personnes trouvées
     const helpText = document.getElementById('search-help-text');
     if (helpText) {
         helpText.textContent = `${results.length} ${searchModalTranslations[window.CURRENT_LANGUAGE].person}${results.length > 1 ? 's' : ''} 
         ${searchModalTranslations[window.CURRENT_LANGUAGE].found}${results.length > 1 ? 's' : ''} 
-        (${searchModalTranslations[window.CURRENT_LANGUAGE].m}=${res.foundMale_counter}, 
-        ${searchModalTranslations[window.CURRENT_LANGUAGE].withPlace}=${res.foundPersonWithPlace_counter}, 
-        ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.foundPersonWithOccupation_counter}) 
         ${searchModalTranslations[window.CURRENT_LANGUAGE].over} ${Object.keys(state.gedcomData.individuals).length} 
         ${searchModalTranslations[window.CURRENT_LANGUAGE].pers} 
         (${searchModalTranslations[window.CURRENT_LANGUAGE].m}=${res.male_counter}, 
@@ -2579,7 +2635,9 @@ function performModalSearch() {
         ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.personWithOccupation_counter})`;
     }
 
-
+        // (${searchModalTranslations[window.CURRENT_LANGUAGE].m}=${res.foundMale_counter}, 
+        //  ${searchModalTranslations[window.CURRENT_LANGUAGE].withPlace}=${res.foundPersonWithPlace_counter}, 
+        //  ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.foundPersonWithOccupation_counter})
 }
 
 /**

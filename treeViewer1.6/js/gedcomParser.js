@@ -39,6 +39,8 @@ export function parseGEDCOM(gedcomText) {
     let residenceCounter = 0;
     let nameCounter = 0;
     // let titleCounter = 0;
+    let previousIndividualsId = null;
+    let previousFamiliesId = null;
 
     for (const line of lines) {
         const match = line.match(/^\s*(\d+)\s+(@\w+@)?\s*(\w+)?\s*(.*)?$/);
@@ -48,25 +50,26 @@ export function parseGEDCOM(gedcomText) {
 
         if (level === "0" && id) {
             if (tag === "INDI") {
+
                 individuals[id] = { 
                     id, 
                     name: "",
-                    name2: "",
-                    givn: "",
-                    surn: "",
+                    // name2: "",
+                    // givn: "",
+                    // surn: "",
                     sex: "", 
                     birthDate: "", 
-                    birthPlace: "",
+                    // birthPlace: "",
                     deathDate: "",
-                    deathPlace: "",
+                    // deathPlace: "",
                     // marriagePlace: "",
-                    residDate1: "",
-                    residPlace1: "",
-                    residDate2: "",
-                    residPlace2: "",
-                    residDate3: "",
-                    residPlace3: "",
-                    occupation: "",
+                    // residDate1: "",
+                    // residPlace1: "",
+                    // residDate2: "",
+                    // residPlace2: "",
+                    // residDate3: "",
+                    // residPlace3: "",
+                    // occupation: "",
                     occupationFull: "",
                     families: [],
                     notes: [],
@@ -75,18 +78,38 @@ export function parseGEDCOM(gedcomText) {
                 currentEntity = individuals[id];  
                 nameCounter = 0;
                 residenceCounter = 0;
+
+                if (previousIndividualsId) {
+                    delete individuals[previousIndividualsId]._expectingBirthDate;                    delete individuals[id]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingDeathDate;                    delete individuals[id]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingDeathPlace;
+                    delete individuals[previousIndividualsId]._expectingResidDate1;                    delete individuals[id]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingResidPlace1;
+                    delete individuals[previousIndividualsId]._expectingResidDate2;                    delete individuals[id]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingResidPlace2;
+                    delete individuals[previousIndividualsId]._expectingResidDate3;                    delete individuals[id]._expectingBirthPlace;
+                    delete individuals[previousIndividualsId]._expectingResidPlace3;
+                }
+
+                previousIndividualsId = id;
             } else if (tag === "FAM") {
                 families[id] = { 
                     id, 
                     husband: null, 
                     wife: null, 
                     children: [],
-                    marriageDate: "",
-                    marriagePlace: "",
+                    // marriageDate: "",
+                    // marriagePlace: "",
                     notes: [],
                     sources: []
                 };
                 currentEntity = families[id];
+                if (previousFamiliesId) {
+                    delete families[previousFamiliesId]._expectingMarriageDate;
+                    delete families[previousFamiliesId]._expectingMarriagePlace;
+                }
+                previousFamiliesId = id;
             } else {
                 currentEntity = null;
             }
@@ -105,6 +128,9 @@ export function parseGEDCOM(gedcomText) {
             } else if (tag === "BIRT") {
                 currentEntity._expectingBirthDate = true;
                 currentEntity._expectingBirthPlace = true;
+
+                currentEntity._expectingDeathDate = false;
+                currentEntity._expectingDeathPlace = false;
             } else if (tag === "DEAT") {
                 currentEntity._expectingDeathDate = true;
                 currentEntity._expectingDeathPlace = true;
@@ -114,12 +140,16 @@ export function parseGEDCOM(gedcomText) {
             } else if (tag === "BAPM") {
                 currentEntity._expectingBirthDate = true;
                 currentEntity._expectingBirthPlace = true;
+
+                currentEntity._expectingDeathDate = false;
+                currentEntity._expectingDeathPlace = false;                
             } else if (tag === "BURI") {
                 currentEntity._expectingDeathDate = true;
                 currentEntity._expectingDeathPlace = true;
                 
                 currentEntity._expectingBirthDate = false;
                 currentEntity._expectingBirthPlace = false;
+
             } else if (tag === "MARR") {
                 currentEntity._expectingMarriageDate = true;
                 currentEntity._expectingMarriagePlace = true;
@@ -206,10 +236,20 @@ export function parseGEDCOM(gedcomText) {
                 currentEntity.surn = data;  // M ou F typiquement
             } else if (tag === "PLAC") {
                 if (currentEntity._expectingBirthPlace) {
-                    currentEntity.birthPlace = data;
+                    if (!currentEntity.birthPlace) {
+                        currentEntity.birthPlace = data;
+                    } 
+                    // else {
+                    //     // console.log('*** BAPM: in parseGedcom ignoring birthPlace for bapteme, only if not already set', currentEntity.name,currentEntity.birthPlace, data);
+                    // }
                     delete currentEntity._expectingBirthPlace;
                 } else if (currentEntity._expectingDeathPlace) {
-                    currentEntity.deathPlace = data;
+                    if (!currentEntity.deathPlace) {
+                        currentEntity.deathPlace = data;
+                    }
+                    // else {
+                    //     console.log('*** BURI: in parseGedcom ignoring burial for deathPlace, only if not already set', currentEntity.name, currentEntity.deathPlace, data);
+                    // }
                     delete currentEntity._expectingDeathPlace;
                 } else if (currentEntity._expectingMarriagePlace) {
                     currentEntity.marriagePlace = data;
@@ -224,7 +264,11 @@ export function parseGEDCOM(gedcomText) {
                 } else if (currentEntity._expectingResidPlace3) {
                     currentEntity.residPlace3 = data;
                     delete currentEntity._expectingResidPlace3;
-                }   
+                }
+                
+                
+                
+
             } else if (tag === "DATE") {
                 if (currentEntity._expectingBirthDate) {
                     // if birthDate is already set, do not overwrite it with a baptism date

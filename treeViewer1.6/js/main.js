@@ -249,7 +249,7 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-export async function displayHeatMap() {
+export async function displayHeatMap(currentSearchResults = null) {
    
     // Création d'un indicateur de chargement
     const loadingIndicator = document.createElement('div');
@@ -266,6 +266,12 @@ export async function displayHeatMap() {
     loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
 
     document.body.appendChild(loadingIndicator);
+
+    let isSearchResults = false;
+    if (currentSearchResults && currentSearchResults.length > 0) {
+        isSearchResults = true;
+    }
+
     
     try {
 
@@ -281,7 +287,12 @@ export async function displayHeatMap() {
         // const persons = getPersonsFromTCurrenTree();
 
         // Générer les données pour la heatmap
-        const heatmapData = await createDataForHeatMap(currentConfig, true);       
+        let heatmapData;
+        if (isSearchResults) {
+            heatmapData = await createDataForHeatMap(currentConfig, false, currentSearchResults); 
+        } else {
+            heatmapData = await createDataForHeatMap(currentConfig, true); 
+        }      
 
         // Supprimer l'indicateur de chargement
         document.body.removeChild(loadingIndicator);

@@ -585,7 +585,7 @@ export async function createHeatmapDataForPeople(people) {
  * @param {Object} config - Configuration contenant type, startDate, endDate, scope, rootPersonId
  * @returns {Promise<Array>} - Données formatées pour la heatmap
  */
-export async function createDataForHeatMap(config, isFromCurrentTree = false) {
+export async function createDataForHeatMap(config, isFromCurrentTree = false, currentSearchResults = null) {
     try {
         // Configuration pour extraire les lieux
         const locationConfig = {
@@ -594,8 +594,11 @@ export async function createDataForHeatMap(config, isFromCurrentTree = false) {
         };
         
         // Obtenir les personnes selon le même filtrage que la CloudMap
+
         let persons;
-        if (!isFromCurrentTree) {
+        if (currentSearchResults) {
+            persons = currentSearchResults;
+        } else if (!isFromCurrentTree) {
             persons = getPersonsFromTree(locationConfig.scope, locationConfig.rootPersonId);
         } else {
             persons = getPersonsFromTCurrenTree();
