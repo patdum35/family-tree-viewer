@@ -101,6 +101,9 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     // Logique principale de traitement des données
     const nameData = processNamesData(config);
 
+
+    // console.log("\n\n Données traitées pour le nuage de noms:", nameData);
+
     // Dimensions de l'écran
     nameCloudState.SVG_width = window.innerWidth;
     nameCloudState.SVG_height = window.innerHeight;
@@ -175,17 +178,18 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
 
 export function processNamesData(config) {
     const nameFrequency = {};
+    const originalName = {};
     const stats = initializeStats();
 
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
     
     persons.forEach(person => {
-        processPersonData(person, config, nameFrequency, stats, { doNotClean: false});
+        processPersonData(person, config, nameFrequency, stats, { doNotClean: false}, originalName);
     });
    
     const averages = updateStats(stats, nameFrequency);
 
-    const result = convertToNameData(nameFrequency);
+    const result = convertToNameData(nameFrequency, originalName);
     
     // Ajouter la moyenne à l'objet retourné
     result.averageData = averages.average;
@@ -196,7 +200,7 @@ export function processNamesData(config) {
 
 }
 
-export function processPersonData(person, config, nameFrequency, stats, options = {}) {
+export function processPersonData(person, config, nameFrequency, stats, options = {}, originalName = {}) {
     const { inRange, date } = hasDateInRange(person, config, stats);
     const hasDate = inRange; // Pour compatibilité avec le code existant
 
@@ -216,6 +220,7 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             firstNames.forEach(name => {
                 if (name) {
                     nameFrequency[name] = (nameFrequency[name] || 0) + 1;
+                    originalName[name] = person.name.split('/')[0].trim();
                 }
             });
         }
@@ -228,6 +233,7 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             const formattedName = formatFamilyName(cleanedName);
             if (formattedName && isValidFamilyName(formattedName)) {
                 nameFrequency[formattedName] = (nameFrequency[formattedName] || 0) + 1;
+                originalName[formattedName] = person.name.split('/')[1];
             }
         }
     } else if (config.type === 'professions') {
@@ -241,10 +247,12 @@ export function processPersonData(person, config, nameFrequency, stats, options 
                     // Si la langue courante est le français, pas besoin de traduire
                     if (currentLang === 'fr') {
                         nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                        originalName[prof] = prof;
                     } else {
                         // Traduire la profession vers la langue courante
                         const translatedProfession = translateOccupation(prof, currentLang);
                         nameFrequency[translatedProfession] = (nameFrequency[translatedProfession] || 0) + 1;
+                        originalName[translatedProfession] = prof;
                     }
                 }
             });
@@ -273,6 +281,7 @@ export function processPersonData(person, config, nameFrequency, stats, options 
         
         allLocations.forEach(location => {
             nameFrequency[location] = (nameFrequency[location] || 0) + 1;
+            originalName[location] = location;
         });
     } else if (config.type === 'duree_vie') {
         if (person.birthDate && person.deathDate) {
@@ -764,7 +773,7 @@ function updateStats(stats, nameFrequency) {
     };
 }
 
-function convertToNameData(nameFrequency) {
+function convertToNameData(nameFrequency, originalName) {
     return Object.entries(nameFrequency)
         .map(([text, value]) => {
             // Vérifier si la valeur est un objet avec des compteurs par sexe
@@ -773,7 +782,8 @@ function convertToNameData(nameFrequency) {
                     text,
                     size: value.count,
                     males: value.males || 0,
-                    females: value.females || 0
+                    females: value.females || 0,
+                    originalName: originalName[text]
                 };
             } else {
                 // Ancien format (simple nombre)
@@ -781,7 +791,8 @@ function convertToNameData(nameFrequency) {
                     text,
                     size: value,
                     males: 0,
-                    females: 0
+                    females: 0,
+                    originalName: originalName[text]                   
                 };
             }
         })
@@ -1145,14 +1156,14 @@ export function collectCenturyData(type) {
         
         // Accumulateur temporaire pour cette personne
         const personFrequency = {};
-        
+        const originalName = {};        
         // Utiliser processPersonData avec une plage de dates très large pour récupérer tous les résultats potentiels
         // La fonction retourne maintenant la date pertinente
         const date = processPersonData(person, {
             type: type,
             startDate: -3000,  // Date très ancienne
             endDate: 3000      // Date très future
-        }, personFrequency, { inPeriod: 0 }); // Stats fictifs, on ne veut pas incrémenter les vrais stats
+        }, personFrequency, { inPeriod: 0 }, originalName); // Stats fictifs, on ne veut pas incrémenter les vrais stats
         
         // Si aucune date pertinente n'a été trouvée, ignorer cette personne
         if (date === null) {

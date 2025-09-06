@@ -879,7 +879,8 @@ export function createFrequencyStatsModal(nameData, type) {
     
     // Récupérer la configuration pour ce type
     const cfg = statsConfig[type];
-    
+
+   
     // Trier les données par fréquence décroissante
     const sortedData = [...nameData].sort((a, b) => b.size - a.size);
         
@@ -1080,7 +1081,7 @@ export function createFrequencyStatsModal(nameData, type) {
                 const currentConfig = nameCloudState.currentConfig || { type };
                 showPersonsList(
                     item.text, 
-                    findPeopleWithName(item.text, currentConfig), 
+                    findPeopleWithName((type === 'noms') ?  item.originalName : item.text, currentConfig), 
                     currentConfig
                 );
             };
