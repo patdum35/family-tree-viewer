@@ -16,6 +16,10 @@ export function makeModalDraggableAndResizable(modal, handle) {
         modal.className += ' custom-modal';
     }
 
+
+
+    modal.classList.add('modal-resizable');
+
     // // Ajouter le style des scrollbars s'il n'existe pas déjà
     // if (!document.getElementById('custom-modal-scrollbar-style')) {
     //     const style = document.createElement("style");
@@ -88,13 +92,16 @@ export function makeModalDraggableAndResizable(modal, handle) {
         if (!document.getElementById('touch-device-scrollbar-style')) {
             const style = document.createElement("style");
             style.id = 'touch-device-scrollbar-style';
+
             style.textContent = `
                 /* Masquer les scrollbars sur les appareils tactiles tout en gardant la fonctionnalité */
-                ${modal.tagName.toLowerCase()} {
+
+                .modal-resizable {
                     -ms-overflow-style: none;  /* IE et Edge */
                     scrollbar-width: none;  /* Firefox */
                 }
-                ${modal.tagName.toLowerCase()}::-webkit-scrollbar {
+
+                .modal-resizable::-webkit-scrollbar {
                     display: none; /* Chrome, Safari et Opera */
                 }
             `;

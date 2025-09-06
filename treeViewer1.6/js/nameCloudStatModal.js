@@ -943,136 +943,6 @@ export function createFrequencyStatsModal(nameData, type) {
     title.style.margin = '0';
     title.style.fontSize = '16px';
 
-    // // Bouton de tri alphabétique
-    // const sortButton = document.createElement('button');
-    // sortButton.innerHTML = '🔤';
-    // sortButton.style.background = 'none';
-    // sortButton.style.border = '1px solid #ccc';
-    // sortButton.style.borderRadius = '4px';
-    // sortButton.style.padding = '4px 8px';
-    // sortButton.style.cursor = 'pointer';
-    // sortButton.style.fontSize = '16px';
-    // sortButton.title = 'Trier par ordre alphabétique';
-
-
-    // // Variable pour suivre l'état du tri
-    // let isAlphabeticalSort = false;
-
-    // // GESTIONNAIRE DE CLIC COMPLET
-    // sortButton.onclick = (event) => {
-    //     console.log('=== CLIC DETECTÉ ===');
-    //     console.log('Clic sur bouton de tri, état actuel:', isAlphabeticalSort);
-        
-    //     isAlphabeticalSort = !isAlphabeticalSort;
-        
-    //     console.log('Nouveau état:', isAlphabeticalSort);
-        
-    //     // Changer l'apparence du bouton
-    //     if (isAlphabeticalSort) {
-    //         sortButton.style.backgroundColor = '#3182ce';
-    //         sortButton.style.color = 'white';
-    //         sortButton.style.border = '2px solid #3182ce';
-    //         sortButton.title = 'Trier par fréquence';
-    //     } else {
-    //         sortButton.style.backgroundColor = 'red'; // Garder rouge pour l'instant
-    //         sortButton.style.color = 'black';
-    //         sortButton.style.border = '2px solid black';
-    //         sortButton.title = 'Trier par ordre alphabétique';
-    //     }
-        
-    //     // Re-trier les données
-    //     const dataToSort = isAlphabeticalSort 
-    //         ? [...nameData].sort((a, b) => a.text.localeCompare(b.text))
-    //         : [...nameData].sort((a, b) => b.size - a.size);
-        
-    //     console.log('Données triées:', dataToSort.slice(0, 5)); // Log des 5 premiers éléments
-        
-    //     // Vider et reconstruire la liste
-    //     list.innerHTML = '';
-        
-    //     // Reconstruire tous les éléments de la liste
-    //     dataToSort.forEach((item, index) => {
-    //         const itemContainer = document.createElement('div');
-    //         itemContainer.style.display = 'flex';
-    //         itemContainer.style.justifyContent = 'space-between';
-    //         itemContainer.style.alignItems = 'center';
-    //         itemContainer.style.padding = '8px 10px';
-    //         itemContainer.style.borderBottom = index < dataToSort.length - 1 ? '1px solid #eee' : 'none';
-    //         itemContainer.style.cursor = 'pointer';
-            
-    //         // Définir des styles alternatifs pour les lignes
-    //         if (index % 2 === 0) {
-    //             itemContainer.style.backgroundColor = '#f9f9f9';
-    //         }
-            
-    //         // Appliquer un style spécial pour le premier élément
-    //         if (index === 0) {
-    //             itemContainer.style.backgroundColor = '#EBF8FF';
-    //             itemContainer.style.fontWeight = 'bold';
-    //         }
-            
-    //         // Texte de l'élément
-    //         const itemText = document.createElement('div');
-    //         itemText.textContent = item.text;
-    //         itemText.style.flex = '1';
-            
-    //         // Nombre d'occurrences
-    //         const itemCount = document.createElement('div');
-    //         itemCount.textContent = item.size;
-    //         itemCount.style.marginLeft = '10px';
-    //         itemCount.style.fontWeight = 'bold';
-    //         itemCount.style.color = '#3182ce';
-            
-    //         itemContainer.appendChild(itemText);
-    //         itemContainer.appendChild(itemCount);
-            
-    //         // Ajouter un effet de survol
-    //         itemContainer.onmouseover = () => {
-    //             itemContainer.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
-    //         };
-            
-    //         itemContainer.onmouseout = () => {
-    //             itemContainer.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
-    //         };
-            
-    //         // Ajouter un gestionnaire de clic pour afficher les personnes
-    //         itemContainer.onclick = () => {
-    //             document.body.removeChild(modal);
-    //             document.body.removeChild(overlay);
-                
-    //             // Trouver les personnes ayant ce nom/prénom/métier/lieu
-    //             const currentConfig = nameCloudState.currentConfig || { type };
-    //             showPersonsList(
-    //                 item.text, 
-    //                 findPeopleWithName(item.text, currentConfig), 
-    //                 currentConfig
-    //             );
-    //         };
-            
-    //         list.appendChild(itemContainer);
-    //     });
-        
-    //     console.log('Liste reconstruite avec', dataToSort.length, 'éléments');
-    // };
-
-    // // Test supplémentaire
-    // sortButton.addEventListener('mousedown', () => {
-    //     console.log('Mousedown détecté');
-    // });
-
-    // // Ajout au container
-    // titleContainer.appendChild(title);
-    // titleContainer.appendChild(sortButton);
-
-
-
-
-
-
-
-
-
-
 
     // Bouton de tri alphabétique
     const sortButton = document.createElement('button');
@@ -1295,29 +1165,40 @@ export function createFrequencyStatsModal(nameData, type) {
     const list = document.createElement('div');
     list.style.maxHeight = '60vh';
     list.style.overflow = 'auto';
-    list.style.scrollbarWidth = 'thin'; // Firefox
-    list.style.scrollbarColor = '#3182ce #f0f0f0'; // Firefox
 
     // Styles pour webkit (Chrome, Safari)
     const style = document.createElement('style');
     style.textContent = `
         .${cfg.buttonClass}-modal div::-webkit-scrollbar {
-            width: 12px;
+            width: 20px !important;
         }
         .${cfg.buttonClass}-modal div::-webkit-scrollbar-track {
-            background: #f0f0f0;
+            background: #80f0f044; /* Couleur de fond du track  */
             border-radius: 6px;
         }
         .${cfg.buttonClass}-modal div::-webkit-scrollbar-thumb {
-            background: #3182ce;
+            background: #3182ce; /* Couleur du curseur  */
             border-radius: 6px;
-            border: 2px solid #f0f0f0;
+            border: 2px solid #f0f0f0; /* Bordure du curseur */
+            min-height: 50px;  /* Hauteur minimum du curseur  */
         }
         .${cfg.buttonClass}-modal div::-webkit-scrollbar-thumb:hover {
-            background: #2c5aa0;
+            background: #2c5aa0; /* Couleur au survol */
         }
     `;
     document.head.appendChild(style);
+
+    // FORCER l'application après le CSS tactile du resizableModalUtils.js dans la function makeModalDraggableAndResizable(modal, handle)
+    // car le makeModalDraggableAndResizable rendait le scrollbar invisible
+    setTimeout(() => {
+        const forceStyle = document.createElement('style');
+        forceStyle.textContent = `
+            .${cfg.buttonClass}-modal div {
+                scrollbar-width: unset !important;
+            }
+        `;
+        document.head.appendChild(forceStyle);
+    }, 0);
 
 
 
