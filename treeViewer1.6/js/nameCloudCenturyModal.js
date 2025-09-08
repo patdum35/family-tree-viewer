@@ -811,6 +811,9 @@ export function showCenturyStatsModal(type) {
 
 
 function showCenturyDetails(century, stats, container, type) {
+
+    // console.log('\n\n, showCenturyDetails(century, stats, container, type)', century, stats, container, type )
+
     // Vider le conteneur
     container.innerHTML = '';
     
@@ -912,7 +915,7 @@ function showCenturyDetails(century, stats, container, type) {
             // Utiliser la fonction existante avec la configuration temporaire
             showPersonsList(
                 `${item.text} (${getDisplayCentury(century)})`, // Titre avec indication du siècle
-                findPeopleWithName(item.text, tempConfig),      // Filtrer par siècle
+                findPeopleWithName(item.text, tempConfig, item.originalName),      // Filtrer par siècle
                 tempConfig                                      // Config temporaire avec dates du siècle
             );
         };

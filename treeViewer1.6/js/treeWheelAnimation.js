@@ -3678,13 +3678,13 @@ function prepareProgressiveClues(person) {
             .filter(note => note !== null);
 
             let noteTextInit = '';
-            if (person.givn !='') {
+            if (person.givn && person.givn !='') {
                noteTextInit = personData.givn; 
             }
-            if (person.surn !='') {
+            if (person.surn  && person.surn !='') {
                noteTextInit = noteTextInit + ' ' + personData.surn ; 
             }
-            if (personData.givn !='' || personData.surn !='') {
+            if ( (person.givn && personData.givn) !='' || (person.surn && personData.surn !='') ) {
                 noteTextInit = noteTextInit + ', '; 
             }
 
@@ -3942,13 +3942,13 @@ function prepareDetailsForReading(person) {
             .filter(note => note !== null);
 
             let noteTextInit = '';
-            if (person.givn !='') {
+            if (person.givn && person.givn !='') {
                noteTextInit = personData.givn; 
             }
-            if (person.surn !='') {
+            if (person.surn && person.surn !='') {
                noteTextInit = noteTextInit + ' ' + personData.surn ; 
             }
-            if (personData.givn !='' || personData.surn !='') {
+            if ((person.givn && personData.givn !='') || (person.surn && personData.surn !='')) {
                 noteTextInit = noteTextInit + ', '; 
             }
 

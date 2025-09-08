@@ -1259,6 +1259,10 @@
     "lat": 48.513966,
     "lon": -2.336892
   },
+  "St Cast Le Guildo (22)": {
+    "lat": 48.6241288,
+    "lon": -2.2617846
+  },
   "Saint-Cast-le-Guildo, Côtes-d'Armor, 22, FR": {
     "lat": 48.6241288,
     "lon": -2.2617846
@@ -5711,6 +5715,10 @@
     "lat": 49.60033,
     "lon": 0.8497964
   },
+  "Cideville, 76174, Seine-Maritime, Normandie, France": {
+    "lat": 49.6156864,
+    "lon": 0.8932818
+  },
   "Flamanville, 76264, Seine Maritime, Normandie, France": {
     "lat": 49.6348243,
     "lon": 0.839636
@@ -6342,5 +6350,17 @@
   "Pléhérel, 22178, Côtes d'Armor, Bretagne, France": {
     "lat": 48.652384,
     "lon": -2.3640432
+  },
+  "Le Palicot - Caulnes, 22350, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.3220723,
+    "lon": -2.1270992
+  },
+  "Caulnes, 22350, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.2880795,
+    "lon": -2.1543918
+  },
+  "Guitté, 22350, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.297143,
+    "lon": -2.095547
   }
 }

@@ -606,11 +606,12 @@ export async function createDataForHeatMap(config, isFromCurrentTree = false, cu
 
         // Collecter tous les lieux non nettoyés
         const locationData = {};
+        const originalName = {};
         const stats = { inPeriod: 0 }; // Stats minimal
         
         // Traiter chaque personne pour extraire ses lieux sans nettoyage
         persons.forEach(person => {
-            processPersonData(person, locationConfig, locationData, stats, { doNotClean: true });
+            processPersonData(person, locationConfig, locationData, stats, { doNotClean: true }, originalName);
         });
         
         // Créer une structure pour stocker les informations détaillées par lieu
@@ -779,11 +780,12 @@ export async function updateHeatmapIfVisible(text, people) {
             
             // Collecter tous les lieux non nettoyés
             const locationData = {};
+            const originalName = {};
             const stats = { inPeriod: 0 }; // Stats minimal
             
             // Traiter chaque personne pour extraire ses lieux sans nettoyage
             selectedPersons.forEach(person => {
-                processPersonData(person, locationConfig, locationData, stats, { doNotClean: true });
+                processPersonData(person, locationConfig, locationData, stats, { doNotClean: true }, originalName);
             });
             
             // Créer une structure pour stocker les informations détaillées par lieu

@@ -1,4 +1,4 @@
-import { state } from './main.js';
+import { state, showAndRestoreTreeButtons } from './main.js';
 import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
@@ -840,6 +840,9 @@ function closeCloudName(modal) {
     console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
     enableBackground(true, true);
     state.backgroundEnabled = true;
+
+    showAndRestoreTreeButtons();
+
     if (state.isRadarEnabled) {
         enableFortuneMode();
     }

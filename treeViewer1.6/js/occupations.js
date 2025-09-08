@@ -1296,7 +1296,7 @@ export function translateOccupation(occupation, targetLang = 'en') {
   }
   
   // Si aucune traduction n'est trouvée, retourner l'occupation originale
-  console.warn(`Aucune traduction trouvée pour '${occupation}' en ${targetLang}`);
+  // console.warn(`Aucune traduction trouvée pour '${occupation}' en ${targetLang}`);
   return occupation;
 }
 

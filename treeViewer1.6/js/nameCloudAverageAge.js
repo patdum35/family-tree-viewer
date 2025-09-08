@@ -1,6 +1,6 @@
 import { state, showToast } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
-import { hasDateInRange, cleanProfession, cleanLocation  } from './nameCloudUtils.js';
+import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud  } from './nameCloudUtils.js';
 import { createStatsModal, createFrequencyStatsModal }  from './nameCloudStatModal.js';
 import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
 
@@ -782,11 +782,15 @@ function positionButtonRelativeToLabel(button, type) {
  * @param {Object} config - La configuration
  * @returns {Array} - Liste des personnes correspondantes
  */
-export function findPeopleWithName(name, config) {
+export function findPeopleWithName(name, config, originalName) {
+
+    console.log("findPeopleWithName called  with name:", name, "and ", config, ', originalName=', originalName);
+
     if (!state.gedcomData) return [];
+    if (!originalName) { originalName = name;}
     
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
-    
+
     const people = Object.values(state.gedcomData.individuals)
         .filter(p => {
             let matches = false;
@@ -798,10 +802,27 @@ export function findPeopleWithName(name, config) {
                     n.toLowerCase().startsWith(name.toLowerCase() + ' ')
                 );
             } else if (config.type === 'noms') {
-                matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === name.toLowerCase());
+                matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === originalName.toLowerCase());
             } else if (config.type === 'professions') {
-                const cleanedProfessions = cleanProfession(p.occupation);
-                matches = cleanedProfessions.includes(name.toLowerCase());
+                const cleanedProfessions = cleanProfessionForNameCloud(p.occupationFull);
+                const regex = new RegExp(`(^|[ ,.;:(){}\\[\\]\\-_'"])\\s*${originalName.toLowerCase()}\\s*($|[ ,.;:(){}\\[\\]\\-_'"])`, 'i');
+
+                matches = cleanedProfessions.some(prof => regex.test(prof));
+
+
+                if (matches) {
+                    cleanedProfessions.forEach(prof => {
+                        if (prof.includes(originalName.toLowerCase()) && (originalName.split(' ').length === 1) && (prof.split(' ').length > 1) && prof.split(' ')[prof.split(' ').length-1].includes(originalName.toLowerCase()) ) {
+                            matches = false;
+                            console.log('\n\n matches is cancelled, search=',originalName, 'in ', prof , p.name, ', ' , originalName.split(' ').length, prof.split(' ').length, prof.split(' ')[0].includes(originalName.toLowerCase()))
+                        }
+                    });
+                }
+
+                // if (p.occupationFull.toLowerCase().includes('roi')) {
+                //     console.log('\n\n debug in findPeopleWithName Average, search=', originalName, ', in' , p.name, p.occupationFull, ', cleanedProfessions=', cleanedProfessions, matches)
+                // }
+
             } else if (config.type === 'lieux') {
                 const personLocations = [
                     p.birthPlace, 
@@ -829,9 +850,9 @@ export function findPeopleWithName(name, config) {
         .map(p => ({
             name: p.name.replace(/\//g, ''),
             id: p.id,
-            occupation: p.occupation || 'Non spécifiée'
+            occupation: p.occupationFull || 'Non spécifiée'
         }));
-    
+
     return people;
 }
 

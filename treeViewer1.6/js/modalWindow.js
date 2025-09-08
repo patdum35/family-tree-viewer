@@ -318,16 +318,16 @@ export function displayPersonDetails(personId) {
     
     if (state.isTouchDevice) {
         // Sur les appareils tactiles, masquer complètement les scrollbars mais garder la fonctionnalité
-        style.textContent = `
-            /* Masquer les scrollbars sur les appareils tactiles tout en gardant la fonctionnalité */
-            .modal-person-name {
-                -ms-overflow-style: none;  /* IE et Edge */
-                scrollbar-width: none;  /* Firefox */
-            }
-            .modal-person-name::-webkit-scrollbar {
-                display: none; /* Chrome, Safari et Opera */
-            }
-        `;
+        // style.textContent = `
+        //     /* Masquer les scrollbars sur les appareils tactiles tout en gardant la fonctionnalité */
+        //     .modal-person-name {
+        //         -ms-overflow-style: none;  /* IE et Edge */
+        //         scrollbar-width: none;  /* Firefox */
+        //     }
+        //     .modal-person-name::-webkit-scrollbar {
+        //         display: none; /* Chrome, Safari et Opera */
+        //     }
+        // `;
     } else {
         // Style standard pour les ascenseurs sur les appareils non-tactiles
         style.textContent = `
@@ -670,27 +670,37 @@ export function displayPersonDetails(personId) {
     }
 
     // Notes (si disponibles)
-    if (person.notes && person.notes.length > 0) {
-        const validNotes = person.notes
-            .map(noteRef => {
-                const note = state.gedcomData.notes[noteRef];
-                return note && note.text && note.text.trim() !== '' ? note.text.trim() : null;
-            })
-            .filter(note => note !== null);
-
-            let noteTextInit = '';
-            if (person.givn !='') {
-               noteTextInit = person.givn; 
-            }
-            if (person.surn !='') {
-               noteTextInit = noteTextInit + ' ' + person.surn ; 
-            }
-            if (person.givn !='' || person.surn !='') {
-                noteTextInit = noteTextInit + ', '; 
-            }
-
+    if ((person.notes && person.notes.length > 0) || person.givn || person.surn ) {
         
-            if (validNotes.length > 0) {
+        let validNotes;
+        if (person.notes && person.notes.length > 0) {
+            validNotes = person.notes
+                .map(noteRef => {
+                    const note = state.gedcomData.notes[noteRef];
+                    return note && note.text && note.text.trim() !== '' ? note.text.trim() : null;
+                })
+                .filter(note => note !== null);
+        } else {
+            validNotes = [''];
+        }
+
+        // if (person.name.includes('Joseph Ben Matthat Le Juste Le Confesseur')) {
+        //     console.log(' debug Joseph Ben Matthat Le Juste Le Confesseur', person, person.givn, person.surn )
+        // }
+
+        let noteTextInit = '';
+        if (person.givn && person.givn !='') {
+            noteTextInit = person.givn; 
+        }
+        if (person.surn && person.surn !='') {
+            noteTextInit = noteTextInit + ' ' + person.surn ; 
+        }
+        if ((person.givn && person.givn !='') || (person.surn && person.surn !='')) {
+            noteTextInit = noteTextInit + ', '; 
+        }
+
+    
+        if (validNotes.length > 0) {
             detailsHTML += `
                 <div class="details-section notes">
                     <small>

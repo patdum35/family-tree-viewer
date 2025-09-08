@@ -884,7 +884,7 @@ export function createFrequencyStatsModal(nameData, type) {
     // Trier les données par fréquence décroissante
     const sortedData = [...nameData].sort((a, b) => b.size - a.size);
         
-    
+    // console.log("/n/n debug type in createFrequencyStatsModal =", type)
     
     // Création du modal
     const modal = document.createElement('div');
@@ -1078,10 +1078,13 @@ export function createFrequencyStatsModal(nameData, type) {
                 document.body.removeChild(modal);
                 document.body.removeChild(overlay);
                 
-                const currentConfig = nameCloudState.currentConfig || { type };
+                const currentConfig = nameCloudState.currentConfig || { type };               
+                
+                // console.log(' \n debug call to showPersonsList with ', item.text, currentConfig, item.originalName)
+                
                 showPersonsList(
                     item.text, 
-                    findPeopleWithName((type === 'noms') ?  item.originalName : item.text, currentConfig), 
+                    findPeopleWithName(item.text, currentConfig, item.originalName ), 
                     currentConfig
                 );
             };
@@ -1263,9 +1266,11 @@ export function createFrequencyStatsModal(nameData, type) {
             
             // Trouver les personnes ayant ce nom/prénom/métier/lieu
             const currentConfig = nameCloudState.currentConfig || { type };
+            // console.log(' \n debug call to showPersonsList with ', item.text, currentConfig, item.originalName, findPeopleWithName(item.text, currentConfig, item.originalName))
+
             showPersonsList(
                 item.text, 
-                findPeopleWithName(item.text, currentConfig), 
+                findPeopleWithName(item.text, currentConfig, item.originalName), 
                 currentConfig
             );
         };

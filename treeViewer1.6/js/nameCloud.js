@@ -1,5 +1,5 @@
 
-import { state, showToast, trackPageView } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
@@ -59,6 +59,8 @@ export const nameCloudState = {
 
 export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
+    hideAndCleanupTreeButtons();
+    
     trackPageView('wordCloud');
 
     state.isWordCloudEnabled = true; // Activer le nuage de mots
@@ -182,12 +184,17 @@ export function processNamesData(config) {
     const stats = initializeStats();
 
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
+
     
+    counter_marchand = 0;
+    nameFrequencyFirstWord = [];
     persons.forEach(person => {
         processPersonData(person, config, nameFrequency, stats, { doNotClean: false}, originalName);
     });
    
     const averages = updateStats(stats, nameFrequency);
+
+    // console.log('debug processNamesData , nameFrequency, stats ', nameFrequency, stats)
 
     const result = convertToNameData(nameFrequency, originalName);
     
@@ -200,11 +207,14 @@ export function processNamesData(config) {
 
 }
 
+
+let counter_marchand = 0;
+let nameFrequencyFirstWord = [];
+
 export function processPersonData(person, config, nameFrequency, stats, options = {}, originalName = {}) {
     const { inRange, date } = hasDateInRange(person, config, stats);
     const hasDate = inRange; // Pour compatibilité avec le code existant
 
-    // Récupérer la langue actuelle (avec français comme fallback)
     const currentLang = window.CURRENT_LANGUAGE || 'fr';
 
     if (config.type === 'prenoms') {
@@ -240,20 +250,59 @@ export function processPersonData(person, config, nameFrequency, stats, options 
         if ((person.occupationFull) && hasDate) {
             stats.inPeriod++;
             const cleanedProfessions = cleanProfessionForNameCloud(person.occupationFull);
-            
+
+            let shortProfDetected = [];
+            let previousNameFrequencyFirstWord = null;
+            if (nameFrequencyFirstWord) {
+                previousNameFrequencyFirstWord = nameFrequencyFirstWord; 
+            }
+
             cleanedProfessions.forEach(prof => {
                 if (prof) {
-                    // nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
                     // Si la langue courante est le français, pas besoin de traduire
                     if (currentLang === 'fr') {
-                        nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+
+                        const shortProfs =  prof.split(/[ \-]/);  //  séparer sur espace, tiret 
+                        const profLength = prof.split(/[ \-]/).length
+
+                        if (profLength > 1) { 
+                            nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                        } else if  (profLength === 1 &&  !(nameFrequency[prof] && shortProfDetected[prof]) ) {
+                                nameFrequency[prof] = (nameFrequency[prof] || 0) + 1;
+                        }
+                
+                        if (profLength > 1) {
+                            for (let i = 0; i < profLength - 1; i++) {  // sortir avant le dernier élément
+                                const shortProf = shortProfs[i];
+                                if ( !nameFrequency[shortProf] && !shortProfDetected[shortProf]) {
+                                    nameFrequencyFirstWord[shortProf] = (nameFrequencyFirstWord[shortProf]|| 0)  + 1;
+                                } else if ( nameFrequency[shortProf] && !shortProfDetected[shortProf]) {
+                                    nameFrequency[shortProf] = (nameFrequency[shortProf] || 0) + 1;
+                                    shortProfDetected[shortProf] = true;
+                                } 
+                            }
+                        }
+
+                        if (profLength === 1 && previousNameFrequencyFirstWord[prof]) {
+                                nameFrequency[prof] = nameFrequency[prof]  + previousNameFrequencyFirstWord[prof];                                
+                                delete nameFrequencyFirstWord[prof];
+                                delete previousNameFrequencyFirstWord[prof];
+                        }
+
                         originalName[prof] = prof;
+
+                        // if (prof.includes('roi')) {
+                        //     counter_marchand++;
+                        //     console.log('debug processPersonData prof=', prof, 'prof[0]=', shortProfs[0], person.name, person.occupationFull, cleanedProfessions, ', counter=', counter_marchand, ', final=','roi','=', nameFrequency['roi'], 'final', prof,'=' , nameFrequency[prof], 'start', shortProfs[0], '=', nameFrequencyFirstWord[shortProfs[0]], shortProfs[0], shortProfs[1], shortProfs[2], shortProfs[3], shortProfs[4])
+                        // }
+
                     } else {
                         // Traduire la profession vers la langue courante
                         const translatedProfession = translateOccupation(prof, currentLang);
                         nameFrequency[translatedProfession] = (nameFrequency[translatedProfession] || 0) + 1;
                         originalName[translatedProfession] = prof;
                     }
+
                 }
             });
         }
@@ -887,11 +936,27 @@ export function filterPeopleByText(text, config) {
                 matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === text.toLowerCase());
             } else if (config.type === 'professions') {
                 const cleanedProfessions = cleanProfessionForNameCloud(p.occupationFull);
-                // matches = cleanedProfessions.includes(text.toLowerCase());
 
                 if (currentLang === 'fr') {
                     // En français, on utilise directement le texte
-                    matches = cleanedProfessions.includes(text.toLowerCase());
+                    const regex = new RegExp(`(^|[ ,.;:(){}\\[\\]\\-_'"])\\s*${text.toLowerCase()}\\s*($|[ ,.;:(){}\\[\\]\\-_'"])`, 'i');
+                    matches = cleanedProfessions.some(prof => regex.test(prof));
+
+
+                    if (matches) {
+                        cleanedProfessions.forEach(prof => {
+                            if (prof.includes(text.toLowerCase()) && (text.split(' ').length === 1) && (prof.split(' ').length > 1) && prof.split(' ')[prof.split(' ').length-1].includes(text.toLowerCase()) ) {
+                                matches = false;
+                                console.log('\n\n matches is cancelled, search=',text, 'in ', prof , p.name, ', ' , text.split(' ').length, prof.split(' ').length, prof.split(' ')[0].includes(text.toLowerCase()))
+                            }
+                        });
+                    }
+
+                    // if (p.occupationFull.includes('du roi')) {
+                    // if (p.occupationFull.toLowerCase().includes('journalier')) {                        
+                    //     console.log('\n\n debug in filterPeopleByText, search=', text, ', in' , p.name, p.occupationFull, ', cleanedProfessions=', cleanedProfessions, matches)
+                    // }
+
                 } else {
                     // Pour les autres langues, il faut chercher la profession originale
                     // dont la traduction correspond au texte
@@ -1044,7 +1109,7 @@ export function filterPeopleByText(text, config) {
                 ((config.scope === 'descendants' || config.scope === 'directDescendants') && persons.some(descendant => descendant.id === p.id)) ||
                 ((config.scope === 'ancestors' || config.scope === 'directAncestors') && persons.some(ancestor => ancestor.id === p.id));
 
-            return matches && isInTree && hasDateInRange(p, config);
+            return matches && isInTree && hasDateInRange(p, config).inRange;
         })
         .map(p => ({
             name: p.name.replace(/\//g, ''),
@@ -1124,6 +1189,7 @@ export function collectCenturyData(type) {
             items: [], // Pour stocker les détails (utile pour les versions futures avec types non numériques)
             frequencies: {}, // Pour stocker les fréquences des valeurs non numériques
             sortedFrequencies: [], // Pour stocker les fréquences triées
+            originalNames: {}, // Pour stocker les fréquences triées
             top3: [] // Pour stocker le top 3 des éléments les plus fréquents
         };
     }
@@ -1145,7 +1211,7 @@ export function collectCenturyData(type) {
     // Utiliser la fonction getPersonsFromTree pour respecter le scope
     const persons = getPersonsFromTree(currentScope, rootPersonId);
     
-    console.log(`collectCenturyData : Traitement de ${persons.length} personnes pour ${type}`);
+    // console.log(`collectCenturyData : Traitement de ${persons.length} personnes pour ${type}`);
     
     // Pour stocker les personnes déjà traitées par siècle (éviter les doublons)
     const processedPersonsByCentury = {};
@@ -1156,15 +1222,20 @@ export function collectCenturyData(type) {
         
         // Accumulateur temporaire pour cette personne
         const personFrequency = {};
-        const originalName = {};        
+        const originalName = {};
         // Utiliser processPersonData avec une plage de dates très large pour récupérer tous les résultats potentiels
         // La fonction retourne maintenant la date pertinente
         const date = processPersonData(person, {
             type: type,
             startDate: -3000,  // Date très ancienne
             endDate: 3000      // Date très future
-        }, personFrequency, { inPeriod: 0 }, originalName); // Stats fictifs, on ne veut pas incrémenter les vrais stats
-        
+        }, personFrequency, { }, { inPeriod: 0 }, originalName); // Stats fictifs, on ne veut pas incrémenter les vrais stats
+ 
+
+
+        // console.log('\n\n personFrequency from processPersonData in collectCenturyData', personFrequency, 'originalName=', originalName)        
+
+
         // Si aucune date pertinente n'a été trouvée, ignorer cette personne
         if (date === null) {
             noDatesCount++;
@@ -1245,7 +1316,10 @@ export function collectCenturyData(type) {
                 if (!centuryStats[century].frequencies[text]) {
                     centuryStats[century].frequencies[text] = 0;
                 }
+
                 centuryStats[century].frequencies[text] += count;
+                // console.log('\n debug  in Object.entries(personFrequency).forEach(([text, count]) ', text, originalName)
+                centuryStats[century].originalNames[text] = originalName[text];
                 
                 // Ajouter aux items
                 centuryStats[century].items.push({
@@ -1257,6 +1331,12 @@ export function collectCenturyData(type) {
             });
         }
     });
+
+
+
+    // console.log('\n\n centuryStats in collectCenturyData',centuryStats )
+
+
     
     // Calculer les moyennes pour chaque siècle
     for (const century in centuryStats) {
@@ -1277,7 +1357,7 @@ export function collectCenturyData(type) {
             if (Object.keys(centuryStats[century].frequencies).length > 0) {
                 // Convertir l'objet de fréquences en tableau pour pouvoir le trier
                 const sortedFreq = Object.entries(centuryStats[century].frequencies)
-                    .map(([text, count]) => ({ text, count }))
+                    .map(([text, count]) => ({ text, count, originalName: centuryStats[century].originalNames[text] }))
                     .sort((a, b) => b.count - a.count);
                 
                 // Stocker le tableau trié

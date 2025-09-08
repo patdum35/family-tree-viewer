@@ -1946,6 +1946,49 @@ function positionHeatMapButton() {
     }
 }
 
+
+
+export function hideAndCleanupTreeButtons() {
+    const buttonListToHide = ['heatMapBtn', 'radarBtn'];
+    const overlayListToHide = ['heatMapBtn-overlay', 'radarBtn-overlay'];
+
+    let btn;
+    let overlay;
+    let index = 0;
+    buttonListToHide.forEach(btnName=>{
+        // Cacher le bouton 
+        btn = document.getElementById(btnName);
+        if (btn) {
+            btn.style.display = 'none';
+        }
+        // Supprimer complètement l'overlay
+        overlay = document.getElementById(overlayListToHide[index]);
+        if (overlay) {
+            overlay.remove();
+        }
+        index++;
+    });
+}
+
+export function showAndRestoreTreeButtons() {
+    const buttonListToRestore = ['heatMapBtn', 'radarBtn'];
+    let btn;
+    let overlay;
+    let index = 0;
+    buttonListToRestore.forEach(btnName=>{
+        // restorer le bouton 
+        btn = document.getElementById(btnName);
+        if (btn) {
+            btn.style.display = '';
+            if (btnName === 'radarBtn') { createAndPositionRadarOverlay(); }
+            else if (btnName === 'heatMapBtn') { createAndPositionHeatMapOverlay(); }
+        }
+    });
+}
+
+
+
+
 // Modifier vos écouteurs existants
 document.addEventListener('DOMContentLoaded', () => {
     positionRadarButton();

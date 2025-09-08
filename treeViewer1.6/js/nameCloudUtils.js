@@ -139,7 +139,8 @@ export function cleanProfessionForNameCloud(profession) {
     if (!profession) return [];
 
     // console.log('\ndebug before cleaning****', profession);
-    const professions = profession.split(',')
+    // const professions = profession.split(',')
+    const professions = profession.split(/[,.;\/]| - /) // split sur ',' ou '/' ou ' - '
         .map(p => {
             let cleaned = p.trim().toLowerCase().replace(/[^a-zà-ÿ\s'-]/gi, '').replace(/\s+/g, ' ');
             // console.log('cleaned 1 ****', cleaned);
