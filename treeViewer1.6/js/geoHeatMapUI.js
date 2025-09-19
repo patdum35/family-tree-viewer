@@ -177,6 +177,10 @@ function getUITranslation(key) {
  */
 export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = false, updateOnly = false, initialPosition = null) {
     
+
+    console.log("\n\n\n ****** debug in createImprovedHeatmap", locationData, heatmapTitle, isFromTree , updateOnly , initialPosition);
+
+
     // Vérifier s'il existe déjà une heatmap
     const existingMap = document.getElementById('namecloud-heatmap-wrapper');
     
@@ -587,7 +591,7 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             // console.error('Données de heatmap invalides:', locationData);
             console.error(getUITranslation('invalidHeatmapData'), locationData);
 
-            return;
+            // return;
         }
 
         // Collecter les coordonnées valides
@@ -599,7 +603,7 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         if (coordinates.length === 0) {
             // console.error('Aucune coordonnée valide trouvée dans les données');
             console.error(getUITranslation('noValidCoordinates'));
-            return;
+            // return;
         }
 
         // Créer la couche de chaleur
@@ -980,22 +984,30 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
  * @param {HTMLElement} mapContainer - Conteneur de la carte
  * @param {String} heatmapTitle - Titre à afficher
  */
+
+
 function createMapTitle(mapContainer, heatmapTitle = 'Heatmap') {
-    const mapTitle = document.createElement('div');
-    mapTitle.id = 'heatmap-map-title';
-    mapTitle.style.position = 'absolute';
-    mapTitle.style.top = '10px';
-    mapTitle.style.left = '10px';
-    mapTitle.style.zIndex = '1000';
-    mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-    mapTitle.style.padding = '3px 6px';
-    mapTitle.style.borderRadius = '4px';
-    mapTitle.style.fontSize = '12px';
-    mapTitle.style.fontWeight = 'bold';
-    mapTitle.style.maxWidth = '70%';
+    let mapTitle = document.getElementById('heatmap-map-title');
+    
+    if (!mapTitle) {
+        mapTitle = document.createElement('div');
+        mapTitle.id = 'heatmap-map-title';
+        mapTitle.style.position = 'absolute';
+        mapTitle.style.top = '10px';
+        mapTitle.style.left = '10px';
+        mapTitle.style.zIndex = '1000';
+        mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        mapTitle.style.padding = '3px 6px';
+        mapTitle.style.borderRadius = '4px';
+        mapTitle.style.fontSize = '12px';
+        mapTitle.style.fontWeight = 'bold';
+        mapTitle.style.maxWidth = '70%';
+        mapContainer.appendChild(mapTitle);
+    }
+
     mapTitle.textContent = heatmapTitle.replace(/^Heatmap\s*-\s*/, '');
-    mapContainer.appendChild(mapTitle);
 }
+
 
 /**
  * Crée les contrôles de la carte (boutons de rafraîchissement et fermeture)

@@ -2,6 +2,10 @@ import { nameCloudState } from './nameCloud.js';
 import { statsConfig, findPeopleWithName, ensureStatsExist } from './nameCloudAverageAge.js';
 import { showPersonsList } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { displayHeatMap } from './main.js';
+import { findPersonsBy } from './searchModalUI.js';
+
+import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 
 
 
@@ -27,7 +31,9 @@ function getStatTranslation(key) {
         'mostFrequentAge': 'Age le plus fréquent',
         'mostFrequentChildCount': 'nb enfant le plus fréquent',
         'years': ' ans',
+        'year': ' an',
         'yearsShort': 'a',
+        'child': ' enf.',
         
         // Abréviations
         'male': 'H',
@@ -54,7 +60,9 @@ function getStatTranslation(key) {
         'placesSingular': 'lieu',
         'placesPlural': 'lieux',
         'elementsSingular': 'élément',
-        'elementsPlural': 'éléments'
+        'elementsPlural': 'éléments',
+        'beforeJC': 'av.JC',
+        'today': "aujourd."
       },
       'en': {
         // Titres et labels généraux
@@ -73,7 +81,9 @@ function getStatTranslation(key) {
         'mostFrequentAge': 'Most frequent age',
         'mostFrequentChildCount': 'Most frequent child count',
         'years': ' yrs',
+        'year': ' year',
         'yearsShort': 'y',
+        'child': ' child.',
         
         // Abréviations
         'male': 'M',
@@ -100,7 +110,9 @@ function getStatTranslation(key) {
         'placesSingular': 'place',
         'placesPlural': 'places',
         'elementsSingular': 'element',
-        'elementsPlural': 'elements'
+        'elementsPlural': 'elements',
+        'beforeJC': 'BC',
+        'today': 'today'
       },
       'es': {
         // Titres et labels généraux
@@ -119,7 +131,9 @@ function getStatTranslation(key) {
         'mostFrequentAge': 'Edad más frecuente',
         'mostFrequentChildCount': 'Número de hijos más frecuente',
         'years': ' años',
+        'year': ' año',
         'yearsShort': 'a',
+        'child': ' hij.',
         
         // Abréviations
         'male': 'H',
@@ -146,7 +160,9 @@ function getStatTranslation(key) {
         'placesSingular': 'lugar',
         'placesPlural': 'lugares',
         'elementsSingular': 'elemento',
-        'elementsPlural': 'elementos'
+        'elementsPlural': 'elementos',
+        'beforeJC': 'a.C.',
+        'today': 'hoy',
       },
       'hu': {
         // Titres et labels généraux
@@ -165,7 +181,9 @@ function getStatTranslation(key) {
         'mostFrequentAge': 'Leggyakoribb életkor',
         'mostFrequentChildCount': 'Leggyakoribb gyermekszám',
         'years': ' év',
+        'year': ' év',
         'yearsShort': 'é',
+        'child': ' gyerm.',
         
         // Abréviations
         'male': 'F',
@@ -192,7 +210,9 @@ function getStatTranslation(key) {
         'placesSingular': 'hely',
         'placesPlural': 'helyek',
         'elementsSingular': 'elem',
-        'elementsPlural': 'elemek'
+        'elementsPlural': 'elemek',
+        'beforeJC': 'ie.',
+        'today': 'ma'        
       }
     };
   
@@ -564,6 +584,8 @@ function initializeDistributionChart(data, container) {
  * @param {string} type - Le type de statistiques
  */
 export function createStatsModal(nameData, type = 'duree_vie') {
+    console.log("-  createStatsModal =", type)
+
     if (!nameData || !nameData.stats) return;
 
 
@@ -640,11 +662,6 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     modal.style.width = '70%';
     modal.style.maxHeight = '80vh';
     modal.style.overflow = 'auto';
-
-
-
-
-
     
     // En-tête du modal
     const header = document.createElement('div');
@@ -675,9 +692,15 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
-        // title.textContent = `${cfg.modalTitle} entre ${nameCloudState.currentConfig.startDate} et ${nameCloudState.currentConfig.endDate}`;
-        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${nameCloudState.currentConfig.startDate} ${getStatTranslation('and')} ${nameCloudState.currentConfig.endDate}`;
-
+        let startDate = nameCloudState.currentConfig.startDate
+        if (nameCloudState.currentConfig.startDate === -6000) {
+            startDate = getStatTranslation('beforeJC')
+        }
+        let endDate = nameCloudState.currentConfig.endDate
+        if (nameCloudState.currentConfig.endDate === 3000) {
+            endDate = getStatTranslation('today')
+        }
+        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${startDate} ${getStatTranslation('and')} ${endDate}`;
     } else {
         title.textContent = cfg.title;
     }
@@ -793,19 +816,6 @@ export function createStatsModal(nameData, type = 'duree_vie') {
 
         const maleMedian = calculateMedianBySex(nameData, 'M');
         const femaleMedian = calculateMedianBySex(nameData, 'F');
-        // addStatItem(grid, `Médiane`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">H: ${maleMedian}</span> / <span style="color:#F687B3">F: ${femaleMedian}</span>)</span>`, '#3949AB');
-
-        // addStatItem(grid, 'Minimum', `${stats.min} ${units}`);
-        // addStatItem(grid, 'Maximum', `${stats.max} ${units}`);
-        
-        // // Modification ici pour inclure les compteurs par sexe
-        // addStatItem(grid, 'Nombre de personnes', `${nameData.stats.count} <span style="font-size:14px">(<span style="color:#4299e1">H:${maleCount}</span> / <span style="color:#F687B3">F:${femaleCount}</span>)</span>`);
-        // if (nameCloudState.currentConfig.type === 'nombre_enfants') { 
-        //     addStatItem(grid, 'nb enfant le plus fréquent', calculateMode(nameData));
-        // } else { 
-        //     addStatItem(grid, 'Age le plus fréquent', calculateMode(nameData));
-        // }
-
 
         addStatItem(grid, `${getStatTranslation('median')}`, `${calculateMedian(nameData)} <span style="font-size:12px">(<span style="color:#4299e1">${getStatTranslation('male')}: ${maleMedian}</span> / <span style="color:#F687B3">${getStatTranslation('female')}: ${femaleMedian}</span>)</span>`, '#3949AB');
 
@@ -874,7 +884,123 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     }, 100);
 }
 
-export function createFrequencyStatsModal(nameData, type) {
+
+
+export function createLocationIcon(index, text, newConfig, searchTerm, self, nbPeople = 1, originalName = null) {
+    const locationIcon = document.createElement('span');
+    locationIcon.className = 'location-icon';
+    locationIcon.innerHTML = '🌍';
+    locationIcon.style.fontSize = nameCloudState.mobilePhone ? '14px' : '16px';
+    locationIcon.style.cursor = 'pointer';
+    locationIcon.style.marginLeft = '5px';
+    locationIcon.style.opacity = '0.7';
+    locationIcon.style.borderRadius = '50%';
+    locationIcon.style.padding = '2px';
+    locationIcon.style.transition = 'all 0.2s ease';
+    locationIcon.title = 'Afficher les lieux de cette personne sur la carte';
+    
+    // Si cette personne est déjà sélectionnée, mettre en évidence l'icône
+    // if (lastSelectedLocationId === person.id && isIndividualMapMode) {
+    if (self.lastSelectedLocationIndex === index) {
+        locationIcon.style.color = '#ffffff';
+        locationIcon.style.backgroundColor = '#4361ee';
+        locationIcon.style.opacity = '1';
+    }
+    
+    // Effet de survol
+    locationIcon.addEventListener('mouseover', () => {
+        locationIcon.style.opacity = '1';
+    });
+    
+    locationIcon.addEventListener('mouseout', () => {
+        // if (lastSelectedLocationId !== person.id || !isIndividualMapMode) {
+        if (self.lastSelectedLocationIndex !== index) {
+            locationIcon.style.opacity = '0.7';
+        }
+    });
+    
+    
+    // Gestionnaire de clic pour l'icône de localisation
+    locationIcon.addEventListener('click', async (e) => {
+        e.stopPropagation(); // Empêcher la propagation au div parent
+        
+        // let searchStrs = null;
+        // let searchStrBis = null;
+        // if (searchTerm) {
+        //     searchStrs = searchTerm.toLowerCase().split(' ');
+        //     searchStrBis = searchTerm.replace(' ','-').toLowerCase();
+        // }
+
+
+        // La heatmap est déjà visible, comportement habituel
+        if (self.lastSelectedLocationIndex === index) {
+            const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+            if (heatmapWrapper) {
+                heatmapWrapper.remove(); // supprime du DOM
+            }
+            self.lastSelectedLocationIndex = null;
+            // Réinitialiser le style de l'icône
+            locationIcon.style.color = '';
+            locationIcon.style.backgroundColor = '';
+            locationIcon.style.opacity = '0.7';
+        } else {
+            // Afficher les lieux de cette personne
+            // Attendre un peu que la carte soit complètement initialisée
+            setTimeout(() => {
+                // Créer une carte avec les lieux de cette personne
+                // Trouver les personnes ayant ce nom/prénom/métier/lieu
+                let filter_string = text.replace(/\//g, '');   
+
+                if (newConfig.type === 'place'  || newConfig.type === 'occupation' ) {
+                    newConfig.type = 'name'
+                }
+
+                // console.log('-debug findPersonsBy filter_string=',  filter_string, 'searchTerm = ', searchTerm, ', originalName= ', originalName)
+                const personList = findPersonsBy(filter_string, newConfig, searchTerm, originalName ); 
+                if (personList.results && personList.results.length > 0) {
+                    // console.log('-debug displayHeatMap true =', personList.results, personList.results.length, filter_string)
+                    displayHeatMap(personList.results, newConfig, filter_string, (nbPeople === 1), filter_string);
+                } 
+                // else {
+                //     console.log('-debug displayHeatMap false = ', personList.results , filter_string)
+                // }  
+                
+                // Mettre à jour les variables de suivi
+                self.lastSelectedLocationIndex = index;
+            
+                // Mettre en évidence cette icône
+                locationIcon.style.color = '#ffffff';
+                locationIcon.style.backgroundColor = '#4361ee';
+                locationIcon.style.opacity = '1';
+            }, 300);
+            
+            // Mettre à jour l'apparence des icônes
+            document.querySelectorAll('.location-icon').forEach(icon => {
+                icon.style.color = '';
+                icon.style.backgroundColor = '';
+                icon.style.opacity = '0.7';
+            });
+            
+            // Mettre en évidence cette icône
+            locationIcon.style.color = '#ffffff';
+            locationIcon.style.backgroundColor = '#4361ee';
+            locationIcon.style.opacity = '1';
+        }
+    });
+    return locationIcon;
+}
+
+
+export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm) {
+
+    this.name = newConfig.type + '_' + newConfig.scope + '_' + newConfig.startDate + '_' + newConfig.endDate + '_' + newConfig.rootPersonId + '_' + (searchTerm)?searchTerm:null;
+    
+    console.log("-call to createFrequencyStatsModal with ", type, newConfig, searchTerm, ', this=', this, this.name);
+
+    // window.lastSelectedLocationIndex = null;
+    this.lastSelectedLocationIndex = null;
+    const self = this; 
+    
     if (!nameData || nameData.length === 0) return;
     
     // Récupérer la configuration pour ce type
@@ -882,9 +1008,7 @@ export function createFrequencyStatsModal(nameData, type) {
 
    
     // Trier les données par fréquence décroissante
-    const sortedData = [...nameData].sort((a, b) => b.size - a.size);
-        
-    // console.log("/n/n debug type in createFrequencyStatsModal =", type)
+    const sortedData = [...nameData].sort((a, b) => b.size - a.size);        
     
     // Création du modal
     const modal = document.createElement('div');
@@ -937,12 +1061,22 @@ export function createFrequencyStatsModal(nameData, type) {
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
-        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${nameCloudState.currentConfig.startDate} ${getStatTranslation('and')} ${nameCloudState.currentConfig.endDate}`;
+        let startDate = nameCloudState.currentConfig.startDate
+        if (nameCloudState.currentConfig.startDate === -6000) {
+            startDate = getStatTranslation('beforeJC')
+        }
+        let endDate = nameCloudState.currentConfig.endDate
+        if (nameCloudState.currentConfig.endDate === 3000) {
+            endDate = getStatTranslation('today')
+        }
+        title.textContent = `${cfg.modalTitle} ${getStatTranslation('between')} ${startDate} ${getStatTranslation('and')} ${endDate}`;
+
     } else {
         title.textContent = cfg.title;
     }
     title.style.margin = '0';
-    title.style.fontSize = '16px';
+    // title.style.fontSize = '16px';
+    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px';
 
 
     // Bouton de tri alphabétique
@@ -974,6 +1108,21 @@ export function createFrequencyStatsModal(nameData, type) {
     // Variables pour suivre l'état du tri
     let isAlphabeticalSort = false;
     let isReversed = false;
+
+
+    const geoLocButton = document.createElement('button');
+    geoLocButton.innerHTML = '🌍';
+    geoLocButton.style.background = 'none';
+    geoLocButton.style.border = '1px solid #ccc';
+    geoLocButton.style.borderRadius = '4px';
+    geoLocButton.style.padding = '4px 8px';
+    geoLocButton.style.cursor = 'pointer';
+    geoLocButton.style.fontSize = '16px';
+    geoLocButton.style.minWidth = '32px';
+    geoLocButton.style.minHeight = '32px';
+    geoLocButton.title = 'geolocalisation';
+
+
 
     // Fonction pour mettre à jour l'affichage des boutons
     function updateButtonStyles() {
@@ -1028,72 +1177,154 @@ export function createFrequencyStatsModal(nameData, type) {
         
         // Vider et reconstruire la liste
         list.innerHTML = '';
+
         
-        dataToSort.forEach((item, index) => {
-            const itemContainer = document.createElement('div');
-            itemContainer.style.display = 'flex';
-            itemContainer.style.justifyContent = 'space-between';
-            itemContainer.style.alignItems = 'center';
-            itemContainer.style.padding = '8px 10px';
-            itemContainer.style.borderBottom = index < dataToSort.length - 1 ? '1px solid #eee' : 'none';
-            itemContainer.style.cursor = 'pointer';
-            
-            // Définir des styles alternatifs pour les lignes
-            if (index % 2 === 0) {
-                itemContainer.style.backgroundColor = '#f9f9f9';
-            }
-            
-            // Appliquer un style spécial pour le premier élément
-            if (index === 0) {
-                itemContainer.style.backgroundColor = '#EBF8FF';
-                itemContainer.style.fontWeight = 'bold';
-            }
-            
-            // Texte de l'élément
-            const itemText = document.createElement('div');
-            itemText.textContent = item.text;
-            itemText.style.flex = '1';
-            
-            // Nombre d'occurrences
-            const itemCount = document.createElement('div');
-            itemCount.textContent = item.size;
-            itemCount.style.marginLeft = '10px';
-            itemCount.style.fontWeight = 'bold';
-            itemCount.style.color = '#3182ce';
-            
-            itemContainer.appendChild(itemText);
-            itemContainer.appendChild(itemCount);
-            
-            // Ajouter un effet de survol
-            itemContainer.onmouseover = () => {
-                itemContainer.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
-            };
-            
-            itemContainer.onmouseout = () => {
-                itemContainer.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
-            };
-            
-            // Ajouter un gestionnaire de clic pour afficher les personnes
-            itemContainer.onclick = () => {
-                document.body.removeChild(modal);
-                document.body.removeChild(overlay);
-                
-                const currentConfig = nameCloudState.currentConfig || { type };               
-                
-                // console.log(' \n debug call to showPersonsList with ', item.text, currentConfig, item.originalName)
-                
-                showPersonsList(
-                    item.text, 
-                    findPeopleWithName(item.text, currentConfig, item.originalName ), 
-                    currentConfig
-                );
-            };
-            
-            list.appendChild(itemContainer);
-        });
+        // Ajouter chaque élément à la liste
+
+        addElementToList(dataToSort);
+
         
         console.log('Liste reconstruite avec', dataToSort.length, 'éléments');
     }
+    
+   
+    function addElementToList(sortedData) {
+        sortedData.forEach((item, index) => {
+            let isMatched = (!searchTerm);
+            if (searchTerm) {
+                if (type ==='prenoms' && searchStrs && searchStrs.length > 1) {
+                    isMatched = (isMatched || item.originalName.toLowerCase().includes(searchTerm.toLowerCase()) );  
+                } else if (type === 'lieux' && searchStrs && searchStrs.length > 1) {
+                    isMatched = (isMatched || item.text.toLowerCase().includes(searchTerm.toLowerCase()) || item.text.toLowerCase().includes(searchStrBis));
+                } else {
+                    isMatched = (isMatched || item.text.toLowerCase().includes(searchTerm.toLowerCase())); 
+                }
+            }
+        
+            if (isMatched) {  
+                const itemContainer = document.createElement('div');
+
+                itemContainer.style.cssText = `
+                    display: flex; 
+                    align-items: stretch; 
+                    border-bottom: ${index < sortedData.length - 1 ? '1px solid #eee' : 'none'};
+                    min-height: 30px;
+                `;
+                
+                // Définir des styles alternatifs pour les lignes
+                if (index % 2 === 0) {
+                    itemContainer.style.backgroundColor = '#f9f9f9';
+                }
+                
+                // Appliquer un style spécial pour le premier élément (le plus fréquent)
+                if (index === 0) {
+                    itemContainer.style.backgroundColor = '#EBF8FF';
+                    itemContainer.style.fontWeight = 'bold';
+                }
+                
+                // Zone gauche (nom + occurrence) - cliquable
+                const leftZone = document.createElement('div');
+                leftZone.style.cssText = `
+                    flex: 1; 
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    cursor: pointer; 
+                    transition: background-color 0.2s;
+                    padding: 8px 0px;
+                    /* padding-left: 8px; */
+                   /*  padding-top: 0; */
+                    height: 100%;
+                    background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};
+                `;
+
+                // Texte de l'élément
+                const itemText = document.createElement('div');
+                if (item.text > 1) {
+                    itemText.textContent = item.text + suffix;
+                } else {
+                    itemText.textContent = item.text + suffix0;                
+                }
+                itemText.style.flex = '1';
+                itemText.style.marginLeft = '5px';
+                if (nameCloudState.mobilePhone) {
+                    itemText.style.fontSize = '13px';
+                }
+
+                // Nombre d'occurrences
+                const itemCount = document.createElement('div');
+                itemCount.textContent = item.size;
+                itemCount.style.marginLeft = '10px';
+                itemCount.style.marginRight = '20px';
+                itemCount.style.fontWeight = 'bold';
+                itemCount.style.color = '#3182ce';
+                itemCount.style.setProperty("text-align", "left", "important");
+                if (nameCloudState.mobilePhone) {
+                    itemCount.style.fontSize = '13px';
+                }
+                leftZone.appendChild(itemText);
+                leftZone.appendChild(itemCount);
+
+
+                // Zone droite (bouton) - séparée
+                const rightZone = document.createElement('div');
+                rightZone.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    transition: background-color 0.2s;
+                    background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};                    
+                    height: 40;
+                `;
+
+                // Gestion des survols et clics
+                leftZone.onclick = () => {
+                    document.body.removeChild(modal);
+                    document.body.removeChild(overlay);
+                    
+                    // Trouver les personnes ayant ce nom/prénom/métier/lieu
+                    const currentConfig = nameCloudState.currentConfig || { type };
+                    let filter_string = item.text;
+                    let filter_string2 = searchTerm;
+
+                    // console.log ('debug findPeopleWithName filter_string= ', filter_string, ', originalName=', item.originalName, filter_string2, findPeopleWithName(filter_string, currentConfig, item.originalName, filter_string2),)
+
+                    showPersonsList(
+                        item.text, 
+                        findPeopleWithName(filter_string, currentConfig, item.originalName, filter_string2), 
+                        currentConfig,
+                    );
+
+                };
+
+                leftZone.addEventListener('mouseenter', () => {
+                    leftZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+                });
+                leftZone.addEventListener('mouseleave', () => {
+                    leftZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+                });
+
+                rightZone.addEventListener('mouseenter', () => {
+                    rightZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+                });
+                rightZone.addEventListener('mouseleave', () => {
+                    rightZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+                });
+
+
+                const locationIcon = createLocationIcon(index, item.text, newConfig, searchTerm, self, item.size, item.originalName);
+                rightZone.appendChild(locationIcon);
+
+                itemContainer.appendChild(leftZone);
+                itemContainer.appendChild(rightZone);
+
+                itemContainer.style.cssText = 'display: flex; align-items: stretch; min-height: 30px; padding: 0;';
+
+                list.appendChild(itemContainer);
+            }
+        });
+    }
+
+
 
     // Gestionnaire du bouton alphabétique
     sortButton.onclick = () => {
@@ -1111,6 +1342,18 @@ export function createFrequencyStatsModal(nameData, type) {
         sortAndDisplayList();
     };
 
+    
+    // Gestionnaire du bouton de geoLocalisation
+    geoLocButton.onclick = () => {
+        console.log('Clic bouton geoLocalisation');
+
+        if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+            // Fermer la modale de recherche
+            // closeSearchModal();
+            displayHeatMap(window.currentSearchResults);
+        } 
+
+    };
     // Initialiser l'affichage des boutons
     updateButtonStyles();
 
@@ -1118,22 +1361,7 @@ export function createFrequencyStatsModal(nameData, type) {
     titleContainer.appendChild(title);
     titleContainer.appendChild(sortButton);
     titleContainer.appendChild(reverseButton);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    titleContainer.appendChild(geoLocButton);
 
 
     const closeButton = document.createElement('button');
@@ -1151,17 +1379,6 @@ export function createFrequencyStatsModal(nameData, type) {
     header.appendChild(titleContainer);
     header.appendChild(closeButton);
 
-
-
-
-
-
-
-
-
-
-
-
     modal.appendChild(header);
     
 
@@ -1169,6 +1386,7 @@ export function createFrequencyStatsModal(nameData, type) {
     const list = document.createElement('div');
     list.style.maxHeight = '60vh';
     list.style.overflow = 'auto';
+    list.style.fontSize = '14px';  // Taille de police réduite
 
     // Styles pour webkit (Chrome, Safari)
     const style = document.createElement('style');
@@ -1205,78 +1423,32 @@ export function createFrequencyStatsModal(nameData, type) {
     }, 0);
 
 
-
-
     list.style.border = '1px solid #eee';
     list.style.borderRadius = '4px';
     list.style.padding = '5px';
     
     // Ajouter chaque élément à la liste
-    sortedData.forEach((item, index) => {
-        const itemContainer = document.createElement('div');
-        itemContainer.style.display = 'flex';
-        itemContainer.style.justifyContent = 'space-between';
-        itemContainer.style.alignItems = 'center';
-        itemContainer.style.padding = '8px 10px';
-        itemContainer.style.borderBottom = index < sortedData.length - 1 ? '1px solid #eee' : 'none';
-        itemContainer.style.cursor = 'pointer';
-        
-        // Définir des styles alternatifs pour les lignes
-        if (index % 2 === 0) {
-            itemContainer.style.backgroundColor = '#f9f9f9';
-        }
-        
-        // Appliquer un style spécial pour le premier élément (le plus fréquent)
-        if (index === 0) {
-            itemContainer.style.backgroundColor = '#EBF8FF';
-            itemContainer.style.fontWeight = 'bold';
-        }
-        
-        // Texte de l'élément
-        const itemText = document.createElement('div');
-        itemText.textContent = item.text;
+    let searchStrs = null;
+    let searchStrBis = null;
+    if (searchTerm) {
+        searchStrs = searchTerm.toLowerCase().split(' ');
+        searchStrBis = searchTerm.replace(' ','-').toLowerCase();
+    } 
 
-        // console.log('debug item.text:', item.text);
 
-        itemText.style.flex = '1';
-        
-        // Nombre d'occurrences
-        const itemCount = document.createElement('div');
-        itemCount.textContent = item.size;
-        itemCount.style.marginLeft = '10px';
-        itemCount.style.fontWeight = 'bold';
-        itemCount.style.color = '#3182ce';
-        
-        itemContainer.appendChild(itemText);
-        itemContainer.appendChild(itemCount);
-        
-        // Ajouter un effet de survol
-        itemContainer.onmouseover = () => {
-            itemContainer.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
-        };
-        
-        itemContainer.onmouseout = () => {
-            itemContainer.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
-        };
-        
-        // Ajouter un gestionnaire de clic pour afficher les personnes
-        itemContainer.onclick = () => {
-            document.body.removeChild(modal);
-            document.body.removeChild(overlay);
-            
-            // Trouver les personnes ayant ce nom/prénom/métier/lieu
-            const currentConfig = nameCloudState.currentConfig || { type };
-            // console.log(' \n debug call to showPersonsList with ', item.text, currentConfig, item.originalName, findPeopleWithName(item.text, currentConfig, item.originalName))
+    let suffix = '';
+    let suffix0 = '';
+    if ( type.includes('duree') || type.includes('age') ) { 
+        suffix = getStatTranslation('years');
+        suffix0 = getStatTranslation('year');        
+    } else if ( type.includes('nombre') ) { 
+        suffix = getStatTranslation('child');
+        suffix0 = getStatTranslation('child');
+    }
 
-            showPersonsList(
-                item.text, 
-                findPeopleWithName(item.text, currentConfig, item.originalName), 
-                currentConfig
-            );
-        };
-        
-        list.appendChild(itemContainer);
-    });
+    addElementToList(sortedData);
+
+    console.log('\nStatistiques détaillées pour ', title.textContent )
     
     modal.appendChild(list);
     

@@ -307,8 +307,11 @@ export const translations = {
     return place.replace(pattern, '');
   }
 
-export function displayPersonDetails(personId) {
-    console.log("Affichage des détails de la personne :", personId);
+export function displayPersonDetails(personId, zindex = null) {
+    console.log("Affichage des détails de la personne :", personId, zindex);
+
+    let z_index = 1000;
+    if (zindex) { z_index = zindex;}
     
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
@@ -370,6 +373,7 @@ export function displayPersonDetails(personId) {
     const modal = document.getElementById('person-details-modal');
     
     modal.className = `modal-person-name custom-modal`;
+    modal.style.zIndex = z_index;
 
     // Rendre l'arrière-plan de la modale semi-transparent
     modal.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
@@ -444,13 +448,43 @@ export function displayPersonDetails(personId) {
         #modal-person-name .details-value {
             display: inline-block;
         }
-        .details-section.birth { background-color: #E3F2FD; }
-        .details-section.death { background-color: #EFEBE9; }
-        .details-section.marriage { background-color: #F8BBD0; }
-        .details-section.residence { background-color: #E8F5E9; }
-        .details-section.notes { background-color: #FFF8E1; }
-        .details-section.sources { background-color: #F3E5F5; font-size: 85%; }
-        .details-section.context { background-color: #E0F2F1; }
+
+        .details-section.gedcomID { background-color: #E8F5E9; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */
+        }
+        .details-section.occupation { background-color:  #F8BBD0;
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */
+        }
+        .details-section.birth { background-color: #E3F2FD;
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */        
+        }
+        .details-section.death { background-color: #EFEBE9; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */        
+        }
+        .details-section.marriage { background-color: #F8BBD0; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */        
+        }
+        .details-section.residence { background-color: #E8F5E9; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */
+        }
+        .details-section.notes { background-color: #FFF8E1;
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */        
+        }
+        .details-section.sources { background-color: #F3E5F5; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */
+            font-size: 85%; }
+        .details-section.context { background-color: #E0F2F1; 
+            padding: 4px 6px !important;     /* Padding réduit */
+            margin: 7 !important;            /* réduit les marges */
+        }
         .details-section.actions { background-color: #ECEFF1; text-align: center; }
 
         .action-btn {
@@ -473,11 +507,15 @@ export function displayPersonDetails(personId) {
 
 
 
-        .details-section.actions { 
-            background-color: #ECEFF1; 
-            text-align: center; 
+        .details-section.actions {
+            min-height: 0 !important;
+            height: auto !important;
+            padding: 2px !important;
+            margin-bottom: 2px !important;
+            margin-top: -20px !important;
+            gap: 2px !important;
             display: flex;
-            gap: 3px;
+            align-items: center; /* centre verticalement */
         }
 
         .sources-link {
@@ -584,9 +622,29 @@ export function displayPersonDetails(personId) {
     // Préparer le contenu HTML
     let detailsHTML = sectionStyle;
 
+
+
+    // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
+    detailsHTML += `
+    <div class="details-section actions">
+        <button onclick="setAsRootPerson('${personId}')" class="action-btn btn-blue">
+            ${translate('setAsRoot')}
+        </button>
+        <button onclick="startQuiz('${personId}')" class="action-btn btn-orange">
+            ${translate('quiz')}
+        </button>
+        <button onclick="readPersonSheet('${personId}')" class="action-btn btn-purple">
+            🗣️${translate('readPersonDetails')}
+        </button>
+    </div>
+    `;
+
+
+
+
     // Identifiant GEDCOM
     detailsHTML += `
-        <div class="details-section">
+        <div class="details-section gedcomID">
             <small>ID GEDCOM: ${cleanId}</small>
         </div>
     `;
@@ -599,7 +657,7 @@ export function displayPersonDetails(personId) {
             if (prof) {
                 // console.log("Profession à traduire :", prof);
                 detailsHTML += `
-                <div class="details-section">
+                <div class="details-section occupation">
                     <span class="details-icon">💼</span>
                     <span class="details-value">${translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr')}</span>
                 </div>
@@ -700,19 +758,37 @@ export function displayPersonDetails(personId) {
         }
 
     
+        // if (validNotes.length > 0) {
+        //     detailsHTML += `
+        //         <div class="details-section notes">
+        //             <small>
+        //                 ${validNotes.map((noteText, idx) => 
+        //                     idx === 0 
+        //                         ? `<p>${noteTextInit}${noteText}</p>` // Ajoute ton texte à la première note
+        //                         : `<p>${noteText}</p>`
+        //                 ).join('')}
+        //             </small>
+        //         </div>
+        //     `;
+        // }
+
+
         if (validNotes.length > 0) {
             detailsHTML += `
                 <div class="details-section notes">
                     <small>
                         ${validNotes.map((noteText, idx) => 
                             idx === 0 
-                                ? `<p>${noteTextInit}${noteText}</p>` // Ajoute ton texte à la première note
-                                : `<p>${noteText}</p>`
+                                ? `${noteTextInit}${noteText}. ` // Ajoute ton texte à la première note
+                                : `${noteText}. `
                         ).join('')}
                     </small>
                 </div>
             `;
         }
+
+
+
     }
 
     // Sources (si disponibles, format compact)
@@ -780,20 +856,20 @@ export function displayPersonDetails(personId) {
         }
     }
 
-    // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
-    detailsHTML += `
-    <div class="details-section actions">
-        <button onclick="setAsRootPerson('${personId}')" class="action-btn btn-blue">
-            ${translate('setAsRoot')}
-        </button>
-        <button onclick="startQuiz('${personId}')" class="action-btn btn-orange">
-            ${translate('quiz')}
-        </button>
-        <button onclick="readPersonSheet('${personId}')" class="action-btn btn-purple">
-            🗣️${translate('readPersonDetails')}
-        </button>
-    </div>
-    `;
+    // // Ajouter 3 boutons: 1 pour définir comme racine de l'arbre, 1 pour le quiz, 1 pour lire la fiche
+    // detailsHTML += `
+    // <div class="details-section actions">
+    //     <button onclick="setAsRootPerson('${personId}')" class="action-btn btn-blue">
+    //         ${translate('setAsRoot')}
+    //     </button>
+    //     <button onclick="startQuiz('${personId}')" class="action-btn btn-orange">
+    //         ${translate('quiz')}
+    //     </button>
+    //     <button onclick="readPersonSheet('${personId}')" class="action-btn btn-purple">
+    //         🗣️${translate('readPersonDetails')}
+    //     </button>
+    // </div>
+    // `;
 
 
     // Définir le contenu et afficher la modale
@@ -819,10 +895,11 @@ export function displayPersonDetails(personId) {
         // Positionner plus haut dans l'écran
         modal.style.top = `${Math.max(10, window.innerHeight * 0.05)}px`;
     }
+    // let forcedZindex = 1000; //1000000;
 
     // Rendre la modale déplaçable et resizable
     setTimeout(() => {
-        makeModalDraggable();
+        makeModalDraggable(z_index);
     }, 100);
     
 
@@ -834,6 +911,11 @@ export function displayPersonDetails(personId) {
     setTimeout(() => {
         displayEnhancedLocationMap(personId);
     }, 150);
+
+
+    // console.log ('debug avec nouveau makeModalDraggable !!!!')
+
+
 }
 
 
@@ -892,7 +974,7 @@ async function readPersonSheet(personId) {
 window.readPersonSheet = readPersonSheet; 
    
 // makeModalDraggable pour fonctionner en tactile    
-function makeModalDraggable() {
+function makeModalDraggable(zindex) {
     const modal = document.getElementById('person-details-modal');
     const modalHeader = modal.querySelector('.modal-header');
     const modalContent = modal.querySelector('.modal-content');
@@ -1047,11 +1129,11 @@ function makeModalDraggable() {
     }
     
     // Ajouter les poignées de redimensionnement avec support tactile
-    addResizeHandles(modal);
+    addResizeHandles(modal, zindex);
 }
 
 // Mise à jour de addResizeHandles pour fonctionner avec les événements tactiles
-function addResizeHandles(modal) {
+function addResizeHandles(modal, zindex) {
     // Supprimer des poignées existantes
     const existingHandles = document.querySelectorAll('.resize-handle');
     existingHandles.forEach(handle => handle.remove());
@@ -1071,11 +1153,14 @@ function addResizeHandles(modal) {
         handleContainer.style.right = '0';
         handleContainer.style.bottom = '0';
         handleContainer.style.pointerEvents = 'none'; // Permets les clics à travers
-        handleContainer.style.zIndex = '1000';
+        handleContainer.style.zIndex = zindex;
         
         // Ajouter le conteneur au document BODY plutôt qu'à la modale
         document.body.appendChild(handleContainer);
     }
+
+
+    handleContainer.style.zIndex = zindex;
     
     // Ajuster le conteneur pour qu'il couvre exactement la modale
     const modalRect = modal.getBoundingClientRect();
@@ -1090,7 +1175,9 @@ function addResizeHandles(modal) {
         const handle = document.createElement('div');
         handle.className = `resize-handle resize-${pos}`;
         handle.style.position = 'absolute';
-        handle.style.zIndex = '1001';
+        handle.style.zIndex = zindex + 1;
+
+        // handle.style.zIndex = 1000000 + 1;
         handle.style.pointerEvents = 'auto';
         handle.style.background = 'transparent'; // Rendre invisible par défaut
         
@@ -1186,7 +1273,7 @@ function addResizeHandles(modal) {
                 break;
         }
         // Configurer les événements de redimensionnement pour cette poignée
-        setupResizeEvents(handle, modal, pos, handleContainer);
+        setupResizeEvents(handle, modal, pos, handleContainer, zindex);
         
         // Ajouter la poignée au conteneur fixe, pas à la modale scrollable
         handleContainer.appendChild(handle);
@@ -1237,7 +1324,7 @@ function addResizeHandles(modal) {
 }
 
 //Configuration des événements de redimensionnement pour la souris et le tactile
-function setupResizeEvents(handle, modal, pos) {
+function setupResizeEvents(handle, modal, pos, zindex) {
     let isResizing = false;
     let startX, startY, startWidth, startHeight, startLeft, startTop;
     
@@ -1260,7 +1347,7 @@ function setupResizeEvents(handle, modal, pos) {
         const touch = e.touches[0];
         
         // Rendre la poignée visible lors du toucher en mode tactile
-        showResizeHandleVisual(handle, pos);
+        showResizeHandleVisual(handle, pos, zindex);
 
         startResize(touch.clientX, touch.clientY);
         
@@ -1270,7 +1357,7 @@ function setupResizeEvents(handle, modal, pos) {
     });
     
      // Fonction pour poignées visiable pendant ele resiz
-    function showResizeHandleVisual(handle, pos) {
+    function showResizeHandleVisual(handle, pos, zindex) {
         // Définir le style de fond selon la position
         switch(pos) {
             case 'se':
@@ -1302,7 +1389,7 @@ function setupResizeEvents(handle, modal, pos) {
         cursorIndicator.style.width = '24px';
         cursorIndicator.style.height = '24px';
         cursorIndicator.style.pointerEvents = 'none';
-        cursorIndicator.style.zIndex = '10002';
+        cursorIndicator.style.zIndex = zindex+2;
         
         // Définir l'indicateur selon la direction
         if (pos.includes('e') || pos.includes('w')) {
@@ -1481,6 +1568,9 @@ function saveModalSettings() {
         top: parseInt(window.getComputedStyle(modal).top)
     };
     
+
+    // makeModalDraggable();
+
     console.log('Modal settings saved:', state.modalSettings.personDetailsModal);
 }
 
@@ -1654,8 +1744,19 @@ function createEnhancedLocationMap(locations) {
     }
 
     // Ajouter le conteneur à la modale
+    // const detailsContent = document.getElementById('person-details-content');
+    // detailsContent.insertBefore(mapContainer, detailsContent.firstChild);
+
+
     const detailsContent = document.getElementById('person-details-content');
-    detailsContent.insertBefore(mapContainer, detailsContent.firstChild);
+    const actionsSection = detailsContent.querySelector('.details-section.actions');
+    if (actionsSection && actionsSection.nextSibling) {
+        detailsContent.insertBefore(mapContainer, actionsSection.nextSibling);
+    } else if (actionsSection) {
+        detailsContent.appendChild(mapContainer);
+    } else {
+        detailsContent.appendChild(mapContainer); // fallback si la section n'existe pas
+    }
 
     // Utiliser la fonction centralisée pour créer la carte
     createLocationMap('multi-location-map', locations, {

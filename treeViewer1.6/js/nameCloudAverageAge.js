@@ -1,6 +1,6 @@
 import { state, showToast } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
-import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud  } from './nameCloudUtils.js';
+import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud, extractYear  } from './nameCloudUtils.js';
 import { createStatsModal, createFrequencyStatsModal }  from './nameCloudStatModal.js';
 import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
 
@@ -661,7 +661,7 @@ export function addStatsLabel(svg, textGroup, config) {
  * @param {Object} nameData - Les données à afficher
  * @param {string} type - Le type de statistiques
  */
-export function addStatsButton(container, nameData, type) {
+export function addStatsButton(container, nameData, type, newConfig) {
     if (!container || !nameData) return;
     
     // Vérifier que le type est valide
@@ -726,7 +726,7 @@ export function addStatsButton(container, nameData, type) {
         if (cfg.type === 'age') {
             createStatsModal(nameData, type);
         } else {
-            createFrequencyStatsModal(nameData, type);
+            new createFrequencyStatsModal(nameData, type, newConfig, null);
         }
     };
     
@@ -782,9 +782,9 @@ function positionButtonRelativeToLabel(button, type) {
  * @param {Object} config - La configuration
  * @returns {Array} - Liste des personnes correspondantes
  */
-export function findPeopleWithName(name, config, originalName) {
+export function findPeopleWithName(name, config, originalName, searchStreamFull) {
 
-    console.log("findPeopleWithName called  with name:", name, "and ", config, ', originalName=', originalName);
+    console.log("findPeopleWithName called  with name:", name, searchStreamFull);
 
     if (!state.gedcomData) return [];
     if (!originalName) { originalName = name;}
@@ -797,12 +797,15 @@ export function findPeopleWithName(name, config, originalName) {
             
             if (config.type === 'prenoms') {
                 const firstName = p.name.split('/')[0].trim();
-                matches = firstName.split(' ').some(n => 
-                    n.toLowerCase() === name.toLowerCase() || 
-                    n.toLowerCase().startsWith(name.toLowerCase() + ' ')
-                );
+                if (searchStreamFull && name.toLowerCase() !== searchStreamFull.toLowerCase()) {
+                    // pour gérer le cas de recharches de prénoms à plusieurs mots
+                    matches = firstName.toLowerCase().includes(name.toLowerCase()) && firstName.toLowerCase().includes(searchStreamFull.toLowerCase());
+                } else {
+                    matches = firstName.toLowerCase().includes(name.toLowerCase());
+                }
             } else if (config.type === 'noms') {
                 matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim() === originalName.toLowerCase());
+                // matches = (p.name.split('/')[1] && p.name.split('/')[1].toLowerCase().trim().includes(originalName.toLowerCase()));
             } else if (config.type === 'professions') {
                 const cleanedProfessions = cleanProfessionForNameCloud(p.occupationFull);
                 const regex = new RegExp(`(^|[ ,.;:(){}\\[\\]\\-_'"])\\s*${originalName.toLowerCase()}\\s*($|[ ,.;:(){}\\[\\]\\-_'"])`, 'i');
@@ -837,7 +840,113 @@ export function findPeopleWithName(name, config, originalName) {
                     const cleanedLocation = cleanLocation(location);
                     return cleanedLocation === name;
                 });
-            }   
+            } else if (config.type === 'duree_vie') {
+                // Calcul de la durée de vie
+                if (p.birthDate && p.deathDate) {
+                    const birthYear = extractYear(p.birthDate);
+                    const deathYear = extractYear(p.deathDate);                    
+                    const age = deathYear - birthYear;
+                    matches = age.toString() === name;
+                }
+            } else if (config.type === 'age_procreation') {
+                if (p.birthDate) {
+                    const parentBirthYear = extractYear(p.birthDate);
+                    // Pour chaque mariage
+                    if (p.spouseFamilies) {
+                        p.spouseFamilies.forEach(familyId => {
+                            const family = state.gedcomData.families[familyId];
+                            if (family && family.children) {
+                                family.children.forEach(childId => {
+                                    const child = state.gedcomData.individuals[childId];
+                                    if (child && child.birthDate) {
+                                        const childBirthYear = extractYear(child.birthDate);
+                                        if (childBirthYear > parentBirthYear) {
+                                            const ageAtChildBirth = childBirthYear - parentBirthYear;
+                                            if (ageAtChildBirth.toString() === name) {
+                                                matches = true;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            } else if (config.type === 'age_first_child') {
+                if (p.birthDate) {
+                    const parentBirthYear = extractYear(p.birthDate);
+                    // Construire un tableau de tous les enfants avec leur année de naissance
+                    const children = [];
+                    if (p.spouseFamilies) {
+                        p.spouseFamilies.forEach(familyId => {
+                            const family = state.gedcomData.families[familyId];
+                            if (family && family.children) {
+                                family.children.forEach(childId => {
+                                    const child = state.gedcomData.individuals[childId];
+                                    if (child && child.birthDate) {
+                                        const childBirthYear = extractYear(child.birthDate);
+                                        if (childBirthYear > parentBirthYear) {
+                                            children.push({
+                                                id: childId,
+                                                birthYear: childBirthYear,
+                                                name: child.name,
+                                                birthDate: child.birthDate
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Trier les enfants par année de naissance
+                    children.sort((a, b) => a.birthYear - b.birthYear);
+                    
+                    // Si au moins un enfant est trouvé
+                    if (children.length > 0) {
+                        const firstChild = children[0];
+                        const ageAtFirstChild = firstChild.birthYear - parentBirthYear;
+                        if (ageAtFirstChild.toString() === name) {
+                            matches = true;
+                            // console.log('debug in findPeopleWithName', p.name, name, ageAtFirstChild )
+                        }
+                    }
+                }
+
+
+            } else if (config.type === 'age_marriage') {
+                // Vérifier l'âge de mariage de la personne
+                if (p.birthDate && p.spouseFamilies) {
+                    const birthYear = extractYear(p.birthDate);
+                    p.spouseFamilies.forEach(familyId => {
+                        const family = state.gedcomData.families[familyId];
+                        if (family && family.marriageDate) {
+                            const marriageYear = extractYear(family.marriageDate);
+                            if (marriageYear > birthYear) {
+                                const ageAtMarriage = marriageYear - birthYear;
+                                if (ageAtMarriage.toString() === name) {
+                                    matches = true;
+                                }
+                            }
+                        }
+                    });
+                }
+
+
+            } else if (config.type === 'nombre_enfants') {
+                let totalChildren = 0;
+                if (p.spouseFamilies) {
+                    p.spouseFamilies.forEach(familyId => {
+                        const family = state.gedcomData.families[familyId];
+                        if (family && family.children) {
+                            totalChildren += family.children.length;
+                        }
+                    });
+                }
+                matches = totalChildren.toString() === name;
+
+            } 
+
 
             // Vérifier si la personne est dans l'arbre approprié selon le scope
             const isInTree = 
@@ -1293,7 +1402,7 @@ function forceRepositionButton(type) {
 }
 
 // Fonction auxiliaire pour mettre à jour la fonction updateStatsButtons
-export function updateStatsButtons(container, nameData, type) {
+export function updateStatsButtons(container, nameData, type, newConfig) {
 
     // Supprimer tous les boutons de statistiques par siècle existants avant d'en créer de nouveaux
     document.querySelectorAll('[id^="century-stats-button-"]').forEach(button => {
@@ -1301,7 +1410,7 @@ export function updateStatsButtons(container, nameData, type) {
     });
     
     // D'abord ajouter le bouton des statistiques détaillées
-    addStatsButton(container, nameData, type);
+    addStatsButton(container, nameData, type, newConfig);
     
     // Puis ajouter le bouton des statistiques par siècle avec un petit délai
     // pour permettre au premier bouton d'être positionné correctement

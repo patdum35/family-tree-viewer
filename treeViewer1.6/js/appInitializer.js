@@ -28,6 +28,11 @@ import {
     resetToDefaultSettings,
     displayGenealogicTree
 } from './main.js';
+
+import {
+    statsModal
+} from './statsModalUI.js';
+
 import { 
     startAncestorAnimation,
     toggleAnimationPause 
@@ -189,6 +194,7 @@ function initializeAppFunctions() {
     window.initBackgroundContainer = initBackgroundContainer;
     window.toggleFullScreen = toggleFullScreen;
     window.resetToDefaultSettings = resetToDefaultSettings;
+    window.statsModal = statsModal;
     // window.changeLanguage = changeLanguage;
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);

@@ -174,7 +174,7 @@ export function cleanLocation(location) {
     if (excludedLocations.has(location)) return '';
     
     // Supprimer les parenthèses et les chiffres
-    location = location.replace(/\(.*?\)/g, '').replace(/\d+/g, '');
+    location = location.replace(/\(.*?\)/g, ',').replace(/\d+/g, ',');
     
     // Prendre la partie avant la virgule
     location = location.split(',')[0];

@@ -10,8 +10,10 @@ import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPos
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
-    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector,
-    setupSearchFieldModal } from './mainUI.js'; 
+    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
+import { setupSearchFieldModal } from './searchModalUI.js';
+    
+    
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
@@ -26,6 +28,7 @@ import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnima
 import { debugLog } from './debugLogUtils.js'
 import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
 import { createImprovedHeatmap } from './geoHeatMapUI.js';
+import { createIndividualLocationMap } from './nameCloudInteractions.js';
 
 import { getTranslation } from './nameCloudUI.js';
 
@@ -249,7 +252,7 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-export async function displayHeatMap(currentSearchResults = null) {
+export async function displayHeatMap(currentSearchResults = null, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
    
     // Création d'un indicateur de chargement
     const loadingIndicator = document.createElement('div');
@@ -276,13 +279,24 @@ export async function displayHeatMap(currentSearchResults = null) {
     try {
 
         // Récupérer les paramètres actuels de filtrage
+        // const currentConfig = {
+        //     type: 'name', //state.treeMode,
+        //     startDate: -6000, //parseInt(startDateInput.value),
+        //     endDate: 3000, //parseInt(endDateInput.value),
+        //     scope: 'all',
+        //     rootPersonId:  null, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+        // };
+
+
         const currentConfig = {
-            type: 'name', //state.treeMode,
-            startDate: -6000, //parseInt(startDateInput.value),
-            endDate: 3000, //parseInt(endDateInput.value),
-            scope: 'all',
-            rootPersonId:  null, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+            type: (newConfig) ? newConfig.type : 'name', 
+            startDate: (newConfig) ? ((newConfig.startDate) ? newConfig.startDate : -6000) : -6000, 
+            endDate: (newConfig) ? ((newConfig.endDate) ? newConfig.endDate : 3000) : 3000, 
+            scope: (newConfig) ? newConfig.scope : 'all',
+            rootPersonId:  (newConfig) ? newConfig.rootPersonId : null, 
         };
+
+
 
         // const persons = getPersonsFromTCurrenTree();
 
@@ -298,23 +312,35 @@ export async function displayHeatMap(currentSearchResults = null) {
         document.body.removeChild(loadingIndicator);
         
         // Créer la heatmap interactive
-        if (heatmapData && heatmapData.length > 0) {
-        // if (true) {
-            // Créer un titre pour la heatmap basé sur la configuration
-            let heatmapTitle;
+        if (!heatmapData || heatmapData.length === 0) {
+            heatmapData = [];
+        }
+        // Créer un titre pour la heatmap basé sur la configuration
+        let heatmapTitle;
+        if (title) { heatmapTitle = title;}
+        
+        // Utiliser la fonction pour créer la heatmap
+        // console.log ('debug displayHeatMap ', heatmapData )
 
-          
-            // Utiliser la fonction pour créer la heatmap
-            if (document.getElementById('namecloud-heatmap-wrapper')) {
+        if (document.getElementById('namecloud-heatmap-wrapper')) {
+            if (!isOnlyOnePerson) { 
+                // console.log('- debug sOnlyOnePerson = false createImprovedHeatmap ', personName, heatmapData)
                 createImprovedHeatmap(heatmapData, heatmapTitle, true, true);
             } else {
-                createImprovedHeatmap(heatmapData, heatmapTitle, true, false, { top: window.innerHeight/2, left: 25, width: window.innerWidth-50, height: window.innerHeight/2-25 });
+                // console.log('- debug isOnlyOnePerson = true createIndividualLocationMap ', personName, heatmapData)
+                createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);
             }
-            
+
+
         } else {
-            // alert('Aucune donnée géographique disponible pour les personnes sélectionnées.');
-            // alert(getTranslation('noGeoData'));
+            // console.log('- debug first Time = true createIndividualLocationMap ', personName, heatmapData)
+            createImprovedHeatmap(heatmapData, heatmapTitle, true, false, { top: window.innerHeight/2, left: 25, width: window.innerWidth-50, height: window.innerHeight/2-25 });
         }
+
+
+
+
+
     } catch (error) {
         console.error('Erreur lors de la génération de la heatmap:', error);
         if (document.body.contains(loadingIndicator)) {
@@ -953,7 +979,7 @@ function addToRootHistory(person) {
 
 
     if (person.name === state.gedcomData.individuals[person.id].name) {
-        console.log('-----------debug addToRootHistory OK', person.id, person.name, state.gedcomData.individuals[person.id].name);
+        console.log('-  addToRootHistory OK', person.id, person.name, state.gedcomData.individuals[person.id].name);
 
         // Utiliser la fonction de mise à jour du sélecteur personnalisé
         // au lieu de manipuler directement le sélecteur standard
@@ -1064,7 +1090,7 @@ export function handleRootPersonChange(event) {
     }
 
     
-    console.log('\ndebug handleRootPersonChange =', selectedValue)
+    console.log('- handleRootPersonChange =', selectedValue)
     
     // if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
     if (selectedValue.includes('demo')) {
@@ -1739,7 +1765,7 @@ export function searchRootPersonId(searchStr, isAlert = true) {
         //     label: person.name.replace(/\//g, '').trim()
         // }));
 
-        console.log('\n\n DEBUG search persone for demo ***********',matchedPerson)
+        console.log('- search persone for demo ***********',matchedPerson)
         return matchedPerson;
         
 
@@ -1860,14 +1886,23 @@ function showErrorMessage(message) {
 function positionRadarButton() {
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
+    const statsButton = document.getElementById('statsBtn');
     
-    if (cloudButton && radarButton) {
+    if (cloudButton && radarButton && statsButton) {
         const cloudRect = cloudButton.getBoundingClientRect();
         radarButton.style.position = 'fixed';
         radarButton.style.left = cloudRect.left + 'px';
         radarButton.style.top = (cloudRect.bottom + 5) + 'px';
         radarButton.style.zIndex = '1001';
+
+
+        statsButton.style.position = 'fixed';
+        statsButton.style.left = cloudRect.left + 40 + 'px';
+        statsButton.style.top = (cloudRect.bottom + 10) + 'px';
+        statsButton.style.zIndex = '1001';
     }
+
+
 }
 
 // Nouvelle fonction pour l'overlay
@@ -1875,9 +1910,10 @@ function createAndPositionRadarOverlay() {
     // Trouver les boutons
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
-    
+    const statsButton = document.getElementById('statsBtn');
+
     // Vérifier que les boutons existent
-    if (!cloudButton || !radarButton) return;
+    if (!cloudButton || !radarButton || !statsButton) return;
     
     // Récupérer les dimensions du bouton cloud
     const cloudRect = cloudButton.getBoundingClientRect();
@@ -1906,6 +1942,42 @@ function createAndPositionRadarOverlay() {
     overlay.style.left = `${cloudRect.left}px`;
     overlay.style.width = `${radarButton.offsetWidth}px`;
     overlay.style.height = `${radarButton.offsetHeight}px`;
+
+
+
+
+
+    // Créer l'overlay s'il n'existe pas déjà
+    overlay = document.getElementById('statsBtn-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'statsBtn-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.backgroundColor = 'transparent';
+        overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+        overlay.style.cursor = 'pointer';
+        
+        // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+        overlay.addEventListener('click', () => {
+            statsButton.click();
+        });
+        
+        // Ajouter l'overlay au body
+        document.body.appendChild(overlay);
+    }
+    
+    // Positionner l'overlay
+    overlay.style.top = `${cloudRect.bottom + 10}px`;
+    overlay.style.left = `${cloudRect.left + 40}px`;
+    overlay.style.width = `${statsButton.offsetWidth}px`;
+    overlay.style.height = `${statsButton.offsetHeight}px`;
+
+
+
+
+
+
+
 }
 
 function createAndPositionHeatMapOverlay() {

@@ -7,9 +7,9 @@
     "lat": 49.5313601,
     "lon": 0.3579164
   },
-  "La Baillie, Saint-Cast-le-Guildo, 22282, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6279708,
-    "lon": -2.2824685
+  "Saint-Cast-le-Guildo, La Baillie, 22282, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.6270568,
+    "lon": -2.2878485
   },
   "Acigné, 35, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1334474,
@@ -27,7 +27,7 @@
     "lat": 49.5188282,
     "lon": 0.534411
   },
-  "St-Cast, 22380, Côtes d'Armor, France": {
+  "Saint-Cast-le-Guildo, 22380, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6241288,
     "lon": -2.2617846
   },
@@ -35,7 +35,7 @@
     "lat": 49.4938975,
     "lon": 0.1079732
   },
-  "Saint-Cast-le-Guildo, 22282, Côtes-d'Armor, Bretagne, France": {
+  "Saint-Cast-le-Guildo, 22380, Côtes-d'Armor, Bretagne, France France": {
     "lat": 48.6241288,
     "lon": -2.2617846
   },
@@ -107,7 +107,7 @@
     "lat": 49.5472915,
     "lon": 0.4151869
   },
-  "Annouville - Annouville-Vilmesnil, 76021, Seine Maritime, Normandie, France": {
+  "Annouville-Vilmesnil, 76021, Seine Maritime, Normandie, France": {
     "lat": 49.6777571,
     "lon": 0.4326426
   },
@@ -123,15 +123,11 @@
     "lat": 49.6777571,
     "lon": 0.4326426
   },
-  "Bretteville du Grand Caux, 76,,": {
+  "Bretteville-du-Grand-Caux, 76110, Seine-Maritime, Normandie, France": {
     "lat": 49.6629465,
     "lon": 0.3922726
   },
   "Bretteville-du-Grand-Caux, 76143, Seine-Maritime, Normandie, France": {
-    "lat": 49.6629465,
-    "lon": 0.3922726
-  },
-  "Bretteville-du-Grand-Caux, 76110, Seine-Maritime, Normandie, France": {
     "lat": 49.6629465,
     "lon": 0.3922726
   },
@@ -167,10 +163,6 @@
     "lat": 49.6456303,
     "lon": 0.3661017
   },
-  "AUBERVILLE LA RENAULT (76)": {
-    "lat": 49.6810924,
-    "lon": 0.3678179
-  },
   "Seine-Maritime, Normandie, France": {
     "lat": 49.6632374,
     "lon": 0.9401134
@@ -190,10 +182,6 @@
   "Tourville-les-Ifs, 76": {
     "lat": 49.713794,
     "lon": 0.3997245
-  },
-  "Annouville Vilmesnil, 76, Seine Maritime, Normandie, France": {
-    "lat": 49.6777571,
-    "lon": 0.4326426
   },
   "La Remuée (76)": {
     "lat": 49.5262384,
@@ -279,19 +267,15 @@
     "lat": 48.5792308,
     "lon": -2.2202534
   },
-  "Saint-Cast (22)": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
   "Pluduno, 22130, Côtes d'Armor, France": {
     "lat": 48.523744,
     "lon": -2.2889406
   },
-  "Saint-Potan, 22550, Côtes d'Armor, France": {
+  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5586158,
     "lon": -2.2902601
   },
-  "St-Lormel, 22130, Côtes d'Armor, France": {
+  "Saint-Lormel, 22311, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5470087,
     "lon": -2.2304962
   },
@@ -299,11 +283,7 @@
     "lat": 48.523744,
     "lon": -2.2889406
   },
-  "Saint-Cast-le-Guildo, 22380, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "St-Germain de la Mer, 22550, Cötes d'Armor, France": {
+  "Saint-Germain,  22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6182513,
     "lon": -2.302739
   },
@@ -314,10 +294,6 @@
   "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, FRANCE": {
     "lat": 48.5586158,
     "lon": -2.2902601
-  },
-  "St-Germain-de-la-Mer, 22550, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Matignon, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5968982,
@@ -331,33 +307,9 @@
     "lat": 48.5626446,
     "lon": -2.123685
   },
-  "Saint-Potan (22)": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Notre-Dame-du-Guildo (22)": {
     "lat": 48.5792308,
     "lon": -2.2202534
-  },
-  "La Ville Mois - Saint-Pôtan, 22323, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5703618,
-    "lon": -2.2613004
-  },
-  "St Potan": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "St-Germain-de-la-Mer, 22, Bretagne": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
-  "Saint Germain de la Mer, 22550 Matignon, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
-  "Saint-Pôtan, 22323, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Hénanbihen,Côtes-d'Armor,Bretagne,France": {
     "lat": 48.560822,
@@ -366,10 +318,6 @@
   "Saint-Cast-le-Guildo,Côtes-d'Armor,Bretagne,France": {
     "lat": 48.6241288,
     "lon": -2.2617846
-  },
-  "St-Germain-de-la-Mer, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Ruca,Côtes-d'Armor,Bretagne,France": {
     "lat": 48.5667727,
@@ -439,10 +387,6 @@
     "lat": 49.523637,
     "lon": 0.5062186
   },
-  "L'Oiselière, 76430, Les Trois-Pierres, Seine-Maritime, Normandie, France": {
-    "lat": 49.5460507,
-    "lon": 0.387735
-  },
   "Mélamare, 76170, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.5388511,
     "lon": 0.4510389
@@ -487,7 +431,7 @@
     "lat": 49.6280806,
     "lon": 0.4006336
   },
-  "Écrainville, 76224, Seine-Maritime, Normandie, France": {
+  "Écrainville, 76110, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6503748,
     "lon": 0.3252411
   },
@@ -498,10 +442,6 @@
   "Manneville-la-Goupil, 76110, Seine-Maritime, Normandie, France": {
     "lat": 49.610593,
     "lon": 0.3539477
-  },
-  "Ecrainville, 76224, Seine-Maritime, Normandie, France": {
-    "lat": 49.6503748,
-    "lon": 0.3252411
   },
   "La Remuée, Seine-Maritime, Normandie, France": {
     "lat": 49.5262384,
@@ -530,10 +470,6 @@
   "Notre-Dame-de-Gravenchon, 76476, Seine-Maritime, Normandie, France": {
     "lat": 49.4898201,
     "lon": 0.5680054
-  },
-  "La Trinité du Mont, Seine Maritime, Normandie, France": {
-    "lat": 49.5431014,
-    "lon": 0.5537634
   },
   "Saint-Eustache-la-Forêt (76)": {
     "lat": 49.5524805,
@@ -603,10 +539,6 @@
     "lat": 49.6432017,
     "lon": 0.8862882
   },
-  "St Etienne le Vieux - Auzouville-L'Esneval, 76760, Seine-Maritime, Normandie, France": {
-    "lat": 49.6238664,
-    "lon": 0.8771749
-  },
   "Ectot-L'Auber,76760,Seine-Maritime,Normandie,France": {
     "lat": 49.6493462,
     "lon": 0.928977
@@ -623,7 +555,7 @@
     "lat": 49.6238664,
     "lon": 0.8771749
   },
-  "Ectot l'Auber (76)": {
+  "Ectot-l'Auber, 76760, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6493462,
     "lon": 0.928977
   },
@@ -659,17 +591,13 @@
     "lat": 49.5899901,
     "lon": 0.8921061
   },
-  "St Etienne le Vieux (76)": {
+  "Saint-Étienne le Vieux (76)": {
     "lat": 49.6238664,
     "lon": 0.8771749
   },
   "Le Verbosc,76": {
     "lat": 49.57808,
     "lon": 0.7942235
-  },
-  "St Etienne le Vieux,76": {
-    "lat": 49.6238664,
-    "lon": 0.8771749
   },
   "Saint Etienne le Vieux, Seine Maritime, France": {
     "lat": 49.6238664,
@@ -727,7 +655,7 @@
     "lat": 49.6400396,
     "lon": 0.2228718
   },
-  "Criquetot l'Esneval (76196)": {
+  "Criquetot-L'Esneval, 76280, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6449576,
     "lon": 0.2661419
   },
@@ -755,7 +683,7 @@
     "lat": 49.5389515,
     "lon": 0.2554623
   },
-  "Etainhus, 76250, Seine-Maritime, Normandie, France": {
+  "Étainhus, 76250, Seine-Maritime, Normandie, France": {
     "lat": 49.567389,
     "lon": 0.3101189
   },
@@ -819,7 +747,7 @@
     "lat": 49.7122785,
     "lon": 0.6166861
   },
-  "Beuzeville la Guérard": {
+  "Beuzeville-la-Guérard, 76091, Seine-Maritime, Normandie": {
     "lat": 49.7122785,
     "lon": 0.6166861
   },
@@ -830,10 +758,6 @@
   "Fécamp (Saint Benoist)": {
     "lat": 49.7558443,
     "lon": 0.3905972
-  },
-  "Beuzeville-la-Guérard, 76091, Seine-Maritime, Normandie": {
-    "lat": 49.7122785,
-    "lon": 0.6166861
   },
   "Bennetot, 76078, Seine Maritime, Normandie, France": {
     "lat": 49.6720105,
@@ -851,25 +775,13 @@
     "lat": 49.80613,
     "lon": 0.555
   },
-  "St Martin aux Buneaux,76": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
   "Saint-Sauflieu, 80240, Somme, Somme, France": {
     "lat": 49.7900575,
     "lon": 2.25828
   },
-  "Les-Loges, 76790, Seine Maritime, Seine-Maritime, France": {
+  "Les Loges, 76390, Seine-Maritime, Normandie, France": {
     "lat": 49.6991265,
     "lon": 0.2827091
-  },
-  "Saint-Martin-aux-Buneaux, 76450, Seine Maritime, Seine-Maritime, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
-  "Saint-Martin-aux-Buneaux, 76613, Seine-Maritime, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
   },
   "Saint-Martin-aux-Buneaux, 76450, Seine-Maritime, Normandie, France": {
     "lat": 49.8243383,
@@ -903,10 +815,6 @@
     "lat": 49.7701305,
     "lon": 2.2723919
   },
-  "Saint Martin aux Buneaux, 76, Seine Maritime, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
   "Sassetot-le-Mauconduit, 76540, Seine-Maritime, Normandie, France": {
     "lat": 49.8023407,
     "lon": 0.5297357
@@ -939,29 +847,9 @@
     "lat": 49.7577729,
     "lon": 0.374891
   },
-  "Saint-Martin-aux-Buneaux, 76613, Seine Maritime, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
   "Sassetot-le-Mauconduit, 76663, Seine Maritime, Normandie, France": {
     "lat": 49.8023407,
     "lon": 0.5297357
-  },
-  "Saint-Martin-aux-Buneaux, 76, Seine-Maritime": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
-  "St Martin aux Buneaux, 76613, Seine Maritime, Normandie": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
-  "Saint-Martin-aux-Buneaux 76 Seine-maritime": {
-    "lat": 49.8243383,
-    "lon": 0.552795
-  },
-  "Saint Martin aux Buneaux, 76, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
   },
   "Angerville-la-Martel,76": {
     "lat": 49.7614028,
@@ -1015,7 +903,7 @@
     "lat": 49.79122,
     "lon": 0.4849
   },
-  "Eletot, 76232, Seine-Maritime, Normandie": {
+  "Életot, Seine-Maritime, Normandie, France": {
     "lat": 49.7878126,
     "lon": 0.4519036
   },
@@ -1023,21 +911,13 @@
     "lat": 49.7595553,
     "lon": 0.6830967
   },
-  "Életot, Seine-Maritime, Normandie, France": {
-    "lat": 49.7878126,
-    "lon": 0.4519036
-  },
   "Életot, Seine-Maritime": {
     "lat": 49.7878126,
     "lon": 0.4519036
   },
-  "Ste-Helene-de-Bondeville": {
-    "lat": 49.7723027,
-    "lon": 0.4410246
-  },
-  "Ste-Helene-de-Bondeville, 76587, Seine-Maritime, Normandie, France": {
-    "lat": 49.7751006,
-    "lon": 0.458877
+  "Sainte-Hélène-Bondeville (76), France": {
+    "lat": 49.7733604,
+    "lon": 0.4506462
   },
   "Bondeville sur fecamp": {
     "lat": 49.7664493,
@@ -1087,10 +967,6 @@
     "lat": 49.80613,
     "lon": 0.555
   },
-  "Sassetot le Mauconduit (76)": {
-    "lat": 49.8023407,
-    "lon": 0.5297357
-  },
   "Sassetot-Le-Mauconduit, Seine Maritime, Normandie, France": {
     "lat": 49.8023407,
     "lon": 0.5297357
@@ -1104,14 +980,6 @@
     "lon": 0.555
   },
   "Életot (76)": {
-    "lat": 49.7878126,
-    "lon": 0.4519036
-  },
-  "SENNEVILLE SUR FECAMP, 76, Normandie, France": {
-    "lat": 49.7723206,
-    "lon": 0.4176305
-  },
-  "ELETOT, 76, Normandie, France": {
     "lat": 49.7878126,
     "lon": 0.4519036
   },
@@ -1139,10 +1007,6 @@
     "lat": 49.8137526,
     "lon": 0.5877768
   },
-  "Sassetot Le Mauconduit, 76663, Seine-Maritime, Normandie, France": {
-    "lat": 49.8023407,
-    "lon": 0.5297357
-  },
   "Criquetot-le-Mauconduit, 76195, Seine Maritime, Normandie, France": {
     "lat": 49.79274,
     "lon": 0.5598
@@ -1150,10 +1014,6 @@
   "Bardouville, Seine-Maritime, Normandie, France": {
     "lat": 49.4349503,
     "lon": 0.9265069
-  },
-  "St Martin aux Buneaux (76), 76 450, Seine-Maritime, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
   },
   "Bardouville, 76, Seine-Maritime, Normandie, France": {
     "lat": 49.4349503,
@@ -1194,10 +1054,6 @@
   "Canouville,76": {
     "lat": 49.8066238,
     "lon": 0.6036945
-  },
-  "Butot Vénesville, 76, SEINE MARITIME, France": {
-    "lat": 49.8137526,
-    "lon": 0.5877768
   },
   "Butot-en-Caux, 76, Seine Maritime, Normandie, France": {
     "lat": 49.6257734,
@@ -1247,29 +1103,13 @@
     "lat": 49.5068234,
     "lon": 0.360228
   },
-  "Auberville la Renault, 76, Seine Maritime, Normandie, France": {
-    "lat": 49.6810924,
-    "lon": 0.3678179
-  },
-  "St-Germain-de-la-Mer, Côtes-d'Armor, 22, FR": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
   "Landébia, Côtes d'Armor, 22, FR": {
     "lat": 48.513966,
     "lon": -2.336892
   },
-  "St Cast Le Guildo (22)": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
   "Saint-Cast-le-Guildo, Côtes-d'Armor, 22, FR": {
     "lat": 48.6241288,
     "lon": -2.2617846
-  },
-  "St-Germain-de-la-Mer, Cotes-d'Armor, 22, FR": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Pléboulle, 22174, Côtes d'Armor, Bretagne, France": {
     "lat": 48.6089629,
@@ -1283,17 +1123,13 @@
     "lat": 45.008,
     "lon": -0.61502
   },
-  "St-Germain-de-la-Mer, Côtes-d'Armor, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
   "Bretagne": {
     "lat": 48.2640845,
     "lon": -2.9202408
   },
-  "La Boitardais 22130 Bourseul": {
-    "lat": 48.503142,
-    "lon": -2.246309
+  "Bourseul, 22130, Bretagne": {
+    "lat": 48.487358,
+    "lon": -2.258746
   },
   "Ploubalay, 22209, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5626446,
@@ -1303,9 +1139,9 @@
     "lat": 48.5968982,
     "lon": -2.2922438
   },
-  "Château de Beaumanoir, Le Leslay, 22126, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.4334082,
-    "lon": -2.9624442
+  "Le Leslay, 22126, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.429608,
+    "lon": -2.96575
   },
   "Nagel-Séez-Mesnil, 27190, Eure, Normandie, France": {
     "lat": 48.92298,
@@ -1355,9 +1191,9 @@
     "lat": 48.560822,
     "lon": -2.376924
   },
-  "La Baillie, Saint-Cast Le Guildo, 22, Bretagne": {
-    "lat": 48.6279708,
-    "lon": -2.2824685
+  "Saint-Cast-le-Guildo, La Baillie, 22, Bretagne": {
+    "lat": 48.6270568,
+    "lon": -2.2878485
   },
   "Saint-Pierre-en-Port, Normandie, France": {
     "lat": 49.8069179,
@@ -1383,11 +1219,11 @@
     "lat": 48.5737296,
     "lon": -2.4340316
   },
-  "Pleboulle, 22, bretagne, france": {
+  "Pléboulle, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6089629,
     "lon": -2.3376606
   },
-  "Henanbihen": {
+  "Hénanbihen, 22076, Côtes d'Armor, Bretagne, France": {
     "lat": 48.560822,
     "lon": -2.376924
   },
@@ -1415,45 +1251,21 @@
     "lat": 48.404988,
     "lon": -2.217027
   },
-  "Saint-Potan, 22550, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Neuil, 37165, Indre et Loire, Centre, France": {
     "lat": 47.1719888,
     "lon": 0.5133112
-  },
-  "Saint-Cast-le-Guildo, 22282, Côtes-d'Armor, Bretagne,": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
   },
   "Saint-Cast-le-Guildo, Côtes d'Armor, Bretagne, France": {
     "lat": 48.6241288,
     "lon": -2.2617846
   },
-  "Saint-Cast": {
-    "lat": 49.4694729,
-    "lon": -2.5953148
-  },
   "Saint-Cast-le-Guildo (22)": {
     "lat": 48.6241288,
     "lon": -2.2617846
   },
-  "St-Germain-de-la-Mer (22143), Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
   "Saint-Cast-le-Guildo (22282), Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6241288,
     "lon": -2.2617846
-  },
-  "St-Germain-de-la-Mer, Côtes d'Armor, 22": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
-  "St-Germain-de-la-Mer, 22, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Rennes, Ille-et-Vilaine, 35": {
     "lat": 48.087414,
@@ -1483,9 +1295,9 @@
     "lat": 48.0430099,
     "lon": -2.4040857
   },
-  "Abbaye de Redon, Redon (35236), France": {
-    "lat": 47.8084053,
-    "lon": -1.5299879
+  "Redon, 35600, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 47.6510682,
+    "lon": -2.0842143
   },
   "29, Finistère, Bretagne, France": {
     "lat": 48.0002283,
@@ -1535,9 +1347,9 @@
     "lat": 49.2157245,
     "lon": 1.1646335
   },
-  "Armorique- Rennes, 35238, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.1295878,
-    "lon": -1.6772463
+  "Rennes, 35, Bretagne": {
+    "lat": 48.087414,
+    "lon": -1.529075
   },
   "Vendôme, 41269, Loir-et-Cher, Centre-Val de Loire, France,": {
     "lat": 47.7934453,
@@ -1591,10 +1403,6 @@
     "lat": 50.441525,
     "lon": -5.0115198
   },
-  "Cornouaille Finistère, Bretagne": {
-    "lat": 47.9713877,
-    "lon": -4.1704099
-  },
   "Appoigny,Yonne,Bourgogne-Franche-Comté,France": {
     "lat": 47.8781778,
     "lon": 3.523723
@@ -1611,7 +1419,7 @@
     "lat": 48.292629,
     "lon": -4.2679655
   },
-  "Grande Bretagne": {
+  "Grande-Bretagne": {
     "lat": 54.3151594,
     "lon": -1.9181532
   },
@@ -1626,10 +1434,6 @@
   "Ewyas, Wales": {
     "lat": 51.9451321,
     "lon": -3.0403082
-  },
-  "Grande-Bretagne": {
-    "lat": 54.3151594,
-    "lon": -1.9181532
   },
   "North, Pays-de-Galles": {
     "lat": 53.2566055,
@@ -1659,9 +1463,9 @@
     "lat": 31.9158969,
     "lon": 35.1781625
   },
-  "Judea, Jerusalem, ISRAEL": {
-    "lat": 32.1156278,
-    "lon": 35.0329921
+  "Judée, Jerusalem, ISRAEL": {
+    "lat": 31.820441,
+    "lon": 35.0926451
   },
   "Glastonbury Somerset, England, Royaume-Uni": {
     "lat": 51.14804,
@@ -1670,10 +1474,6 @@
   "Judée, Palestine": {
     "lat": 31.8475659,
     "lon": 35.2302307
-  },
-  "Jerusalem": {
-    "lat": 31.7788242,
-    "lon": 35.2257626
   },
   "Broërec, Morbihan, France": {
     "lat": 47.805705,
@@ -1695,13 +1495,13 @@
     "lat": 48.8588897,
     "lon": 2.320041
   },
-  "Jupille-sur-Meuse Liège, Belgique": {
+  "Jupille-sur-Meuse, Liège, Belgique": {
     "lat": 50.6431909,
     "lon": 5.6301266
   },
-  "Paris France": {
-    "lat": 48.8534951,
-    "lon": 2.3483915
+  "Paris, 75, Paris, Ile-de-France, France": {
+    "lat": 48.8605462,
+    "lon": 2.3791013
   },
   "Saint-Denis, 93066, Seine-Saint-Denis, Ile-de-France, France": {
     "lat": 48.935773,
@@ -1723,39 +1523,15 @@
     "lat": 48.0686181,
     "lon": -2.7527983
   },
-  "Saint-Cast-le-Guildo, 22282, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
   "Plévenon, 22240, Côtes d'Armor, Bretagne, France": {
     "lat": 48.6548909,
     "lon": -2.3315588
-  },
-  "St-Cast-Le-Guildo, 220282, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast, 22, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast 22 France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "St-Germain-de-la-Mer, 22550, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Pléboulle 22": {
     "lat": 48.6089629,
     "lon": -2.3376606
   },
   "Pléboulle, 22174, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6089629,
-    "lon": -2.3376606
-  },
-  "Pléboulle, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6089629,
     "lon": -2.3376606
   },
@@ -1771,39 +1547,7 @@
     "lat": 48.6241288,
     "lon": -2.2617846
   },
-  "Saint-Cast, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast, 22, Franc": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Potan, 22323, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint Pôtan, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Potan, 22323, Côtes d'Armor, Bretagne": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint  Pôtan (22)": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "St Potan 22": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Potan 22": {
+  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, France, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5586158,
     "lon": -2.2902601
   },
@@ -1822,14 +1566,6 @@
   "Broons, 22020, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.3179354,
     "lon": -2.2620533
-  },
-  "Saint-Potan 22, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Potan 22 Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Valenciennes, 59, Hauts-de-France, France": {
     "lat": 50.3579317,
@@ -1859,19 +1595,11 @@
     "lat": 48.5569125,
     "lon": -2.5339979
   },
-  "Hénanbihen, 22076, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.560822,
-    "lon": -2.376924
-  },
   "Ruca, 22550, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5667727,
     "lon": -2.338703
   },
-  "Saint-Potan, 22550, Côtes-D'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint Denoual (22)": {
+  "Saint-Denoual, 22400, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5277373,
     "lon": -2.4017284
   },
@@ -1883,17 +1611,9 @@
     "lat": 48.5164864,
     "lon": -2.427571
   },
-  "St Denoual, 22286, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5277373,
-    "lon": -2.4017284
-  },
   "Quintenic, 22, Bretagne": {
     "lat": 48.5164864,
     "lon": -2.427571
-  },
-  "St Denoual, 22, Bretagne": {
-    "lat": 48.5277373,
-    "lon": -2.4017284
   },
   "Ruca, 22550, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5667727,
@@ -1907,29 +1627,9 @@
     "lat": 48.523744,
     "lon": -2.2889406
   },
-  "Saint-Potan, Côtes-d’Armor, 22": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Potan, 22323, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Germain-de la Mer. Matignon, 22143, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
-  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Bourseul 22130 côtes d'Armor Bretagne France": {
+  "Bourseul (22)": {
     "lat": 48.487358,
     "lon": -2.258746
-  },
-  "Plancoët 22130 Côtes d' Armor Bretagne France": {
-    "lat": 48.5225082,
-    "lon": -2.2345898
   },
   "Pleurtuit, 35730, Ille et Vilaine, Bretagne, France": {
     "lat": 48.5815,
@@ -2003,10 +1703,6 @@
     "lat": 50.6668629,
     "lon": 5.611534
   },
-  "Aix la Chapelle, Allemagne": {
-    "lat": 50.776351,
-    "lon": 6.083862
-  },
   "Saint-Denis, 93066, Seine St Denis, Ile-de-France, France": {
     "lat": 48.935773,
     "lon": 2.3580232
@@ -2018,10 +1714,6 @@
   "Quierzy, 02631, Aisne, Picardie, France": {
     "lat": 49.5713889,
     "lon": 3.1441667
-  },
-  "Jupille-sur-Meuse, Liège, Belgique": {
-    "lat": 50.6431909,
-    "lon": 5.6301266
   },
   "Remiremont, 88383, Vosges, Lorraine, France": {
     "lat": 48.0158951,
@@ -2047,10 +1739,6 @@
     "lat": 48.6089629,
     "lon": -2.3376606
   },
-  "plevenon": {
-    "lat": 48.6548909,
-    "lon": -2.3315588
-  },
   "Rieux, 56194, Morbihan, Bretagne, France": {
     "lat": 47.5978987,
     "lon": -2.1073053
@@ -2059,33 +1747,17 @@
     "lat": 48.5667727,
     "lon": -2.338703
   },
-  "Saint-Pôtan, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Potan ( 22 )": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "CREHEN ( 22 )": {
+  "Créhen, 22049, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.546319,
     "lon": -2.213879
-  },
-  "Saint-Cast ( 22 )": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
   },
   "Pléhérel (22)": {
     "lat": 48.652384,
     "lon": -2.3640432
   },
-  "Plorec sur Arguenon (22)": {
+  "Plorec-sur-Arguenon, 22205, Côtes d'Armor, Bretagne, France": {
     "lat": 48.4802451,
     "lon": -2.297288
-  },
-  "Bourseul (22)": {
-    "lat": 48.487358,
-    "lon": -2.258746
   },
   "Hénanbihen, Côtes-D'armor, Bretagne, France": {
     "lat": 48.560822,
@@ -2106,10 +1778,6 @@
   "Pléboulle, 22, Côtes-d'Armor, Bretagne, Fr": {
     "lat": 48.6089629,
     "lon": -2.3376606
-  },
-  "St-Germain-de-la-Mer, 22, Côtes-d'Armor, Bretagne, Fr": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Ruca, 22": {
     "lat": 48.5667727,
@@ -2151,33 +1819,13 @@
     "lat": 48.560822,
     "lon": -2.376924
   },
-  "Saint-Cast Le Guildo, 22, Bretagne": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast Le Guildo (22)": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast, 22, Côtes-d'Armor, Bretagne, Fr": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint-Cast 22380 Côtes d' Armor Bretagne France": {
+  "Saint-Cast-le-Guildo, 22, Bretagne": {
     "lat": 48.6241288,
     "lon": -2.2617846
   },
   "RUCA ( 22 )": {
     "lat": 48.5667727,
     "lon": -2.338703
-  },
-  "PLEBOULLE ( 22 )": {
-    "lat": 48.6089629,
-    "lon": -2.3376606
-  },
-  "St-Germain-de-la-Mer 22": {
-    "lat": 48.6182513,
-    "lon": -2.302739
   },
   "Hénansal 22": {
     "lat": 48.5412777,
@@ -2190,10 +1838,6 @@
   "Hénansal, 22077, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5412777,
     "lon": -2.4345185
-  },
-  "Saint-Potan, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Trégon, 22650, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5646156,
@@ -2219,9 +1863,9 @@
     "lat": 47.5525545,
     "lon": -1.5322775
   },
-  "abbaye de Melleray, La Meilleraye-de-Bretagne (Loire-Atlantique)": {
-    "lat": 47.5495335,
-    "lon": -1.3774292
+  "La Meilleraye-de-Bretagne (Loire-Atlantique)": {
+    "lat": 47.5590149,
+    "lon": -1.4021731
   },
   "Montfort-sur-Meu, 35160, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1372782,
@@ -2263,17 +1907,17 @@
     "lat": 48.8588897,
     "lon": 2.320041
   },
-  "chateau, Béthisy-saint-pierre": {
-    "lat": 49.301942,
-    "lon": 2.8072279
+  "Béthisy-saint-pierre": {
+    "lat": 49.3054,
+    "lon": 2.8032
   },
   "Troyes, 10387, Aube, Champagne-Ardenne, France": {
     "lat": 48.2971626,
     "lon": 4.0746257
   },
-  "chateau de melun, Melun, 77, Seine-et-Marne, Ile-de-France, France": {
-    "lat": 48.5809085,
-    "lon": 2.5670983
+  "Melun, 77, Seine-et-Marne, Ile-de-France, France": {
+    "lat": 48.539927,
+    "lon": 2.6608169
   },
   "Montreuil, 93048, Seine-Saint-Denis, Ile-de-France, France": {
     "lat": 48.8623357,
@@ -2287,17 +1931,9 @@
     "lat": 47.9027336,
     "lon": 1.9086066
   },
-  "Melun, 77, Seine-et-Marne, Ile-de-France, France": {
-    "lat": 48.539927,
-    "lon": 2.6608169
-  },
   "Prasville, 28304, Eure-et-Loir, Centre-Val de Loire, France": {
     "lat": 48.2767097,
     "lon": 1.7092261
-  },
-  "Eglise Saint-Denis, Paris, 75056, Paris, Ile-de-France, France": {
-    "lat": 48.8599705,
-    "lon": 2.3652531
   },
   "Brissarthe, 49051, Maine-et-Loire, Pays de la Loire, France": {
     "lat": 47.7004572,
@@ -2311,14 +1947,6 @@
     "lat": 48.523744,
     "lon": -2.2889406
   },
-  "La Lande Moisan, Saint-Cast-le-Guildo, 22282, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5945597,
-    "lon": -2.2427748
-  },
-  "Saint Pôtan": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Ruca": {
     "lat": 48.5667727,
     "lon": -2.338703
@@ -2331,49 +1959,25 @@
     "lat": 48.5384022,
     "lon": -2.1424799
   },
-  "St Potan, 22550, Côtes d'Armor": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Ruca, 22268, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5667727,
     "lon": -2.338703
-  },
-  "Quinténic, 22400, Côtes d'Armor": {
-    "lat": 48.5164864,
-    "lon": -2.427571
   },
   "Ploubalay, 22650, Côtes d'Armor": {
     "lat": 48.5626446,
     "lon": -2.123685
   },
-  "Saint-Pôtan, 22323, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Ruca, 22550, Cotes d'Armor": {
     "lat": 48.5667727,
     "lon": -2.338703
-  },
-  "Saint-Potan,  Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Châtelaudren, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5428119,
     "lon": -2.9698277
   },
-  "La-Touche-à-la-Vache, 22130 Créhen": {
-    "lat": 48.5215143,
-    "lon": -2.1962924
-  },
-  "la Tandourie, Corseul (22)": {
-    "lat": 48.5009151,
-    "lon": -2.182803
-  },
-  "Créhen, 22049, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.546319,
-    "lon": -2.213879
+  "Corseul, Côtes-d'Armor, Bretagne, France": {
+    "lat": 48.4810524,
+    "lon": -2.1684565
   },
   "Pontvallain, 72243, Sarthe, Pays de la Loire, France": {
     "lat": 47.7516432,
@@ -2395,15 +1999,11 @@
     "lat": 48.1113387,
     "lon": -1.6800198
   },
-  "Rennes, 35, Bretagne": {
-    "lat": 48.087414,
-    "lon": -1.529075
-  },
   "Rennes, 35000, Ille-Et-Vilaine, Bretagne, France": {
     "lat": 48.1113387,
     "lon": -1.6800198
   },
-  "Bassilly Hainaut, Belgique": {
+  "Bassilly, Hainaut, Belgique": {
     "lat": 50.6724203,
     "lon": 3.9360497
   },
@@ -2431,10 +2031,6 @@
     "lat": 48.601358,
     "lon": -1.4735804
   },
-  "Saint Cast, 22, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
   "Saint-Eustache-la-Forêt, 76210, Seine-Maritime, Normandie, France": {
     "lat": 49.5524805,
     "lon": 0.4512736
@@ -2443,13 +2039,9 @@
     "lat": 49.8080133,
     "lon": 2.2789348
   },
-  "Jacobins, Dinan, 22, bretagne": {
-    "lat": 48.4375914,
-    "lon": -2.0403069
-  },
-  "Jacobins, Dinan, Côtes-d'Armor, 22, France": {
-    "lat": 48.4375914,
-    "lon": -2.0403069
+  "Dinan, 22050, Côtes d'Armor, Bretagne": {
+    "lat": 48.4539775,
+    "lon": -2.047687
   },
   "Matignon": {
     "lat": 48.5968982,
@@ -2479,10 +2071,6 @@
     "lat": 49.0393377,
     "lon": -0.9826705
   },
-  "France": {
-    "lat": 46.603354,
-    "lon": 1.8883335
-  },
   "Paris, Seine, France": {
     "lat": 48.8252181,
     "lon": 2.7054865
@@ -2502,10 +2090,6 @@
   "Torigni-sur-Vire, 50601, Manche, Normandie, France": {
     "lat": 49.034722,
     "lon": -0.9791576
-  },
-  "Paris, 75, Paris, Ile-de-France, France": {
-    "lat": 48.8605462,
-    "lon": 2.3791013
   },
   "Monaco,  Monaco": {
     "lat": 43.7323492,
@@ -2591,9 +2175,9 @@
     "lat": 47.7961287,
     "lon": 3.570579
   },
-  "rue Saint-Jean, Mortagne-au-Perche, 61": {
-    "lat": 48.5238462,
-    "lon": 0.5497795
+  "Mortagne-au-Perche, 61": {
+    "lat": 48.5205106,
+    "lon": 0.5501095
   },
   "Pouilly-en-Auxois, Bourgogne": {
     "lat": 47.2622415,
@@ -2602,10 +2186,6 @@
   "Tourouvre, Orne, 61": {
     "lat": 48.5901217,
     "lon": 0.6639297
-  },
-  "Mortagne-au-Perche, 61": {
-    "lat": 48.5205106,
-    "lon": 0.5501095
   },
   "Beauport, Québec": {
     "lat": 46.8983492,
@@ -2646,10 +2226,6 @@
   "Vittefleur, 76, Normandie, France": {
     "lat": 49.8189759,
     "lon": 0.6376968
-  },
-  "Saint-Martin-aux-Buneaux, 76, Normandie, France": {
-    "lat": 49.8243383,
-    "lon": 0.552795
   },
   "Crosville-sur-Scie, 76, Normandie, France": {
     "lat": 49.82108,
@@ -2727,10 +2303,6 @@
     "lat": 48.3001245,
     "lon": -2.0077252
   },
-  "St-Pern, 35307, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.2884779,
-    "lon": -1.9870775
-  },
   "Kerien, 22088, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.3901982,
     "lon": -3.2119138
@@ -2755,10 +2327,6 @@
     "lat": 48.3095942,
     "lon": -1.9392869
   },
-  "la beaumenais-Guitté, 22071, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.2861239,
-    "lon": -2.0779235
-  },
   "Guitté, 22071, Côtes d'Armor, Bretagne, France": {
     "lat": 48.297143,
     "lon": -2.095547
@@ -2766,10 +2334,6 @@
   "Tréfumel, 22352, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.33832,
     "lon": -2.0259706
-  },
-  "saint juvat": {
-    "lat": 48.3528781,
-    "lon": -2.0435232
   },
   "Saint-Maden, 22312, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.330351,
@@ -2791,11 +2355,7 @@
     "lat": 48.1113387,
     "lon": -1.6800198
   },
-  "Evran, 22056, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.382309,
-    "lon": -1.979691
-  },
-  "evran": {
+  "Évran, 22630, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.382309,
     "lon": -1.979691
   },
@@ -2803,21 +2363,9 @@
     "lat": 48.0419835,
     "lon": -1.712372
   },
-  "Fontenay - Chartres-de-Bretagne, 35066, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0459738,
-    "lon": -1.6961298
-  },
-  "La Chaussairie, Bruz, 35, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0290549,
-    "lon": -1.723094
-  },
-  "La Chalotière, Bruz, 35, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0112215,
-    "lon": -1.7444229
-  },
-  "Rue Derval - Rennes, 35238, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1112744,
-    "lon": -1.6764129
+  "Bruz, La Chaussairie, 35, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.0291598,
+    "lon": -1.71929
   },
   "La Silardière, Bruz, 35, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0113522,
@@ -2835,9 +2383,9 @@
     "lat": 49.9443256,
     "lon": 2.1418065
   },
-  "Toussaints - Rennes, 35000, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.1091321,
-    "lon": -1.6756264
+  "Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1113387,
+    "lon": -1.6800198
   },
   "Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.0432406,
@@ -2846,10 +2394,6 @@
   "Bruz, 35170, Ille et Vilaine, Bretagne, FRANCE": {
     "lat": 48.0245814,
     "lon": -1.7471629
-  },
-  "La Chaussairie - Bruz, 35170, Ille et Vilaine, Bretagne, FRANCE": {
-    "lat": 48.029055,
-    "lon": -1.723094
   },
   "Craon, 53400, Mayenne, Pays de la Loire, France": {
     "lat": 47.84831,
@@ -2863,61 +2407,33 @@
     "lat": 47.8313035,
     "lon": -1.317543
   },
-  "La Chaussée, Moisdon-la-Rivière, 44520, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6142753,
-    "lon": -1.3781747
+  "Moisdon-la-Rivière, 44520, Loire Atlantique, Pays de la Loire, France": {
+    "lat": 47.6211147,
+    "lon": -1.3728134
   },
   "Châteaubriant, 44110, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.7194057,
     "lon": -1.3757282
   },
-  "Moisdon-la-Rivière, 44520, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6211147,
-    "lon": -1.3728134
-  },
-  "Port-Brillet - Olivet, 53410, Mayenne, Pays de la Loire, France": {
-    "lat": 48.1203026,
-    "lon": -0.9191797
+  "Port-Brillet, 53410, Mayenne, Pays de la Loire, France": {
+    "lat": 48.1126614,
+    "lon": -0.9715748
   },
   "Erbray, 44110, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.6552164,
     "lon": -1.3179329
   },
-  "Bignon - Châteaubriant, 44110, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6990301,
-    "lon": -1.3573165
-  },
-  "Eglise St Martin, Erbray, 44110, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6550255,
-    "lon": -1.3180628
-  },
   "Saint-Sulpice-des-Landes, 44540, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.5744654,
     "lon": -1.2061371
   },
-  "Le Hadet - Erbray, 44110, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6661641,
-    "lon": -1.2966093
-  },
-  "Eglise St Julien - Saint-Julien-de-Vouvantes, 44670, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6418903,
-    "lon": -1.2376332
+  "Saint-Julien-de-Vouvantes, 44670, Loire Atlantique, Pays de la Loire, France": {
+    "lat": 47.6419095,
+    "lon": -1.2380528
   },
   "Le Pin, 44540, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.5897141,
     "lon": -1.154128
-  },
-  "Eglise St Sulpice - Saint-Sulpice-des-Landes, 44540, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.574644,
-    "lon": -1.2057626
-  },
-  "Eglise St Martin - Erbray, 44110, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6550255,
-    "lon": -1.3180628
-  },
-  "Saint-Julien-de-Vouvantes, 44670, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6419095,
-    "lon": -1.2380528
   },
   "Petit-Auverné, 44670, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.6097071,
@@ -2934,10 +2450,6 @@
   "Guichen, 35580, Ille et Vilaine, Bretagne, France": {
     "lat": 47.9659271,
     "lon": -1.7970987
-  },
-  "La Pinais, Moisdon-la-Rivière, 44520, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6184669,
-    "lon": -1.3371965
   },
   "Bourg-des-Comptes, 35890, Ille et Vilaine, Bretagne, France": {
     "lat": 47.9298273,
@@ -2962,10 +2474,6 @@
   "Saint-Jean-sur-Erve, 53270, Mayenne, Pays de la Loire, France": {
     "lat": 48.0409518,
     "lon": -0.3854004
-  },
-  "La Fenderie, Chailland, 53420, Mayenne, Pays de la Loire, France": {
-    "lat": 48.2335901,
-    "lon": -0.8632979
   },
   "Châtres-la-Forêt, 53600, Mayenne, Pays de la Loire, France": {
     "lat": 48.1249835,
@@ -2999,9 +2507,9 @@
     "lat": 47.8009392,
     "lon": -0.8207619
   },
-  "Ruillé - Ruillé-Froid-Fonds, 53170, Mayenne, Pays de la Loire, France": {
-    "lat": 47.9002865,
-    "lon": -0.641522
+  "Ruillé-Froid-Fonds, 53170, Mayenne, Pays de la Loire, France": {
+    "lat": 47.9009601,
+    "lon": -0.6415538
   },
   "Mée, 53400, Mayenne, Pays de la Loire, France": {
     "lat": 47.7978449,
@@ -3015,10 +2523,6 @@
     "lat": 48.1844169,
     "lon": -1.9191125
   },
-  "La Chesnelais, Pleumeleuc (35)": {
-    "lat": 48.1607738,
-    "lon": -1.8945619
-  },
   "Breteil, \" Gautrel \" (35)": {
     "lat": 48.1457582,
     "lon": -1.9001485
@@ -3031,11 +2535,7 @@
     "lat": 48.2153539,
     "lon": -1.89245
   },
-  "St Gilles (35)": {
-    "lat": 50.3060756,
-    "lon": 5.1172823
-  },
-  "Saint Gilles ille et Vilaine Bretagne France": {
+  "Saint-Gilles, 35275, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1539357,
     "lon": -1.8299928
   },
@@ -3054,10 +2554,6 @@
   "Breteil, \" la Herdrouais \" (35)": {
     "lat": 48.1465448,
     "lon": -1.9084908
-  },
-  "Breteil \" le Chesnot \" (35)": {
-    "lat": 48.1465686,
-    "lon": -1.8898802
   },
   "Talensac (35)": {
     "lat": 48.1092798,
@@ -3103,18 +2599,6 @@
     "lat": 48.14059,
     "lon": -1.9166947
   },
-  "Saint-Gilles, 35275, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1539357,
-    "lon": -1.8299928
-  },
-  "La Villeneuve - Saint-Gilles, 35275, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1473229,
-    "lon": -1.8783572
-  },
-  "fresne - Breteil, 35160, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.1381638,
-    "lon": -1.9106821
-  },
   "Breteil, 35160, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1459113,
     "lon": -1.8996064
@@ -3122,10 +2606,6 @@
   "Breteil, 35040, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1459113,
     "lon": -1.8996064
-  },
-  "le fresne - Breteil, 35160, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.1381638,
-    "lon": -1.9106821
   },
   "Talensac, \" Le Chatellier \" (35)": {
     "lat": 48.111917,
@@ -3135,25 +2615,17 @@
     "lat": 48.1459113,
     "lon": -1.8996064
   },
-  "La Touche - Breteil, 35040, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1298065,
-    "lon": -1.9170823
+  "Breteil, (35)": {
+    "lat": 48.1441545,
+    "lon": -1.9167803
   },
   "Breteil, 35160, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1459113,
     "lon": -1.8996064
   },
-  "Les Champs - Iffendic, 35133, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1404941,
-    "lon": -1.9933449
-  },
-  "La Riolais - Breteil, 35040, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1550818,
-    "lon": -1.8964726
-  },
-  "La Tassinière - Breteil, 35040, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1337591,
-    "lon": -1.897532
+  "Iffendic, 35133, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1290768,
+    "lon": -2.0336601
   },
   "Breteil, \" Les Vilbertes \" (35)": {
     "lat": 48.143087,
@@ -3167,7 +2639,7 @@
     "lat": 48.0678931,
     "lon": -1.9454995
   },
-  "Verger (Le), 35351, Ille-et-Vilaine, Bretagne, France": {
+  "Le Verger, 35351, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.0700479,
     "lon": -1.9320335
   },
@@ -3175,19 +2647,15 @@
     "lat": 48.087414,
     "lon": -1.529075
   },
+  "Le Verger, 35160, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 48.0700479,
+    "lon": -1.9320335
+  },
   "Talensac, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1092798,
     "lon": -1.9269063
   },
   "Le Verger, 35160, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0700479,
-    "lon": -1.9320335
-  },
-  "Le-Verger,Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.0700479,
-    "lon": -1.9320335
-  },
-  "Le-Verger, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.0700479,
     "lon": -1.9320335
   },
@@ -3198,10 +2666,6 @@
   "Talensac, 35331, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1092798,
     "lon": -1.9269063
-  },
-  "Saint Etienne, Rennes, 35000, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1128688,
-    "lon": -1.6864172
   },
   "Brissac, 49050, Maine et Loire, Pays de la Loire, France": {
     "lat": 47.3410667,
@@ -3215,7 +2679,7 @@
     "lat": 47.4144313,
     "lon": -0.6827825
   },
-  "Brissac-Quincé, 49050, Maine-et-Loire, Pays de la Loire, France": {
+  "Brissac, 49050, Maine-et-Loire, Pays de la Loire, France": {
     "lat": 47.3410667,
     "lon": -0.4425197
   },
@@ -3359,10 +2823,6 @@
     "lat": 48.297143,
     "lon": -2.095547
   },
-  "La Reculais - Guitté, 22350, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.2964911,
-    "lon": -2.0579505
-  },
   "Médréac, 35360, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.267486,
     "lon": -2.066007
@@ -3379,14 +2839,6 @@
     "lat": 48.3001245,
     "lon": -2.0077252
   },
-  "Bétineuc - Évran, 22630, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.3821373,
-    "lon": -2.0025881
-  },
-  "Querrier - Médréac, 35360, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.2844994,
-    "lon": -2.0527589
-  },
   "Médréac, Ille-et-Vilaine": {
     "lat": 48.267486,
     "lon": -2.066007
@@ -3395,10 +2847,6 @@
     "lat": 48.297143,
     "lon": -2.095547
   },
-  "La Ville Blanchet - Plouasne, 22830, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.300508,
-    "lon": -2.0423182
-  },
   "Saint-Thual, 35190, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.337293,
     "lon": -1.933277
@@ -3406,10 +2854,6 @@
   "La Baussaine, 35190, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.3129244,
     "lon": -1.8974199
-  },
-  "Évran, 22630, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.382309,
-    "lon": -1.979691
   },
   "Breteil, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1459113,
@@ -3435,9 +2879,9 @@
     "lat": 48.245019,
     "lon": -1.853596
   },
-  "la Chauvrais - Romillé, 35850, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.2178744,
-    "lon": -1.8885629
+  "Romillé, 35850, Ille-et-Vilaine, Bretagne, France": {
+    "lat": 48.2153539,
+    "lon": -1.89245
   },
   "Romillé, 35245, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.2153539,
@@ -3455,10 +2899,6 @@
     "lat": 48.2204891,
     "lon": -1.7896366
   },
-  "Le Bois Clos - Romillé, 35850, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.2394711,
-    "lon": -1.8689436
-  },
   "Gévezé (35)": {
     "lat": 48.2204891,
     "lon": -1.7896366
@@ -3466,10 +2906,6 @@
   "la Mézière (35)": {
     "lat": 48.1931256,
     "lon": -1.7809922
-  },
-  "Romillé, 35850, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.2153539,
-    "lon": -1.89245
   },
   "Langan, 35144, Ille et Vilaine, Bretagne, France": {
     "lat": 48.245019,
@@ -3507,15 +2943,7 @@
     "lat": 48.297143,
     "lon": -2.095547
   },
-  "Plorec-sur-Arguenon, 22205, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.4802451,
-    "lon": -2.297288
-  },
-  "Côtes-d'Armor, Bretagne": {
-    "lat": 48.4614877,
-    "lon": -2.7514328
-  },
-  "Côtes d’Armor, Bretagne, France": {
+  "Côtes-d’Armor, Bretagne, France": {
     "lat": 48.4614877,
     "lon": -2.7514328
   },
@@ -3595,17 +3023,9 @@
     "lat": 48.0513567,
     "lon": -1.867686
   },
-  "Bréal sous Montfort, 35037, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0513567,
-    "lon": -1.867686
-  },
   "Talensac, 35331, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1092798,
     "lon": -1.9269063
-  },
-  "Le Verger, 35351, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.0700479,
-    "lon": -1.9320335
   },
   "Bréal-sous-Montfort, 35310, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.0513567,
@@ -3635,9 +3055,9 @@
     "lat": 48.0720556,
     "lon": -1.818031
   },
-  "Vezin (35)": {
-    "lat": 48.0986383,
-    "lon": -1.5295571
+  "Vezin-le-Coquet, 35132, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1195379,
+    "lon": -1.75711
   },
   "Pacé, \" la Grande Touche \" (35)": {
     "lat": 48.1441764,
@@ -3703,10 +3123,6 @@
     "lat": 48.0839505,
     "lon": -1.8332594
   },
-  "Montfort ; St Jean (35)": {
-    "lat": 47.8693829,
-    "lon": -3.5402695
-  },
   "Épernay, 51001, Marne, Champagne-Ardenne, France": {
     "lat": 49.042561,
     "lon": 3.9528655
@@ -3739,13 +3155,9 @@
     "lat": 48.2204891,
     "lon": -1.7896366
   },
-  "Langan \" les Ruisseaux \" (35)": {
-    "lat": 48.2567316,
-    "lon": -1.8729798
-  },
-  "Dinan, 22050, Côtes d'Armor, Bretagne": {
-    "lat": 48.4539775,
-    "lon": -2.047687
+  "Langan, 35850, Ille-et-Vilaine, Bretagne, France ": {
+    "lat": 48.245019,
+    "lon": -1.853596
   },
   "Bideford, Devon, Royaume-Uni": {
     "lat": 51.0181448,
@@ -3783,21 +3195,13 @@
     "lat": 49.3008653,
     "lon": -0.0751662
   },
-  "Epretot, 76239, Seine-Maritime, Normandie, France": {
+  "Épretot, 76239 Seine-Maritime, Normandie, Normandie, France": {
     "lat": 49.5403053,
     "lon": 0.3130389
   },
   "Le Havre": {
     "lat": 49.4938975,
     "lon": 0.1079732
-  },
-  "Le Verger, 35160, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.0700479,
-    "lon": -1.9320335
-  },
-  "Redon, 35236, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 47.6510682,
-    "lon": -2.0842143
   },
   "MONTERFIL (35)": {
     "lat": 48.0652825,
@@ -3807,25 +3211,9 @@
     "lat": 48.0652825,
     "lon": -1.9793057
   },
-  "Iffendic, 35133, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1290768,
-    "lon": -2.0336601
-  },
-  "Les Couettes - Monterfil, 35187, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0521123,
-    "lon": -1.9883238
-  },
-  "Le Pâtis - Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0907306,
-    "lon": -1.8700805
-  },
   "Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0733304,
     "lon": -1.8485204
-  },
-  "L'Abbaye - Mordelles, 35196, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0869867,
-    "lon": -1.8393563
   },
   "L'Hermitage, 35131, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1243,
@@ -3838,10 +3226,6 @@
   "Le Rheu, 35240, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1006715,
     "lon": -1.7937675
-  },
-  "Moigne, 35240, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0800965,
-    "lon": -1.7741448
   },
   "Cintré, 35080, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1058654,
@@ -3859,10 +3243,6 @@
     "lat": 48.0733304,
     "lon": -1.8485204
   },
-  "L'Hôtel David - Monterfil, 35187, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0539096,
-    "lon": -1.9783455
-  },
   "Treffendel, 35340, Ille et Vilaine, Bretagne, France": {
     "lat": 48.041297,
     "lon": -2.0090611
@@ -3870,10 +3250,6 @@
   "Monterfil, 35187, Ille et Vilaine, Bretagne,  France": {
     "lat": 48.0652825,
     "lon": -1.9793057
-  },
-  "La Roussinais - Treffendel, 35340, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0297101,
-    "lon": -1.9958655
   },
   "Treffendel, 35340, Bretagne, France": {
     "lat": 48.041297,
@@ -3883,27 +3259,11 @@
     "lat": 48.0293427,
     "lon": -1.931223
   },
-  "La Cocaudais - Saint-Thurial, 35319, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0308178,
-    "lon": -1.9528477
-  },
-  "Le Hil Berhault - Monterfil, 35187, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0783103,
-    "lon": -1.9442899
-  },
-  "Bréal sous Montfort, 35310, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0513567,
-    "lon": -1.867686
-  },
   "Saint-Thurial, 35319, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.0293427,
     "lon": -1.931223
   },
   "Saint-Thurial, 35310, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.0293427,
-    "lon": -1.931223
-  },
-  "Saint-Thurial Ille et Vilaine Bretagne France": {
     "lat": 48.0293427,
     "lon": -1.931223
   },
@@ -3914,10 +3274,6 @@
   "Baulon, Ille et Vilaine, Bretagne, France": {
     "lat": 47.9854372,
     "lon": -1.9315829
-  },
-  "Painvoisin - Monterfil, 35187, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.0537805,
-    "lon": -1.9674111
   },
   "Monterfil, 35187, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.0652825,
@@ -3958,14 +3314,6 @@
   "Vignoc, 35356, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.248742,
     "lon": -1.7840405
-  },
-  "La Chaine - Gévezé, 35850, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.2401637,
-    "lon": -1.8316651
-  },
-  "Langouët, 35146, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.249746,
-    "lon": -1.8219965
   },
   "Gévezé, 35120, Ille et Vilaine, Bretagne, France": {
     "lat": 48.2204891,
@@ -4047,45 +3395,21 @@
     "lat": 50.7861863,
     "lon": 3.1627429
   },
-  "Le Chesnot - Breteil, 35160, Ille-Et-Vilaine, Bretagne, France": {
-    "lat": 48.1465686,
-    "lon": -1.8898802
-  },
   "Clayes, 35590, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1781142,
     "lon": -1.8543417
-  },
-  "Saint-Pôtan,Côtes-d'Armor,Bretagne,France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Plurien,22242,Côtes-d'Armor,Bretagne,France": {
     "lat": 48.6262391,
     "lon": -2.404043
   },
-  "St-Gilles, 35275, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.1539357,
-    "lon": -1.8299928
-  },
-  "St-Gilles (la villeneuve), 35275, Ille et Vilaine, Bretagne, France": {
-    "lat": 47.7307593,
-    "lon": -1.7337539
-  },
   "Romillé, 35, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.2153539,
     "lon": -1.89245
   },
-  "La Meziere": {
-    "lat": 48.2193772,
-    "lon": -1.7557922
-  },
   "La  Meziere 35": {
     "lat": 48.1931256,
     "lon": -1.7809922
-  },
-  "Gevezé ( ille et vilaine)": {
-    "lat": 48.2204891,
-    "lon": -1.7896366
   },
   "Romillé, 35, Ille et Vilaine, Bretagne, France": {
     "lat": 48.2153539,
@@ -4095,45 +3419,13 @@
     "lat": 48.192815,
     "lon": -1.8307019
   },
-  "Romille, 35, Ille et Vilaine, Bretagne, France": {
-    "lat": 48.2153539,
-    "lon": -1.89245
-  },
   "Moigné 35": {
     "lat": 48.0800965,
     "lon": -1.7741448
   },
-  "Moigné le Rheu": {
-    "lat": 48.0800965,
-    "lon": -1.7741448
-  },
-  "Moigné le Rheu 35": {
-    "lat": 48.0800965,
-    "lon": -1.7741448
-  },
-  "Saint-Gilles (35)": {
-    "lat": 50.3060756,
-    "lon": 5.1172823
-  },
-  "22 Saint Potan": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "22 Saint Lormel": {
     "lat": 48.5470087,
     "lon": -2.2304962
-  },
-  "Saint-Lormel, 22311, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5470087,
-    "lon": -2.2304962
-  },
-  "Saint-Pôtan, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint Cast le Guildo, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
   },
   "Pléneuf-Val-André, 22186, Côtes d'Armor, Bretagne, France": {
     "lat": 48.5854291,
@@ -4147,21 +3439,9 @@
     "lat": 48.5569125,
     "lon": -2.5339979
   },
-  "Pléneuf,22,Côtes d'Armor,Bretagne,France": {
-    "lat": 48.5839267,
-    "lon": -2.535957
-  },
-  "Pléneuf,22": {
-    "lat": 48.5839267,
-    "lon": -2.535957
-  },
   "Planguenoual, 22173, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.5382859,
     "lon": -2.5823287
-  },
-  "Pleneuf,22,Côtes d'Armor,Bretagne,France": {
-    "lat": 48.5854291,
-    "lon": -2.5302145
   },
   "Erquy, 22054, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.6286582,
@@ -4170,10 +3450,6 @@
   "Lamballe, 22093, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.4624461,
     "lon": -2.5165023
-  },
-  "Hénanbihen 22550 côtes d' Armor Bretagne France, , , ,": {
-    "lat": 48.560822,
-    "lon": -2.376924
   },
   "L'Hermitage, 35590, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.1243,
@@ -4199,21 +3475,9 @@
     "lat": 48.2204891,
     "lon": -1.7896366
   },
-  "Le Theil, Saint-Thurial, 35319, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.035889,
-    "lon": -1.9212101
-  },
   "Rannée, 35130, Ille et Vilaine, Bretagne, France": {
     "lat": 47.924362,
     "lon": -1.240552
-  },
-  "Saint-Germain-de-la-Mer, 22550, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.6182513,
-    "lon": -2.302739
-  },
-  "Rue Saint-Germain - Matignon, 22550, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.5981184,
-    "lon": -2.2937189
   },
   "Alfortville, 94140, Val-de-Marne, France": {
     "lat": 48.8051624,
@@ -4250,10 +3514,6 @@
   "Gahard, 35118, Ille-et-Vilaine, Bretagne, France": {
     "lat": 48.2974956,
     "lon": -1.5183894
-  },
-  "Bréteil, 35160, Ille-et-Vilaine, Bretagne, France": {
-    "lat": 48.1459113,
-    "lon": -1.8996064
   },
   "Léhon, 22123, Côtes-d'Armor, Bretagne, France": {
     "lat": 48.4383294,
@@ -4451,10 +3711,6 @@
     "lat": 50.8070452,
     "lon": 3.2336226
   },
-  "Saint-Pôtan, 22 Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Hénanbihen, 22 Côtes d'Armor, Bretagne, France": {
     "lat": 48.560822,
     "lon": -2.376924
@@ -4463,15 +3719,7 @@
     "lat": 48.6548909,
     "lon": -2.3315588
   },
-  "Saint- Pôtan ,  Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Pôtan, Côtes d'Armor, Bretagne, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint Pôtan, Côtes d'Armor,Bretagne,France": {
+  "Saint-Pôtan, 22550, Côtes-d'Armor, Bretagne, France, Côtes d'Armor,Bretagne,France": {
     "lat": 48.5586158,
     "lon": -2.2902601
   },
@@ -4559,7 +3807,7 @@
     "lat": 49.5565588,
     "lon": 0.3683088
   },
-  "ANGERVILLE L ORCHER, SEINE MARITIME, FRANCE": {
+  "Angerville-l'Orcher, 76280, Seine-Maritime, Normandie, France": {
     "lat": 49.5881645,
     "lon": 0.281906
   },
@@ -4579,15 +3827,7 @@
     "lat": 49.5565588,
     "lon": 0.3683088
   },
-  "Écrainville, 76110, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.6503748,
-    "lon": 0.3252411
-  },
   "Saint-Romain-de-Colbosc, 76430, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.5313601,
-    "lon": 0.3579164
-  },
-  "Saint Romain de Colbosc (76)": {
     "lat": 49.5313601,
     "lon": 0.3579164
   },
@@ -4595,13 +3835,13 @@
     "lat": 49.5658677,
     "lon": 0.255913
   },
-  "Les Trois Pierres (Seine Maritime) France": {
+  "Les Trois-Pierres, 76430, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.5472915,
     "lon": 0.4151869
   },
-  "Sanvic - Le Havre, 76600, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.5057242,
-    "lon": 0.1063322
+  "Le Havre, Sanvic, 76600, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.5053981,
+    "lon": 0.1037774
   },
   "Pré-en-Pail, 53185, Mayenne, Pays de la Loire, France": {
     "lat": 48.4412753,
@@ -4640,10 +3880,6 @@
     "lon": 0.839636
   },
   "Limésy,76570,Seine-Maritime,Normandie,FRANCE": {
-    "lat": 49.6116823,
-    "lon": 0.9245242
-  },
-  "LIMESY, 76570, Seine-maritime, FRANCE": {
     "lat": 49.6116823,
     "lon": 0.9245242
   },
@@ -4739,9 +3975,9 @@
     "lat": 47.9013296,
     "lon": -1.266358
   },
-  "La Gautrais, Retiers, 35240, France": {
-    "lat": 47.8978707,
-    "lon": -1.345667
+  "Retiers, 35240, France": {
+    "lat": 47.9128732,
+    "lon": -1.3818706
   },
   "Martigné-Ferchaud, Ille-et-Vilaine, Bretagne, France": {
     "lat": 47.8313035,
@@ -4752,10 +3988,6 @@
     "lon": -1.317543
   },
   "Eancé, 35103, Ille et Vilaine": {
-    "lat": 47.822195,
-    "lon": -1.2443964
-  },
-  "Eancé": {
     "lat": 47.822195,
     "lon": -1.2443964
   },
@@ -4811,7 +4043,7 @@
     "lat": 49.7147439,
     "lon": 0.9520001
   },
-  "Etoutteville 76": {
+  "Étoutteville, 76253, Seine Maritime, Normandie, France": {
     "lat": 49.6765378,
     "lon": 0.7854339
   },
@@ -4831,7 +4063,7 @@
     "lat": 49.7698389,
     "lon": 0.841072
   },
-  "Benesville, 76077, Seine-Maritime, FRANCE": {
+  "Bénesville, 76077, Seine-Maritime, Normandie, France": {
     "lat": 49.75513,
     "lon": 0.8354166
   },
@@ -4843,25 +4075,17 @@
     "lat": 49.6972383,
     "lon": 0.815775
   },
-  "gremonville 76": {
-    "lat": 49.6707917,
-    "lon": 0.8271945
-  },
   "Ectot-lès-Baons, 76228, Seine-Maritime, Normandie, France": {
     "lat": 49.64282,
     "lon": 0.80644
   },
-  "Hautot-l'Auvray 76": {
+  "Hautot-l'Auvray (76)": {
     "lat": 49.7616793,
     "lon": 0.7519047
   },
   "doudeville 76": {
     "lat": 49.7229361,
     "lon": 0.7835886
-  },
-  "Hautot l'Auvray (76)": {
-    "lat": 49.7616793,
-    "lon": 0.7519047
   },
   "doudeville (76)": {
     "lat": 49.7229361,
@@ -4871,7 +4095,7 @@
     "lat": 49.7810234,
     "lon": 0.7822055
   },
-  "Biville la Baignarde (76)": {
+  "Biville-la-Baignarde (76)": {
     "lat": 49.7209136,
     "lon": 1.0487521
   },
@@ -4882,10 +4106,6 @@
   "fauville en caux (76)": {
     "lat": 49.6556519,
     "lon": 0.5889453
-  },
-  "etoutteville (76)": {
-    "lat": 49.6765378,
-    "lon": 0.7854339
   },
   "Anglesqueville, 76890 Val-de-Saâne, Seine Maritime, Normandie, FRANCE": {
     "lat": 49.7065848,
@@ -4947,10 +4167,6 @@
     "lat": 49.7542104,
     "lon": 0.597414
   },
-  "Ectot-l'Auber, 76760, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.6493462,
-    "lon": 0.928977
-  },
   "Normanville, 76470, Seine-Maritime, Normandie, France": {
     "lat": 49.6948768,
     "lon": 0.5941406
@@ -4975,10 +4191,6 @@
     "lat": 49.6513816,
     "lon": 1.0439724
   },
-  "Beautôt, , , ,": {
-    "lat": 49.6422659,
-    "lon": 1.0374288
-  },
   "Varneville-Bretteville, , , ,": {
     "lat": 49.6513816,
     "lon": 1.0439724
@@ -4991,10 +4203,6 @@
     "lat": 47.9670665,
     "lon": -1.2136646
   },
-  "La Charbonnière, Drouges, Bretagne, France": {
-    "lat": 47.9045719,
-    "lon": -1.2385657
-  },
   "moussé": {
     "lat": 47.9244804,
     "lon": -1.2704183
@@ -5003,21 +4211,13 @@
     "lat": 47.9013296,
     "lon": -1.266358
   },
-  "Etrelles, 35109, Ille et Vilaine, Bretagne, France": {
+  "Étrelles, 35370, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.0601694,
     "lon": -1.1938644
   },
   "Héric, 44073, Loire-Atlantique, Pays de la Loire, France": {
     "lat": 47.4144202,
     "lon": -1.6523209
-  },
-  "Étrelles, 35370, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.0601694,
-    "lon": -1.1938644
-  },
-  "Marcillé Robert, 35240, Ille et Vilaine, Bretagne, France": {
-    "lat": 47.9513589,
-    "lon": -1.3559138
   },
   "Marcillé-Robert, 35165, Ille et Vilaine, Bretagne, France": {
     "lat": 47.9513589,
@@ -5047,18 +4247,6 @@
     "lat": 48.6794274,
     "lon": -0.7243832
   },
-  "Saint-Cast-le-Guildo, 22 FR": {
-    "lat": 48.6241288,
-    "lon": -2.2617846
-  },
-  "Saint Potan, 22 FR": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
-  "Saint-Pôtan 22 FR": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "Matignon, Bretagne, France": {
     "lat": 48.5968982,
     "lon": -2.2922438
@@ -5075,7 +4263,7 @@
     "lat": 48.2024303,
     "lon": -1.9978832
   },
-  "Saint Jacques de la Lande": {
+  "Saint-Jacques-de-la-Lande, 35, Bretagne, France": {
     "lat": 48.0806436,
     "lon": -1.7135029
   },
@@ -5095,9 +4283,9 @@
     "lat": 47.5917553,
     "lon": -1.3300431
   },
-  "Soudan, , , ,": {
-    "lat": 14.5844444,
-    "lon": 29.4917691
+  "Soudan, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
+    "lat": 47.7376378,
+    "lon": -1.3069406
   },
   "Mesnil-Panneville, 76, France": {
     "lat": 49.5899901,
@@ -5119,7 +4307,7 @@
     "lat": 49.6351055,
     "lon": 0.8902949
   },
-  "Emanville, 76234, Seine-Maritime, Normandie, France": {
+  "Émanville, 76234, Seine Maritime, Normandie, France": {
     "lat": 49.6227937,
     "lon": 0.9593776
   },
@@ -5130,10 +4318,6 @@
   "Auzouville-l'Esneval, 76045, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6351055,
     "lon": 0.8902949
-  },
-  "Émanville, 76234, Seine Maritime, Normandie, France": {
-    "lat": 49.6227937,
-    "lon": 0.9593776
   },
   "Limésy": {
     "lat": 49.6116823,
@@ -5175,7 +4359,7 @@
     "lat": 49.7835011,
     "lon": 0.8670226
   },
-  "Renfeugères - Goupillières, 76570, Seine-Maritime, Normandie, FRANCE": {
+  "Renfeugères, Goupillières, 76570, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.5827975,
     "lon": 0.9976856
   },
@@ -5187,7 +4371,7 @@
     "lat": 49.5633687,
     "lon": 1.0047394
   },
-  "Berville, , , ,": {
+  "Berville-en-Caux, 76560, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.7076762,
     "lon": 0.8325183
   },
@@ -5215,10 +4399,6 @@
     "lat": 49.5632173,
     "lon": 0.8660735
   },
-  "Berville en Caux, 76560, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.7076762,
-    "lon": 0.8325183
-  },
   "Ectot-l'Auber, 76227, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6493462,
     "lon": 0.928977
@@ -5227,9 +4407,9 @@
     "lat": 49.6933301,
     "lon": 0.903621
   },
-  "Region, Normandie, France": {
-    "lat": 49.8876641,
-    "lon": 1.0964386
+  "Normandie, France": {
+    "lat": 49.0677708,
+    "lon": 0.3138532
   },
   "Ectot-l'Auber, 76227, Seine Maritime, Normandie, France": {
     "lat": 49.6493462,
@@ -5291,10 +4471,6 @@
     "lat": 49.752549,
     "lon": 0.8799089
   },
-  "Auzouville-sur-Saâne ; 76730 ; Normandie ; France": {
-    "lat": 49.7450677,
-    "lon": 0.9362558
-  },
   "Lindebeuf, 76760, Seine Maritime, Normandie, France": {
     "lat": 49.7107011,
     "lon": 0.9064449
@@ -5306,10 +4482,6 @@
   "Canville-les-deux-églises, 76560,Seine Maritime, FRANCE": {
     "lat": 49.7698389,
     "lon": 0.841072
-  },
-  "Bénesville, 76077, Seine-Maritime, Normandie, France": {
-    "lat": 49.75513,
-    "lon": 0.8354166
   },
   "Tourville-sur-Arques, , , ,": {
     "lat": 49.8583687,
@@ -5435,17 +4607,9 @@
     "lat": 49.5566905,
     "lon": 0.286551
   },
-  "Angerville-l'Orcher, 76014, Seine-Maritime, Normandie, France": {
-    "lat": 49.5666929,
-    "lon": 0.2593385
-  },
   "Graimbouville, 76314, Seine-Maritime, Normandie, France": {
     "lat": 49.5756882,
     "lon": 0.3326565
-  },
-  "Angerville-l'Orcher, 76280, Seine-Maritime, Normandie, France": {
-    "lat": 49.5881645,
-    "lon": 0.281906
   },
   "Sainneville, 76430, Seine-Maritime, FRANCE": {
     "lat": 49.5566905,
@@ -5463,10 +4627,6 @@
     "lat": 49.5566905,
     "lon": 0.286551
   },
-  "Épretot, 76239 Seine-Maritime, Normandie, Normandie, France": {
-    "lat": 49.5403053,
-    "lon": 0.3130389
-  },
   "Bréauté, 76141 Seine-Maritime, Normandie, Normandie, France": {
     "lat": 49.6280806,
     "lon": 0.4006336
@@ -5478,10 +4638,6 @@
   "Saint-Jean-de-la-Neuville, 76593, Seine-Maritime, Normandie, France": {
     "lat": 49.574399,
     "lon": 0.4210112
-  },
-  "Étainhus, 76250, Seine-Maritime, Normandie, France": {
-    "lat": 49.567389,
-    "lon": 0.3101189
   },
   "Cramesnil, Saint-Vincent-Cramesnil, 76658, Seine-Maritime, Normandie, France": {
     "lat": 49.5132698,
@@ -5535,10 +4691,6 @@
     "lat": 49.6400396,
     "lon": 0.2228718
   },
-  "Criquetot-L'Esneval, 76280, Seine-Maritime, Normandie, FRANCE": {
-    "lat": 49.6449576,
-    "lon": 0.2661419
-  },
   "Vassy, 14726, Calvados, Normandie, France": {
     "lat": 48.8654183,
     "lon": -0.658462
@@ -5547,17 +4699,13 @@
     "lat": 48.880543,
     "lon": -0.7153107
   },
-  "Le-Theil-Bocage, Calvados, Normandie, France": {
+  "Le Theil-Bocage, Calvados, Normandie, France": {
     "lat": 48.880543,
     "lon": -0.7153107
   },
   "Sainte-Marie-Laumont, 14618, Calvados, Normandie, France": {
     "lat": 48.9210096,
     "lon": -0.9002383
-  },
-  "Le Theil-Bocage, Calvados, Normandie, France": {
-    "lat": 48.880543,
-    "lon": -0.7153107
   },
   "Vassy, Calvados, Normandie, France": {
     "lat": 48.8654183,
@@ -5571,19 +4719,7 @@
     "lat": 49.6991265,
     "lon": 0.2827091
   },
-  "Les Loges, 76390, Seine-Maritime, Normandie, France": {
-    "lat": 49.6991265,
-    "lon": 0.2827091
-  },
-  "Bordeaux Saint Clair, 76, seine maritime, Normandie, France": {
-    "lat": 49.7007871,
-    "lon": 0.2563417
-  },
   "Bordeaux-Saint-Clair, 76117, Seine-Maritime, Normandie, France": {
-    "lat": 49.7007871,
-    "lon": 0.2563417
-  },
-  "Bordeaux Saint Clair, 76 seine maritime, Normandie, France": {
     "lat": 49.7007871,
     "lon": 0.2563417
   },
@@ -5607,7 +4743,7 @@
     "lat": 49.56417,
     "lon": -1.42084
   },
-  "St Germain de Tournebut (Manche) France": {
+  "Saint-Germain-de-Tournebut (Manche) France": {
     "lat": 49.53262,
     "lon": -1.39738
   },
@@ -5647,7 +4783,7 @@
     "lat": 49.5569416,
     "lon": 0.4866308
   },
-  "Auberbosc - Auzouville-Auberbosc, 76640, Seine-Maritime, Normandie, FRANCE": {
+  "Auzouville-Auberbosc, 76640, Seine-Maritime, Normandie, FRANCE": {
     "lat": 49.6271512,
     "lon": 0.5711206
   },
@@ -5723,9 +4859,9 @@
     "lat": 49.6348243,
     "lon": 0.839636
   },
-  "Cidetot - Mesnil-Panneville, 76433, Seine Maritime, Normandie, France": {
-    "lat": 49.6077318,
-    "lon": 0.8681535
+  "Mesnil-Panneville, 76433, Seine Maritime, Normandie, France": {
+    "lat": 49.5899901,
+    "lon": 0.8921061
   },
   "Rouen, 76540, Seine Maritime, Normandie, France": {
     "lat": 49.4404591,
@@ -5743,17 +4879,9 @@
     "lat": 49.67588,
     "lon": 0.84519
   },
-  "Ectot-les-Baons, 76228, Seine Maritime, Normandie, France": {
-    "lat": 49.64282,
-    "lon": 0.80644
-  },
   "Ourville-en-Caux, 76490, Seine Maritime, Normandie, France": {
     "lat": 49.7291568,
     "lon": 0.6020575
-  },
-  "Étoutteville, 76253, Seine Maritime, Normandie, France": {
-    "lat": 49.6765378,
-    "lon": 0.7854339
   },
   "Yvecrique, 76757, Seine Maritime, Normandie, France": {
     "lat": 49.6879087,
@@ -5787,10 +4915,6 @@
     "lat": 49.5832391,
     "lon": 0.9794989
   },
-  "Auzouville L'esneval, 76760, Seine Maritime, FRANCE": {
-    "lat": 49.6432017,
-    "lon": 0.8862882
-  },
   "Amfreville-les-Champs, 76560, Seine-Maritime, FRANCE": {
     "lat": 49.6972383,
     "lon": 0.815775
@@ -5815,10 +4939,6 @@
     "lat": 49.6521319,
     "lon": 0.9698512
   },
-  "Ancretieville-St-Victor, Seine maritime, FRANCE": {
-    "lat": 49.6521319,
-    "lon": 0.9698512
-  },
   "Blacqueville, 76, Seine Maritime, Normandie, FRANCE": {
     "lat": 49.5632173,
     "lon": 0.8660735
@@ -5831,15 +4951,15 @@
     "lat": 49.5814283,
     "lon": 0.7643983
   },
-  "Ste Marguerite De Duclair, 76, Seine Maritime, FRANCE": {
-    "lat": 49.4890051,
-    "lon": 0.8649464
+  "Sainte-Marguerite-sur-Duclair, 76, Seine Maritime, FRANCE": {
+    "lat": 49.5097149,
+    "lon": 0.841092
   },
   "Eancé, , , ,la Cour": {
     "lat": 47.8201824,
     "lon": -1.2458419
   },
-  "Villepot, , , ,": {
+  "Villepot, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
     "lat": 47.7756596,
     "lon": -1.2778074
   },
@@ -5847,11 +4967,7 @@
     "lat": 47.8016735,
     "lon": -1.2790125
   },
-  "Eancé, , , ,": {
-    "lat": 47.822195,
-    "lon": -1.2443964
-  },
-  "Forges la Forêt, , , ,": {
+  "Forges-la-Forêt,35640,Ille-et-Vilaine,Bretagne,FRANCE,": {
     "lat": 47.8619159,
     "lon": -1.2793479
   },
@@ -5867,7 +4983,7 @@
     "lat": 47.822195,
     "lon": -1.2443964
   },
-  "Ste Gemmes d'Andigné 49": {
+  "Sainte-Gemmes-d'Andigné (49), France": {
     "lat": 47.6670831,
     "lon": -0.8948534
   },
@@ -5887,29 +5003,17 @@
     "lat": 47.8314372,
     "lon": -1.1915092
   },
-  "Moisdon la Rivière (Loire-Inférieure), , , ,": {
-    "lat": 47.6211147,
-    "lon": -1.3728134
-  },
-  "Saint Julien de Vouvantes, , , ,": {
-    "lat": 47.6419095,
-    "lon": -1.2380528
-  },
-  "La Chapelle Glain": {
+  "La Chapelle-Glain, 44031, Loire Atlantique, Pays de la Loire, France": {
     "lat": 47.6219886,
     "lon": -1.1960495
   },
-  "Erbray, , , ,": {
+  "Erbray, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
     "lat": 47.6552164,
     "lon": -1.3179329
   },
   "Juigné les Moutiers": {
     "lat": 47.504597,
     "lon": -2.1160997
-  },
-  "La Chapelle Glain 44": {
-    "lat": 47.6219886,
-    "lon": -1.1960495
   },
   "La Chapelle-Glain": {
     "lat": 47.6219886,
@@ -5935,14 +5039,6 @@
     "lat": 47.1760091,
     "lon": -1.3404289
   },
-  "La Chapelle-Glain, 44031, Loire Atlantique, Pays de la Loire, France": {
-    "lat": 47.6219886,
-    "lon": -1.1960495
-  },
-  "Saint Julien de Vouvantes (44)": {
-    "lat": 47.6419095,
-    "lon": -1.2380528
-  },
   "La  Chapelle-glain": {
     "lat": 47.6219886,
     "lon": -1.1960495
@@ -5959,14 +5055,6 @@
     "lat": 47.6673622,
     "lon": -1.6702011
   },
-  "Erbray Loire-Inférieure,": {
-    "lat": 47.6552164,
-    "lon": -1.3179329
-  },
-  "La Poterie - Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.0419455,
-    "lon": -1.7043393
-  },
   "Chatillon sur Seiche, 35": {
     "lat": 48.0345442,
     "lon": -1.6698114
@@ -5979,41 +5067,13 @@
     "lat": 48.0345442,
     "lon": -1.6698114
   },
-  "LAUNAY - Chatillon sur Seiche, 35, 35": {
-    "lat": 48.054398,
-    "lon": -1.6862303
-  },
   "Noyal-Châtillon-sur-Seiche, 35230, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.0425725,
     "lon": -1.6619865
   },
-  "noyal sur Seiche - Noyal-Châtillon-sur-Seiche, 35230, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.0542473,
-    "lon": -1.6574233
-  },
-  "Toussaint - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1149134,
-    "lon": -1.6795058
-  },
-  "Le Marais - Chatillon sur Seiche, 35, 35": {
-    "lat": 48.0529872,
-    "lon": -1.7051859
-  },
-  "Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1113387,
-    "lon": -1.6800198
-  },
-  "Toussaints - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1091321,
-    "lon": -1.6756264
-  },
   "Saint-Jacques-de-la-Lande, 35136, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.0806436,
     "lon": -1.7135029
-  },
-  "toussaint - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1149134,
-    "lon": -1.6795058
   },
   "Québriac, 35190, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.3438911,
@@ -6038,10 +5098,6 @@
   "Chavagne, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.0539088,
     "lon": -1.7881749
-  },
-  "noyal sur Seiche - Noyal sur Seiche, 35, 35, Bretagne, FRANCE": {
-    "lat": 48.0630855,
-    "lon": -1.6515622
   },
   "Noyal-Châtillon-sur-Seiche, 35206, Ille et Vilaine, Bretagne, France": {
     "lat": 48.0425725,
@@ -6135,17 +5191,13 @@
     "lat": 58.8390063,
     "lon": 5.6345712
   },
-  "Lillestrom, Norvège": {
+  "Lillestrøm, Norvège": {
     "lat": 59.9155395,
     "lon": 11.2170354
   },
   "Tønsberg, Norvège": {
     "lat": 59.3549795,
     "lon": 10.2820491
-  },
-  "Lillestrøm, Norvège": {
-    "lat": 59.9155395,
-    "lon": 11.2170354
   },
   "Tjøllingvollen, Norvège": {
     "lat": 59.0556397,
@@ -6163,19 +5215,11 @@
     "lat": 50.1357818,
     "lon": 1.9467999
   },
-  "St Aubin - Rennes, 35000, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.2630217,
-    "lon": -1.607077
-  },
   "Pacé, 35740, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.1465726,
     "lon": -1.7728997
   },
-  "Vezin-le-Coquet, 35132, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1195379,
-    "lon": -1.75711
-  },
-  "St-Grégoire, 35278, Ille et Vilaine, Bretagne, France": {
+  "Saint-Grégoire, 35760, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.1524129,
     "lon": -1.685398
   },
@@ -6186,10 +5230,6 @@
   "La Chapelle-des-Fougeretz, 35520, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.178066,
     "lon": -1.7341163
-  },
-  "Saint-Grégoire, 35760, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.1524129,
-    "lon": -1.685398
   },
   "Betton, 35024, Ille et Vilaine, Bretagne, France": {
     "lat": 48.1817122,
@@ -6211,25 +5251,9 @@
     "lat": 48.1084993,
     "lon": -1.6731782
   },
-  "Noyal sur Seiche, 35, 35, Bretagne, FRANCE": {
-    "lat": 48.0630855,
-    "lon": -1.6515622
-  },
-  "Auditoire - Chartres-de-Bretagne, 35131, Ille-et-Vilaine, Bretagne, FRANCE": {
-    "lat": 48.0416478,
-    "lon": -1.7026221
-  },
   "Cintré, 35310, Ille-et-Vilaine, Bretagne, FRANCE": {
     "lat": 48.1058654,
     "lon": -1.8712888
-  },
-  "Soudan, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
-    "lat": 47.7376378,
-    "lon": -1.3069406
-  },
-  "Villepot, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
-    "lat": 47.7756596,
-    "lon": -1.2778074
   },
   "Senonnes, 53390, Mayenne, Pays de la Loire, FRANCE": {
     "lat": 47.798134,
@@ -6239,17 +5263,9 @@
     "lat": 47.7403392,
     "lon": -1.1729927
   },
-  "Erbray, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
-    "lat": 47.6552164,
-    "lon": -1.3179329
-  },
   "La Chapelle-Glain, 44670, Loire-Atlantique, Pays de la Loire, FRANCE": {
     "lat": 47.6219886,
     "lon": -1.1960495
-  },
-  "le boulay - Erbray, 44110, Loire-Atlantique, Pays de la Loire, FRANCE": {
-    "lat": 47.6379108,
-    "lon": -1.3265482
   },
   "TREFFENDEL (35)": {
     "lat": 48.041297,
@@ -6291,10 +5307,6 @@
     "lat": 47.924362,
     "lon": -1.240552
   },
-  "Corseul, Côtes-d'Armor, Bretagne, France": {
-    "lat": 48.4810524,
-    "lon": -2.1684565
-  },
   "Pluduno, 22 Côtes d'Armor, Bretagne, France": {
     "lat": 48.523744,
     "lon": -2.2889406
@@ -6306,10 +5318,6 @@
   "Brem-sur-Mer, 85243, Vendée, Pays de la Loire, France": {
     "lat": 46.6055556,
     "lon": -1.8297222
-  },
-  "Saint Potan, Côtes d'Armor, France": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "Pluduno, Bretagne, France": {
     "lat": 48.523744,
@@ -6327,17 +5335,9 @@
     "lat": 48.523744,
     "lon": -2.2889406
   },
-  "22, Saint-Potan, Côtes d'Armor": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
-  },
   "22, Pluduno, Côtes d'Armor": {
     "lat": 48.523744,
     "lon": -2.2889406
-  },
-  "22, St-Potan, Côtes d'Armor": {
-    "lat": 48.5586158,
-    "lon": -2.2902601
   },
   "22, Ruca, Côtes d'Armor": {
     "lat": 48.5667727,
@@ -6350,10 +5350,6 @@
   "Pléhérel, 22178, Côtes d'Armor, Bretagne, France": {
     "lat": 48.652384,
     "lon": -2.3640432
-  },
-  "Le Palicot - Caulnes, 22350, Côtes-d'Armor, Bretagne, FRANCE": {
-    "lat": 48.3220723,
-    "lon": -2.1270992
   },
   "Caulnes, 22350, Côtes-d'Armor, Bretagne, FRANCE": {
     "lat": 48.2880795,

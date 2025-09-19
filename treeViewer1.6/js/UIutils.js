@@ -52,6 +52,7 @@ export function createCustomSelector(config) {
     const padding = {
         display: { x: 4, y: 4 }, // Padding du display (x = horizontal, y = vertical)
         options: { x: 8, y: 8 }, // Padding des options
+        displayPosition : 'left',
         ...(config.padding || {})
     };
     
@@ -109,6 +110,12 @@ export function createCustomSelector(config) {
     } else {
         displayText.style.textAlign = 'left';
     }
+    if (padding.displayPosition.includes('center'))  {
+        displayText.style.textAlign = 'center';
+    }
+
+// displayText.style.textAlign = 'center';
+
     
     // Ajouter la flèche comme un pseudo-élément si elle est visible
     if (arrow.visible) {

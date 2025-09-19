@@ -765,6 +765,7 @@ function createSection(title, index = 0) {
     const rootSearchPlaceholder = document.createElement('div');
     rootSearchPlaceholder.id = 'menu-root-person-search-placeholder';
     rootSearchPlaceholder.style.width = '100%';
+    rootSearchPlaceholder.style.backgroundColor = '#F6CC7F';
     
     // Adapter uniquement pour les petits écrans
     if (height < 400) {
@@ -1948,7 +1949,8 @@ function syncCustomSelectors() {
                     // rootSearchLink.textContent = '🔍 personne racine';
                     rootSearchLink.textContent = getMenuTranslation('rootSearch');
                     rootSearchLink.style.cursor = 'pointer';
-                    rootSearchLink.style.backgroundColor = 'white';
+                    // rootSearchLink.style.backgroundColor = 'white';
+                    rootSearchLink.style.backgroundColor = '#F6CC7F';
                     rootSearchLink.style.textAlign = 'left';
                     rootSearchLink.style.border = '1px solid #333';
                     rootSearchLink.style.borderRadius = '4px';

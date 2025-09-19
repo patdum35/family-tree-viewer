@@ -506,12 +506,15 @@ select {
 }
 
 #root-person-search {
+    background-color: rgb(246, 204, 127);
     padding: 0px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 65px; /* Largeur standard */
     font-size: 15px; /* Taille de police pour éviter le zoom automatique sur mobile */
     height: 30px;
+    color: #000 !important;             /* texte */
+    -webkit-text-fill-color: #000 !important; /* cas Chrome/autofill */
 }
 
 
@@ -628,6 +631,33 @@ input[type=number] {
     padding: 10px;
     margin: 5px;
 }
+
+
+#statsBtn {
+    /* font-size: 12px;    */      /* Taille du texte */
+    background-color: #438aee; /* Couleur du bouton */
+    color: #fff;               /* Couleur du texte */
+    border: 2px solid #438aee;    /* Couleur et épaisseur du trait */
+    border-radius: 8px;        /* Coins arrondis */
+    padding: 10px 24px;        /* Espacement interne */
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+#statsBtn .wide-span {
+    font-size: 12px !important; /* Choisis la taille souhaitée */
+}
+
+#statsBtn:hover {
+    background-color: #2762a6; /* Couleur du bouton au survol */
+    color: #ffd700;            /* Couleur du texte au survol */
+    border-color: #ffd700;     /* Couleur du trait au survol */
+}
+
+
+
+
+
 
 /* Media query pour les petits écrans */
 @media screen and (max-width: 768px) {

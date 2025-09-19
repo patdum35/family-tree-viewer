@@ -84,11 +84,233 @@ function getPersonsListTitle(name, count, config) {
   }
   
 
-export function showPersonsList(name, people, config) {
+
+/**
+ * Crée une carte individuelle avec les lieux d'une personne
+ * @param {string} personId - ID de la personne
+ * @returns {Promise<void>}
+ */
+export async function createIndividualLocationMap(personId, heatmapData = null, isOnlyOnePerson = false, personName = null ) {
+    // Vérifier que le wrapper de la heatmap existe
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    if (!heatmapWrapper) {
+        console.error("Wrapper de heatmap non trouvé");
+        return;
+    }
+    
+    // Vérifier que la carte existe dans le wrapper
+    if (!heatmapWrapper.map) {
+        console.error("Carte Leaflet non trouvée dans le wrapper");
+        return;
+    }
+    
+    // Configurer le style personnalisé pour les popups
+    setupCustomPopupStyle();
+
+    // Récupérer les informations de la personne
+    
+    let person  = null;
+    let locations = null;
+    let isMapToBeCleared = false;
+    if (personId) {
+        person = state.gedcomData.individuals[personId];
+        if (!person) {
+            console.error("Personne non trouvée avec l'ID:", personId);
+            return;
+        }
+        console.log("Personne trouvée:", person.name);
+        
+        // Collecter les lieux de la personne avec la fonction centralisée
+        locations = collectPersonLocations(person, state.gedcomData.families);
+        personId = '';
+    } else if (heatmapData) {
+        person = {};
+        // console.log('-debug locations : ', heatmapData);  
+        if (heatmapData.length>0) {
+            person.name = heatmapData[0].locations[0].name;
+            // console.log('-debug createIndividualLocationMap ', person.name)
+            // locations = heatmapData[0].locations;
+            locations = [];
+            heatmapData.forEach( (loc, index) => {
+                locations[index] = {};
+                locations[index].place = loc.placeName;
+                locations[index].coords = loc.coords;
+                locations[index].type = loc.locations[0].type;  
+                // console.log('-debug locations type : ', loc.locations[0].type);           
+            });
+        } else {
+            isMapToBeCleared = true;
+        }
+
+    } else {
+        isMapToBeCleared = true;
+    }
+
+
+
+    if (locations && locations.length === 0) {
+        console.log('Aucun lieu trouvé pour cette personne');
+        alert('Aucun lieu trouvé pour cette personne');
+        isMapToBeCleared = true;
+        // return;
+    }
+
+    // if (isMapToBeCleared) {
+    //     console.log('-debug clear de la map  ');  
+    // }
+
+
+    
+    // Afficher un indicateur de chargement
+    const loadingOverlay = addLoadingOverlay(heatmapWrapper, 'Chargement des lieux...');
+    
+    try {
+        // Récupérer la carte
+        const map = heatmapWrapper.map;
+        
+        const  mapTitle = document.getElementById('heatmap-map-title');
+        if (mapTitle) {
+            // console.log('\n\n ************  debug mapTitle exist', mapTitle.textContent)
+            mapTitle.remove();  // 👈 boum, plus de titre
+        }
+        
+        // Nettoyer toutes les couches existantes sauf la couche de tuiles
+        clearMap(map);
+        
+        // Tableau pour stocker les marqueurs
+        const markers = [];
+
+        if (!isMapToBeCleared) {
+
+            // Géocoder et placer les marqueurs
+            for (const location of locations) {
+                try {
+                    console.log("Géocodage de:", location.place);
+                    const coords = await geocodeLocation(location.place);
+                    
+                    if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+                        console.log("Coordonnées trouvées:", coords, location.place, location.type);
+                        
+                        // Créer l'icône pour le marqueur avec un style amélioré
+                        const markerIcon = createEnhancedMarkerIcon(location.type);
+                        
+                        // Créer et ajouter le marqueur
+                        const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
+                            .addTo(map)
+                            .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
+                        
+                        markers.push(marker);
+                    } else {
+                        console.warn("Coordonnées invalides pour:", location.place);
+                    }
+                } catch (error) {
+                    console.error(`Erreur lors du géocodage de ${location.place}:`, error);
+                }
+            }
+
+
+
+
+            
+            // Vérifier si des marqueurs ont été ajoutés
+            if (markers.length === 0) {
+                console.warn("Aucun marqueur n'a pu être ajouté à la carte");
+                alert("Aucun lieu n'a pu être localisé sur la carte");
+                loadingOverlay.remove();
+                return;
+            }
+            
+            // Ajuster la vue de la carte pour inclure tous les marqueurs
+            await fitMapToMarkers(map, markers, {
+                maxZoom: 9,
+                animate: true,
+                duration: 1.5,
+                easeLinearity: 0.25
+            });
+            
+            // Améliorer aussi les popups pour plus de lisibilité
+            markers.forEach(marker => {
+                // Personnaliser le style de la popup
+                const popup = marker.getPopup();
+                if (popup) {
+                    popup.options.className = 'custom-popup';
+                }
+            });
+
+
+
+            
+            // Ajouter un bouton pour revenir à la heatmap originale
+            addMapButton(heatmapWrapper, 'Voir tous les lieux', () => {
+                // Rétablir la heatmap originale
+                if (typeof refreshHeatmap === 'function') {
+                    refreshHeatmap();
+                    
+                    // Réinitialiser les variables de suivi
+                    window.lastSelectedLocationId = null;
+                    window.isIndividualMapMode = false;
+                    
+                    // Mettre à jour l'apparence des icônes de localisation
+                    document.querySelectorAll('.location-icon').forEach(icon => {
+                        icon.style.color = '';
+                        icon.style.backgroundColor = '';
+                    });
+                }
+                
+                // Supprimer le titre et le bouton de reset
+                const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
+                if (mapTitle) mapTitle.remove();
+                
+                const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
+                if (resetButton) resetButton.remove();
+            });
+
+            // Ajouter un titre à la carte
+            addMapTitle(heatmapWrapper, `Lieux de ${person.name.replace(/\//g, '')}`);
+
+
+            const existingMap = document.getElementById('namecloud-heatmap-wrapper');
+
+
+            // Mettre à jour aussi le titre de la carte
+            const mapTitle = existingMap.querySelector('.map-title');
+            if (mapTitle) {
+                // console.log('debug mapTitle exist', mapTitle.textContent)
+                mapTitle.textContent = '';
+            }
+
+
+        } else {
+            // Ajouter un titre à la carte
+            if (personName) {
+                addMapTitle(heatmapWrapper, `pas de Lieux pour ${personName.replace(/\//g, '')}`);
+            }
+        }
+
+
+        
+    } catch (error) {
+        console.error('Erreur lors de la création de la carte individuelle:', error);
+        alert('Erreur lors de la création de la carte: ' + error.message);
+    } finally {
+        // Supprimer l'overlay de chargement
+        removeLoadingOverlay(heatmapWrapper);
+    }
+
+    // Mettre à jour les variables de suivi
+    window.lastSelectedLocationId = personId;
+    window.isIndividualMapMode = true;
+}
+
+
+
+
+
+export function showPersonsList(name, people, config, searchTerm) {
     
 
 
-    // console.log("\n\n debug showPersonsList ", name, people, config)
+    console.log("- showPersonsList ", name)
 
 
 
@@ -329,8 +551,8 @@ export function showPersonsList(name, people, config) {
                     if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
                     
                     // Réinitialiser les variables de suivi
-                    lastSelectedLocationId = null;
-                    isIndividualMapMode = false;
+                    window.lastSelectedLocationId = null;
+                    window.isIndividualMapMode = false;
                     
                     // Rafraîchir la carte avec les données initiales (toutes les personnes)
                     if (typeof refreshHeatmap === 'function') {
@@ -378,18 +600,22 @@ export function showPersonsList(name, people, config) {
         if (individual) {
             if (individual.birthDate) {
                 symbolType = 'birth';
-                date = `<span class="date-symbol" style="font-size: 1.5em; vertical-align: middle;">👶</span> ${individual.birthDate}`; //🚼
+                // date = `<span class="date-symbol" style="font-size: 1.5em; vertical-align: middle;">👶</span> ${individual.birthDate}`; //🚼
+                date = '👶' + individual.birthDate;
+
                 sortDate = extractYear(individual.birthDate) || 0;
             } else if (individual.deathDate) {
                 symbolType = 'death';
-                date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">✝️</span> ${individual.deathDate}`; //'✝'; ////☦🏴⚰️
+                // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">✝️</span> ${individual.deathDate}`; //'✝'; ////☦🏴⚰️
+                date = '✝️' + individual.deathDate;
                 sortDate = extractYear(individual.deathDate) || 0;
             } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
                 for (const famId of individual.spouseFamilies) {
                     const family = state.gedcomData.families[famId];
                     if (family && family.marriageDate) {
                         symbolType = 'marriage';
-                        date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">💍</span> ${family.marriageDate}`; //🔗💞⚭
+                        // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">💍</span> ${family.marriageDate}`; //🔗💞⚭
+                        date = '💍' + family.marriageDate;
                         sortDate = extractYear(family.marriageDate) || 0;
                         break;
                     }
@@ -421,194 +647,158 @@ export function showPersonsList(name, people, config) {
     }).sort((a, b) => b.sortDate - a.sortDate);
 
 
-    /**
-     * Crée une carte individuelle avec les lieux d'une personne
-     * @param {string} personId - ID de la personne
-     * @returns {Promise<void>}
-     */
-    async function createIndividualLocationMap(personId) {
-        // Vérifier que le wrapper de la heatmap existe
-        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-        if (!heatmapWrapper) {
-            console.error("Wrapper de heatmap non trouvé");
-            return;
-        }
+    // /**
+    //  * Crée une carte individuelle avec les lieux d'une personne
+    //  * @param {string} personId - ID de la personne
+    //  * @returns {Promise<void>}
+    //  */
+    // async function createIndividualLocationMap(personId) {
+    //     // Vérifier que le wrapper de la heatmap existe
+    //     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    //     if (!heatmapWrapper) {
+    //         console.error("Wrapper de heatmap non trouvé");
+    //         return;
+    //     }
         
-        // Vérifier que la carte existe dans le wrapper
-        if (!heatmapWrapper.map) {
-            console.error("Carte Leaflet non trouvée dans le wrapper");
-            return;
-        }
+    //     // Vérifier que la carte existe dans le wrapper
+    //     if (!heatmapWrapper.map) {
+    //         console.error("Carte Leaflet non trouvée dans le wrapper");
+    //         return;
+    //     }
         
-        // Configurer le style personnalisé pour les popups
-        setupCustomPopupStyle();
+    //     // Configurer le style personnalisé pour les popups
+    //     setupCustomPopupStyle();
 
-        // Récupérer les informations de la personne
-        const person = state.gedcomData.individuals[personId];
-        if (!person) {
-            console.error("Personne non trouvée avec l'ID:", personId);
-            return;
-        }
+    //     // Récupérer les informations de la personne
+    //     const person = state.gedcomData.individuals[personId];
+    //     if (!person) {
+    //         console.error("Personne non trouvée avec l'ID:", personId);
+    //         return;
+    //     }
         
-        console.log("Personne trouvée:", person.name);
+    //     console.log("Personne trouvée:", person.name);
         
-        // Collecter les lieux de la personne avec la fonction centralisée
-        const locations = collectPersonLocations(person, state.gedcomData.families);
+    //     // Collecter les lieux de la personne avec la fonction centralisée
+    //     const locations = collectPersonLocations(person, state.gedcomData.families);
         
-        if (locations.length === 0) {
-            console.log('Aucun lieu trouvé pour cette personne');
-            alert('Aucun lieu trouvé pour cette personne');
-            return;
-        }
+    //     if (locations.length === 0) {
+    //         console.log('Aucun lieu trouvé pour cette personne');
+    //         alert('Aucun lieu trouvé pour cette personne');
+    //         return;
+    //     }
         
-        // Afficher un indicateur de chargement
-        const loadingOverlay = addLoadingOverlay(heatmapWrapper, 'Chargement des lieux...');
+    //     // Afficher un indicateur de chargement
+    //     const loadingOverlay = addLoadingOverlay(heatmapWrapper, 'Chargement des lieux...');
         
-        try {
-            // Récupérer la carte
-            const map = heatmapWrapper.map;
+    //     try {
+    //         // Récupérer la carte
+    //         const map = heatmapWrapper.map;
             
-            // Nettoyer toutes les couches existantes sauf la couche de tuiles
-            clearMap(map);
+    //         // Nettoyer toutes les couches existantes sauf la couche de tuiles
+    //         clearMap(map);
             
-            // Tableau pour stocker les marqueurs
-            const markers = [];
+    //         // Tableau pour stocker les marqueurs
+    //         const markers = [];
             
-            // Géocoder et placer les marqueurs
-            for (const location of locations) {
-                try {
-                    console.log("Géocodage de:", location.place);
-                    const coords = await geocodeLocation(location.place);
+    //         // Géocoder et placer les marqueurs
+    //         for (const location of locations) {
+    //             try {
+    //                 console.log("Géocodage de:", location.place);
+    //                 const coords = await geocodeLocation(location.place);
                     
-                    if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
-                        console.log("Coordonnées trouvées:", coords);
+    //                 if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+    //                     console.log("Coordonnées trouvées:", coords);
                         
-                        // Créer l'icône pour le marqueur avec un style amélioré
-                        const markerIcon = createEnhancedMarkerIcon(location.type);
+    //                     // Créer l'icône pour le marqueur avec un style amélioré
+    //                     const markerIcon = createEnhancedMarkerIcon(location.type);
                         
-                        // Créer et ajouter le marqueur
-                        const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
-                            .addTo(map)
-                            .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
+    //                     // Créer et ajouter le marqueur
+    //                     const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
+    //                         .addTo(map)
+    //                         .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
                         
-                        markers.push(marker);
-                    } else {
-                        console.warn("Coordonnées invalides pour:", location.place);
-                    }
-                } catch (error) {
-                    console.error(`Erreur lors du géocodage de ${location.place}:`, error);
-                }
-            }
+    //                     markers.push(marker);
+    //                 } else {
+    //                     console.warn("Coordonnées invalides pour:", location.place);
+    //                 }
+    //             } catch (error) {
+    //                 console.error(`Erreur lors du géocodage de ${location.place}:`, error);
+    //             }
+    //         }
             
-            // Vérifier si des marqueurs ont été ajoutés
-            if (markers.length === 0) {
-                console.warn("Aucun marqueur n'a pu être ajouté à la carte");
-                alert("Aucun lieu n'a pu être localisé sur la carte");
-                loadingOverlay.remove();
-                return;
-            }
+    //         // Vérifier si des marqueurs ont été ajoutés
+    //         if (markers.length === 0) {
+    //             console.warn("Aucun marqueur n'a pu être ajouté à la carte");
+    //             alert("Aucun lieu n'a pu être localisé sur la carte");
+    //             loadingOverlay.remove();
+    //             return;
+    //         }
             
-            // Ajuster la vue de la carte pour inclure tous les marqueurs
-            await fitMapToMarkers(map, markers, {
-                maxZoom: 9,
-                animate: true,
-                duration: 1.5,
-                easeLinearity: 0.25
-            });
+    //         // Ajuster la vue de la carte pour inclure tous les marqueurs
+    //         await fitMapToMarkers(map, markers, {
+    //             maxZoom: 9,
+    //             animate: true,
+    //             duration: 1.5,
+    //             easeLinearity: 0.25
+    //         });
             
-            // Améliorer aussi les popups pour plus de lisibilité
-            markers.forEach(marker => {
-                // Personnaliser le style de la popup
-                const popup = marker.getPopup();
-                if (popup) {
-                    popup.options.className = 'custom-popup';
-                }
-            });
+    //         // Améliorer aussi les popups pour plus de lisibilité
+    //         markers.forEach(marker => {
+    //             // Personnaliser le style de la popup
+    //             const popup = marker.getPopup();
+    //             if (popup) {
+    //                 popup.options.className = 'custom-popup';
+    //             }
+    //         });
     
-            // Ajouter un titre à la carte
-            addMapTitle(heatmapWrapper, `Lieux de ${person.name.replace(/\//g, '')}`);
+    //         // Ajouter un titre à la carte
+    //         addMapTitle(heatmapWrapper, `Lieux de ${person.name.replace(/\//g, '')}`);
             
-            // Ajouter un bouton pour revenir à la heatmap originale
-            addMapButton(heatmapWrapper, 'Voir tous les lieux', () => {
-                // Rétablir la heatmap originale
-                if (typeof refreshHeatmap === 'function') {
-                    refreshHeatmap();
+    //         // Ajouter un bouton pour revenir à la heatmap originale
+    //         addMapButton(heatmapWrapper, 'Voir tous les lieux', () => {
+    //             // Rétablir la heatmap originale
+    //             if (typeof refreshHeatmap === 'function') {
+    //                 refreshHeatmap();
                     
-                    // Réinitialiser les variables de suivi
-                    window.lastSelectedLocationId = null;
-                    window.isIndividualMapMode = false;
+    //                 // Réinitialiser les variables de suivi
+    //                 window.lastSelectedLocationId = null;
+    //                 window.isIndividualMapMode = false;
                     
-                    // Mettre à jour l'apparence des icônes de localisation
-                    document.querySelectorAll('.location-icon').forEach(icon => {
-                        icon.style.color = '';
-                        icon.style.backgroundColor = '';
-                    });
-                }
+    //                 // Mettre à jour l'apparence des icônes de localisation
+    //                 document.querySelectorAll('.location-icon').forEach(icon => {
+    //                     icon.style.color = '';
+    //                     icon.style.backgroundColor = '';
+    //                 });
+    //             }
                 
-                // Supprimer le titre et le bouton de reset
-                const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
-                if (mapTitle) mapTitle.remove();
+    //             // Supprimer le titre et le bouton de reset
+    //             const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
+    //             if (mapTitle) mapTitle.remove();
                 
-                const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
-                if (resetButton) resetButton.remove();
-            });
+    //             const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
+    //             if (resetButton) resetButton.remove();
+    //         });
             
-        } catch (error) {
-            console.error('Erreur lors de la création de la carte individuelle:', error);
-            alert('Erreur lors de la création de la carte: ' + error.message);
-        } finally {
-            // Supprimer l'overlay de chargement
-            removeLoadingOverlay(heatmapWrapper);
-        }
+    //     } catch (error) {
+    //         console.error('Erreur lors de la création de la carte individuelle:', error);
+    //         alert('Erreur lors de la création de la carte: ' + error.message);
+    //     } finally {
+    //         // Supprimer l'overlay de chargement
+    //         removeLoadingOverlay(heatmapWrapper);
+    //     }
 
-        // Mettre à jour les variables de suivi
-        window.lastSelectedLocationId = personId;
-        window.isIndividualMapMode = true;
-
-        // Mettre en évidence l'icône de localisation correspondante
-        document.querySelectorAll('.location-icon').forEach(icon => {
-            const parentElement = icon.closest('[data-person-id]');
-            const iconPersonId = parentElement ? parentElement.dataset.personId : null;
-            
-            if (iconPersonId === personId) {
-                icon.style.color = '#ffffff';
-                icon.style.backgroundColor = '#4361ee';
-                icon.style.opacity = '1';
-            } else {
-                icon.style.color = '';
-                icon.style.backgroundColor = '';
-                icon.style.opacity = '0.7';
-            }
-        });
-    }
+    //     // Mettre à jour les variables de suivi
+    //     window.lastSelectedLocationId = personId;
+    //     window.isIndividualMapMode = true;
+    // }
 
 
     peopleWithDates.forEach((person, index) => {
-        const personDiv = document.createElement('div');
-        personDiv.style.padding = '3px 5px';
-        personDiv.style.backgroundColor = index % 2 === 0 ? '#f9f9f9' : 'white';
-        personDiv.style.display = 'flex';
-        personDiv.style.justifyContent = 'space-between';
-        personDiv.style.alignItems = 'center';
-        personDiv.style.lineHeight = '1.2';
-        personDiv.style.cursor = 'pointer';
 
-        // Partie gauche pour le nom et l'icône de localisation
-        const leftPart = document.createElement('div');
-        leftPart.style.display = 'flex';
-        leftPart.style.alignItems = 'center';
-        leftPart.style.gap = '5px';
-        
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = person.name;
-        if (nameCloudState.mobilePhone) {
-            nameSpan.style.fontSize = '12px';
-        }
-        
         // Ajouter l'icône de localisation si la personne a des lieux
-        // if (person.hasLocations && isHeatmapVisible) {
+        let locationIcon = null;
         if (person.hasLocations) {
-            const locationIcon = document.createElement('span');
+            locationIcon = document.createElement('span');
             locationIcon.className = 'location-icon';
             locationIcon.innerHTML = '🌍';
             locationIcon.style.fontSize = nameCloudState.mobilePhone ? '14px' : '16px';
@@ -621,19 +811,21 @@ export function showPersonsList(name, people, config) {
             locationIcon.title = 'Afficher les lieux de cette personne sur la carte';
             
             // Si cette personne est déjà sélectionnée, mettre en évidence l'icône
-            if (lastSelectedLocationId === person.id && isIndividualMapMode) {
+            if (window.lastSelectedLocationId === person.id && window.isIndividualMapMode) {
                 locationIcon.style.color = '#ffffff';
                 locationIcon.style.backgroundColor = '#4361ee';
                 locationIcon.style.opacity = '1';
             }
+
             
+
             // Effet de survol
             locationIcon.addEventListener('mouseover', () => {
                 locationIcon.style.opacity = '1';
             });
             
             locationIcon.addEventListener('mouseout', () => {
-                if (lastSelectedLocationId !== person.id || !isIndividualMapMode) {
+                if (window.lastSelectedLocationId !== person.id || !window.isIndividualMapMode) {
                     locationIcon.style.opacity = '0.7';
                 }
             });
@@ -643,8 +835,6 @@ export function showPersonsList(name, people, config) {
             // Gestionnaire de clic pour l'icône de localisation
             locationIcon.addEventListener('click', async (e) => {
                 e.stopPropagation(); // Empêcher la propagation au div parent
-                
-                // console.log("Clic sur l'icône de localisation pour la personne:", person.id);
                 
                 // Vérifier si une heatmap est déjà visible
                 let heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
@@ -701,7 +891,7 @@ export function showPersonsList(name, people, config) {
                         // Mettre à jour les variables de suivi
                         window.lastSelectedLocationId = person.id;
                         window.isIndividualMapMode = true;
-                        
+
                         // Mettre à jour l'apparence des icônes
                         document.querySelectorAll('.location-icon').forEach(icon => {
                             icon.style.color = '';
@@ -717,31 +907,105 @@ export function showPersonsList(name, people, config) {
                 }
             });
 
+        } 
 
-            leftPart.appendChild(nameSpan);
-            leftPart.appendChild(locationIcon);
-        } else {
-            leftPart.appendChild(nameSpan);
+        const itemContainer = document.createElement('div');
+
+        itemContainer.style.cssText = `
+            display: flex; 
+            align-items: stretch; 
+            border-bottom: ${index < peopleWithDates.length - 1 ? '1px solid #eee' : 'none'};
+            min-height: 30px;
+            padding: 0;
+        `;
+        // itemContainer.style.lineHeight = '1.2';
+        itemContainer.style.cursor = 'pointer';
+        
+        // Définir des styles alternatifs pour les lignes
+        if (index % 2 === 0) {
+            itemContainer.style.backgroundColor = '#f9f9f9';
         }
+           
+        // Zone gauche (nom + occurrence) - cliquable
+        const leftZone = document.createElement('div');
+        leftZone.style.cssText = `
+            flex: 1; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer; 
+            transition: background-color 0.2s;
+            padding: 2px 0px;
+            /* padding-left: 8px; */
+            /*  padding-top: 0; */
+            /* height: 100%;*/
+            /*min-height: 15px;*/
+            background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};
+        `;
 
-        const dateSpan = document.createElement('span');
-        dateSpan.innerHTML = person.date; // Utiliser innerHTML pour interpréter les balises span
-        dateSpan.style.color = 'darkblue';
-        dateSpan.style.whiteSpace = 'nowrap';
+        // Texte de l'élément : Name
+        const itemName = document.createElement('div');
+        itemName.textContent = person.name;
+        itemName.style.flex = '1';
+        itemName.style.marginLeft = '5px';
         if (nameCloudState.mobilePhone) {
-            dateSpan.style.fontSize = '10px';
+            itemName.style.fontSize = '13px';
         }
 
-        personDiv.appendChild(leftPart);
-        personDiv.appendChild(dateSpan);
+        // Dates
+        const itemDate = document.createElement('div');
+        itemDate.textContent = person.date;
+        itemDate.style.marginLeft = '10px';
+        itemDate.style.marginRight = '20px';
+        itemDate.style.color = 'darkblue';
+        itemDate.style.setProperty("text-align", "left", "important");
+        if (nameCloudState.mobilePhone) {
+            itemDate.style.fontSize = '10px';
+        }
 
-        personDiv.addEventListener('click', (event) => {
+        leftZone.appendChild(itemName);
+        leftZone.appendChild(itemDate);
+
+        // Zone droite (bouton) - séparée
+        const rightZone = document.createElement('div');
+        rightZone.style.cssText = `
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+            background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};                    
+            /* height: 40; */
+            /*min-height: 15px;*/            
+        `;
+
+        // Gestion des survols et clics
+        leftZone.addEventListener('click', (event) => {
             // console.log('Clicked on person:', person.name, person.id);
             event.stopPropagation();
             showPersonActions(person, event);
         });
 
-        list.appendChild(personDiv);
+        leftZone.addEventListener('mouseenter', () => {
+            leftZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+        });
+        leftZone.addEventListener('mouseleave', () => {
+            leftZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+        });
+
+        rightZone.addEventListener('mouseenter', () => {
+            rightZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+        });
+        rightZone.addEventListener('mouseleave', () => {
+            rightZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+        });
+
+
+        if (person.hasLocations) {
+            rightZone.appendChild(locationIcon);
+        }
+
+        itemContainer.appendChild(leftZone);
+        itemContainer.appendChild(rightZone);
+        list.appendChild(itemContainer);
     });
 
     // content.appendChild(closeBtn);
@@ -786,8 +1050,8 @@ export function showPersonsList(name, people, config) {
                         }
                         
                         // Réinitialiser les variables de suivi
-                        lastSelectedLocationId = null;
-                        isIndividualMapMode = false;
+                        window.lastSelectedLocationId = null;
+                        window.isIndividualMapMode = false;
                     } catch (error) {
                         console.error('Erreur lors de la restauration du style de la heatmap:', error);
                     }
@@ -990,7 +1254,7 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
  */
 function adjustSplitScreenLayout(modal, heatmapWrapper) {
     
-    console.log("Debug  Ajustement de la disposition en mode écran partagé");
+    console.log("- Ajustement de la disposition en mode écran partagé");
     
     modal.setAttribute('data-splitscreen-mode', 'true');
     const isLandscape = window.innerWidth > window.innerHeight;
@@ -1285,7 +1549,8 @@ export function showPersonActions(person, event) {
 
     const actions = [
         { text: "Voir dans l'arbre", action: () => showInTree(person.id) },
-        { text: "Voir la fiche", action: () => showPersonDetails(person.id) },
+        // { text: "Voir la fiche", action: () => showPersonDetails(person.id, 1000) },
+        { text: "Voir la fiche", action: () => showPersonDetails(person.id, 999999) },
         { text: "Animation", action: () => startAnimation(person.id) }
     ];
 
@@ -1331,7 +1596,7 @@ export function showPersonActions(person, event) {
     });
 }
 
-export function showPersonDetails(personId) {
+export function showPersonDetails(personId, zindex = null) {
     console.log('Showing details for:', personId);
 
     if (typeof removeAllStatsElements === 'function') {
@@ -1339,7 +1604,7 @@ export function showPersonDetails(personId) {
     }
 
 
-    displayPersonDetails(personId);
+    displayPersonDetails(personId, zindex);
 
     const modal = document.querySelector('.modal-container');
     if (modal) {

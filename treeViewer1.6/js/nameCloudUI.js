@@ -50,6 +50,9 @@ export function getTranslation(key) {
         'optionDescDir': 'Desc dir',
         'optionDescend': 'Descend',
 
+        'optionGlobal': 'Statistiques Globales', 
+        'optionPerCentury': 'Statistiques par siècle', 
+
         'expandedOptionPrenoms': 'Prénoms',
         'expandedOptionNoms': 'Noms de famille',
         'expandedOptionMetiers': 'Métiers',
@@ -60,10 +63,14 @@ export function getTranslation(key) {
         'expandedOptionMariage': 'Age de Mariage',
         'expandedOptionNbEnf': 'Nombre d\'enfants',
         'expandedOptionTout': 'Tout le fichier',
-        'expandedOptionAscDir': 'Ascendants directs de la racine',
-        'expandedOptionAscend': 'Ascendants + fratrie de la racine',
-        'expandedOptionDescDir': 'Descendants directs de la racine',
+        'expandedOptionAscDir': 'Ascendants directs       de la racine',
+        'expandedOptionAscend': 'Ascendants + fratrie     de la racine',
+        'expandedOptionDescDir': 'Descendants directs     de la racine',
         'expandedOptionDescend': 'Descendants + conjoints de la racine',
+
+        'expandedOptionGlobal': 'Statistiques Globales', 
+        'expandedOptionPerCentury': 'Statistiques par siècle', 
+
         'labelPersonneRacine': 'Personne racine',
         'searchPlaceholder': 'search racine',
         'searchButtonText': '🔍',
@@ -112,6 +119,8 @@ export function getTranslation(key) {
         'optionDescDir': 'dir Desc',
         'optionDescend': 'Descend',
 
+        'optionGlobal': 'Global Statistics',
+        'optionPerCentury': 'Statistics by Century',
 
         'expandedOptionPrenoms': 'First Names',
         'expandedOptionNoms': 'Last Names',
@@ -127,6 +136,10 @@ export function getTranslation(key) {
         'expandedOptionAscend': 'Ancestors + siblings of root',
         'expandedOptionDescDir': 'Direct descendants of root',
         'expandedOptionDescend': 'Descendants + spouses of root',
+
+        'expandedOptionGlobal': 'Global Statistics',
+        'expandedOptionPerCentury': 'Statistics by Century',
+
         'labelPersonneRacine': 'Root person',
         'searchPlaceholder': 'search root',
         'searchButtonText': '🔍',
@@ -166,15 +179,17 @@ export function getTranslation(key) {
         'optionVie': 'Vida',
         'optionProcreat': 'Procreac.',
         'option1erEnf': '1erHijo',
+
         'optionMariage': 'Matrimonio',
         'optionNbEnf': 'NºHijos',
-
-
         'optionTout': 'Todo',
         'optionAscDir': 'Asc. dir',
         'optionAscend': 'Ascend.',
         'optionDescDir': 'Desc dir',
         'optionDescend': 'Descend',
+
+        'optionGlobal': 'Estadísticas Globales',
+        'optionPerCentury': 'Estadísticas por Siglo',
 
         'expandedOptionPrenoms': 'Nombres',
         'expandedOptionNoms': 'Apellidos',
@@ -190,6 +205,10 @@ export function getTranslation(key) {
         'expandedOptionAscend': 'Ascendientes + hermanos de la raíz',
         'expandedOptionDescDir': 'Descendientes directos de la raíz',
         'expandedOptionDescend': 'Descendientes + cónyuges de la raíz',
+
+        'expandedOptionGlobal': 'Estadísticas Globales',
+        'expandedOptionPerCentury': 'Estadísticas por Siglo',
+
         'labelPersonneRacine': 'Persona raíz',
         'searchPlaceholder': 'buscar raíz',
         'searchButtonText': '🔍',
@@ -222,7 +241,6 @@ export function getTranslation(key) {
         'début': 'kezdet',
         'fin': 'vég',
 
-
         'optionPrenom': 'Keresztnév',
         'optionNom': 'Név',
         'optionMetier': 'Foglalk.',
@@ -233,15 +251,14 @@ export function getTranslation(key) {
         'optionMariage': 'Házasság',
         'optionNbEnf': 'Gyerm.sz',
 
-
-
-
-
         'optionTout': 'Mind',
         'optionAscDir': 'Közv. ős',
         'optionAscend': 'Ősök',
         'optionDescDir': 'Közv ut',
         'optionDescend': 'Utód.',
+
+        'optionGlobal': 'Globális statisztikák',
+        'optionPerCentury': 'Statisztikák évszázadonként',
 
         'expandedOptionPrenoms': 'Keresztnevek',
         'expandedOptionNoms': 'Vezetéknevek',
@@ -257,6 +274,10 @@ export function getTranslation(key) {
         'expandedOptionAscend': 'Gyökér ősei + testvérek',
         'expandedOptionDescDir': 'Gyökér közvetlen utódai',
         'expandedOptionDescend': 'Gyökér utódai + házastársak',
+
+        'expandedOptionGlobal': 'Globális statisztikák',
+        'expandedOptionPerCentury': 'Statisztikák évszázadonként',
+
         'labelPersonneRacine': 'Gyökérszemély',
         'searchPlaceholder': 'gyökér keresése',
         'searchButtonText': '🔍',
@@ -280,7 +301,7 @@ export function getTranslation(key) {
     
     // Retourner la traduction ou le fallback en français
     return translations[currentLang]?.[key] || translations['fr'][key];
-  }
+}
 
 
 function createModalContainer() {
@@ -415,22 +436,18 @@ function createStandardTypeSelect(config) {
     return typeSelect;
 }
 
-function createTypeSelect(config) {
+export function createTypeSelect(type, isForStatsModal = false, width = 60, 
+    colors = {
+        main: ' #4361ee',    // Bleu pour le sélecteur
+        options: ' #38b000', // Vert pour les options
+        hover: ' #2e9800',   // Vert légèrement plus foncé au survol
+        selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
+    }
+) {
     // Définir les options et les valeurs correspondantes
     // const typeOptions = ['Prénom', 'Nom', 'Métier', 'Lieux', 'Vie', 'Procréat', '1er Enf.', 'Mariage',  'Nb Enf.']; 
     // const typeOptionsExpanded = ['Prénoms', 'Noms de famille', 'Métiers', 'Lieux', 'Durée de Vie', 'Ages de procréation', 'Age au 1er enfant', 'Age de Mariage', 'Nombre d\'enfants'];   
     // Définir les options et les valeurs correspondantes
-    const typeOptions = [
-        getTranslation('optionPrenom'), 
-        getTranslation('optionNom'), 
-        getTranslation('optionMetier'), 
-        getTranslation('optionLieux'), 
-        getTranslation('optionVie'), 
-        getTranslation('optionProcreat'), 
-        getTranslation('option1erEnf'), 
-        getTranslation('optionMariage'), 
-        getTranslation('optionNbEnf')
-    ]; 
     
     const typeOptionsExpanded = [
         getTranslation('expandedOptionPrenoms'), 
@@ -442,7 +459,29 @@ function createTypeSelect(config) {
         getTranslation('expandedOption1erEnf'), 
         getTranslation('expandedOptionMariage'), 
         getTranslation('expandedOptionNbEnf')
-    ];       
+    ]; 
+    
+    let typeOptions;
+    let dropdownWidth = 170;
+    let padding_x = 1;
+    if (isForStatsModal) {
+        typeOptions = typeOptionsExpanded;
+        dropdownWidth = width;
+        padding_x = 15;
+    } else {
+        typeOptions = [
+            getTranslation('optionPrenom'), 
+            getTranslation('optionNom'), 
+            getTranslation('optionMetier'), 
+            getTranslation('optionLieux'), 
+            getTranslation('optionVie'), 
+            getTranslation('optionProcreat'), 
+            getTranslation('option1erEnf'), 
+            getTranslation('optionMariage'), 
+            getTranslation('optionNbEnf')
+        ]; 
+    }
+
     const typeValues = ['prenoms', 'noms', 'professions', 'lieux', 'duree_vie', 'age_procreation', 'age_first_child', 'age_marriage', 'nombre_enfants'];
     
     
@@ -450,23 +489,23 @@ function createTypeSelect(config) {
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
     
     // Couleurs pour le sélecteur personnalisé
-    const colors = {
-        main: ' #4361ee',    // Bleu pour le sélecteur
-        options: ' #38b000', // Vert pour les options
-        hover: ' #2e9800',   // Vert légèrement plus foncé au survol
-        selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
-    };
+    // const colors = {
+    //     main: ' #4361ee',    // Bleu pour le sélecteur
+    //     options: ' #38b000', // Vert pour les options
+    //     hover: ' #2e9800',   // Vert légèrement plus foncé au survol
+    //     selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
+    // };
     
     // Utiliser le sélecteur personnalisé avec une configuration très précise
     return createCustomSelector({
         options: options,
-        selectedValue: config.type,
+        selectedValue: type,
         colors: colors,
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
-            width: '60px',
+            width: width + 'px',
             height: '25px',
-            dropdownWidth: '170px',
+            dropdownWidth: dropdownWidth+'px',
             // Hauteur fixe au lieu d'une hauteur maximale
             // Calculée en fonction du nombre d'options et de leur hauteur
             // dropdownFixedHeight: `${(options.length) * 50}px` // 38px par option (padding 10px haut+bas + texte)
@@ -476,17 +515,10 @@ function createTypeSelect(config) {
         
         // Padding très réduit pour maximiser la compacité
         padding: {
-            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
-            options: { x: 1, y: 1 }     // Padding pour les options
+            display: { x: padding_x, y: 1 },    // Padding minimal pour le sélecteur
+            options: { x: 1, y: 1 },     // Padding pour les options
+            displayPosition : 'center'
         },
-        
-        // Configuration précise de la flèche comme dans l'original
-        // arrow: {
-        //     position: 'top',        // Position en haut
-        //     visible: true,
-        //     size: 6,                // Taille en pixels
-        //     offset: { x: 0, y: 0 }  // Décalage en pixels
-        // },
         
 
         arrow: {
@@ -494,8 +526,6 @@ function createTypeSelect(config) {
             size: 5.5,
             offset: { x: -5, y: 1} // Décale 5px vers la gauche et 2px vers le bas
         },
-
-
 
         // Personnalisation des options
         customizeOptionElement: (optionElement, option) => {
@@ -512,19 +542,18 @@ function createTypeSelect(config) {
     });
 }
 
-function createScopeSelect(config) {
+export function createScopeSelect(type, isForStatsModal = false, width = 60, 
+    colors = {
+        main: ' #4361ee',    // Bleu pour le sélecteur
+        options: ' #38b000', // Vert pour les options
+        hover: ' #2e9800',   // Vert légèrement plus foncé au survol
+        selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
+    }
+) {
     // Définir les options et les valeurs correspondantes
     // Définir les options et les valeurs correspondantes
     // const typeOptions = ['Tout', 'Asc dir.','Ascend', 'Desc dir',  'Descend']; 
     // const typeOptionsExpanded = ['Tout le fichier', 'Ascendants directs de la racine', 'Ascendants + fratrie de la racine', 'Desccendants directs de la racine' , 'Desccendants + conjoints de la racine'];       
-    const typeOptions = [
-        getTranslation('optionTout'), 
-        getTranslation('optionAscDir'),
-        getTranslation('optionAscend'), 
-        getTranslation('optionDescDir'),  
-        getTranslation('optionDescend')
-    ]; 
-    
     const typeOptionsExpanded = [
         getTranslation('expandedOptionTout'), 
         getTranslation('expandedOptionAscDir'), 
@@ -533,6 +562,40 @@ function createScopeSelect(config) {
         getTranslation('expandedOptionDescend')
     ];
 
+    let typeOptions;
+    let dropdownWidth = 170;
+    let padding_x = 1;
+    if (isForStatsModal) {
+        // typeOptions = typeOptionsExpanded;
+        // typeOptions.forEach(option => {option = option.substring(0, 10)});
+        typeOptions = [];
+        typeOptionsExpanded.forEach((option, index) => {
+            typeOptions[index] = option.substring(0, 23);
+        });
+
+
+        dropdownWidth = width;
+        padding_x = 15;
+    } else {
+        typeOptions = [
+            getTranslation('optionTout'), 
+            getTranslation('optionAscDir'),
+            getTranslation('optionAscend'), 
+            getTranslation('optionDescDir'),  
+            getTranslation('optionDescend')
+        ]; 
+    }
+
+    // const typeOptions = [
+    //     getTranslation('optionTout'), 
+    //     getTranslation('optionAscDir'),
+    //     getTranslation('optionAscend'), 
+    //     getTranslation('optionDescDir'),  
+    //     getTranslation('optionDescend')
+    // ]; 
+    
+
+
     
     
     const typeValues = ['all', 'directAncestors', 'ancestors', 'directDescendants', 'descendants'];
@@ -540,29 +603,31 @@ function createScopeSelect(config) {
     // Créer la liste d'options
     const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
     
-    // Couleurs pour le sélecteur personnalisé
-    const colors = {
-        main: ' #4CAF50',    // Vert pour le sélecteur principal
-        options: ' #4361ee', // Bleu pour les options
-        hover: ' #2341ce', //#4CAF50',   // Vert au survol
-        selected: ' #1a237e' // Bleu foncé pour l'option sélectionnée
-    };
+    // // Couleurs pour le sélecteur personnalisé
+    // const colors = {
+    //     main: ' #4CAF50',    // Vert pour le sélecteur principal
+    //     options: ' #4361ee', // Bleu pour les options
+    //     hover: ' #2341ce', //#4CAF50',   // Vert au survol
+    //     selected: ' #1a237e' // Bleu foncé pour l'option sélectionnée
+    // };
     
     // Utiliser la fonction générique
     return createCustomSelector({
         options: options,
-        selectedValue: config.type,
+        selectedValue: type,
         colors: colors,
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
-            width: '60px',
+            // width: '60px',
+            width: width + 'px',
             height: '25px',
             dropdownWidth: '280px',
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
-            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
-            options: { x: 8, y: 10 }     // Padding pour les options
+            display: { x: padding_x, y: 1 },    // Padding minimal pour le sélecteur
+            options: { x: 8, y: 10 },    // Padding pour les options
+            displayPosition : 'center'
         },
         arrow: {
             position: 'top-right',
@@ -584,6 +649,89 @@ function createScopeSelect(config) {
 
     });
 }
+
+
+
+
+export function createStatsTypeSelect(type, isForStatsModal = false, width = 60, 
+    colors = {
+        main: ' #4361ee',    // Bleu pour le sélecteur
+        options: ' #38b000', // Vert pour les options
+        hover: ' #2e9800',   // Vert légèrement plus foncé au survol
+        selected: ' #1a4d00' // Vert beaucoup plus foncé pour l'option sélectionnée
+    }
+) {
+    // Définir les options et les valeurs correspondantes    
+    const typeOptionsExpanded = [
+        getTranslation('expandedOptionGlobal'), 
+        getTranslation('expandedOptionPerCentury'), 
+    ];
+
+    let typeOptions;
+    let dropdownWidth = 170;
+    let padding_x = 1;
+    if (isForStatsModal) {
+        typeOptions = [];
+        typeOptionsExpanded.forEach((option, index) => {
+            typeOptions[index] = option.substring(0, 23);
+        });
+
+
+        dropdownWidth = width;
+        padding_x = 15;
+    } else {
+        typeOptions = [
+            getTranslation('optionGlobal'), 
+            getTranslation('optionPerCentury'),
+        ]; 
+    }    
+    
+    const typeValues = ['global', 'perCentury'];
+    
+    // Créer la liste d'options
+    const options = createOptionsFromLists(typeOptions, typeOptionsExpanded, typeValues);
+    
+    
+    // Utiliser la fonction générique
+    return createCustomSelector({
+        options: options,
+        selectedValue: type,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            // width: '60px',
+            width: width + 'px',
+            height: '25px',
+            dropdownWidth: width + 'px',
+        },
+        // Padding très réduit pour maximiser la compacité
+        padding: {
+            display: { x: padding_x, y: 1 },    // Padding minimal pour le sélecteur
+            options: { x: 8, y: 10 },    // Padding pour les options
+            displayPosition : 'center'
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1 } // Décale 5px vers la gauche et 2px vers le bas
+        },
+        
+        // Personnalisation des options
+        customizeOptionElement: (optionElement, option) => {
+            // Utiliser le label étendu dans le menu déroulant
+            optionElement.textContent = option.expandedLabel;
+            
+            // Centrer le texte
+            optionElement.style.textAlign = 'center';
+            
+            // Padding spécifique
+            optionElement.style.padding = '10px 8px';
+        },
+
+    });
+}
+
+
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -951,10 +1099,10 @@ function showNameCloud(nameData, config) {
     optionsContainer.style.right = '0';
     optionsContainer.style.zIndex = '10';
 
-    const typeSelect = createTypeSelect(config);
+    const typeSelect = createTypeSelect(config.type);
     // typeSelect.style.zIndex = 99999;
     typeSelect.style.marginTop = '20px';
-    const scopeSelect = createScopeSelect(config);
+    const scopeSelect = createScopeSelect(config.type);
     scopeSelect.style.marginTop = '20px';
     const rootPersonSelect = createRootPersonSelect();
 
@@ -1069,7 +1217,7 @@ function showNameCloud(nameData, config) {
             
             // Ajouter le bouton des statistiques détaillées avec le type approprié
             // addStatsButton(container, nameCloudState.currentNameData, newConfig.type);
-            updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type);
+            updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type, newConfig);
         }
 
         

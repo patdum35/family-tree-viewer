@@ -178,25 +178,31 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
 
 }
 
-export function processNamesData(config) {
+export function processNamesData(config, searchTerm = null, isFromStatsModal = false) {
     const nameFrequency = {};
     const originalName = {};
     const stats = initializeStats();
 
     const persons = getPersonsFromTree(config.scope, config.rootPersonId);
 
+
+    console.log('\n debug processNamesData  ', config, searchTerm)
+
     
     counter_marchand = 0;
     nameFrequencyFirstWord = [];
     persons.forEach(person => {
-        processPersonData(person, config, nameFrequency, stats, { doNotClean: false}, originalName);
+        processPersonData(person, config, nameFrequency, stats, { doNotClean: false}, originalName, searchTerm);
     });
    
     const averages = updateStats(stats, nameFrequency);
 
-    // console.log('debug processNamesData , nameFrequency, stats ', nameFrequency, stats)
+
+    // console.log('-debug in processNamesData before convertToNameData , nameFrequency =', nameFrequency)
 
     const result = convertToNameData(nameFrequency, originalName);
+
+    // console.log('-debug in processNamesData after convertToNameData , nameFrequency =', nameFrequency, ' , result= ', result)    
     
     // Ajouter la moyenne à l'objet retourné
     result.averageData = averages.average;
@@ -211,9 +217,19 @@ export function processNamesData(config) {
 let counter_marchand = 0;
 let nameFrequencyFirstWord = [];
 
-export function processPersonData(person, config, nameFrequency, stats, options = {}, originalName = {}) {
+export function processPersonData(person, config, nameFrequency, stats, options = {}, originalName = {}, searchTerm = null) {
+
     const { inRange, date } = hasDateInRange(person, config, stats);
     const hasDate = inRange; // Pour compatibilité avec le code existant
+    let searchStr = null;
+    let isMatched = true;
+    if (searchTerm) { 
+        searchStr = searchTerm.toLowerCase();
+        isMatched = false;
+    }
+
+
+    // console.log('\n debug processPersonData  ', config, searchStr)
 
     const currentLang = window.CURRENT_LANGUAGE || 'fr';
 
@@ -225,7 +241,11 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             .filter(name => isValidSurName(name))
             .map(name => capitalizeName(name));
         
-        if (hasDate) {
+        if (firstName.toLowerCase().includes(searchStr)) {
+            isMatched = true;
+        }
+
+        if (hasDate && isMatched) {
             stats.inPeriod++;
             firstNames.forEach(name => {
                 if (name) {
@@ -236,18 +256,26 @@ export function processPersonData(person, config, nameFrequency, stats, options 
         }
     } else if (config.type === 'noms') {
         const familyName = person.name.split('/')[1];
-
-        if (familyName && hasDate) {
+        if (familyName.toLowerCase().includes(searchStr)) {
+            isMatched = true;
+            // console.log('-debug in processPersonData', person.name)
+        }
+        if (familyName && hasDate && isMatched ) {
             stats.inPeriod++;
             const cleanedName = cleanFamilyName(familyName);
             const formattedName = formatFamilyName(cleanedName);
+            // console.log('-debug in processPersonData cleanedName', cleanedName, ', formattedName=', formattedName, ', isValidFamilyName=', isValidFamilyName(formattedName))
             if (formattedName && isValidFamilyName(formattedName)) {
                 nameFrequency[formattedName] = (nameFrequency[formattedName] || 0) + 1;
                 originalName[formattedName] = person.name.split('/')[1];
             }
         }
     } else if (config.type === 'professions') {
-        if ((person.occupationFull) && hasDate) {
+        if (person.occupationFull && person.occupationFull.toLowerCase().includes(searchStr)) {
+            isMatched = true;
+        }
+        if ((person.occupationFull) && hasDate && isMatched) {
+            // console.log('debug ', searchStr, person.name, person.occupationFull )
             stats.inPeriod++;
             const cleanedProfessions = cleanProfessionForNameCloud(person.occupationFull);
 
@@ -308,8 +336,22 @@ export function processPersonData(person, config, nameFrequency, stats, options 
         }
     } else if (config.type === 'lieux') {
         const allLocations = [];
-        
+       
         if (hasDate) {
+
+            // Les personnes ne stockent généralement pas directement leur lieu de mariage
+            // Il faut la récupérer via les familles où elles apparaissent comme conjoint
+            if (person.spouseFamilies && person.spouseFamilies.length > 0) {
+                // Pour chaque famille où la personne est un conjoint
+                person.spouseFamilies.forEach(familyId => {
+                    const family = state.gedcomData.families[familyId];
+                    if (family && family.marriagePlace) {
+                        person.marriagePlace = family.marriagePlace; // On peut aussi récupérer le lieu de mariage
+                    }
+                });
+            }
+
+
             const potentialLocations = [
                 person.birthPlace, 
                 person.deathPlace, 
@@ -319,12 +361,20 @@ export function processPersonData(person, config, nameFrequency, stats, options 
                 person.residPlace3
             ];
             
+            let searchStrBis = '';
+            if (searchStr)  { searchStrBis = searchStr.replace(' ','-'); }
             potentialLocations.forEach(location => {
                 // const cleanedLocation = cleanLocation(location);
                 const cleanedLocation = options.doNotClean ? location : cleanLocation(location);
                 if (cleanedLocation) {
+                    if (cleanedLocation.toLowerCase().includes(searchStr) || cleanedLocation.toLowerCase().includes(searchStrBis) ) {
+                        isMatched = true;
+                    }
+                }
+                if (cleanedLocation && isMatched ) {
                     allLocations.push(cleanedLocation);
                 }
+
             });
         }
         
@@ -508,86 +558,12 @@ export function processPersonData(person, config, nameFrequency, stats, options 
                             nameFrequency[ageStr].males += 0.5;
                             nameFrequency[ageStr].females += 0.5;
                         }
+
                     }
                 }
             }
         }
 
-        if (person.birthDate) {
-            const parentBirthYear = extractYear(person.birthDate);
-            
-            if (person.spouseFamilies) {
-                // Construire un tableau de tous les enfants avec leur année de naissance
-                const children = [];
-                
-                person.spouseFamilies.forEach(familyId => {
-                    const family = state.gedcomData.families[familyId];
-                    if (family && family.children) {
-                        family.children.forEach(childId => {
-                            const child = state.gedcomData.individuals[childId];
-                            if (child && child.birthDate) {
-                                const childBirthYear = extractYear(child.birthDate);
-                                if (childBirthYear > parentBirthYear) {
-                                    children.push({
-                                        id: childId,
-                                        birthYear: childBirthYear,
-                                        name: child.name
-                                    });
-                                }
-                            }
-                        });
-                    }
-                });
-                
-                // Trier les enfants par année de naissance
-                children.sort((a, b) => a.birthYear - b.birthYear);
-                
-                // Si au moins un enfant est trouvé
-                if (children.length > 0) {
-                    const firstChild = children[0];
-                    const ageAtFirstChild = firstChild.birthYear - parentBirthYear;
-                    
-                    const startYear = Math.min(config.startDate, config.endDate);
-                    const endYear = Math.max(config.startDate, config.endDate);
-                    
-                    // Vérifier que la naissance du parent est dans la période
-                    if ((parentBirthYear <= endYear) && (parentBirthYear >= startYear) && ageAtFirstChild >= 10 && ageAtFirstChild <= 100) {
-                        stats.inPeriod++;
-                        const ageStr = ageAtFirstChild.toString();
-                        
-                        // Initialiser l'objet avec compteurs par sexe s'il n'existe pas
-                        if (!nameFrequency[ageStr]) {
-                            nameFrequency[ageStr] = {
-                                count: 0,
-                                males: 0,
-                                females: 0
-                            };
-                        } else if (typeof nameFrequency[ageStr] === 'number') {
-                            // Convertir l'ancien format (simple nombre) en objet avec compteurs par sexe
-                            nameFrequency[ageStr] = {
-                                count: nameFrequency[ageStr],
-                                males: 0,
-                                females: 0
-                            };
-                        }
-                        
-                        // Incrémenter le compteur total - UNE SEULE FOIS par parent
-                        nameFrequency[ageStr].count++;
-                        
-                        // Incrémenter le compteur par sexe
-                        if (person.sex === 'M') {
-                            nameFrequency[ageStr].males++;
-                        } else if (person.sex === 'F') {
-                            nameFrequency[ageStr].females++;
-                        } else {
-                            // Si le sexe n'est pas spécifié, répartir équitablement
-                            nameFrequency[ageStr].males += 0.5;
-                            nameFrequency[ageStr].females += 0.5;
-                        }
-                    }
-                }
-            }
-        }
     } else if (config.type === 'age_marriage') {
         // Les personnes ne stockent généralement pas directement leur date de mariage
         // Il faut la récupérer via les familles où elles apparaissent comme conjoint

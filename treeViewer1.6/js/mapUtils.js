@@ -8,6 +8,7 @@ export const locationSymbols = {
     'Naissance': '👶',
     'Mariage': '💍',
     'Décès': '✝️',
+    'Résidence': '🏠',
     'Résidence1': '🏠',
     'Résidence2': '🏠',
     'Résidence3': '🏠'
