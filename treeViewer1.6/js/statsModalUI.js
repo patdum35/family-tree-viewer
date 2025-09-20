@@ -344,7 +344,7 @@ function openStatsModal() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
+            padding: 3px 35px;
             background: #438aee;
             color: white;
         }
@@ -372,14 +372,14 @@ function openStatsModal() {
         }
         
         .stats-modal-body {
-            padding: 10px;
+            padding: 7px;
             max-height: calc(100vh - 100px) !important; /* Ajuster selon la hauteur du header */
             overflow-y: auto !important;
         }
 
         
         .stats-type-section, .stats-input-section, .date-filter-section, .stats-searchRoot-section {
-            margin-bottom: 10px;
+            margin-bottom: 4px;
         }
         
 
@@ -485,7 +485,7 @@ function openStatsModal() {
         
         .stats-help {
             background: #f5f5f5ff;
-            padding: 10px 8px;
+            padding: 8px 8px;
             border-radius: 4px;
             margin-bottom: 15px;
             font-size: 15px; !important

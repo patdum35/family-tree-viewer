@@ -33,8 +33,10 @@ function getPersonsListTitle(name, count, config) {
         'age_first_child': `Personnes ayant eu leur premier enfant à ${name} ans (${count} personnes)`,
         'nombre_enfants': `Personnes ayant eu ${name} enfant(s) (${count} personnes)`,
         'lieux': `Personnes ayant un lien avec le lieu ${name} (${count} personnes)`,
-        'default': `Personnes (${count})`
-      },
+        'default': `Personnes (${count})`,
+        'placeOf' : 'Lieux de ',
+        'noPlaceFor': 'pas de Lieux pour '
+      }, 
       'en': {
         'prenoms': `People with first name "${name}" (${count} people)`,
         'noms': `People with last name "${name}" (${count} people)`,
@@ -45,7 +47,9 @@ function getPersonsListTitle(name, count, config) {
         'age_first_child': `People who had their first child at ${name} years old (${count} people)`,
         'nombre_enfants': `People who had ${name} child(ren) (${count} people)`,
         'lieux': `People connected to the place ${name} (${count} people)`,
-        'default': `People (${count})`
+        'default': `People (${count})`,
+        'placeOf' : 'Places of ',
+        'noPlaceFor' : 'No places for ',       
       },
       'es': {
         'prenoms': `Personas con el nombre "${name}" (${count} personas)`,
@@ -57,7 +61,9 @@ function getPersonsListTitle(name, count, config) {
         'age_first_child': `Personas que tuvieron su primer hijo a los ${name} años (${count} personas)`,
         'nombre_enfants': `Personas que tuvieron ${name} hijo(s) (${count} personas)`,
         'lieux': `Personas relacionadas con el lugar ${name} (${count} personas)`,
-        'default': `Personas (${count})`
+        'default': `Personas (${count})`,
+        'placeOf' : 'Lugares de ',
+        'noPlaceFor' : 'No hay lugares para ',
       },
       'hu': {
         'prenoms': `Személyek "${name}" keresztnévvel (${count} személy)`,
@@ -69,7 +75,9 @@ function getPersonsListTitle(name, count, config) {
         'age_first_child': `Személyek, akiknek ${name} évesen született az első gyermekük (${count} személy)`,
         'nombre_enfants': `Személyek, akiknek ${name} gyermekük volt (${count} személy)`,
         'lieux': `Személyek kapcsolódva a(z) ${name} helyhez (${count} személy)`,
-        'default': `Személyek (${count})`
+        'default': `Személyek (${count})`,
+        'placeOf' : 'Helyek: ',
+        'noPlaceFor' : 'Nincsenek helyek ehhez: ', 
       }
     };
   

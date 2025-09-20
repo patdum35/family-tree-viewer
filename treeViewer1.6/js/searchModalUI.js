@@ -1113,7 +1113,8 @@ window.showHeatmapFromSearch = function() {
     if (window.currentSearchResults && window.currentSearchResults.length > 0) {
         // Fermer la modale de recherche
         // closeSearchModal();
-        displayHeatMap(window.currentSearchResults, null, null,(personList.results.length ===1), personList.results[0].name);
+        displayHeatMap(window.currentSearchResults, null, null,(window.currentSearchResults.length ===1), window.currentSearchResults[0].name);
+        //window.currentSearchResults
     }
 };
 
