@@ -656,7 +656,7 @@ function openSearchModal() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 3px 20px;
             background: #ff9800;
             color: white;
         }
@@ -683,13 +683,13 @@ function openSearchModal() {
         }
         
         .search-modal-body {
-            padding: 20px;
-            max-height: calc(100vh - 10px) !important; /* Ajuster selon la hauteur du header */
+            padding: 7px;
+            max-height: calc(100vh - 60px) !important; /* -10px Ajuster selon la hauteur du header */
             overflow-y: auto !important;
         }
         
         .search-type-section, .search-input-section, .date-filter-section {
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
         
 
@@ -780,7 +780,7 @@ function openSearchModal() {
             background: #f5f5f5;
             padding: 8px;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
             font-size: 11px;
             color: #666;
         }
@@ -788,7 +788,7 @@ function openSearchModal() {
         
         .search-results {
             overflow-y: auto;
-            max-height: calc(100vh - 275px) !important; /* Utiliser presque toute la hauteur mais pas trop il faut retirer la hauteur de toute l'entête*/
+            max-height: calc(100vh - 120px) !important; /* 275 Utiliser presque toute la hauteur mais pas trop il faut retirer la hauteur de toute l'entête*/
             height: auto !important;
         }
         
@@ -841,14 +841,15 @@ function openSearchModal() {
             }
 
 
-
-
         /* Styles pour mobile en mode paysage */
         @media screen and (max-height: 500px)  {
+
             .search-modal-header {
-                padding: 5px 10px !important; /* Réduire de 20px à 10px */
+                padding: 3px 20px;
             }
             
+
+
             .search-modal-header h3 {
                 font-size: 16px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
@@ -1179,7 +1180,7 @@ function performModalSearch() {
         // Modifier instructionDiv pour flex + stretch
         instructionDiv.style.display = 'flex';
         instructionDiv.style.alignItems = 'stretch';
-        instructionDiv.style.padding = '5px 0';  
+        instructionDiv.style.padding = '0px 5px';  
         instructionDiv.style.color = '#ff6600ff';
         instructionDiv.style.fontWeight = 'bold';
         instructionDiv.style.fontSize = '13px';
@@ -1197,14 +1198,22 @@ function performModalSearch() {
         // 👉 bloc d'instruction
         const span = document.createElement('span');
         span.textContent = searchModalTranslations[window.CURRENT_LANGUAGE].clickMessage;
+        span.style.fontSize = '11px';
+        span.style.padding = '0px';
+        span.style.marginTop = '0px';
+        span.style.marginBottom = '0px';        
+        leftZone.style.padding = '0px';
+        leftZone.style.marginTop = '0px';
+        leftZone.style.marginBottom = '0px'; 
         leftZone.appendChild(span);
+
 
         // Zone droite (bouton) - même style que les lignes
         const rightZone = document.createElement('div');
         rightZone.style.cssText = `
             display: flex;
             align-items: center;
-            padding: 6 0px;
+            padding: 0px 0px;
             transition: background-color 0.2s;
             align-self: stretch;                    // ← AJOUT : force l'étirement vertical
         `;
