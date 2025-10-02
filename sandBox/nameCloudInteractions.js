@@ -5,6 +5,10 @@ import { extractYear } from './nameCloudUtils.js';
 import { removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createDataForHeatMap, createHeatmapDataForPeople, refreshHeatmap } from './geoHeatMapDataProcessor.js';
 import { createImprovedHeatmap, createIndividualLocationMap } from './geoHeatMapUI.js';
+import { createLocationIcon } from './nameCloudStatModal.js';
+import { displayHeatMap } from './geoHeatMapUI.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { resizeModal } from './nameCloudStatModal.js';
 
 window.lastSelectedLocationId = null;
 window.isIndividualMapMode = false;
@@ -20,15 +24,15 @@ window.isIndividualMapMode = false;
 export function getPersonsListTitle(name, count, config) {
     const translations = {
       'fr': {
-        'prenoms': `Personnes avec le prénom "${name}" (${count} personnes)`,
-        'noms': `Personnes avec le nom "${name}" (${count} personnes)`,
-        'professions': `Personnes avec la profession "${name}" (${count} personnes)`,
-        'duree_vie': `Personnes ayant vécu ${name} ans (${count} personnes)`,
-        'age_procreation': `Personnes ayant eu un enfant à ${name} ans (${count} personnes)`,
-        'age_marriage': `Personnes s'étant mariées à ${name} ans (${count} personnes)`,
-        'age_first_child': `Personnes ayant eu leur premier enfant à ${name} ans (${count} personnes)`,
-        'nombre_enfants': `Personnes ayant eu ${name} enfant(s) (${count} personnes)`,
-        'lieux': `Personnes ayant un lien avec le lieu ${name} (${count} personnes)`,
+        'prenoms': `Personnes avec le prénom "${name}" (${count} pers.)`,
+        'noms': `Personnes avec le nom "${name}" (${count} pers.)`,
+        'professions': `Personnes avec la prof. "${name}" (${count} pers.)`,
+        'duree_vie': `Personnes ayant vécu ${name} ans (${count} pers.)`,
+        'age_procreation': `Personnes ayant eu un enfant à ${name} a. (${count} pers.)`,
+        'age_marriage': `Personnes s'étant mariées à ${name} a. (${count} pers.)`,
+        'age_first_child': `Personnes ayant eu leur 1ier enfant à ${name} a. (${count} pers.)`,
+        'nombre_enfants': `Personnes ayant eu ${name} enfant(s) (${count} pers.)`,
+        'lieux': `Personnes ayant un lien avec ${name} (${count} pers.)`,
         'default': `Personnes (${count})`,
         'placeOf' : 'Lieux de ',
         'noPlaceFor': 'pas de Lieux pour '
@@ -48,15 +52,15 @@ export function getPersonsListTitle(name, count, config) {
         'noPlaceFor' : 'No places for ',       
       },
       'es': {
-        'prenoms': `Personas con el nombre "${name}" (${count} personas)`,
-        'noms': `Personas con el apellido "${name}" (${count} personas)`,
-        'professions': `Personas con la profesión "${name}" (${count} personas)`,
-        'duree_vie': `Personas que vivieron ${name} años (${count} personas)`,
-        'age_procreation': `Personas que tuvieron un hijo a los ${name} años (${count} personas)`,
-        'age_marriage': `Personas que se casaron a los ${name} años (${count} personas)`,
-        'age_first_child': `Personas que tuvieron su primer hijo a los ${name} años (${count} personas)`,
-        'nombre_enfants': `Personas que tuvieron ${name} hijo(s) (${count} personas)`,
-        'lieux': `Personas relacionadas con el lugar ${name} (${count} personas)`,
+        'prenoms': `Personas con el nombre "${name}" (${count} pers.)`,
+        'noms': `Personas con el apellido "${name}" (${count} pers.)`,
+        'professions': `Personas con la profesión "${name}" (${count} pers.)`,
+        'duree_vie': `Personas que vivieron ${name} años (${count} pers.)`,
+        'age_procreation': `Personas que tuvieron un hijo a los ${name} años (${count} pers.)`,
+        'age_marriage': `Personas que se casaron a los ${name} años (${count} pers.)`,
+        'age_first_child': `Personas que tuvieron su primer hijo a los ${name} años (${count} pers.)`,
+        'nombre_enfants': `Personas que tuvieron ${name} hijo(s) (${count} pers.)`,
+        'lieux': `Personas relacionadas con el lugar ${name} (${count} pers.)`,
         'default': `Personas (${count})`,
         'placeOf' : 'Lugares de ',
         'noPlaceFor' : 'No hay lugares para ',
@@ -86,163 +90,111 @@ export function getPersonsListTitle(name, count, config) {
     // Retourner le titre pour le type de config ou le titre par défaut
     return langTranslations[config.type] || langTranslations['default'];
 }
-  
+
 export function showPersonsList(name, people, config, searchTerm) {
+
+    // console.log("- showPersonsList ", name, people)
+
+    window.currentPeople = people;
+    window.currentName = name;
+
+    const type = config.type;
+    this.name = config.type + '_' + config.scope + '_' + config.startDate + '_' + config.endDate + '_' + config.rootPersonId + '_' + (searchTerm)?searchTerm:null;
     
-    console.log("- showPersonsList ", name)
+    console.log("-call to showPersonsList with ", type, config, searchTerm, ', this=', this, this.name);
 
-    // Ajouter un style pour personnaliser les ascenseurs
-    const style = document.createElement("style");
-    style.textContent = `
-        .custom-modal::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        .custom-modal::-webkit-scrollbar-button {
-            height: 0px;
-            width: 0px;
-            display: none;
-        }
-
-        .custom-modal::-webkit-scrollbar-thumb {
-            background-color: #888;
-            border-radius: 6px; 
-            border: 3px solid transparent;
-            }
-
-        .custom-modal::-webkit-scrollbar-track {
-            background-color: #f1f1f1;
-            border-radius: 4px;
-            margin: 30px;
-        }
-
-        /* Style pour agrandir le bouton de fermeture - NOUVELLE SECTION */
-        #person-list-close-button {
-            font-size: 24px !important;
-            width: 40px !important;
-            height: 30px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            line-height: 1 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            cursor: pointer !important;
-            border-radius: 4px !important;
-            transition: background-color 0.2s ease !important;
-            border: none !important;
-            background: none !important;
-        }
-        
-        #person-list-close-button:hover {
-            background-color: rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        /* Sur les appareils tactiles, augmenter encore plus la zone */
-        @media (pointer: coarse) {
-            #person-list-close-button {
-                font-size: 28px !important;
-                width: 40px !important;
-                height: 30px !important;
-            }
-        }
-    `;
-    // Ajouter le style au document
-    document.head.appendChild(style);
+    this.lastSelectedLocationIndex = null;
+    const self = this; 
     
+    if (!people || people.length === 0) return;
+    
+       
+    let existingModal;
+    const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
+    if (allModals) { existingModal = allModals[allModals.length - 1]; }
+
+    let modalId; 
+    // if (existingModal && (window.innerHeight < 800 || window.innerWidth < 800 ) ) { 
+    if (false) {
+        existingModal.remove();
+        modalId = `show-person-list-modal-0`;
+    } else {
+        modalId = `show-person-list-modal-${state.showPersonListModalCounter}`;
+        state.showPersonListModalCounter++;      
+    }
+
+    // Création du modal
     const modal = document.createElement('div');
-    // modal.className = 'person-list-modal'; // Ajouter une classe pour faciliter la sélection ultérieure
+    modal.id = modalId;
+    // modal.className = 'frequency-stat-modal';
+    modal.className = `show-person-list-modal`;
 
-    modal.className = `person-list-modal custom-modal`; // Ajouter une classe pour faciliter la sélection ultérieure
+    modal.style.position = 'fixed';
+    modal.style.left = '50%';
 
-
-    // Position et taille différentes si la heatmap est visible
-    let heatmapWrapper = null;
-
-    if (nameCloudState.isHeatmapVisible)  {
-        heatmapWrapper = nameCloudState.heatmapWrapper
-        adjustSplitScreenLayout(modal, heatmapWrapper);
-        modal.style.backgroundColor = 'transparent'; // Fond transparent au lieu de rgba(0,0,0,0.8)
-        // modal.style.pointerEvents = 'auto'; // Important: assure que la modale capte les événements
-        modal.style.pointerEvents = 'none'; // Permet aux clics de passer à travers
+    let topLocal;
+    let ratioHeight;
+    if (window.innerHeight < 500) {
+        ratioHeight = 80;
+        topLocal = 70;
     } else {
-        // Configuration standard (sans heatmap visible)
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'transparent'; // Fond transparent au lieu de rgba(0,0,0,0.8)
-        // modal.style.pointerEvents = 'auto'; // Important: assure que la modale capte les événements
-        modal.style.pointerEvents = 'none'; // Permet aux clics de passer à travers
+        ratioHeight = 70;
+        topLocal = 105;        
     }
+
+    modal.style.top = topLocal + 'px'; 
+    modal.style.transform = 'translateX(-50%)';
+    modal.style.backgroundColor = 'white';
+    modal.style.padding = '0px 4px';
+    modal.style.borderRadius = '8px';
+    modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
+    modal.style.zIndex = state.topZindex;
+
+    modal.style.maxWidth = '600px';
+    modal.style.minWidth = state.minModalWidth + 'px';
+    modal.style.width = '90%';
+
+    modal.style.maxHeight = ratioHeight +'vh';
+    modal.style.minWHeight = state.minModalHeight + 'px';
+    modal.style.overflow = 'auto';
+
+    modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
+    modal.style.flexDirection = "column";   // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
     
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '2000';
-
-    const content = document.createElement('div');
-    content.style.backgroundColor = 'white';
-    content.style.padding = '20px';
-    content.style.borderRadius = '10px';
-
-
-    content.style.border = '2px solid rgba(200, 220, 255, 0.9)'; // Bordure bleue pâle
-    content.style.boxShadow = '0 0 15px rgba(200, 220, 255, 0.5)'; // Ombre bleue légère
-    // content.style.pointerEvents = 'auto'; // Assure que le contenu capte les événements
+    
+    // En-tête du modal
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.borderBottom = '1px solid #eee';
+    // Nouvelles propriétés pour rendre l'en-tête sticky
+    header.style.position = 'sticky';
+    header.style.top = '0';
+    header.style.backgroundColor = '#EBF8FF'; //'white';
+    header.style.zIndex = '1101';
+    header.style.paddingTop = '3px';
+    header.style.paddingBottom = '5px';
+    header.style.width = '100%';
+    // header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    // Ajuster la marge pour éviter le déplacement du contenu
+    header.style.marginBottom = '0px';
+    header.style.marginLeft = '-20px';  // Compenser le padding du modal
+    header.style.marginRight = '-20px'; // Compenser le padding du modal
+    header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
+    header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
 
     
-    // Ajuster la taille du contenu si la heatmap est visible
-    if (nameCloudState.isHeatmapVisible)  {
-        // content.style.width = '90%';
-        // content.style.maxWidth = '100%';
-        // content.style.height = '90%';
-        content.style.maxHeight = '80vh';
-    } else {
-        // content.style.width = '80%';
-        // content.style.maxWidth = '800px';
-        // content.style.maxHeight = '80vh';
-        // Centrage horizontal en mode normal (sans heatmap)
-        content.style.position = 'fixed';
-        content.style.top = '50%';
-        content.style.left = '50%';
-        content.style.transform = 'translate(-55%, -50%)';
-        content.style.maxWidth = '700px';
-        content.style.width = '75%';
-        content.style.maxHeight = '80vh';
-    }
-  
-    
-    // modal.style.width = 'fit-content';
-    // modal.style.height = 'fit-content';
+    // Container pour titre + bouton de tri
+    const titleContainer = document.createElement('div');
+    titleContainer.style.display = 'flex';
+    titleContainer.style.alignItems = 'center';
+    titleContainer.style.gap = '5px 5px';
+    titleContainer.style.marginLeft = '5px';
 
-    content.style.overflowY = 'auto';
-    content.style.position = 'relative';
-
-    content.style.pointerEvents = 'auto'; // S'assure que le contenu de la modale capte les événements
-
-    // Créer un conteneur pour l'en-tête qui restera fixe
-    const headerContainer = document.createElement('div');
-    headerContainer.style.position = 'sticky';
-    headerContainer.style.top = '0';
-    headerContainer.style.zIndex = '1001';
-    headerContainer.style.backgroundColor = 'rgba(235, 245, 255, 0.95)';
-    headerContainer.style.padding = '8px';
-    headerContainer.style.borderRadius = '8px 8px 0 0';
-    headerContainer.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)';
-    headerContainer.style.marginTop = '-20px';
-    headerContainer.style.marginLeft = '-20px';
-    headerContainer.style.marginRight = '-20px';
-    headerContainer.style.paddingLeft = '20px';
-    headerContainer.style.display = 'flex';
-    headerContainer.style.justifyContent = 'space-between';
-    headerContainer.style.alignItems = 'center';
-    headerContainer.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-
-    // Titre
     const title = document.createElement('h2');
+
+
     title.textContent = getPersonsListTitle(name, people.length, config);
 
     // on ajoute un titre caché en français , qui était l'ancien titre avant le multilingue pour le filtrage de personnes dans showHeatmapAndAdjustLayout qui est resté en français
@@ -261,481 +213,413 @@ export function showPersonsList(name, people, config, searchTerm) {
                         'Personnes';
 
 
-    title.style.backgroundColor = 'rgba(235, 245, 255, 0.9)'; // Fond bleu pâle
-    title.style.borderBottom = '1px solid rgba(200, 220, 255, 0.8)'; // Bordure bleue pâle
+    title.style.margin = '0';
+    title.style.fontSize = nameCloudState.mobilePhone ? '11px' : '16px';
 
-    title.style.marginBottom = '0';  // Changer à 0 car l'en-tête a déjà un padding
-    title.style.paddingBottom = '0';
-    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px';
-    title.style.flex = '1';  // Permet au titre de prendre l'espace disponible
 
-    // Bouton de fermeture
-    const closeBtn = document.createElement('button');
-    closeBtn.id = 'person-list-close-button';  // Ajout d'un ID unique
-    closeBtn.innerHTML = '×';
-    // closeBtn.style.position = 'absolute';
-    closeBtn.style.right = '10px';
-    closeBtn.style.top = '10px';
-    closeBtn.style.border = 'none';
-    closeBtn.style.background = 'none';
-    closeBtn.style.fontSize = '20px';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.marginLeft = '10px';  // Espace entre le titre et le bouton
+    const geoLocButton = document.createElement('button');
+    geoLocButton.innerHTML = '🌍';
+    geoLocButton.style.background = 'none';
+    geoLocButton.style.border = '1px solid #ccc';
+    geoLocButton.style.borderRadius = '4px';
+    geoLocButton.style.padding = '2px 3px';
+    geoLocButton.style.cursor = 'pointer';
+    geoLocButton.style.fontSize = '16px';
+    geoLocButton.style.minWidth = '32px';
+    geoLocButton.style.minHeight = '32px';
+    geoLocButton.title = 'geolocalisation';
 
-    // Ajouter le titre et le bouton à l'en-tête
-    headerContainer.appendChild(title);
-    headerContainer.appendChild(closeBtn);
 
-    // Ajouter l'en-tête au contenu avant la liste
-    content.appendChild(headerContainer);
+    modal._nbElementInlist = people.length;
 
-    // Ajuster le style du content pour accommoder l'en-tête fixe
-    content.style.paddingTop = '0';  // Réduire le padding car l'en-tête a son propre padding
 
-    closeBtn.onclick = () => {
-        // console.log("Fermeture explicite de la modale via le bouton de fermeture");
-        // Nettoyer toutes les poignées de redimensionnement
-        removeAllResizeHandles();
-        if (modal.parentNode) {
-            modal.removeAttribute('data-splitscreen-mode');
-            modal.parentNode.removeChild(modal);
-            
-            // Restaurer la taille originale de la heatmap si elle était visible
-            if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
-                try {
-                    const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-                    if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-                    if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-                    if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-                    if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                    
-                    // Réinitialiser les variables de suivi
-                    window.lastSelectedLocationId = null;
-                    window.isIndividualMapMode = false;
-                    
-                    // Rafraîchir la carte avec les données initiales (toutes les personnes)
-                    if (typeof refreshHeatmap === 'function') {
-                        refreshHeatmap();
-                    } else if (heatmapWrapper.map) {
-                        setTimeout(() => {
-                            heatmapWrapper.map.invalidateSize();
-                        }, 100);
-                    }
-                } catch (error) {
-                    // console.error('Erreur lors de la restauration du style de la heatmap:', error);
-                    
-                    // Restaurer aux valeurs par défaut en cas d'erreur
-                    heatmapWrapper.style.top = '60px';
-                    heatmapWrapper.style.left = '20px';
-                    heatmapWrapper.style.width = 'calc(100% - 40px)';
-                    heatmapWrapper.style.height = 'calc(100% - 100px)';
-                    
-                    setTimeout(() => {
-                        if (heatmapWrapper.map) {
-                            heatmapWrapper.map.invalidateSize();
+
+    function addElementToList(people) {
+
+        // Trier les personnes par date
+        const peopleWithDates = people.map(person => {
+            let date = '';
+            let sortDate = 0;
+            let symbolType = ''; // Pour stocker le type de symbole
+            const individual = state.gedcomData.individuals[person.id];
+
+            if (individual) {
+                if (individual.birthDate) {
+                    symbolType = 'birth';
+                    // date = `<span class="date-symbol" style="font-size: 1.5em; vertical-align: middle;">👶</span> ${individual.birthDate}`; //🚼
+                    date = '👶' + individual.birthDate;
+
+                    sortDate = extractYear(individual.birthDate) || 0;
+                } else if (individual.deathDate) {
+                    symbolType = 'death';
+                    // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">✝️</span> ${individual.deathDate}`; //'✝'; ////☦🏴⚰️
+                    date = '✝️' + individual.deathDate;
+                    sortDate = extractYear(individual.deathDate) || 0;
+                } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
+                    for (const famId of individual.spouseFamilies) {
+                        const family = state.gedcomData.families[famId];
+                        if (family && family.marriageDate) {
+                            symbolType = 'marriage';
+                            // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">💍</span> ${family.marriageDate}`; //🔗💞⚭
+                            date = '💍' + family.marriageDate;
+                            sortDate = extractYear(family.marriageDate) || 0;
+                            break;
                         }
-                    }, 100);
-                }
-            }
-        }
-    };
-
-    // Liste des personnes
-    const list = document.createElement('div');
-    list.style.display = 'grid';
-    list.style.gap = '2px';  // Espacement réduit
-    list.style.fontSize = '14px';  // Taille de police réduite
-    list.style.paddingTop = '20px';
-
-    // Trier les personnes par date
-    const peopleWithDates = people.map(person => {
-        let date = '';
-        let sortDate = 0;
-        let symbolType = ''; // Pour stocker le type de symbole
-        const individual = state.gedcomData.individuals[person.id];
-
-        if (individual) {
-            if (individual.birthDate) {
-                symbolType = 'birth';
-                // date = `<span class="date-symbol" style="font-size: 1.5em; vertical-align: middle;">👶</span> ${individual.birthDate}`; //🚼
-                date = '👶' + individual.birthDate;
-
-                sortDate = extractYear(individual.birthDate) || 0;
-            } else if (individual.deathDate) {
-                symbolType = 'death';
-                // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">✝️</span> ${individual.deathDate}`; //'✝'; ////☦🏴⚰️
-                date = '✝️' + individual.deathDate;
-                sortDate = extractYear(individual.deathDate) || 0;
-            } else if (individual.spouseFamilies && individual.spouseFamilies.length > 0) {
-                for (const famId of individual.spouseFamilies) {
-                    const family = state.gedcomData.families[famId];
-                    if (family && family.marriageDate) {
-                        symbolType = 'marriage';
-                        // date = `<span class="date-symbol" style="font-size: 1.6em; vertical-align: middle;">💍</span> ${family.marriageDate}`; //🔗💞⚭
-                        date = '💍' + family.marriageDate;
-                        sortDate = extractYear(family.marriageDate) || 0;
-                        break;
                     }
                 }
-            }
-            
-            // Ajouter les informations de lieu
-            individual.hasLocations = !!(
-                individual.birthPlace || 
-                individual.deathPlace || 
-                individual.residPlace1 || 
-                individual.residPlace2 || 
-                individual.residPlace3 ||
-                (individual.spouseFamilies && individual.spouseFamilies.some(famId => {
-                    const family = state.gedcomData.families[famId];
-                    return family && family.marriagePlace;
-                }))
-            );
-        }
-
-        return {
-            name: person.name,
-            id: person.id,
-            date: date,
-            symbolType: symbolType,
-            sortDate: sortDate,
-            hasLocations: individual ? individual.hasLocations : false
-        };
-    }).sort((a, b) => b.sortDate - a.sortDate);
-
-
-    peopleWithDates.forEach((person, index) => {
-
-        // Ajouter l'icône de localisation si la personne a des lieux
-        let locationIcon = null;
-        if (person.hasLocations) {
-            locationIcon = document.createElement('span');
-            locationIcon.className = 'location-icon';
-            locationIcon.innerHTML = '🌍';
-            locationIcon.style.fontSize = nameCloudState.mobilePhone ? '14px' : '16px';
-            locationIcon.style.cursor = 'pointer';
-            locationIcon.style.marginLeft = '5px';
-            locationIcon.style.opacity = '0.7';
-            locationIcon.style.borderRadius = '50%';
-            locationIcon.style.padding = '2px';
-            locationIcon.style.transition = 'all 0.2s ease';
-            locationIcon.title = 'Afficher les lieux de cette personne sur la carte';
-            
-            // Si cette personne est déjà sélectionnée, mettre en évidence l'icône
-            if (window.lastSelectedLocationId === person.id && window.isIndividualMapMode) {
-                locationIcon.style.color = '#ffffff';
-                locationIcon.style.backgroundColor = '#4361ee';
-                locationIcon.style.opacity = '1';
-            }
-
-            
-
-            // Effet de survol
-            locationIcon.addEventListener('mouseover', () => {
-                locationIcon.style.opacity = '1';
-            });
-            
-            locationIcon.addEventListener('mouseout', () => {
-                if (window.lastSelectedLocationId !== person.id || !window.isIndividualMapMode) {
-                    locationIcon.style.opacity = '0.7';
-                }
-            });
-            
-
-
-            // Gestionnaire de clic pour l'icône de localisation
-            locationIcon.addEventListener('click', async (e) => {
-                e.stopPropagation(); // Empêcher la propagation au div parent
                 
-                // Vérifier si une heatmap est déjà visible
-                let heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-                const currentlyHeatmapVisible = heatmapWrapper !== null;
-                
-                // Si la heatmap n'est pas visible, il faut la créer et ajuster le layout
-                if (!currentlyHeatmapVisible) {
-                    // Utiliser notre fonction qui réutilise le code existant
-                    heatmapWrapper = await showHeatmapAndAdjustLayout(modal, nameCloudState.currentConfig, hiddenFormerFrenchTitle);
-                    
-                    if (heatmapWrapper && heatmapWrapper.map) {
-                        // Attendre un peu que la carte soit complètement initialisée
-                        setTimeout(() => {
-                            // Créer une carte avec les lieux de cette personne
-                            createIndividualLocationMap(person.id);
-                            
-                            // Mettre à jour les variables de suivi
-                            window.lastSelectedLocationId = person.id;
-                            window.isIndividualMapMode = true;
-                            
-                            // Mettre en évidence cette icône
-                            locationIcon.style.color = '#ffffff';
-                            locationIcon.style.backgroundColor = '#4361ee';
-                            locationIcon.style.opacity = '1';
-                        }, 300);
-                    }
-                } else {
-                    // La heatmap est déjà visible, comportement habituel
-                    if (window.lastSelectedLocationId === person.id && window.isIndividualMapMode) {
-                        // Si on clique sur la personne déjà sélectionnée, revenir à la heatmap originale
-                        if (typeof refreshHeatmap === 'function') {
-                            refreshHeatmap();
-                            
-                            // Réinitialiser les variables de suivi
-                            window.lastSelectedLocationId = null;
-                            window.isIndividualMapMode = false;
-                            
-                            // Réinitialiser le style de l'icône
-                            locationIcon.style.color = '';
-                            locationIcon.style.backgroundColor = '';
-                            locationIcon.style.opacity = '0.7';
-                            
-                            // Supprimer le titre et le bouton de reset
-                            const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
-                            if (mapTitle) mapTitle.remove();
-                            
-                            const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
-                            if (resetButton) resetButton.remove();
-                        }
-                    } else {
-                        // Afficher les lieux de cette personne
-                        createIndividualLocationMap(person.id);
-                        
-                        // Mettre à jour les variables de suivi
-                        window.lastSelectedLocationId = person.id;
-                        window.isIndividualMapMode = true;
+                // Ajouter les informations de lieu
+                individual.hasLocations = !!(
+                    individual.birthPlace || 
+                    individual.deathPlace || 
+                    individual.residPlace1 || 
+                    individual.residPlace2 || 
+                    individual.residPlace3 ||
+                    (individual.spouseFamilies && individual.spouseFamilies.some(famId => {
+                        const family = state.gedcomData.families[famId];
+                        return family && family.marriagePlace;
+                    }))
+                );
+            }
 
-                        // Mettre à jour l'apparence des icônes
-                        document.querySelectorAll('.location-icon').forEach(icon => {
-                            icon.style.color = '';
-                            icon.style.backgroundColor = '';
-                            icon.style.opacity = '0.7';
-                        });
+            return {
+                name: person.name,
+                id: person.id,
+                date: date,
+                symbolType: symbolType,
+                sortDate: sortDate,
+                hasLocations: individual ? individual.hasLocations : false
+            };
+        }).sort((a, b) => b.sortDate - a.sortDate);
+
+        peopleWithDates.forEach((person, index) => {
+
+            const itemContainer = document.createElement('div');
+
+            itemContainer.style.cssText = `
+                display: flex; 
+                align-items: stretch; 
+                border-bottom: ${index < people.length - 1 ? '1px solid #eee' : 'none'};
+                min-height: 30px;
+            `;
+            
+            // Définir des styles alternatifs pour les lignes
+            if (index % 2 === 0) {
+                itemContainer.style.backgroundColor = '#f9f9f9';
+            }
                         
-                        // Mettre en évidence cette icône
-                        locationIcon.style.color = '#ffffff';
-                        locationIcon.style.backgroundColor = '#4361ee';
-                        locationIcon.style.opacity = '1';
-                    }
-                }
+            // Zone gauche (nom + occurrence) - cliquable
+            const leftZone = document.createElement('div');
+            leftZone.style.cssText = `
+                flex: 1; 
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                cursor: pointer; 
+                transition: background-color 0.2s;
+                padding: 8px 0px;
+                /* padding-left: 8px; */
+                /*  padding-top: 0; */
+                height: 100%;
+                background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};
+            `;
+
+            // Texte de l'élément
+            const itemName = document.createElement('div');
+            itemName.textContent = person.name;
+            itemName.style.flex = '1';
+            itemName.style.marginLeft = '5px';
+            if (nameCloudState.mobilePhone) {
+                itemName.style.fontSize = '13px';
+            }
+
+            // Dates
+            const itemDate = document.createElement('div');
+            itemDate.textContent = person.date;
+            itemDate.style.marginLeft = '10px';
+            itemDate.style.marginRight = '20px';
+            itemDate.style.color = 'darkblue';
+            itemDate.style.setProperty("text-align", "left", "important");
+            if (nameCloudState.mobilePhone) {
+                itemDate.style.fontSize = '10px';
+            }
+
+            leftZone.appendChild(itemName);
+            leftZone.appendChild(itemDate);
+
+
+
+            // Zone droite (bouton) - séparée
+            const rightZone = document.createElement('div');
+            rightZone.style.cssText = `
+                display: flex;
+                align-items: center;
+                transition: background-color 0.2s;
+                background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};                    
+                height: 40;
+            `;
+
+            // Gestion des survols et clics
+            leftZone.addEventListener('click', (event) => {
+                // console.log('Clicked on person:', person.name, person.id);
+                event.stopPropagation();
+                showPersonActions(person, event);
             });
 
-        } 
+            leftZone.addEventListener('mouseenter', () => {
+                leftZone.style.backgroundColor = index === -1 ? '#E1F0FF' : '#f0f0f0';
+            });
+            leftZone.addEventListener('mouseleave', () => {
+                leftZone.style.backgroundColor = index === -1 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+            });
 
-        const itemContainer = document.createElement('div');
+            rightZone.addEventListener('mouseenter', () => {
+                rightZone.style.backgroundColor = index === -1 ? '#E1F0FF' : '#f0f0f0';
+            });
+            rightZone.addEventListener('mouseleave', () => {
+                rightZone.style.backgroundColor = index === -1 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+            });
 
-        itemContainer.style.cssText = `
-            display: flex; 
-            align-items: stretch; 
-            border-bottom: ${index < peopleWithDates.length - 1 ? '1px solid #eee' : 'none'};
-            min-height: 30px;
-            padding: 0;
-        `;
-        // itemContainer.style.lineHeight = '1.2';
-        itemContainer.style.cursor = 'pointer';
-        
-        // Définir des styles alternatifs pour les lignes
-        if (index % 2 === 0) {
-            itemContainer.style.backgroundColor = '#f9f9f9';
-        }
-           
-        // Zone gauche (nom + occurrence) - cliquable
-        const leftZone = document.createElement('div');
-        leftZone.style.cssText = `
-            flex: 1; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer; 
-            transition: background-color 0.2s;
-            padding: 2px 0px;
-            /* padding-left: 8px; */
-            /*  padding-top: 0; */
-            /* height: 100%;*/
-            /*min-height: 15px;*/
-            background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};
-        `;
-
-        // Texte de l'élément : Name
-        const itemName = document.createElement('div');
-        itemName.textContent = person.name;
-        itemName.style.flex = '1';
-        itemName.style.marginLeft = '5px';
-        if (nameCloudState.mobilePhone) {
-            itemName.style.fontSize = '13px';
-        }
-
-        // Dates
-        const itemDate = document.createElement('div');
-        itemDate.textContent = person.date;
-        itemDate.style.marginLeft = '10px';
-        itemDate.style.marginRight = '20px';
-        itemDate.style.color = 'darkblue';
-        itemDate.style.setProperty("text-align", "left", "important");
-        if (nameCloudState.mobilePhone) {
-            itemDate.style.fontSize = '10px';
-        }
-
-        leftZone.appendChild(itemName);
-        leftZone.appendChild(itemDate);
-
-        // Zone droite (bouton) - séparée
-        const rightZone = document.createElement('div');
-        rightZone.style.cssText = `
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s;
-            background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};                    
-            /* height: 40; */
-            /*min-height: 15px;*/            
-        `;
-
-        // Gestion des survols et clics
-        leftZone.addEventListener('click', (event) => {
-            // console.log('Clicked on person:', person.name, person.id);
-            event.stopPropagation();
-            showPersonActions(person, event);
-        });
-
-        leftZone.addEventListener('mouseenter', () => {
-            leftZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
-        });
-        leftZone.addEventListener('mouseleave', () => {
-            leftZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
-        });
-
-        rightZone.addEventListener('mouseenter', () => {
-            rightZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
-        });
-        rightZone.addEventListener('mouseleave', () => {
-            rightZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
-        });
-
-
-        if (person.hasLocations) {
-            rightZone.appendChild(locationIcon);
-        }
-
-        itemContainer.appendChild(leftZone);
-        itemContainer.appendChild(rightZone);
-        list.appendChild(itemContainer);
-    });
-
-    // content.appendChild(closeBtn);
-    // content.appendChild(title);
-    content.appendChild(list);
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-
-
-    // Gestion de la touche Échap
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            // console.log("Fermeture par touche Escape", new Error().stack);
-            removeAllResizeHandles();
-            if (modal.parentNode) {
-                modal.removeAttribute('data-splitscreen-mode');
-                modal.parentNode.removeChild(modal);
-                
-                // Restaurer la taille originale de la heatmap si elle était visible
-                if ((nameCloudState.isHeatmapVisible) && heatmapWrapper) {
-                    try {
-                        const originalStyle = JSON.parse(modal.dataset.originalHeatmapStyle || '{}');
-                        if (originalStyle.top) heatmapWrapper.style.top = originalStyle.top;
-                        if (originalStyle.left) heatmapWrapper.style.left = originalStyle.left;
-                        if (originalStyle.width) heatmapWrapper.style.width = originalStyle.width;
-                        if (originalStyle.height) heatmapWrapper.style.height = originalStyle.height;
-                        
-                        // Rafraîchir la carte avec les données initiales (toutes les personnes)
-                        if (typeof refreshHeatmap === 'function') {
-                            refreshHeatmap();
-                        } else if (heatmapWrapper.map) {
-                            // heatmapWrapper.map.invalidateSize();
-                            setTimeout(() => {
-                                if (heatmapWrapper && heatmapWrapper.map) {
-                                    try {
-                                        heatmapWrapper.map.invalidateSize({ animate: false });
-                                    } catch (error) {
-                                        console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
-                                    }
-                                }
-                            }, 200);
-                        }
-                        
-                        // Réinitialiser les variables de suivi
-                        window.lastSelectedLocationId = null;
-                        window.isIndividualMapMode = false;
-                    } catch (error) {
-                        console.error('Erreur lors de la restauration du style de la heatmap:', error);
-                    }
-                }
+            if (person.hasLocations) {
+                const localConfig = {};
+                localConfig.type = 'name';
+                localConfig.scope = 'all';   
+                localConfig.startDate = null;                
+                localConfig.endDate = null;   
+                const locationIcon = createLocationIcon(true, index, person.name, localConfig, searchTerm, self);
+                rightZone.appendChild(locationIcon);
             }
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
 
-    document.addEventListener('keydown', handleEscape);
+            itemContainer.appendChild(leftZone);
+            itemContainer.appendChild(rightZone);
 
-    // Gérer la redimension de fenêtre si la heatmap est visible
-    if ((nameCloudState.isHeatmapVisible) ) {
-        const resizeHandler = () => {
-            if (!document.body.contains(modal)) {
-                window.removeEventListener('resize', resizeHandler);
-                return;
-            }
-            
-            const isLandscapeNow = window.innerWidth > window.innerHeight;
-            
-            if (isLandscapeNow) {
-                // Mode paysage
-                modal.style.top = '0';
-                modal.style.left = '50%';
-                modal.style.width = '50%';
-                modal.style.height = '100%';
-                
-                heatmapWrapper.style.width = '50%';
-                heatmapWrapper.style.height = 'calc(100% - 60px)';
-                heatmapWrapper.style.left = '0';
-                heatmapWrapper.style.top = '60px';
-            } else {
-                // Mode portrait
-                modal.style.top = '50%';
-                modal.style.left = '0';
-                modal.style.width = '100%';
-                modal.style.height = '50%';
-                
-                heatmapWrapper.style.width = '100%';
-                heatmapWrapper.style.height = '50%';
-                heatmapWrapper.style.top = '60px';
-                heatmapWrapper.style.left = '0';
-            }
-            
-            // Invalider la taille de la carte
-            if (heatmapWrapper.map) {
-                heatmapWrapper.map.invalidateSize();
-            }
-        };
-        
-        window.addEventListener('resize', resizeHandler);
-        
-        // Assurons-nous que l'écouteur est supprimé si la modale est fermée
-        const originalCloseHandler = closeBtn.onclick;
-        closeBtn.onclick = (e) => {
-            window.removeEventListener('resize', resizeHandler);
-            if (originalCloseHandler) originalCloseHandler.call(closeBtn, e);
-        };
+            itemContainer.style.cssText = 'display: flex; align-items: stretch; min-height: 30px; padding: 0;';
+
+            list.appendChild(itemContainer);
+        });
     }
 
-    modal.addEventListener('mousedown', function(e) {
-        e.stopPropagation();
-        // console.log("Mousedown sur la modale intercepté");
+
+
+
+    // Gestionnaire du bouton de geoLocalisation
+    geoLocButton.onclick = () => {
+        console.log('Clic bouton geoLocalisation');
+        showHeatmapFromShowPersonList();
+        // // if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+        // runCreateHeatmapDataForPeople().then(() => {
+        //     if (heatmapData ) {
+        //         // Fermer la modale de recherche
+        //         // closeSearchModal();
+
+        //         // Ajouter un titre à la carte
+        //         const confLocal = {};
+        //         confLocal.type = 'placeOf';
+        //         const title =  getPersonsListTitle(name, 0 , confLocal) + ' ' + name;
+        //         displayHeatMap(null, heatmapData, true, null, title).then(() => {
+        //             const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+        //             const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
+        //             let modal;
+        //             if (allModals) { modal = allModals[allModals.length - 1]; }
+        //             // const modal = document.getElementById('frequency-stat-modal')
+        //             if (heatmapWrapper && modal ) {
+        //                 adjustSplitScreenLayout(modal, heatmapWrapper, true);
+        //             }
+        //         });
+        //     } 
+        // })
+        
+
+
+
+
+
+
+    };
+    // Initialiser l'affichage des boutons
+
+    // Ajout au container
+    titleContainer.appendChild(title);
+    titleContainer.appendChild(geoLocButton);
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.padding = '1px 8px';
+    closeButton.style.marginRight = '10px';
+
+    // style hover via JS
+    closeButton.addEventListener('mouseenter', () => {
+        closeButton.style.background = 'rgba(128, 128, 128, 0.5)';
+        closeButton.style.borderRadius = '50%';
     });
-    
-    content.addEventListener('mousedown', function(e) {
-        e.stopPropagation();
-        // console.log("Mousedown sur le contenu intercepté");
+    closeButton.addEventListener('mouseleave', () => {
+        closeButton.style.background = 'none';
+        closeButton.style.borderRadius = '0';
     });
 
-    makeModalDraggableAndResizable(modal, title);
+    closeButton.onclick = () => {
+        document.body.removeChild(modal);
+        document.body.removeChild(overlay);
+    };
+
+    header.appendChild(titleContainer);
+    header.appendChild(closeButton);
+
+    modal.appendChild(header);
+    
+
+    // Créer une liste pour les occurrences avec ascenseur personnalisé
+    const list = document.createElement('div');
+    list.style.maxHeight = '80vh';
+    list.style.overflow = 'auto';
+    list.style.fontSize = '14px';  // Taille de police réduite
+
+
+    // Styles pour webkit (Chrome, Safari) POUR LE SCROLLBAR ***************************
+    const style = document.createElement('style');
+    style.textContent = `
+        .show-person-list-modal div::-webkit-scrollbar {
+            width: 20px !important;
+        }
+        .show-person-list-modal div::-webkit-scrollbar-track {
+            background: #80f0f044; /* Couleur de fond du track  */
+            border-radius: 6px;
+        }
+        .show-person-list-modal div::-webkit-scrollbar-thumb {
+            background: #3182ce; /* Couleur du curseur  */
+            border-radius: 6px;
+            border: 2px solid #f0f0f0; /* Bordure du curseur */
+            min-height: 50px;  /* Hauteur minimum du curseur  */
+        }
+        .show-person-list-modal div::-webkit-scrollbar-thumb:hover {
+            background: #2c5aa0; /* Couleur au survol */
+        }
+
+        /* Bouton du haut */
+        .show-person-list-modal div::-webkit-scrollbar-button:single-button:vertical:decrement {
+            background: #3182ce;
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,10 5,0 10,10'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* Bouton du bas */
+        .show-person-list-modal div::-webkit-scrollbar-button:single-button:vertical:increment {
+            background: #3182ce;
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,0 5,10 10,0'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 0 0 6px 6px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // FORCER l'application après le CSS tactile du resizableModalUtils.js dans la function makeModalDraggableAndResizable(modal, handle)
+    // car le makeModalDraggableAndResizable rendait le scrollbar invisible
+    setTimeout(() => {
+        const forceStyle = document.createElement('style');
+        forceStyle.textContent = `
+            .show-person-list-modal div {
+                scrollbar-width: unset !important;
+            }
+        `;
+        document.head.appendChild(forceStyle);
+    }, 0);
+
+
+    list.style.border = '1px solid #eee';
+    list.style.borderRadius = '4px';
+    list.style.padding = '5px';
+    
+    addElementToList(people);
+
+    console.log('\nStatistiques détaillées pour ', title.textContent )
+    
+    modal.appendChild(list);
+    
+    // Création d'un overlay pour l'arrière-plan
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'transparent'; // Arrière-plan transparent
+    overlay.style.zIndex = '1049'; // Juste sous la modale
+    overlay.style.pointerEvents = 'none'; // Laisser passer les clics vers l'arrière-plan
+
+    // overlay.onclick = () => {
+    //     document.body.removeChild(modal);
+    //     document.body.removeChild(overlay);
+    // };
+    
+
+    // Ajouter un moyen de fermer la modale seulement avec le bouton de fermeture
+    closeButton.onclick = () => {
+        if (document.body.contains(modal)) document.body.removeChild(modal);
+        if (document.body.contains(overlay)) document.body.removeChild(overlay);
+    };
+
+    // Ajout au DOM
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+
+    // Rendre la modale déplaçable et redimensionnable
+    makeModalDraggableAndResizable(modal, header);
+
+    // Ajuster la disposition pour le mode écran partagé si nécessaire
+    adjustSplitScreenLayout(modal, true);
+
+    makeModalInteractive(modal);
+
+    window.addEventListener('resize', () => resizeModal(modal, true));
+
+    resizeModal(modal, true)
 }
+
+
+
+
+
+
+export async function showHeatmapFromShowPersonList() {
+    let heatmapData;
+    async function runCreateHeatmapDataForPeople() {
+        heatmapData = await createHeatmapDataForPeople(window.currentPeople);
+        console.log(heatmapData);
+    }
+    // if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+    runCreateHeatmapDataForPeople().then(() => {
+        if (heatmapData ) {
+            // Fermer la modale de recherche
+            // closeSearchModal();
+
+            // Ajouter un titre à la carte
+            const confLocal = {};
+            confLocal.type = 'placeOf';
+            const title =  getPersonsListTitle(window.currentName, 0 , confLocal) + ' ' + window.currentName;
+            console.log('-debug call to displayHeatMap from showHeatmapFromShowPersonList');
+            displayHeatMap(null, heatmapData, true, null, title).then(() => {
+                const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
+                let modal;
+                if (allModals) { modal = allModals[allModals.length - 1]; }
+                // Ajuster la disposition pour le mode écran partagé si nécessaire
+                adjustSplitScreenLayout(modal, true);
+            });
+        } 
+    })
+}
+
+
 
 /**
  * Affiche la heatmap et ajuste le layout pour l'écran partagé
@@ -832,8 +716,8 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
             return null;
         }
         
-        // Ajuster la disposition pour le mode écran partagé
-        adjustSplitScreenLayout(modal, heatmapWrapper);
+        // Ajuster la disposition pour le mode écran partagé si nécessaire
+        adjustSplitScreenLayout(modal);
         
         return heatmapWrapper;
     } catch (error) {
@@ -851,187 +735,231 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
  * @param {HTMLElement} modal - La modale de liste de personnes
  * @param {HTMLElement} heatmapWrapper - Le wrapper de la heatmap
  */
-export function adjustSplitScreenLayout(modal, heatmapWrapper, isFromSearchModal = false) {
+export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    const allModals1 = document.querySelectorAll('[id^="frequency-stat-modal-"]');
+    const allModals2 = document.querySelectorAll('[id^="show-person-list-modal-"]');
+    const allModals3 = document.querySelectorAll('[id^="graph-stats-modal-"]');
+    const allModals4 = document.querySelectorAll('[id^="century-stats-modal-"]');    
+    const searchModalContent = document.querySelector('[class^="searchModal-content"]');
+
+
+    function countVisible(modals) {
+        return modals ? Array.from(modals).filter(m => getComputedStyle(m).display !== "none").length : 0;
+    }
+
+    const modalsLength = 
+        countVisible(allModals1) +
+        countVisible(allModals2) +
+        countVisible(allModals3) +
+        countVisible(allModals4) +
+        ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
+    //     countVisible(searchModalContent);
+
+
+    // console.log("- Before Ajustement de la disposition en mode écran partagé, modalsLength=", searchModal,  searchModalContent, searchModal.offsetParent, searchModalContent.offsetParent,  (searchModal.offsetParent !== null), searchModal._isVisible);
+
+    // const modalsLength = ((allModals1) ? allModals1.length : 0) 
+    // + ((allModals2) ? allModals2.length : 0)
+    // + ((allModals3) ? allModals3.length : 0)
+    // + ((allModals4) ? allModals4.length : 0)
+    // + ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
+
+    if (modalsLength > 1 || heatmapWrapper ) {
+
+        console.log("- Ajustement de la disposition en mode écran partagé, modalsLength=", modalsLength, (searchModalContent) ? searchModalContent._isVisible : false);
+        
+        modal.setAttribute('data-splitscreen-mode', 'true');
+        const isLandscape = window.innerWidth > window.innerHeight;
+        
+        // Sauvegarder le style original pour restauration ultérieure
+        const originalHeatmapStyle = {
+            top: (heatmapWrapper) ? heatmapWrapper.style.top : '60px',
+            left: (heatmapWrapper) ? heatmapWrapper.style.left : '20px',
+            width: (heatmapWrapper) ? heatmapWrapper.style.width : 'calc(100% - 40px)',
+            height: (heatmapWrapper) ? heatmapWrapper.style.height : 'calc(100% - 100px)'
+        };
+        
+        modal.dataset.originalHeatmapStyle = JSON.stringify(originalHeatmapStyle);
+        
     
-    console.log("- Ajustement de la disposition en mode écran partagé");
-    
-    modal.setAttribute('data-splitscreen-mode', 'true');
-    const isLandscape = window.innerWidth > window.innerHeight;
-    
-    // Sauvegarder le style original pour restauration ultérieure
-    const originalHeatmapStyle = {
-        top: heatmapWrapper.style.top || '60px',
-        left: heatmapWrapper.style.left || '20px',
-        width: heatmapWrapper.style.width || 'calc(100% - 40px)',
-        height: heatmapWrapper.style.height || 'calc(100% - 100px)'
-    };
-    
-    modal.dataset.originalHeatmapStyle = JSON.stringify(originalHeatmapStyle);
-    
+        const zIndexRef = modal.style.zIndex;
+        let maxComputedHeight;
+        let offsetTop = 35; //5;
+        let offsetTopInit = offsetTop;
+        let localHeight;
+        let splitWidth = window.innerWidth ;
+        let splitHeight = window.innerHeight - offsetTopInit;
+        let splitHeightFull = window.innerHeight ;
+        let commonWidth = Math.min(600, splitWidth - 10);  
+        let widthToBeApplied = commonWidth;
 
-
-
-    if (!isFromSearchModal) {
-        if (isLandscape) {
-            // Mode paysage : heatmap à gauche, liste à droite
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '50%';
-            modal.style.width = '48%';
-            modal.style.height = '95%';
-            const content = modal.querySelector('div');
-
-
-            if (content) {
-                content.style.position = 'relative'; // Au lieu de fixed
-                content.style.width = '90%';
-                content.style.maxWidth = '95%';
-                content.style.height = '90%';
-                content.style.maxHeight = '95%';
-                content.style.top = '5%';  // Centrer verticalement
-                content.style.left = '2%'; // Centrer horizontalement
-                content.style.transform = 'none'; // Supprimer le transform qui pourrait interférer
-            }
-
-
-            heatmapWrapper.style.width = '50%';
-            heatmapWrapper.style.height = 'calc(100% - 60px)';
-            heatmapWrapper.style.left = '0';
-            heatmapWrapper.style.top = '60px';
-        } else {
-            // Mode portrait : heatmap en haut, liste en bas
-            // CORRECTION: Ajuster la position de la modale pour qu'elle commence exactement
-            // là où se termine la heatmap, en évitant tout chevauchement
-            
-            const mapHeight = 'calc(50% - 30px)'; // Réduire légèrement la hauteur de la carte
-            const modalTop = 'calc(50% - 2px)'; // Début de la modale après la carte
-            
-
-
-            // Ajuster la heatmap
-            heatmapWrapper.style.width = '100%';
-            heatmapWrapper.style.height = mapHeight;
-            heatmapWrapper.style.left = '0';
-            heatmapWrapper.style.top = '60px'; // Laisser de l'espace en haut pour les contrôles
-            
-            // Ajuster la modale
-            modal.style.position = 'fixed';
-            modal.style.top = modalTop; // Commencer exactement où se termine la carte
-            modal.style.left = '0';
-            modal.style.width = '90%';
-            modal.style.height = 'calc(48% )'; // Augmenter légèrement la hauteur
-            // modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-
-            // modal.style.pointerEvents = 'auto'; // Changé de 'none' à 'auto'
-            
-
-            // IMPORTANT: Configurer aussi le contenu principal
-            const content = modal.querySelector('div'); 
-            if (content) {
-                content.style.position = 'relative'; // Au lieu de fixed
-                content.style.width = '90%';
-                content.style.maxWidth = '100%';
-                content.style.height = 'calc(100% - 40px)'; // Laisser un peu d'espace
-                content.style.maxHeight = '100%';
-                content.style.top = '20px';  // Un peu d'espace en haut
-                content.style.left = '5%';   // Centrer horizontalement
-                content.style.margin = '0 auto'; // Centrage horizontal
-                content.style.transform = 'none'; // Supprimer le transform
-                content.style.pointerEvents = 'auto'; // S'assurer que les clics fonctionnent
-            }
-
-
-        }
-    } else {
-        if (isLandscape) {
-            // Mode paysage : heatmap à gauche, liste à droite
-
-            heatmapWrapper.style.top = '2px';
-            heatmapWrapper.style.left = '0';
-            heatmapWrapper.style.width = '50%';
-            heatmapWrapper.style.height = '99%'; 
-
-            modal.style.position = 'fixed';
-            modal.style.left = '50%';
-            modal.style.height = 'auto';
-            modal.style.top = `${(window.innerHeight - modal.offsetHeight) / 2}px`;
-            if (modal.className.includes('frequency-stat-modal')) { modal.style.width = 'auto'; } 
-            else {modal.style.width = '50%';}
-
-            if (modal.className.includes('frequency-stat-modal')) { 
-                const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
-                if (allModals.length > 1) {
-                    const commonWidth = modal.offsetWidth; 
-                    allModals.forEach((modalItem, index) => {
-                        modalItem.style.position = 'fixed';
-                        modalItem.style.left = '50%';
-                        modalItem.style.height = `${((window.innerHeight) / allModals.length) - 2}px` ; //'auto';
-                        modalItem.style.top = `${((index * window.innerHeight) / allModals.length) }px`;
-                        modalItem.style.width = `${commonWidth}px`;
-                    }); 
-                }
+        if (heatmapWrapper) { 
+            if (isLandscape){
+                splitWidth = window.innerWidth/2; 
+                commonWidth = Math.min(400, splitWidth - 10);
+            } else {
+                splitHeight = window.innerHeight/2 - offsetTopInit;
+                splitHeightFull = window.innerHeight/2;
             } 
+        } 
+
+        let headerHeight = 40.8 + 2.2;
+        if (splitWidth < 439) { headerHeight = 63.2 + 10;}
+        else if (splitWidth < 520) { headerHeight = 49.6 + 10;}
+
+
+        let headerHeightSearchModal = 36 + 4 + 28 + 4 + 28 + 4 + 35.2 + 4 + 40 + 4 + 30.4 + 4;
+        if (window.innerHeight < 500) { headerHeightSearchModal = headerHeightSearchModal - 32 - 10;}
+
+
+
+        let firstLeft = 0;
+
+        if (isLandscape && heatmapWrapper) {
+            firstLeft = (splitWidth - commonWidth - 8); 
+        } else { 
+            firstLeft = (splitWidth - commonWidth)/2; 
+        }
+
+
+
+        function moveModal(modalItem) {
+            modalItem.style.position = 'fixed';
+            modalItem.style.left = firstLeft + 'px';
+            widthToBeApplied = commonWidth;
+
+            if (!heatmapWrapper) { 
+                modalItem.style.left = firstLeft + 'px';
+            }
+
+            if (modalItem._nbElementInlist) {
+                if (modalItem.className.includes('searchModal-content')) {
+                    maxComputedHeight = headerHeightSearchModal + modalItem._nbElementInlist*35 + 5;
+                    widthToBeApplied = commonWidth + 7;
+                } else {
+                    maxComputedHeight = headerHeight + modalItem._nbElementInlist*32.8 + 22 + 5;
+                }
+            } else {
+                maxComputedHeight = modalItem.offsetHeight;
+            }
+            if (modalItem.id.includes('graph-stats-modal-')) { widthToBeApplied = commonWidth + 3; }
+            if (modalItem.id.includes('century-stats-modal')) { widthToBeApplied = commonWidth - 12; }
+
+
+
+            localHeight = Math.min( maxComputedHeight , (splitHeight/ modalsLength));
+
+            console.log('\n - debug moveModal: modalItem.id, = ', modalItem, ', _nbElementInlist=', modalItem._nbElementInlist,'maxComputedHeight= ', maxComputedHeight, ', modalsLength=', modalsLength, ', localHeight=', localHeight, ', Left=',modalItem.style.left, 'commonWidth=', commonWidth )
+
+
+            if (heatmapWrapper && modalsLength === 1 ) {
+                // pour centrer la modal en hauteur quand elle est seule
+                if (isLandscape) { offsetTop = Math.max( offsetTopInit, (splitHeight - modalItem.offsetHeight)/2); }
+                else { offsetTop = Math.max( offsetTopInit, (splitHeight - localHeight)/2); }
+
+                console.log(' - debug if (heatmapWrapper && modalsLength === 1 && ) offsetTop =', offsetTop, ', splitHeight=',splitHeight, ', offsetHeight=', modalItem.offsetHeight, 'localHeight=', localHeight, ', firstLeft=',firstLeft)
+            }
+
+
+            if (localHeight > (headerHeight + 33 + 22) ) {               
+                if (maxComputedHeight < (splitHeight/ modalsLength) - 20 ) {
+                    modalItem.style.height = 'auto';
+                } else {
+                    modalItem.style.height = `${localHeight}px` ; //'auto';
+                }
+                modalItem.style.top = `${offsetTop}px`;
+                offsetTop = offsetTop + modalItem.offsetHeight; //localHeight;
+                modalItem.style.width = `${widthToBeApplied}px`;
+                modalItem.style.zIndex = zIndexRef;
+                console.log(' - debug ', modalItem.id,  ',  commonWidth =', commonWidth + 'px,  Height=', localHeight + 'px, offsetTop=',  offsetTop +'px, firstLeft=', firstLeft + 'px');
+            }
+
+            makeModalInteractive(modalItem);
+        }
+
+
+        if(isLandscape) {
+            // Mode paysage : heatmap à gauche, liste à droite
+            if (heatmapWrapper) {
+                heatmapWrapper.style.top = '2px';
+                heatmapWrapper.style.left = splitWidth + 'px'; //'0';
+                heatmapWrapper.style.width = '50%';
+                heatmapWrapper.style.height = '99%'; 
+            }
         } else {
             // Mode portrait : heatmap en haut, liste en bas
             const mapHeight = '49%'; 
-            const modalTop = '50%'; 
-            
-            // Ajuster la heatmap
-            heatmapWrapper.style.width = '100%';
-            heatmapWrapper.style.height = mapHeight;
-            heatmapWrapper.style.left = '0';
-            heatmapWrapper.style.top = '1%', 
-            
-            // Ajuster la modale
-            modal.style.position = 'fixed';
-            modal.style.top = modalTop; // Commencer exactement où se termine la carte
-            modal.style.width = 'auto'; //'90%';
-            modal.style.height = 'auto'; 
-            // modal.style.height = '49%'; //'auto'; //
-            if (modal.offsetHeight < window.innerHeight/2) { modal.style.height = 'auto';  }
-            else { modal.style.height = '49%'; }
-            modal.style.left = `${(window.innerWidth - modal.offsetWidth) / 2}px`;
-            // modal.style.marginLeft = 'auto';
-        }        
-    }
-    
-
-    // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
-    setTimeout(() => {
-        if (heatmapWrapper && heatmapWrapper.map) {
-            // Vérifier que la carte a des dimensions non nulles
-            const mapContainer = heatmapWrapper.querySelector('#ancestors-heatmap');
-            if (mapContainer && mapContainer.offsetWidth > 0 && mapContainer.offsetHeight > 0) {
-                try {
-                    // Forcer un recalcul du style avant d'invalider la taille
-                    void mapContainer.offsetHeight;
-                    
-                    // Désactiver l'animation pendant l'invalidation
-                    heatmapWrapper.map.invalidateSize({
-                        animate: false,
-                        pan: false
-                    });
-                    
-                    console.log("Carte redimensionnée avec succès");
-                } catch (error) {
-                    console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
-                }
-            } else {
-                console.warn("Le conteneur de carte a des dimensions nulles, invalidation ignorée");
+            if (heatmapWrapper) {
+                // Ajuster la heatmap
+                heatmapWrapper.style.width = '100%';
+                heatmapWrapper.style.height = mapHeight;
+                heatmapWrapper.style.left = '0';
+                heatmapWrapper.style.top = splitHeightFull + 3 + 'px'; //'1%'; 
             }
-        }
-    }, 300); // Augmenter le délai à 300ms pour plus de sécurité
+        }        
+        if (modal) {
+            // console.log('\n - debug adjustSplitScreenLayout: modal.id., allModals1, allModals2, modalsLength = ', modal.id, allModals1, allModals2, modalsLength, ', allModals2.length=', allModals2.length)
+            if (modalsLength > 1 || heatmapWrapper ) {
+                if (allModals1) {
+                    allModals1.forEach(modalItem => {
+                        if (getComputedStyle(modalItem).display !== "none") { moveModal(modalItem); }
+                        if (modalItem.id.includes('frequency-stat-modal-') && (allModals3) ) { 
+                            const idNum = modalItem.id.replace("frequency-stat-modal-", "");
+                            const graphModalItem = document.querySelector(`[id="graph-stats-modal-${idNum}"]`);
+                            // console.log('   -> also move associated graph modal for ', modalItem.id, idNum, graphModalItem);
+                            if (graphModalItem) { 
+                                moveModal(graphModalItem);
+                                graphModalItem.isAlreadyDisplayed = true;
+                            }
+                        }
+                    }); 
+                }
+                if (allModals2) {
+                    allModals2.forEach(modalItem => {
+                        if (getComputedStyle(modalItem).display !== "none") { moveModal(modalItem); }
+                    }); 
+                }
+                if (allModals3) {
+                    allModals3.forEach(modalItem => {
+                        if (!modalItem.isAlreadyDisplayed && (getComputedStyle(modalItem).display !== "none")) { moveModal(modalItem);}
+                    }); 
+                }
+                if (allModals4) {
+                    allModals4.forEach(modalItem => {
+                        if (getComputedStyle(modalItem).display !== "none") { moveModal(modalItem); }
+                    }); 
+                }
+                if (searchModalContent && (searchModalContent._isVisible)) {
+                    moveModal(searchModalContent);
+                }
+            }
+        }         
 
-    // commonWidth = '400px';
-    // const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
-    // if (allModals.length > 1) {
-    //     allModals.forEach((modalItem, index) => {
-    //         modalItem.style.width = commonWidth;
-    //         console.log('debug modal.offsetWidth in loop ', index, ', modalItem.id=', modalItem.id, ', commonWidth=', commonWidth, ', modalItem.style.width=' , modalItem.style.width)   
-    //     }); 
-    // }
-
-
+        // Attendre que le DOM soit complètement mis à jour avant d'invalider la taille
+        setTimeout(() => {
+            if (heatmapWrapper && heatmapWrapper.map) {
+                // Vérifier que la carte a des dimensions non nulles
+                const mapContainer = heatmapWrapper.querySelector('#ancestors-heatmap');
+                if (mapContainer && mapContainer.offsetWidth > 0 && mapContainer.offsetHeight > 0) {
+                    try {
+                        // Forcer un recalcul du style avant d'invalider la taille
+                        void mapContainer.offsetHeight;
+                        // Désactiver l'animation pendant l'invalidation
+                        heatmapWrapper.map.invalidateSize({
+                            animate: false,
+                            pan: false
+                        });
+                        console.log("Carte redimensionnée avec succès");
+                    } catch (error) {
+                        console.error("Erreur lors de l'invalidation de la taille de la carte:", error);
+                    }
+                } else {
+                    console.warn("Le conteneur de carte a des dimensions nulles, invalidation ignorée");
+                }
+            }
+        }, 300); // Augmenter le délai à 300ms pour plus de sécurité
+    }
 
 
 }
@@ -1111,7 +1039,6 @@ export function showPersonDetails(personId, zindex = null) {
         removeAllStatsElements();
     }
 
-
     displayPersonDetails(personId, zindex);
 
     const modal = document.querySelector('.modal-container');
@@ -1170,593 +1097,3 @@ export function showInTree(personId) {
         document.dispatchEvent(refreshListEvent);
     });
 })();
-
-/**
- * Rend une modale déplaçable et redimensionnable - solution simplifiée et stabilisée
- * @param {HTMLElement} modal - L'élément de la modale
- * @param {HTMLElement} handle - L'élément qui sert de poignée pour déplacer la modale (titre)
- */
-function makeModalDraggableAndResizable(modal, handle) {
-    // 1. Trouver le contenu réel qui doit être redimensionné
-    const content = modal.querySelector('div');
-    if (!content) return;
-    
-    // 2. S'assurer que le contenu est correctement positionné
-    content.style.position = 'fixed';
-    content.style.overflow = 'auto';
-    
-    
-    // 3. Gestion du déplacement
-    handle.style.cursor = 'move';
-    let isDragging = false;
-    let startX, startY, initialLeft, initialTop;
-    
-    // Démarrer le déplacement (souris)
-    handle.addEventListener('mousedown', function(e) {
-        if (e.target.id === 'person-list-close-button') return;
-        
-        const rect = content.getBoundingClientRect();
-        initialLeft = rect.left;
-        initialTop = rect.top;
-        startX = e.clientX;
-        startY = e.clientY;
-        isDragging = true;
-        modal.setAttribute('data-dragging', 'true'); // Ajouter un flag
-        
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        e.preventDefault();
-    });
-    
-    // Démarrer le déplacement (tactile)
-    handle.addEventListener('touchstart', function(e) {
-        if (e.target.id === 'person-list-close-button') return;
-        
-        const touch = e.touches[0];
-        const rect = content.getBoundingClientRect();
-        initialLeft = rect.left;
-        initialTop = rect.top;
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isDragging = true;
-        
-        document.addEventListener('touchmove', onTouchMove, { passive: false });
-        document.addEventListener('touchend', onTouchEnd);
-        e.preventDefault();
-    });
-    
-    // Déplacer avec la souris
-    function onMouseMove(e) {
-        if (!isDragging) return;
-        
-        moveContent(e.clientX, e.clientY);
-        e.preventDefault();
-    }
-    
-    // Déplacer avec le toucher
-    function onTouchMove(e) {
-        if (!isDragging) return;
-        
-        const touch = e.touches[0];
-        moveContent(touch.clientX, touch.clientY);
-        e.preventDefault();
-    }
-    
-
-
-    function moveContent(clientX, clientY) {
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-        
-        // Vérifier le mode splitscreen
-        const isSplitscreen = modal.getAttribute('data-splitscreen-mode') === 'true';
-        
-        // Vérifier le mode de positionnement actuel
-        const isRelativePosition = content.style.position === 'relative';
-        
-        if (isSplitscreen && isRelativePosition) {
-            // En mode splitscreen + position relative, utiliser des pourcentages
-            const parentRect = modal.getBoundingClientRect();
-            const deltaXPercent = (dx / parentRect.width) * 100;
-            const deltaYPercent = (dy / parentRect.height) * 100;
-            
-            // Récupérer les positions actuelles en pourcentage
-            let currentLeft = parseFloat(content.style.left) || 0;
-            let currentTop = parseFloat(content.style.top) || 0;
-            
-            // Si la valeur actuelle contient "%", alors on utilise directement la valeur
-            if (content.style.left.includes('%')) {
-                currentLeft = parseFloat(content.style.left);
-            }
-            
-            if (content.style.top.includes('%')) {
-                currentTop = parseFloat(content.style.top);
-            }
-            
-            // Calculer les nouvelles positions en pourcentage
-            const newLeft = currentLeft + deltaXPercent;
-            const newTop = currentTop + deltaYPercent;
-            
-            // Limiter entre 0% et 90% pour éviter la sortie complète
-            const limitedLeft = Math.max(0, Math.min(90, newLeft)); 
-            const limitedTop = Math.max(0, Math.min(90, newTop));
-            
-            // Appliquer les nouvelles positions
-            content.style.left = `${limitedLeft}%`;
-            content.style.top = `${limitedTop}%`;
-            
-            // En mode splitscreen, on met à jour les points de départ
-            startX = clientX;
-            startY = clientY;
-        } else {
-            // Mode standard avec position fixed - on garde la logique d'origine
-            // IMPORTANT: En mode normal, on ne met PAS à jour startX et startY
-            content.style.left = `${initialLeft + dx}px`;
-            content.style.top = `${initialTop + dy}px`;
-            content.style.transform = 'none';
-            
-            // Limites d'écran pour position fixed
-            const rect = content.getBoundingClientRect();
-            if (rect.top < 0) content.style.top = '0px';
-            if (rect.left < 0) content.style.left = '0px';
-            if (rect.right > window.innerWidth) 
-                content.style.left = `${window.innerWidth - rect.width}px`;
-            if (rect.bottom > window.innerHeight) 
-                content.style.top = `${window.innerHeight - rect.height}px`;
-        }
-    }
-
-    
-    // Arrêter le déplacement (souris)
-    function onMouseUp() {
-        isDragging = false;
-        modal.setAttribute('data-dragging', 'false'); // Réinitialiser le flag
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        
-        // Actualiser les poignées
-        createResizeHandles();
-    }
-    
-    // Arrêter le déplacement (tactile)
-    function onTouchEnd() {
-        isDragging = false;
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', onTouchEnd);
-        
-        // Actualiser les poignées
-        createResizeHandles();
-    }
-    
-    // Gestion du redimensionnement
-    function createResizeHandles() {
-        // Supprimer les anciennes poignées
-        content.querySelectorAll('.resize-handle').forEach(h => h.remove());
-    
-        // IMPORTANT: Forcer l'initialisation correcte des coordonnées
-        const rect = content.getBoundingClientRect();
-        
-        // Si la position est centrée avec transform, la convertir en coordonnées absolues
-        if (content.style.transform && content.style.transform.includes('translate')) {
-            // Garder la taille actuelle
-            const width = rect.width;
-            const height = rect.height;
-            
-            // Calculer la position absolue
-            const left = rect.left;
-            const top = rect.top;
-            
-            // Appliquer les nouvelles coordonnées sans transform
-            content.style.left = `${left}px`;
-            content.style.top = `${top}px`;
-            content.style.transform = 'none';
-            
-            // S'assurer que la taille reste la même
-            content.style.width = `${width}px`;
-            content.style.height = `${height}px`;
-        }
-        
-        // Positions des poignées
-        const positions = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne'];
-        
-        positions.forEach(pos => {
-            const handle = document.createElement('div');
-            handle.className = `resize-handle resize-${pos}`;
-            handle.style.position = 'absolute';
-            handle.style.zIndex = '9999';
-            handle.style.background = 'transparent'; // Rendre invisible par défaut
-            
-            // Configurer l'apparence et la position de chaque poignée selon sa position
-            switch(pos) {
-                case 'e':  // Est (droite)
-                    handle.style.right = '0px';
-                    handle.style.top = '50%';
-                    handle.style.transform = 'translateY(-50%)';
-                    handle.style.width = '10px';
-                    handle.style.height = '100%';
-                    handle.style.cursor = 'ew-resize';
-                    break;
-                case 'se': // Sud-Est (bas droite)
-                    handle.style.right = '0px';
-                    handle.style.bottom = '0px';
-                    handle.style.width = '30px';
-                    handle.style.height = '30px';
-                    handle.style.cursor = 'nwse-resize';
-                    // Montrer un indicateur visuel uniquement au survol
-                    handle.addEventListener('mouseover', () => {
-                        handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
-                    });
-                    handle.addEventListener('mouseout', () => {
-                        handle.style.background = 'transparent';
-                    });
-                    break;
-                case 's':  // Sud (bas)
-                    handle.style.bottom = '0px';
-                    handle.style.left = '50%';
-                    handle.style.transform = 'translateX(-50%)';
-                    handle.style.width = '100%';
-                    handle.style.height = '10px';
-                    handle.style.cursor = 'ns-resize';
-                    break;
-                case 'sw': // Sud-Ouest (bas gauche)
-                    handle.style.left = '0px';
-                    handle.style.bottom = '0px';
-                    handle.style.width = '35px';
-                    handle.style.height = '35px';
-                    handle.style.cursor = 'nesw-resize';
-                    // Montrer un indicateur visuel uniquement au survol
-                    handle.addEventListener('mouseover', () => {
-                        handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
-                    });
-                    handle.addEventListener('mouseout', () => {
-                        handle.style.background = 'transparent';
-                    });
-                    break;
-                case 'w':  // Ouest (gauche)
-                    handle.style.left = '0px';
-                    handle.style.top = '50%';
-                    handle.style.transform = 'translateY(-50%)';
-                    handle.style.width = '10px';
-                    handle.style.height = '100%';
-                    handle.style.cursor = 'ew-resize';
-                    break;
-                case 'nw': // Nord-Ouest (haut gauche)
-                    handle.style.left = '0px';
-                    handle.style.top = '0px';
-                    handle.style.width = '35px';
-                    handle.style.height = '35px';
-                    handle.style.cursor = 'nwse-resize';
-                    // Montrer un indicateur visuel uniquement au survol
-                    handle.addEventListener('mouseover', () => {
-                        handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
-                    });
-                    handle.addEventListener('mouseout', () => {
-                        handle.style.background = 'transparent';
-                    });
-                    break;
-                case 'n':  // Nord (haut)
-                    handle.style.top = '0px';
-                    handle.style.left = '50%';
-                    handle.style.transform = 'translateX(-50%)';
-                    handle.style.width = '100%';
-                    handle.style.height = '10px';
-                    handle.style.cursor = 'ns-resize';
-                    break;
-                case 'ne': // Nord-Est (haut droite)
-                    handle.style.right = '0px';
-                    handle.style.top = '0px';
-                    handle.style.width = '20px';
-                    handle.style.height = '20px';
-                    handle.style.cursor = 'nesw-resize';
-                    // Montrer un indicateur visuel uniquement au survol
-                    handle.addEventListener('mouseover', () => {
-                        handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.3) 30%)';
-                    });
-                    handle.addEventListener('mouseout', () => {
-                        handle.style.background = 'transparent';
-                    });
-                    break;
-            }
-    
-            setupResizeHandlers(handle, pos);
-            
-            // Ajouter la poignée au contenu
-            content.appendChild(handle);
-        });
-    }
-
-    // Fonction pour configurer les gestionnaires d'événements pour chaque poignée
-    function setupResizeHandlers(handle, pos) {
-        let isResizing = false;
-        let resizeStartX, resizeStartY, initialWidth, initialHeight, initialLeft, initialTop;
-        
-        // Démarrer le redimensionnement (souris)
-        handle.addEventListener('mousedown', function(e) {
-            if (e.target.id === 'person-list-close-button') return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const rect = content.getBoundingClientRect();
-            initialWidth = rect.width;
-            initialHeight = rect.height;
-            initialLeft = rect.left;
-            initialTop = rect.top;
-            resizeStartX = e.clientX;
-            resizeStartY = e.clientY;
-            isResizing = true;
-            
-            document.addEventListener('mousemove', onResizeMove);
-            document.addEventListener('mouseup', onResizeEnd);
-        });
-        
-        // Démarrer le redimensionnement (tactile)
-        handle.addEventListener('touchstart', function(e) {
-            if (e.target.id === 'person-list-close-button') return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Rendre la poignée visible lors du toucher en mode tactile
-            showResizeHandleVisual(handle, pos);
-            
-            const touch = e.touches[0];
-            const rect = content.getBoundingClientRect();
-            initialWidth = rect.width;
-            initialHeight = rect.height;
-            initialLeft = rect.left;
-            initialTop = rect.top;
-            resizeStartX = touch.clientX;
-            resizeStartY = touch.clientY;
-            isResizing = true;
-            
-            document.addEventListener('touchmove', onResizeTouchMove, { passive: false });
-            document.addEventListener('touchend', onResizeEnd);
-        });
-        
-        // Fonction pour afficher la visualisation de la poignée
-        function showResizeHandleVisual(handle, pos) {
-            // Définir le style de fond selon la position
-            switch(pos) {
-                case 'se':
-                    handle.style.background = 'linear-gradient(135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-                    break;
-                case 'sw':
-                    handle.style.background = 'linear-gradient(-135deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-                    break;
-                case 'nw':
-                    handle.style.background = 'linear-gradient(-45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-                    break;
-                case 'ne':
-                    handle.style.background = 'linear-gradient(45deg, transparent 70%, rgba(0,0,0,0.5) 30%)';
-                    break;
-                case 'e':
-                case 'w':
-                    handle.style.background = 'rgba(0,0,0,0.2)';
-                    break;
-                case 'n':
-                case 's':
-                    handle.style.background = 'rgba(0,0,0,0.2)';
-                    break;
-            }
-            
-            // Ajouter un indicateur de curseur visuel pour le tactile
-            const cursorIndicator = document.createElement('div');
-            cursorIndicator.className = 'touch-cursor-indicator';
-            cursorIndicator.style.position = 'absolute';
-            cursorIndicator.style.width = '24px';
-            cursorIndicator.style.height = '24px';
-            cursorIndicator.style.pointerEvents = 'none';
-            cursorIndicator.style.zIndex = '10002';
-            
-            // Définir l'indicateur selon la direction
-            if (pos.includes('e') || pos.includes('w')) {
-                cursorIndicator.innerHTML = '⟷'; // Indicateur horizontal
-            } else if (pos.includes('n') || pos.includes('s')) {
-                cursorIndicator.innerHTML = '⟺'; // Indicateur vertical
-            } else {
-                cursorIndicator.innerHTML = '⤡'; // Indicateur diagonal
-            }
-            
-            // Positionner l'indicateur près de la poignée
-            handle.appendChild(cursorIndicator);
-            
-            // Stocker une référence pour la suppression
-            handle._cursorIndicator = cursorIndicator;
-        }
-        
-         // Arrêter le redimensionnement
-        function onResizeEnd() {
-            isResizing = false;
-            document.removeEventListener('mousemove', onResizeMove);
-            document.removeEventListener('touchmove', onResizeTouchMove);
-            document.removeEventListener('mouseup', onResizeEnd);
-            document.removeEventListener('touchend', onResizeEnd);
-            
-            // Masquer la poignée après le redimensionnement
-            handle.style.background = 'transparent';
-            
-            // Supprimer l'indicateur de curseur
-            if (handle._cursorIndicator) {
-                handle._cursorIndicator.remove();
-                delete handle._cursorIndicator;
-            }
-        }
-        
-          // Redimensionner avec la souris
-        function onResizeMove(e) {
-            if (!isResizing) return;
-            
-            resizeContent(e.clientX, e.clientY);
-            e.preventDefault();
-        }
-        
-        // Redimensionner avec le toucher
-        function onResizeTouchMove(e) {
-            if (!isResizing) return;
-            
-            const touch = e.touches[0];
-            resizeContent(touch.clientX, touch.clientY);
-            e.preventDefault();
-        }
-        
-        // Fonction commune pour redimensionner
-        function resizeContent(clientX, clientY) {
-            const dx = clientX - resizeStartX;
-            const dy = clientY - resizeStartY;
-            
-            // Valeurs par défaut (pas de changement)
-            let newWidth = initialWidth;
-            let newHeight = initialHeight;
-            let newLeft = initialLeft;
-            let newTop = initialTop;
-            
-            // Redimensionnement horizontal
-            if (pos.includes('e')) {
-                newWidth = initialWidth + dx;
-            } else if (pos.includes('w')) {
-                newWidth = initialWidth - dx;
-                newLeft = initialLeft + dx;
-            }
-            
-            // Redimensionnement vertical
-            if (pos.includes('s')) {
-                newHeight = initialHeight + dy;
-            } else if (pos.includes('n')) {
-                newHeight = initialHeight - dy;
-                newTop = initialTop + dy;
-            }
-            
-            // Limites minimales
-            const minWidth = 300;
-            const minHeight = 200;
-            
-            // Vérifier le mode splitscreen
-            const isSplitscreen = modal.getAttribute('data-splitscreen-mode') === 'true';
-            const isRelativePosition = content.style.position === 'relative';
-            
-            // Gestion différente selon le mode
-            if (isSplitscreen && isRelativePosition) {
-                // Pour le mode splitscreen, adapter les limites
-                // (implementation plus simple car les positions sont déjà relatives)
-                if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {
-                    content.style.width = `${newWidth}px`;
-                }
-                
-                if ((pos.includes('n') || pos.includes('s')) && newHeight >= minHeight) {
-                    content.style.height = `${newHeight}px`;
-                }
-            } else {
-                // Appliquer les nouvelles dimensions avec limites
-                if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {
-                    content.style.width = `${newWidth}px`;
-                    if (pos.includes('w')) {
-                        content.style.left = `${newLeft}px`;
-                    }
-                }
-                
-                if ((pos.includes('n') || pos.includes('s')) && newHeight >= minHeight) {
-                    content.style.height = `${newHeight}px`;
-                    if (pos.includes('n')) {
-                        content.style.top = `${newTop}px`;
-                    }
-                }
-                
-                // Assurer que la modale reste dans l'écran
-                const rect = content.getBoundingClientRect();
-                if (rect.right > window.innerWidth) {
-                    content.style.width = `${window.innerWidth - rect.left}px`;
-                }
-                if (rect.bottom > window.innerHeight) {
-                    content.style.height = `${window.innerHeight - rect.top}px`;
-                }
-                if (rect.left < 0 && pos.includes('w')) {
-                    const adjustedWidth = initialWidth + initialLeft;
-                    content.style.left = '0px';
-                    content.style.width = `${adjustedWidth}px`;
-                }
-                if (rect.top < 0 && pos.includes('n')) {
-                    const adjustedHeight = initialHeight + initialTop;
-                    content.style.top = '0px';
-                    content.style.height = `${adjustedHeight}px`;
-                }
-            }
-        }
-
-    }
-
-
-    // 5. Centrer initialement le contenu si nécessaire
-    if (!content.style.left || !content.style.top) {
-        content.style.left = '50%';
-        content.style.top = '50%';
-        content.style.transform = 'translate(-50%, -50%)';
-    }
-    
-    // 6. Nettoyer les poignées lors de la fermeture
-    const closeButton = document.getElementById('person-list-close-button');
-    if (closeButton) {
-        const originalOnClick = closeButton.onclick;
-        closeButton.onclick = function(e) {
-            content.querySelectorAll('.resize-handle').forEach(h => h.remove());
-            
-            if (originalOnClick) {
-                originalOnClick.call(this, e);
-            }
-        };
-    }
-    
-    // 7. Gestion de la touche Échap
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            content.querySelectorAll('.resize-handle').forEach(h => h.remove());
-        }
-    });
-    
-    // 8. Initialiser les poignées
-    createResizeHandles();
-}
-
-/**
- * Fonction de nettoyage pour supprimer toutes les poignées de redimensionnement
- */
-function removeAllResizeHandles() {
-    // Nettoyer toutes les poignées individuelles
-    document.querySelectorAll('.resize-handle').forEach(handle => {
-        if (handle.parentNode) {
-            handle.parentNode.removeChild(handle);
-        }
-    });
-    
-    // Nettoyer le conteneur de poignées
-    const handleContainer = document.getElementById('resize-handles-container');
-    if (handleContainer && handleContainer.parentNode) {
-        handleContainer.parentNode.removeChild(handleContainer);
-    }
-    
-    // Arrêter tous les observateurs
-    document.querySelectorAll('[data-has-observer="true"]').forEach(el => {
-        if (el._modalObserver) {
-            el._modalObserver.disconnect();
-            delete el._modalObserver;
-        }
-    });
-    
-    // Supprimer les écouteurs d'événements window si nécessaire
-    window.removeEventListener('scroll', updateHandleContainerPosition);
-}
-
-// Fonction utilitaire pour mettre à jour la position du conteneur de poignées
-function updateHandleContainerPosition() {
-    const handleContainer = document.getElementById('resize-handles-container');
-    if (!handleContainer) return;
-    
-    const targetModal = document.querySelector('[data-has-observer="true"]');
-    if (targetModal) {
-        const rect = targetModal.getBoundingClientRect();
-        handleContainer.style.width = `${targetModal.offsetWidth}px`;
-        handleContainer.style.height = `${targetModal.offsetHeight}px`;
-        handleContainer.style.left = `${rect.left}px`;
-        handleContainer.style.top = `${rect.top}px`;
-    }
-}

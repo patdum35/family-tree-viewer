@@ -36,7 +36,7 @@ function getCloudTranslation(key) {
         // Titres modaux
         'firstnamesTitle': 'prénoms',
         'lastnamesTitle': 'Noms',
-        'jobsTitle': 'métiers',
+        'jobsTitle': 'Métiers',
         'placesTitle': 'Lieux',
         'lifespanTitle': 'Durée de vie',
         'procreationAgeTitle': 'Âge de procréat.',

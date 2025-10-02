@@ -5,10 +5,10 @@ import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
-import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { adjustSplitScreenLayout } from './nameCloudInteractions.js';
-
-
+import { resizeModal } from './nameCloudStatModal.js';
+import { fullResetAnimationState } from './treeAnimation.js';
 const searchModalTranslations = {
     fr: {
         title: "Recherche de la pers. racine",
@@ -570,6 +570,8 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
  */
 function openSearchModal() {
 
+
+    fullResetAnimationState();
     // Vérifier si la modale existe déjà
     let existingModal = document.getElementById('search-modal');
 
@@ -578,10 +580,12 @@ function openSearchModal() {
     if (existingModal) {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
-        document.getElementById('search-modal-search-input').value = '';
-        // document.getElementById('date-start').value = '';
-        // document.getElementById('date-end').value = '';
-        document.getElementById('search-modal-search-input').focus();
+        document.getElementById('searchModal-search-input').value = '';
+        document.getElementById('searchModal-search-input').focus();
+        makeModalInteractive(existingModal); 
+        const content = existingModal.querySelector('.searchModal-content'); 
+        content._isVisible = true;        
+
         return;
     }
 
@@ -589,22 +593,24 @@ function openSearchModal() {
     // Créer la modale
     const modal = document.createElement('div');
     modal.id = 'search-modal';
+    modal.className = 'search-modal';
+
     modal.innerHTML = `
-        <div class="search-modal-content">
-            <div class="search-modal-header">
+        <div class="searchModal-content">
+            <div class="searchModal-header">
                 <h3>${searchModalTranslations[window.CURRENT_LANGUAGE].title}</h3>
-                <button class="search-modal-close" onclick="closeSearchModal()">&times;</button>
+                <button class="searchModal-close" onclick="closeSearchModal()">&times;</button>
             </div>
             
-            <div class="search-modal-body">
+            <div class="searchModal-body">
 
                 <div class="search-input-section">
-                    <input type="text" id="search-modal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
-                    <button id="search-modal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
+                    <input type="text" id="searchModal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
+                    <button id="searchModal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
                 </div>
 
                 <div class="search-type-section">
-                    <div id="search-modal-search-type-container"></div>
+                    <div id="searchModal-search-type-container"></div>
                 </div>
 
                 <div class="date-filter-section">
@@ -618,7 +624,7 @@ function openSearchModal() {
                     <div id="search-help-text">${searchModalTranslations[window.CURRENT_LANGUAGE].helpName}</div>
                 </div>
                 
-                <div class="search-results" id="search-modal-search-results">
+                <div class="search-results" id="searchModal-search-results">
                     <!-- Les résultats apparaîtront ici -->
                 </div>
 
@@ -645,14 +651,15 @@ function openSearchModal() {
             pointer-events: none !important;
         }
                
-        .search-modal-content {
+        .searchModal-content {
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 600px;
+            max-width: 650px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            max-height: calc(100vh - 5px) !important; /* Utiliser presque toute la hauteur */
+            /* max-height: calc(100vh - 5px) !important; */  /* Utiliser presque toute la hauteur */
+            max-height: 70vh !important; /* Utiliser presque toute la hauteur */
             min-height: 100px; /* sinon on ne pourra pas réduire */
             /* height: auto !important; */
             pointer-events: all !important;
@@ -660,7 +667,7 @@ function openSearchModal() {
             flex-direction: column;   /* header en haut, liste qui s'adapte en bas */
         }
     
-        .search-modal-header {
+        .searchModal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -669,12 +676,12 @@ function openSearchModal() {
             color: white;
         }
         
-        .search-modal-header h3 {
+        .searchModal-header h3 {
             margin: 0;
             font-size: 18px;
         }
         
-        .search-modal-close {
+        .searchModal-close {
             background: none;
             border: none;
             color: white;
@@ -685,12 +692,12 @@ function openSearchModal() {
             height: 30px;
         }
         
-        .search-modal-close:hover {
+        .searchModal-close:hover {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
         }
         
-        .search-modal-body {
+        .searchModal-body {
             padding: 7px;
             max-height: calc(100vh - 60px) !important; /* -10px Ajuster selon la hauteur du header */
             overflow-y: auto !important;
@@ -714,8 +721,8 @@ function openSearchModal() {
             text-align: center;
         }   
 
-        #search-modal-search-input {
-            width: 200px;
+        #searchModal-search-input {
+            width: 170px;
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
@@ -723,7 +730,7 @@ function openSearchModal() {
             box-sizing: border-box;
         }      
 
-        #search-modal-search-type{
+        #searchModal-search-type{
             margin-left: -10px;
         } 
 
@@ -742,7 +749,7 @@ function openSearchModal() {
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 15px;
+            font-size: 14px;
         }
         
         #date-start, #date-end {
@@ -755,17 +762,18 @@ function openSearchModal() {
 
         #date-start {
             margin-left: 0px;
-            width: 95px;
-        }
+            width: 91px; /* 95px*/
+            margin-right: -9px;
+            }
 
         #date-end {
-            margin-left: -2px;
-            width: 82px;
+            margin-left: -8px;
+            width: 70px; /* 82px */
         }
         
-        #search-modal-search-button {
+        #searchModal-search-button {
             padding: 4px 4px;
-            background: #ff9800;
+            background: #faad38ff;
             color: white;
             border: none;
             border-radius: 4px;
@@ -774,7 +782,7 @@ function openSearchModal() {
             height: 28px !important;
         }
         
-        #search-modal-search-button:hover {
+        #searchModal-search-button:hover {
             background: #f57c00;
         }
         
@@ -788,7 +796,7 @@ function openSearchModal() {
         }
 
         /* .search-results { */
-        #search-modal-search-results {        
+        #searchModal-search-results {        
             overflow-y: auto;   /* active l’ascenseur si contenu trop grand */
             /* max-height: calc(100vh - 120px) !important; */  /* 275 Utiliser presque toute la hauteur mais pas trop il faut retirer la hauteur de toute l'entête*/
             /*height: auto !important; */
@@ -835,33 +843,46 @@ function openSearchModal() {
         }
 
 
+        /* Styles pour mobile en mode paysage  */
+        @media screen and (max-height: 500px) {
+            .searchModal-content {
+                max-height: calc(100vh - 5px) !important;   /* Utiliser presque toute la hauteur */
+            }
+            .searchModal-body {
+                max-height: calc(100vh - 60px) !important; /* Ajuster selon la hauteur du header */
+            }
+        }
+
         /* Styles pour mobile en mode portrait */
-        @media screen and (max-width: 400px)  {
+        @media screen and (max-width: 400px) {
+            .searchModal-content {
+                /* width: 100% !important;*/ /* Utiliser plus de largeur */
+                /*max-width: 700px !important;*/ /* Augmenter la largeur max */
+            }   
+
+        }
+
+
+        /* Styles pour mobile en mode smartphone*/
+        @media screen and (max-width: 400px) , screen and (max-height: 500px)  {
+
             .result-name {
                 font-size: 13px;
             }
 
-        /* Styles pour mobile en mode paysage */
-        @media screen and (max-height: 500px)  {
-
-            .search-modal-header {
+            .searchModal-header {
                 padding: 3px 20px;
             }
             
-            .search-modal-header h3 {
+            .searchModal-header h3 {
                 font-size: 16px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
             }
             
-            .search-modal-body {
+            .searchModal-body {
                 padding: 5px 10px !important; /* Réduire de 20px à 10px */
-                max-height: calc(100vh - 60px) !important; /* Ajuster selon la hauteur du header */
-            }
-
-            .search-modal-content {
-                width: 100% !important; /* Utiliser plus de largeur */
-                max-width: 700px !important; /* Augmenter la largeur max */
-            }            
+                /* max-height: calc(100vh - 60px) !important; * //* Ajuster selon la hauteur du header */
+            }           
 
             .search-type-section, 
             .search-input-section, 
@@ -875,12 +896,11 @@ function openSearchModal() {
                 font-size: 12px !important;
             }
 
-            /*.search-results {*/
-            #search-modal-search-results {
-                /*overflow-y: auto; */
-                /*  max-height: calc(100vh - 150px) !important;  Utiliser presque toute la hauteur mais pas trop il faut retirer la hauteur de toute l'entête*/
-                /* height: auto !important; */
+            .date-filter-section label {
+                /* font-weight: bold; */
+                font-size: 13px;
             }
+
 
         }
         </style>
@@ -888,34 +908,94 @@ function openSearchModal() {
 
     
     // Ajouter les styles au document
-    if (!document.getElementById('search-modal-styles')) {
+    if (!document.getElementById('searchModal-styles')) {
         const styleElement = document.createElement('div');
-        styleElement.id = 'search-modal-styles';
+        styleElement.id = 'searchModal-styles';
         styleElement.innerHTML = styles;
         document.head.appendChild(styleElement);
     }
+
+    // Styles pour webkit (Chrome, Safari) POUR LE SCROLLBAR ***************************
+    const style = document.createElement('style');
+    style.textContent = `
+        .search-modal div::-webkit-scrollbar {
+            width: 20px !important;
+        }
+        .search-modal div::-webkit-scrollbar-track {
+            background: #f9efdfff; /* Couleur de fond du track  */
+            border-radius: 6px;
+        }
+        .search-modal div::-webkit-scrollbar-thumb {
+            background: #faad38ff;  /* Couleur du curseur  */
+            border-radius: 6px;
+            border: 2px solid #f0f0f0; /* Bordure du curseur */
+            min-height: 50px;  /* Hauteur minimum du curseur  */
+        }
+        .search-modal div::-webkit-scrollbar-thumb:hover {
+            background: #ff6a00ff; /* Couleur au survol */
+        }
+
+        /* Bouton du haut */
+        .search-modal div::-webkit-scrollbar-button:single-button:vertical:decrement {
+            background: #faad38ff; 
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,10 5,0 10,10'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* Bouton du bas */
+        .search-modal div::-webkit-scrollbar-button:single-button:vertical:increment {
+            background: #faad38ff; 
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,0 5,10 10,0'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 0 0 6px 6px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // FORCER l'application après le CSS tactile du resizableModalUtils.js dans la function makeModalDraggableAndResizable(modal, handle)
+    // car le makeModalDraggableAndResizable rendait le scrollbar invisible
+    setTimeout(() => {
+        const forceStyle = document.createElement('style');
+        forceStyle.textContent = `
+            .search-modall div {
+                scrollbar-width: unset !important;
+            }
+        `;
+        document.head.appendChild(forceStyle);
+    }, 0);
+
     
     // Ajouter la modale au document
     document.body.appendChild(modal);
 
     // Cibler le vrai conteneur draggable/redimensionnable
-    const content = modal.querySelector('.search-modal-content'); 
-    const header = modal.querySelector('.search-modal-header');
+    const content = modal.querySelector('.searchModal-content'); 
+    content._isVisible = true;
+    const header = modal.querySelector('.searchModal-header');
     // Rendre la modale déplaçable et redimensionnable
     makeModalDraggableAndResizable(content, header, false);
 
-    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-    if (heatmapWrapper) {
-        adjustSplitScreenLayout(content, heatmapWrapper, true);
-    }
-
+    adjustSplitScreenLayout(content, true);
 
     // Configurer les événements
     setupModalEvents();
+
+    makeModalInteractive(modal);   
+
+    window.addEventListener('resize', () => resizeModal(content, true));
+
+    resizeModal(content, true)    
     
     // Donner le focus au champ de recherche
     setTimeout(() => {
-        document.getElementById('search-modal-search-input').focus();
+        document.getElementById('searchModal-search-input').focus();
     }, 100);
 
 }
@@ -944,8 +1024,8 @@ function setupModalEvents() {
 
         selectedValue: 'name',
         colors: {
-            main: '#ff9800',
-            options: '#ff9800',
+            main: '#faad38ff',
+            options: '#faad38ff',
             hover: '#f57c00',
             selected: '#e65100'
         },
@@ -956,9 +1036,9 @@ function setupModalEvents() {
 
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
-            width: '200px',
+            width: '170px',
             height: '28px',
-            dropdownWidth: '200px',
+            dropdownWidth: '170px',
             dropdownHeight: '240px' 
         },
         // Personnalisation des options
@@ -968,21 +1048,21 @@ function setupModalEvents() {
         },
         onChange: (value) => {
             // Vider le champ et la liste
-            document.getElementById('search-modal-search-input').value = '';
-            document.getElementById('search-modal-search-results').innerHTML = '';
+            document.getElementById('searchModal-search-input').value = '';
+            document.getElementById('searchModal-search-results').innerHTML = '';
         }
     });
 
     // Ajouter l'ID pour la fonction moveSelector
-    customSelector.id = 'search-modal-search-type';
+    customSelector.id = 'searchModal-search-type';
 
     // L'insérer dans le conteneur
-    document.getElementById('search-modal-search-type-container').appendChild(customSelector);
+    document.getElementById('searchModal-search-type-container').appendChild(customSelector);
 
 
-    const searchType = document.getElementById('search-modal-search-type');
-    const searchInput = document.getElementById('search-modal-search-input');
-    const searchButton = document.getElementById('search-modal-search-button');
+    const searchType = document.getElementById('searchModal-search-type');
+    const searchInput = document.getElementById('searchModal-search-input');
+    const searchButton = document.getElementById('searchModal-search-button');
     const helpText = document.getElementById('search-help-text');
     
     // Textes d'aide selon le type de recherche
@@ -996,8 +1076,8 @@ function setupModalEvents() {
     searchType.addEventListener('change', function() {
         helpText.textContent = helpTexts[this.value];
         // Vider le champ de recherche quand on change de type
-        document.getElementById('search-modal-search-input').value = '';
-        document.getElementById('search-modal-search-results').innerHTML = '';
+        document.getElementById('searchModal-search-input').value = '';
+        document.getElementById('searchModal-search-results').innerHTML = '';
     });
 
     
@@ -1037,21 +1117,23 @@ function setupModalEvents() {
 
 
     function moveSelector() {
-        const selector = document.getElementById('search-modal-search-type');
+        const selector = document.getElementById('searchModal-search-type');
         const typeSection = document.querySelector('.search-type-section');
         const inputSection = document.querySelector('.search-input-section');
-        const searchButton = document.getElementById('search-modal-search-button');
+        const searchButton = document.getElementById('searchModal-search-button');
         
-        if (window.innerHeight < 500) {
-            // Hauteur faible (mode paysage) : déplacer le sélecteur
-            inputSection.insertBefore(selector, searchButton);
-            selector.style.marginLeft = '0px';
-            typeSection.style.display = 'none';
-        } else {
-            // Hauteur normale (mode portrait) : remettre le sélecteur
-            typeSection.appendChild(selector);
-            selector.style.marginLeft = '-10px';
-            typeSection.style.display = 'flex';
+        if (typeSection && inputSection)  {
+            if (window.innerHeight < 500) {
+                // Hauteur faible (mode paysage) : déplacer le sélecteur
+                inputSection.insertBefore(selector, searchButton);
+                selector.style.marginLeft = '0px';
+                typeSection.style.display = 'none';
+            } else {
+                // Hauteur normale (mode portrait) : remettre le sélecteur
+                typeSection.appendChild(selector);
+                selector.style.marginLeft = '-10px';
+                typeSection.style.display = 'flex';
+            }
         }
     }
 
@@ -1066,7 +1148,7 @@ function setupModalEvents() {
 
 
     // Gestion spéciale pour les champs de dates en mode paysage mobile
-    const inputs = [document.getElementById('search-modal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
+    const inputs = [document.getElementById('searchModal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
     const modal = document.getElementById('search-modal');
 
     inputs.forEach(input => {
@@ -1100,19 +1182,16 @@ function setupModalEvents() {
 }
 
 
-window.showHeatmapFromSearch = async function() {
+export async function showHeatmapFromSearch() {
     if (window.currentSearchResults && window.currentSearchResults.length > 0) {
         // closeSearchModal();
-        await displayHeatMap(window.currentSearchResults, null, null,(window.currentSearchResults.length ===1), window.currentSearchResults[0].name);
+        await displayHeatMap(null, window.currentSearchResults, false, null, null,(window.currentSearchResults.length ===1), window.currentSearchResults[0].name);
         // Ajuster la disposition pour le mode écran partagé
         const modal = document.getElementById('search-modal')
-        const content = modal.querySelector('.search-modal-content'); 
-        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
- 
+        const content = modal.querySelector('.searchModal-content'); 
         // console.log('- debug adjustSplitScreenLayout in showHeatmapFromSearch', modal, content, heatmapWrapper)
-        if (content && heatmapWrapper) {
-
-            adjustSplitScreenLayout(content, heatmapWrapper, true);
+        if (content ) {
+            adjustSplitScreenLayout(content, true);
             // console.log('- debug adjustSplitScreenLayout in showHeatmapFromSearch')
         }
         //window.currentSearchResults
@@ -1132,11 +1211,11 @@ function performModalSearch() {
     const self = this; 
 
 
-    const searchType = document.getElementById('search-modal-search-type').value;
-    const searchTerm = document.getElementById('search-modal-search-input').value.trim();
+    const searchType = document.getElementById('searchModal-search-type').value;
+    const searchTerm = document.getElementById('searchModal-search-input').value.trim();
     const startYear = document.getElementById('date-start').value;
     const endYear = document.getElementById('date-end').value;
-    const resultsContainer = document.getElementById('search-modal-search-results');
+    const resultsContainer = document.getElementById('searchModal-search-results');
     
     // if (!searchTerm) {
     //     resultsContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 10px;">Veuillez saisir un terme de recherche</div>';
@@ -1382,14 +1461,12 @@ function performModalSearch() {
         ${searchModalTranslations[window.CURRENT_LANGUAGE].withOccupation}=${res.personWithOccupation_counter})`;
     }
 
-
-
-    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
     const modal = document.getElementById('search-modal')
-    const content = modal.querySelector('.search-modal-content'); 
-    if (heatmapWrapper) {
-        adjustSplitScreenLayout(content, heatmapWrapper, true);
-    }
+
+    const content = modal.querySelector('.searchModal-content'); 
+    content._nbElementInlist = results.length;
+    content._isVisible = true;    
+    adjustSplitScreenLayout(content, true);
 
 
 }
@@ -1400,7 +1477,7 @@ function performModalSearch() {
 window.selectPersonFromModal = function(personId) {
     // Fermer la modale
     // state.rootPersonId = personId;
-    const searchRoot = document.getElementById('stats-modal-search-root');
+    const searchRoot = document.getElementById('statsModal-search-root');
     if (searchRoot) {
         searchRoot.value = '🔍'+state.gedcomData.individuals[personId].name.replace(/\//g, '');
     }
@@ -1436,11 +1513,12 @@ window.selectPersonFromModal = function(personId) {
 window.closeSearchModal = function() {
     const modal = document.getElementById('search-modal');
     if (modal) {
-        const content = modal.querySelector('.search-modal-content'); 
+        const content = modal.querySelector('.searchModal-content'); 
         if (content) {
             if (content._cleanupDraggable) content._cleanupDraggable();
         }
         modal.style.display = 'none';
+        content._isVisible = false;
     }
 };
 

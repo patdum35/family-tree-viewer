@@ -6,7 +6,7 @@ import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
-    toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+    toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
@@ -42,7 +42,8 @@ import {
     zoomOut,
     resetView,
     resetZoom,
-    searchTree
+    searchTree,
+    closeAllModals
 } from './eventHandlers.js';
 
 let stopMonitoring = null;
@@ -170,7 +171,15 @@ export const state = {
     currentY: 0,
     nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
     linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
-    modalCounter: 0,
+    frequencyStatsModalCounter: 0,
+    showPersonListModalCounter: 0,
+    graphStatsModalCounter: 0,
+    centuryStatsModalCounter: 0,
+    topZindex : 1100,
+    minModalWidth: 250,
+    minModalHeight: 40,
+    isFullResetAnimationRequested: false,
+    // animationMap: null
 
 };
 
@@ -252,6 +261,8 @@ export function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
     updateRadarButtonText();  
+    closeAllModals();
+    fullResetAnimationState();
 
     if (state.isRadarEnabled) {
         state.treeModeReal_backup = state.treeMode;        
@@ -1783,17 +1794,22 @@ function positionRadarButton() {
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
     
+
+    let offsetY = 0;
+    let offsetY2 = 5;
+    if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+
     if (cloudButton && radarButton && statsButton) {
         const cloudRect = cloudButton.getBoundingClientRect();
         radarButton.style.position = 'fixed';
         radarButton.style.left = cloudRect.left + 'px';
-        radarButton.style.top = (cloudRect.bottom + 5) + 'px';
+        radarButton.style.top = (cloudRect.bottom + 3 + offsetY) + 'px';
         radarButton.style.zIndex = '1001';
 
 
         statsButton.style.position = 'fixed';
-        statsButton.style.left = cloudRect.left + 40 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 10) + 'px';
+        statsButton.style.left = cloudRect.left + 37 + 'px';
+        statsButton.style.top = (cloudRect.bottom + 12 - offsetY2) + 'px';
         statsButton.style.zIndex = '1001';
     }
 
@@ -1806,6 +1822,18 @@ function createAndPositionRadarOverlay() {
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
+
+    // Forcer padding/marges/tailles (avec !important)
+    statsButton.style.setProperty('padding-top', '0px', 'important');
+    statsButton.style.setProperty('padding-bottom', '0px', 'important');
+    statsButton.style.setProperty('padding-left', '0px', 'important');
+    statsButton.style.setProperty('padding-right', '0px', 'important');
+
+    statsButton.style.setProperty('border-radius', '4px', 'important');
+
+    statsButton.style.setProperty('min-width', '67px', 'important');
+    statsButton.style.setProperty('height', '27px', 'important');
+
 
     // Vérifier que les boutons existent
     if (!cloudButton || !radarButton || !statsButton) return;
@@ -1893,8 +1921,10 @@ function createAndPositionHeatMapOverlay() {
         document.body.appendChild(overlay);
     }
 
+
+
     const rect = heatMapBtn.getBoundingClientRect();
-    overlay.style.top = `${rect.top - 10}px`;
+    overlay.style.top = `${rect.top - 10 }px`;
     overlay.style.left = `${rect.left - 10}px`;
     overlay.style.width = `${rect.width + 20}px`;
     overlay.style.height = `${rect.height + 20}px`;
@@ -1903,12 +1933,15 @@ function createAndPositionHeatMapOverlay() {
 function positionHeatMapButton() {
     // const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
-    
+
+    let offsetY = 0;
+    if (window.innerWidth < 768) {offsetY = 5;}
+
     if (settingsBtn && heatMapBtn) {
         const settingRect = settingsBtn.getBoundingClientRect();
         heatMapBtn.style.position = 'fixed';
         heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
-        heatMapBtn.style.top = (settingRect.bottom + 5) + 'px';
+        heatMapBtn.style.top = (settingRect.bottom + 5 + offsetY) + 'px';
         heatMapBtn.style.zIndex = '1001';
     }
 }

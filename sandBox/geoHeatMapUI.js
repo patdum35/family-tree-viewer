@@ -10,7 +10,8 @@ import { getTranslation } from './nameCloudUI.js';
 import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
 import { getPersonsListTitle } from './nameCloudInteractions.js';
 import { addTooltipTransparencyFix } from './treeAnimation.js';
-
+import { showHeatmapFromSearch } from './searchModalUI.js';
+import { showHeatmapFromShowPersonList } from './nameCloudInteractions.js';
 
 /**
  * Fonction de traduction spécifique pour geoHeatMapUI.js
@@ -44,7 +45,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Erreur lors de la création de la carte. Voir console pour détails.',
         'noValidCoordinates': 'Aucune coordonnée valide trouvée dans les données',
-        'invalidHeatmapData': 'Données de heatmap invalides:'
+        'invalidHeatmapData': 'Données de heatmap invalides:',
+        'seeAllPlaces' : 'Voir tous les lieux'
       },
       'en': {
         // Titres et boutons
@@ -73,7 +75,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Error creating the map. See console for details.',
         'noValidCoordinates': 'No valid coordinates found in data',
-        'invalidHeatmapData': 'Invalid heatmap data:'
+        'invalidHeatmapData': 'Invalid heatmap data:',
+        'seeAllPlaces' : 'See all places'
       },
       'es': {
         // Titres et boutons
@@ -102,7 +105,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Error al crear el mapa. Ver consola para detalles.',
         'noValidCoordinates': 'No se encontraron coordenadas válidas en los datos',
-        'invalidHeatmapData': 'Datos de mapa de calor inválidos:'
+        'invalidHeatmapData': 'Datos de mapa de calor inválidos:',
+        'seeAllPlaces' : 'Ver todos los lugares'
       },
       'hu': {
         // Titres et boutons
@@ -131,7 +135,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Hiba a térkép létrehozásakor. Részletek a konzolon.',
         'noValidCoordinates': 'Nem található érvényes koordináta az adatokban',
-        'invalidHeatmapData': 'Érvénytelen hőtérkép adatok:'
+        'invalidHeatmapData': 'Érvénytelen hőtérkép adatok:',
+        'seeAllPlaces' : 'Összes hely megtekintése'
       }
     };
   
@@ -172,8 +177,8 @@ function getUITranslation(key) {
   }
 
 
-export async function displayHeatMap(currentSearchResults = null, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
-    // console.log('- debug displayHeatMap' , currentSearchResults, newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
+export async function displayHeatMap(personId = null, currentSearchResults = null, isResultsFormated = false, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
+    console.log('- debug displayHeatMap' , personId, currentSearchResults,isResultsFormated,  newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
     // Création d'un indicateur de chargement
     const loadingIndicator = document.createElement('div');
     loadingIndicator.style.position = 'fixed';
@@ -223,7 +228,12 @@ export async function displayHeatMap(currentSearchResults = null, newConfig = nu
         // Générer les données pour la heatmap
         let heatmapData;
         if (isSearchResults) {
-            heatmapData = await createDataForHeatMap(currentConfig, false, currentSearchResults); 
+            if (isResultsFormated) { 
+                heatmapData = currentSearchResults;
+            } else {
+                heatmapData = await createDataForHeatMap(currentConfig, false, currentSearchResults);  
+            }
+
         } else {
             heatmapData = await createDataForHeatMap(currentConfig, true); 
         }      
@@ -457,22 +467,20 @@ export async function createIndividualLocationMap(personId, heatmapData = null, 
 
             
             // Ajouter un bouton pour revenir à la heatmap originale
-            addMapButton(heatmapWrapper, 'Voir tous les lieux', () => {
+            addMapButton(heatmapWrapper, getUITranslation('seeAllPlaces'), () => {
                 // Rétablir la heatmap originale
-                if (typeof refreshHeatmap === 'function') {
-                    refreshHeatmap();
-                    
-                    // Réinitialiser les variables de suivi
-                    window.lastSelectedLocationId = null;
-                    window.isIndividualMapMode = false;
-                    
-                    // Mettre à jour l'apparence des icônes de localisation
-                    document.querySelectorAll('.location-icon').forEach(icon => {
-                        icon.style.color = '';
-                        icon.style.backgroundColor = '';
-                    });
-                }
-                
+                const modal = document.getElementById('search-modal')
+                const isVisible = modal && getComputedStyle(modal).display !== 'none' && getComputedStyle(modal).visibility !== 'hidden';
+                if (isVisible) { 
+                    showHeatmapFromSearch();
+                } else {                           
+                    const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
+                    const isVisible = (allModals) && allModals[allModals.length - 1] && getComputedStyle(allModals[allModals.length - 1]).display !== 'none' && getComputedStyle(allModals[allModals.length - 1]).visibility !== 'hidden';
+                    if (isVisible) { 
+                        showHeatmapFromShowPersonList();
+                    }
+                } 
+
                 // Supprimer le titre et le bouton de reset
                 const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
                 if (mapTitle) mapTitle.remove();
@@ -691,9 +699,11 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
         // Seulement redimensionner si nécessaire
         if (needsResize) {
             // Calculer les nouvelles dimensions pour respecter les marges
-            const newWidth = Math.min(wrapperRect.width, windowWidth - 40);
-            const newHeight = Math.min(wrapperRect.height, windowHeight - 100);
-            
+            // const newWidth = Math.min(wrapperRect.width, windowWidth - 40);
+            const newWidth = Math.min(wrapperRect.width, windowWidth - 2);
+            // const newHeight = Math.min(wrapperRect.height, windowHeight - 100);
+            const newHeight = Math.min(wrapperRect.height, windowHeight - 5);
+
             // Appliquer les nouvelles dimensions
             wrapper.style.width = `${newWidth}px`;
             wrapper.style.height = `${newHeight}px`;
@@ -1437,7 +1447,8 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
                 refreshHeatmap();
             }
         } else {
-            displayHeatMap();
+            console.log('-debug call to displayHeatMap from createMapControls');
+            displayHeatMap(null, false);
         }
     });
     

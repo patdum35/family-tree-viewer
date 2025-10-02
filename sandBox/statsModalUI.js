@@ -6,7 +6,9 @@ import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
 import { processNamesData } from './nameCloud.js';
 import { ensureStatsExist } from './nameCloudAverageAge.js';
 import { setupSearchFieldModal, findPersonsBy } from './searchModalUI.js';
-import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { closeAllModals } from './eventHandlers.js';
+import { fullResetAnimationState } from './treeAnimation.js';
 
 let lang = window.CURRENT_LANGUAGE;
 
@@ -230,15 +232,18 @@ const translations = {
  * Crée et affiche la modale de recherche
  */
 function openStatsModal() {
+
+    fullResetAnimationState();
     // Vérifier si la modale existe déjà
     let existingModal = document.getElementById('stats-modal');
     if (existingModal) {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
-        document.getElementById('stats-modal-search-input').value = '';
-        document.getElementById('stats-modal-search-input').focus();
-        const searchRoot = document.getElementById('stats-modal-search-root');
+        document.getElementById('statsModal-search-input').value = '';
+        document.getElementById('statsModal-search-input').focus();
+        const searchRoot = document.getElementById('statsModal-search-root');
         searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
+        makeModalInteractive(existingModal);  
         return;
     }
 
@@ -246,39 +251,39 @@ function openStatsModal() {
     const modal = document.createElement('div');
     modal.id = 'stats-modal';
     modal.innerHTML = `
-        <div class="stats-modal-content">
-            <div class="stats-modal-header">
+        <div class="statsModal-content">
+            <div class="statsModal-header">
                 <h3>${translations[lang].title}</h3>
-                <button class="stats-modal-close" onclick="closeStatsModal()">&times;</button>
+                <button class="statsModal-close" onclick="closeStatsModal()">&times;</button>
             </div>
             
-            <div class="stats-modal-body">
+            <div class="statsModal-body">
 
                 <div class="stats-type-section">
-                    <div id="stats-modal-search-type-container"></div>
-                    <label id = "stats-modal-search-type-label">${translations[lang].categoryLabel}</label>
+                    <div id="statsModal-search-type-container"></div>
+                    <label id = "statsModal-search-type-label">${translations[lang].categoryLabel}</label>
                 </div>
 
                 <div class="stats-input-section">
-                    <input type="text" id="stats-modal-search-input" placeholder="${translations[lang].searchPlaceholder}">
-                    <button id="stats-modal-search-button"> ${translations[lang].searchButton} </button>
+                    <input type="text" id="statsModal-search-input" placeholder="${translations[lang].searchPlaceholder}">
+                    <button id="statsModal-search-button"> ${translations[lang].searchButton} </button>
                 </div>
 
                 <div class="date-filter-section">
                     <input type="number" id="stats-date-start" placeholder="${translations[lang].yearStartPlaceholder}" min="1000" max="2100">
-                    <span><label id="stats-date-label0">- </label></span>
+                    <span><label id="stats-date-label0">-</label></span>
                     <input type="number" id="stats-date-end" placeholder="${translations[lang].yearEndPlaceholder}" min="1000" max="2100">
                     <label id="stats-date-label">${translations[lang].dateFilterLabel}</label>
                 </div>
 
                 <div class="stats-searchRoot-section">
-                    <div id="stats-modal-search-scope-container"></div>
-                    <input type="text" id="stats-modal-search-root" placeholder="">
+                    <div id="statsModal-search-scope-container"></div>
+                    <input type="text" id="statsModal-search-root" placeholder="">
                     <label>${translations[lang].perimeterLabel}</label>
                 </div>
 
                 <div class="stats-statsType-section">
-                    <div id="stats-modal-statsType-container"></div>
+                    <div id="statsModal-statsType-container"></div>
                     <label>${translations[lang].statsTypeLabel}</label>
                 </div>
 
@@ -286,7 +291,7 @@ function openStatsModal() {
                     <div id="stats-help-text">${translations[lang].helpName}</div>
                 </div>
                 
-                <div class="stats-results" id="stats-modal-search-results">
+                <div class="stats-results" id="statsModal-search-results">
                     <!-- Les résultats apparaîtront ici -->
                 </div>
 
@@ -313,7 +318,7 @@ function openStatsModal() {
             pointer-events: none !important; 
         }
            
-        .stats-modal-content {
+        .statsModal-content {
             background: white;
             border-radius: 8px;
             width: 90%;
@@ -325,7 +330,7 @@ function openStatsModal() {
             pointer-events: all !important;
         }
 
-        .stats-modal-header {
+        .statsModal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -334,12 +339,12 @@ function openStatsModal() {
             color: white;
         }
         
-        .stats-modal-header h3 {
+        .statsModal-header h3 {
             margin: 0;
             font-size: 18px;
         }
         
-        .stats-modal-close {
+        .statsModal-close {
             background: none;
             border: none;
             color: white;
@@ -350,12 +355,12 @@ function openStatsModal() {
             height: 30px;
         }
         
-        .stats-modal-close:hover {
+        .statsModal-close:hover {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
         }
         
-        .stats-modal-body {
+        .statsModal-body {
             padding: 7px;
             max-height: calc(100vh - 100px) !important; /* Ajuster selon la hauteur du header */
             overflow-y: auto !important;
@@ -379,8 +384,8 @@ function openStatsModal() {
             margin-left: 1px;
         }   
 
-        #stats-modal-search-input {
-            width: 200px;
+        #statsModal-search-input {
+            width: 180px;
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
@@ -388,7 +393,7 @@ function openStatsModal() {
             box-sizing: border-box;
         }      
 
-        #stats-modal-search-type{
+        #statsModal-search-type{
             margin-left: -10px;
         } 
 
@@ -435,15 +440,16 @@ function openStatsModal() {
 
         #stats-date-start {
             margin-left: 0px;
-            width: 95px;
+            margin-right: -4px;
+            width: 91px;
         }
 
         #stats-date-end {
-            margin-left: -2px;
-            width: 82px;
+            margin-left: -6px;
+            width: 74px;
         }
 
-        #stats-modal-search-button {
+        #statsModal-search-button {
             padding: 4px 4px;
             background: #438aee;
             color: white;
@@ -452,9 +458,10 @@ function openStatsModal() {
             cursor: pointer;
             font-weight: bold;
             height: 28px !important;
+            width: 50px !important;
         }
         
-        #stats-modal-search-button:hover {
+        #statsModal-search-button:hover {
             background: #f57c00;
         }
         
@@ -514,7 +521,7 @@ function openStatsModal() {
             gap: 5px !important;
             align-items: center !important;
         }
-        #stats-modal-search-root {
+        #statsModal-search-root {
             width: 100px;
         }
 
@@ -528,21 +535,21 @@ function openStatsModal() {
 
         /* Styles pour mobile en mode paysage */
         @media screen and (max-height: 500px)  {
-            .stats-modal-header {
+            .statsModal-header {
                 padding: 3px 35px !important; /* Réduire de 20px à 10px */
             }
             
-            .stats-modal-header h3 {
+            .statsModal-header h3 {
                 font-size: 16px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
             }
             
-            .stats-modal-body {
+            .statsModal-body {
                 padding: 5px 10px !important; /* Réduire de 20px à 10px */
                 max-height: calc(100vh - 60px) !important; /* Ajuster selon la hauteur du header */
             }
 
-            .stats-modal-content {
+            .statsModal-content {
                 width: 100% !important; /* Utiliser plus de largeur */
                 max-width: 700px !important; /* Augmenter la largeur max */
             }            
@@ -573,27 +580,27 @@ function openStatsModal() {
                 align-items: center !important;
             }
 
-            #stats-modal-search-input {
-                order: 2;
-                width: 190px !important;
+            #statsModal-search-input {
+                order: 3;
+                width: 180px !important;
                 margin-left: 0px !important;
             }
             
-            #stats-modal-search-type {
+            #statsModal-search-type {
                 order: 1;
-                width: 200px !important;
+                width: 180px !important;
                 position: relative !important;
-                margin-left: 5px !important;
+                margin-left: 0px !important;
             }
             
-            #stats-modal-search-button {
-                order: 3;
-                width: 70px !important;
+            #statsModal-search-button {
+                order: 2;
+                width: 50px !important;
                 height: 28px !important;
                 font-size: 13px !important;
             }
 
-            #stats-modal-search-type-label {
+            #statsModal-search-type-label {
                 order: 4;
                 font-weight: bold;
                 color: #333;
@@ -606,9 +613,9 @@ function openStatsModal() {
     `;
     
     // Ajouter les styles au document
-    if (!document.getElementById('stats-modal-styles')) {
+    if (!document.getElementById('statsModal-styles')) {
         const styleElement = document.createElement('div');
-        styleElement.id = 'stats-modal-styles';
+        styleElement.id = 'statsModal-styles';
         styleElement.innerHTML = styles;
         document.head.appendChild(styleElement);
     }
@@ -617,17 +624,19 @@ function openStatsModal() {
     document.body.appendChild(modal);
 
     // Cibler le vrai conteneur draggable/redimensionnable
-    const content = modal.querySelector('.stats-modal-content');
-    const header = modal.querySelector('.stats-modal-header');
+    const content = modal.querySelector('.statsModal-content');
+    const header = modal.querySelector('.statsModal-header');
     // Rendre la modale déplaçable et redimensionnable
     makeModalDraggableAndResizable(content, header, false);
 
     // Configurer les événements
     setupModalEvents();
+
+    makeModalInteractive(modal);        
     
     // Donner le focus au champ de recherche
     setTimeout(() => {
-        document.getElementById('stats-modal-search-input').focus();
+        document.getElementById('statsModal-search-input').focus();
     }, 100);
 
     updatehelpText();
@@ -656,14 +665,14 @@ function updatehelpText() {
     
     // Changer le texte d'aide selon le type sélectionné
     const helpText = document.getElementById('stats-help-text');
-    const searchTypeSelect = document.querySelector('#stats-modal-search-type select');
+    const searchTypeSelect = document.querySelector('#statsModal-search-type select');
     const selectedTypeOption = searchTypeSelect.options[searchTypeSelect.selectedIndex];
-    const searchTerm = document.getElementById('stats-modal-search-input').value.trim();
-    const searchType = document.getElementById('stats-modal-search-type');
-    const searchScope = document.getElementById('stats-modal-search-scope');
-    const searchScopeSelect = document.querySelector('#stats-modal-search-scope select');
+    const searchTerm = document.getElementById('statsModal-search-input').value.trim();
+    const searchType = document.getElementById('statsModal-search-type');
+    const searchScope = document.getElementById('statsModal-search-scope');
+    const searchScopeSelect = document.querySelector('#statsModal-search-scope select');
     const selectedScopeOption = searchScopeSelect.options[searchScopeSelect.selectedIndex];
-    const statsType = document.getElementById('stats-modal-StatsType');   
+    const statsType = document.getElementById('statsModal-StatsType');   
     const startYear = document.getElementById('stats-date-start').value;
     const endYear = document.getElementById('stats-date-end').value;
     let textEnd = '';
@@ -693,8 +702,8 @@ function updatehelpText() {
         '<span style="color:blue;">' + '<br><br><b>' + translations[lang].helpGO  +'</b></span>';          
 
     // Vider le champ de recherche quand on change de type
-    document.getElementById('stats-modal-search-input').value = '';
-    document.getElementById('stats-modal-search-results').innerHTML = '';
+    document.getElementById('statsModal-search-input').value = '';
+    document.getElementById('statsModal-search-results').innerHTML = '';
 }
 
 /**
@@ -708,27 +717,27 @@ function setupModalEvents() {
             selected: '#e65100'
         }
 
-    const customSelector = createTypeSelect('noms', true, 200, 200, colors);
-    const customScopeSelector = createScopeSelect('all', true, 200, 200, colors);
-    const customStatsTypeSelector = createStatsTypeSelect('all', true, 200, 200, colors);
+    const customSelector = createTypeSelect('noms', true, 180, 200, colors);
+    const customScopeSelector = createScopeSelect('all', true, 180, 200, colors);
+    const customStatsTypeSelector = createStatsTypeSelect('all', true, 180, 200, colors);
     //  const typeValues = ['all', 'directAncestors', 'ancestors', 'directDescendants', 'descendants'];
 
 
     // Ajouter l'ID pour la fonction moveSelector
-    customSelector.id = 'stats-modal-search-type';
-    customScopeSelector.id = 'stats-modal-search-scope';
-    customStatsTypeSelector.id = 'stats-modal-StatsType';
+    customSelector.id = 'statsModal-search-type';
+    customScopeSelector.id = 'statsModal-search-scope';
+    customStatsTypeSelector.id = 'statsModal-StatsType';
 
     // L'insérer dans le conteneur
-    document.getElementById('stats-modal-search-type-container').appendChild(customSelector);
-    document.getElementById('stats-modal-search-scope-container').appendChild(customScopeSelector);
-    document.getElementById('stats-modal-statsType-container').appendChild(customStatsTypeSelector);
+    document.getElementById('statsModal-search-type-container').appendChild(customSelector);
+    document.getElementById('statsModal-search-scope-container').appendChild(customScopeSelector);
+    document.getElementById('statsModal-statsType-container').appendChild(customStatsTypeSelector);
 
-    const searchType = document.getElementById('stats-modal-search-type');
-    const searchScope = document.getElementById('stats-modal-search-scope');  
-    const statsType = document.getElementById('stats-modal-StatsType');   
-    const searchInput = document.getElementById('stats-modal-search-input');
-    const searchButton = document.getElementById('stats-modal-search-button');
+    const searchType = document.getElementById('statsModal-search-type');
+    const searchScope = document.getElementById('statsModal-search-scope');  
+    const statsType = document.getElementById('statsModal-StatsType');   
+    const searchInput = document.getElementById('statsModal-search-input');
+    const searchButton = document.getElementById('statsModal-search-button');
     const startYear = document.getElementById('stats-date-start');
     const endYear = document.getElementById('stats-date-end');
     const dateLabel = document.getElementById('stats-date-label');
@@ -736,7 +745,7 @@ function setupModalEvents() {
     
     // const helpText = document.getElementById('stats-help-text');
 
-    const searchRoot = document.getElementById('stats-modal-search-root');
+    const searchRoot = document.getElementById('statsModal-search-root');
     if (searchScope.value != 'all') {
         searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
         searchRoot.style.display =  'flex';
@@ -838,28 +847,31 @@ function setupModalEvents() {
 
 
     function moveSelector() {
-        const selector = document.getElementById('stats-modal-search-type');
-        const selectorLlabel = document.getElementById('stats-modal-search-type-label');
+        const selector = document.getElementById('statsModal-search-type');
+        const selectorLabel = document.getElementById('statsModal-search-type-label');
         const typeSection = document.querySelector('.stats-type-section');
         const inputSection = document.querySelector('.stats-input-section');
-        const searchButton = document.getElementById('stats-modal-search-button');
+        const searchButton = document.getElementById('statsModal-search-button');
+        const searchTerm = document.getElementById('statsModal-search-input');
         
-        if (window.innerHeight < 500) {
-            // Hauteur faible (mode paysage) : déplacer le sélecteur
-            inputSection.appendChild(selectorLlabel);
-            inputSection.appendChild(searchButton);
-            // inputSection.insertBefore(selector, searchButton);
-            inputSection.insertBefore(selector, selectorLlabel);
-            // inputSection.appendChild(selectorLlabel);
+        if (typeSection && inputSection)  {
+            if (window.innerHeight < 500) {
+                // Hauteur faible (mode paysage) : déplacer le sélecteur
+                // inputSection.appendChild(selectorLabel);
+                // inputSection.appendChild(searchButton);
+                // inputSection.insertBefore(selector, selectorLabel);
 
+                inputSection.appendChild(selector);
+                inputSection.appendChild(selectorLabel);
+                typeSection.style.display = 'none';
+            } else {
+                // Hauteur normale (mode portrait) : remettre le sélecteur
+                inputSection.insertBefore(searchTerm, searchButton);
 
-
-            typeSection.style.display = 'none';
-        } else {
-            // Hauteur normale (mode portrait) : remettre le sélecteur
-            typeSection.appendChild(selector);
-            typeSection.appendChild(selectorLlabel);
-            typeSection.style.display = 'flex';
+                typeSection.appendChild(selector);
+                typeSection.appendChild(selectorLabel);
+                typeSection.style.display = 'flex';
+            }
         }
     }
 
@@ -874,7 +886,7 @@ function setupModalEvents() {
 
 
     // Gestion spéciale pour les champs de dates en mode paysage mobile
-    const inputs = [document.getElementById('stats-modal-search-input'), document.getElementById('stats-date-start'), document.getElementById('stats-date-end')];
+    const inputs = [document.getElementById('statsModal-search-input'), document.getElementById('stats-date-start'), document.getElementById('stats-date-end')];
     const modal = document.getElementById('stats-modal');
 
     inputs.forEach(input => {
@@ -911,13 +923,13 @@ function setupModalEvents() {
  * Effectue la recherche dans la modale
  */
 function performModalSearch() {
-    const searchType = document.getElementById('stats-modal-search-type').value;
-    const searchScope = document.getElementById('stats-modal-search-scope').value;
-    const statsType = document.getElementById('stats-modal-StatsType').value;   
-    const searchTerm = document.getElementById('stats-modal-search-input').value.trim();
+    const searchType = document.getElementById('statsModal-search-type').value;
+    const searchScope = document.getElementById('statsModal-search-scope').value;
+    const statsType = document.getElementById('statsModal-StatsType').value;   
+    const searchTerm = document.getElementById('statsModal-search-input').value.trim();
     const startYear = document.getElementById('stats-date-start').value;
     const endYear = document.getElementById('stats-date-end').value;
-    const resultsContainer = document.getElementById('stats-modal-search-results');
+    const resultsContainer = document.getElementById('statsModal-search-results');
     
     
     // Convertir les années en nombres ou null
@@ -955,7 +967,7 @@ function performModalSearch() {
             } else if (searchType === 'duree_vie' || searchType === 'age_procreation' || searchType === 'age_first_child' || searchType === 'age_marriage' || searchType === 'nombre_enfants' ) {
                 ensureStatsExist(nameData);
                 new createFrequencyStatsModal(nameData, searchType, nameCloudState.currentConfig, searchTerm);
-                createStatsModal(nameData, searchType, searchTerm);
+                createStatsModal(nameData, searchType, state.frequencyStatsModalCounter -1);
                 results = [];
             } 
         } else {
@@ -983,13 +995,14 @@ function performModalSearch() {
 window.closeStatsModal = function() {
     const modal = document.getElementById('stats-modal');
     if (modal) {
-        const content = modal.querySelector('.stats-modal-content'); 
+        const content = modal.querySelector('.statsModal-content'); 
         if (content) {
             if (content._cleanupDraggable) content._cleanupDraggable();
         }
 
         modal.style.display = 'none';
     }
+    closeAllModals();
 };
 
 /**

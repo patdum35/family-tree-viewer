@@ -1,5 +1,68 @@
 import { state } from './main.js';
 
+export function makeModalInteractive(modal) {
+    // modal.style.position = "fixed";   // ou absolute selon ton cas
+    state.topZindex++;
+    modal.style.zIndex = state.topZindex;
+    console.log('\n\n debug init makeModalInteractive ', modal.id, state.topZindex);
+
+    // écoute tout ce qui se passe dans la modal (y compris header)
+    modal.addEventListener("mousedown", () => {
+        state.topZindex++;
+        modal.style.zIndex = state.topZindex;
+        console.log('\n\n debug mousedown in makeModalInteractive ', modal.id, state.topZindex);
+        if (modal.id === 'person-details-modal') {
+            specialCaseOfPersonDetailsModal();
+        }
+    }, true); // <== capture activée
+
+
+    function specialCaseOfPersonDetailsModal() {
+        console.log("bringToFront sur :", modal.id, modal._handleContainer);
+        // // si la modal a un conteneur de poignées, on le remet devant aussi
+        const hc = modal._handleContainer;
+
+        if (hc) {
+            console.log('\n\n debug1 makeModalInteractive ', modal.id)
+            // s'assurer que le container est le dernier enfant du body (au-dessus dans l'ordre DOM)
+            document.body.appendChild(hc);
+
+            // position fixed évite certains problèmes de stacking context (ajuste si tu veux rester en absolute)
+            hc.style.position = 'fixed';
+            hc.style.pointerEvents = 'none'; // container ignore les clics, mais les handles auront pointerEvents auto
+
+            // recalculer sa position pour coller sur la modal
+            const rect = modal.getBoundingClientRect();
+            hc.style.left = `${Math.round(rect.left)}px`;
+            hc.style.top = `${Math.round(rect.top)}px`;
+            hc.style.width = `${modal.offsetWidth}px`;
+            hc.style.height = `${modal.offsetHeight}px`;
+
+            // z-index du container + des handles + des indicateurs
+            hc.style.zIndex = state.topZindex + 1;
+
+            // handles
+            const handles = hc.querySelectorAll('.resize-handle');
+            handles.forEach(h => {
+            h.style.zIndex = state.topZindex + 2;
+            h.style.pointerEvents = 'auto'; // réactiver les clics sur chaque poignée
+            });
+
+            // indicateurs tactiles éventuels
+            const cursors = hc.querySelectorAll('.touch-cursor-indicator');
+            cursors.forEach(c => c.style.zIndex = state.topZindex + 3);
+
+            // forcer une remise à jour de la position si modal._updateHandleContainer existe
+            if (typeof modal._updateHandleContainer === 'function') {
+            modal._updateHandleContainer();
+            } else {
+            // fallback : appliquer rect déjà calculé (déjà fait plus haut)
+            }
+        }
+    }
+}
+
+
 /**
  * Rend une modale déplaçable et redimensionnable
  * @param {HTMLElement} modal - L'élément de la modale
@@ -9,7 +72,7 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
     // 1. Trouver le contenu réel à redimensionner (la modale elle-même dans ce cas)
     if (!modal) return;
 
-    console.log('n\n- debug in makeModalDraggableAndResizable  RESET position and size', rememberPositionAndSize);
+    // console.log('n\n- debug in makeModalDraggableAndResizable  RESET position and size', rememberPositionAndSize);
 
 
     // exposer le flag et la fonction de reset
@@ -513,8 +576,8 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
             }
             
             // Limites minimales
-            const minWidth = 300;
-            const minHeight = 200;
+            const minWidth = 50; //300;
+            const minHeight = 50; //200;
             
             // Appliquer les nouvelles dimensions avec limites
             if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {

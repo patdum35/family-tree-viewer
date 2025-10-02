@@ -2,7 +2,7 @@ import { state } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { statsConfig, findPeopleWithName, ensureStatsExist } from './nameCloudAverageAge.js';
 import { showPersonsList, adjustSplitScreenLayout } from './nameCloudInteractions.js';
-import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { findPersonsBy } from './searchModalUI.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
 
@@ -345,7 +345,7 @@ function addStatItem(grid, label, value, color = 'inherit') {
     grid.appendChild(valueDiv);
 }
 
-function initializeDistributionChart(data, container) {
+function initializeDistributionChart(data, container, type) {
     // S'assurer que d3 est disponible
     if (!window.d3) {
         console.error("D3.js n'est pas chargé");
@@ -356,7 +356,7 @@ function initializeDistributionChart(data, container) {
     d3.select(container).html("");
     
     // Dimensions du graphique
-    const margin = {top: 20, right: 15, bottom: 30, left: 30};
+    const margin = {top: 5, right: 0, bottom: 30, left: (type === 'nombre_enfants') ? 35 : 30};
     const width = container.clientWidth - margin.left - margin.right;
     const height = container.clientHeight - margin.top - margin.bottom;
     
@@ -559,13 +559,19 @@ function initializeDistributionChart(data, container) {
     svg.append("g")
         .call(d3.axisLeft(y).ticks(5));
     
+    // svg.append("g")
+    //     .call(d3.axisLeft(y)
+    //         .ticks(5)
+    //         .tickFormat(d => d < 1 ? d3.format(".1f")(d) : d3.format("d")(d))
+    //     );
+
     // Étiquettes des axes
     svg.append("text")
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom - 5)
         .attr("font-size", "10px")
-        .text("Âge");
+        .text( (type==='nombre_enfants') ? getStatTranslation('child') : getStatTranslation('age') );
     
     svg.append("text")
         .attr("text-anchor", "middle")
@@ -573,19 +579,20 @@ function initializeDistributionChart(data, container) {
         .attr("y", -margin.left + 12)
         .attr("x", -height / 2)
         .attr("font-size", "10px")
-        .text("Nombre");
+        .text( (type==='nombre_enfants') ? getStatTranslation('people') : getStatTranslation('year'));
 }
 
+/********************************************************************************** */
+/********************************************************************************** */
 /**
  * Crée un modal avec les statistiques détaillées
  * @param {Object} nameData - Les données à afficher
  * @param {string} type - Le type de statistiques
  */
-export function createStatsModal(nameData, type = 'duree_vie') {
+export function createStatsModal(nameData, type = 'duree_vie', frequencyStatsModalCounter = null ) {
     console.log("-  createStatsModal =", type)
 
     if (!nameData || !nameData.stats) return;
-
 
     nameCloudState.statsConfig = statsConfig;
     
@@ -641,26 +648,57 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         }
     }
   
+    let modalId; 
+    if (frequencyStatsModalCounter) {
+        modalId = `graph-stats-modal-${frequencyStatsModalCounter}`;
+    } else {
+        modalId = `graph-stats-modal-${state.graphStatsModalCounter}`;
+    }
 
     // Création du modal
     const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.graphStatsModalCounter =  state.graphStatsModalCounter;
+
+    state.graphStatsModalCounter++; 
+
+
     modal.className = `${cfg.buttonClass}-modal`;
     modal.style.position = 'fixed';
-    modal.style.top = '50%';
     modal.style.left = '50%';
-    modal.style.transform = 'translate(-57%, -50%)';
+
+    let topLocal;
+    let ratioHeight;
+    if (window.innerHeight < 500) {
+        ratioHeight = 80;
+        topLocal = 70;
+    } else {
+        ratioHeight = 70;
+        topLocal = 105;        
+    }
+
+    modal.style.top = topLocal + 'px'; 
+    modal.style.transform = 'translateX(-50%)';
     modal.style.backgroundColor = 'white';
-    modal.style.padding = '20px';
+    modal.style.padding = '0px 20px';
     modal.style.borderRadius = '8px';
     modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
-    modal.style.zIndex = '1100';
+    modal.style.zIndex = state.topZindex;
 
+    modal.style.justifyContent = 'center';
+    modal.style.alignIitems =  'flex-start';
 
-    modal.style.maxWidth = '600px';
-    modal.style.width = '70%';
-    modal.style.maxHeight = '80vh';
+    modal.style.maxWidth = '568px';
+    modal.style.minWidth = state.minModalWidth + 'px';    
+    modal.style.width = '90%';
+
+    modal.style.maxHeight = '95vh';
+    modal.style.minHeight = state.minModalHeight + 'px';
     modal.style.overflow = 'auto';
     
+    modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
+    modal.style.flexDirection = "column";   // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
+
     // En-tête du modal
     const header = document.createElement('div');
     header.style.display = 'flex';
@@ -672,21 +710,19 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     // Nouvelles propriétés pour rendre l'en-tête sticky
     header.style.position = 'sticky';
     header.style.top = '0';
-    header.style.backgroundColor = 'white';
+    header.style.backgroundColor = colorPerType(type);
     header.style.zIndex = '1101';
-    header.style.paddingTop = '10px';
+    header.style.paddingTop = '3px';
+    header.style.paddingBottom = '5px';
     header.style.width = '100%';
     header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
     // Ajuster la marge pour éviter le déplacement du contenu
-    header.style.marginBottom = '15px';
+    header.style.marginBottom = '5px';
     header.style.marginLeft = '-20px';  // Compenser le padding du modal
     header.style.marginRight = '-20px'; // Compenser le padding du modal
     header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
     header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
 
-
-
-    
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
     if (nameCloudState.currentConfig && nameCloudState.currentConfig.startDate && nameCloudState.currentConfig.endDate) {
@@ -703,7 +739,7 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         title.textContent = cfg.title;
     }
     title.style.margin = '0';
-    title.style.fontSize = '16px';
+    title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px';
     
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
@@ -711,7 +747,17 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     closeButton.style.border = 'none';
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '0 5px';
+    closeButton.style.padding = '1 8px';
+    closeButton.style.marginRight = '10px';
+    closeButton.addEventListener('mouseenter', () => {
+        closeButton.style.background = 'rgba(128, 128, 128, 0.5)';
+        closeButton.style.borderRadius = '50%';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+        closeButton.style.background = 'none';
+        closeButton.style.borderRadius = '0';
+    });
+
     closeButton.onclick = () => {
         document.body.removeChild(modal);
         document.body.removeChild(overlay);
@@ -720,11 +766,13 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     header.appendChild(title);
     header.appendChild(closeButton);
     modal.appendChild(header);
+
+    
     
     // Corps avec statistiques
     const stats = nameData.stats;
     const statsContainer = document.createElement('div');
-    statsContainer.style.marginBottom = '20px';
+    statsContainer.style.marginBottom = '3px';
     
     // Vérifier si nous sommes sur un écran de faible hauteur
     const isLowHeight = window.innerHeight < 400;
@@ -804,8 +852,9 @@ export function createStatsModal(nameData, type = 'duree_vie') {
         const grid = document.createElement('div');
         grid.style.display = 'grid';
         grid.style.gridTemplateColumns = '47% 53%'; // Plus d'espace pour la colonne des valeurs
-        grid.style.gap = '8px'; // Espacement réduit
-        grid.style.marginBottom = '15px';
+        grid.style.gap = '4px'; // Espacement réduit
+        grid.style.marginBottom = '10px';
+        grid.style.fontSize = '12px';
         
         // Ajout des statistiques principales
         // addStatItem(grid, `Moyenne`, `${nameData.stats.average} ${units} <span style="font-size:12px">(<span style="color:#4299e1">H: ${nameData.maleAverageData || 'N/A'}</span> / <span style="color:#F687B3">F: ${nameData.femaleAverageData || 'N/A'}</span>)</span>`, '#3949AB');
@@ -829,14 +878,18 @@ export function createStatsModal(nameData, type = 'duree_vie') {
             addStatItem(grid, getStatTranslation('mostFrequentAge'), calculateMode(nameData));
         }
         
-
         statsContainer.appendChild(grid);
     }
 
+    
     // Ajout d'un graphique de distribution
     const chartContainer = document.createElement('div');
     chartContainer.style.height = isLowHeight ? '180px' : '240px'; // Hauteur réduite pour écran bas
+    // chartContainer.style.maxWidth = '550px';     
     chartContainer.style.marginTop = '-5px';
+    chartContainer.style.padding = '0px 0px';
+    chartContainer.style.marginLeft = '-10px';
+    chartContainer.style.marginRight = '-5px';
     chartContainer.id = cfg.chartId;
     
     statsContainer.appendChild(chartContainer);
@@ -872,19 +925,27 @@ export function createStatsModal(nameData, type = 'duree_vie') {
     document.body.appendChild(overlay);
     document.body.appendChild(modal);
 
+
+
     // Rendre la modale déplaçable et redimensionnable
     makeModalDraggableAndResizable(modal, header);
     
+    makeModalInteractive(modal);  
     
+    window.addEventListener('resize', () => resizeModal(modal, true));    
+
+    resizeModal(modal, true);
+
     // Initialiser le graphique avec D3.js
     setTimeout(() => {
-        initializeDistributionChart(histogramData, chartContainer);
-    }, 100);
+        initializeDistributionChart(histogramData, chartContainer, type);
+    }, 100);   
 }
 
 
 
 export function createLocationIcon(isfromSearch = true, index, text, newConfig, searchTerm, self, nbPeople = 1, originalName = null, currentConfig, filter_string, filter_string2) {
+
     const locationIcon = document.createElement('span');
     locationIcon.className = 'location-icon';
     locationIcon.innerHTML = '🌍';
@@ -965,19 +1026,27 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
 
                     // console.log('-debug displayHeatMap true =', personList.results, personList.results.length, filter_string, ', firstItemInList= ', (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null )
 
-                    displayHeatMap(personList.results, newConfig, filter_string, (nbPeople === 1), (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null).then(() => {
-                        const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
 
+                    console.log('-debug call to displayHeatMap from createLocationIcon');
+                    displayHeatMap(null, personList.results, false, newConfig, filter_string, (nbPeople === 1), (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null).then(() => {
                         let content;
-                        if (isfromSearch) {
-                            const modal = document.getElementById('search-modal')
-                            if (modal) { content = modal.querySelector('.search-modal-content'); }
-                        } else {
-                            const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
-                            if (allModals) { content = allModals[allModals.length - 1]; }
+                        const modal = document.getElementById('search-modal')
+                        const isVisible = modal && getComputedStyle(modal).display !== 'none' && getComputedStyle(modal).visibility !== 'hidden';
+                        if (isVisible) { 
+                            content = modal.querySelector('.searchModal-content'); 
+                        } 
+                        else {                           
+                            const allModals1 = document.querySelectorAll('[id^="frequency-stat-modal-"]');
+                            const isVisible = (allModals1) && allModals1[allModals1.length - 1] && getComputedStyle(allModals1[allModals1.length - 1]).display !== 'none' && getComputedStyle(allModals1[allModals1.length - 1]).visibility !== 'hidden';
+                            if (isVisible) { content = allModals1[allModals1.length - 1]; } 
+                            else {
+                                const allModals2 = document.querySelectorAll('[id^="show-person-list-modal-"]');
+                                const isVisible = (allModals2) && allModals2[allModals2.length - 1] && getComputedStyle(allModals2[allModals2.length - 1]).display !== 'none' && getComputedStyle(allModals2[allModals2.length - 1]).visibility !== 'hidden';
+                                if (isVisible) { content = allModals2[allModals2.length - 1]; }
+                            }
                         }
-                        if (heatmapWrapper && content ) {
-                            adjustSplitScreenLayout(content, heatmapWrapper, true);
+                        if (content ) {
+                            adjustSplitScreenLayout(content, true);
                         } 
                     });
 
@@ -1012,6 +1081,112 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
 }
 
 
+
+function destroyAllFrequencyStatModals() {
+  const selector = '[id^="frequency-stat-modal-"]';
+  const modals = Array.from(document.querySelectorAll(selector));
+  modals.forEach(modal => {
+    try {
+      // casser l'identité et enlever les styles inline
+      modal.removeAttribute('id');
+      modal.removeAttribute('style');
+      modal.removeAttribute('data-dynamic');
+
+      // remplacer par un commentaire (empêche la "restauration" magique)
+      const placeholder = document.createComment('frequency-stat-modal removed');
+      if (modal.parentNode) modal.parentNode.replaceChild(placeholder, modal);
+      else modal.remove();
+    } catch (e) { /* safe */ }
+  });
+}
+
+
+export function resizeModal(modal, isFromSearchModal = false) {
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    const allModals1 = document.querySelectorAll('[id^="frequency-stat-modal-"]');
+    const allModals2 = document.querySelectorAll('[id^="show-person-list-modal-"]');
+    const allModals3 = document.querySelectorAll('[id^="graph-stats-modal-"]');
+    const allModals4 = document.querySelectorAll('[id^="century-stats-modal-"]');    
+    const searchModalContent = document.querySelector('[class^="searchModal-content"]');
+
+    // const allModalsLength = ((allModals1) ? allModals1.length : 0) 
+    // + ((allModals2) ? allModals2.length : 0)
+    // + ((allModals3) ? allModals3.length : 0)
+    // + ((allModals4) ? allModals4.length : 0)
+    // + ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
+
+
+    function countVisible(modals) {
+        return modals ? Array.from(modals).filter(m => getComputedStyle(m).display !== "none").length : 0;
+    }
+
+    const allModalsLength = 
+        countVisible(allModals1) +
+        countVisible(allModals2) +
+        countVisible(allModals3) +
+        countVisible(allModals4) +
+        ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
+
+
+    // marge gauche actuelle en pixels
+    const left = modal.offsetLeft; 
+    const top = modal.offsetTop; 
+    // valeur originale CSS
+    const maxHeightCss = modal.style.maxHeight; // ex: "95vh" ou "90%"
+ 
+    // convertit en pixels pour comparer
+    let maxHeightPx;
+    if (maxHeightCss.endsWith('vh')) {
+        const vh = parseFloat(maxHeightCss);
+        maxHeightPx = window.innerHeight * vh / 100;
+    } else if (maxHeightCss.endsWith('%')) {
+        const pct = parseFloat(maxHeightCss);
+        maxHeightPx = modal.parentElement.clientHeight * pct / 100;
+    } else {
+        maxHeightPx = parseFloat(maxHeightCss); // déjà en px
+    }
+
+    // largeur dispo = viewport - marge gauche - petite marge de sécurité (20px)
+    // largeur finale = minimum entre dispo et 600px
+    const width = Math.min(window.innerWidth - 20, 600);
+    const newLeft = (window.innerWidth - width)/2;
+
+    const height= Math.min(window.innerHeight - top - 20, maxHeightPx);
+    const newTop = top; //(window.innerHeight - height)/2;
+
+
+    console.log('\n -debug resizeModal modal= ', modal, ',  modal._nbElementInlist= ', modal._nbElementInlist, allModalsLength, ', width=', width, ', newLeft=', newLeft)
+
+
+    if(!heatmapWrapper && allModalsLength === 1 ) {
+        modal.style.width = width + 'px';
+        modal.style.left = newLeft + 'px';
+        // modal.style.height = height + 'px';
+        // modal.style.top = newTop + 'px';
+
+    } else {
+        adjustSplitScreenLayout(modal, true);
+    }
+}
+
+export function colorPerType(type) {
+   const colorPerTypesValues = 
+   {'prenoms': '#E6F9EC', // Vert pastel
+    'noms': '#FDECF3', // Rose poudré
+    'professions': '#F5EAE3', // Marron clair doux
+    'lieux': '#F9E0E8', // Vieux rose pastel
+    'duree_vie': '#D6F5E3', // Vert menthe
+    'age_procreation': '#FFEDE5', // Orange pêche clair
+    'age_first_child': '#F0E6FA', // Violet lavande
+    'age_marriage': '#EDE3DC', // Taupe pastel
+    'nombre_enfants': '#E8DFF5', // Violet lilas
+    'spare': '#E5F3FF'}; // Bleu ciel un peu plus chaud
+    return(colorPerTypesValues[type]);
+}
+
+
+/********************************************************************************** */
+/********************************************************************************** */
 export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm) {
 
     this.name = newConfig.type + '_' + newConfig.scope + '_' + newConfig.startDate + '_' + newConfig.endDate + '_' + newConfig.rootPersonId + '_' + (searchTerm)?searchTerm:null;
@@ -1031,44 +1206,58 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     // Trier les données par fréquence décroissante
     const sortedData = [...nameData].sort((a, b) => b.size - a.size);        
     
-
-    let existingModal;
-    const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
-    if (allModals) { existingModal = allModals[allModals.length - 1]; }
-
-    // const existingModal = document.getElementById('frequency-stat-modal');
-    let modalId; 
-    if (existingModal && (window.innerHeight < 800 || window.innerWidth < 800 ) ) { 
-        existingModal.remove();
-        modalId = `frequency-stat-modal-0`;
-    } else {
-        modalId = `frequency-stat-modal-${state.modalCounter}`;
-        state.modalCounter++;      
+    if (state.frequencyStatsModalCounter === 0) { // a l'init pour être sûr de bien détruite toutes les modals de l'ancienne session après sortie avec le bouton "X"
+        destroyAllFrequencyStatModals();
     }
+
+    let modalId; 
+    modalId = `frequency-stat-modal-${state.frequencyStatsModalCounter}`;
+    state.frequencyStatsModalCounter++; 
 
     // Création du modal
     const modal = document.createElement('div');
     modal.id = modalId;
-    modal.className = 'frequency-stat-modal';
-    // modal.className = `${cfg.buttonClass}-modal`;
+    // modal.className = 'frequency-stat-modal';
+    modal.className = `${cfg.buttonClass}-modal`;
+
+    // console.log('\n\n - debug `${cfg.buttonClass}-modal` =', `${cfg.buttonClass}-modal`)
+
+
     modal.style.position = 'fixed';
-    modal.style.top = '50%';
     modal.style.left = '50%';
-    modal.style.transform = 'translate(-57%, -50%)';
+
+    let topLocal;
+    let ratioHeight;
+    if (window.innerHeight < 500) {
+        ratioHeight = 80;
+        topLocal = 70;
+    } else {
+        ratioHeight = 70;
+        topLocal = 105;        
+    }
+
+    modal.style.top = topLocal + 'px'; 
+    modal.style.transform = 'translateX(-50%)';
     modal.style.backgroundColor = 'white';
-    modal.style.padding = '20px';
+    modal.style.padding = '0px 4px';
     modal.style.borderRadius = '8px';
     modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
-    modal.style.zIndex = '1100';
-    modal.style.maxWidth = '600px';
-    modal.style.width = '70%';
-    modal.style.maxHeight = '80vh';
-    modal.style.overflow = 'auto';
+    modal.style.zIndex = state.topZindex;
 
+    modal.style.justifyContent = 'center';
+    modal.style.alignIitems =  'flex-start'; 
+
+    // modal.style.maxWidth = '90%';
+    modal.style.maxWidth = '600px';
+    modal.style.minWidth = state.minModalWidth + 'px';
+    modal.style.width = '90%';
+
+    modal.style.maxHeight = ratioHeight +'vh';
+    modal.style.minHeight = state.minModalHeight + 'px';
+    modal.style.overflow = 'auto';
 
     modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
     modal.style.flexDirection = "column";   // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
-    
     
     // En-tête du modal
     const header = document.createElement('div');
@@ -1081,13 +1270,14 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     // Nouvelles propriétés pour rendre l'en-tête sticky
     header.style.position = 'sticky';
     header.style.top = '0';
-    header.style.backgroundColor = 'white';
+    header.style.backgroundColor = colorPerType(type); 
     header.style.zIndex = '1101';
-    header.style.paddingTop = '10px';
+    header.style.paddingTop = '3px';
+    header.style.paddingBottom = '5px';
     header.style.width = '100%';
     header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
     // Ajuster la marge pour éviter le déplacement du contenu
-    header.style.marginBottom = '15px';
+    header.style.marginBottom = '2px';
     header.style.marginLeft = '-20px';  // Compenser le padding du modal
     header.style.marginRight = '-20px'; // Compenser le padding du modal
     header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
@@ -1098,7 +1288,8 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     const titleContainer = document.createElement('div');
     titleContainer.style.display = 'flex';
     titleContainer.style.alignItems = 'center';
-    titleContainer.style.gap = '10px';
+    titleContainer.style.gap = '5px 5px';
+    titleContainer.style.marginLeft = '5px';
 
     const title = document.createElement('h2');
     // Ajouter l'intervalle de temps au titre
@@ -1117,7 +1308,6 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
         title.textContent = cfg.title;
     }
     title.style.margin = '0';
-    // title.style.fontSize = '16px';
     title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '16px';
 
 
@@ -1127,7 +1317,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     sortButton.style.background = 'none';
     sortButton.style.border = '1px solid #ccc';
     sortButton.style.borderRadius = '4px';
-    sortButton.style.padding = '4px 8px';
+    sortButton.style.padding = '2px 3px';
     sortButton.style.cursor = 'pointer';
     sortButton.style.fontSize = '16px';
     sortButton.style.minWidth = '32px';
@@ -1140,7 +1330,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     reverseButton.style.background = 'none';
     reverseButton.style.border = '1px solid #ccc';
     reverseButton.style.borderRadius = '4px';
-    reverseButton.style.padding = '4px 8px';
+    reverseButton.style.padding = '2px 3px';
     reverseButton.style.cursor = 'pointer';
     reverseButton.style.fontSize = '16px';
     reverseButton.style.minWidth = '32px';
@@ -1157,7 +1347,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     geoLocButton.style.background = 'none';
     geoLocButton.style.border = '1px solid #ccc';
     geoLocButton.style.borderRadius = '4px';
-    geoLocButton.style.padding = '4px 8px';
+    geoLocButton.style.padding = '2px 3px';
     geoLocButton.style.cursor = 'pointer';
     geoLocButton.style.fontSize = '16px';
     geoLocButton.style.minWidth = '32px';
@@ -1223,6 +1413,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
         
         // Ajouter chaque élément à la liste
 
+        matchedCounter = 0;
         addElementToList(dataToSort);
 
         
@@ -1243,7 +1434,8 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
                 }
             }
         
-            if (isMatched) {  
+            if (isMatched) { 
+                matchedCounter++; 
                 const itemContainer = document.createElement('div');
 
                 itemContainer.style.cssText = `
@@ -1258,11 +1450,11 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
                     itemContainer.style.backgroundColor = '#f9f9f9';
                 }
                 
-                // Appliquer un style spécial pour le premier élément (le plus fréquent)
-                if (index === 0) {
-                    itemContainer.style.backgroundColor = '#EBF8FF';
-                    itemContainer.style.fontWeight = 'bold';
-                }
+                // // Appliquer un style spécial pour le premier élément (le plus fréquent)
+                // if (index === 0) {
+                //     itemContainer.style.backgroundColor = '#EBF8FF';
+                //     itemContainer.style.fontWeight = 'bold';
+                // }
                 
                 // Zone gauche (nom + occurrence) - cliquable
                 const leftZone = document.createElement('div');
@@ -1326,10 +1518,10 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
                 let filter_string2 = searchTerm;
                 // const peopleList = findPeopleWithName(filter_string, currentConfig, item.originalName, filter_string2);
                 leftZone.onclick = () => {
-                    document.body.removeChild(modal);
-                    document.body.removeChild(overlay);
+                    // document.body.removeChild(modal);
+                    // document.body.removeChild(overlay);
                     // console.log ('debug findPeopleWithName filter_string= ', filter_string, ', originalName=', item.originalName, filter_string2, findPeopleWithName(filter_string, currentConfig, item.originalName, filter_string2),)
-                    showPersonsList(
+                    new showPersonsList(
                         item.text, 
                         findPeopleWithName(filter_string, currentConfig, item.originalName, filter_string2), 
                         currentConfig,
@@ -1338,17 +1530,17 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
                 };
 
                 leftZone.addEventListener('mouseenter', () => {
-                    leftZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+                    leftZone.style.backgroundColor = index === -1 ? '#E1F0FF' : '#f0f0f0';
                 });
                 leftZone.addEventListener('mouseleave', () => {
-                    leftZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+                    leftZone.style.backgroundColor = index === -1 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
                 });
 
                 rightZone.addEventListener('mouseenter', () => {
-                    rightZone.style.backgroundColor = index === 0 ? '#E1F0FF' : '#f0f0f0';
+                    rightZone.style.backgroundColor = index === -1 ? '#E1F0FF' : '#f0f0f0';
                 });
                 rightZone.addEventListener('mouseleave', () => {
-                    rightZone.style.backgroundColor = index === 0 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
+                    rightZone.style.backgroundColor = index === -1 ? '#EBF8FF' : (index % 2 === 0 ? '#f9f9f9' : 'white');
                 });
 
 
@@ -1387,23 +1579,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     // Gestionnaire du bouton de geoLocalisation
     geoLocButton.onclick = () => {
         console.log('Clic bouton geoLocalisation');
-
-        if (window.currentSearchResults && window.currentSearchResults.length > 0) {
-            // Fermer la modale de recherche
-            // closeSearchModal();
-            displayHeatMap(window.currentSearchResults).then(() => {
-                const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-                const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
-                let modal;
-                if (allModals) { modal = allModals[allModals.length - 1]; }
-                // const modal = document.getElementById('frequency-stat-modal')
-                if (heatmapWrapper && modal ) {
-                    adjustSplitScreenLayout(modal, heatmapWrapper, true);
-                }
-            });
-
-        } 
-
+        showHeatmapFromStats();
     };
     // Initialiser l'affichage des boutons
     updateButtonStyles();
@@ -1421,7 +1597,21 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     closeButton.style.border = 'none';
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '0 5px';
+    closeButton.style.padding = '1px 8px';
+    closeButton.style.marginRight = '10px';
+    // closeButton.style.padding = '10px 20px'; // élargit le bouton
+    // closeButton.style.width = '100px';       // largeur fixe si tu veux
+
+    // style hover via JS
+    closeButton.addEventListener('mouseenter', () => {
+        closeButton.style.background = 'rgba(128, 128, 128, 0.5)';
+        closeButton.style.borderRadius = '50%';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+        closeButton.style.background = 'none';
+        closeButton.style.borderRadius = '0';
+    });
+
     closeButton.onclick = () => {
         document.body.removeChild(modal);
         document.body.removeChild(overlay);
@@ -1429,18 +1619,17 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
 
     header.appendChild(titleContainer);
     header.appendChild(closeButton);
-
     modal.appendChild(header);
     
 
     // Créer une liste pour les occurrences avec ascenseur personnalisé
     const list = document.createElement('div');
-    list.style.maxHeight = '60vh';
+    list.style.maxHeight = '80vh';
     list.style.overflow = 'auto';
     list.style.fontSize = '14px';  // Taille de police réduite
 
 
-    // Styles pour webkit (Chrome, Safari)
+    // Styles pour webkit (Chrome, Safari) POUR LE SCROLLBAR ***************************
     const style = document.createElement('style');
     style.textContent = `
         .${cfg.buttonClass}-modal div::-webkit-scrollbar {
@@ -1454,10 +1643,32 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
             background: #3182ce; /* Couleur du curseur  */
             border-radius: 6px;
             border: 2px solid #f0f0f0; /* Bordure du curseur */
-            min-height: 50px;  /* Hauteur minimum du curseur  */
+            min-height: 30px;  /* Hauteur minimum du curseur  */
         }
         .${cfg.buttonClass}-modal div::-webkit-scrollbar-thumb:hover {
             background: #2c5aa0; /* Couleur au survol */
+        }
+
+        /* Bouton du haut */
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar-button:single-button:vertical:decrement {
+            background: #3182ce;
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,10 5,0 10,10'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* Bouton du bas */
+        .${cfg.buttonClass}-modal div::-webkit-scrollbar-button:single-button:vertical:increment {
+            background: #3182ce;
+            height: 20px;
+            display: block;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,0 5,10 10,0'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 0 0 6px 6px;
         }
     `;
     document.head.appendChild(style);
@@ -1477,7 +1688,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
 
     list.style.border = '1px solid #eee';
     list.style.borderRadius = '4px';
-    list.style.padding = '5px';
+    list.style.padding = '0px 0px';
     
     // Ajouter chaque élément à la liste
     let searchStrs = null;
@@ -1498,7 +1709,10 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
         suffix0 = getStatTranslation('child');
     }
 
+    let matchedCounter = 0;
     addElementToList(sortedData);
+
+    modal._nbElementInlist = matchedCounter;
 
     console.log('\nStatistiques détaillées pour ', title.textContent )
     
@@ -1506,11 +1720,14 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     
     // Informations complémentaires
     const infoContainer = document.createElement('div');
-    infoContainer.style.marginTop = '15px';
+    infoContainer.style.marginTop = '3px';
+    infoContainer.style.marginBottom = '0px';
+    infoContainer.style.paddingBottom = '0px';
     infoContainer.style.fontSize = '14px';
     infoContainer.style.color = '#666';
+    infoContainer.style.marginLeft = '5px';
     // infoContainer.textContent = `Total: ${sortedData.length} ${getTypeLabel(type)} différents`;
-    infoContainer.textContent = `${getStatTranslation('total')}: ${sortedData.length} ${getTypeLabel(type)} ${getStatTranslation('differentItems')}`;
+    infoContainer.textContent = `${getStatTranslation('total')}: ${matchedCounter} ${getTypeLabel(type)} ${getStatTranslation('differentItems')}`;
 
 
     modal.appendChild(infoContainer);
@@ -1547,8 +1764,33 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
 
     // Rendre la modale déplaçable et redimensionnable
     makeModalDraggableAndResizable(modal, header);
+
+    adjustSplitScreenLayout(modal, true);
+
+    makeModalInteractive(modal);
+
+    window.addEventListener('resize', () => resizeModal(modal, true));
+
+    resizeModal(modal, true);
 }
 
+export async function showHeatmapFromStats() {
+    if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+        // Fermer la modale de recherche
+        // closeSearchModal();
+        console.log('-debug call to displayHeatMap from showHeatmapFromStats');
+        displayHeatMap(null, window.currentSearchResults, false).then(() => {
+            const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
+            let modal;
+            if (allModals) { modal = allModals[allModals.length - 1]; }
+            // const modal = document.getElementById('frequency-stat-modal')
+            if (modal ) {
+                adjustSplitScreenLayout(modal, true);
+            }
+        });
+
+    } 
+}
 
 function getTypeLabel(type, form = 'plural') {
     const typeMapping = {
