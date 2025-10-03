@@ -1,13 +1,86 @@
 import { state } from './main.js';
 
+export function makeModalInteractive(modal) {
+    // modal.style.position = "fixed";   // ou absolute selon ton cas
+    state.topZindex++;
+    modal.style.zIndex = state.topZindex;
+    console.log('\n\n debug init makeModalInteractive ', modal.id, state.topZindex);
+
+    // écoute tout ce qui se passe dans la modal (y compris header)
+    modal.addEventListener("mousedown", () => {
+        state.topZindex++;
+        modal.style.zIndex = state.topZindex;
+        console.log('\n\n debug mousedown in makeModalInteractive ', modal.id, state.topZindex);
+        if (modal.id === 'person-details-modal') {
+            specialCaseOfPersonDetailsModal();
+        }
+    }, true); // <== capture activée
+
+
+    function specialCaseOfPersonDetailsModal() {
+        console.log("bringToFront sur :", modal.id, modal._handleContainer);
+        // // si la modal a un conteneur de poignées, on le remet devant aussi
+        const hc = modal._handleContainer;
+
+        if (hc) {
+            console.log('\n\n debug1 makeModalInteractive ', modal.id)
+            // s'assurer que le container est le dernier enfant du body (au-dessus dans l'ordre DOM)
+            document.body.appendChild(hc);
+
+            // position fixed évite certains problèmes de stacking context (ajuste si tu veux rester en absolute)
+            hc.style.position = 'fixed';
+            hc.style.pointerEvents = 'none'; // container ignore les clics, mais les handles auront pointerEvents auto
+
+            // recalculer sa position pour coller sur la modal
+            const rect = modal.getBoundingClientRect();
+            hc.style.left = `${Math.round(rect.left)}px`;
+            hc.style.top = `${Math.round(rect.top)}px`;
+            hc.style.width = `${modal.offsetWidth}px`;
+            hc.style.height = `${modal.offsetHeight}px`;
+
+            // z-index du container + des handles + des indicateurs
+            hc.style.zIndex = state.topZindex + 1;
+
+            // handles
+            const handles = hc.querySelectorAll('.resize-handle');
+            handles.forEach(h => {
+            h.style.zIndex = state.topZindex + 2;
+            h.style.pointerEvents = 'auto'; // réactiver les clics sur chaque poignée
+            });
+
+            // indicateurs tactiles éventuels
+            const cursors = hc.querySelectorAll('.touch-cursor-indicator');
+            cursors.forEach(c => c.style.zIndex = state.topZindex + 3);
+
+            // forcer une remise à jour de la position si modal._updateHandleContainer existe
+            if (typeof modal._updateHandleContainer === 'function') {
+            modal._updateHandleContainer();
+            } else {
+            // fallback : appliquer rect déjà calculé (déjà fait plus haut)
+            }
+        }
+    }
+}
+
+
 /**
  * Rend une modale déplaçable et redimensionnable
  * @param {HTMLElement} modal - L'élément de la modale
  * @param {HTMLElement} handle - L'élément qui sert de poignée pour déplacer la modale (généralement l'en-tête)
  */
-export function makeModalDraggableAndResizable(modal, handle) {
+export function makeModalDraggableAndResizable(modal, handle, rememberPositionAndSize = true) {
     // 1. Trouver le contenu réel à redimensionner (la modale elle-même dans ce cas)
     if (!modal) return;
+
+    // console.log('n\n- debug in makeModalDraggableAndResizable  RESET position and size', rememberPositionAndSize);
+
+
+    // exposer le flag et la fonction de reset
+    modal._rememberPositionAndSize= !!rememberPositionAndSize;
+    modal.resetPositionAndSize = function() {
+        // cible l'élément sur lequel on a appliqué les styles (ici "modal")
+        ['left','top','width','height','transform'].forEach(p => modal.style.removeProperty(p));
+    };
 
 
 
@@ -16,40 +89,7 @@ export function makeModalDraggableAndResizable(modal, handle) {
         modal.className += ' custom-modal';
     }
 
-
-
     modal.classList.add('modal-resizable');
-
-    // // Ajouter le style des scrollbars s'il n'existe pas déjà
-    // if (!document.getElementById('custom-modal-scrollbar-style')) {
-    //     const style = document.createElement("style");
-    //     style.id = 'custom-modal-scrollbar-style'; // ID pour éviter les doublons
-    //     style.textContent = `
-    //         .custom-modal::-webkit-scrollbar {
-    //             width: 10px;
-    //             height: 10px;
-    //         }
-
-    //         .custom-modal::-webkit-scrollbar-button {
-    //             height: 0px;
-    //             width: 0px;
-    //             display: none;
-    //         }
-
-    //         .custom-modal::-webkit-scrollbar-thumb {
-    //             background-color: #888;
-    //             border-radius: 6px; 
-    //             border: 3px solid transparent;
-    //         }
-
-    //         .custom-modal::-webkit-scrollbar-track {
-    //             background-color: #f1f1f1;
-    //             border-radius: 4px;
-    //             margin: 30px;
-    //         }
-    //     `;
-    //     document.head.appendChild(style);
-    // }
 
     // Ajouter la classe pour le style des scrollbars uniquement sur les appareils non tactiles
     if (!state.isTouchDevice) {
@@ -109,7 +149,7 @@ export function makeModalDraggableAndResizable(modal, handle) {
         }
     }
 
- 
+
     // 2. S'assurer que la modale est correctement positionnée
     modal.style.position = 'fixed';
     
@@ -394,8 +434,6 @@ export function makeModalDraggableAndResizable(modal, handle) {
     }
     
 
-
-
    // Fonction pour configurer les gestionnaires d'événements pour chaque poignée
     function setupResizeHandlers(handle, pos) {
         let isResizing = false;
@@ -538,8 +576,8 @@ export function makeModalDraggableAndResizable(modal, handle) {
             }
             
             // Limites minimales
-            const minWidth = 300;
-            const minHeight = 200;
+            const minWidth = 50; //300;
+            const minHeight = 50; //200;
             
             // Appliquer les nouvelles dimensions avec limites
             if ((pos.includes('w') || pos.includes('e')) && newWidth >= minWidth) {
@@ -576,7 +614,6 @@ export function makeModalDraggableAndResizable(modal, handle) {
             }
         }
         
-        
         // Arrêter le redimensionnement
         function onResizeEnd() {
             isResizing = false;
@@ -596,12 +633,8 @@ export function makeModalDraggableAndResizable(modal, handle) {
         }
     }
     
-
-    
     // 5. Initialiser les poignées
     createResizeHandles();
-
-
 
     // Fonction de nettoyage
     modal._cleanupDraggable = function() {
@@ -609,21 +642,17 @@ export function makeModalDraggableAndResizable(modal, handle) {
         document.removeEventListener('scroll', modal._handlesUpdateFn, true);
         window.removeEventListener('resize', modal._handlesUpdateFn);
         modal.removeEventListener('scroll', modal._handlesUpdateFn);
-        
-        // if (modal._handlesInterval) {
-        //     clearInterval(modal._handlesInterval);
-        // }
-        
+
+        // si on ne veut pas garder la position/taille entre ouvertures -> on reset
+        if (!modal._rememberPositionAndSize) {
+            try { modal.resetPositionAndSize(); } catch(e){ /* safe */ }
+        }
+              
         if (modal._animationFrameId) {
             cancelAnimationFrame(modal._animationFrameId);
         }
-
-
-
         modal.querySelectorAll('.resize-handle').forEach(h => {
             if (h.parentNode) h.parentNode.removeChild(h);
         });
     };
-    
 }
-

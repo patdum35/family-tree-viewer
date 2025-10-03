@@ -485,7 +485,7 @@ document.addEventListener('refreshPersonList', (event) => {
     
     // Fermer l'ancienne liste et en ouvrir une nouvelle
     personListModal.remove();
-    showPersonsList(searchText, filteredPeople, config);
+    new showPersonsList(searchText, filteredPeople, config);
 });
 
 
@@ -679,7 +679,7 @@ function refreshPersonList() {
         personListModal.remove();
         
         // Afficher la liste mise à jour
-        showPersonsList(searchText, filteredPeople, config);
+        new showPersonsList(searchText, filteredPeople, config);
         
         // Ajouter un effet d'apparition à la nouvelle liste
         setTimeout(() => {

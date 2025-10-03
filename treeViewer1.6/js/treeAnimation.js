@@ -1,7 +1,7 @@
 // ====================================
 // Animation de l'arbre
 // ====================================
-import { state, searchRootPersonId, trackPageView } from './main.js';
+import { state, searchRootPersonId, trackPageView, toggleTreeRadar } from './main.js';
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
 import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
 import { buildDescendantTree, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
@@ -16,7 +16,9 @@ import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
 import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
 import { debugLog } from './debugLogUtils.js'
 import { findYoungestPerson } from './utils.js';
+import { closeAllModals, resetZoom } from './eventHandlers.js';
 
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 let animationTimeouts = [];
 let optimalSpeechRate = 1.0; //1.1;
 let animationMap = null;
@@ -497,6 +499,12 @@ function saveAnimationMapPosition() {
 function initAnimationMap() {
     // Supprimer proprement toute carte existante
     const existingContainer = document.getElementById('animation-map-container');
+
+    if (existingContainer && existingContainer.style.display) {
+        existingContainer.style.removeProperty("display");
+    }
+
+
     if (existingContainer && existingContainer.parentNode) {
         // Nettoyer l'observateur de redimensionnement s'il existe
         if (existingContainer.resizeObserver) {
@@ -641,7 +649,7 @@ function initAnimationMap() {
     dragHandle.style.justifyContent = 'center';
     dragHandle.style.alignItems = 'center';
     dragHandle.style.cursor = 'move';
-    dragHandle.style.zIndex = '1100';
+    dragHandle.style.zIndex = state.topZindex;
     dragHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
     dragHandle.title = 'Déplacer la carte';
     dragHandle.style.opacity = '0.4';
@@ -664,7 +672,7 @@ function initAnimationMap() {
     resizeHandle.style.alignItems = 'center';
     resizeHandle.style.cursor = 'nwse-resize';
     resizeHandle.style.borderTopLeftRadius = '10px';
-    resizeHandle.style.zIndex = '1100';
+    resizeHandle.style.zIndex = state.topZindex;
     resizeHandle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
     resizeHandle.title = 'Redimensionner la carte';
     resizeHandle.style.opacity = '0.4';
@@ -742,6 +750,8 @@ function initAnimationMap() {
         zoomControl: false,
         attributionControl: false
     });
+
+    // state.animationMap = animationMap;
     
     if (useLocalTiles) {
         // Supprimer la couche de tuiles par défaut si elle existe
@@ -902,7 +912,7 @@ let tileStats = {
 };
 
 
-function addTooltipTransparencyFix() {
+export function addTooltipTransparencyFix() {
     if (!document.getElementById('tooltip-transparency-fix')) {
         const style = document.createElement('style');
         style.id = 'tooltip-transparency-fix';
@@ -1686,10 +1696,27 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
 }
 /* */
 
-
+let origineGenNb;
+let treeModeBackup;
 
 //#####################################################
 export async function startAncestorAnimation() {
+
+
+    disableFortuneModeClean();
+    disableFortuneModeWithLever();
+
+    origineGenNb = state.nombre_generation;
+
+    console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex);
+
+
+    if (animationState.currentIndex === 0) {
+        state.nombre_generation = 2;
+        displayGenealogicTree(null, true, false);        
+    }
+
+    state.isFullResetAnimationRequested = false; 
 
     trackPageView('treeAnimation');
     // playEndOfAnimationSound();
@@ -1752,7 +1779,7 @@ export async function startAncestorAnimation() {
     };
 
 
-    let treeModeBackup =  state.treeModeReal;
+    treeModeBackup =  state.treeModeReal;
 
     let rootId = state.rootPersonId.id;
    
@@ -2002,14 +2029,14 @@ export async function startAncestorAnimation() {
 
 
                     // Avant le 1ier affichage créer une promesse qui simule la lecture vocale pour un message de démarrage : en voiture Simone
-                    if (animationState.currentIndex === 0) {
-                        const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                            ? speakPersonName(startMessage)
-                            : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
+                    // if (animationState.currentIndex === 0) {
+                    //     const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                    //         ? speakPersonName(startMessage)
+                    //         : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
                         
-                        // Attendre la lecture ou le délai
-                        await voicePromiseStart;
-                    }
+                    //     // Attendre la lecture ou le délai
+                    //     await voicePromiseStart;
+                    // }
 
                     // Créer une promesse qui simule la lecture vocale si le son est coupé
                     const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
@@ -2127,23 +2154,22 @@ export async function startAncestorAnimation() {
             // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
 
 
-            if (state.targetCousinId==null && i >= (animationState.path.length) )
+            if (state.targetCousinId==null && i >= (animationState.path.length) && (!state.isFullResetAnimationRequested))
             {
+                // arrêter l'audio si néccessaire
                 playEndOfAnimationSound();
                 showEndAnimationPhoto(node.data.name);
             }
 
 
 
-
-
-            const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                ? speakPersonName(endMessage)
-                : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
-            // Attendre la lecture ou le délai
-            await voicePromiseStart;
-
-
+            if (!state.isFullResetAnimationRequested) {
+                // const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                //     ? speakPersonName(endMessage)
+                //     : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
+                // // Attendre la lecture ou le délai
+                // await voicePromiseStart;
+            }
 
             
             
@@ -2344,18 +2370,19 @@ export async function startAncestorAnimation() {
 
                 // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
 
-                if (j >= (animationState.cousinDescendantPath.length) )
+                if (j >= (animationState.cousinDescendantPath.length) && (!state.isFullResetAnimationRequested))
                 {
                     playEndOfAnimationSound();
                     showEndAnimationPhoto(lastName);
                 }
 
-
-                const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                    ? speakPersonName(endMessage)
-                    : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
-                // Attendre la lecture ou le délai
-                await voicePromiseStart;
+                if (!state.isFullResetAnimationRequested) {
+                    // const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                    //     ? speakPersonName(endMessage)
+                    //     : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
+                    // // Attendre la lecture ou le délai
+                    // await voicePromiseStart;
+                }
             }
 
 
@@ -2906,6 +2933,16 @@ window.generateLocalMaps = generateLocalMaps;
 
 
 export function toggleAnimationPause() {
+
+    if (state.isRadarEnabled) {
+        disableFortuneModeClean();
+        disableFortuneModeWithLever();
+        // displayGenealogicTree(null, true, false, true);
+        toggleTreeRadar();
+    }
+
+    closeAllModals(false);
+
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     
     // Basculer l'état de pause
@@ -2921,23 +2958,8 @@ export function toggleAnimationPause() {
         // Reprendre l'animation
         startAncestorAnimation();
     }
+
 }
-
-// export function stopAnimation() {
-//     // Arrêter la synthèse vocale
-//     if ('speechSynthesis' in window) {
-//         window.speechSynthesis.cancel();
-//     }
-
-//     // Annuler l'animation
-//     if (animationController) {
-//         animationController.cancel();
-//     }
-
-//     // Réinitialiser les timeouts
-//     animationTimeouts.forEach(timeout => clearTimeout(timeout));
-//     animationTimeouts = [];
-// }
 
 export function stopAnimation() {
     // Démarquer le nœud actuellement en surbrillance
@@ -2962,7 +2984,6 @@ export function stopAnimation() {
     stopAnimationAudio();
 }
 
-
 export function resetAnimationState() {
     // Démarquer le nœud actuellement en surbrillance
     if (animationState.currentHighlightedNodeId) {
@@ -2985,8 +3006,44 @@ export function resetAnimationState() {
     stopAnimation();
 }
 
+export function fullResetAnimationState() {
+    console.log("\n\n🔄 Full Reset Animation State");
 
+    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    
+    // Basculer l'état de pause
+    animationState.isPaused = true;
+    if (animationController) { animationController.isCancelled = true; }
+    
+    // Mettre à jour le bouton
+    animationPauseBtn.querySelector('span').textContent = '▶️';
 
+    state.isFullResetAnimationRequested = true;
 
+    if (animationState.currentHighlightedNodeId) {
+        highlightAnimationNode(animationState.currentHighlightedNodeId, false);
+    }
+    
+    animationState = {
+        path: [],
+        currentIndex: 0,
+        isPaused: true,
+        currentHighlightedNodeId: null
+    };
 
+    stopAnimation();  
 
+    if (!state.isRadarEnabled) {
+        // if (origineGenNb) {state.nombre_generation = origineGenNb;}
+        state.nombre_generation = 4;
+
+        if (treeModeBackup) {state.treeModeReal = treeModeBackup;}
+
+        displayGenealogicTree(null, true, false);
+
+        setTimeout(() => {
+            resetZoom();
+        }, 200);
+    }
+
+}

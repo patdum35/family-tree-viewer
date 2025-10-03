@@ -6,9 +6,10 @@ import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
 import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
 import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
-    toggleAnimationPause, resetAnimationState  } from './treeAnimation.js';
+    toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
+import { closeCloudName } from './nameCloudUI.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
 import { setupSearchFieldModal } from './searchModalUI.js';
@@ -24,14 +25,8 @@ import { createAudioElement } from './audioPlayer.js';
 import { cleanupExportControls } from './exportSettings.js';
 
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
-import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
-import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
-import { createImprovedHeatmap } from './geoHeatMapUI.js';
-import { createIndividualLocationMap } from './nameCloudInteractions.js';
-
-import { getTranslation } from './nameCloudUI.js';
-
 
 import { 
     displayPersonDetails, 
@@ -48,7 +43,8 @@ import {
     zoomOut,
     resetView,
     resetZoom,
-    searchTree
+    searchTree,
+    closeAllModals
 } from './eventHandlers.js';
 
 let stopMonitoring = null;
@@ -107,7 +103,8 @@ export const state = {
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
-    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'    
+    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'   
+    treeModeReal_whenReturnToTree: 'ancestors', // ou 'descendants' ou 'both'   
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
@@ -176,6 +173,15 @@ export const state = {
     currentY: 0,
     nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
     linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
+    frequencyStatsModalCounter: 0,
+    showPersonListModalCounter: 0,
+    graphStatsModalCounter: 0,
+    centuryStatsModalCounter: 0,
+    topZindex : 1100,
+    minModalWidth: 250,
+    minModalHeight: 40,
+    isFullResetAnimationRequested: false,
+    // animationMap: null
 
 };
 
@@ -252,174 +258,78 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-export async function displayHeatMap(currentSearchResults = null, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
-   
-    // Création d'un indicateur de chargement
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.style.position = 'fixed';
-    loadingIndicator.style.top = '50%';
-    loadingIndicator.style.left = '50%';
-    loadingIndicator.style.transform = 'translate(-50%, -50%)';
-    loadingIndicator.style.backgroundColor = 'white';
-    loadingIndicator.style.padding = '20px';
-    loadingIndicator.style.borderRadius = '8px';
-    loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    loadingIndicator.style.zIndex = '9999';
-    // loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
-    loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
-
-    document.body.appendChild(loadingIndicator);
-
-    let isSearchResults = false;
-    if (currentSearchResults && currentSearchResults.length > 0) {
-        isSearchResults = true;
-    }
-
-    
-    try {
-
-        // Récupérer les paramètres actuels de filtrage
-        // const currentConfig = {
-        //     type: 'name', //state.treeMode,
-        //     startDate: -6000, //parseInt(startDateInput.value),
-        //     endDate: 3000, //parseInt(endDateInput.value),
-        //     scope: 'all',
-        //     rootPersonId:  null, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
-        // };
-
-
-        const currentConfig = {
-            type: (newConfig) ? newConfig.type : 'name', 
-            startDate: (newConfig) ? ((newConfig.startDate) ? newConfig.startDate : -6000) : -6000, 
-            endDate: (newConfig) ? ((newConfig.endDate) ? newConfig.endDate : 3000) : 3000, 
-            scope: (newConfig) ? newConfig.scope : 'all',
-            rootPersonId:  (newConfig) ? newConfig.rootPersonId : null, 
-        };
-
-
-
-        // const persons = getPersonsFromTCurrenTree();
-
-        // Générer les données pour la heatmap
-        let heatmapData;
-        if (isSearchResults) {
-            heatmapData = await createDataForHeatMap(currentConfig, false, currentSearchResults); 
-        } else {
-            heatmapData = await createDataForHeatMap(currentConfig, true); 
-        }      
-
-        // Supprimer l'indicateur de chargement
-        document.body.removeChild(loadingIndicator);
-        
-        // Créer la heatmap interactive
-        if (!heatmapData || heatmapData.length === 0) {
-            heatmapData = [];
-        }
-        // Créer un titre pour la heatmap basé sur la configuration
-        let heatmapTitle;
-        if (title) { heatmapTitle = title;}
-        
-        // Utiliser la fonction pour créer la heatmap
-        // console.log ('debug displayHeatMap ', heatmapData )
-
-        if (document.getElementById('namecloud-heatmap-wrapper')) {
-            if (!isOnlyOnePerson) { 
-                // console.log('- debug sOnlyOnePerson = false createImprovedHeatmap ', personName, heatmapData)
-                createImprovedHeatmap(heatmapData, heatmapTitle, true, true);
-            } else {
-                // console.log('- debug isOnlyOnePerson = true createIndividualLocationMap ', personName, heatmapData)
-                createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);
-            }
-
-
-        } else {
-            // console.log('- debug first Time = true createIndividualLocationMap ', personName, heatmapData)
-            createImprovedHeatmap(heatmapData, heatmapTitle, true, false, { top: window.innerHeight/2, left: 25, width: window.innerWidth-50, height: window.innerHeight/2-25 });
-        }
-
-
-
-
-
-    } catch (error) {
-        console.error('Erreur lors de la génération de la heatmap:', error);
-        if (document.body.contains(loadingIndicator)) {
-            document.body.removeChild(loadingIndicator);
-        }
-        // alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
-        // alert(`${getTranslation('errorHeatmap')}: ${error.message}`);
-    }
-}
-
-
 
 export function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
     updateRadarButtonText();  
+    closeAllModals();
+    fullResetAnimationState();
 
     if (state.isRadarEnabled) {
-        state.treeModeReal_backup = state.treeMode;        
+        state.treeModeReal_whenReturnToTree = state.treeMode; 
+        state.treeModeReal_backup = state.treeMode; 
+        state.nombre_generation = 4;       
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
 
     } else {
 
-        if ((state.treeModeReal_backup.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
+        disableFortuneModeClean();
+
+        if ((state.treeModeReal_whenReturnToTree.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
             state.treeMode = 'ancestors';
             state.treeModeReal = 'ancestors';
             state.treeModeReal_backup = 'ancestors';
+            state.treeModeReal_whenReturnToTree = 'ancestors';
 
-        } else if ((state.treeModeReal_backup.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
+        } else if ((state.treeModeReal_whenReturnToTree.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
             state.treeMode = 'descendants';
             state.treeModeReal = 'descendants';
             state.treeModeReal_backup = 'descendants';
+            state.treeModeReal_whenReturnToTree = 'descendants';
         } else {
-            state.treeMode = state.treeModeReal_backup;
-            state.treeModeReal = state.treeModeReal_backup;  
-        }      
+            state.treeMode = state.treeModeReal_whenReturnToTree;
+            state.treeModeReal = state.treeModeReal_whenReturnToTree;  
+            state.treeModeReal_backup = state.treeModeReal_whenReturnToTree;  
+        } 
+        
         displayGenealogicTree(null, true, false);
     }
 }
 
 // Fonction pour basculer le son
 export function toggleSpeech() {
-    const speechToggleBtn = document.getElementById('speechToggleBtn');
-    
-    // Basculer l'état du son
-    state.isSpeechEnabled = !state.isSpeechEnabled;
+    if (state.isRadarEnabled) {
+        disableFortuneModeClean();
+    } else {
+        const speechToggleBtn = document.getElementById('speechToggleBtn');
+        
+        // Basculer l'état du son
+        state.isSpeechEnabled = !state.isSpeechEnabled;
 
-
-
-
-    
-    // Mettre à jour le bouton
-    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
-
-
+        // Mettre à jour le bouton
+        speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
+    }
 }
 
 // Fonction pour desactiver complètement le son dans l'animation
 export function toggleSpeech2() {
-    const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
-    
-    // Basculer l'état du son
-    state.isSpeechEnabled2 = !state.isSpeechEnabled2;
-
-
-
-
-    
-    // Mettre à jour le bouton
-    menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
-    // Appliquer le style uniquement pour l'emoji 🗣️
-    if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
-        menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+    if (state.isRadarEnabled) {
+        disableFortuneModeClean();
     } else {
-        menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+        const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
+        // Basculer l'état du son
+        state.isSpeechEnabled2 = !state.isSpeechEnabled2;
+  
+        // Mettre à jour le bouton
+        menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
+        // Appliquer le style uniquement pour l'emoji 🗣️
+        if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+        } else {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+        }
     }
-
-
-
 }
 
 // Pour arrêter le monitoring
@@ -1159,7 +1069,7 @@ export function handleRootPersonChange(event) {
             } else if (selectedValue === 'demo3'){ // 'comme un ouragan'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('bertrand gouyon');
-                cousin = searchRootPersonId('stephanie marie elisabeth grimaldi');
+                cousin = searchRootPersonId('stéphanie marie elisabeth grimaldi');
             } else if (selectedValue === 'demo4'){  //'Espace'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('charles lebon');
@@ -1216,6 +1126,16 @@ export function handleRootPersonChange(event) {
 
         // Réinitialiser l'état de l'animation avant de démarrer
         resetAnimationState();
+
+        if (state.isRadarEnabled) {
+            disableFortuneModeClean();
+            disableFortuneModeWithLever();
+            // displayGenealogicTree(null, true, false, true);
+            toggleTreeRadar();
+        }
+
+        if (state.isWordCloudEnabled) { closeCloudName(); }
+
 
         state.isAnimationLaunched = true;
         
@@ -1888,17 +1808,22 @@ function positionRadarButton() {
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
     
+
+    let offsetY = 0;
+    let offsetY2 = 5;
+    if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+
     if (cloudButton && radarButton && statsButton) {
         const cloudRect = cloudButton.getBoundingClientRect();
         radarButton.style.position = 'fixed';
         radarButton.style.left = cloudRect.left + 'px';
-        radarButton.style.top = (cloudRect.bottom + 5) + 'px';
+        radarButton.style.top = (cloudRect.bottom + 3 + offsetY) + 'px';
         radarButton.style.zIndex = '1001';
 
 
         statsButton.style.position = 'fixed';
-        statsButton.style.left = cloudRect.left + 40 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 10) + 'px';
+        statsButton.style.left = cloudRect.left + 37 + 'px';
+        statsButton.style.top = (cloudRect.bottom + 12 - offsetY2) + 'px';
         statsButton.style.zIndex = '1001';
     }
 
@@ -1911,6 +1836,18 @@ function createAndPositionRadarOverlay() {
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
+
+    // Forcer padding/marges/tailles (avec !important)
+    statsButton.style.setProperty('padding-top', '0px', 'important');
+    statsButton.style.setProperty('padding-bottom', '0px', 'important');
+    statsButton.style.setProperty('padding-left', '0px', 'important');
+    statsButton.style.setProperty('padding-right', '0px', 'important');
+
+    statsButton.style.setProperty('border-radius', '4px', 'important');
+
+    statsButton.style.setProperty('min-width', '67px', 'important');
+    statsButton.style.setProperty('height', '27px', 'important');
+
 
     // Vérifier que les boutons existent
     if (!cloudButton || !radarButton || !statsButton) return;
@@ -1998,8 +1935,10 @@ function createAndPositionHeatMapOverlay() {
         document.body.appendChild(overlay);
     }
 
+
+
     const rect = heatMapBtn.getBoundingClientRect();
-    overlay.style.top = `${rect.top - 10}px`;
+    overlay.style.top = `${rect.top - 10 }px`;
     overlay.style.left = `${rect.left - 10}px`;
     overlay.style.width = `${rect.width + 20}px`;
     overlay.style.height = `${rect.height + 20}px`;
@@ -2008,12 +1947,15 @@ function createAndPositionHeatMapOverlay() {
 function positionHeatMapButton() {
     // const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
-    
+
+    let offsetY = 0;
+    if (window.innerWidth < 768) {offsetY = 5;}
+
     if (settingsBtn && heatMapBtn) {
         const settingRect = settingsBtn.getBoundingClientRect();
         heatMapBtn.style.position = 'fixed';
         heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
-        heatMapBtn.style.top = (settingRect.bottom + 5) + 'px';
+        heatMapBtn.style.top = (settingRect.bottom + 5 + offsetY) + 'px';
         heatMapBtn.style.zIndex = '1001';
     }
 }

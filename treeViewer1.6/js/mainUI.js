@@ -1,7 +1,7 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree, displayHeatMap, showToast } from './main.js';
+import { state, displayGenealogicTree, showToast } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';

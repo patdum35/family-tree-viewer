@@ -1,10 +1,18 @@
+import { state } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
-import { createCachedTileLayer } from './mapUtils.js';
-import { displayHeatMap } from './main.js';
-
-
+import { collectPersonLocations, createCachedTileLayer, createEnhancedMarkerIcon, fitMapToMarkers, 
+    clearMap, addMapTitle, addMapButton, addLoadingOverlay, removeLoadingOverlay, 
+    setupCustomPopupStyle, cleanLocationName, showTemporaryLabel } from './mapUtils.js';
+import { geocodeLocation } from './geoLocalisation.js';
+import { getTranslation } from './nameCloudUI.js';
+import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
+import { getPersonsListTitle } from './nameCloudInteractions.js';
+import { addTooltipTransparencyFix, toggleAnimationPause, animationState} from './treeAnimation.js';
+import { showHeatmapFromSearch } from './searchModalUI.js';
+import { showHeatmapFromShowPersonList } from './nameCloudInteractions.js';
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
 
 /**
  * Fonction de traduction spécifique pour geoHeatMapUI.js
@@ -38,7 +46,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Erreur lors de la création de la carte. Voir console pour détails.',
         'noValidCoordinates': 'Aucune coordonnée valide trouvée dans les données',
-        'invalidHeatmapData': 'Données de heatmap invalides:'
+        'invalidHeatmapData': 'Données de heatmap invalides:',
+        'seeAllPlaces' : 'Voir tous les lieux'
       },
       'en': {
         // Titres et boutons
@@ -67,7 +76,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Error creating the map. See console for details.',
         'noValidCoordinates': 'No valid coordinates found in data',
-        'invalidHeatmapData': 'Invalid heatmap data:'
+        'invalidHeatmapData': 'Invalid heatmap data:',
+        'seeAllPlaces' : 'See all places'
       },
       'es': {
         // Titres et boutons
@@ -96,7 +106,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Error al crear el mapa. Ver consola para detalles.',
         'noValidCoordinates': 'No se encontraron coordenadas válidas en los datos',
-        'invalidHeatmapData': 'Datos de mapa de calor inválidos:'
+        'invalidHeatmapData': 'Datos de mapa de calor inválidos:',
+        'seeAllPlaces' : 'Ver todos los lugares'
       },
       'hu': {
         // Titres et boutons
@@ -125,7 +136,8 @@ function getUITranslation(key) {
         // Messages d'erreur
         'mapInitError': 'Hiba a térkép létrehozásakor. Részletek a konzolon.',
         'noValidCoordinates': 'Nem található érvényes koordináta az adatokban',
-        'invalidHeatmapData': 'Érvénytelen hőtérkép adatok:'
+        'invalidHeatmapData': 'Érvénytelen hőtérkép adatok:',
+        'seeAllPlaces' : 'Összes hely megtekintése'
       }
     };
   
@@ -166,6 +178,377 @@ function getUITranslation(key) {
   }
 
 
+export async function displayHeatMap(personId = null, currentSearchResults = null, isResultsFormated = false, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
+
+
+    // // si le mode animation était lancé, le mettre en pause
+    if (!animationState.isPaused && !state.isRadarEnabled && !state.isWordCloudEnabled ) {
+        console.log("🔴 Pause de l'animation pour afficher la heatmap, animationState.currentIndex=", animationState.currentIndex);
+        toggleAnimationPause();
+        await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
+    const wrapper = document.getElementById('animation-map-container');
+    if (wrapper) {
+        wrapper.style.display = "none";
+    }
+
+    disableFortuneModeClean();
+
+    console.log('- debug displayHeatMap' , personId, currentSearchResults,isResultsFormated,  newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
+    // Création d'un indicateur de chargement
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.style.position = 'fixed';
+    loadingIndicator.style.top = '50%';
+    loadingIndicator.style.left = '50%';
+    loadingIndicator.style.transform = 'translate(-50%, -50%)';
+    loadingIndicator.style.backgroundColor = 'white';
+    loadingIndicator.style.padding = '20px';
+    loadingIndicator.style.borderRadius = '8px';
+    loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    loadingIndicator.style.zIndex = '9999';
+    // loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
+    loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
+
+    document.body.appendChild(loadingIndicator);
+
+    let isSearchResults = false;
+    if (currentSearchResults && currentSearchResults.length > 0) {
+        isSearchResults = true;
+    }
+
+    
+    try {
+
+        // Récupérer les paramètres actuels de filtrage
+        // const currentConfig = {
+        //     type: 'name', //state.treeMode,
+        //     startDate: -6000, //parseInt(startDateInput.value),
+        //     endDate: 3000, //parseInt(endDateInput.value),
+        //     scope: 'all',
+        //     rootPersonId:  null, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+        // };
+
+
+        const currentConfig = {
+            type: (newConfig) ? newConfig.type : 'name', 
+            startDate: (newConfig) ? ((newConfig.startDate) ? newConfig.startDate : -6000) : -6000, 
+            endDate: (newConfig) ? ((newConfig.endDate) ? newConfig.endDate : 3000) : 3000, 
+            scope: (newConfig) ? newConfig.scope : 'all',
+            rootPersonId:  (newConfig) ? newConfig.rootPersonId : null, 
+        };
+
+
+
+        // const persons = getPersonsFromTCurrenTree();
+
+        // Générer les données pour la heatmap
+        let heatmapData;
+        if (isSearchResults) {
+            if (isResultsFormated) { 
+                heatmapData = currentSearchResults;
+            } else {
+                heatmapData = await createDataForHeatMap(currentConfig, false, currentSearchResults);  
+            }
+
+        } else {
+            heatmapData = await createDataForHeatMap(currentConfig, true); 
+        }      
+
+        // Supprimer l'indicateur de chargement
+        document.body.removeChild(loadingIndicator);
+        
+        // Créer la heatmap interactive
+        if (!heatmapData || heatmapData.length === 0) {
+            heatmapData = [];
+        }
+        // Créer un titre pour la heatmap basé sur la configuration
+        let heatmapTitle;
+        if (title) { heatmapTitle = title;}
+        else if (isOnlyOnePerson && personName) {
+            heatmapTitle = personName;
+        }
+
+        if (!personName && heatmapTitle ) { personName = heatmapTitle; }
+
+        if (personName && !heatmapTitle && heatmapData.length >1) { personName = 'Heatmap'; heatmapTitle = 'Heatmap'; }
+        //  if (personName && ! heatmapTitle ) { heatmapTitle = personName; }
+        
+
+        // Utiliser la fonction pour créer la heatmap
+        // console.log('- debug displayHeatMap' , ', heatmapTitle=', heatmapTitle, isOnlyOnePerson, ', personName=', personName)
+
+        if (document.getElementById('namecloud-heatmap-wrapper')) {
+            if (!isOnlyOnePerson) { 
+                // console.log('- debug several Person  createImprovedHeatmap ', isOnlyOnePerson, personName, currentSearchResults, heatmapData, 'title=', heatmapTitle)
+                createImprovedHeatmap(heatmapData, heatmapTitle, true, true);
+                // createIndividualLocationMap(null, heatmapData, true, heatmapTitle);
+
+            } else {
+                // console.log('- debug isOnlyOnePerson = true call to  createIndividualLocationMap with ', null, heatmapData, isOnlyOnePerson, personName)
+                createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);
+            }
+
+
+        } else {
+            // console.log('- debug first Time = true createImprovedHeatmap ', isOnlyOnePerson, ', personName=' , personName, currentSearchResults, heatmapData, 'title=', heatmapTitle)
+            createImprovedHeatmap(heatmapData, heatmapTitle, true, false, { top: window.innerHeight/2, left: 25, width: window.innerWidth-50, height: window.innerHeight/2-25 });
+            if (isOnlyOnePerson) {         
+                // console.log('- debug isOnlyOnePerson = true call to  createIndividualLocationMap with ', null, heatmapData, isOnlyOnePerson, personName)
+                setTimeout(() => {
+                    createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);  
+                }, 100); // Petit délai pour s'assurer que le DOM est prêt
+            }  
+        }
+
+    } catch (error) {
+        console.error('Erreur lors de la génération de la heatmap:', error);
+        if (document.body.contains(loadingIndicator)) {
+            document.body.removeChild(loadingIndicator);
+        }
+        // alert(`Erreur lors de la génération de la heatmap: ${error.message}`);
+        // alert(`${getTranslation('errorHeatmap')}: ${error.message}`);
+    }
+
+}
+
+
+
+/**
+ * Crée une carte individuelle avec les lieux d'une personne
+ * @param {string} personId - ID de la personne
+ * @returns {Promise<void>}
+ */
+export async function createIndividualLocationMap(personId, heatmapData = null, isOnlyOnePerson = false, personName = null ) {
+    // Vérifier que le wrapper de la heatmap existe
+    const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    if (!heatmapWrapper) {
+        console.error("Wrapper de heatmap non trouvé");
+        return;
+    }
+    
+    // Vérifier que la carte existe dans le wrapper
+    if (!heatmapWrapper.map) {
+        console.error("Carte Leaflet non trouvée dans le wrapper");
+        return;
+    }
+
+    window.displayedLocationNames = new Set();
+    addTooltipTransparencyFix();
+    
+    // Configurer le style personnalisé pour les popups
+    setupCustomPopupStyle();
+
+    // Récupérer les informations de la personne
+    
+    let person  = null;
+    let locations = null;
+    let isMapToBeCleared = false;
+    if (personId) {
+        person = state.gedcomData.individuals[personId];
+        if (!person) {
+            console.error("Personne non trouvée avec l'ID:", personId);
+            return;
+        }
+        console.log("Personne trouvée:", person.name);
+        
+        // Collecter les lieux de la personne avec la fonction centralisée
+        locations = collectPersonLocations(person, state.gedcomData.families);
+        personId = '';
+    } else if (heatmapData) {
+        person = {};
+        // console.log('-debug locations : ', heatmapData);  
+        if (heatmapData.length > 0) {
+            person.name = heatmapData[0].locations[0].name;
+            // console.log('-debug createIndividualLocationMap ', person.name)
+            // locations = heatmapData[0].locations;
+            locations = [];
+            heatmapData.forEach( (loc, index) => {
+                locations[index] = {};
+                locations[index].place = loc.placeName;
+                locations[index].coords = loc.coords;
+                locations[index].type = loc.locations[0].type;  
+            });
+        } else {
+            isMapToBeCleared = true;
+        }
+
+    } else {
+        isMapToBeCleared = true;
+    }
+
+
+
+    if (locations && locations.length === 0) {
+        console.log('Aucun lieu trouvé pour cette personne');
+        alert('Aucun lieu trouvé pour cette personne');
+        isMapToBeCleared = true;
+        // return;
+    }
+
+    
+    // Afficher un indicateur de chargement
+    const loadingOverlay = addLoadingOverlay(heatmapWrapper, 'Chargement des lieux...');
+    
+    try {
+        // Récupérer la carte
+        const map = heatmapWrapper.map;
+        
+        const  mapTitle = document.getElementById('heatmap-map-title');
+        if (mapTitle) {
+            mapTitle.remove();  // 👈 boum, plus de titre
+        }
+        
+        // Nettoyer toutes les couches existantes sauf la couche de tuiles
+        clearMap(map);
+        
+        // Tableau pour stocker les marqueurs
+        const markers = [];
+
+        if (!isMapToBeCleared) {
+
+            // Géocoder et placer les marqueurs
+            for (const location of locations) {
+                try {
+                    console.log("Géocodage de:", location.place);
+                    const coords = await geocodeLocation(location.place);
+                    
+                    if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+                        console.log("Coordonnées trouvées:", coords, location.place, location.type);
+                        
+                        // Créer l'icône pour le marqueur avec un style amélioré
+                        const markerIcon = createEnhancedMarkerIcon(location.type);
+                        
+                        // Créer et ajouter le marqueur
+                        const marker = L.marker([coords.lat, coords.lon], { icon: markerIcon })
+                            .addTo(map)
+                            // .bindPopup(`<strong>${location.type}:</strong> ${location.place}`);
+                            .bindPopup(`${location.type}: ${location.place}`);                        
+                        markers.push(marker);
+
+                        // Afficher le label temporaire au-dessus du marqueur
+                        // Nettoyer et simplifier le nom du lieu
+                        let displayName = cleanLocationName(location.place);
+
+                        // Vérifier si ce lieu a déjà été affiché pour cette personne
+                        if (!window.displayedLocationNames) {
+                            window.displayedLocationNames = new Set();
+                        }
+                        
+                        // Si le lieu n'a pas déjà été affiché, l'afficher maintenant
+                        if (!window.displayedLocationNames.has(displayName)) {
+                            window.displayedLocationNames.add(displayName);
+                            // showTemporaryLabel(marker, displayName, options.labelDuration || 1000);
+                            showTemporaryLabel(marker, displayName, 5000);
+                        }
+
+
+
+                    } else {
+                        console.warn("Coordonnées invalides pour:", location.place);
+                    }
+                } catch (error) {
+                    console.error(`Erreur lors du géocodage de ${location.place}:`, error);
+                }
+            }
+
+
+
+
+            
+            // Vérifier si des marqueurs ont été ajoutés
+            if (markers.length === 0) {
+                console.warn("Aucun marqueur n'a pu être ajouté à la carte");
+                alert("Aucun lieu n'a pu être localisé sur la carte");
+                loadingOverlay.remove();
+                return;
+            }
+            
+            // Ajuster la vue de la carte pour inclure tous les marqueurs
+            await fitMapToMarkers(map, markers, {
+                maxZoom: 9,
+                animate: true,
+                duration: 1.5,
+                easeLinearity: 0.25
+            });
+            
+            // Améliorer aussi les popups pour plus de lisibilité
+            markers.forEach(marker => {
+                // Personnaliser le style de la popup
+                const popup = marker.getPopup();
+                if (popup) {
+                    popup.options.className = 'custom-popup';
+                }
+            });
+
+
+
+            
+            // Ajouter un bouton pour revenir à la heatmap originale
+            addMapButton(heatmapWrapper, getUITranslation('seeAllPlaces'), () => {
+                // Rétablir la heatmap originale
+                const modal = document.getElementById('search-modal')
+                const isVisible = modal && getComputedStyle(modal).display !== 'none' && getComputedStyle(modal).visibility !== 'hidden';
+                if (isVisible) { 
+                    showHeatmapFromSearch();
+                } else {                           
+                    const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
+                    const isVisible = (allModals) && allModals[allModals.length - 1] && getComputedStyle(allModals[allModals.length - 1]).display !== 'none' && getComputedStyle(allModals[allModals.length - 1]).visibility !== 'hidden';
+                    if (isVisible) { 
+                        showHeatmapFromShowPersonList();
+                    }
+                } 
+
+                // Supprimer le titre et le bouton de reset
+                const mapTitle = heatmapWrapper.querySelector('.individual-map-title');
+                if (mapTitle) mapTitle.remove();
+                
+                const resetButton = heatmapWrapper.querySelector('.reset-heatmap-button');
+                if (resetButton) resetButton.remove();
+            });
+
+            // Ajouter un titre à la carte
+            const confLocal = {};
+            confLocal.type = 'placeOf';
+
+            addMapTitle(heatmapWrapper, `${getPersonsListTitle(personName, (heatmapData) ? heatmapData.length : null , confLocal)} ${person.name.replace(/\//g, '')}`);
+
+
+            const existingMap = document.getElementById('namecloud-heatmap-wrapper');
+
+
+            // Mettre à jour aussi le titre de la carte
+            const mapTitle = existingMap.querySelector('.map-title');
+            if (mapTitle) {
+                mapTitle.textContent = '';
+            }
+
+
+        } else {
+            // Ajouter un titre à la carte
+            if (personName) {
+                const confLocal = {};
+                confLocal.type = 'noPlaceFor';
+                addMapTitle(heatmapWrapper, `${getPersonsListTitle(personName, (heatmapData) ? heatmapData.length : null, confLocal)}${personName}`);
+            }
+        }
+
+
+        
+    } catch (error) {
+        console.error('Erreur lors de la création de la carte individuelle:', error);
+        alert('Erreur lors de la création de la carte: ' + error.message);
+    } finally {
+        // Supprimer l'overlay de chargement
+        removeLoadingOverlay(heatmapWrapper);
+    }
+
+    // Mettre à jour les variables de suivi
+    window.lastSelectedLocationId = personId;
+    window.isIndividualMapMode = true;
+}
+
+
 /**
  * Crée et affiche la heatmap avec son interface utilisateur, ou met à jour les données d'une heatmap existante
  * 
@@ -178,7 +561,7 @@ function getUITranslation(key) {
 export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = false, updateOnly = false, initialPosition = null) {
     
 
-    console.log("\n\n\n ****** debug in createImprovedHeatmap", locationData, heatmapTitle, isFromTree , updateOnly , initialPosition);
+    // console.log("\n\n\n ****** debug in createImprovedHeatmap", locationData, heatmapTitle, isFromTree , updateOnly , initialPosition);
 
 
     // Vérifier s'il existe déjà une heatmap
@@ -334,9 +717,11 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
         // Seulement redimensionner si nécessaire
         if (needsResize) {
             // Calculer les nouvelles dimensions pour respecter les marges
-            const newWidth = Math.min(wrapperRect.width, windowWidth - 40);
-            const newHeight = Math.min(wrapperRect.height, windowHeight - 100);
-            
+            // const newWidth = Math.min(wrapperRect.width, windowWidth - 40);
+            const newWidth = Math.min(wrapperRect.width, windowWidth - 2);
+            // const newHeight = Math.min(wrapperRect.height, windowHeight - 100);
+            const newHeight = Math.min(wrapperRect.height, windowHeight - 5);
+
             // Appliquer les nouvelles dimensions
             wrapper.style.width = `${newWidth}px`;
             wrapper.style.height = `${newHeight}px`;
@@ -702,7 +1087,20 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
 
 
         // Créer le titre intégré à la carte (toujours visible)
-        createMapTitle(mapContainer, heatmapTitle);
+        // createMapTitle(mapContainer, heatmapTitle);
+
+        //    mapTitle.textContent = heatmapTitle.replace(/^Heatmap\s*-\s*/, '');
+
+
+
+
+        //*******************
+        const existingTitle = mapContainer.querySelector('.individual-map-title');
+        if (existingTitle) existingTitle.remove();
+        addMapTitle(mapContainer, heatmapTitle);
+        //***************************
+
+
 
         // Créer les contrôles de carte
         createMapControls(mapContainer, heatmapWrapper, isFromTree);
@@ -1067,7 +1465,8 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
                 refreshHeatmap();
             }
         } else {
-            displayHeatMap();
+            console.log('-debug call to displayHeatMap from createMapControls');
+            displayHeatMap(null, false);
         }
     });
     

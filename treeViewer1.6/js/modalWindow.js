@@ -1,15 +1,14 @@
 import { state, displayGenealogicTree, updateRadarButtonText } from './main.js';
 import { historicalFigures } from './historicalData.js';
 import { extractYear } from './utils.js';
-import { geocodeLocation } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
-import { createEnhancedMarkerIcon, fitMapToMarkers, locationSymbols, collectPersonLocations, createLocationMap } from './mapUtils.js';
+import { collectPersonLocations, createLocationMap } from './mapUtils.js';
 import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
 import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
-import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
-
+import { testSpeechSynthesisHealth, selectVoice, addTooltipTransparencyFix } from './treeAnimation.js';
+import { makeModalInteractive } from './resizableModalUtils.js';
 
 
 /**
@@ -307,14 +306,26 @@ export const translations = {
     return place.replace(pattern, '');
   }
 
+
+
+
+/********************************** */  
 export function displayPersonDetails(personId, zindex = null) {
     console.log("Affichage des détails de la personne :", personId, zindex);
 
     let z_index = 1000;
     if (zindex) { z_index = zindex;}
+    // state.topZindex++;
+    z_index = state.topZindex;
     
     const person = state.gedcomData.individuals[personId];
     if (!person) return;
+
+
+
+    window.displayedLocationNames = new Set();
+    addTooltipTransparencyFix();
+
 
     // Ajouter un style pour personnaliser les ascenseurs
     const style = document.createElement("style");
@@ -371,6 +382,7 @@ export function displayPersonDetails(personId, zindex = null) {
     const modalName = document.getElementById('modal-person-name');
     const detailsContent = document.getElementById('person-details-content');
     const modal = document.getElementById('person-details-modal');
+    window.personDetailsModal = modal;
     
     modal.className = `modal-person-name custom-modal`;
     modal.style.zIndex = z_index;
@@ -390,6 +402,8 @@ export function displayPersonDetails(personId, zindex = null) {
             overflow: auto !important;
             max-width: calc(100% - 20px) !important;
             max-height: calc(100% - 50px) !important;
+            padding: 0px 0px;
+            margin: 0 !important;
             /*left: 10px !important; */
         }
         
@@ -399,7 +413,8 @@ export function displayPersonDetails(personId, zindex = null) {
             width: 100% !important;
             max-width: 100% !important;
             overflow: visible !important;
-            padding: 10px !important;
+            /* padding: 10px !important; */
+            padding: 0px 0px !important;
             margin: 0 !important;
             box-sizing: border-box !important;
         }
@@ -413,21 +428,25 @@ export function displayPersonDetails(personId, zindex = null) {
         /* Réduire la hauteur du bandeau titre */
         #modal-person-name {
             font-size: ${nameCloudState && nameCloudState.mobilePhone ? '14px' : '16px'};
-            padding: 6px !important;
+            padding: 0px !important;
             margin: 0 !important;
             line-height: 1.2 !important;
         }
-        #modal-person-name .modal-header {
-            padding: 4px !important;
+        /*#modal-person-name .modal-header {*/
+        #person-details-modal .modal-header {
+            padding: 0px 5px !important;
             min-height: unset !important;
-            background-color: rgba(248, 249, 250, 0.95) !important;
+            background-color: rgba(227, 242, 253, 0.95) !important;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
 
             /* Rendre l'en-tête fixe */
             position: sticky !important;
             top: 0 !important;
             z-index: 1001 !important;
-            width: 100% !important;
+            // width: 97% !important;
+            width: calc(100% - 5px) !important;
+            margin-bottom: 20px !important;
+            margin-top: 0px !important;
             
             /* Ajouter une ombre pour démarcation visuelle */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
@@ -897,11 +916,20 @@ export function displayPersonDetails(personId, zindex = null) {
     }
     // let forcedZindex = 1000; //1000000;
 
+
+    setTimeout(() => {
+        makeModalInteractive(modal);
+    }, 100);
+
     // Rendre la modale déplaçable et resizable
     setTimeout(() => {
-        makeModalDraggable(z_index);
+        makeModalDraggable(state.topZindex);
     }, 100);
+ 
     
+
+
+
 
     // Ajouter cet écouteur d'événement pour le resize de l'écran
     window.addEventListener('resize', adjustModalOnResize);
@@ -911,6 +939,10 @@ export function displayPersonDetails(personId, zindex = null) {
     setTimeout(() => {
         displayEnhancedLocationMap(personId);
     }, 150);
+
+
+
+
 
 
     // console.log ('debug avec nouveau makeModalDraggable !!!!')
@@ -1040,7 +1072,7 @@ function makeModalDraggable(zindex) {
     let startX, startY, startLeft, startTop;
     
     modalHeader.style.cursor = 'move';
-    
+        
     // === ÉVÉNEMENTS SOURIS ===
     modalHeader.addEventListener('mousedown', function(e) {
         // Ne pas capturer les clics sur le bouton de fermeture
@@ -1169,7 +1201,6 @@ function addResizeHandles(modal, zindex) {
     handleContainer.style.left = `${modalRect.left}px`;
     handleContainer.style.top = `${modalRect.top}px`;
     
-    
 
     positions.forEach(pos => {
         const handle = document.createElement('div');
@@ -1280,11 +1311,7 @@ function addResizeHandles(modal, zindex) {
     });
     
 
-    
-    
-    
-    
-    
+    modal._handleContainer = handleContainer;
     
     
     // Mettre à jour la position du conteneur de poignées quand la modale bouge
@@ -1744,10 +1771,6 @@ function createEnhancedLocationMap(locations) {
     }
 
     // Ajouter le conteneur à la modale
-    // const detailsContent = document.getElementById('person-details-content');
-    // detailsContent.insertBefore(mapContainer, detailsContent.firstChild);
-
-
     const detailsContent = document.getElementById('person-details-content');
     const actionsSection = detailsContent.querySelector('.details-section.actions');
     if (actionsSection && actionsSection.nextSibling) {

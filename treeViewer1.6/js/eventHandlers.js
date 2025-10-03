@@ -3,15 +3,14 @@
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
 import { state, displayGenealogicTree, hideMap } from './main.js';
-import { replaceRootPersonSelector, updateSelectorDisplayText } from './mainUI.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
 import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
-import { drawWheelTree, setMaxGenerations, resetWheelView, removeSpinningImage } from './treeWheelRenderer.js'
-import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { setMaxGenerations, removeSpinningImage } from './treeWheelRenderer.js'
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { enableBackground } from './backgroundManager.js';
 import { calculateFullTreeDimensions } from './exportManager.js';
 
@@ -525,6 +524,102 @@ function highlightAndZoomToNode(matchedNode) {
 }
 
 
+export function closeAllModals(isCloseAnimationmap = true) {
+    // on récupère toutes les modales ouvertes
+    //
+    const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-details-modal"]'); 
+    // const modals = document.querySelectorAll('div[id*="stats-modal"], div[id*="search-modal"], div[id*="show-person-list-modal"], div[id*="frequency-stat-modal"], div[id*="graph-stats-modal"], div[id*="century-stats-modal"], div[id*="person-details-modal"]'); 
+
+   //[class*="searchModal-content"]
+
+
+    let modal;
+    let content;
+    modal = document.querySelector('[id="search-modal"]');
+    if (modal) {
+        content = modal.querySelector('.searchModal-content');
+        if (content) {
+            if (content._cleanupDraggable) {
+                content._cleanupDraggable();
+            }
+        }
+    }
+
+    modal = document.querySelector('[id="stats-modal"]');
+    if (modal) {
+        content = modal.querySelector('.statsModal-content');
+        if (content) {
+            if (content._cleanupDraggable) {
+                content._cleanupDraggable();
+            }
+        }
+    }
+
+
+
+    const modals_freq = document.querySelectorAll('[id*="frequency-stat-modal"]');
+    // content = modal.querySelector('.statsModal-content');
+    modals_freq.forEach(modal => {
+        if (modal) {
+            if (modal._cleanupDraggable) {
+                modal._cleanupDraggable();
+            }
+        }
+    });
+
+
+
+    const heatMapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+    if (heatMapWrapper) {
+        heatMapWrapper.remove();
+        console.log('-debug closeAllModals remove heatMapWrapper', document.getElementById('namecloud-heatmap-wrapper'));
+
+    }
+
+    if (isCloseAnimationmap) {
+        const wrapper = document.getElementById('animation-map-container');
+        if (wrapper) {
+            wrapper.style.display = "none";
+        }
+    }
+
+
+
+    // on les supprime du DOM
+    modals.forEach(modal => {
+
+        if (modal.className.includes('searchModal-content')) {
+            modal._isVisible = false
+            // modal.style.display = "none";
+        }
+        else {
+
+            if (modal.dataset.dynamic === "true") {
+                // créées par JS → on peut les supprimer
+
+                if (modal._cleanupDraggable) {
+                    modal._cleanupDraggable();
+                }
+                modal.remove();
+            } else {
+                // cas des modals crée dans les html : on ne peut pas les détruire !!!
+                if (modal._cleanupDraggable) {
+                    modal._cleanupDraggable();
+                }
+                // définies dans le HTML → on les cache
+                modal.style.display = "none";
+            }
+
+        }
+    });
+
+    state.frequencyStatsModalCounter = 0;
+    state.showPersonListModalCounter = 0;
+    state.graphStatsModalCounter = 0;
+    state.centuryStatsModalCounter = 0; 
+}
+
+
 export async function returnToLogin() {
     // Masquer l'arbre
     document.getElementById('tree-container').style.display = 'none';
@@ -552,6 +647,7 @@ export async function returnToLogin() {
     state.rootPerson = null;
     // Réinitialiser d'autres propriétés si nécessaire
     state.isAnimationLaunched = false;
+    state.isFullResetAnimationRequested = true;
     stopAnimation();
 
     animationState.isPaused = true;
@@ -562,12 +658,21 @@ export async function returnToLogin() {
     // Masquer la carte
     hideMap();
 
+
+
+
     state.isRadarEnabled = false;
     disableFortuneModeWithLever();
     state.isRadarEnabled = false;
     state.treeMode = 'ancestors';
     state.treeModeReal = 'ancestors';
     removeSpinningImage();
+
+    disableFortuneModeClean();
+
+
+
+    closeAllModals();
 
     // updateRadarButtonText();
     
@@ -590,7 +695,7 @@ export async function returnToLogin() {
             // const imagePath = 'background_images/lichen-red.jpg';
             // const imagePath = 'background_images/bois.jpg';
             backgroundImage.src = 'background_images/tree-log.jpg';
-            backgroundImage.src = await getCachedResourceUrl(imagePath);
+            // backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
             // Fallback en cas d'erreur

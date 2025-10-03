@@ -268,7 +268,7 @@ function drawNameCloud(svg, textGroup, words, color, config) {
         const people = filterPeopleByText(d.text, config);
 
         // Afficher la liste des personnes
-        showPersonsList(d.text, people, config);
+        new showPersonsList(d.text, people, config);
     }
 
 

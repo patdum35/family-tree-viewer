@@ -36,7 +36,7 @@ function getCloudTranslation(key) {
         // Titres modaux
         'firstnamesTitle': 'prénoms',
         'lastnamesTitle': 'Noms',
-        'jobsTitle': 'métiers',
+        'jobsTitle': 'Métiers',
         'placesTitle': 'Lieux',
         'lifespanTitle': 'Durée de vie',
         'procreationAgeTitle': 'Âge de procréat.',
@@ -784,7 +784,7 @@ function positionButtonRelativeToLabel(button, type) {
  */
 export function findPeopleWithName(name, config, originalName, searchStreamFull) {
 
-    console.log("findPeopleWithName called  with name:", name, searchStreamFull);
+    // console.log("findPeopleWithName called  with name:", name, searchStreamFull);
 
     if (!state.gedcomData) return [];
     if (!originalName) { originalName = name;}

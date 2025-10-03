@@ -1,8 +1,8 @@
-import { state , getPersonsFromTCurrenTree, displayHeatMap } from './main.js';
+import { state , getPersonsFromTCurrenTree } from './main.js';
 import { nameCloudState, getPersonsFromTree, processPersonData, filterPeopleByText } from './nameCloud.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
-import { createImprovedHeatmap } from './geoHeatMapUI.js';
+import { createImprovedHeatmap, displayHeatMap } from './geoHeatMapUI.js';
 
 
 /**
@@ -194,7 +194,8 @@ export async function refreshHeatmap(isFromTree = false) {
 
 
     if (isFromTree) {
-        displayHeatMap();
+        console.log('-debug call to displayHeatMap from refreshHeatmap');
+        displayHeatMap(null, false);
         return; // Si on vient de la carte 
     }
 
@@ -318,11 +319,9 @@ export async function refreshHeatmap(isFromTree = false) {
                     }
                     
                     // Ajuster la disposition pour le mode écran partagé
-                    if (typeof adjustSplitScreenLayout === 'function') {
-                        const newHeatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-                        if (newHeatmapWrapper && personListModal) {
-                            adjustSplitScreenLayout(personListModal, newHeatmapWrapper);
-                        }
+
+                    if (personListModal) {
+                        adjustSplitScreenLayout(personListModal);
                     }
                     
                     return; // Arrêter ici car nous avons déjà tout géré
@@ -586,6 +585,8 @@ export async function createHeatmapDataForPeople(people) {
  * @returns {Promise<Array>} - Données formatées pour la heatmap
  */
 export async function createDataForHeatMap(config, isFromCurrentTree = false, currentSearchResults = null) {
+    
+    console.log('\n\n - debug : call to createDataForHeatMap',  config, isFromCurrentTree);    
     try {
         // Configuration pour extraire les lieux
         const locationConfig = {

@@ -3,10 +3,11 @@
 // ====================================
 import { isNodeHidden } from './utils.js';
 import { drawNodes } from './nodeRenderer.js';
-import { state, displayHeatMap } from './main.js';
+import { state } from './main.js';
 import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
+import { displayHeatMap } from './geoHeatMapUI.js';
 
 let zoom;
 let lastTransform = null;
@@ -97,7 +98,8 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
 
     // Vérifier si une heatmap est déjà affichée
     if (document.getElementById('namecloud-heatmap-wrapper')) {
-        displayHeatMap();
+        console.log('-debug call to displayHeatMap from drawTree', document.getElementById('namecloud-heatmap-wrapper'));
+        displayHeatMap(null, false);
     }
 
 

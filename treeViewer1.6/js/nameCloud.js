@@ -8,8 +8,9 @@ import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburge
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
-import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
-
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { closeAllModals } from './eventHandlers.js';
+import { fullResetAnimationState } from './treeAnimation.js';
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -59,6 +60,13 @@ export const nameCloudState = {
 
 export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
+    closeAllModals();
+    fullResetAnimationState();
+
+    disableFortuneModeClean();
+    disableFortuneModeWithLever();
+
+
     hideAndCleanupTreeButtons();
     
     trackPageView('wordCloud');
@@ -68,7 +76,7 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     // Pour désactiver le fond d'écran
     enableBackground(false);
 
-    disableFortuneModeWithLever();
+
 
     // Appeler la fonction au chargement du module
     loadSettingsFromLocalStorage();
@@ -288,8 +296,8 @@ export function processPersonData(person, config, nameFrequency, stats, options 
             cleanedProfessions.forEach(prof => {
                 if (prof) {
                     // Si la langue courante est le français, pas besoin de traduire
-                    if (currentLang === 'fr') {
-
+                    // if (currentLang === 'fr') {
+                    if (true) { // Finalement je supprime la traduction des métiers : c'est trop compliqué
                         const shortProfs =  prof.split(/[ \-]/);  //  séparer sur espace, tiret 
                         const profLength = prof.split(/[ \-]/).length
 
@@ -913,7 +921,8 @@ export function filterPeopleByText(text, config) {
             } else if (config.type === 'professions') {
                 const cleanedProfessions = cleanProfessionForNameCloud(p.occupationFull);
 
-                if (currentLang === 'fr') {
+                // if (currentLang === 'fr') {
+                if (true) { // Finalement je supprime la traduction des métiers : c'est trop compliqué
                     // En français, on utilise directement le texte
                     const regex = new RegExp(`(^|[ ,.;:(){}\\[\\]\\-_'"])\\s*${text.toLowerCase()}\\s*($|[ ,.;:(){}\\[\\]\\-_'"])`, 'i');
                     matches = cleanedProfessions.some(prof => regex.test(prof));

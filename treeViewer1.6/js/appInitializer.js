@@ -11,7 +11,6 @@ import {
     zoomIn, 
     zoomOut, 
     resetZoom,
-    displayHeatMap,
     toggleTreeRadar,
     toggleSpeech,
     toggleSpeech2,
@@ -40,6 +39,11 @@ import {
 import {
     initBackgroundContainer
 } from './backgroundManager.js';
+import { 
+    displayHeatMap 
+} from './geoHeatMapUI.js';
+import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
+
 
 
 // import { changeLanguage } from './i18n.js';
@@ -179,6 +183,7 @@ function initializeAppFunctions() {
     window.resetZoom = resetZoom;
     window.displayHeatMap = displayHeatMap;
     window.toggleTreeRadar = toggleTreeRadar;
+    window.toggleTreeRadarFromHamburger = toggleTreeRadarFromHamburger;
     window.toggleSpeech = toggleSpeech;
     window.toggleSpeech2 = toggleSpeech2;
     window.toggleAnimationPause = toggleAnimationPause;

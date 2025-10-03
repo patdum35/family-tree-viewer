@@ -225,6 +225,24 @@ export function createLocationMap(containerId, locations, options = {}) {
                     .bindPopup(`<div style="font-weight:bold;text-align:center;">${locationSymbols[location.type]} ${location.place}</div>`);
                 
                 markers.push(marker);
+
+                // Afficher le label temporaire au-dessus du marqueur
+                // Nettoyer et simplifier le nom du lieu
+                let displayName = cleanLocationName(location.place);
+
+                // Vérifier si ce lieu a déjà été affiché pour cette personne
+                if (!window.displayedLocationNames) {
+                    window.displayedLocationNames = new Set();
+                }
+                
+                // Si le lieu n'a pas déjà été affiché, l'afficher maintenant
+                if (!window.displayedLocationNames.has(displayName)) {
+                    window.displayedLocationNames.add(displayName);
+                    // showTemporaryLabel(marker, displayName, options.labelDuration || 1000);
+                    showTemporaryLabel(marker, displayName, 5000);
+                }
+
+
                 return marker;
             }
             return null;
@@ -433,7 +451,7 @@ export function showTemporaryLabel(marker, text, duration = 1000, options = {}) 
             font-weight: bold; 
             text-align: center;
             font-size: 12px;
-            background-color: rgba(255, 255, 255, 0.6) !important;
+            background-color: rgba(255, 255, 255, 0.6) !important; 
             padding: 3px 6px;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -549,7 +567,7 @@ function calculateLabelOffset(index, nearTopEdge = false) {
  * @param {string} locationName - Nom de lieu brut
  * @returns {string} - Nom de lieu nettoyé
  */
-function cleanLocationName(locationName) {
+export function cleanLocationName(locationName) {
     if (!locationName) return '';
     
     // 1. Supprimer tout ce qui est entre parenthèses (et les parenthèses)

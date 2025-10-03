@@ -683,7 +683,7 @@ function showFeedback(message, type = 'info') {
     feedback.style.fontSize = '14px';
     feedback.style.fontWeight = 'bold';
     feedback.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    feedback.style.zIndex = '1100';
+    feedback.style.zIndex = state.topZindex;
     
     if (type === 'success') {
         feedback.style.backgroundColor = '#4CAF50';

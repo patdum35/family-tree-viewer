@@ -1,7 +1,9 @@
+import { state } from './main.js';
 import { nameCloudState, collectCenturyData } from './nameCloud.js';
 import { statsConfig, findPeopleWithName } from './nameCloudAverageAge.js';
 import { showPersonsList } from './nameCloudInteractions.js';
-import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { resizeModal } from './nameCloudStatModal.js';
 
 
 
@@ -355,22 +357,47 @@ export function showCenturyStatsModal(type) {
             if (!cfg) return;
 
 
+
+            let modalId; 
+            modalId = `century-stats-modal-${state.centuryStatsModalCounter}`;
+            state.centuryStatsModalCounter++; 
+
             // Création du modal
             const modal = document.createElement('div');
+            modal.id = modalId;
             modal.className = `century-stats-modal-${type}`;
             modal.style.position = 'fixed';
-            modal.style.top = '50%';
             modal.style.left = '50%';
-            modal.style.transform = 'translate(-54%, -50%)';
+
+            let topLocal;
+            let ratioHeight;
+            if (window.innerHeight < 500) {
+                ratioHeight = 80;
+                topLocal = 70;
+            } else {
+                ratioHeight = 70;
+                topLocal = 105;        
+            }
+
+            modal.style.top = topLocal + 'px';
+            modal.style.transform = 'translateX(-50%)';
             modal.style.backgroundColor = 'white';
-            modal.style.padding = '10px';
+            modal.style.padding = '0px 10px';
             modal.style.borderRadius = '8px';
             modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
-            modal.style.zIndex = '1100';
+            modal.style.zIndex = state.topZindex;
             modal.style.maxWidth = '800px';
-            modal.style.width = '85%';
-            modal.style.maxHeight = '95vh';
+            modal.style.minWidth = state.minModalWidth + 'px';
+            // modal.style.maxWidth = '90%';
+            modal.style.width = '90%';
+            
+            modal.style.maxHeight = ratioHeight +'vh';
+            modal.style.minHeight = state.minModalHeight + 'px';
             modal.style.overflow = 'auto';
+
+            // modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
+            // modal.style.flexDirection = "column";   // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
+            
             
             // En-tête du modal
             const header = document.createElement('div');
@@ -380,31 +407,29 @@ export function showCenturyStatsModal(type) {
             header.style.marginTop= '0px';
             header.style.marginBottom = '5px';
             header.style.borderBottom = '1px solid #eee';
-            header.style.paddingBottom = '2px';
+            header.style.paddingBottom = '10px';
             // Nouvelles propriétés pour rendre l'en-tête sticky
             header.style.position = 'sticky';
             header.style.top = '0';
-            header.style.backgroundColor = 'white';
+            header.style.backgroundColor =  '#EBF8FF'; //'white';
             header.style.zIndex = '1101';
-            header.style.paddingTop = '10px';
+            header.style.paddingTop = '3px';
+            header.style.paddingBottom = '5px';
             header.style.width = '100%';
             header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
             // Ajuster la marge pour éviter le déplacement du contenu
-            header.style.marginBottom = '15px';
+            header.style.marginBottom = '2px';
             header.style.marginLeft = '-20px';  // Compenser le padding du modal
             header.style.marginRight = '-20px'; // Compenser le padding du modal
             header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
             header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
 
-
-
-
-
             
             const title = document.createElement('h2');
             title.textContent = ` ${getCenturyTranslation('Evolution')} ${cfg.modalArticle} ${cfg.modalTitle} ${getCenturyTranslation('perCentury')}`; //  par siècle
-            title.style.margin = '0';
-            title.style.fontSize = '15px';
+            title.style.margin = '0 10px';
+            // title.style.fontSize = '15px';
+            title.style.fontSize = nameCloudState.mobilePhone ? '12px' : '15px';
             
             const closeButton = document.createElement('button');
             closeButton.textContent = '×';
@@ -412,7 +437,18 @@ export function showCenturyStatsModal(type) {
             closeButton.style.border = 'none';
             closeButton.style.fontSize = '24px';
             closeButton.style.cursor = 'pointer';
-            closeButton.style.padding = '0 5px';
+            closeButton.style.padding = '1 8px';
+            closeButton.style.marginRight = '10px';
+            // style hover via JS
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(128, 128, 128, 0.5)';
+                closeButton.style.borderRadius = '50%';
+            });
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'none';
+                closeButton.style.borderRadius = '0';
+            });
+
             closeButton.onclick = () => {
                 document.body.removeChild(modal);
                 document.body.removeChild(overlay);
@@ -422,6 +458,7 @@ export function showCenturyStatsModal(type) {
             header.appendChild(closeButton);
             modal.appendChild(header);
             
+            
             // MODIFICATION IMPORTANTE: Contenu différent selon le type
             if (isNumericType) {
                 // Version originale pour les types numériques
@@ -429,6 +466,7 @@ export function showCenturyStatsModal(type) {
                 const chartContainer = document.createElement('div');
                 chartContainer.style.height = '400px';
                 chartContainer.style.marginBottom = '20px';
+                chartContainer.style.marginLeft = '2px';
                 chartContainer.id = `century-chart-${type}`;
                 modal.appendChild(chartContainer);
                 
@@ -766,7 +804,7 @@ export function showCenturyStatsModal(type) {
                     initializeNonNumericCenturyChart(centuryStats, firstCentury, lastCentury, chartContainer, detailsContainer, type);
                 }, 100);
             }
-            
+          
             // Création d'un overlay pour l'arrière-plan
             const overlay = document.createElement('div');
             overlay.style.position = 'fixed';
@@ -797,7 +835,14 @@ export function showCenturyStatsModal(type) {
 
             // Rendre la modale déplaçable et redimensionnable
             makeModalDraggableAndResizable(modal, header);
-            
+
+            makeModalInteractive(modal);    
+ 
+            window.addEventListener('resize', () => resizeModal(modal, true));
+
+            resizeModal(modal, true);
+
+
         } catch (error) {
             // En cas d'erreur, supprimer l'indicateur de chargement et afficher l'erreur
             if (document.body.contains(loadingIndicator)) {
@@ -913,7 +958,7 @@ function showCenturyDetails(century, stats, container, type) {
             };
             
             // Utiliser la fonction existante avec la configuration temporaire
-            showPersonsList(
+            new showPersonsList(
                 `${item.text} (${getDisplayCentury(century)})`, // Titre avec indication du siècle
                 findPeopleWithName(item.text, tempConfig, item.originalName),      // Filtrer par siècle
                 tempConfig                                      // Config temporaire avec dates du siècle
@@ -1355,7 +1400,7 @@ function initializeCenturyChart(centuryStats, firstCentury, lastCentury, contain
     // Titre de l'axe Y
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", -margin.left + 7)
+        .attr("y", -margin.left + 7 + 2)
         .attr("x", -height / 2)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")

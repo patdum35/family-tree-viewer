@@ -323,7 +323,7 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     closeButton.style.justifyContent = 'center';
     closeButton.style.alignItems = 'center';
     closeButton.style.padding = '0';
-    closeButton.style.zIndex = '1100';  // S'assurer qu'il est au-dessus
+    closeButton.style.zIndex = state.topZindex; // S'assurer qu'il est au-dessus
 
     // Ajouter une zone de toucher plus grande (padding invisible)
     closeButton.style.boxSizing = 'content-box';

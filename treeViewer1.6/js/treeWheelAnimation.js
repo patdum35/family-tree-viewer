@@ -180,6 +180,8 @@ function launchFortuneWheelWithLever(baseVelocity) {
     
     if (window.leverControls) {
         window.leverControls.disable();
+        //👉 Quand tu lances la roue (levier activé)
+        document.getElementById("stopFortuneBtn").style.display = "block";
     }
     
     // Calculs avec randomisation (identique)
@@ -356,7 +358,6 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
 
         highlightWinnerSegment(winner.segment, winner.generation, winner.sex);
 
-
         // resetLastWinnerHighlightAsync();
 
 
@@ -372,11 +373,15 @@ function animateFortuneWheelWithLever(transparentPng, finalRotation, duration) {
         }, 800);
         state.currentAnimationTimeouts.push(timeoutId4);
 
+
     }, duration + 100);
     
     state.currentAnimationTimeouts.push(timeoutId1);
     state.currentAnimationTimeouts.push(timeoutId2);
+
+
 }
+
 
 // Recentrer le radar chart (avec préservation du zoom initial)
 function resetRadarToCenter() {
@@ -1218,6 +1223,23 @@ class FortuneWheelSounds {
         });
     }
 
+    // Arrêter tous les sons en cours (spinning, ticking, etc.)
+    stopAll() {
+        try {
+            this.stopWheelSpinning();
+        } catch(e) { console.warn("⚠️ Impossible d'arrêter wheel-spinning", e); }
+
+        try {
+            this.stopTicking();
+        } catch(e) { console.warn("⚠️ Impossible d'arrêter ticking", e); }
+
+        // Tu peux en ajouter d’autres ici si tu crées plus tard
+        // des sons persistants avec source.loop = true
+        console.log("🔇 Tous les sons actifs arrêtés");
+    }
+
+
+
     // Pour activer le tic-tac lancer :
     // const sounds = new FortuneWheelSounds();
     // sounds.play('tick');
@@ -1706,9 +1728,10 @@ function createRealisticSlotHandle() {
     const leverText = document.createElement("div");
     leverText.style.cssText = `
         position: absolute;
-        top: -30px;
+        top: 100px; /*-30px;*/
         left: 50%;
         transform: translateX(-50%);
+        left: 85px;
         color: #fff;
         font-weight: bold;
         font-size: 12px;
@@ -1723,6 +1746,59 @@ function createRealisticSlotHandle() {
     // UTILISER LA TRADUCTION
     leverText.textContent = getFortuneText('leverText');
     
+
+    const stopBtn = document.createElement("button");
+    stopBtn.id = "stopFortuneBtn";
+    stopBtn.textContent = "STOP";
+    stopBtn.style.cssText = `
+        position: absolute;
+        top: 100px; /*-30px;*/
+        left: 50%;
+        transform: translateX(-50%);
+        left: 85px;
+        z-index: 2; /* au-dessus du texte */
+        background: crimson;
+        color: white;
+        font-weight: bold;
+        font-size: 13px;
+        text-align: center;
+        padding: 7px 11px;
+        border: none;
+        border-radius: 12px;
+        white-space: nowrap;
+        cursor: pointer;
+        display: none; /* caché par défaut au démarrage*/
+    `;
+    stopBtn.onclick = () => {
+        console.log("🛑 STOP demandé !");
+        disableFortuneModeClean(); 
+        stopBtn.style.display = "none"; // disparaît après clic
+    };
+
+    leverContainer.appendChild(stopBtn);
+
+
+
+    // // 👉 Quand tu lances la roue (levier activé)
+    // stopBtn.style.display = "block";
+
+    // // 👉 Quand l’animation est terminée (wheel end)
+    // stopBtn.style.display = "none";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     leverContainer.appendChild(leverPivot);
     leverContainer.appendChild(leverArm);
     leverArm.appendChild(leverHandle);
@@ -1850,6 +1926,15 @@ function createRealisticSlotHandle() {
         state.currentAnimationTimeouts.push(timeoutId7);
 
         console.log(`🎯 FIN pullLever() après traduction: ${(performance.now() - pullStart).toFixed(1)}ms`);
+
+
+        // 👉 Quand tu lances la roue (levier activé)
+        // stopBtn.style.display = "block";
+
+
+
+
+
     }
     
     function disableLever() {
@@ -1934,6 +2019,8 @@ window.closeWinnerMessage = closeWinnerMessage;
 
 // Fonction showWinnerMessage modifiée avec 6 boutons
 function showWinnerMessage(winner) {
+
+    document.getElementById("stopFortuneBtn").style.display = "none";
     const message = document.createElement("div");
     message.style.cssText = `
         position: fixed;
@@ -3976,7 +4063,7 @@ function showFortuneInstructions() {
     const instructions = document.createElement("div");
     instructions.style.cssText = `
         position: fixed;
-        top: 20px;
+        top: 80px;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(0,0,0,0.8);
@@ -3996,6 +4083,7 @@ function showFortuneInstructions() {
             0%, 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             15%, 85% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+
     `;
     document.head.appendChild(style);
     
@@ -4005,7 +4093,7 @@ function showFortuneInstructions() {
         if (instructions.parentNode) {
             document.body.removeChild(instructions);
         }
-    }, 4000);
+    }, 1000);
 }
 
 function removeWinnerRedArrowIndicator() {
@@ -4214,6 +4302,55 @@ export function disableFortuneModeWithLever() {
     removeWinnerRedArrowIndicator();
     
     console.log("✅ Mode Fortune désactivé");
+}
+
+// fonction de désactivation
+export function disableFortuneModeClean() {
+
+    console.log("🚫 disableFortuneModeClean appelé - Fonction désactivée pour tests");
+
+    console.log("🛑 STOP animations demandé !");
+
+    // 1. Stopper tous les timeouts
+    state.currentAnimationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    state.currentAnimationTimeouts = [];
+
+    // 2. Stopper toutes les transitions D3
+    d3.selectAll("*").interrupt();
+
+    // 3. Virer le PNG temporaire
+    const spinningImg = document.getElementById("fortune-wheel-spinning-img");
+    if (spinningImg) spinningImg.remove();
+
+    // 4. Arrêter les sons
+    if (fortuneSounds) {
+        fortuneSounds.stopAll();
+    }
+
+    // 5. Restaurer la roue (SVG principal)
+    const originalRadar = d3.select("#tree-svg").selectAll("g").filter(function() {
+        return this.querySelector(".center-person-group") !== null;
+    });
+
+    if (!originalRadar.empty()) {
+        originalRadar
+            .style("opacity", 1)
+            .attr("transform", 
+                `translate(${state.WheelConfig.centerX}, ${state.WheelConfig.centerY}) rotate(${state.currentRadarAngle || 0}) scale(${state.lastWheelTransform?.k || 1})`
+            );
+    }
+
+    // 6. Nettoyer affichages
+    hideWinnerText();
+    if (typeof closeWinnerMessage === 'function') closeWinnerMessage();
+
+    // 7. Réinitialiser état
+    state.isSpinning = false;
+    state.leverEnabled = true;
+
+    if (window.leverControls) {
+        window.leverControls.enable();
+    }
 }
 
 function announceWinner(winner) {

@@ -4,15 +4,14 @@ import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { ensureStatsExist, addStatsButton, updateStatsButtons, removeAllStatsElements } from './nameCloudAverageAge.js';
+import { ensureStatsExist, updateStatsButtons, removeAllStatsElements } from './nameCloudAverageAge.js';
 import { createImprovedHeatmap  } from './geoHeatMapUI.js';
 import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
-import { attachFilterListeners  } from './geoHeatMapInteractions.js';
 import { showHamburgerButtonForcefully, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { enableFortuneMode } from './treeWheelAnimation.js';
-
-
+import { closeAllModals } from './eventHandlers.js';
+import { fullResetAnimationState } from './treeAnimation.js';
 
 // Fonction pour obtenir les traductions selon la langue actuelle
 export function getTranslation(key) {
@@ -66,7 +65,7 @@ export function getTranslation(key) {
         'expandedOptionAscDir': 'Ascendants directs       de la racine',
         'expandedOptionAscend': 'Ascendants + fratrie     de la racine',
         'expandedOptionDescDir': 'Descendants directs     de la racine',
-        'expandedOptionDescend': 'Descendants + conjoints de la racine',
+        'expandedOptionDescend': 'Descendants + conj.     de la racine',
 
         'expandedOptionGlobal': 'Statistiques Globales', 
         'expandedOptionPerCentury': 'Statistiques par siècle', 
@@ -303,10 +302,9 @@ export function getTranslation(key) {
     return translations[currentLang]?.[key] || translations['fr'][key];
 }
 
-
 function createModalContainer() {
     const modal = document.createElement('div');
-    modal.className = 'modal-container';
+    modal.className = 'nameCloud-modal-container';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';
@@ -650,9 +648,6 @@ export function createScopeSelect(type, isForStatsModal = false, width = 60,
     });
 }
 
-
-
-
 export function createStatsTypeSelect(type, isForStatsModal = false, width = 60, 
     colors = {
         main: ' #4361ee',    // Bleu pour le sélecteur
@@ -730,8 +725,6 @@ export function createStatsTypeSelect(type, isForStatsModal = false, width = 60,
 
     });
 }
-
-
 
 function createRootPersonSelect() {
     const rootPersonSelect = document.createElement('select');
@@ -976,11 +969,14 @@ function createSettingsButton() {
     return settingsButton;
 }
 
-
-function closeCloudName(modal) {
+export function closeCloudName() {
     // Supprimer toutes les stats modals avant de fermer la CloudMap
+
+    const modal = document.querySelector('[class^="nameCloud-modal-container"]');
+
+
     removeAllStatsElements(); 
-    document.body.removeChild(modal);
+    if (modal) {document.body.removeChild(modal);}
     resetHamburgerButtonPosition();
     showHamburgerButtonForcefully();
 
@@ -991,9 +987,19 @@ function closeCloudName(modal) {
 
     showAndRestoreTreeButtons();
 
+
+
     if (state.isRadarEnabled) {
         enableFortuneMode();
     }
+
+    fullResetAnimationState();
+
+    setTimeout(() => {
+        closeAllModals();
+    }, 300);
+
+    state.isWordCloudEnabled = false; // le nuage de mots est désactivé
 }
 
 
