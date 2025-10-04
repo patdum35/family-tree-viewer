@@ -185,7 +185,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
     if (!animationState.isPaused && !state.isRadarEnabled && !state.isWordCloudEnabled ) {
         console.log("🔴 Pause de l'animation pour afficher la heatmap, animationState.currentIndex=", animationState.currentIndex);
         toggleAnimationPause();
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 600));
     }
 
     const wrapper = document.getElementById('animation-map-container');
@@ -606,10 +606,13 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
     // Créer un conteneur principal (semi-transparent) qui ne couvre pas tout l'écran
     const heatmapWrapper = document.createElement('div');
     
+    
     heatmapWrapper.id = 'namecloud-heatmap-wrapper';
     heatmapWrapper.style.position = 'fixed';
     heatmapWrapper.style.top = '60px'; // Remonté de 20px comme demandé
     heatmapWrapper.style.left = '20px';
+    // heatmapWrapper.style.left = Math.floor(Math.max(window.innerWidth - 700, 5)/2) + 'px';
+    // heatmapWrapper.style.transform = 'translateX(-50%)'; // Centrer horizontalement
     heatmapWrapper.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
     heatmapWrapper.style.zIndex = '9000'; // Élevé mais inférieur aux contrôles (11000+)
     heatmapWrapper.style.display = 'flex'; // IMPORTANT - NE PAS SUPPRIMER
@@ -620,6 +623,8 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
     heatmapWrapper.style.resize = 'both'; // Permettre le redimensionnement
     heatmapWrapper.style.minWidth = '50px'; //'400px';
     heatmapWrapper.style.minHeight = '50px'; //'300px';
+    heatmapWrapper.style.maxWidth = '800px'; 
+
 
     function applyHeatmapPosition() {
         // 1. Priorité aux paramètres passés directement à la fonction (pour création initiale)

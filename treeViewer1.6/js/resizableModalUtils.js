@@ -7,14 +7,28 @@ export function makeModalInteractive(modal) {
     console.log('\n\n debug init makeModalInteractive ', modal.id, state.topZindex);
 
     // écoute tout ce qui se passe dans la modal (y compris header)
-    modal.addEventListener("mousedown", () => {
+
+    modal.addEventListener("mousedown", bringToFront, true);
+    modal.addEventListener("touchstart", bringToFront, true);
+
+    function bringToFront() {
         state.topZindex++;
         modal.style.zIndex = state.topZindex;
-        console.log('\n\n debug mousedown in makeModalInteractive ', modal.id, state.topZindex);
+        console.log('bringToFront', modal.id, state.topZindex);
         if (modal.id === 'person-details-modal') {
             specialCaseOfPersonDetailsModal();
         }
-    }, true); // <== capture activée
+    }
+
+
+    // modal.addEventListener("mousedown", () => {
+    //     state.topZindex++;
+    //     modal.style.zIndex = state.topZindex;
+    //     console.log('\n\n debug mousedown in makeModalInteractive ', modal.id, state.topZindex);
+    //     if (modal.id === 'person-details-modal') {
+    //         specialCaseOfPersonDetailsModal();
+    //     }
+    // }, true); // <== capture activée
 
 
     function specialCaseOfPersonDetailsModal() {

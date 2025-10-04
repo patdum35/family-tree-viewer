@@ -147,6 +147,16 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
 
     previousRootPersonId = state.rootPersonId;
     previousNombreGeneration = state.nombre_generation;
+
+
+    // Vérifier si une heatmap est déjà affichée
+    if (document.getElementById('namecloud-heatmap-wrapper')) {
+        console.log('-debug call to displayHeatMap from drawWheelTree', document.getElementById('namecloud-heatmap-wrapper'));
+        displayHeatMap(null, false);
+    }
+
+
+
 }
 
 
