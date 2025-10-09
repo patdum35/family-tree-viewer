@@ -154,7 +154,6 @@ const searchModalTranslations = {
  */
 export function findPersonsBy(searchTerm, config, searchTermFull, originalName = null, searchFirstName = null, searchLastName = null ) {  
     
-
     if (!state.gedcomData || !state.gedcomData.individuals) {
         return [];
     }
@@ -164,11 +163,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
     const searchScope = config.scope;
     const rootPersonId = config.rootPersonId;
 
-    
     const searchStr = searchTerm.toLowerCase();
-
-
-
 
     let searchStrFull = searchStr;
     if (searchTermFull) {searchStrFull = searchTermFull.toLowerCase();} 
@@ -176,10 +171,11 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
     let searchStrFullFull = originalName;
     if (searchStrFullFull) {searchStrFullFull = searchStrFullFull.toLowerCase();} 
 
+    if (searchFirstName) { searchFirstName = searchFirstName.toLowerCase();}
+    if (searchLastName) { searchLastName = searchLastName.toLowerCase();}
+
 
     // console.log('-debug in findPersonsBy0 searchStr =', searchStr, config, ', searchStrFull=', searchStrFull,  ', searchStrFullFull=', searchStrFullFull, ', originalName=', originalName)
-
-
 
     let results = [];
     let personWithDate_counter = 0;
@@ -312,10 +308,12 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     let lastNameWithoutAccent = lastName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     let searchLastNameWithoutAccent = searchLastName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     let isMatched = false;
+                    // console.log('\n\n - debug findBy', searchFirstName, searchLastName)
+
 
                     if (new RegExp(`\\b${searchFirstName}(\\b| |-)`, "i").test(firstName) 
                         && lastName.includes(searchLastName) ) {
-                        console.log('\n\n-debug detected with accent :', person.name )
+                        // console.log('\n\n-debug detected with accent :', person.name )
                         if (!isMatched1) {
                             results = [];
                         }
@@ -329,7 +327,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     
                     if (!isMatched && !isMatched1 && new RegExp(`\\b${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
                         && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
-                        console.log('\n\n-debug detected without accent :', person.name )
+                        // console.log('\n\n-debug detected without accent :', person.name )
                         if (!isMatched2) {
                             results = [];
                         }
@@ -342,7 +340,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     } 
                     if (!isMatched && !isMatched2 && firstName.includes(searchFirstName) &&
                             lastName.includes(searchLastName) ) {
-                        console.log('\n\n-debug detected with accent et partiel:', person.name )
+                        // console.log('\n\n-debug detected with accent et partiel:', person.name )
                         if (!isMatched3) {
                             results = [];
                         }
@@ -355,7 +353,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     }
                     if (!isMatched && !isMatched3 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
                         lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
-                        console.log('\n\n-debug detected without accent et partiel:', person.name )
+                        // console.log('\n\n-debug detected without accent et partiel:', person.name )
                         matches.push({
                                 type: 'name',
                                 field: 'Nom',
@@ -657,7 +655,8 @@ export function openSearchModal(firstName = null, lastName = null) {
 
         if (firstName && lastName && firstName != '' && lastName != '') {
             new performModalSearch(firstName, lastName);
- 
+            console.log('\n\n- open setupSearchFieldModal openSearchModal', window.currentSearchResults );
+            
             // regarder si il existe plus qu'un résultat
             if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
         }
@@ -1076,6 +1075,7 @@ export function openSearchModal(firstName = null, lastName = null) {
 
     if (firstName && lastName && firstName != '' && lastName != '') {
         new performModalSearch(firstName, lastName);
+        console.log('\n\n- open setupSearchFieldModal openSearchModal', firstName, lastName, window.currentSearchResults );        
         // regarder si il existe plus qu'un résultat
         if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
     }
@@ -1287,13 +1287,11 @@ export async function showHeatmapFromSearch() {
  */
 function performModalSearch(firstName = null, lastName = null) {
 
-    let isCallFromInit = false;
-
+    
     let searchTerm = document.getElementById('searchModal-search-input').value.trim();
 
     if (firstName && lastName && firstName != '' && lastName != '') {
         searchTerm = firstName + ' ' + lastName;
-        isCallFromInit = true;
     }
 
     this.name = 'performModalSearch';

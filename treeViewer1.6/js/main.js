@@ -73,7 +73,7 @@ if ('serviceWorker' in navigator) {
       .catch(error => {
         console.error('Échec de l\'enregistrement du Service Worker:', error);
       });
-  }
+}
 
   
 // for tracking with google Analytics
@@ -88,7 +88,25 @@ export function trackPageView(pagePath) {
 }
 
 
+// Sélection des champs
+const firstNameInput = document.getElementById('input-form-firstName');
+const lastNameInput = document.getElementById('input-form-lastName');
 
+// Charger les valeurs stockées au chargement de la page
+window.addEventListener('DOMContentLoaded', () => {
+    const savedFirstName = localStorage.getItem('firstName');
+    const savedLastName = localStorage.getItem('lastName');
+    if (savedFirstName) firstNameInput.value = savedFirstName;
+    if (savedLastName) lastNameInput.value = savedLastName;
+});
+
+// Sauvegarder les valeurs dès qu’elles changent
+[firstNameInput, lastNameInput].forEach(input => {
+    input.addEventListener('input', () => {
+        localStorage.setItem('firstName', firstNameInput.value);
+        localStorage.setItem('lastName', lastNameInput.value);
+    });
+});
 
 export const state = {
     gedcomData: null,
@@ -515,6 +533,7 @@ export async function loadData() {
   
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
+    
     state.firstName = document.getElementById('input-form-firstName').value;
     state.lastName = document.getElementById('input-form-lastName').value;
 
@@ -1222,10 +1241,10 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
     let person = null; 
 
-    console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
+    // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
     if (state.firstName != '' && state.lastName!= '') {
         // person = findPersonByName(state.firstName + ' ' + state.lastName)
-        console.log('\n\n - debug : personne trouvée : ', findPersonByName(state.firstName + ' ' + state.lastName) , '\n\n')
+        // console.log('\n\n - debug : personne trouvée : ', findPersonByName(state.firstName + ' ' + state.lastName) , '\n\n')
         openSearchModal(state.firstName,  state.lastName );
 
         if (window.currentSearchResults.length === 1) {
