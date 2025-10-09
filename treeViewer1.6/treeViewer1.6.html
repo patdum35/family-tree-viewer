@@ -160,18 +160,9 @@
     </div>
 
     <!-- Formulaire de mot de passe -->
-    <div id="password-form" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; height: 100vh;">
-        <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; box-sizing: border-box;">
-            <div class="password-row">
-                <input type="password" id="password" placeholder="Mot de passe" data-text-key="motDePasse" style="width: 100%; max-width: 240px; box-sizing: border-box;" autocomplete="new-password">
-            </div>
-            <div class="submit-row">
-                <button id="loadDataButton" data-text-key="visualiserArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">Visualiser l'arbre</button>
-            </div>
-        </div>
+    <div id="password-form" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">    
 
-
-        <div id="language-selector-container" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 999; pointer-events: none;">
+        <div id="language-selector-container" style="position: fixed; top: 0px; margin-top: -10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 999; pointer-events: none;">
             <div class="language-selector" style="display: inline-flex; background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
                 <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr')"></div>
                 <div class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en')"></div>
@@ -179,7 +170,43 @@
                 <div class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu')"></div>
             </div>
         </div>
+
+
+
+
+
+
+
+
+        <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; padding-bottom: 5px; box-sizing: border-box; margin-top: -50px;  overflow-y: auto;">
+            <div class="name-row" style="display: flex; gap: 8px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
+                <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormfirstName"
+                    style="flex: 1 1 0; min-width: 0; box-sizing: border-box;">
+                <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormlastName"
+                    style="flex: 1 1 0; min-width: 0; box-sizing: border-box;">
+            </div>
+            <div class="password-row" style="max-width: 240px; width: 100%; max-width: 240px; margin-left: auto; margin-right: auto; margin-bottom: 5px">
+                <input type="password" id="password" placeholder="Mot de passe" data-text-key="motDePasse"
+                    style="width: 100%; max-width: 240px; max-height: 30px;  box-sizing: border-box;" autocomplete="new-password">
+            </div>
+            <div class="submit-row" style="max-width: 240px; width: 100%; margin-left: auto; margin-right: auto; margin-top: 0; margin-bottom: 0;">
+                <button id="loadDataButton" data-text-key="visualiserArbre"
+                    style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">
+                    Visualiser l'arbre
+                </button>
+            </div>
+        </div>
+
+
+
         
+
+        <div id="startTitle" style=" text-align: center; z-index: 999; ">
+            <h2 style="text-align:center; margin-bottom: 10px; margin-left: 0px; padding: 0; font-size: 20px; color: white" 
+            data-text-key="startTitle">explore tes origines...</h2>
+        </div>
+
+
 
     </div>
 
@@ -243,18 +270,7 @@
  
     </div>
 
-    <!-- Fenêtre modale pour les détails -->
-    <div id="person-details-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-person-name"></h2>
-                <span class="modal-close" onclick="closePersonDetails()">&times;</span>
-            </div>
-            <div id="person-details-content"></div>
-        </div>
-    </div>
-
-
+    <!-- Fenêtre modale pour les paramètres -->
     <div id="settings-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <div class="modal-header">

@@ -20,7 +20,7 @@ import { calculateFullTreeDimensions } from './exportManager.js';
  */
 export function initializeEventHandlers() {
     window.addEventListener('resize', handleWindowResize);
-    window.addEventListener('click', handleModalClick);
+    // window.addEventListener('click', handleModalClick);
     
     document.getElementById("root-person-search")
         .addEventListener("keydown", handleSearchKeydown);
@@ -95,12 +95,12 @@ export function handleWindowResize() {
 /**
  * Gère les clics sur la modale
  */
-export function handleModalClick(event) {
-    const modal = document.getElementById('person-details-modal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
+// export function handleModalClick(event) {
+//     const modal = document.getElementById('person-details-modal');
+//     if (event.target === modal) {
+//         modal.style.display = 'none';
+//     }
+// }
 
 /**
  * Gère les touches du clavier pour la recherche

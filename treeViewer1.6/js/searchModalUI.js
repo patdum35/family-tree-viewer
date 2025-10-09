@@ -152,7 +152,7 @@ const searchModalTranslations = {
 /**
  * Fonction de recherche étendue avec filtrage par dates
  */
-export function findPersonsBy(searchTerm, config, searchTermFull, originalName = null ) {  
+export function findPersonsBy(searchTerm, config, searchTermFull, originalName = null, searchFirstName = null, searchLastName = null ) {  
     
 
     if (!state.gedcomData || !state.gedcomData.individuals) {
@@ -181,7 +181,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
 
 
 
-    const results = [];
+    let results = [];
     let personWithDate_counter = 0;
     let personWithOccupation_counter = 0;
     let personWithPlace_counter = 0;
@@ -200,6 +200,11 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
         personList = getPersonsFromTree(searchScope, rootPersonId);
     }
    
+    let matchCounter = 0;
+    let isMatched1 = false;
+    let isMatched2 = false;
+    let isMatched3 = false;
+    let isMatched4 = false;
 
     // Object.values(state.gedcomData.individuals).forEach(person => {
     personList.forEach(person => {
@@ -275,7 +280,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
         // Recherche par nom
         if (searchType === 'name' || (searchType === 'prenoms' || searchType === 'noms')) {
 
-            let givn, surn;
+            let givn, surn, firstName, lastName ;
             if (person.givn) { givn=person.givn;} else {givn='';}
             if (person.surn) { surn=person.surn;} else {surn='';}
             let fullName;
@@ -286,6 +291,8 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                 fullName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
             } else {
                 fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + givn.toLowerCase().replace(/\//g, '') + ' ' + surn.toLowerCase().replace(/\//g, '');
+                firstName = person.name.split('/')[0].toLowerCase().replace(/\//g, '')  + ' ' + surn.toLowerCase().replace(/\//g, '');
+                lastName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
             }
 
 
@@ -296,7 +303,68 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
             // }
             if (searchType !== 'prenoms'  || searchStr === searchStrFull) {
                 // if (searchType == 'noms' && searchStrFullFull && fullName.includes(searchStrFullFull)) {
-                if (searchType == 'noms' && searchStrFullFull) {
+
+                // cas de la recherche initiale avec password
+                if (searchType === 'name' && searchFirstName && searchLastName && searchFirstName != '' && searchLastName != '') { 
+
+                    let firstNameWithoutAccent = firstName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    let searchFirstNameWithoutAccent = searchFirstName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    let lastNameWithoutAccent = lastName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    let searchLastNameWithoutAccent = searchLastName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    let isMatched = false;
+
+                    if (new RegExp(`\\b${searchFirstName}(\\b| |-)`, "i").test(firstName) 
+                        && lastName.includes(searchLastName) ) {
+                        console.log('\n\n-debug detected with accent :', person.name )
+                        if (!isMatched1) {
+                            results = [];
+                        }
+                        matches.push({
+                            type: 'name',
+                            field: 'Nom',
+                            value: person.name.replace(/\//g, '').trim()
+                        });
+                        matchCounter++; isMatched = true; isMatched1 = true;
+                    } 
+                    
+                    if (!isMatched && !isMatched1 && new RegExp(`\\b${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
+                        && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
+                        console.log('\n\n-debug detected without accent :', person.name )
+                        if (!isMatched2) {
+                            results = [];
+                        }
+                        matches.push({
+                            type: 'name',
+                            field: 'Nom',
+                            value: person.name.replace(/\//g, '').trim()
+                        });
+                        matchCounter++; isMatched = true; isMatched2 = true;
+                    } 
+                    if (!isMatched && !isMatched2 && firstName.includes(searchFirstName) &&
+                            lastName.includes(searchLastName) ) {
+                        console.log('\n\n-debug detected with accent et partiel:', person.name )
+                        if (!isMatched3) {
+                            results = [];
+                        }
+                        matches.push({
+                                type: 'name',
+                                field: 'Nom',
+                                value: person.name.replace(/\//g, '').trim()
+                            });
+                        matchCounter++; isMatched = true; isMatched3 = true;            
+                    }
+                    if (!isMatched && !isMatched3 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
+                        lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
+                        console.log('\n\n-debug detected without accent et partiel:', person.name )
+                        matches.push({
+                                type: 'name',
+                                field: 'Nom',
+                                value: person.name.replace(/\//g, '').trim()
+                            });
+                        matchCounter++; isMatched = true; isMatched4 = true;
+                    }  
+
+                } else if (searchType == 'noms' && searchStrFullFull) {
                     if (fullName.trim() === searchStrFullFull) {
                         matches.push({
                                 type: 'name',
@@ -311,13 +379,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                             value: person.name.replace(/\//g, '').trim()
                         });
                 } 
-                // else if (searchType == 'noms' && searchStrFullFull && fullName.includes(searchStrFullFull)) {
-                //         matches.push({
-                //             type: 'name',
-                //             field: 'Nom',
-                //             value: person.name.replace(/\//g, '').trim()
-                //         });
-                // }
+
             } else {
                 if (fullName.includes(searchStr) && fullName.includes(searchStrFull) ) {
                         matches.push({
@@ -547,7 +609,6 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
         }       
 
 
-        
         if (matches.length > 0) {
             results.push({
                 ...person,
@@ -569,11 +630,16 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
 /**
  * Crée et affiche la modale de recherche
  */
-function openSearchModal() {
+export function openSearchModal(firstName = null, lastName = null) {
+    let isCallFromInit = false;
+    if (firstName && lastName && firstName != '' && lastName != '') {
+        isCallFromInit = true;
+    }
 
-
-    fullResetAnimationState();
-    disableFortuneModeClean();
+    if (!isCallFromInit) { 
+        fullResetAnimationState();
+        disableFortuneModeClean();
+    }
     // disableFortuneModeWithLever();    
     // Vérifier si la modale existe déjà
     let existingModal = document.getElementById('search-modal');
@@ -589,6 +655,12 @@ function openSearchModal() {
         const content = existingModal.querySelector('.searchModal-content'); 
         content._isVisible = true;        
 
+        if (firstName && lastName && firstName != '' && lastName != '') {
+            new performModalSearch(firstName, lastName);
+ 
+            // regarder si il existe plus qu'un résultat
+            if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
+        }
         return;
     }
 
@@ -1001,6 +1073,12 @@ function openSearchModal() {
         document.getElementById('searchModal-search-input').focus();
     }, 100);
 
+
+    if (firstName && lastName && firstName != '' && lastName != '') {
+        new performModalSearch(firstName, lastName);
+        // regarder si il existe plus qu'un résultat
+        if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
+    }
 }
 
 /**
@@ -1207,20 +1285,34 @@ export async function showHeatmapFromSearch() {
 /**
  * Effectue la recherche dans la modale
  */
-function performModalSearch() {
+function performModalSearch(firstName = null, lastName = null) {
+
+    let isCallFromInit = false;
+
+    let searchTerm = document.getElementById('searchModal-search-input').value.trim();
+
+    if (firstName && lastName && firstName != '' && lastName != '') {
+        searchTerm = firstName + ' ' + lastName;
+        isCallFromInit = true;
+    }
 
     this.name = 'performModalSearch';
     
     console.log("-call to performModalSearch with ", this.name);
     this.lastSelectedLocationIndex = null;
-    const self = this; 
+    let self = this; 
+
 
 
     const searchType = document.getElementById('searchModal-search-type').value;
-    const searchTerm = document.getElementById('searchModal-search-input').value.trim();
+
     const startYear = document.getElementById('date-start').value;
     const endYear = document.getElementById('date-end').value;
     const resultsContainer = document.getElementById('searchModal-search-results');
+
+
+
+
     
     // if (!searchTerm) {
     //     resultsContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 10px;">Veuillez saisir un terme de recherche</div>';
@@ -1243,7 +1335,7 @@ function performModalSearch() {
 
 
     // Effectuer la recherche avec filtrage par dates
-    const res = findPersonsBy(searchTerm, config, searchTerm);
+    const res = findPersonsBy(searchTerm, config, searchTerm, null, firstName, lastName);
     const results = res.results;
     // Stocker les résultats pour la heatmap
     window.currentSearchResults = results;
@@ -1542,6 +1634,7 @@ export function setupSearchFieldModal(isFromStatsModal = false) {
     const searchField = document.getElementById('root-person-search');
     if (searchField) {
         console.log('- open setupSearchFieldModal');
+
         // Remplacer l'événement focus existant
         searchField.addEventListener('focus', function(event) {
             event.preventDefault();

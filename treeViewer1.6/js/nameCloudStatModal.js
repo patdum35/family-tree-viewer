@@ -983,16 +983,9 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
     locationIcon.addEventListener('click', async (e) => {
         e.stopPropagation(); // Empêcher la propagation au div parent
         
-        // let searchStrs = null;
-        // let searchStrBis = null;
-        // if (searchTerm) {
-        //     searchStrs = searchTerm.toLowerCase().split(' ');
-        //     searchStrBis = searchTerm.replace(' ','-').toLowerCase();
-        // }
-
-
         // La heatmap est déjà visible, comportement habituel
-        if (self.lastSelectedLocationIndex === index) {
+        // if (self.lastSelectedLocationIndex === index) {
+        if (false) {
             const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
             if (heatmapWrapper) {
                 heatmapWrapper.remove(); // supprime du DOM
@@ -1109,13 +1102,6 @@ export function resizeModal(modal, isFromSearchModal = false) {
     const allModals4 = document.querySelectorAll('[id^="century-stats-modal-"]');    
     const searchModalContent = document.querySelector('[class^="searchModal-content"]');
 
-    // const allModalsLength = ((allModals1) ? allModals1.length : 0) 
-    // + ((allModals2) ? allModals2.length : 0)
-    // + ((allModals3) ? allModals3.length : 0)
-    // + ((allModals4) ? allModals4.length : 0)
-    // + ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
-
-
     function countVisible(modals) {
         return modals ? Array.from(modals).filter(m => getComputedStyle(m).display !== "none").length : 0;
     }
@@ -1155,8 +1141,7 @@ export function resizeModal(modal, isFromSearchModal = false) {
     const newTop = top; //(window.innerHeight - height)/2;
 
 
-    console.log('\n -debug resizeModal modal= ', modal, ',  modal._nbElementInlist= ', modal._nbElementInlist, allModalsLength, ', width=', width, ', newLeft=', newLeft)
-
+    // console.log('\n -debug resizeModal modal= ', modal, ',  modal._nbElementInlist= ', modal._nbElementInlist, allModalsLength, ', width=', width, ', newLeft=', newLeft)
 
     if(!heatmapWrapper && allModalsLength === 1 ) {
         modal.style.width = width + 'px';

@@ -728,6 +728,8 @@ export function clearMap(map) {
  */
 export function addMapTitle(container, title) {
     const existingTitle = container.querySelector('.individual-map-title');
+    console.log('- debug Existing title element:', existingTitle, title);
+
     if (existingTitle) existingTitle.remove();
     
     const titleElement = document.createElement('div');
@@ -740,7 +742,11 @@ export function addMapTitle(container, title) {
     titleElement.style.padding = '5px 10px';
     titleElement.style.borderRadius = '4px';
     titleElement.style.zIndex = '9100';
-    titleElement.style.fontSize = '14px';
+    if (window.innerHeight < 500 || window.innerWidth < 800) {
+        titleElement.style.fontSize = '12px';
+    } else {
+        titleElement.style.fontSize = '14px';  
+    }
     titleElement.style.fontWeight = 'bold';
     titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
     titleElement.textContent = title;

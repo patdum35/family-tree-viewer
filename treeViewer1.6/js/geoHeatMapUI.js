@@ -195,7 +195,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
 
     disableFortuneModeClean();
 
-    console.log('- debug displayHeatMap' , personId, currentSearchResults,isResultsFormated,  newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
+    // console.log('- debug displayHeatMap' , personId, currentSearchResults,isResultsFormated,  newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
     // Création d'un indicateur de chargement
     const loadingIndicator = document.createElement('div');
     loadingIndicator.style.position = 'fixed';
@@ -1100,9 +1100,11 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
 
 
         //*******************
-        const existingTitle = mapContainer.querySelector('.individual-map-title');
-        if (existingTitle) existingTitle.remove();
-        addMapTitle(mapContainer, heatmapTitle);
+        const existingTitle = heatmapWrapper.querySelector('.individual-map-title');
+        // console.log("\n\n\n *********** :) Existing title ******* :", existingTitle);
+        if (existingTitle) { existingTitle.remove(); }
+        // addMapTitle(mapContainer, heatmapTitle);
+        addMapTitle(heatmapWrapper, heatmapTitle);
         //***************************
 
 
@@ -1448,20 +1450,51 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
     // Bouton fermeture
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '✖';
-    // closeBtn.title = 'Fermer la heatmap';
     closeBtn.title = getUITranslation('closeHeatmap');
-    closeBtn.style.width = '24px';
-    closeBtn.style.height = '24px';
-    closeBtn.style.padding = '0';
-    closeBtn.style.border = '1px solid #ccc';
-    closeBtn.style.borderRadius = '3px';
-    closeBtn.style.backgroundColor = 'white';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.fontSize = '12px';
-    closeBtn.style.display = 'flex';
-    closeBtn.style.justifyContent = 'center';
-    closeBtn.style.alignItems = 'center';
-    
+
+    Object.assign(closeBtn.style, {
+    width: '32px',               // plus grand, plus facile à viser
+    height: '32px',
+    padding: '0',
+    border: 'none',
+    borderRadius: '50%',         // bouton rond, plus élégant
+    backgroundColor: '#f5f5f5',
+    color: '#333',
+    fontSize: '18px',            // icône plus visible
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '-6px',
+    marginRight: '-6px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+    transition: 'all 0.2s ease',
+    touchAction: 'manipulation', // évite les zooms parasites sur mobile
+    });
+
+
+    // Effet de survol / toucher
+    closeBtn.addEventListener('mouseenter', () => {
+    closeBtn.style.backgroundColor = '#ffdddd';
+    closeBtn.style.transform = 'scale(1.1)';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+    closeBtn.style.backgroundColor = '#f5f5f5';
+    closeBtn.style.transform = 'scale(1)';
+    });
+
+    // Effet au toucher mobile
+    closeBtn.addEventListener('touchstart', () => {
+    closeBtn.style.backgroundColor = '#ffcccc';
+    closeBtn.style.transform = 'scale(1.1)';
+    }, { passive: true });
+    closeBtn.addEventListener('touchend', () => {
+    closeBtn.style.backgroundColor = '#f5f5f5';
+    closeBtn.style.transform = 'scale(1)';
+    }, { passive: true });
+
+
     // Ajouter les écouteurs d'événements
     refreshBtn.addEventListener('click', () => {
         if(!isFromTree) 

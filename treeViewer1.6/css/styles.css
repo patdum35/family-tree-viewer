@@ -99,7 +99,7 @@ body {
 
 
 .password-row, .or-row, .file-row, .submit-row {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .password-row input, .file-row button, .submit-row button {
@@ -874,11 +874,17 @@ input[type=number] {
     margin-left: -7px !important; /* Rapprocher encore plus du search */
 }
 
+#close-tree-button {
+        top: 6px !important; 
+        right: 6px !important; 
+}
+
 
 /* Descendre le bouton de fermeture sur petits écrans */
 @media screen and (max-width: 400px) {
     #close-tree-button {
-        top: 40px !important; /* Descendre de 10px à 40px */
+        top: 48px !important; /* Descendre de 10px à 50px */
+        right: 6px !important; 
     }
 }
 

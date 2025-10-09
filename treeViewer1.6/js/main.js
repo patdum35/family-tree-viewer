@@ -12,7 +12,7 @@ import { nameCloudState } from './nameCloud.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
-import { setupSearchFieldModal } from './searchModalUI.js';
+import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
     
     
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
@@ -181,6 +181,8 @@ export const state = {
     minModalWidth: 250,
     minModalHeight: 40,
     isFullResetAnimationRequested: false,
+    firstName: '',
+    lastName: ''
     // animationMap: null
 
 };
@@ -411,8 +413,10 @@ function initialize() {
 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
+
+
     if (passwordInput) {
-        console.log("Password input trouvé, ajout de l'écouteur d'événement pour Enter");
+        console.log(" - Password input trouvé, ajout de l'écouteur d'événement pour Enter");
         passwordInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 console.log("Touche Enter détectée");
@@ -511,6 +515,12 @@ export async function loadData() {
   
     const fileInput = document.getElementById('gedFile');
     const passwordInput = document.getElementById('password');
+    state.firstName = document.getElementById('input-form-firstName').value;
+    state.lastName = document.getElementById('input-form-lastName').value;
+
+
+    console.log("\n\n ******* in loadData", state.firstName, state.lastName, '\n\n');
+
     // toggleFullScreen();
 
     // for mobile phone
@@ -1210,18 +1220,36 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
 
 
-    let person; 
-    if (state.treeOwner === 6) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? findYoungestPerson() : findYoungestPerson());
-    } else if (state.treeOwner === 5) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
-    } else if (state.treeOwner === 4) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
-    } else if (state.treeOwner === 3) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
-    } else {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+    let person = null; 
+
+    console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
+    if (state.firstName != '' && state.lastName!= '') {
+        // person = findPersonByName(state.firstName + ' ' + state.lastName)
+        console.log('\n\n - debug : personne trouvée : ', findPersonByName(state.firstName + ' ' + state.lastName) , '\n\n')
+        openSearchModal(state.firstName,  state.lastName );
+
+        if (window.currentSearchResults.length === 1) {
+           person = window.currentSearchResults[0];
+        }
+
     }
+
+    if (!person) {
+        if (state.treeOwner === 6) {
+            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? findYoungestPerson() : findYoungestPerson());
+        } else if (state.treeOwner === 5) {
+            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
+        } else if (state.treeOwner === 4) {
+            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
+        } else if (state.treeOwner === 3) {
+            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
+        } else {
+            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+        }
+    }
+
+
+
     // Important : toujours sauvegarder l'ID de la personne courante
     if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
         state.rootPersonId = rootPersonId || person.id;
@@ -1945,7 +1973,7 @@ function createAndPositionHeatMapOverlay() {
 }
 
 function positionHeatMapButton() {
-    // const settingsBtn = document.getElementById('settingsBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
 
     let offsetY = 0;
@@ -1955,7 +1983,7 @@ function positionHeatMapButton() {
         const settingRect = settingsBtn.getBoundingClientRect();
         heatMapBtn.style.position = 'fixed';
         heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
-        heatMapBtn.style.top = (settingRect.bottom + 5 + offsetY) + 'px';
+        heatMapBtn.style.top = (settingRect.bottom + 3 + offsetY) + 'px';
         heatMapBtn.style.zIndex = '1001';
     }
 }

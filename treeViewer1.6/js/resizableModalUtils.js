@@ -14,66 +14,55 @@ export function makeModalInteractive(modal) {
     function bringToFront() {
         state.topZindex++;
         modal.style.zIndex = state.topZindex;
-        console.log('bringToFront', modal.id, state.topZindex);
-        if (modal.id === 'person-details-modal') {
-            specialCaseOfPersonDetailsModal();
-        }
+        // console.log('bringToFront', modal.id, state.topZindex);
+        // if (modal.id === 'person-details-modal') {
+        //     specialCaseOfPersonDetailsModal();
+        // }
     }
 
+    // function specialCaseOfPersonDetailsModal() {
+    //     // console.log("bringToFront sur :", modal.id, modal._handleContainer);
+    //     // // si la modal a un conteneur de poignées, on le remet devant aussi
+    //     const hc = modal._handleContainer;
 
-    // modal.addEventListener("mousedown", () => {
-    //     state.topZindex++;
-    //     modal.style.zIndex = state.topZindex;
-    //     console.log('\n\n debug mousedown in makeModalInteractive ', modal.id, state.topZindex);
-    //     if (modal.id === 'person-details-modal') {
-    //         specialCaseOfPersonDetailsModal();
+    //     if (hc) {
+    //         console.log('\n\n debug1 makeModalInteractive ', modal.id)
+    //         // s'assurer que le container est le dernier enfant du body (au-dessus dans l'ordre DOM)
+    //         document.body.appendChild(hc);
+
+    //         // position fixed évite certains problèmes de stacking context (ajuste si tu veux rester en absolute)
+    //         hc.style.position = 'fixed';
+    //         hc.style.pointerEvents = 'none'; // container ignore les clics, mais les handles auront pointerEvents auto
+
+    //         // recalculer sa position pour coller sur la modal
+    //         const rect = modal.getBoundingClientRect();
+    //         hc.style.left = `${Math.round(rect.left)}px`;
+    //         hc.style.top = `${Math.round(rect.top)}px`;
+    //         hc.style.width = `${modal.offsetWidth}px`;
+    //         hc.style.height = `${modal.offsetHeight}px`;
+
+    //         // z-index du container + des handles + des indicateurs
+    //         hc.style.zIndex = state.topZindex + 1;
+
+    //         // handles
+    //         const handles = hc.querySelectorAll('.resize-handle');
+    //         handles.forEach(h => {
+    //         h.style.zIndex = state.topZindex + 2;
+    //         h.style.pointerEvents = 'auto'; // réactiver les clics sur chaque poignée
+    //         });
+
+    //         // indicateurs tactiles éventuels
+    //         const cursors = hc.querySelectorAll('.touch-cursor-indicator');
+    //         cursors.forEach(c => c.style.zIndex = state.topZindex + 3);
+
+    //         // forcer une remise à jour de la position si modal._updateHandleContainer existe
+    //         if (typeof modal._updateHandleContainer === 'function') {
+    //         modal._updateHandleContainer();
+    //         } else {
+    //         // fallback : appliquer rect déjà calculé (déjà fait plus haut)
+    //         }
     //     }
-    // }, true); // <== capture activée
-
-
-    function specialCaseOfPersonDetailsModal() {
-        console.log("bringToFront sur :", modal.id, modal._handleContainer);
-        // // si la modal a un conteneur de poignées, on le remet devant aussi
-        const hc = modal._handleContainer;
-
-        if (hc) {
-            console.log('\n\n debug1 makeModalInteractive ', modal.id)
-            // s'assurer que le container est le dernier enfant du body (au-dessus dans l'ordre DOM)
-            document.body.appendChild(hc);
-
-            // position fixed évite certains problèmes de stacking context (ajuste si tu veux rester en absolute)
-            hc.style.position = 'fixed';
-            hc.style.pointerEvents = 'none'; // container ignore les clics, mais les handles auront pointerEvents auto
-
-            // recalculer sa position pour coller sur la modal
-            const rect = modal.getBoundingClientRect();
-            hc.style.left = `${Math.round(rect.left)}px`;
-            hc.style.top = `${Math.round(rect.top)}px`;
-            hc.style.width = `${modal.offsetWidth}px`;
-            hc.style.height = `${modal.offsetHeight}px`;
-
-            // z-index du container + des handles + des indicateurs
-            hc.style.zIndex = state.topZindex + 1;
-
-            // handles
-            const handles = hc.querySelectorAll('.resize-handle');
-            handles.forEach(h => {
-            h.style.zIndex = state.topZindex + 2;
-            h.style.pointerEvents = 'auto'; // réactiver les clics sur chaque poignée
-            });
-
-            // indicateurs tactiles éventuels
-            const cursors = hc.querySelectorAll('.touch-cursor-indicator');
-            cursors.forEach(c => c.style.zIndex = state.topZindex + 3);
-
-            // forcer une remise à jour de la position si modal._updateHandleContainer existe
-            if (typeof modal._updateHandleContainer === 'function') {
-            modal._updateHandleContainer();
-            } else {
-            // fallback : appliquer rect déjà calculé (déjà fait plus haut)
-            }
-        }
-    }
+    // }
 }
 
 
@@ -626,6 +615,18 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                 modal.style.top = '0px';
                 modal.style.height = `${adjustedHeight}px`;
             }
+
+
+            if (modal.id.includes('person-fullDetails-modal') ) {
+                const innerContent = document.getElementById('person-details-content');
+                if (innerContent) {
+                    // console.log('\n\n - debug innerContent detected in resizeContent ', window.innerHeight, modal.offsetTop)
+                    innerContent.style.maxHeight = window.innerHeight - modal.offsetTop + 'px';
+                }
+            }
+
+
+
         }
         
         // Arrêter le redimensionnement

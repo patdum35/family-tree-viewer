@@ -92,9 +92,7 @@ export function getPersonsListTitle(name, count, config) {
 }
 
 export function showPersonsList(name, people, config, searchTerm) {
-
     // console.log("- showPersonsList ", name, people)
-
     window.currentPeople = people;
     window.currentName = name;
 
@@ -155,7 +153,7 @@ export function showPersonsList(name, people, config, searchTerm) {
     modal.style.width = '90%';
 
     modal.style.maxHeight = ratioHeight +'vh';
-    modal.style.minWHeight = state.minModalHeight + 'px';
+    modal.style.minHeight = state.minModalHeight + 'px';
     modal.style.overflow = 'auto';
 
     modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
@@ -586,11 +584,6 @@ export function showPersonsList(name, people, config, searchTerm) {
     resizeModal(modal, true)
 }
 
-
-
-
-
-
 export async function showHeatmapFromShowPersonList() {
     let heatmapData;
     async function runCreateHeatmapDataForPeople() {
@@ -618,8 +611,6 @@ export async function showHeatmapFromShowPersonList() {
         } 
     })
 }
-
-
 
 /**
  * Affiche la heatmap et ajuste le layout pour l'écran partagé
@@ -754,16 +745,8 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
         countVisible(allModals3) +
         countVisible(allModals4) +
         ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
-    //     countVisible(searchModalContent);
-
 
     // console.log("- Before Ajustement de la disposition en mode écran partagé, modalsLength=", searchModal,  searchModalContent, searchModal.offsetParent, searchModalContent.offsetParent,  (searchModal.offsetParent !== null), searchModal._isVisible);
-
-    // const modalsLength = ((allModals1) ? allModals1.length : 0) 
-    // + ((allModals2) ? allModals2.length : 0)
-    // + ((allModals3) ? allModals3.length : 0)
-    // + ((allModals4) ? allModals4.length : 0)
-    // + ((searchModalContent && searchModalContent._isVisible) ? 1 : 0);
 
     if (modalsLength > 1 || heatmapWrapper ) {
 
@@ -782,7 +765,6 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
         
         modal.dataset.originalHeatmapStyle = JSON.stringify(originalHeatmapStyle);
         
-    
         const zIndexRef = modal.style.zIndex;
         let maxComputedHeight;
         let offsetTop = 35; //5;
@@ -812,8 +794,6 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
         let headerHeightSearchModal = 36 + 4 + 28 + 4 + 28 + 4 + 35.2 + 4 + 40 + 4 + 30.4 + 4;
         if (window.innerHeight < 500) { headerHeightSearchModal = headerHeightSearchModal - 32 - 10;}
 
-
-
         let firstLeft = 0;
 
         if (isLandscape && heatmapWrapper) {
@@ -821,8 +801,6 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
         } else { 
             firstLeft = (splitWidth - commonWidth)/2; 
         }
-
-
 
         function moveModal(modalItem) {
             modalItem.style.position = 'fixed';
@@ -850,7 +828,7 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
 
             localHeight = Math.min( maxComputedHeight , (splitHeight/ modalsLength));
 
-            console.log('\n - debug moveModal: modalItem.id, = ', modalItem, ', _nbElementInlist=', modalItem._nbElementInlist,'maxComputedHeight= ', maxComputedHeight, ', modalsLength=', modalsLength, ', localHeight=', localHeight, ', Left=',modalItem.style.left, 'commonWidth=', commonWidth )
+            // console.log('\n - debug moveModal: modalItem.id, = ', modalItem, ', _nbElementInlist=', modalItem._nbElementInlist,'maxComputedHeight= ', maxComputedHeight, ', modalsLength=', modalsLength, ', localHeight=', localHeight, ', Left=',modalItem.style.left, 'commonWidth=', commonWidth )
 
 
             if (heatmapWrapper && modalsLength === 1 ) {
@@ -877,7 +855,6 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
 
             makeModalInteractive(modalItem);
         }
-
 
         if(isLandscape) {
             // Mode paysage : heatmap à gauche, liste à droite
@@ -960,8 +937,6 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
             }
         }, 300); // Augmenter le délai à 300ms pour plus de sécurité
     }
-
-
 }
 
 export function showPersonActions(person, event) {
@@ -986,7 +961,7 @@ export function showPersonActions(person, event) {
     const actions = [
         { text: "Voir dans l'arbre", action: () => showInTree(person.id) },
         // { text: "Voir la fiche", action: () => showPersonDetails(person.id, 1000) },
-        { text: "Voir la fiche", action: () => showPersonDetails(person.id, 999999) },
+        { text: "Voir la fiche", action: () => showPersonDetails(person.id) },
         { text: "Animation", action: () => startAnimation(person.id) }
     ];
 
@@ -1032,14 +1007,14 @@ export function showPersonActions(person, event) {
     });
 }
 
-export function showPersonDetails(personId, zindex = null) {
+export function showPersonDetails(personId) {
     console.log('Showing details for:', personId);
 
     if (typeof removeAllStatsElements === 'function') {
         removeAllStatsElements();
     }
 
-    displayPersonDetails(personId, zindex);
+    displayPersonDetails(personId);
 
     const modal = document.querySelector('.modal-container');
     if (modal) {
