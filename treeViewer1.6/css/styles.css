@@ -674,11 +674,7 @@ input[type=number] {
 /* Styles responsive pour le formulaire de mot de passe */
 @media screen and (max-width: 768px) {
 
-    #password-form input[type="password"] {
-        font-size: 16px; /* Taille de police plus grande */
-        padding: 12px; /* Padding plus important */
-        width: 100%; /* Largeur complète */
-    }
+
     #password-form button {
         font-size: 16px; /* Taille de police plus grande */
         padding: 12px; /* Padding plus important */

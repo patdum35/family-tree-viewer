@@ -9,7 +9,7 @@ window.i18n = {
     'fr': {
       // Page password-form
       'motDePasse': 'Mot de passe',
-      'visualiserArbre': 'Visualiser l\'arbre',
+      'visualiserArbre': 'Entrez', //'Visualiser l\'arbre',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menu utilisateur avancé',
@@ -66,7 +66,7 @@ window.i18n = {
     'en': {
       // Page password-form
       'motDePasse': 'Password',
-      'visualiserArbre': 'View family tree',
+      'visualiserArbre': 'Enter', //'View family tree',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Advanced user menu',
@@ -121,7 +121,7 @@ window.i18n = {
     'es': {
       // Page password-form
       'motDePasse': 'Contraseña',
-      'visualiserArbre': 'Ver árbol genealógico',
+      'visualiserArbre': 'Entrar', //'Ver árbol genealógico',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menú de usuario avanzado',
@@ -177,7 +177,7 @@ window.i18n = {
     'hu': {
       // Page password-form
       'motDePasse': 'Jelszó',
-      'visualiserArbre': 'Családfa megtekintése',
+      'visualiserArbre': 'Belépés', //'Családfa megtekintése',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Haladó felhasználói menü',

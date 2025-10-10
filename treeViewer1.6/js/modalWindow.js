@@ -399,9 +399,9 @@ export function displayPersonDetails(personId) {
     closeButton.textContent = '×';
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
-    closeButton.style.fontSize = '24px';
+    closeButton.style.fontSize = '28px';
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '1px 8px';
+    closeButton.style.padding = '2px 10px';
     closeButton.style.marginRight = '10px';
 
     // style hover via JS
@@ -880,7 +880,7 @@ export function displayPersonDetails(personId) {
         modal.style.transform = 'translateX(-50%)';
         modal.style.maxWidth = '440px';
         modal.style.maxHeight = innerContentHeight +'px';
-        modal.style.width = Math.min(440, window.innerWidth - 20) + 'px';
+        modal.style.width = Math.min(440, window.innerWidth - 35) + 'px';
 
         innerContent.style.maxWidth = 450 - 10 +'px';
         innerContent.style.maxHeight = window.innerHeight - 80 +'px'; // ratioHeight +'vh';
@@ -889,7 +889,7 @@ export function displayPersonDetails(personId) {
         modal.style.left = prevLeft +'px';
         modal.style.maxWidth = '440px';
         modal.style.maxHeight = innerContentHeight +'px';        
-        modal.style.width = Math.min(440, window.innerWidth - prevLeft) + 'px';
+        modal.style.width = Math.min(440, window.innerWidth - prevLeft - 17) + 'px';
 
         innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft) +'px';
         innerContent.style.maxHeight = Math.min(window.innerHeight -80 , window.innerHeight - 40 - prevTop) +'px'; // ratioHeight +'vh';
@@ -915,7 +915,7 @@ function adjustModalOnResize(modal, innerContent) {
 
         modal.style.top = prevTop +'px';
         modal.style.left = prevLeft +'px';
-        modal.style.width = Math.min(440, window.innerWidth - prevLeft) + 'px';
+        modal.style.width = Math.min(440, window.innerWidth - prevLeft -17) + 'px';
 
         innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft -10 ) +'px';
         innerContent.style.maxHeight = Math.min(window.innerHeight -80 , window.innerHeight - 40 - prevTop) +'px'; // ratioHeight +'vh';

@@ -444,9 +444,9 @@ export function showPersonsList(name, people, config, searchTerm) {
     closeButton.textContent = '×';
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
-    closeButton.style.fontSize = '24px';
+    closeButton.style.fontSize = '28px';
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '1px 8px';
+    closeButton.style.padding = '2px 10px';
     closeButton.style.marginRight = '10px';
 
     // style hover via JS

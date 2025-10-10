@@ -352,11 +352,12 @@ function openStatsModal() {
             background: none;
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 30px;
             cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
+            /* padding: 0; */
+            padding = '2px 10px';
+            width: 35px;
+            height: 35px;
         }
         
         .statsModal-close:hover {

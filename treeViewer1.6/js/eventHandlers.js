@@ -640,7 +640,7 @@ export async function returnToLogin() {
     }
     
     // Réinitialiser le champ de mot de passe
-    document.getElementById('password').value = '';
+    // document.getElementById('password').value = '';
     
     // Réinitialiser rootPersonId dans l'objet state
     state.rootPersonId = null;

@@ -178,23 +178,35 @@
 
 
 
-        <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; padding-bottom: 5px; box-sizing: border-box; margin-top: -50px;  overflow-y: auto;">
-            <div class="name-row" style="display: flex; gap: 8px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
+        <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; padding-top: 15px; padding-bottom: 5px; box-sizing: border-box; margin-top: -50px;  overflow-y: auto;">
+            <div class="name-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
                 <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormfirstName"
-                    style="flex: 1 1 0; min-width: 0; box-sizing: border-box;">
-                <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormlastName"
-                    style="flex: 1 1 0; min-width: 0; box-sizing: border-box;">
+                    style="flex: 1 1 0; width: 115px; height: 22px; margin-top: 11px; box-sizing: border-box; text-align: center;">
+
+
+
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 25px;">
+                    <small style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        (fem.: de jeune fille)
+                    </small>
+                    <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormlastName"
+                        style="box-sizing: border-box; width: 115px; text-align: center;">
+                </div>
+
+
             </div>
-            <div class="password-row" style="max-width: 240px; width: 100%; max-width: 240px; margin-left: auto; margin-right: auto; margin-bottom: 5px">
+            <div class="password-row" style="display: flex; gap: 8px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
+
                 <input type="password" id="password" placeholder="Mot de passe" data-text-key="motDePasse"
-                    style="width: 100%; max-width: 240px; max-height: 30px;  box-sizing: border-box;" autocomplete="new-password">
-            </div>
-            <div class="submit-row" style="max-width: 240px; width: 100%; margin-left: auto; margin-right: auto; margin-top: 0; margin-bottom: 0;">
+                    style="flex: 1 1 0; width: 115px; box-sizing: border-box; text-align: center; padding-left: 0; padding-right: 0" >  
+
                 <button id="loadDataButton" data-text-key="visualiserArbre"
-                    style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer;">
-                    Visualiser l'arbre
+                    style="flex: 1 1 0; width: 115px; box-sizing: border-box; height: 23px; padding-top: 1px; padding-bottom: 1px;  background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Continuer
                 </button>
+
             </div>
+
         </div>
 
 

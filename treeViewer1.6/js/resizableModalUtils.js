@@ -616,17 +616,14 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                 modal.style.height = `${adjustedHeight}px`;
             }
 
-
             if (modal.id.includes('person-fullDetails-modal') ) {
                 const innerContent = document.getElementById('person-details-content');
                 if (innerContent) {
                     // console.log('\n\n - debug innerContent detected in resizeContent ', window.innerHeight, modal.offsetTop)
+                    innerContent.style.maxWidth = Math.min(440, window.innerWidth - modal.offsetLeft) +'px';
                     innerContent.style.maxHeight = window.innerHeight - modal.offsetTop + 'px';
                 }
             }
-
-
-
         }
         
         // Arrêter le redimensionnement

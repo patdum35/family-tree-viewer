@@ -89,20 +89,24 @@ export function trackPageView(pagePath) {
 
 
 // Sélection des champs
+const passwordInput = document.getElementById('password');
 const firstNameInput = document.getElementById('input-form-firstName');
 const lastNameInput = document.getElementById('input-form-lastName');
 
 // Charger les valeurs stockées au chargement de la page
 window.addEventListener('DOMContentLoaded', () => {
+    const savedPassword  = localStorage.getItem('password');
     const savedFirstName = localStorage.getItem('firstName');
     const savedLastName = localStorage.getItem('lastName');
+    if (savedPassword) passwordInput.value = savedPassword;
     if (savedFirstName) firstNameInput.value = savedFirstName;
     if (savedLastName) lastNameInput.value = savedLastName;
 });
 
 // Sauvegarder les valeurs dès qu’elles changent
-[firstNameInput, lastNameInput].forEach(input => {
+[passwordInput, firstNameInput, lastNameInput].forEach(input => {
     input.addEventListener('input', () => {
+        localStorage.setItem('password', passwordInput.value);
         localStorage.setItem('firstName', firstNameInput.value);
         localStorage.setItem('lastName', lastNameInput.value);
     });
@@ -438,7 +442,7 @@ function initialize() {
         passwordInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 console.log("Touche Enter détectée");
-                event.preventDefault();
+                // event.preventDefault();
                 loadData();
             }
         });

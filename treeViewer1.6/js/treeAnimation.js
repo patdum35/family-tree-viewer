@@ -403,7 +403,11 @@ function showNetworkStatus(message) {
         notification = document.createElement('div');
         notification.id = 'network-status';
         notification.style.position = 'fixed';
-        notification.style.top = '10px';
+        if (window.innerWidth <400) {
+            notification.style.top = '50px';
+        } else {
+            notification.style.top = '10px';
+        }
         notification.style.right = '10px';
         notification.style.padding = '10px';
         notification.style.borderRadius = '5px';
