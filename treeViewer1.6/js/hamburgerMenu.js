@@ -2450,7 +2450,7 @@ function setupButtonSync() {
      // Toaster un message
      if (typeof window.showToast === 'function') {
         //  window.showToast('Menu principal disponible');
-         window.showToast(getMenuTranslation('menuAvailable'))
+        //  window.showToast(getMenuTranslation('menuAvailable'))
      }
 }
 

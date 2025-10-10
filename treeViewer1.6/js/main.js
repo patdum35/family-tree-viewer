@@ -442,7 +442,7 @@ function initialize() {
         passwordInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 console.log("Touche Enter détectée");
-                // event.preventDefault();
+                event.preventDefault();
                 loadData();
             }
         });
@@ -1243,33 +1243,29 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
 
 
-    let person = null; 
 
+    let personInit = null; 
     // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
     if (state.firstName != '' && state.lastName!= '') {
-        // person = findPersonByName(state.firstName + ' ' + state.lastName)
-        // console.log('\n\n - debug : personne trouvée : ', findPersonByName(state.firstName + ' ' + state.lastName) , '\n\n')
         openSearchModal(state.firstName,  state.lastName );
-
         if (window.currentSearchResults.length === 1) {
-           person = window.currentSearchResults[0];
-        }
-
-    }
-
-    if (!person) {
-        if (state.treeOwner === 6) {
-            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? findYoungestPerson() : findYoungestPerson());
-        } else if (state.treeOwner === 5) {
-            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
-        } else if (state.treeOwner === 4) {
-            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
-        } else if (state.treeOwner === 3) {
-            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
-        } else {
-            person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+           personInit = window.currentSearchResults[0];
         }
     }
+
+    let person = null; 
+    if (state.treeOwner === 6) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 5) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 4) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 3) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
+    } else {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+    }
+
 
 
 
