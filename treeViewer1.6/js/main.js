@@ -2066,6 +2066,15 @@ document.addEventListener('load', () => {
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
+
+    // Recalage 200 ms plus tard pour s'assurer du bon placement
+    setTimeout(() => {
+        positionRadarButton();
+        positionHeatMapButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+    }, 200);
+
 });
 
 
