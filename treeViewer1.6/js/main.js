@@ -668,7 +668,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
             createAndPositionRadarOverlay();
             createAndPositionHeatMapOverlay();
             console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
-        }, 500);
+        }, 50);
 
         
         

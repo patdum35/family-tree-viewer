@@ -1055,15 +1055,15 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                     } else {
                         // Sinon, utiliser fitBounds classique
                         // Correction : recalcul de la vue après affichage complet
-                        setTimeout(() => {
-                            map.invalidateSize();
+                        map.whenReady(() => {
                             if (bounds.isValid()) {
+                                map.invalidateSize();
                                 map.fitBounds(bounds, {
                                     padding: [50, 50],
                                     maxZoom: maxAllowedZoom
                                 });
                             }
-                        }, 100);
+                        });
                     }
                 }
             }
