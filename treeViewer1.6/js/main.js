@@ -2052,31 +2052,21 @@ export function showAndRestoreTreeButtons() {
 
 
 
-// // Modifier vos écouteurs existants
-// document.addEventListener('DOMContentLoaded', () => {
-//     positionRadarButton();
-//     positionHeatMapButton();
-//     createAndPositionRadarOverlay();
-//     createAndPositionHeatMapOverlay();
-// });
-
 // Modifier vos écouteurs existants
-document.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
     positionRadarButton();
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
 
-    // Recalage 200 ms plus tard pour s'assurer du bon placement
+
     setTimeout(() => {
-        positionRadarButton();
-        positionHeatMapButton();
-        createAndPositionRadarOverlay();
-        createAndPositionHeatMapOverlay();
-    }, 200);
+        window.dispatchEvent(new Event('resize'));
+    }, 500);
+
+
 
 });
-
 
 
 window.addEventListener('resize', () => {
@@ -2085,3 +2075,6 @@ window.addEventListener('resize', () => {
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
 });
+
+
+
