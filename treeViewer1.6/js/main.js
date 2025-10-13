@@ -2054,40 +2054,48 @@ export function showAndRestoreTreeButtons() {
 
 // Modifier vos écouteurs existants
 document.addEventListener('DOMContentLoaded', () => {
-    positionRadarButton();
-    positionHeatMapButton();
-    createAndPositionRadarOverlay();
-    createAndPositionHeatMapOverlay();
+    // positionRadarButton();
+    // positionHeatMapButton();
+    // createAndPositionRadarOverlay();
+    // createAndPositionHeatMapOverlay();
+
+    console.log('\n\n\n -**** DEBUG : addEventListener(DOMContentLoaded) for button positionning**********\n\n\n')
+
 });
 
 
 window.addEventListener('resize', () => {
-    positionRadarButton();
-    positionHeatMapButton();
-    createAndPositionRadarOverlay();
-    createAndPositionHeatMapOverlay();
-});
-
-
-
-
-
-window.addEventListener('load', () => {
+    // positionRadarButton();
+    // positionHeatMapButton();
+    // createAndPositionRadarOverlay();
+    // createAndPositionHeatMapOverlay();
     setTimeout(() => {
-        // petit recalage comme si on venait de pivoter
-        console.log('\n\n -debug fake orientationchange au démarrage')
-        window.dispatchEvent(new Event('orientationchange'));
-    }, 500);
-});
-
-
-
-window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-        console.log('\n\n -debug  orientationchange ')
         positionRadarButton();
         positionHeatMapButton();
         createAndPositionRadarOverlay();
         createAndPositionHeatMapOverlay();
     }, 300);
+    console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
+
 });
+
+
+
+// window.addEventListener('load', () => {
+//     if (!sessionStorage.getItem('reloadedOnce')) {
+//         sessionStorage.setItem('reloadedOnce', 'true');
+//         // setTimeout(() => {
+//         //     console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//         //     location.reload();
+//         // }, 1000);
+
+//         setTimeout(() => {
+//             console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//             setTimeout(() => location.reload(), 100); // petit délai pour laisser la console écrire
+//         }, 1000);
+//         alert('DEBUG: reload after 1s');
+
+
+
+//     }
+// });

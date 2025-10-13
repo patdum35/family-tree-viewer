@@ -226,7 +226,6 @@
                 <button  id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔊</span></button>
                 <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>▶️</span></button>
                 <button onclick="openSettingsModal()" id="settingsBtn" data-text-key="openSettingsModal"><span>⚙️</span></button>
-                <!-- <button onclick="toggleFullScreen()" class="large-button" data-text-key="toggleFullScreen"><span>⛶</span></button> -->
                 <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'all' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
                     <span class="wide-span">💖</span>
                 </button>            
@@ -244,10 +243,8 @@
                 <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" > 
                     <span class="wide-span">STATS</span>
                 </button> 
-
             </div>
             
-            <!-- <div class="controls-row-2" style="margin-top: -10px; gap: 5px;">   -->
             <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px;">                  
                 <label for="generations" data-text-key="nbreGene">nbre<br>géné</label>
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
@@ -260,9 +257,6 @@
                         <option value="both" data-text-key="treeModeBoth">A+D</option>
                     </select>
                 </select>
-                <!-- <button onclick="toggleFullScreen()" class="large-button" data-text-key="toggleFullScreen"><span>⛶</span></button> -->
-
-                <!-- <input type="text" id="search" placeholder="🔍nom" oninput="searchTree(this.value)" data-text-key="search">      -->
             </div>                       
         </div>
 
