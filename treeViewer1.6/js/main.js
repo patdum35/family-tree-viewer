@@ -2058,14 +2058,6 @@ document.addEventListener('DOMContentLoaded', () => {
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
-
-
-    setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-    }, 500);
-
-
-
 });
 
 
@@ -2078,3 +2070,24 @@ window.addEventListener('resize', () => {
 
 
 
+
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        // petit recalage comme si on venait de pivoter
+        console.log('\n\n -debug fake orientationchange au démarrage')
+        window.dispatchEvent(new Event('orientationchange'));
+    }, 500);
+});
+
+
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        console.log('\n\n -debug  orientationchange ')
+        positionRadarButton();
+        positionHeatMapButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+    }, 300);
+});
