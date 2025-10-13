@@ -657,6 +657,19 @@ export async function loadData(isfromNonEncryptedFile = '') {
 
 
         toggleFullScreen();
+
+
+
+
+
+        setTimeout(() => {
+            positionRadarButton();
+            positionHeatMapButton();
+            createAndPositionRadarOverlay();
+            createAndPositionHeatMapOverlay();
+            console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
+        }, 500);
+
         
         
     } catch (error) {
@@ -2053,30 +2066,21 @@ export function showAndRestoreTreeButtons() {
 
 
 // Modifier vos écouteurs existants
-document.addEventListener('DOMContentLoaded', () => {
+// document.addEventListener('DOMContentLoaded', () => {
     // positionRadarButton();
     // positionHeatMapButton();
     // createAndPositionRadarOverlay();
     // createAndPositionHeatMapOverlay();
-
-    console.log('\n\n\n -**** DEBUG : addEventListener(DOMContentLoaded) for button positionning**********\n\n\n')
-
-});
+    // console.log('\n\n\n -**** DEBUG : addEventListener(DOMContentLoaded) for button positionning**********\n\n\n')
+// });
 
 
 window.addEventListener('resize', () => {
-    // positionRadarButton();
-    // positionHeatMapButton();
-    // createAndPositionRadarOverlay();
-    // createAndPositionHeatMapOverlay();
-    setTimeout(() => {
-        positionRadarButton();
-        positionHeatMapButton();
-        createAndPositionRadarOverlay();
-        createAndPositionHeatMapOverlay();
-    }, 300);
+    positionRadarButton();
+    positionHeatMapButton();
+    createAndPositionRadarOverlay();
+    createAndPositionHeatMapOverlay();
     console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
-
 });
 
 
