@@ -9,7 +9,11 @@ window.i18n = {
     'fr': {
       // Page password-form
       'motDePasse': 'Mot de passe',
-      'visualiserArbre': 'Entrez', //'Visualiser l\'arbre',
+      'visualiserArbre': 'Entrez', 
+      'startTitle': 'explore tes origines...',
+      'inputFormFirstName': 'prénom',
+      'inputFormLastName': 'nom',
+      'inputFormLastNameComment': 'nom (fem.: de jeune fille)',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menu utilisateur avancé',
@@ -67,7 +71,10 @@ window.i18n = {
       // Page password-form
       'motDePasse': 'Password',
       'visualiserArbre': 'Enter', //'View family tree',
-      
+      'startTitle': 'explore your origins...',
+      'inputFormFirstName': 'first name',
+      'inputFormLastName': 'last name',
+      'inputFormLastNameComment': 'last name (wom.: maiden)',      
       // Modal GEDCOM
       'AdvancedUserMenu': 'Advanced user menu',
       'afficherArbre': 'Show tree',
@@ -122,7 +129,11 @@ window.i18n = {
       // Page password-form
       'motDePasse': 'Contraseña',
       'visualiserArbre': 'Entrar', //'Ver árbol genealógico',
-      
+      'startTitle': 'explora tus orígenes...',
+      'inputFormFirstName': 'nombre',
+      'inputFormLastName': 'apellido',
+      'inputFormLastNameComment': 'apellido (muj.: de soltera)',
+
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menú de usuario avanzado',
       'afficherArbre': 'Mostrar árbol',
@@ -178,7 +189,11 @@ window.i18n = {
       // Page password-form
       'motDePasse': 'Jelszó',
       'visualiserArbre': 'Belépés', //'Családfa megtekintése',
-      
+      'startTitle': 'fedezd fel az eredeted...',
+      'inputFormFirstName': 'keresztnév',
+      'inputFormLastName': 'vezetéknév',
+      'inputFormLastNameComment': 'vezetéknév (nők.: leánykori)',  
+
       // Modal GEDCOM
       'AdvancedUserMenu': 'Haladó felhasználói menü',
       'afficherArbre': 'Fa megjelenítése',

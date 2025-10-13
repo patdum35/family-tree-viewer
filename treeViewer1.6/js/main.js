@@ -443,7 +443,7 @@ function initialize() {
             if (event.key === 'Enter') {
                 console.log("Touche Enter détectée");
                 event.preventDefault();
-                loadData();
+                loadData(false);
             }
         });
     } else {
@@ -478,7 +478,7 @@ export let audioUnlocked = false;
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
-export async function loadData() {
+export async function loadData(isfromNonEncryptedFile = '') {
 
 
     trackPageView('AccueilTreeViewer');
@@ -536,13 +536,14 @@ export async function loadData() {
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
   
     const fileInput = document.getElementById('gedFile');
+
     const passwordInput = document.getElementById('password');
     
     state.firstName = document.getElementById('input-form-firstName').value;
     state.lastName = document.getElementById('input-form-lastName').value;
 
 
-    console.log("\n\n ******* in loadData", state.firstName, state.lastName, '\n\n');
+    console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
 
     // toggleFullScreen();
 
@@ -552,7 +553,7 @@ export async function loadData() {
     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
     
     try {
-        let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
+        let gedcomContent = await loadGedcomContent(fileInput, passwordInput, (isfromNonEncryptedFile==='nonEncrypted'));
         state.gedcomData = parseGEDCOM(gedcomContent);
 
 
@@ -698,8 +699,8 @@ window.addEventListener('load', injectCustomStyle);
  * Charge le contenu du fichier GEDCOM
  * @private
  */
-async function loadGedcomContent(fileInput, passwordInput) {
-    if ((!passwordInput.value) && (!fileInput.files[0])) {
+async function loadGedcomContent(fileInput, passwordInput, isfromNonEncryptedFile = false ) {
+    if( ((!passwordInput.value) && (!fileInput.files[0]))  ||  ((isfromNonEncryptedFile) && (!fileInput.files[0])) ){
         if (window.CURRENT_LANGUAGE === 'fr') {
             throw new Error('Veuillez sélectionner un fichier ou entrer un mot de passe');
         } else if (window.CURRENT_LANGUAGE === 'en') {
@@ -711,7 +712,8 @@ async function loadGedcomContent(fileInput, passwordInput) {
         }
     }
 
-    if (passwordInput.value) {
+
+    if (passwordInput.value && !isfromNonEncryptedFile) {
         try {
             // Essayer d'abord avec arbre.enc
             const content = await loadEncryptedContent(passwordInput.value, 'arbre.enc');
@@ -796,7 +798,7 @@ async function loadGedcomContent(fileInput, passwordInput) {
                 throw error;
             }
         }
-    } else {
+    } else if (isfromNonEncryptedFile) {
         // Pour un fichier téléchargé, définir treeOwner = 0 (ou autre valeur par défaut)
         state.treeOwner = 0;
         console.log("Fichier GEDCOM personnalisé chargé. Owner: 0");
@@ -2050,13 +2052,23 @@ export function showAndRestoreTreeButtons() {
 
 
 
+// // Modifier vos écouteurs existants
+// document.addEventListener('DOMContentLoaded', () => {
+//     positionRadarButton();
+//     positionHeatMapButton();
+//     createAndPositionRadarOverlay();
+//     createAndPositionHeatMapOverlay();
+// });
+
 // Modifier vos écouteurs existants
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('load', () => {
     positionRadarButton();
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
 });
+
+
 
 window.addEventListener('resize', () => {
     positionRadarButton();

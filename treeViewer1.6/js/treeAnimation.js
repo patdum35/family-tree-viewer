@@ -454,9 +454,9 @@ export function initializeAnimationMapPosition()
         animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
     } else {
     // larguer screens: PC ou tablette
-        animationMapPosition.width = window.innerWidth/2 ;
-        animationMapPosition.left = window.innerWidth/4;
-        animationMapPosition.height = window.innerHeight/3;
+        animationMapPosition.width = Math.max(400 - 40, window.innerWidth/2) ;
+        animationMapPosition.left = (window.innerWidth - Math.max(400-40, window.innerWidth/2))/ 2; // window.innerWidth/4;
+        animationMapPosition.height = Math.max(400*0.8, window.innerHeight/3);
         animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
     }
 

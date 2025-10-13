@@ -53,6 +53,13 @@ body {
     z-index: 1;
 }
 
+#password-form button {
+    font-size: 16px; /* Taille de police plus grande */
+    padding: 12px; /* Padding plus important */
+    width: 100%; /* Largeur complète */
+}
+
+
 .form-container {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid #ccc;
@@ -106,7 +113,7 @@ body {
     margin-bottom: 10px;
 }
 
-.password-row input, .file-row button, .submit-row button {
+.file-row button, .submit-row button {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -677,7 +684,6 @@ input[type=number] {
 
 /* Styles responsive pour le formulaire de mot de passe */
 @media screen and (max-width: 768px) {
-
 
     #password-form button {
         font-size: 16px; /* Taille de police plus grande */

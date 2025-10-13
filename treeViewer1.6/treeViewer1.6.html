@@ -138,12 +138,7 @@
                 });
                 </script>
 
-
-
-
-
-                
-                <button onclick="loadData(); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
+                <button onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
                 <!-- <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
                 <!-- <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
                 <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="SWUpdate" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Mise à jour du logiciel</button>
@@ -172,55 +167,55 @@
 
 
 
-
-
-
-
-
         <div class="form-container" style="width: 280px; max-width: 280px; padding: 20px; padding-top: 15px; padding-bottom: 5px; box-sizing: border-box; margin-top: -50px;  overflow-y: auto;">
             <div class="name-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
-                <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormfirstName"
-                    style="flex: 1 1 0; width: 115px; height: 22px; margin-top: 11px; box-sizing: border-box; text-align: center;">
-
-
-
-                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 25px;">
-                    <small style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
-                        (fem.: de jeune fille)
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 30px;">
+                    <small data-text-key="inputFormFirstName" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        prénom
                     </small>
-                    <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormlastName"
-                        style="box-sizing: border-box; width: 115px; text-align: center;">
+                    <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName"
+                        style="box-sizing: border-box; width: 115px; text-align: center; height: 30px;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 30px;">
+                    <small data-text-key="inputFormLastNameComment" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        nom (fem.: de jeune fille)
+                    </small>
+                    <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName"
+                        style="box-sizing: border-box; width: 115px; text-align: center;height: 30px;">
                 </div>
 
 
             </div>
-            <div class="password-row" style="display: flex; gap: 8px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
 
-                <input type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" 
-                    style="flex: 1 1 0; width: 115px; box-sizing: border-box; text-align: center; padding-left: 0; padding-right: 0" >
 
-                <button id="loadDataButton" data-text-key="visualiserArbre"
-                    style="flex: 1 1 0; width: 115px; box-sizing: border-box; height: 23px; padding-top: 1px; padding-bottom: 1px;  background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Continuer
-                </button>
+            <div class="password-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 14px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 30px;">
+                    <small data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        mot de passe
+                    </small>
+                    <input type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false"
+                        style="box-sizing: border-box; width: 115px; text-align: center; height: 30px; ">
+                </div>
 
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 30px;">
+                    <small style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        .
+                    </small>
+                    <button id="loadDataButton" data-text-key="visualiserArbre"
+                        style="flex: 1 1 0; width: 115px; box-sizing: border-box; min-height: 21px;  padding-top: 1px; padding-bottom: 1px;  background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Continuer
+                    </button>
+                </div>
             </div>
-
         </div>
-
-        
 
         <div id="startTitle" style=" text-align: center; z-index: 999; ">
             <h2 style="text-align:center; margin-bottom: 10px; margin-left: 0px; padding: 0; font-size: 20px; color: white" 
             data-text-key="startTitle">explore tes origines...</h2>
         </div>
 
-
-
     </div>
-
-
-    <!-- style="left: 30px;" 👥 -->
 
     <!-- Conteneur de l'arbre -->
     <div id="tree-container" style="display: none;">
@@ -254,7 +249,6 @@
             
             <!-- <div class="controls-row-2" style="margin-top: -10px; gap: 5px;">   -->
             <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px;">                  
-                
                 <label for="generations" data-text-key="nbreGene">nbre<br>géné</label>
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
                 <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">

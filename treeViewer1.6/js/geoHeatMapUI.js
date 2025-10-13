@@ -1051,12 +1051,30 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                     if (finalZoom < idealZoom) {
                         const center = bounds.getCenter();
                         map.setView(center, finalZoom);
+console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )
+
                     } else {
                         // Sinon, utiliser fitBounds classique
-                        map.fitBounds(bounds, {
-                            padding: [50, 50],
-                            maxZoom: maxAllowedZoom
-                        });
+
+console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )
+                        // map.fitBounds(bounds, {
+                        //     padding: [50, 50],
+                        //     maxZoom: maxAllowedZoom
+                        // });
+
+                        // Correction : recalcul de la vue après affichage complet
+                        setTimeout(() => {
+                            map.invalidateSize();
+                            if (bounds.isValid()) {
+                                map.fitBounds(bounds, {
+                                    padding: [50, 50],
+                                    maxZoom: maxAllowedZoom
+                                });
+                            }
+                        }, 300);
+
+
+
                     }
                 }
             }

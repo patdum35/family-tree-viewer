@@ -197,10 +197,8 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
     }
    
     let matchCounter = 0;
-    let isMatched1 = false;
-    let isMatched2 = false;
-    let isMatched3 = false;
-    let isMatched4 = false;
+    let isMatched1 = false, isMatched2 = false, isMatched3 = false, isMatched4 = false, isMatched5 = false, isMatched6 = false;
+    let bestdate1 = null, bestdate2 = null, bestdate3 = null, bestdate4 = null, bestdate5 = null, bestdate6 = null;
 
     // Object.values(state.gedcomData.individuals).forEach(person => {
     personList.forEach(person => {
@@ -272,6 +270,12 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
         
         }
 
+        let bestdate = null;
+        bestdate = (birthYear)  ? birthYear : (marriageYear) ? marriageYear : (deathYear) ? deathYear : relevantDate;
+
+
+
+
        
         // Recherche par nom
         if (searchType === 'name' || (searchType === 'prenoms' || searchType === 'noms')) {
@@ -310,11 +314,10 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     let isMatched = false;
                     // console.log('\n\n - debug findBy', searchFirstName, searchLastName)
 
-
-                    if (new RegExp(`\\b${searchFirstName}(\\b| |-)`, "i").test(firstName) 
+                    if (new RegExp(`^${searchFirstName}(\\b| |-)`, "i").test(firstName)
                         && lastName.includes(searchLastName) ) {
                         // console.log('\n\n-debug detected with accent :', person.name )
-                        if (!isMatched1) {
+                        if (!isMatched1 || (bestdate1 && (bestdate < bestdate1) ) ) {
                             results = [];
                         }
                         matches.push({
@@ -322,13 +325,12 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched1 = true;
+                        matchCounter++; isMatched = true; isMatched1 = true; bestdate1 = bestdate;
                     } 
-                    
-                    if (!isMatched && !isMatched1 && new RegExp(`\\b${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
+                    if (!isMatched && !isMatched1 && new RegExp(`^${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
                         && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent :', person.name )
-                        if (!isMatched2) {
+                        if (!isMatched2 || (bestdate2 && (bestdate < bestdate2) ) ) {
                             results = [];
                         }
                         matches.push({
@@ -336,12 +338,38 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched2 = true;
+                        matchCounter++; isMatched = true; isMatched2 = true; bestdate2 = bestdate;
                     } 
-                    if (!isMatched && !isMatched2 && firstName.includes(searchFirstName) &&
+                    if (!isMatched && !isMatched2 && new RegExp(`\\b${searchFirstName}(\\b| |-)`, "i").test(firstName) 
+                        && lastName.includes(searchLastName) ) {
+                        // console.log('\n\n-debug detected with accent :', person.name )
+                        if (!isMatched3 || (bestdate3 && (bestdate < bestdate3) ) ) {
+                            results = [];
+                        }
+                        matches.push({
+                            type: 'name',
+                            field: 'Nom',
+                            value: person.name.replace(/\//g, '').trim()
+                        });
+                        matchCounter++; isMatched = true; isMatched3 = true; bestdate3 = bestdate;
+                    } 
+                    if (!isMatched && !isMatched3 && new RegExp(`\\b${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
+                        && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
+                        // console.log('\n\n-debug detected without accent :', person.name )
+                        if (!isMatched4 || (bestdate4 && (bestdate < bestdate4) ) ) {
+                            results = [];
+                        }
+                        matches.push({
+                            type: 'name',
+                            field: 'Nom',
+                            value: person.name.replace(/\//g, '').trim()
+                        });
+                        matchCounter++; isMatched = true; isMatched4 = true; bestdate4 = bestdate;
+                    } 
+                    if (!isMatched && !isMatched4 && firstName.includes(searchFirstName) &&
                             lastName.includes(searchLastName) ) {
                         // console.log('\n\n-debug detected with accent et partiel:', person.name )
-                        if (!isMatched3) {
+                        if (!isMatched5 || (bestdate5 && (bestdate < bestdate5) ) ) {
                             results = [];
                         }
                         matches.push({
@@ -349,17 +377,20 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                                 field: 'Nom',
                                 value: person.name.replace(/\//g, '').trim()
                             });
-                        matchCounter++; isMatched = true; isMatched3 = true;            
+                        matchCounter++; isMatched = true; isMatched5 = true; bestdate5 = bestdate;            
                     }
-                    if (!isMatched && !isMatched3 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
+                    if (!isMatched && !isMatched5 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
                         lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent et partiel:', person.name )
+                        if (!isMatched6 || (bestdate6 && (bestdate < bestdate6) ) ) {
+                            results = [];
+                        }
                         matches.push({
                                 type: 'name',
                                 field: 'Nom',
                                 value: person.name.replace(/\//g, '').trim()
                             });
-                        matchCounter++; isMatched = true; isMatched4 = true;
+                        matchCounter++; isMatched = true; isMatched6 = true; bestdate6 = bestdate;
                     }  
 
                 } else if (searchType == 'noms' && searchStrFullFull) {
