@@ -698,6 +698,11 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
 
     // Définir et stocker le nouvel écouteur
     window._resizeHeatmapListener = function() {
+
+
+console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
+
+
         const wrapper = document.getElementById('namecloud-heatmap-wrapper');
         if (!wrapper) return;
         
@@ -754,6 +759,9 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
 
     // Ajouter l'écouteur
     window.addEventListener('resize', window._resizeHeatmapListener);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => window._resizeHeatmapListener(), 200);
+    });   
 
     // Nous créons un titleBar invisible pour permettre le drag même si la barre de titre n'est pas visible
     const titleBar = document.createElement('div');
