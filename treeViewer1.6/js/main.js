@@ -251,11 +251,20 @@ export function updateRadarButtonText() {
 
     if (menu_nameTreeRadarBtn) {
         // Mettre à jour le bouton du menu hamburger
-        if (window.innerHeight < 800) {
-            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
-        } else {
-            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
-        }
+        // if (window.innerHeight < 800) {
+        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
+        // } else {
+        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
+        // }
+
+        // if (window.innerHeight < 800) {
+        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌳' : '  -  🎯';
+        // } else {
+        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
+        // }
+
+        menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
+
     }
 
 }

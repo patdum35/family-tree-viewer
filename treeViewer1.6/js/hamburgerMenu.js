@@ -25,7 +25,7 @@ function getMenuTranslation(key) {
       'section_audio': 'Animation et audio',
       'section_root': 'Racine',
       'section_modes': 'Modes',
-      'section_namecloud': 'Nuage / radar / arbre',
+      'section_namecloud': 'nuage / radar / map / stats',
       'section_radar': 'radar',
       'section_settings': 'Fonds d\'écran',
       'section_search': 'Recherche dans l\'arbre',
@@ -252,9 +252,9 @@ function updateMenuStyles() {
     span.style.fontSize = '';
     
     if (height < 400) {
-      span.style.fontSize = '16px';
+      span.style.fontSize = '20px';
     } else if (height < 800) {
-      span.style.fontSize = '18px';
+      span.style.fontSize = '20px';
     }
   });
   
@@ -314,36 +314,36 @@ function updateMenuStyles() {
       }
 
 
-      settingsBtn = document.getElementById('menu-nameCloudBtn');
-      if (settingsBtn) {
-          // Vérifier si le label existe déjà
-          let labelExists = false;
-          let parent = settingsBtn.parentElement;
+      // settingsBtn = document.getElementById('menu-nameCloudBtn');
+      // if (settingsBtn) {
+      //     // Vérifier si le label existe déjà
+      //     let labelExists = false;
+      //     let parent = settingsBtn.parentElement;
           
-          // Vérifier si le parent est un SPAN (label)
-          if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
-              labelExists = true;
-          }
+      //     // Vérifier si le parent est un SPAN (label)
+      //     if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
+      //         labelExists = true;
+      //     }
           
-          // Créer le label s'il n'existe pas
-          if (!labelExists) {
-              const section = settingsBtn.closest('.menu-section-content');
-              if (section) {
-                section.removeChild(settingsBtn);
+      //     // Créer le label s'il n'existe pas
+      //     if (!labelExists) {
+      //         const section = settingsBtn.closest('.menu-section-content');
+      //         if (section) {
+      //           section.removeChild(settingsBtn);
                 
-                const labelContainer = document.createElement('span');
-                labelContainer.textContent = "Nuage de mots";
-                labelContainer.style.fontSize = '11px';
-                labelContainer.appendChild(settingsBtn);
-                section.appendChild(labelContainer);
+      //           const labelContainer = document.createElement('span');
+      //           labelContainer.textContent = " ";//"Nuage de mots";
+      //           labelContainer.style.fontSize = '11px';
+      //           labelContainer.appendChild(settingsBtn);
+      //           section.appendChild(labelContainer);
                 
-                // Ajuster la taille et l'espacement
-                settingsBtn.style.marginRight = '10px';
-                const span = settingsBtn.querySelector('span');
-                if (span) span.style.fontSize = '18px';
-              }
-          }
-      }
+      //           // Ajuster la taille et l'espacement
+      //           settingsBtn.style.marginRight = '10px';
+      //           const span = settingsBtn.querySelector('span');
+      //           if (span) span.style.fontSize = '18px';
+      //         }
+      //     }
+      // }
       
       // Ajuster les boutons d'affichage
       document.querySelectorAll('.menu-section h3').forEach(heading => {
@@ -637,10 +637,10 @@ function createSection(title, index = 0) {
   const height = window.innerHeight;
   if (height < 400) {
     container.style.margin = '2px 0';
-    container.style.padding = '3px';
+    container.style.padding = '0px';
   } else if (height < 800) {
     container.style.margin = '3px 0';
-    container.style.padding = '5px';
+    container.style.padding = '0px';
   }
   
   const heading = document.createElement('h3');
@@ -676,9 +676,9 @@ function createSection(title, index = 0) {
   
   // Ajuster l'espacement du contenu uniquement pour les petits écrans
   if (height < 400) {
-    content.style.gap = '3px';
+    content.style.gap = '0px';
   } else if (height < 800) {
-    content.style.gap = '5px';
+    content.style.gap = '0px';
   }
   
   container.appendChild(content);
@@ -716,11 +716,12 @@ function createDisplaySection() {
     // Adapter uniquement pour les petits écrans
     if (height < 400) {
       span.style.fontSize = '20px';
-      button.style.padding = '1px';
-      button.style.marginRight = '8px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';
     } else if (height < 800) {
       span.style.fontSize = '20px';
-      button.style.padding = '2px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';
     }
     // Pour les grands écrans, on conserve le style original
     
@@ -1114,54 +1115,180 @@ function createNameCloudSection() {
       id: 'menu-nameCloudBtn',
       onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
       title: getMenuTranslation('section_namecloud'), //'Nuage de noms', 
-      text: '💖🔠💗' 
+      text: '💖' //🔠💗' 
     },
     { 
       id: 'menu-nameTreeRadarBtn',
-      // onclick: 'enableRadarAndDisplay()',
       onclick: 'toggleTreeRadarFromHamburger()',
       title: getMenuTranslation('section_radar'), //'Nuage de noms', 
-      text: (window.innerHeight < 800) ? '  -  🕸️🎯' : '🕸️🎯'
-    }
-
+      text: '🎯' // (window.innerHeight < 800) ? '  -  🎯' : '🎯' //'  -  🕸️🎯' : '🕸️🎯'
+    },
+    { 
+      id: 'menu-heatMapBtn',
+      onclick: 'displayHeatMap()',
+      title: getMenuTranslation('section_radar'), //'heatMap', 
+      text: '🌍' //(window.innerHeight < 800) ? '  -  🌍' : '🌍'
+    },
+    { 
+      id: 'menu-statsBtn',
+      onclick: 'statsModal()',
+      title: getMenuTranslation('section_radar'), //'stats', 
+      text: 'STATS' // (window.innerHeight < 800) ? '  - STATS' : 'STATS'
+    }    
   ];
 
 
 
-
+  // section.content.style.display = 'flex';
+  // section.content.style.gap = '0px ! important'; // réduit l’espace entre les boutons
+  // section.content.style.flexWrap = 'wrap'; // pour éviter le débordement sur petit écran
   
+
+
+
+// // 1) tague le conteneur pour ciblage propre
+// section.content.classList.add('compact-menu');
+
+// // 2) injecte un style ciblé (ne le recrée pas si déjà présent)
+// if (!document.getElementById('compact-menu-style')) {
+//   const s = document.createElement('style');
+//   s.id = 'compact-menu-style';
+//   s.textContent = `
+//     .compact-menu {
+//       gap: 0px !important;        /* espacement serré */
+//     }
+//   `;
+//   document.head.appendChild(s);
+// }
+
+
+
+// section.content.style.setProperty('gap', '0px', 'important');
+
+section.content.style.cssText += 'gap:0 !important; display:flex !important;';
+section.content.classList.add('compact-menu');
+document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0!important}</style>');
+
+
+// section.content.style.display = 'flex !important';
+// section.content.style.flexWrap = 'wrap !important';
+// section.content.style.alignItems = 'center !important';
+// section.content.style.gap = '0px !important';
+
+
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
     button.setAttribute('onclick', buttonData.onclick);
     if (buttonData.id) button.id = buttonData.id;
     button.title = buttonData.title;
     
-    const span = document.createElement('span');
-    span.textContent = buttonData.text;
-    
-    // Adapter uniquement pour les petits écrans
-    if (height < 400) {
-      span.style.fontSize = '16px';
-      button.style.padding = '1px';
-    } else if (height < 800) {
-      span.style.fontSize = '16px';
-      button.style.padding = '2px';
-    }
-    // Pour les grands écrans, on conserve le style original
-    
-    button.appendChild(span);
-    if (height < 400) {
-      // Créer un conteneur pour le label + bouton
-      const container = document.createElement('span');
 
-      container.style.fontSize = '13px';
-      container.appendChild(button);
-      section.content.appendChild(container);
+    
+
+    // Si c'est le bouton STATS, réduire le texte
+    if (buttonData.id === 'menu-statsBtn') {
+        button.textContent = buttonData.text; // on met directement le texte dans le bouton
+        button.style.fontSize = '12px';
+        button.style.backgroundColor = '#438aee';
+        button.style.color = '#fff';
+        button.style.border = '2px solid #438aee';
+        button.style.borderRadius = '6px';
+        button.style.padding = '0px 2px';
+        button.style.cursor = 'pointer';
+        button.style.transition = 'background 0.2s, color 0.2s, border-color 0.2s';
+        button.style.height = '25px';
+        button.style.marginTop = '8px';
+
+        button.addEventListener('mouseenter', () => {
+            button.style.backgroundColor = '#2762a6';
+            button.style.color = '#ffd700';
+            button.style.borderColor = '#ffd700';
+        });
+        button.addEventListener('mouseleave', () => {
+            button.style.backgroundColor = '#438aee';
+            button.style.color = '#fff';
+            button.style.borderColor = '#438aee';
+        });
+        section.content.appendChild(button);
     } else {
-          section.content.appendChild(button);
+      // button.textContent = buttonData.text; 
+      const span = document.createElement('span');
+      span.textContent = buttonData.text;
+      span.style.fontSize = '16px';
+      button.style.padding = '0px';
+      button.style.margin = '0px';
+      button.appendChild(span);
+      // if (height < 400) {
+      //   // Créer un conteneur pour le label + bouton
+      //   const container = document.createElement('span');
+      //   container.style.fontSize = '16px';
+      //   // button.style.margin = '0';
+      //   container.appendChild(button);
+      //   section.content.appendChild(container);
+      // } else {
+      //     // button.style.margin = '0';
+      //     section.content.appendChild(button);
+      // }
+      section.content.appendChild(button);
     }
+
+
+
+
+
+
+
+
+
+
+
   //   section.content.appendChild(button);
   });
+
+
+
+
+  // buttons.forEach(buttonData => {
+  //     const button = document.createElement('button');
+  //     button.id = buttonData.id;
+  //     button.title = buttonData.title;
+  //     button.textContent = buttonData.text; // on met directement le texte dans le bouton
+
+  //     // Si c'est le bouton STATS, réduire le texte
+  //     if (buttonData.id === 'menu-statsBtn') {
+  //         button.style.fontSize = '12px';
+  //         button.style.backgroundColor = '#438aee';
+  //         button.style.color = '#fff';
+  //         button.style.border = '2px solid #438aee';
+  //         button.style.borderRadius = '8px';
+  //         button.style.padding = '10px 24px';
+  //         button.style.cursor = 'pointer';
+  //         button.style.transition = 'background 0.2s, color 0.2s, border-color 0.2s';
+
+  //         button.addEventListener('mouseenter', () => {
+  //             button.style.backgroundColor = '#2762a6';
+  //             button.style.color = '#ffd700';
+  //             button.style.borderColor = '#ffd700';
+  //         });
+  //         button.addEventListener('mouseleave', () => {
+  //             button.style.backgroundColor = '#438aee';
+  //             button.style.color = '#fff';
+  //             button.style.borderColor = '#438aee';
+  //         });
+  //     }
+
+  //     section.content.appendChild(button);
+  // });
+
+
+
+
+
+
+  // section.content.style.gap = '0px';
+  // section.content.style.display = 'flex';
+  // section.content.style.flexWrap = 'wrap';
+
   
   sideMenu.appendChild(section.container);
 }

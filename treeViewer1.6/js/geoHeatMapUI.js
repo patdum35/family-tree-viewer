@@ -760,7 +760,7 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
     // Ajouter l'écouteur
     window.addEventListener('resize', window._resizeHeatmapListener);
     window.addEventListener('orientationchange', () => {
-        setTimeout(() => window._resizeHeatmapListener(), 200);
+        setTimeout(() => window._resizeHeatmapListener(), 300);
     });   
 
     // Nous créons un titleBar invisible pour permettre le drag même si la barre de titre n'est pas visible
