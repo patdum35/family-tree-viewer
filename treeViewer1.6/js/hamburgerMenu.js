@@ -251,16 +251,21 @@ function updateMenuStyles() {
     }
   });
   
+
+
+//////////////////////////////
   // Adapter les boutons et les spans
   document.querySelectorAll('.side-menu button span').forEach(span => {
-    span.style.fontSize = '20px';
+    span.style.fontSize = '20px ! important';
     
     if (height < 400) {
-      span.style.fontSize = '20px';
+      span.style.fontSize = '20px ! important';
     } else if (height < 800) {
-      span.style.fontSize = '20px';
+      span.style.fontSize = '20px ! important';
     } 
   });
+////////////////////////////////
+
   
   // Adapter les labels
   document.querySelectorAll('.menu-section-content label').forEach(label => {
@@ -1195,11 +1200,11 @@ function createNameCloudSection() {
     } else {
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      span.style.fontSize = '16px ! important';
+      // span.style.fontSize = '16px ! important';
       button.style.padding = '0px';
       button.style.margin = '0px';
       button.appendChild(span);
-      button.style.fontSize = '16px ! important';
+      // button.style.fontSize = '16px ! important';
       section.content.appendChild(button);
     }
 
@@ -2027,7 +2032,7 @@ function injectStyles() {
         }
         
         .small-screen .side-menu button span {
-        font-size: 16px;
+        font-size: 20px;
         }
         
         .small-screen .menu-section-content label {
@@ -2072,8 +2077,9 @@ function injectStyles() {
         gap: 5px;
         }
         
+        
         .medium-screen .side-menu button span {
-        font-size: 22px;
+        font-size: 20px;
         }
         
         .medium-screen .menu-section-content label {
@@ -2173,6 +2179,7 @@ function injectStyles() {
         border: none;
         background-color: transparent;
         border-radius: 4px;
+        font-size: 28px;
         }
     
         .side-menu button:hover {
@@ -2180,7 +2187,7 @@ function injectStyles() {
         }
     
         .side-menu button span {
-        font-size: 28px;
+        font-size: 20px;
         display: block;
         }
     
