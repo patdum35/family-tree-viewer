@@ -5,7 +5,7 @@ import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
-import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive, bringToFrontOfHamburgerButton } from './resizableModalUtils.js';
 import { adjustSplitScreenLayout } from './nameCloudInteractions.js';
 import { resizeModal } from './nameCloudStatModal.js';
 import { fullResetAnimationState } from './treeAnimation.js';
@@ -691,6 +691,11 @@ export function openSearchModal(firstName = null, lastName = null) {
             // regarder si il existe plus qu'un résultat
             if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
         }
+
+        // verifier si le bouton hamburger se superpose à la modal searchModal
+        // dans ce cas chnager le zIndex
+        bringToFrontOfHamburgerButton();
+
         return;
     }
 
@@ -760,7 +765,7 @@ export function openSearchModal(firstName = null, lastName = null) {
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 650px;
+            max-width: 580px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             /* max-height: calc(100vh - 5px) !important; */  /* Utiliser presque toute la hauteur */
@@ -776,14 +781,14 @@ export function openSearchModal(firstName = null, lastName = null) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 3px 15px;
+            padding: 3px 30px;
             background: #ff9800;
             color: white;
         }
         
         .searchModal-header h3 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .searchModal-close {
@@ -977,7 +982,7 @@ export function openSearchModal(firstName = null, lastName = null) {
             }
 
             .searchModal-header {
-                padding: 3px 20px;
+                padding: 3px 30px;
             }
             
             .searchModal-header h3 {
@@ -1111,6 +1116,9 @@ export function openSearchModal(firstName = null, lastName = null) {
         // regarder si il existe plus qu'un résultat
         if (window.currentSearchResults.length < 2) { window.closeSearchModal();}
     }
+    // verifier si le bouton hamburger se superpose à la modal searchModal
+    // dans ce cas chnager le zIndex
+    bringToFrontOfHamburgerButton();
 }
 
 /**
@@ -1260,36 +1268,36 @@ function setupModalEvents() {
 
 
 
-    // Gestion spéciale pour les champs de dates en mode paysage mobile
-    const inputs = [document.getElementById('searchModal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
-    const modal = document.getElementById('search-modal');
+    // // Gestion spéciale pour les champs de dates en mode paysage mobile
+    // const inputs = [document.getElementById('searchModal-search-input'), document.getElementById('date-start'), document.getElementById('date-end')];
+    // const modal = document.getElementById('search-modal');
 
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            // Détection mobile paysage
-            if (window.innerHeight <= 600) {
-                modal.style.paddingTop = '5px';
-                modal.style.alignItems = 'flex-start';
+    // inputs.forEach(input => {
+    //     input.addEventListener('focus', function() {
+    //         // Détection mobile paysage
+    //         if (window.innerHeight <= 600) {
+    //             modal.style.paddingTop = '5px';
+    //             modal.style.alignItems = 'flex-start';
                 
-                // Faire défiler vers le haut
-                setTimeout(() => {
-                    this.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }, 300);
-            }
-        });
+    //             // Faire défiler vers le haut
+    //             setTimeout(() => {
+    //                 this.scrollIntoView({ 
+    //                     behavior: 'smooth', 
+    //                     block: 'start' 
+    //                 });
+    //             }, 300);
+    //         }
+    //     });
         
-        input.addEventListener('blur', function() {
-            // Restaurer la position normale après un délai
-            setTimeout(() => {
-                if (window.innerHeight < 500) {
-                    modal.style.paddingTop = '5px';
-                }
-            }, 300);
-        });
-    });
+    //     input.addEventListener('blur', function() {
+    //         // Restaurer la position normale après un délai
+    //         setTimeout(() => {
+    //             if (window.innerHeight < 500) {
+    //                 modal.style.paddingTop = '5px';
+    //             }
+    //         }, 300);
+    //     });
+    // });
 
     
 }

@@ -879,7 +879,7 @@ export function displayPersonDetails(personId) {
         modal.style.left = '50%';
         modal.style.transform = 'translateX(-50%)';
         modal.style.maxWidth = '440px';
-        modal.style.maxHeight = innerContentHeight +'px';
+        modal.style.maxHeight = innerContentHeight + 35 +'px';
         modal.style.width = Math.min(440, window.innerWidth - 35) + 'px';
 
         innerContent.style.maxWidth = 450 - 10 +'px';
@@ -888,7 +888,7 @@ export function displayPersonDetails(personId) {
         modal.style.top = prevTop +'px';
         modal.style.left = prevLeft +'px';
         modal.style.maxWidth = '440px';
-        modal.style.maxHeight = innerContentHeight +'px';        
+        modal.style.maxHeight = innerContentHeight + 35 + 'px';        
         modal.style.width = Math.min(440, window.innerWidth - prevLeft - 17) + 'px';
 
         innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft) +'px';

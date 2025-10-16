@@ -371,69 +371,6 @@ function createNameCloudContainer() {
     return nameCloudContainer;
 }
 
-function createStandardTypeSelect(config) {
-    const typeSelect = document.createElement('select');
-    typeSelect.style.padding = '0px';
-    typeSelect.style.minWidth = '10px';
-    typeSelect.style.backgroundColor = '#4361ee';
-    typeSelect.style.color = 'white';
-    typeSelect.style.border = '1px solid #3f51b5';
-    typeSelect.style.borderRadius = '3px';
-    typeSelect.style.appearance = 'none';
-    typeSelect.style.cursor = 'pointer';
-    typeSelect.style.fontSize = '14px';
-    typeSelect.style.fontWeight = 'bold';
-    typeSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-    
-    typeSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-    typeSelect.style.backgroundRepeat = 'no-repeat';
-    typeSelect.style.backgroundPosition = 'top 0px right -13px';
-    typeSelect.style.paddingRight = '0px';
-    
-    typeSelect.innerHTML = `
-        <option value="prenoms">Prénom</option>
-        <option value="noms">Nom</option>
-        <option value="professions">Métier</option>
-        <option value="duree_vie">Vie</option>
-        <option value="age_procreation">Procréat</option>
-        <option value="lieux">Lieux</option>                    
-    `;
-    typeSelect.value = config.type;
-    
-    typeSelect.addEventListener('mouseover', () => {
-        typeSelect.style.backgroundColor = '#3a56e8';
-    });
-    typeSelect.addEventListener('mouseout', () => {
-        typeSelect.style.backgroundColor = '#4361ee';
-    });
-
-    // Générer un ID unique pour ce sélecteur
-    const selectId = `type-select-${Date.now()}`;
-    typeSelect.id = selectId;
-    
-    // Style pour les options, incluant l'état au survol
-    const style = document.createElement('style');
-    style.textContent = `
-        #${selectId} option {
-            background-color: #38b000;
-            color: white;
-        }
-        
-        #${selectId} option:hover {
-            background-color: #2e9800 !important;
-            color: white !important;
-        }
-        
-        #${selectId} option:checked {
-            background-color: #38b000;
-            color: white;
-        }
-    `;
-    document.head.appendChild(style);
-
-    return typeSelect;
-}
-
 export function createTypeSelect(type, isForStatsModal = false, width = 60, 
     colors = {
         main: ' #4361ee',    // Bleu pour le sélecteur
@@ -726,209 +663,6 @@ export function createStatsTypeSelect(type, isForStatsModal = false, width = 60,
     });
 }
 
-function createRootPersonSelect() {
-    const rootPersonSelect = document.createElement('select');
-    rootPersonSelect.style.padding = '5px';
-    rootPersonSelect.style.width = '100%';
-    rootPersonSelect.style.display = 'none';
-    rootPersonSelect.style.marginTop = '-30px';
-
-    const rootPersons = Object.values(state.gedcomData.individuals);
-    rootPersons.sort((a, b) => a.name.localeCompare(b.name));
-    rootPersons.forEach(person => {
-        const option = document.createElement('option');
-        option.value = person.id;
-        option.textContent = person.name.replace(/\//g, '').trim();
-        rootPersonSelect.appendChild(option);
-    });
-
-    if (state.rootPersonId) {
-        rootPersonSelect.value = state.rootPersonId;
-    }
-
-    return rootPersonSelect;
-}
-
-function createRootPersonSearchContainer(rootPersonSelect, generateNameCloud) {
-    const container = document.createElement('div');
-    container.style.display = 'none'; // Caché par défaut
-    container.style.position = 'relative';
-    container.style.marginLeft = '5px'; // Changé de -7px à 5px pour le coller à gauche du bouton OK
-    container.style.display = 'flex';
-    container.style.width = 'auto';
-    container.style.alignSelf = 'flex-start';
-    container.style.zIndex = '10';
-    container.style.flexDirection = 'column';
-    container.style.alignItems = 'flex-start'; // S'assure que tout est aligné à gauche
-
-    const label = document.createElement('label');
-    // label.textContent = 'Personne racine';
-    label.textContent = getTranslation('labelPersonneRacine');
-    label.style.fontSize = '12px';
-    label.style.marginBottom = '2px';
-    label.style.textAlign = 'left'; // Assurez-vous que le texte est aligné à gauche
-
-    const searchWrapper = document.createElement('div');
-    searchWrapper.style.display = 'flex';
-    searchWrapper.style.gap = '5px';
-    searchWrapper.style.width = '100%'; // Assure que le wrapper prend toute la largeur disponible
-    searchWrapper.style.height = '25px'; // Hauteur réduite
-    searchWrapper.style.position = 'relative'; // Ajout de position relative pour le positionnement du résultat
-
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    // searchInput.placeholder = 'search racine';
-    searchInput.placeholder = getTranslation('searchPlaceholder');
-    searchInput.style.padding = '2px 3px'; // Padding réduit
-    searchInput.style.width = '79px';
-    searchInput.style.height = '17px'; // Hauteur réduite
-    searchInput.style.marginTop= '2px'
-    
-    const searchButton = document.createElement('button');
-    // searchButton.textContent = '🔍';
-    searchButton.textContent = getTranslation('searchButtonText');
-    searchButton.style.padding = '0px 0px'; // Padding réduit
-    searchButton.style.height = '24px'; // Hauteur réduite
-    searchButton.style.marginLeft = '-3px';
-    searchButton.style.marginTop= '3px'
-
-    const resultsSelect = document.createElement('select');
-    resultsSelect.style.display = 'none';
-    resultsSelect.style.position = 'absolute';
-    resultsSelect.style.bottom = 'calc(100% - 2px)'; // '100%'; // Changé de 'top: 100%' à 'bottom: 100%' pour afficher au-dessus
-    resultsSelect.style.left = '0';
-    resultsSelect.style.width = '100%';
-    resultsSelect.style.zIndex = '1000';
-    // resultsSelect.style.marginBottom = '0px'; // Ajout d'une marge en bas pour l'espacement
-    resultsSelect.style.height = '22px'; // Hauteur réduite
-    // resultsSelect.style.marginTop= '4px';
-
-    function normalizeString(str) {
-        return str.toLowerCase()
-            .replace(/[éèêë]/g, 'e')
-            .replace(/[àâä]/g, 'a')
-            .replace(/[îï]/g, 'i')
-            .replace(/[ôö]/g, 'o')
-            .replace(/[ûüù]/g, 'u')
-            .replace(/ç/g, 'c');
-    }
-
-    function searchRootPerson() {
-        const searchStr = normalizeString(searchInput.value);
-        
-        // resultsSelect.innerHTML = '<option value="">...    select</option>';
-        resultsSelect.innerHTML = `<option value="">${getTranslation('selectDefaultOption')}</option>`;
-
-        resultsSelect.style.display = 'none';
-        
-        resultsSelect.style.textAlign = 'left';
-        resultsSelect.style.backgroundColor = '#4361ee';
-        resultsSelect.style.color = 'white';
-        resultsSelect.style.border = '1px solid #3f51b5';
-        resultsSelect.style.borderRadius = '4px';
-        resultsSelect.style.appearance = 'none';
-        resultsSelect.style.cursor = 'pointer';
-        resultsSelect.style.fontSize = '14px';
-        resultsSelect.style.fontWeight = 'bold';
-        resultsSelect.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
-
-        // Réduire l'espacement interne du texte
-        const selectId = `results-select-${Date.now()}`;
-        resultsSelect.id = selectId;
-        const optionStyle = document.createElement('style');
-        optionStyle.textContent = `
-            #${selectId} option {
-                padding: 0px 0px !important;
-            }
-        `;
-        document.head.appendChild(optionStyle);
-
-
-        resultsSelect.style.backgroundImage = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' fill=\'white\'><polygon points=\'0,0 3,0 1.5,2\'/></svg>")';
-        resultsSelect.style.backgroundRepeat = 'no-repeat';
-        resultsSelect.style.backgroundPosition = 'top 0px left 5px';
-        resultsSelect.style.paddingLeft = '0px';
-
-        if (!searchStr) return;
-    
-        const matchedPersons = Object.values(state.gedcomData.individuals)
-            .filter(person => {
-                const fullName = normalizeString(person.name.replace(/\//g, ''));
-                return fullName.includes(searchStr);
-            });
-    
-        if (matchedPersons.length > 0) {
-            matchedPersons.forEach(person => {
-                const option = document.createElement('option');
-                option.value = person.id;
-                option.textContent = person.name.replace(/\//g, '').trim();
-                resultsSelect.appendChild(option);
-            });
-            
-            resultsSelect.style.display = 'block';
-            
-            resultsSelect.style.backgroundColor = '#FF6D00';
-            resultsSelect.style.border = '1px solid #E65100';
-            
-            // Ajout d'une animation de clignotement pour le sélecteur orange
-            resultsSelect.style.animation = 'blink 1s infinite';
-            const blinkStyle = document.createElement('style');
-            blinkStyle.textContent = `
-                @keyframes blink {
-                    0% { opacity: 1; }
-                    50% { opacity: 0.7; }
-                    100% { opacity: 1; }
-                }
-            `;
-            document.head.appendChild(blinkStyle);
-        } else {
-            // alert('Aucune personne trouvée');
-            alert(getTranslation('alertNoPerson'));
-        }
-    }
-
-    searchButton.addEventListener('click', searchRootPerson);
-    searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            searchRootPerson();
-        }
-    });
-
-
-    resultsSelect.addEventListener('change', () => {
-        const selectedPersonId = resultsSelect.value;
-        if (selectedPersonId) {
-            resultsSelect.style.animation = 'none';
-            resultsSelect.style.backgroundColor = 'orange';
-            rootPersonSelect.value = selectedPersonId;
-            
-            // Générer le nuage
-            generateNameCloud();
-            
-            // Rafraîchir la heatmap si elle est visible
-            if (typeof refreshHeatmap === 'function' && 
-                document.getElementById('namecloud-heatmap-wrapper')) {
-                console.log("Rafraîchissement de la heatmap suite à la sélection d'une nouvelle personne racine");
-                setTimeout(refreshHeatmap, 100); // Petit délai pour permettre à generateNameCloud de terminer
-            }
-        }
-    });
-
-    searchWrapper.appendChild(searchInput);
-    searchWrapper.appendChild(searchButton);
-    searchWrapper.appendChild(resultsSelect); // Ajout du résultat dans le searchWrapper pour le positionnement
-
-    container.appendChild(label);
-    container.appendChild(searchWrapper);
-    container.appendChild(rootPersonSelect);
-
-    return {
-        container: container,
-        rootPersonSelect: rootPersonSelect
-    };
-}
-
 function createSettingsButton() {
     const settingsButton = document.createElement('button');
     settingsButton.innerHTML = '⚙️';
@@ -974,7 +708,6 @@ export function closeCloudName() {
 
     const modal = document.querySelector('[class^="nameCloud-modal-container"]');
 
-
     removeAllStatsElements(); 
     if (modal) {document.body.removeChild(modal);}
     resetHamburgerButtonPosition();
@@ -988,7 +721,6 @@ export function closeCloudName() {
     showAndRestoreTreeButtons();
 
 
-
     if (state.isRadarEnabled) {
         enableFortuneMode();
     }
@@ -1000,9 +732,26 @@ export function closeCloudName() {
     }, 300);
 
     state.isWordCloudEnabled = false; // le nuage de mots est désactivé
+
+    //  quand on quitte la page remettre le root selector dans la page initiale...
+    let searchRootOverlay = document.getElementById('resultsTreeOverlay');
+    if (searchRootOverlay) { searchRootOverlay.remove(); }
+    if (nameCloudState.originalNextSiblingResults) {
+        nameCloudState.originalParentResults.insertBefore(nameCloudState.resultsSelectTree, nameCloudState.originalNextSiblingResults);
+    } else {
+        nameCloudState.originalParentResults.appendChild(nameCloudState.resultsSelectTree);
+    }
+
+    if (nameCloudState.originalNextSiblingSearch) {
+        nameCloudState.originalParentSearch.insertBefore(nameCloudState.searchInputTree, nameCloudState.originalNextSiblingSearch);
+    } else {
+        nameCloudState.originalParentSearch.appendChild(nameCloudState.searchInputTree);
+    }
+
+    // Restaurer les styles inline originaux
+    nameCloudState.searchInputTree.style.cssText = nameCloudState.originalInlineStyleSearchCss;
+
 }
-
-
 
 // // Fonction pour fermer depuis l'extérieur
 // export function closeCurrentNameCloud() {
@@ -1011,8 +760,6 @@ export function closeCloudName() {
 //         state.currentNameCloudModal = null;
 //     }
 // }
-
-
 
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
@@ -1079,15 +826,42 @@ export function updateTitleText(element, cfg) {
     element.innerHTML = titleText;
 }
 
-
 export function generateNameCloudExport() {
-    
-   
+    // console.log('\n\n **** debug generateNameCloudNew', nameCloudState.typeSelect.value, nameCloudState.scopeSelect.value )
+        const newConfig = {
+            type: nameCloudState.typeSelect.value,
+            startDate: parseInt(nameCloudState.startDateInput.value),
+            endDate: parseInt(nameCloudState.endDateInput.value),
+            scope: nameCloudState.scopeSelect.value,
+            // rootPersonId: scopeSelect.value !== 'all' ? rootPersonSelect.value : null
+            rootPersonId: nameCloudState.scopeSelect.value !== 'all' ? state.rootPersonId : null
+        };
+
+        // Mettre à jour le titre
+        updateTitleText(nameCloudState.titleElement, newConfig);
+
+        // Nettoyer le conteneur
+        nameCloudState.nameCloudContainer.innerHTML = '';
+
+        // Générer le nuage de mots
+        processNamesCloudWithDate(newConfig, nameCloudState.nameCloudContainer);
+
+        // Tous les types supportés
+        const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
+
+        if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
+            // Préparer les données statistiques si nécessaire pour les types d'âge
+            if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
+                ensureStatsExist(nameCloudState.currentNameData);
+            }
+            // Ajouter le bouton des statistiques détaillées avec le type approprié
+            updateStatsButtons(nameCloudState.container, nameCloudState.currentNameData, newConfig.type, newConfig);
+        }        
 }
 
-
-
 function showNameCloud(nameData, config) {
+    config.scope ='ancestors';
+
     const modal = createModalContainer();
     const container = createMainContainer();
     const closeButton = createCloseButton();
@@ -1106,17 +880,9 @@ function showNameCloud(nameData, config) {
     optionsContainer.style.zIndex = '10';
 
     const typeSelect = createTypeSelect(config.type);
-    // typeSelect.style.zIndex = 99999;
     typeSelect.style.marginTop = '20px';
-    const scopeSelect = createScopeSelect(config.type);
+    const scopeSelect = createScopeSelect(config.scope);
     scopeSelect.style.marginTop = '20px';
-    const rootPersonSelect = createRootPersonSelect();
-
-
-    // Modification ici pour utiliser config.startDate et config.endDate
-    // const { container: startDateContainer, input: startDateInput } = createDateInput('début', config.startDate || 1500);
-    // const { container: endDateContainer, input: endDateInput } = createDateInput('fin', config.endDate || new Date().getFullYear());
-
 
     const { container: startDateContainer, input: startDateInput } = createDateInput(getTranslation('début'), config.startDate || 1500, (value) => {
         // Support de callback en option pour réagir directement aux changements
@@ -1146,22 +912,58 @@ function showNameCloud(nameData, config) {
     showButton.style.justifyContent = 'center';
     showButton.style.alignItems = 'center';
     showButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    // showButton.title = 'Valider';
     showButton.title = getTranslation('buttonValidate');
 
 
-    const { container: rootPersonContainer, rootPersonSelect: finalRootPersonSelect } = 
-    createRootPersonSearchContainer(rootPersonSelect, () => {
-        generateNameCloud();
-    });
+    nameCloudState.searchInputTree = document.getElementById('root-person-search');
+    // Sauvegarder la position d'origine
+    nameCloudState.originalParentSearch = nameCloudState.searchInputTree.parentNode;
+    nameCloudState.originalNextSiblingSearch = nameCloudState.searchInputTree.nextSibling;
+    // Sauvegarde ses dimensions et styles actuels
+    const computed = getComputedStyle(nameCloudState.searchInputTree);
+    nameCloudState.originalStyleSearch = {
+        width: computed.width,
+        height: computed.height,
+        fontSize: computed.fontSize,
+        // si tu veux scale ou autre
+        transform: computed.transform
+    };
 
+    nameCloudState.originalInlineStyleSearchCss = nameCloudState.searchInputTree.style.cssText;
 
-    rootPersonContainer.style.marginLeft = '-7px';
-    rootPersonContainer.style.marginTop = '3px';
+    nameCloudState.resultsSelectTree = document.getElementById('root-person-results');
+    // Sauvegarder la position d'origine
+    nameCloudState.originalParentResults = nameCloudState.resultsSelectTree.parentNode;
+    nameCloudState.originalNextSiblingResults = nameCloudState.resultsSelectTree.nextSibling;
+
+    // Crée un conteneur searchRootOverlay pour le sélecteur resultsSelectTree 
+    let searchRootOverlay = document.getElementById('resultsTreeOverlay');
+    if (!searchRootOverlay) {
+    searchRootOverlay = document.createElement('div');
+    searchRootOverlay.id = 'resultsTreeOverlay';
+    searchRootOverlay.style.position = 'fixed';
+    searchRootOverlay.style.top = '-3px';
+    searchRootOverlay.style.left = '250px';
+    searchRootOverlay.style.zIndex = '1100';
+    searchRootOverlay.style.pointerEvents = 'auto'; // <-- cliquable
+    document.body.appendChild(searchRootOverlay);
+    }
+
+    // Mets le sélecteur dans l'overlay
+    searchRootOverlay.appendChild(nameCloudState.resultsSelectTree);
+    searchRootOverlay.appendChild(nameCloudState.searchInputTree);
+
+    nameCloudState.searchInputTree.style.setProperty('max-height', '20px', 'important');
+    nameCloudState.searchInputTree.style.setProperty('margin-left', '-7px', 'important');  
+    nameCloudState.searchInputTree.style.setProperty('margin-top', '1px', 'important');  
+    nameCloudState.searchInputTree.style.setProperty('min-width', '68px', 'important'); 
+
+    console.log('\n\n\n *******  -debug in showNameCloud', nameCloudState.searchInputTree, nameCloudState.resultsSelectTree, nameCloudState.originalStyleSearch, nameCloudState.originalInlineStyleSearchCss )
 
     function updateRootPersonVisibility() {
         const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(scopeSelect.value);
-        rootPersonContainer.style.display = isRootPersonNeeded ? 'flex' : 'none';
+        searchRootOverlay.style.display = isRootPersonNeeded ? 'block' : 'none';
+
     }
     scopeSelect.addEventListener('change', updateRootPersonVisibility);
     updateRootPersonVisibility();
@@ -1179,7 +981,6 @@ function showNameCloud(nameData, config) {
     titleElement.style.position = 'relative';
     titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     titleElement.style.zIndex = '15'; // Z-index plus élevé pour superposer sur le sélecteur
-    // if ((window.innerWidth > 700) && (window.innerWidth < 1600)) {
     if ((window.innerWidth > 700)) {
             titleElement.style.marginTop = '-30px';
             titleElement.style.marginLeft = '375px';
@@ -1192,14 +993,17 @@ function showNameCloud(nameData, config) {
 
     updateTitleText(titleElement, config);
     
+    //*********************************************************************************************************** */
     function generateNameCloud() {
+        // console.log('\n\n **** debug generateNameCloud', typeSelect.value, nameCloudState.scopeSelect.value )
+        console.log('\n\n **** debug generateNameCloud', typeSelect.value, scopeSelect.value ,' root=' , state.rootPersonId)
+
         const newConfig = {
             type: typeSelect.value,
             startDate: parseInt(startDateInput.value),
             endDate: parseInt(endDateInput.value),
             scope: scopeSelect.value,
-            // rootPersonId: scopeSelect.value !== 'all' ? rootPersonSelect.value : null
-            rootPersonId: scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+            rootPersonId: scopeSelect.value !== 'all' ? state.rootPersonId: null
         };
 
         // Mettre à jour le titre
@@ -1211,7 +1015,6 @@ function showNameCloud(nameData, config) {
         // Générer le nuage de mots
         processNamesCloudWithDate(newConfig, nameCloudContainer);
 
-
         // Tous les types supportés
         const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
 
@@ -1222,13 +1025,10 @@ function showNameCloud(nameData, config) {
             }
             
             // Ajouter le bouton des statistiques détaillées avec le type approprié
-            // addStatsButton(container, nameCloudState.currentNameData, newConfig.type);
             updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type, newConfig);
         }
-
         
     }
-
 
     // Ajouter les écouteurs d'événements
     typeSelect.addEventListener('change', generateNameCloud);
@@ -1236,6 +1036,14 @@ function showNameCloud(nameData, config) {
     startDateInput.addEventListener('change', generateNameCloud);
     endDateInput.addEventListener('change', generateNameCloud);
     showButton.addEventListener('click', generateNameCloud);
+
+    nameCloudState.typeSelect = typeSelect; 
+    nameCloudState.scopeSelect = scopeSelect; 
+    nameCloudState.startDateInput = startDateInput; 
+    nameCloudState.endDateInput = endDateInput;     
+    nameCloudState.titleElement = titleElement; 
+    nameCloudState.nameCloudContainer= nameCloudContainer; 
+    nameCloudState.container = container;
 
 
     // Ajout du bouton de paramètres
@@ -1270,10 +1078,6 @@ function showNameCloud(nameData, config) {
     optionsContainer.appendChild(settingsButton);
 
 
-
-
-
-
     // À ajouter après la création du bouton de paramètres dans showNameCloud
     // Création du bouton de carte
     const mapButton = createMapButton();
@@ -1285,7 +1089,7 @@ function showNameCloud(nameData, config) {
             startDate: parseInt(startDateInput.value),
             endDate: parseInt(endDateInput.value),
             scope: scopeSelect.value,
-            rootPersonId: scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+            rootPersonId: scopeSelect.value !== 'all' ? state.rootPersonId : null
         };
     
         // Vérifier si une heatmap est déjà affichée
@@ -1323,15 +1127,6 @@ function showNameCloud(nameData, config) {
             if (heatmapData && heatmapData.length > 0) {
                 // Créer un titre pour la heatmap basé sur la configuration
                 let heatmapTitle;
-                // if (window.innerWidth < 300) { 
-                //     heatmapTitle = `${currentConfig.scope === 'all' ? 'Tous' : 
-                //         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ascend.' : 'Descend.'} 
-                //         (${currentConfig.startDate}-${currentConfig.endDate})`;
-                // } else {
-                //     heatmapTitle = `Heatmap - ${currentConfig.scope === 'all' ? 'Tous' : 
-                //         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? 'Ancêtres' : 'Descendants'} 
-                //         (${currentConfig.startDate}-${currentConfig.endDate})`;                    
-                // }
                 if (window.innerWidth < 300) { 
                     heatmapTitle = `${currentConfig.scope === 'all' ? getTranslation('heatmapTitleTous') : 
                         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? getTranslation('heatmapTitleAscend') : getTranslation('heatmapTitleDescend')} 
@@ -1345,17 +1140,41 @@ function showNameCloud(nameData, config) {
                 // Utiliser la fonction pour créer la heatmap
                 createImprovedHeatmap(heatmapData, heatmapTitle);
                 
-                // Attacher les écouteurs pour le rafraîchissement
-                // attachFilterListeners();
-                
                 // Ajouter les écouteurs d'événements aux contrôles
                 typeSelect.addEventListener('change', refreshHeatmap);
                 scopeSelect.addEventListener('change', refreshHeatmap);
                 startDateInput.addEventListener('change', refreshHeatmap);
                 endDateInput.addEventListener('change', refreshHeatmap);
-                if (finalRootPersonSelect) {
-                    finalRootPersonSelect.addEventListener('change', refreshHeatmap);
-                }
+
+
+
+
+
+
+
+
+
+
+
+/////////// MODIF à Faire
+                // if (finalRootPersonSelect) {
+                    // finalRootPersonSelect.addEventListener('change', refreshHeatmap);
+                    // state.rootPersonId.addEventListener('change', refreshHeatmap);
+                // }
+
+/////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
                 
                 // Le bouton OK
                 const showButton = document.querySelector('button[title="Valider"]');
@@ -1377,14 +1196,6 @@ function showNameCloud(nameData, config) {
     });
 
 
-
-
-
-
-
-
-
-
     // Positionnement du bouton carte
     mapButton.style.position = 'absolute';
     if (nameCloudState.mobilePhone) 
@@ -1396,16 +1207,6 @@ function showNameCloud(nameData, config) {
     // Ajout du bouton à optionsContainer
     optionsContainer.appendChild(mapButton);
 
-
-
-
-
-
-
-
-
-
-    
 
     const dateContainer = document.createElement('div');
     dateContainer.style.display = 'flex';
@@ -1422,8 +1223,6 @@ function showNameCloud(nameData, config) {
     mainOptionsContainer.appendChild(dateContainer);
     mainOptionsContainer.appendChild(showButton);
 
-
-
     const bottomContainer = document.createElement('div');
     bottomContainer.style.display = 'flex';
     bottomContainer.style.justifyContent = 'flex-start'; // Changé de 'space-between' à 'flex-start'
@@ -1432,7 +1231,6 @@ function showNameCloud(nameData, config) {
     bottomContainer.style.gap = '10px'; 
 
     bottomContainer.appendChild(mainOptionsContainer);
-    bottomContainer.appendChild(rootPersonContainer);
 
     optionsContainer.appendChild(bottomContainer);
     optionsContainer.appendChild(titleElement);
@@ -1447,7 +1245,6 @@ function showNameCloud(nameData, config) {
     state.currentNameCloudModal = modal;
 
 
-
     // Configuration des événements
     setupModalEvents(modal, closeButton, generateNameCloud);
     typeSelect.addEventListener('change', generateNameCloud);
@@ -1458,15 +1255,11 @@ function showNameCloud(nameData, config) {
     // Générer initialement le nuage de mots
     generateNameCloud();
 
-
     // Configurer les écouteurs d'événements pour les changements de taille d'écran
     setupResizeListeners();
 
-
     // Définir le texte du titre
     updateTitleText(titleElement, config);
-
-
 
     return modal;
 }
@@ -1484,7 +1277,6 @@ export const createNameCloudUI = {
         showNameCloud(nameData, config);
     }
 };
-
 
 // Fonction à ajouter dans nameCloudUI.js
 function createMapButton() {

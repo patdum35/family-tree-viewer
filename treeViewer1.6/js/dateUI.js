@@ -662,8 +662,8 @@ export function createMobileDateInput(label, defaultValue, onChange) {
     const dateButton = document.createElement('button');
     dateButton.textContent = defaultValue;
     dateButton.style.width = '36px';
-    dateButton.style.padding = '0px';
-    dateButton.style.fontSize = '12px';
+    dateButton.style.padding = '3px 0px';
+    dateButton.style.fontSize = '13px';
     dateButton.style.border = '1px solid #3f51b5';
     dateButton.style.borderRadius = '3px';
     dateButton.style.backgroundColor = '#e8eaf6';

@@ -15,54 +15,39 @@ export function makeModalInteractive(modal) {
         state.topZindex++;
         modal.style.zIndex = state.topZindex;
         // console.log('bringToFront', modal.id, state.topZindex);
-        // if (modal.id === 'person-details-modal') {
-        //     specialCaseOfPersonDetailsModal();
-        // }
+        if (modal.id === 'search-modal') { 
+            bringToFrontOfHamburgerButton();
+        }
     }
+}
 
-    // function specialCaseOfPersonDetailsModal() {
-    //     // console.log("bringToFront sur :", modal.id, modal._handleContainer);
-    //     // // si la modal a un conteneur de poignées, on le remet devant aussi
-    //     const hc = modal._handleContainer;
+export function bringToFrontOfHamburgerButton() {
+    // verifier si le bouton hamburger se superpose à la modal searchModal
+    // dans ce cas chnager le zIndex
+    const hamburgerButton = document.getElementById('hamburger-menu');
+    const searchModal = document.getElementById('search-modal');
+    const searchContent = searchModal.querySelector('.searchModal-content'); 
 
-    //     if (hc) {
-    //         console.log('\n\n debug1 makeModalInteractive ', modal.id)
-    //         // s'assurer que le container est le dernier enfant du body (au-dessus dans l'ordre DOM)
-    //         document.body.appendChild(hc);
+    if (hamburgerButton) {
+        // Récupérer les rectangles de position
+        const modalRect = searchContent.getBoundingClientRect();
+        const hamburgerRect = hamburgerButton.getBoundingClientRect();
 
-    //         // position fixed évite certains problèmes de stacking context (ajuste si tu veux rester en absolute)
-    //         hc.style.position = 'fixed';
-    //         hc.style.pointerEvents = 'none'; // container ignore les clics, mais les handles auront pointerEvents auto
+        // Vérifier s’il y a chevauchement avec la zone de recherche de texte situé 30px sous le bandeau et 10px à droite
+        const chevauchement =
+            modalRect.left + 10 < hamburgerRect.right &&
+            modalRect.right > hamburgerRect.left &&
+            modalRect.top + 45 < hamburgerRect.bottom &&
+            modalRect.bottom > hamburgerRect.top;
 
-    //         // recalculer sa position pour coller sur la modal
-    //         const rect = modal.getBoundingClientRect();
-    //         hc.style.left = `${Math.round(rect.left)}px`;
-    //         hc.style.top = `${Math.round(rect.top)}px`;
-    //         hc.style.width = `${modal.offsetWidth}px`;
-    //         hc.style.height = `${modal.offsetHeight}px`;
-
-    //         // z-index du container + des handles + des indicateurs
-    //         hc.style.zIndex = state.topZindex + 1;
-
-    //         // handles
-    //         const handles = hc.querySelectorAll('.resize-handle');
-    //         handles.forEach(h => {
-    //         h.style.zIndex = state.topZindex + 2;
-    //         h.style.pointerEvents = 'auto'; // réactiver les clics sur chaque poignée
-    //         });
-
-    //         // indicateurs tactiles éventuels
-    //         const cursors = hc.querySelectorAll('.touch-cursor-indicator');
-    //         cursors.forEach(c => c.style.zIndex = state.topZindex + 3);
-
-    //         // forcer une remise à jour de la position si modal._updateHandleContainer existe
-    //         if (typeof modal._updateHandleContainer === 'function') {
-    //         modal._updateHandleContainer();
-    //         } else {
-    //         // fallback : appliquer rect déjà calculé (déjà fait plus haut)
-    //         }
-    //     }
-    // }
+        if (chevauchement) {
+            const hamburgerZ = parseInt(getComputedStyle(hamburgerButton).zIndex) || 0;
+            searchModal.style.zIndex = hamburgerZ + 1;
+            // console.log('\n\n **** -debug : Chevauchement détecté → z-index modal ajusté à', searchModal.style.zIndex,', hamburger=' , hamburgerRect, ', search=', modalRect);
+        } else {
+            // console.log('\n\n **** -debug :Aucun chevauchement détecté');
+        }
+    }
 }
 
 

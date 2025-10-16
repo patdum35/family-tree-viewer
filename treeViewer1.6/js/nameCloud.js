@@ -60,6 +60,10 @@ export const nameCloudState = {
 
 export function processNamesCloudWithDate(config, containerElement = null) {onclick
 
+    if (!config) {
+        config = nameCloudState.currentConfig;
+    }
+
     closeAllModals();
     fullResetAnimationState();
 
@@ -76,12 +80,8 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     // Pour désactiver le fond d'écran
     enableBackground(false);
 
-
-
     // Appeler la fonction au chargement du module
     loadSettingsFromLocalStorage();
-
-
 
     // Masquer le menu hamburger
     console.log("Masquer le menu hamburger");
@@ -106,6 +106,14 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
         };
         nameCloudState.initialized = true;
     }
+
+
+    // if (config.scope != 'all'  && !config.rootPersonId) {
+    //     config.rootPersonId = state.rootPersonId;
+    //     console.log('\n\n\n -***** - debug  processNamesCloudWithDate: config ', config, state.rootPersonId, '\n\n\n')
+    // }
+
+
 
 
     // Logique principale de traitement des données
@@ -183,6 +191,25 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
         }
     });
     document.dispatchEvent(cloudMapRefreshEvent);
+
+    window.addEventListener('resize', () => {
+        if (state.isWordCloudEnabled) { 
+            console.log('\n\n*** debug resize in processNamesCloudWithDate \n\n')
+            // Dimensions de l'écran
+            nameCloudState.SVG_width = window.innerWidth;
+            nameCloudState.SVG_height = window.innerHeight;
+
+            nameCloudState.mobilePhone = false;
+            if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+            else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+
+            // for mobile phone
+            if (nameCloudState.mobilePhone) 
+                { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
+        
+            createNameCloudUI.renderInContainer(nameData, config, containerElement);
+        }
+    });
 
 }
 
@@ -1191,6 +1218,7 @@ export function collectCenturyData(type) {
     
     // Obtenir les personnes selon le scope actuel
     const currentScope = nameCloudState.currentConfig ? nameCloudState.currentConfig.scope : 'all';
+
     const rootPersonId = nameCloudState.currentConfig ? nameCloudState.currentConfig.rootPersonId : null;
     
     // Utiliser la fonction getPersonsFromTree pour respecter le scope
@@ -1380,3 +1408,6 @@ export function collectCenturyData(type) {
     
     return centuryStats;
 }
+
+
+

@@ -1380,6 +1380,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
 }
 
+
 window.displayGenealogicTree = displayGenealogicTree; // Exposer la fonction pour l'utiliser dans d'autres modules
 
 /**

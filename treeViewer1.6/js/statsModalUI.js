@@ -865,14 +865,12 @@ function setupModalEvents() {
                 // inputSection.appendChild(selectorLabel);
                 // inputSection.appendChild(searchButton);
                 // inputSection.insertBefore(selector, selectorLabel);
-
                 inputSection.appendChild(selector);
                 inputSection.appendChild(selectorLabel);
                 typeSection.style.display = 'none';
             } else {
                 // Hauteur normale (mode portrait) : remettre le sélecteur
-                inputSection.insertBefore(searchTerm, searchButton);
-
+                // inputSection.insertBefore(searchTerm, searchButton);
                 typeSection.appendChild(selector);
                 typeSection.appendChild(selectorLabel);
                 typeSection.style.display = 'flex';
@@ -890,36 +888,36 @@ function setupModalEvents() {
 
 
 
-    // Gestion spéciale pour les champs de dates en mode paysage mobile
-    const inputs = [document.getElementById('statsModal-search-input'), document.getElementById('stats-date-start'), document.getElementById('stats-date-end')];
-    const modal = document.getElementById('stats-modal');
+    // // Gestion spéciale pour les champs de dates en mode paysage mobile
+    // const inputs = [document.getElementById('statsModal-search-input'), document.getElementById('stats-date-start'), document.getElementById('stats-date-end')];
+    // const modal = document.getElementById('stats-modal');
 
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            // Détection mobile paysage
-            if (window.innerHeight <= 600) {
-                modal.style.paddingTop = '5px';
-                modal.style.alignItems = 'flex-start';
+    // inputs.forEach(input => {
+    //     input.addEventListener('focus', function() {
+    //         // Détection mobile paysage
+    //         if (window.innerHeight <= 600) {
+    //             modal.style.paddingTop = '5px';
+    //             modal.style.alignItems = 'flex-start';
                 
-                // Faire défiler vers le haut
-                setTimeout(() => {
-                    this.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }, 300);
-            }
-        });
+    //             // Faire défiler vers le haut
+    //             setTimeout(() => {
+    //                 this.scrollIntoView({ 
+    //                     behavior: 'smooth', 
+    //                     block: 'start' 
+    //                 });
+    //             }, 300);
+    //         }
+    //     });
         
-        input.addEventListener('blur', function() {
-            // Restaurer la position normale après un délai
-            setTimeout(() => {
-                if (window.innerHeight < 500) {
-                    modal.style.paddingTop = '5px';
-                }
-            }, 300);
-        });
-    });
+    //     input.addEventListener('blur', function() {
+    //         // Restaurer la position normale après un délai
+    //         setTimeout(() => {
+    //             if (window.innerHeight < 500) {
+    //                 modal.style.paddingTop = '5px';
+    //             }
+    //         }, 300);
+    //     });
+    // });
 
     
 }

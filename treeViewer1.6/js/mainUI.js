@@ -3,8 +3,10 @@
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { state, displayGenealogicTree, showToast } from './main.js';
 import { nameCloudState } from './nameCloud.js';
+import { generateNameCloudExport } from './nameCloudUI.js';
 import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
+import { refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 
 // Variable pour suivre si les sélecteurs ont été initialisés
 let selectorsInitialized = false;
@@ -528,6 +530,15 @@ export function replaceRootPersonSelector(customOptions = null) {
                     // displayGenealogicTree(value, true);
                     if (state.isRadarEnabled) {
                         displayGenealogicTree(value, false, false,  false, 'WheelAncestors');
+                    } else if (state.isWordCloudEnabled) {
+                        state.rootPersonId = value;
+                        state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
+                        generateNameCloudExport();
+                        // Vérifier si une heatmap est déjà affichée
+                        if (document.getElementById('namecloud-heatmap-wrapper')) {
+                            // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+                            refreshHeatmap();
+                        }
                     } else {
                         displayGenealogicTree(value, true, false);
                     }
