@@ -244,7 +244,7 @@ function openStatsModal() {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
         document.getElementById('statsModal-search-input').value = '';
-        document.getElementById('statsModal-search-input').focus();
+        // document.getElementById('statsModal-search-input').focus();
         const searchRoot = document.getElementById('statsModal-search-root');
         searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
         makeModalInteractive(existingModal);  
@@ -640,9 +640,9 @@ function openStatsModal() {
     makeModalInteractive(modal);        
     
     // Donner le focus au champ de recherche
-    setTimeout(() => {
-        document.getElementById('statsModal-search-input').focus();
-    }, 100);
+    // setTimeout(() => {
+    //     document.getElementById('statsModal-search-input').focus();
+    // }, 100);
 
     updatehelpText();
 }

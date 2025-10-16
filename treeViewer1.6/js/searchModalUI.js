@@ -679,7 +679,7 @@ export function openSearchModal(firstName = null, lastName = null) {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
         document.getElementById('searchModal-search-input').value = '';
-        document.getElementById('searchModal-search-input').focus();
+        // document.getElementById('searchModal-search-input').focus();
         makeModalInteractive(existingModal); 
         const content = existingModal.querySelector('.searchModal-content'); 
         content._isVisible = true;        
@@ -1105,9 +1105,9 @@ export function openSearchModal(firstName = null, lastName = null) {
     resizeModal(content, true)    
     
     // Donner le focus au champ de recherche
-    setTimeout(() => {
-        document.getElementById('searchModal-search-input').focus();
-    }, 100);
+    // setTimeout(() => {
+    //     document.getElementById('searchModal-search-input').focus();
+    // }, 100);
 
 
     if (firstName && lastName && firstName != '' && lastName != '') {

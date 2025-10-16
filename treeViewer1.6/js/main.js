@@ -1895,7 +1895,7 @@ function positionRadarButton() {
 
         statsButton.style.position = 'fixed';
         statsButton.style.left = cloudRect.left + 37 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 12 - offsetY2) + 'px';
+        statsButton.style.top = (cloudRect.bottom + 11 - offsetY2) + 'px';
         statsButton.style.zIndex = '1001';
     }
 
