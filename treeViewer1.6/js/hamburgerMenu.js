@@ -224,9 +224,9 @@ function updateMenuStyles() {
       )) {
         heading.style.display = 'none';
       } else if (height < 400) {
-        heading.style.fontSize = '12px';
+        heading.style.fontSize = '14px';
         heading.style.marginTop = '0';
-        heading.style.marginBottom = '3px';
+        heading.style.marginBottom = '0px';
       } else if (height < 800) {
         heading.style.fontSize = '14px';
         heading.style.marginTop = '0';
@@ -522,9 +522,9 @@ function updateHeightClass() {
   const height = window.innerHeight;
   document.documentElement.classList.remove('small-screen', 'medium-screen');
   
-  if (height < 400) {
+  if (height < 400) { // mode paysage
     document.documentElement.classList.add('small-screen');
-  } else if (height < 800) {
+  } else if (height < 800) { //mode portrait
     document.documentElement.classList.add('medium-screen');
   }
   // Pas de classe pour les grands écrans pour préserver le layout original
@@ -665,7 +665,7 @@ function createSection(title, index = 0) {
     // Option alternative : heading.style.fontSize = '0';
   } else if (height < 400) {
     // Pour les autres titres en petit écran
-    heading.style.fontSize = '12px';
+    heading.style.fontSize = '14px !important';
     heading.style.marginTop = '0';
     heading.style.marginBottom = '3px';
   } else if (height < 800) {
@@ -678,12 +678,6 @@ function createSection(title, index = 0) {
     heading.style.marginBottom = '5px';
   }
   
-
-  // if (title === 'Nuage de mots') { 
-  // heading.style.fontSize = '11px ! important';
-  // }
-
-
   container.appendChild(heading);
   
   const content = document.createElement('div');
@@ -698,7 +692,6 @@ function createSection(title, index = 0) {
   
   container.appendChild(content);
 
-  
   return { container, content };
 }
 
@@ -992,12 +985,6 @@ function createModeSection() {
   sideMenu.appendChild(section.container);
 }
 
-
-
-
-
-
-
 // Créer la section Audio et Animation
 function createAudioSection() {
   const height = window.innerHeight;
@@ -1122,28 +1109,24 @@ function createAudioSection() {
   }
 }
 
-
-
 export function toggleTreeRadarFromHamburger() {
   if (state.isWordCloudEnabled) { closeCloudName(); }
   toggleTreeRadar();
 }
 
+/////////////////////////////////////////////
 // Créer la section Name Cloud
 function createNameCloudSection() {
   const height = window.innerHeight;
   // const section = createSection('Nuage de mots', 0);
   const section = createSection(getMenuTranslation('section_namecloud'), 0);
   
-
   function enableRadarAndDisplay() {
       state.isRadarEnabled = true;
       updateRadarButtonText();
       displayGenealogicTree(null, false, false, false, 'WheelAncestors');
   }
   window.enableRadarAndDisplay = enableRadarAndDisplay;
-
-
 
   const buttons = [
     { 
@@ -1172,12 +1155,10 @@ function createNameCloudSection() {
     }    
   ];
 
+  section.content.style.cssText += 'gap:0 !important; display:flex !important;';
+  section.content.classList.add('compact-menu');
 
-
-section.content.style.cssText += 'gap:0 !important; display:flex !important;';
-section.content.classList.add('compact-menu');
-document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 6px !important}</style>');
-
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 18px !important}</style>');
 
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
@@ -1214,20 +1195,21 @@ document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 6px !i
     } else {
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      span.style.fontSize = '16px';
+      span.style.fontSize = '16px ! important';
       button.style.padding = '0px';
       button.style.margin = '0px';
       button.appendChild(span);
+      button.style.fontSize = '16px ! important';
       section.content.appendChild(button);
     }
 
   });
 
-  
   sideMenu.appendChild(section.container);
 }
 
 
+////////////////////////////////////
 // Créer la section Paramètres
 function createSettingsSection() {
   const height = window.innerHeight;
@@ -2020,7 +2002,7 @@ function injectStyles() {
         }
         
         .small-screen .side-menu {
-        width: 180px;
+        width: 210px;
         padding: 40px 5px 10px;
         }
         
@@ -2037,7 +2019,7 @@ function injectStyles() {
         
         .small-screen .menu-section h3 {
         margin-bottom: 4px;
-        font-size: 12px;
+        font-size: 14px;
         }
         
         .small-screen .menu-section-content {
@@ -2066,7 +2048,7 @@ function injectStyles() {
         }
         
         .medium-screen .side-menu {
-        width: 190px;
+        width: 210px;
         padding: 50px 8px 15px;
         }
         
@@ -2592,19 +2574,19 @@ if (!state.isHamburgerMenuInitialized) {
 
   // Ajouter un écouteur pour les changements de taille de fenêtre
   window.addEventListener('resize', function() {
-  updateHeightClass();
-  // Ajuster les sélecteurs si le menu est ouvert
-  if (sideMenu && sideMenu.classList.contains('open')) {
-      setTimeout(syncCustomSelectors, 300);
-  }
+    updateHeightClass();
+    // Ajuster les sélecteurs si le menu est ouvert
+    if (sideMenu && sideMenu.classList.contains('open')) {
+        setTimeout(syncCustomSelectors, 300);
+    }
   });
 
   document.addEventListener('change', function(event) {
-  // Vérifier si l'événement provient du sélecteur de personne racine
-  if (event.target && event.target.id === 'root-person-results') {
-      // Petit délai pour s'assurer que l'interface s'est mise à jour
-      setTimeout(updateRootPersonNameInMenu, 100);
-  }
+    // Vérifier si l'événement provient du sélecteur de personne racine
+    if (event.target && event.target.id === 'root-person-results') {
+        // Petit délai pour s'assurer que l'interface s'est mise à jour
+        setTimeout(updateRootPersonNameInMenu, 100);
+    }
   });
 }
 }
