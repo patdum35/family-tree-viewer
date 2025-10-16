@@ -58,16 +58,26 @@ export const nameCloudState = {
     animationStyle: "none",
 }
 
-export function processNamesCloudWithDate(config, containerElement = null) {onclick
+export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false) {onclick
 
     if (!config) {
         config = nameCloudState.currentConfig;
     }
 
-    closeAllModals();
+    const isCloseHeatMapWrapper = !isCallFromCloudName;
+    closeAllModals(true, isCloseHeatMapWrapper);
     fullResetAnimationState();
 
+    if(!isCallFromCloudName) {
+        state.previousMode = (state.isRadarEnabled) ? 'radar' : 'tree';
+        // console.log('\n\n debug state.previousMode = (state.isRadarEnabled) ? radar : tree;', ', previousMode=', state.previousMode, ', isRadarEnabled=',state.isRadarEnabled )
+    }
+
+    state.isRadarEnabled = false;
+
+    // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeClean')
     disableFortuneModeClean();
+    // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeWithLever')    
     disableFortuneModeWithLever();
 
 

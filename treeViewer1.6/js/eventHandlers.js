@@ -13,6 +13,8 @@ import { setMaxGenerations, removeSpinningImage } from './treeWheelRenderer.js'
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { enableBackground } from './backgroundManager.js';
 import { calculateFullTreeDimensions } from './exportManager.js';
+import { generateNameCloudExport } from './nameCloudUI.js';
+import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 
 
 /**
@@ -238,11 +240,27 @@ export function selectFoundPerson(personId) {
     // Afficher la personne comme racine
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
     // displayGenealogicTree(personId, true);
+    // if (state.isRadarEnabled) {
+    //     displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
+    // } else {
+    //     displayGenealogicTree(personId, true, false);
+    // }
+
     if (state.isRadarEnabled) {
         displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
+    } else if (state.isWordCloudEnabled) {
+        state.rootPersonId = personId;
+        state.rootPerson = state.gedcomData.individuals[personId];
+        generateNameCloudExport();
+        // Vérifier si une heatmap est déjà affichée
+        if (document.getElementById('namecloud-heatmap-wrapper')) {
+            // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+            refreshHeatmap();
+        }
     } else {
         displayGenealogicTree(personId, true, false);
     }
+
 
     
     // Attendre que l'arbre soit affiché et que l'historique soit mis à jour
@@ -524,7 +542,7 @@ function highlightAndZoomToNode(matchedNode) {
 }
 
 
-export function closeAllModals(isCloseAnimationmap = true) {
+export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper = true) {
     // on récupère toutes les modales ouvertes
     //
     const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-details-modal"]'); 
@@ -568,12 +586,13 @@ export function closeAllModals(isCloseAnimationmap = true) {
     });
 
 
+    if (isCloseHeatMapWrapper) {
+        const heatMapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+        if (heatMapWrapper) {
+            heatMapWrapper.remove();
+            console.log('-debug closeAllModals remove heatMapWrapper', document.getElementById('namecloud-heatmap-wrapper'));
 
-    const heatMapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-    if (heatMapWrapper) {
-        heatMapWrapper.remove();
-        console.log('-debug closeAllModals remove heatMapWrapper', document.getElementById('namecloud-heatmap-wrapper'));
-
+        }
     }
 
     if (isCloseAnimationmap) {

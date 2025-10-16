@@ -249,7 +249,7 @@ function updateMenuStyles() {
   
   // Adapter les boutons et les spans
   document.querySelectorAll('.side-menu button span').forEach(span => {
-    span.style.fontSize = '';
+    span.style.fontSize = '20px';
     
     if (height < 400) {
       span.style.fontSize = '20px';

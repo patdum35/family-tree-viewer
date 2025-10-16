@@ -1,4 +1,4 @@
-import { state, showAndRestoreTreeButtons } from './main.js';
+import { state, showAndRestoreTreeButtons, displayGenealogicTree } from './main.js';
 import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
@@ -720,11 +720,6 @@ export function closeCloudName() {
 
     showAndRestoreTreeButtons();
 
-
-    if (state.isRadarEnabled) {
-        enableFortuneMode();
-    }
-
     fullResetAnimationState();
 
     setTimeout(() => {
@@ -750,6 +745,13 @@ export function closeCloudName() {
 
     // Restaurer les styles inline originaux
     nameCloudState.searchInputTree.style.cssText = nameCloudState.originalInlineStyleSearchCss;
+
+    state.isRadarEnabled = (state.previousMode === 'radar') ? true : false;
+
+    if (state.isRadarEnabled) {
+        enableFortuneMode();
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+    }
 
 }
 
@@ -844,7 +846,8 @@ export function generateNameCloudExport() {
         nameCloudState.nameCloudContainer.innerHTML = '';
 
         // Générer le nuage de mots
-        processNamesCloudWithDate(newConfig, nameCloudState.nameCloudContainer);
+        const isCallFromCloudName = true;
+        processNamesCloudWithDate(newConfig, nameCloudState.nameCloudContainer, isCallFromCloudName);
 
         // Tous les types supportés
         const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
@@ -958,7 +961,7 @@ function showNameCloud(nameData, config) {
     nameCloudState.searchInputTree.style.setProperty('margin-top', '1px', 'important');  
     nameCloudState.searchInputTree.style.setProperty('min-width', '68px', 'important'); 
 
-    console.log('\n\n\n *******  -debug in showNameCloud', nameCloudState.searchInputTree, nameCloudState.resultsSelectTree, nameCloudState.originalStyleSearch, nameCloudState.originalInlineStyleSearchCss )
+    // console.log('\n\n\n *******  -debug in showNameCloud', nameCloudState.searchInputTree, nameCloudState.resultsSelectTree, nameCloudState.originalStyleSearch, nameCloudState.originalInlineStyleSearchCss )
 
     function updateRootPersonVisibility() {
         const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(scopeSelect.value);
@@ -1013,7 +1016,8 @@ function showNameCloud(nameData, config) {
         nameCloudContainer.innerHTML = '';
 
         // Générer le nuage de mots
-        processNamesCloudWithDate(newConfig, nameCloudContainer);
+        const isCallFromCloudName = true;
+        processNamesCloudWithDate(newConfig, nameCloudContainer, isCallFromCloudName);
 
         // Tous les types supportés
         const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];

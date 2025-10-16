@@ -204,7 +204,8 @@ export const state = {
     minModalHeight: 40,
     isFullResetAnimationRequested: false,
     firstName: '',
-    lastName: ''
+    lastName: '',
+    previousMode: 'tree'
     // animationMap: null
 
 };

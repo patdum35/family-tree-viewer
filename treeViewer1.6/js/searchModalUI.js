@@ -1634,7 +1634,7 @@ window.selectPersonFromModal = function(personId) {
     closeSearchModal();
     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
 
-    if (heatmapWrapper) {
+    if (heatmapWrapper && !state.isWordCloudEnabled) {
         heatmapWrapper.remove();
     }
 
@@ -1642,16 +1642,17 @@ window.selectPersonFromModal = function(personId) {
     if (true) { 
     
         // Utiliser la fonction existante selectFoundPerson ou displayGenealogicTree
-        if (typeof selectFoundPerson === 'function') {
-            selectFoundPerson(personId);
-        } else {
-            console.log('\n\n\n\n ###################   CALL displayGenealogicTree from modal ################# ');
-            if (state.isRadarEnabled) {
-                displayGenealogicTree(personId, false, false, false, 'WheelAncestors');
-            } else {
-                displayGenealogicTree(personId, true, false);
-            }
-        }
+        // if (typeof selectFoundPerson === 'function') {
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree from modal ################# ');
+        selectFoundPerson(personId);
+        // } else {
+        //     console.log('\n\n\n\n ###################   CALL displayGenealogicTree from modal ################# ');
+        //     if (state.isRadarEnabled) {
+        //         displayGenealogicTree(personId, false, false, false, 'WheelAncestors');
+        //     } else {
+        //         displayGenealogicTree(personId, true, false);
+        //     }
+        // }
     }
 
     window.isFromStatsModal = false;
