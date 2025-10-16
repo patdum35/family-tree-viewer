@@ -568,7 +568,7 @@ function createMenuElements() {
     sideMenu = document.createElement('div');
     sideMenu.id = 'side-menu';
     sideMenu.className = 'side-menu';
-    sideMenu.style.display = 'block'; // Modifié pour être visible initialement
+    // sideMenu.style.display = 'block'; // Modifié pour être visible initialement
     
     // Ajouter le titre du menu
     const menuTitle = document.createElement('div');
@@ -589,7 +589,6 @@ function createMenuElements() {
     createDisplaySection();  //0
     createSettingsSection(); //1
     createSearchSection(); //2
-    
     // Ajouter les éléments au DOM
     document.body.appendChild(hamburgerMenu);
     document.body.appendChild(menuOverlay);
@@ -710,6 +709,10 @@ function createDisplaySection() {
   const height = window.innerHeight;
   // const section = createSection('Affichage', 3);  // Index 3
   const section = createSection(getMenuTranslation('section_display'), 3);
+
+
+  section.content.classList.add('compact-menu');
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
   
   // const buttons = [
   //   { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
@@ -1165,11 +1168,8 @@ function createNameCloudSection() {
     }    
   ];
 
-  // section.content.style.cssText += 'gap:0 !important; display:flex !important;';
-  section.content.style.cssText += 'gap:0 18px!important; display:flex !important;';
   section.content.classList.add('compact-menu');
-
-  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 18px !important}</style>');
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 20px !important}</style>');
 
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
@@ -1181,7 +1181,7 @@ function createNameCloudSection() {
     // Si c'est le bouton STATS, réduire le texte
     if (buttonData.id === 'menu-statsBtn') {
         button.textContent = buttonData.text; // on met directement le texte dans le bouton
-        button.style.fontSize = (window.innerWidth < 800 || window.innerHeight < 400) ?  '10px' : '12px';
+        button.style.fontSize = '10px'; //(window.innerWidth < 800 || window.innerHeight < 400) ?  '10px' : '12px';
         button.style.backgroundColor = '#438aee';
         button.style.color = '#fff';
         button.style.border = '2px solid #438aee';
@@ -1189,8 +1189,8 @@ function createNameCloudSection() {
         button.style.padding = '0px 2px';
         button.style.cursor = 'pointer';
         button.style.transition = 'background 0.2s, color 0.2s, border-color 0.2s';
-        button.style.height = (window.innerWidth < 800 || window.innerHeight < 400) ? '21px' : '25px';
-        button.style.marginTop = (window.innerWidth < 800 || window.innerHeight < 400) ? '5px' : '8px' ;
+        button.style.height = '21px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '21px' : '25px';
+        button.style.marginTop = '5px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '5px' : '8px' ;
 
         button.addEventListener('mouseenter', () => {
             button.style.backgroundColor = '#2762a6';
@@ -2128,13 +2128,17 @@ function injectStyles() {
         top: 0;
         left: -250px;
         width: 210px;
-        height: 100%;
+        height: 100vh;
         background-color: white;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         z-index: 2900;
         transition: left 0.3s ease;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 60px 10px 20px;
+        display: flex;              /* IMPORTANT */
+        flex-direction: column;     /* header + body */
+        box-sizing: border-box;
         }
     
         .side-menu.open {
@@ -2185,13 +2189,14 @@ function injectStyles() {
         border: none;
         background-color: transparent;
         border-radius: 4px;
-        font-size: 28px;
+        /* font-size: 28px; */
         }
     
         .side-menu button:hover {
         background-color: rgba(0,0,0,0.05);
         }
-    
+
+
         .side-menu button span {
         font-size: 20px;
         display: block;

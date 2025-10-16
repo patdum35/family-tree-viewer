@@ -545,7 +545,7 @@ function highlightAndZoomToNode(matchedNode) {
 export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper = true) {
     // on récupère toutes les modales ouvertes
     //
-    const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-details-modal"]'); 
+    const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-fullDetails-modal"]'); 
     // const modals = document.querySelectorAll('div[id*="stats-modal"], div[id*="search-modal"], div[id*="show-person-list-modal"], div[id*="frequency-stat-modal"], div[id*="graph-stats-modal"], div[id*="century-stats-modal"], div[id*="person-details-modal"]'); 
 
    //[class*="searchModal-content"]
