@@ -231,6 +231,10 @@ function updateMenuStyles() {
         heading.style.fontSize = '14px';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '5px';
+      } else  {
+        heading.style.fontSize = '14px';
+        heading.style.marginTop = '0';
+        heading.style.marginBottom = '5px';
       }
     }
     
@@ -255,13 +259,13 @@ function updateMenuStyles() {
       span.style.fontSize = '20px';
     } else if (height < 800) {
       span.style.fontSize = '20px';
-    }
+    } 
   });
   
   // Adapter les labels
   document.querySelectorAll('.menu-section-content label').forEach(label => {
-    label.style.fontSize = '';
-    label.style.marginBottom = '';
+    label.style.fontSize = '12px';
+    label.style.marginBottom = '2px';
     
     if (height < 400) {
       label.style.fontSize = '11px';
@@ -508,6 +512,7 @@ function updateSearchSectionStyles() {
       searchInput.style.padding = '3px';
     } else {
       searchInput.style.fontSize = '13px';
+      searchInput.style.padding = '3px';
     }
   }
 }
@@ -667,6 +672,10 @@ function createSection(title, index = 0) {
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
     heading.style.marginBottom = '5px';
+  } else {
+    heading.style.fontSize = '14px';
+    heading.style.marginTop = '0';
+    heading.style.marginBottom = '5px';
   }
   
 
@@ -729,6 +738,10 @@ function createDisplaySection() {
       span.style.fontSize = '14px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';
+    } else {
+      span.style.fontSize = '14px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';     
     }
     // Pour les grands écrans, on conserve le style original
     
@@ -830,6 +843,7 @@ function createSearchSection() {
     searchInput.style.padding = '3px';
   } else {
     searchInput.style.fontSize = '13px'; // Valeur originale
+    searchInput.style.padding = '3px';
   }
   
   searchDiv.appendChild(searchInput);
@@ -860,7 +874,11 @@ function createModeSection() {
   } else if (height < 800) {
     modeLabel.style.fontSize = '12px';
     modeLabel.style.marginBottom = '2px';
+  } else {
+    modeLabel.style.fontSize = '12px';
+    modeLabel.style.marginBottom = '2px';
   }
+
   // Pour les grands écrans, on conserve le style original
   
   modeDiv.appendChild(modeLabel);
@@ -897,6 +915,9 @@ function createModeSection() {
     genLabel.style.fontSize = '11px';
     genLabel.style.marginBottom = '1px';
   } else if (height < 800) {
+    genLabel.style.fontSize = '12px';
+    genLabel.style.marginBottom = '2px';
+  } else {
     genLabel.style.fontSize = '12px';
     genLabel.style.marginBottom = '2px';
   }
@@ -938,6 +959,9 @@ function createModeSection() {
     prenomsLabel.style.fontSize = '11px';
     prenomsLabel.style.marginBottom = '1px';
   } else if (height < 800) {
+    prenomsLabel.style.fontSize = '12px';
+    prenomsLabel.style.marginBottom = '2px';
+  } else {
     prenomsLabel.style.fontSize = '12px';
     prenomsLabel.style.marginBottom = '2px';
   }
@@ -1241,6 +1265,9 @@ function createSettingsSection() {
     } else if (height < 800) {
       span.style.fontSize = '20px';
       button.style.padding = '2px';
+    } else {
+      span.style.fontSize = '20px';
+      button.style.padding = '2px';
     }
     // Pour les grands écrans, on conserve le style original
     
@@ -1406,6 +1433,7 @@ function createDemoSelector() {
         } else {  
           // Valeurs originales pour les grands écrans
           optionElement.style.padding = '10px 8px';
+          optionElement.style.fontSize = '13px';
         }
       },
       onChange: (value) => {
@@ -1444,6 +1472,9 @@ function createDemoSelector() {
             displayElement.style.fontSize = '12px';
             displayElement.style.padding = '2px 3px';
           } else if (window.innerHeight < 800) {
+            displayElement.style.fontSize = '12px';
+            displayElement.style.padding = '2px 3px';
+          } else {
             displayElement.style.fontSize = '12px';
             displayElement.style.padding = '2px 3px';
           }
@@ -1602,6 +1633,9 @@ function createPrenomsSelector() {
             displayElement.style.fontSize = '10px';
             displayElement.style.padding = '1px 2px';
           } else if (window.innerHeight < 800) {
+            displayElement.style.fontSize = '11px';
+            displayElement.style.padding = '2px 3px';
+          } else {
             displayElement.style.fontSize = '11px';
             displayElement.style.padding = '2px 3px';
           }
