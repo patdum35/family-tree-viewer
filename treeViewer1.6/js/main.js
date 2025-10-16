@@ -1652,8 +1652,9 @@ export function isIOSDevice() {
 
 
 export function detectDeviceType() {
-  const deviceInfo = {
+  state.deviceInfo = {
     isMobile: false,
+    isIOS: false,
     hasTouchScreen: false,
     inputType: "inconnu",
     viewportWidth: window.innerWidth,
@@ -1663,27 +1664,28 @@ export function detectDeviceType() {
   // Détection par user-agent
 //   deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+  state.deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
   
   // Détection de l'écran tactile
-  deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
+  state.deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
                               (navigator.maxTouchPoints > 0) || 
                               (navigator.msMaxTouchPoints > 0);
   
-  state.isMobile = deviceInfo.isMobile;
+  state.isMobile = state.deviceInfo.isMobile;
   debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
-  state.isIOS = isIOSDevice();
+  state.deviceInfo.isIOS = isIOSDevice();
+  state.isIOS = state.deviceInfo.isIOS;
 
   // Détection du type d'entrée principal
   if (window.matchMedia) {
     if (window.matchMedia('(pointer: fine)').matches) {
-      deviceInfo.inputType = "souris";
+      state.deviceInfo.inputType = "souris";
     } else if (window.matchMedia('(pointer: coarse)').matches) {
-      deviceInfo.inputType = "tactile";
+      state.deviceInfo.inputType = "tactile";
     }
   }
   
-  
+ console.log(`ℹ️  isMobile : ${state.deviceInfo.isMobile}, ℹ️  isIOS : ${state.deviceInfo.isIOS} ,  ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen},  ℹ️  isIOS: ${state.deviceInfo.isIOS}, ℹ️  inputType: ${state.deviceInfo.inputType}, W : ${state.deviceInfo.viewportWidth} x H : ${state.deviceInfo.viewportHeight}`)
   
   // // Utilisation
   // if (hasTouchScreen()) {
@@ -1699,7 +1701,7 @@ export function detectDeviceType() {
 
 
   
-  return deviceInfo;
+  return state.deviceInfo;
 }
 
 

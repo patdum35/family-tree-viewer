@@ -244,7 +244,13 @@ function openStatsModal() {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
         document.getElementById('statsModal-search-input').value = '';
-        // document.getElementById('statsModal-search-input').focus();
+
+
+        if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
+            // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début
+            document.getElementById('statsModal-search-input').focus();
+        }
+
         const searchRoot = document.getElementById('statsModal-search-root');
         searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
         makeModalInteractive(existingModal);  
@@ -638,11 +644,15 @@ function openStatsModal() {
     setupModalEvents();
 
     makeModalInteractive(modal);        
+   
     
-    // Donner le focus au champ de recherche
-    // setTimeout(() => {
-    //     document.getElementById('statsModal-search-input').focus();
-    // }, 100);
+    if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
+        // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début
+        //Donner le focus au champ de recherche
+        setTimeout(() => {
+            document.getElementById('statsModal-search-input').focus();
+        }, 100);
+    }
 
     updatehelpText();
 }

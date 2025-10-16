@@ -16,9 +16,12 @@ const searchModalTranslations = {
         nameOption: "par Nom/Prénom",
         placeOption: "par Lieux", 
         occupationOption: "par Profession",
-        nameOptionShort: "par Nom/Pré.",
+        // nameOptionShort: "par Nom/Pré.",
+        nameOptionShort: "par Nom/Prénom",
         placeOptionShort: "par Lieux", 
-        occupationOptionShort: "par Profess.",
+        // occupationOptionShort: "par Profess.",
+        occupationOptionShort: "par Profession",
+
         searchPlaceholder: "🔍Tapez votre recherche...",
         yearStartPlaceholder: "Année début",
         yearEndPlaceholder: "Année fin",
@@ -50,9 +53,9 @@ const searchModalTranslations = {
         nameOption: "per Name/First name",
         placeOption: "per Places",
         occupationOption: "per Profession",
-        nameOptionShort: "per Name/First",
+        nameOptionShort: "per Name/First name",
         placeOptionShort: "per Places",
-        occupationOptionShort: "per Profess.",
+        occupationOptionShort: "per Profession",
         searchPlaceholder: "🔍Type your search...",
         yearStartPlaceholder: "Start year",
         yearEndPlaceholder: "End year", 
@@ -84,9 +87,9 @@ const searchModalTranslations = {
         nameOption: "por Nombre/Apellido",
         placeOption: "por Lugares",
         occupationOption: "por Profesión",
-        nameOptionShort: "por Nombre/Ape.",
+        nameOptionShort: "por Nombre/Apellido",
         placeOptionShort: "por Lugares",
-        occupationOptionShort: "por Profes.",
+        occupationOptionShort: "por Profesión",
         searchPlaceholder: "🔍Escriba su búsqueda...",
         yearStartPlaceholder: "Año inicio",
         yearEndPlaceholder: "Año fin",
@@ -679,7 +682,10 @@ export function openSearchModal(firstName = null, lastName = null) {
         existingModal.style.display = 'flex';
         // Vider les champs à la réouverture
         document.getElementById('searchModal-search-input').value = '';
-        // document.getElementById('searchModal-search-input').focus();
+        if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
+            // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début
+            document.getElementById('searchModal-search-input').focus();
+        }
         makeModalInteractive(existingModal); 
         const content = existingModal.querySelector('.searchModal-content'); 
         content._isVisible = true;        
@@ -1103,11 +1109,14 @@ export function openSearchModal(firstName = null, lastName = null) {
     window.addEventListener('resize', () => resizeModal(content, true));
 
     resizeModal(content, true)    
-    
-    // Donner le focus au champ de recherche
-    // setTimeout(() => {
-    //     document.getElementById('searchModal-search-input').focus();
-    // }, 100);
+
+    if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
+        // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début
+        //Donner le focus au champ de recherche
+        setTimeout(() => {
+            document.getElementById('searchModal-search-input').focus();
+        }, 100);
+    }
 
 
     if (firstName && lastName && firstName != '' && lastName != '') {
