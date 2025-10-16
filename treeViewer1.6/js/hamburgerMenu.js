@@ -611,6 +611,11 @@ function createMenuElements() {
     
     // Observer les changements de boutons
     setupButtonSync();
+
+
+    updateMenuStyles();
+
+
     
     state.menuHamburgerInitialized = true;
     console.log("Menu hamburger initialisé avec succès");
@@ -727,17 +732,17 @@ function createDisplaySection() {
     const span = document.createElement('span');
     span.textContent = buttonData.text;
     
-    // Adapter uniquement pour les petits écrans
+    // // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      span.style.fontSize = '14px';
+      // span.style.fontSize = '14px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';
     } else if (height < 800) {
-      span.style.fontSize = '14px';
+      // span.style.fontSize = '14px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';
     } else {
-      span.style.fontSize = '14px';
+      // span.style.fontSize = '14px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';     
     }
@@ -1160,7 +1165,8 @@ function createNameCloudSection() {
     }    
   ];
 
-  section.content.style.cssText += 'gap:0 !important; display:flex !important;';
+  // section.content.style.cssText += 'gap:0 !important; display:flex !important;';
+  section.content.style.cssText += 'gap:0 18px!important; display:flex !important;';
   section.content.classList.add('compact-menu');
 
   document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 18px !important}</style>');
