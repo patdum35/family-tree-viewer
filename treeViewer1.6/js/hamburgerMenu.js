@@ -224,18 +224,21 @@ function updateMenuStyles() {
       )) {
         heading.style.display = 'none';
       } else if (height < 400) {
-        heading.style.fontSize = '14px';
+        heading.style.fontSize = '143x';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '0px';
       } else if (height < 800) {
-        heading.style.fontSize = '14px';
+        heading.style.fontSize = '13px';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '5px';
       } else  {
-        heading.style.fontSize = '14px';
+        heading.style.fontSize = '13px';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '5px';
       }
+      heading.style.marginLeft = '0px';
+      heading.style.paddingLeft = '0px';
+      
     }
     
     // Adapter le contenu des sections
@@ -653,8 +656,11 @@ function createSection(title, index = 0) {
     container.style.margin = '2px 0';
     container.style.padding = '0px';
   } else if (height < 800) {
-    container.style.margin = '3px 0';
+    container.style.margin = '2px 0';
     container.style.padding = '0px';
+  } else {
+    container.style.margin = '2px 0';
+    container.style.padding = '0px';    
   }
   
   const heading = document.createElement('h3');
@@ -680,19 +686,24 @@ function createSection(title, index = 0) {
   } else if (height < 800) {
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
-    heading.style.marginBottom = '5px';
+    heading.style.marginBottom = '3px';
   } else {
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
-    heading.style.marginBottom = '5px';
+    heading.style.marginBottom = '3px';
   }
+
   
+  heading.style.paddingLeft = '0px';
+  heading.style.marginLeft = '0px';
+
   container.appendChild(heading);
   
   const content = document.createElement('div');
   content.className = 'menu-section-content';
   
   // Ajuster l'espacement du contenu uniquement pour les petits écrans
+  content.style.gap = '0px';
   if (height < 400) {
     content.style.gap = '0px';
   } else if (height < 800) {
@@ -1169,7 +1180,15 @@ function createNameCloudSection() {
   ];
 
   section.content.classList.add('compact-menu');
-  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 20px !important}</style>');
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{ display:flex !important; gap:0 25px !important; margin-right: 0px, padding-right: 0px}</style>');
+
+  // section.content.style.cssText += 'gap:0 !important; display:flex !important;';
+  // section.content.style.cssText += 'gap:0 30px !important; display:flex !important;';
+  // section.content.classList.add('compact-menu');
+
+  // document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 30px !important}</style>');
+
+
 
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
@@ -1187,10 +1206,12 @@ function createNameCloudSection() {
         button.style.border = '2px solid #438aee';
         button.style.borderRadius = '6px';
         button.style.padding = '0px 2px';
+        button.style.paddingRight = '0px';
         button.style.cursor = 'pointer';
         button.style.transition = 'background 0.2s, color 0.2s, border-color 0.2s';
         button.style.height = '21px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '21px' : '25px';
         button.style.marginTop = '5px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '5px' : '8px' ;
+        button.style.marginRight = '0px';
 
         button.addEventListener('mouseenter', () => {
             button.style.backgroundColor = '#2762a6';
@@ -2184,12 +2205,11 @@ function injectStyles() {
         /* Adaptations pour les contrôles - Style de base inchangé */
         .side-menu button {
         min-width: auto;
-        padding: 2px;
+        padding: 0px;
         margin: 0;
         border: none;
         background-color: transparent;
         border-radius: 4px;
-        /* font-size: 28px; */
         }
     
         .side-menu button:hover {
@@ -2199,7 +2219,7 @@ function injectStyles() {
 
         .side-menu button span {
         font-size: 20px;
-        display: block;
+        /*display: block;*/
         }
     
         .side-menu select, .side-menu input {
