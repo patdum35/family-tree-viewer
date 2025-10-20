@@ -72,7 +72,7 @@ export function createCustomSelector(config) {
     // Conteneur principal
     const selectContainer = document.createElement('div');
     selectContainer.style.position = 'relative';
-    selectContainer.style.width = dimensions.width;
+    selectContainer.style.width = dimensions.width; // + ' !important';
     selectContainer.style.height = dimensions.height;
     selectContainer.style.zIndex = '99900'; // Ajout d'un z-index élevé
     selectContainer.className = 'custom-select-container'; // Ajout d'une classe

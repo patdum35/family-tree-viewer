@@ -6,7 +6,7 @@ import { closeCloudName } from './nameCloudUI.js';
 let hamburgerMenu, sideMenu, menuOverlay;
 
 // Fonction de traduction pour le menu hamburger
-function getMenuTranslation(key) {
+export function getMenuTranslation(key) {
   const translations = {
     'fr': {
       'menuTitle': 'Menu de l\'arbre',
@@ -15,17 +15,19 @@ function getMenuTranslation(key) {
       'generations': 'nb géné',
       'firstNames': 'prénoms',
       'searchPlaceholder': '🔍nom',
-      'rootPersonLabel': 'Sélect. personne racine',
+      'rootPersonLabel': 'Sélectionner la racine',
       'rootSearch': '🔍 personne racine',
       'soundToggle': 'Activer/désactiver le son',
       'animationPause': 'Pause animation',
       'animationPlay': 'lecture animation',
       'settings': 'Paramètres avancés',
+      'section_buttonOnDisplay': 'Boutons sur l\'écran',
       'section_display': 'Affichage',
       'section_audio': 'Animation et audio',
       'section_root': 'Racine',
       'section_modes': 'Modes',
       'section_namecloud': 'nuage / radar / map / stats',
+      'section_namecloud2': 'nuage / arbre / map / stats',
       'section_radar': 'radar',
       'section_settings': 'Fonds d\'écran',
       'section_search': 'Recherche dans l\'arbre',
@@ -40,8 +42,16 @@ function getMenuTranslation(key) {
       'fistNameUpdated': 'Nombre de prénoms mis à jour',
       'selectDemo': 'Sélectionner une démo',
       'selectDemoToDisplay': 'Sélectionner une démo à afficher',
-      'nbFirstNameToDisplay': 'Nombre de prénoms à afficher'
-
+      'nbFirstNameToDisplay': 'Nombre de prénoms à afficher',
+      'yes': 'oui',
+      'no': 'non',
+      'title_nameCloud': 'Nuage de noms',
+      'title_radar': 'Graphique radar',
+      'title_heatmap': 'Carte de chaleur',
+      'title_stats': 'Statistiques',
+      'buttonOnDisplay': 'Afficher les boutons sur l\'écran',
+      'noButtonOnDisplay': 'Ne pas afficher les boutons sur l\'écran',
+      'tutoDocumention': 'Tutoriel / Documentation'
 
     },
     'en': {
@@ -57,11 +67,13 @@ function getMenuTranslation(key) {
       'animationPause': 'Pause animation',
       'animationPlay': 'Play animation',
       'settings': 'Advanced settings',
+      'section_buttonOnDisplay': 'Buttons on screen',
       'section_display': 'Display',
       'section_audio': 'Animation and audio',
       'section_root': 'Root',
       'section_modes': 'Modes',
-      'section_namecloud': 'Cloud / radar / tree',
+      'section_namecloud': 'cloud / radar / map / stats',
+      'section_namecloud2': 'cloud / tree / map / stats',
       'section_radar': 'radar chart',
       'section_settings': 'Backgrounds',
       'section_search': 'Tree search',
@@ -76,7 +88,17 @@ function getMenuTranslation(key) {
       'fistNameUpdated': 'First names updated',
       'selectDemo': 'Select demo',
       'selectDemoToDisplay': 'Select demo to display',
-      'nbFirstNameToDisplay': 'Number of first names to display'
+      'nbFirstNameToDisplay': 'Number of first names to display',
+      'yes': 'yes',
+      'no': 'no',
+      'title_nameCloud': 'Name cloud',
+      'title_radar': 'Radar chart',
+      'title_heatmap': 'Heat map',
+      'title_stats': 'Stats',
+      'buttonOnDisplay': 'Show buttons on screen',
+      'noButtonOnDisplay': 'Do not show buttons on screen',
+      'tutoDocumention': 'Tutorial / Documentation'     
+
     },
     'es': {
       'menuTitle': 'Menú del árbol',
@@ -85,17 +107,19 @@ function getMenuTranslation(key) {
       'generations': 'núm gen',
       'firstNames': 'nombres',
       'searchPlaceholder': '🔍nombre',
-      'rootPersonLabel': 'Selec. persona raíz',
+      'rootPersonLabel': 'Seleccionar raíz',
       'rootSearch': '🔍 buscar persona raíz',
       'soundToggle': 'Activar/desactivar sonido',
       'animationPause': 'Pausar animación',
       'animationPlay': 'Reproducir animación',
       'settings': 'Configuración avanzada',
+      'section_buttonOnDisplay': 'Botones en pantalla',
       'section_display': 'Visualización',
       'section_audio': 'Animación y audio',
       'section_root': 'Raíz',
       'section_modes': 'Modos',
-      'section_namecloud': 'Nube / radar / árbol',
+      'section_namecloud': 'nube / radar / mapa / stats',
+      'section_namecloud2': 'nube / árbol / mapa / stats',
       'section_radar': 'gráfico de radar',
       'section_settings': 'Fondos de pantalla',
       'section_search': 'Búsqueda en el árbol',
@@ -110,7 +134,16 @@ function getMenuTranslation(key) {
       'fistNameUpdated': 'Nombres actualizados',
       'selectDemo': 'Seleccionar demo',
       'selectDemoToDisplay': 'Seleccionar demo para mostrar',
-      'nbFirstNameToDisplay': 'Número de nombres para mostrar'
+      'nbFirstNameToDisplay': 'Número de nombres para mostrar',
+      'yes': 'sí',
+      'no': 'no',
+      'title_nameCloud': 'Nube de nombres',
+      'title_radar': 'Gráfico de radar',
+      'title_heatmap': 'Mapa de calor',
+      'title_stats': 'Estadísticas',
+      'buttonOnDisplay': 'Mostrar botones en pantalla',
+      'noButtonOnDisplay': 'Desactivar botones en pantalla',
+      'tutoDocumention': 'Tutorial / Documentación'
     },
     'hu': {
       'menuTitle': 'Fa menü',
@@ -119,17 +152,19 @@ function getMenuTranslation(key) {
       'generations': 'genSzám',
       'firstNames': 'keresz.',
       'searchPlaceholder': '🔍név',
-      'rootPersonLabel': 'Gyökér személy kivála.', //sztása',
+      'rootPersonLabel': 'Gyökér kiválasztása', 
       'rootSearch': '🔍 gyökérszemély keresése',
       'soundToggle': 'Hang be/ki',
       'animationPause': 'Animáció szüneteltetése',
       'animationPlay': 'Animáció lejátszása',
       'settings': 'Speciális beállítások',
+      'section_buttonOnDisplay': 'Gombok a képernyőn',
       'section_display': 'Megjelenítés',
       'section_audio': 'Animáció és hang',
       'section_root': 'Gyökér',
       'section_modes': 'Módok',
-      'section_namecloud': 'Szófelhő / radar / fa',
+      'section_namecloud': 'Szófelhő / radar / térkép /stats',
+      'section_namecloud2': 'Szófelhő / fa / térkép / stats',
       'section_radar': 'radardiagram',
       'section_settings': 'Hátterek',
       'section_search': 'Fa keresés',
@@ -144,7 +179,16 @@ function getMenuTranslation(key) {
       'fistNameUpdated': 'Keresztnevek frissítve',
       'selectDemo': 'Demó kiválasztása',
       'selectDemoToDisplay': 'Demó kiválasztása megjelenítéshez',
-      'nbFirstNameToDisplay': 'Megjelenítendő keresztnevek száma'
+      'nbFirstNameToDisplay': 'Megjelenítendő keresztnevek száma',
+      'yes': 'igen',
+      'no': 'nem',
+      'title_nameCloud': 'Névfelhő',
+      'title_radar': 'Radar diagram',
+      'title_heatmap': 'Hőtérkép',
+      'title_stats': 'Statisztika',
+      'buttonOnDisplay': 'Gombok megjelenítése a képernyőn',
+      'noButtonOnDisplay': 'Gombok elrejtése a képernyőn',
+      'tutoDocumention': 'Bemutató / Dokumentáció'
     }
   };
 
@@ -192,17 +236,21 @@ function updateMenuStyles() {
   // Adapter les sections
   document.querySelectorAll('.menu-section').forEach((section, index) => {
     // Réinitialiser d'abord les styles
-    section.style.margin = '';
-    section.style.padding = '';
+    // section.style.margin = '';
+    // section.style.padding = '';
     
-    // Appliquer les styles appropriés selon la taille d'écran
-    if (height < 400) {
-      section.style.margin = '2px 0';
-      section.style.padding = '3px';
-    } else if (height < 800) {
-      section.style.margin = '3px 0';
-      section.style.padding = '5px';
-    }
+    // // Appliquer les styles appropriés selon la taille d'écran
+    // if (height < 400) {
+    //   section.style.margin = '2px 0';
+    //   section.style.padding = '3px';
+    // } else if (height < 800) {
+    //   section.style.margin = '3px 0';
+    //   section.style.padding = '5px';
+    // }
+
+    section.style.margin = '2px 0';
+    section.style.padding = '3px';
+
     
     // Adapter les titres des sections
     const heading = section.querySelector('h3');
@@ -224,7 +272,7 @@ function updateMenuStyles() {
       )) {
         heading.style.display = 'none';
       } else if (height < 400) {
-        heading.style.fontSize = '143x';
+        heading.style.fontSize = '13x';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '0px';
       } else if (height < 800) {
@@ -244,13 +292,15 @@ function updateMenuStyles() {
     // Adapter le contenu des sections
     const content = section.querySelector('.menu-section-content');
     if (content) {
-      content.style.gap = '';
+      // content.style.gap = '';
       
-      if (height < 400) {
-        content.style.gap = '3px';
-      } else if (height < 800) {
-        content.style.gap = '5px';
-      }
+      // if (height < 400) {
+      //   content.style.gap = '3px';
+      // } else if (height < 800) {
+      //   content.style.gap = '5px';
+      // }
+
+      content.style.gap = '3px';
     }
   });
   
@@ -402,16 +452,20 @@ function updateAudioSectionStyles() {
   const container = document.getElementById('audio-controls-container');
   
   if (container) {
-    container.style.gap = '';
-    container.style.marginTop = '';
+    // container.style.gap = '';
+    // container.style.marginTop = '';
     
-    if (height < 400) {
-      container.style.gap = '2px';
-      container.style.marginTop = '2px';
-    } else if (height < 800) {
-      container.style.gap = '3px';
-      container.style.marginTop = '3px';
-    }
+    // if (height < 400) {
+    //   container.style.gap = '2px';
+    //   container.style.marginTop = '2px';
+    // } else if (height < 800) {
+    //   container.style.gap = '3px';
+    //   container.style.marginTop = '3px';
+    // }
+    container.style.gap = '2px';
+    container.style.marginTop = '2px';
+
+
   }
 }
 
@@ -585,6 +639,7 @@ function createMenuElements() {
     sideMenu.appendChild(menuTitle);
     
     // Créer les sections du menu
+    createButtonsOnDisplaySection();
     createAudioSection(); // 0
     createRootSection();  //1
     createModeSection();  //3
@@ -680,7 +735,7 @@ function createSection(title, index = 0) {
     // Option alternative : heading.style.fontSize = '0';
   } else if (height < 400) {
     // Pour les autres titres en petit écran
-    heading.style.fontSize = '14px !important';
+    heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
     heading.style.marginBottom = '3px';
   } else if (height < 800) {
@@ -716,57 +771,262 @@ function createSection(title, index = 0) {
 }
 
 // Créer la section Navigation
-function createDisplaySection() {
+function createButtonsOnDisplaySection() {
   const height = window.innerHeight;
   // const section = createSection('Affichage', 3);  // Index 3
-  const section = createSection(getMenuTranslation('section_display'), 3);
+  const section = createSection(getMenuTranslation('section_buttonOnDisplay'), 3);
 
 
   section.content.classList.add('compact-menu');
   document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
   
-  // const buttons = [
-  //   { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
-  //   { onclick: 'zoomOut()', title: 'Zoom arrière', text: '➖' },
-  //   { onclick: 'resetZoom()', title: 'Réinitialiser la vue', text: '🏠' },
-  //   { onclick: 'toggleFullScreen()', title: 'Plein écran', text: '⛶' }
-  // ];
   const buttons = [
-    { onclick: 'zoomIn()', title: getMenuTranslation('zoomIn'), text: '➕' },
-    { onclick: 'zoomOut()', title: getMenuTranslation('zoomOut'), text: '➖' },
-    { onclick: 'resetZoom()', title: getMenuTranslation('resetView'), text: '🏠' },
-    { onclick: 'toggleFullScreen()', title: getMenuTranslation('fullscreen'), text: '⛶' }
+    { onclick: () => {buttonsOnDisplay(true); toggleMenu(false);}, title: getMenuTranslation('buttonOnDisplay'), text: '👆' },
+    { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('noButtonOnDisplay'), text: '🚫' },
+    { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
   ];
   
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
-    button.setAttribute('onclick', buttonData.onclick);
+    // button.setAttribute('onclick', buttonData.onclick);
+    button.addEventListener('click', buttonData.onclick);   
+    button.title = buttonData.title;
+    
+    const span = document.createElement('span');
+    span.textContent = buttonData.text;
+
+    span.style.fontSize = '25px';
+
+    // // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      // span.style.fontSize = '14px';
+      button.style.padding = '0px';
+      button.style.marginRight = '1px';
+    } else if (height < 800) {
+      // span.style.fontSize = '14px';
+      button.style.padding = '0px';
+      button.style.marginRight = '1px';
+    } else {
+      // span.style.fontSize = '14px';
+      button.style.padding = '0px';
+      button.style.marginRight = '1px';     
+    }
+    // Pour les grands écrans, on conserve le style original
+    
+    button.appendChild(span);
+    // Créer un conteneur pour le label + bouton
+    const container = document.createElement('span');
+    if (buttonData.text === '👆') { container.textContent = getMenuTranslation('yes'); }
+    else if (buttonData.text === '🚫'){ container.textContent = getMenuTranslation('no');}
+    else { 
+      button.style.marginLeft = '-8px';
+      button.style.marginRight = '0px'; 
+      container.textContent = 'doc';
+      container.style.backgroundColor = 'lightGreen';
+      // container.style.marginTop= '-15px';
+      container.style.paddingLeft= '4px'; 
+      container.style.maxheight = '20px';
+      container.style.borderRadius = '6px';  
+      
+   
+
+      span.style.display = 'inline-block';
+      // Applique l’animation target 
+      span.style.animation = 'lightbulb-glow 3s ease-in-out infinite';
+      // span.style.transition = 'transform 0.2se';      
+
+      // Animation subtile au survol
+      button.addEventListener('mouseover', () => {
+          button.style.animation = 'sound-animate  3s ease-in-out infinite';
+      });
+      
+      button.addEventListener('mouseout', () => {
+          button.style.animation = 'none';
+      });
+
+
+
+      // Création de la balise <style> pour l'animation CSS
+      const style = document.createElement('style');
+      style.textContent += `
+        @keyframes lightbulb-glow {
+          0%, 100% {
+            text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
+            filter: brightness(1);
+          }
+          50% {
+            text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
+            filter: brightness(1.6);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+
+        // #helpBtn {
+        //   background: transparent;
+        //   border: none;
+        //   cursor: pointer;
+        //   font-size: 20px;
+        //   animation: lightbulb-glow 2s ease-in-out infinite;
+        //   transition: transform 0.2s;
+        // }
+        // #helpBtn:hover {
+        //   transform: scale(1.1);
+        // }
+
+
+
+
+
+
+    }
+
+    container.style.fontSize = '11px';
+    container.appendChild(button);
+    section.content.appendChild(container);
+    // section.content.appendChild(button);
+  });
+  
+  sideMenu.appendChild(section.container);
+}
+
+// Créer la section Audio et Animation
+function createAudioSection() {
+  const height = window.innerHeight;
+  // const section = createSection('Animation et audio', 0);  // Index 4
+  const section = createSection(getMenuTranslation('section_audio'), 0);
+  
+  // Créer un conteneur flex unique pour tous les éléments
+  const audioControlsContainer = document.createElement('div');
+  audioControlsContainer.id = 'audio-controls-container'; // Ajout d'un ID pour le retrouver facilement
+  audioControlsContainer.style.display = 'flex';
+  audioControlsContainer.style.flexDirection = 'row';
+  audioControlsContainer.style.alignItems = 'center';
+  audioControlsContainer.style.justifyContent = 'space-between';
+  audioControlsContainer.style.width = '100%';
+  
+  // Adapter uniquement pour les petits écrans
+  if (height < 400) {
+    audioControlsContainer.style.gap = '2px';
+    audioControlsContainer.style.marginTop = '2px';
+  } else if (height < 800) {
+    audioControlsContainer.style.gap = '3px';
+    audioControlsContainer.style.marginTop = '3px';
+  } else {
+    audioControlsContainer.style.gap = '5px'; // Valeur originale
+    audioControlsContainer.style.marginTop = '5px'; // Valeur originale
+  }
+  
+  // Créer un placeholder pour le sélecteur de démo
+  const demoPlaceholder = document.createElement('div');
+  demoPlaceholder.id = 'menu-demo-selector-placeholder';
+  demoPlaceholder.style.flex = '0 0 auto';
+  
+  // Adapter uniquement pour les petits écrans
+  if (height < 400) {
+    demoPlaceholder.style.marginRight = '2px';
+  } else if (height < 800) {
+    demoPlaceholder.style.marginRight = '3px';
+  } else {
+    demoPlaceholder.style.marginRight = '5px'; // Valeur originale
+  }
+  
+  audioControlsContainer.appendChild(demoPlaceholder);
+  
+  // Définir les boutons
+  const buttons = [
+    { 
+      id: 'menu-speechToggleBtn',
+      onclick: toggleSpeech2, 
+      title: getMenuTranslation('soundToggle'), //'Activer/désactiver le son', 
+      text: '🗣️', //'🔇' 
+      style: 'filter: brightness(2) contrast(0.7) saturate(2);'
+    },
+    { 
+      id: 'menu-animationPauseBtn',
+      onclick:  () => {
+        if (state.isWordCloudEnabled) { 
+          state.isRadarEnabled = true;
+          toggleTreeRadarFromHamburger();
+        }
+        toggleAnimationPause(); toggleMenu(false);
+      }, 
+      title: getMenuTranslation('animationPause'), //'Pause animation', 
+      text: '⏸️' 
+    },
+    { 
+      id: 'menu-animationPlayBtn',
+      onclick:  () => {
+        if (state.isWordCloudEnabled) { 
+          state.isRadarEnabled = true;
+          toggleTreeRadarFromHamburger();
+        }
+        toggleAnimationPause(); toggleMenu(false);
+      },  
+      title: getMenuTranslation('animationPlay'), //'lecture animation', 
+      text: '▶️' 
+    }
+  ];
+  
+  // Créer les boutons et les ajouter au conteneur
+  buttons.forEach(buttonData => {
+    const button = document.createElement('button');
+    // button.setAttribute('onclick', buttonData.onclick);
+    button.addEventListener('click', buttonData.onclick);   
+    if (buttonData.id) button.id = buttonData.id;
     button.title = buttonData.title;
     
     const span = document.createElement('span');
     span.textContent = buttonData.text;
     
-    // // Adapter uniquement pour les petits écrans
+
+    // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      // span.style.fontSize = '14px';
-      button.style.padding = '0px';
-      button.style.marginRight = '2px';
+      span.style.fontSize = '25px';
     } else if (height < 800) {
-      // span.style.fontSize = '14px';
-      button.style.padding = '0px';
-      button.style.marginRight = '2px';
+      span.style.fontSize = '25px';
     } else {
-      // span.style.fontSize = '14px';
-      button.style.padding = '0px';
-      button.style.marginRight = '2px';     
+      span.style.fontSize = '25px'; // Valeur originale
     }
-    // Pour les grands écrans, on conserve le style original
+
+    if (buttonData.style && buttonData.text === '🗣️') {
+      span.style.cssText = buttonData.style; // Appliquer le style au span
+    }
     
     button.appendChild(span);
-    section.content.appendChild(button);
+    
+    // Styles pour les boutons sans bordure
+    button.style.border = 'none';
+    button.style.backgroundColor = 'transparent';
+    
+    // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      button.style.padding = '2px';
+    } else if (height < 800) {
+      button.style.padding = '3px';
+    } else {
+      button.style.padding = '4px'; // Valeur originale
+    }
+    
+    button.style.margin = '0';
+    button.style.borderRadius = '4px';
+    button.style.flex = '0 0 auto';
+    
+    audioControlsContainer.appendChild(button);
   });
   
+  // Ajouter le conteneur à la section
+  section.content.appendChild(audioControlsContainer);
   sideMenu.appendChild(section.container);
+  
+  // Initialiser le sélecteur de démo - MAIS NE LE RÉCRÉONS PAS si déjà présent
+  if (!document.getElementById('menu-demo-selector')) {
+    // Attendre que le DOM soit complètement construit
+    setTimeout(() => {
+      createDemoSelector();
+    }, 100);
+  }
 }
 
 // Créer la section Root avec des placeholders pour les sélecteurs
@@ -793,6 +1053,7 @@ function createRootSection() {
   rootSearchPlaceholder.id = 'menu-root-person-search-placeholder';
   rootSearchPlaceholder.style.width = '100%';
   rootSearchPlaceholder.style.backgroundColor = '#F6CC7F';
+  rootSearchPlaceholder.title = getMenuTranslation('rootPersonLabel'); //'Champ de recherche de la personne racine';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
@@ -827,45 +1088,6 @@ function createRootSection() {
   rootResultsDiv.appendChild(rootResultsPlaceholder);
   section.content.appendChild(rootResultsDiv);
       
-  sideMenu.appendChild(section.container);
-}
-
-// Créer la section Recherche a
-function createSearchSection() {
-  const height = window.innerHeight;
-  // const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
-  const section = createSection(getMenuTranslation('section_search'), 2);
-  
-  section.content.style.flexDirection = 'column';
-    
-  // Champ de recherche dans l'arbre
-  const searchDiv = document.createElement('div');
-  searchDiv.id = 'menu-search-container';
-  
-  const searchInput = document.createElement('input');
-  searchInput.type = 'text';
-  searchInput.id = 'menu-search';
-  // searchInput.placeholder = '🔍nom';
-  searchInput.placeholder = getMenuTranslation('searchPlaceholder');
-  searchInput.setAttribute('oninput', 'searchTree(this.value)');
-  searchInput.style.width = '60%';
-  searchInput.style.color = '#000';
-  
-  // Adapter uniquement pour les petits écrans
-  if (height < 400) {
-    searchInput.style.fontSize = '11px';
-    searchInput.style.padding = '2px';
-  } else if (height < 800) {
-    searchInput.style.fontSize = '12px';
-    searchInput.style.padding = '3px';
-  } else {
-    searchInput.style.fontSize = '13px'; // Valeur originale
-    searchInput.style.padding = '3px';
-  }
-  
-  searchDiv.appendChild(searchInput);
-  section.content.appendChild(searchDiv);
-  
   sideMenu.appendChild(section.container);
 }
 
@@ -1009,142 +1231,12 @@ function createModeSection() {
   sideMenu.appendChild(section.container);
 }
 
-// Créer la section Audio et Animation
-function createAudioSection() {
-  const height = window.innerHeight;
-  // const section = createSection('Animation et audio', 0);  // Index 4
-  const section = createSection(getMenuTranslation('section_audio'), 0);
-  
-  // Créer un conteneur flex unique pour tous les éléments
-  const audioControlsContainer = document.createElement('div');
-  audioControlsContainer.id = 'audio-controls-container'; // Ajout d'un ID pour le retrouver facilement
-  audioControlsContainer.style.display = 'flex';
-  audioControlsContainer.style.flexDirection = 'row';
-  audioControlsContainer.style.alignItems = 'center';
-  audioControlsContainer.style.justifyContent = 'space-between';
-  audioControlsContainer.style.width = '100%';
-  
-  // Adapter uniquement pour les petits écrans
-  if (height < 400) {
-    audioControlsContainer.style.gap = '2px';
-    audioControlsContainer.style.marginTop = '2px';
-  } else if (height < 800) {
-    audioControlsContainer.style.gap = '3px';
-    audioControlsContainer.style.marginTop = '3px';
-  } else {
-    audioControlsContainer.style.gap = '5px'; // Valeur originale
-    audioControlsContainer.style.marginTop = '5px'; // Valeur originale
-  }
-  
-  // Créer un placeholder pour le sélecteur de démo
-  const demoPlaceholder = document.createElement('div');
-  demoPlaceholder.id = 'menu-demo-selector-placeholder';
-  demoPlaceholder.style.flex = '0 0 auto';
-  
-  // Adapter uniquement pour les petits écrans
-  if (height < 400) {
-    demoPlaceholder.style.marginRight = '2px';
-  } else if (height < 800) {
-    demoPlaceholder.style.marginRight = '3px';
-  } else {
-    demoPlaceholder.style.marginRight = '5px'; // Valeur originale
-  }
-  
-  audioControlsContainer.appendChild(demoPlaceholder);
-  
-  // Définir les boutons
-  const buttons = [
-    { 
-      id: 'menu-speechToggleBtn',
-      onclick: 'toggleSpeech2()', 
-      title: getMenuTranslation('soundToggle'), //'Activer/désactiver le son', 
-      text: '🗣️', //'🔇' 
-      style: 'filter: brightness(2) contrast(0.7) saturate(2);'
-    },
-    { 
-      id: 'menu-animationPauseBtn',
-      onclick: 'toggleAnimationPause()', 
-      title: getMenuTranslation('animationPause'), //'Pause animation', 
-      text: '⏸️' 
-    },
-    { 
-      id: 'menu-animationPlayBtn',
-      onclick: 'toggleAnimationPause()',  
-      title: getMenuTranslation('animationPlay'), //'lecture animation', 
-      text: '▶️' 
-    }
-  ];
-  
-  // Créer les boutons et les ajouter au conteneur
-  buttons.forEach(buttonData => {
-    const button = document.createElement('button');
-    button.setAttribute('onclick', buttonData.onclick);
-    if (buttonData.id) button.id = buttonData.id;
-    button.title = buttonData.title;
-    
-    const span = document.createElement('span');
-    span.textContent = buttonData.text;
-    
-    // Adapter uniquement pour les petits écrans
-    if (height < 400) {
-      span.style.fontSize = '22px';
-    } else if (height < 800) {
-      span.style.fontSize = '22px';
-    } else {
-      span.style.fontSize = '22px'; // Valeur originale
-    }
-
-    if (buttonData.style && buttonData.text === '🗣️') {
-      span.style.cssText = buttonData.style; // Appliquer le style au span
-    }
-    
-    button.appendChild(span);
-    
-    // Styles pour les boutons sans bordure
-    button.style.border = 'none';
-    button.style.backgroundColor = 'transparent';
-    
-    // Adapter uniquement pour les petits écrans
-    if (height < 400) {
-      button.style.padding = '2px';
-    } else if (height < 800) {
-      button.style.padding = '3px';
-    } else {
-      button.style.padding = '4px'; // Valeur originale
-    }
-    
-    button.style.margin = '0';
-    button.style.borderRadius = '4px';
-    button.style.flex = '0 0 auto';
-    
-    audioControlsContainer.appendChild(button);
-  });
-  
-  // Ajouter le conteneur à la section
-  section.content.appendChild(audioControlsContainer);
-  sideMenu.appendChild(section.container);
-  
-  // Initialiser le sélecteur de démo - MAIS NE LE RÉCRÉONS PAS si déjà présent
-  if (!document.getElementById('menu-demo-selector')) {
-    // Attendre que le DOM soit complètement construit
-    setTimeout(() => {
-      createDemoSelector();
-    }, 100);
-  }
-}
-
-export function toggleTreeRadarFromHamburger() {
-  if (state.isWordCloudEnabled) { closeCloudName(); }
-  toggleTreeRadar();
-}
-
-/////////////////////////////////////////////
 // Créer la section Name Cloud
 function createNameCloudSection() {
   const height = window.innerHeight;
   // const section = createSection('Nuage de mots', 0);
   const section = createSection(getMenuTranslation('section_namecloud'), 0);
-  
+   
   function enableRadarAndDisplay() {
       state.isRadarEnabled = true;
       updateRadarButtonText();
@@ -1152,29 +1244,32 @@ function createNameCloudSection() {
   }
   window.enableRadarAndDisplay = enableRadarAndDisplay;
 
+
+
   const buttons = [
     { 
       id: 'menu-nameCloudBtn',
-      onclick: 'processNamesCloudWithDate({ type: \"prenoms\", startDate: 1500, endDate: new Date().getFullYear(), scope: \"all\" })',
-      title: getMenuTranslation('section_namecloud'), //'Nuage de noms', 
+      onclick: () => {processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "all" }); toggleMenu(false);},
+      title: getMenuTranslation('title_nameCloud'), //'Nuage de noms', 
       text: '💖' //🔠💗' 
     },
     { 
       id: 'menu-nameTreeRadarBtn',
-      onclick: 'toggleTreeRadarFromHamburger()',
-      title: getMenuTranslation('section_radar'), //'Nuage de noms', 
+      onclick:  () => { toggleTreeRadarFromHamburger(); toggleMenu(false); },
+      title: getMenuTranslation('title_radar'), //'Nuage de noms', 
       text: '🎯' 
     },
     { 
       id: 'menu-heatMapBtn',
-      onclick: 'displayHeatMap()',
-      title: getMenuTranslation('section_radar'), //'heatMap', 
-      text: '🌍' 
+      onclick: () => {displayHeatMap(); toggleMenu(false);},
+      title: getMenuTranslation('title_heatmap'), //'heatMap', 
+      text: '🌍',
+
     },
     { 
       id: 'menu-statsBtn',
-      onclick: 'statsModal()',
-      title: getMenuTranslation('section_radar'), //'stats', 
+      onclick:  () => {statsModal(); toggleMenu(false);},
+      title: getMenuTranslation('title_stats'), //'stats', 
       text: 'STATS' 
     }    
   ];
@@ -1189,18 +1284,18 @@ function createNameCloudSection() {
   // document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 30px !important}</style>');
 
 
-
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
-    button.setAttribute('onclick', buttonData.onclick);
+    // button.setAttribute('onclick', buttonData.onclick);
+    button.addEventListener('click', buttonData.onclick);   
     if (buttonData.id) button.id = buttonData.id;
     button.title = buttonData.title;
-    
+ 
 
     // Si c'est le bouton STATS, réduire le texte
     if (buttonData.id === 'menu-statsBtn') {
         button.textContent = buttonData.text; // on met directement le texte dans le bouton
-        button.style.fontSize = '10px'; //(window.innerWidth < 800 || window.innerHeight < 400) ?  '10px' : '12px';
+        button.style.fontSize = '11px'; //(window.innerWidth < 800 || window.innerHeight < 400) ?  '10px' : '12px';
         button.style.backgroundColor = '#438aee';
         button.style.color = '#fff';
         button.style.border = '2px solid #438aee';
@@ -1209,7 +1304,7 @@ function createNameCloudSection() {
         button.style.paddingRight = '0px';
         button.style.cursor = 'pointer';
         button.style.transition = 'background 0.2s, color 0.2s, border-color 0.2s';
-        button.style.height = '21px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '21px' : '25px';
+        button.style.height = '23px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '21px' : '25px';
         button.style.marginTop = '5px'; //(window.innerWidth < 800 || window.innerHeight < 400) ? '5px' : '8px' ;
         button.style.marginRight = '0px';
 
@@ -1227,7 +1322,7 @@ function createNameCloudSection() {
     } else {
       const span = document.createElement('span');
       span.textContent = buttonData.text;
-      // span.style.fontSize = '16px ! important';
+      span.style.fontSize = '23px';
       button.style.padding = '0px';
       button.style.margin = '0px';
       button.appendChild(span);
@@ -1237,11 +1332,67 @@ function createNameCloudSection() {
 
   });
 
+  window.nameCloudSection = section;
+  // console.log('\n\n *** debug window.nameCloudSection in createNameCloudSection', window.nameCloudSection, ', section=', section, section.container, window.nameCloudSection.container.querySelector('h3').textContent , '\n\n');
+
   sideMenu.appendChild(section.container);
 }
 
+// Créer la section Navigation
+function createDisplaySection() {
+  const height = window.innerHeight;
+  // const section = createSection('Affichage', 3);  // Index 3
+  const section = createSection(getMenuTranslation('section_display'), 3);
 
-////////////////////////////////////
+
+  section.content.classList.add('compact-menu');
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
+  
+  // const buttons = [
+  //   { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
+  //   { onclick: 'zoomOut()', title: 'Zoom arrière', text: '➖' },
+  //   { onclick: 'resetZoom()', title: 'Réinitialiser la vue', text: '🏠' },
+  //   { onclick: 'toggleFullScreen()', title: 'Plein écran', text: '⛶' }
+  // ];
+  const buttons = [
+    { onclick: () => {zoomIn();}, title: getMenuTranslation('zoomIn'), text: '➕' },
+    { onclick: () => {zoomOut();}, title: getMenuTranslation('zoomOut'), text: '➖' },
+    { onclick: () => {resetZoom(); toggleMenu(false);}, title: getMenuTranslation('resetView'), text: '🏠' },
+    { onclick: () => {toggleFullScreen();}, title: getMenuTranslation('fullscreen'), text: '⛶' }
+  ];
+  
+  buttons.forEach(buttonData => {
+    const button = document.createElement('button');
+    // button.setAttribute('onclick', buttonData.onclick);
+    button.addEventListener('click', buttonData.onclick);  
+    button.title = buttonData.title;
+    
+    const span = document.createElement('span');
+    span.textContent = buttonData.text;
+    
+    // // Adapter uniquement pour les petits écrans
+    if (height < 400) {
+      span.style.fontSize = '25px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';
+    } else if (height < 800) {
+      span.style.fontSize = '25px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';
+    } else {
+      span.style.fontSize = '25px';
+      button.style.padding = '0px';
+      button.style.marginRight = '2px';     
+    }
+    // Pour les grands écrans, on conserve le style original
+    
+    button.appendChild(span);
+    section.content.appendChild(button);
+  });
+  
+  sideMenu.appendChild(section.container);
+}
+
 // Créer la section Paramètres
 function createSettingsSection() {
   const height = window.innerHeight;
@@ -1251,12 +1402,12 @@ function createSettingsSection() {
   const buttons = [
     { 
       id: 'menu-settingsBtn',
-      onclick: 'openSettingsModal()', 
+      onclick: () => {openSettingsModal(); toggleMenu(false);}, 
       title: getMenuTranslation('settings'), //'Paramètres avancés', 
       text: '⚙️' 
     },
     { 
-      onclick: 'returnToLogin()', 
+      onclick: () => {returnToLogin()}, 
       title: getMenuTranslation('backToLogin'), //'Retour à l\'écran de connexion', 
       text: '🔙' 
     }
@@ -1264,7 +1415,8 @@ function createSettingsSection() {
   
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
-    button.setAttribute('onclick', buttonData.onclick);
+    // button.setAttribute('onclick', buttonData.onclick);
+    button.addEventListener('click', buttonData.onclick);   
     if (buttonData.id) button.id = buttonData.id;
     button.title = buttonData.title;
     
@@ -1273,16 +1425,17 @@ function createSettingsSection() {
     
     // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      span.style.fontSize = '20px';
+      span.style.fontSize = '25px';
       button.style.padding = '1px';
       button.style.marginRight = '10px';
     } else if (height < 800) {
-      span.style.fontSize = '20px';
+      span.style.fontSize = '25px';
       button.style.padding = '2px';
     } else {
-      span.style.fontSize = '20px';
+      span.style.fontSize = '25px';
       button.style.padding = '2px';
     }
+    if (buttonData.text === '⚙️') { span.style.fontSize = '28px'; }
     // Pour les grands écrans, on conserve le style original
     
     button.appendChild(span);
@@ -1291,9 +1444,8 @@ function createSettingsSection() {
       if (buttonData.text === '⚙️' && height < 400) {
           // Créer un conteneur pour le label + bouton
           const container = document.createElement('span');
-          // container.textContent = 'Fond d\'écran';
           container.textContent = getMenuTranslation('backgroundLabel');
-          container.style.fontSize = '13px';
+          container.style.fontSize = '28px';
           container.appendChild(button);
           section.content.appendChild(container);
       } else {
@@ -1302,6 +1454,50 @@ function createSettingsSection() {
   });
   
   sideMenu.appendChild(section.container);
+}
+
+// Créer la section Recherche a
+function createSearchSection() {
+  const height = window.innerHeight;
+  // const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
+  const section = createSection(getMenuTranslation('section_search'), 2);
+  
+  section.content.style.flexDirection = 'column';
+    
+  // Champ de recherche dans l'arbre
+  const searchDiv = document.createElement('div');
+  searchDiv.id = 'menu-search-container';
+  
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.id = 'menu-search';
+  // searchInput.placeholder = '🔍nom';
+  searchInput.placeholder = getMenuTranslation('searchPlaceholder');
+  searchInput.setAttribute('oninput', 'searchTree(this.value)');
+  searchInput.style.width = '60%';
+  searchInput.style.color = '#000';
+  
+  // Adapter uniquement pour les petits écrans
+  if (height < 400) {
+    searchInput.style.fontSize = '11px';
+    searchInput.style.padding = '2px';
+  } else if (height < 800) {
+    searchInput.style.fontSize = '12px';
+    searchInput.style.padding = '3px';
+  } else {
+    searchInput.style.fontSize = '13px'; // Valeur originale
+    searchInput.style.padding = '3px';
+  }
+  
+  searchDiv.appendChild(searchInput);
+  section.content.appendChild(searchDiv);
+  
+  sideMenu.appendChild(section.container);
+}
+
+export function toggleTreeRadarFromHamburger() {
+  if (state.isWordCloudEnabled) { closeCloudName(); }
+  else { toggleTreeRadar(); }
 }
 
 // Fonction pour créer un sélecteur de démo
@@ -1726,9 +1922,11 @@ function syncCustomSelectors() {
             }
         });
     }
+   
     
     // Fonction générique pour gérer l'ouverture d'un sélecteur
-    function handleSelectorClick(originalSelector, e) {
+    function handleSelectorClick(originalSelector, e, width = null) {
+
         e.stopPropagation();
         
         // Fermer le menu hamburger
@@ -1740,10 +1938,15 @@ function syncCustomSelectors() {
         // Délai pour s'assurer que le menu est fermé
         setTimeout(() => {
             const displayElement = originalSelector.querySelector('div.custom-select-display');
+
             if (displayElement) {
-                displayElement.click();
+              // console.log("\n\n  debug  0 Clicked on menu-generations: displayElement.offsetWidth= ", displayElement.offsetWidth);
+              if (width) { displayElement.style.minWidth = width + 'px'; }
+              displayElement.click();
             } else {
-                originalSelector.click();
+              // console.log("\n\n  debug  0 Clicked on menu-generations: originalSelector.offsetWidth= ", originalSelector.offsetWidth);
+              if (width) { originalSelector.style.minWidth = width + 'px'; }
+              originalSelector.click();
             }
         }, 300);
     }
@@ -1756,30 +1959,61 @@ function syncCustomSelectors() {
                 // Synchroniser les sélecteurs de génération
                 const genPlaceholder = document.getElementById('menu-generations-placeholder');
                 const originalGen = document.getElementById('generations');
+                originalGen.style.visibility = 'visible';
+
+                // console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+
                 if (genPlaceholder && originalGen) {
-                    const clone = originalGen.cloneNode(true);
-                    clone.id = 'menu-generations';
-                    
-                    genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
-                    
-                    clone.addEventListener('click', (e) => handleSelectorClick(originalGen, e));
+                  const clone = originalGen.cloneNode(true);
+                  clone.id = 'menu-generations';
+                  
+                  genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
+                  // console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                  
+                  clone.addEventListener('click', (e) => {
+                    const currentGen = document.getElementById('generations');
+                    if (!currentGen) return;
+                    // Rendre visible avant le handler
+                    currentGen.style.visibility = 'visible';
+
+                    // Rendre visible avant le handler
+                    currentGen.style.display = 'inline-flex';
+                    // Appeler le handler
+                    handleSelectorClick(currentGen, e, currentGen.offsetWidth);
+                  });
                 }
+                if (originalGen && !state.isButtonOnDisplay) {originalGen.style.visibility = 'hidden';}
                 
                 // Synchroniser les sélecteurs de mode d'arbre
                 const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
                 const originalMode = document.getElementById('treeMode');
+                originalMode.style.visibility = 'visible';
+                                
                 if (modePlaceholder && originalMode) {
-                    const clone = originalMode.cloneNode(true);
-                    clone.id = 'menu-treeMode';
-                    
-                    modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
-                    
-                    clone.addEventListener('click', (e) => handleSelectorClick(originalMode, e));
+                  const clone = originalMode.cloneNode(true);
+                  clone.id = 'menu-treeMode';
+                  
+                  modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
+                  
+                  clone.addEventListener('click', (e) => {
+                    const currentTreeMode = document.getElementById('treeMode');
+                    if (!currentTreeMode) return;
+                    console.log("\n\n  debug  Clicked on menu-generations: currentTreeMode.offsetWidth= ", currentTreeMode.offsetWidth);
+                    // Rendre visible avant le handler
+                    currentTreeMode.style.visibility = 'visible';
+
+                    // Rendre visible avant le handler
+                    currentTreeMode.style.display = 'inline-flex';
+                    // Appeler le handler
+                    handleSelectorClick(currentTreeMode, e, currentTreeMode.offsetWidth);
+                  });
                 }
+                if (originalMode && !state.isButtonOnDisplay) {originalMode.style.visibility = 'hidden';}
     
                 // Synchronisation du sélecteur de personne racine
                 const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
                 const originalRootResults = document.getElementById('root-person-results');
+
     
                 if (rootResultsPlaceholder && originalRootResults) {
                     // Conteneur principal
@@ -1796,7 +2030,10 @@ function syncCustomSelectors() {
                     } else {
                         rootPersonContainer.style.gap = '10px'; // Valeur originale
                     }
-    
+                    // rootPersonContainer.style.width = '200px'; // Valeur originale
+                    // rootPersonContainer.style.maxWidth = '200px'; // Valeur originale  
+                    
+                    
                     // Label à gauche
                     const rootPersonLabel = document.createElement('label');
                     // rootPersonLabel.textContent = 'Sélect. personne racine';
@@ -1809,14 +2046,16 @@ function syncCustomSelectors() {
                     // Adapter uniquement pour les petits écrans
                     if (height < 400) {
                         rootPersonLabel.style.fontSize = '10px';
-                        rootPersonLabel.style.width = '45px';
+                        rootPersonLabel.style.width = '60px';
                     } else if (height < 800) {
                         rootPersonLabel.style.fontSize = '12px';
-                        rootPersonLabel.style.width = '50px';
+                        rootPersonLabel.style.width = '60px';
                     } else {
                         rootPersonLabel.style.fontSize = '14px'; // Valeur originale
                         rootPersonLabel.style.width = '60px'; // Valeur originale
                     }
+                    rootPersonLabel.style.marginRight = '10px';
+
     
                     // Bouton/div style sélecteur personnalisé
                     const rootPersonLink = document.createElement('div');
@@ -1840,17 +2079,20 @@ function syncCustomSelectors() {
                         rootPersonLink.style.fontSize = '11px';
                         rootPersonLink.style.padding = '1px 3px';
                         rootPersonLink.style.height = '20px';
-                        rootPersonLink.style.minWidth = '70px';
-                    } else if (height < 800) {
+                        rootPersonLink.style.minWidth = '80px';
+                        rootPersonLink.style.maxWidth = '80px';
+                      } else if (height < 800) {
                         rootPersonLink.style.fontSize = '12px';
                         rootPersonLink.style.padding = '1px 4px';
                         rootPersonLink.style.height = '22px';
-                        rootPersonLink.style.minWidth = '75px';
+                        rootPersonLink.style.minWidth = '80px';
+                        rootPersonLink.style.maxWidth = '80px';                      
                     } else {
                         rootPersonLink.style.fontSize = '14px'; // Valeur originale
                         rootPersonLink.style.padding = '1px 4px'; // Valeur originale
                         rootPersonLink.style.height = '25px'; // Valeur originale
                         rootPersonLink.style.minWidth = '80px'; // Valeur originale
+                        rootPersonLink.style.maxWidth = '80px';                        
                     }
     
                     // Texte du bouton (nom de la personne racine)
@@ -1863,7 +2105,9 @@ function syncCustomSelectors() {
                         // Récupérer explicitement le sélecteur de root person
                         const originalRootResults = document.getElementById('root-person-results');                                       
                         const displayElement = originalRootResults.querySelector('div[style*="border"]');
-                        
+
+                        originalRootResults.style.visibility = 'visible';
+
                         if (displayElement) {
                             const span = displayElement.querySelector('span');
                             const currentText = span ? (span.getAttribute('data-full-text') || span.textContent) : 'Sélectionner';
@@ -1937,6 +2181,8 @@ function syncCustomSelectors() {
                     // Remplacer le placeholder par le nouveau conteneur
                     rootResultsPlaceholder.parentNode.replaceChild(rootPersonContainer, rootResultsPlaceholder);
                 }
+
+                if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
     
                 // Synchronisation du champ de recherche de personne racine
                 const rootSearchPlaceholder = document.getElementById('menu-root-person-search-placeholder');
@@ -1969,8 +2215,10 @@ function syncCustomSelectors() {
                         rootSearchLink.style.padding = '3px 4px'; // Valeur originale
                         rootSearchLink.style.margin = '3px 0'; // Valeur originale
                     }
-                    
+                    rootSearchLink.style.maxWidth = '150px'; // Valeur originale
+
                     rootSearchLink.addEventListener('click', function(e) {
+                        originalRootSearch.style.visibility = 'visible';
                         e.stopPropagation();
                         
                         // Fermer le menu hamburger
@@ -2013,6 +2261,7 @@ function syncCustomSelectors() {
     } catch (error) {
         console.error("Erreur lors de la synchronisation des sélecteurs:", error);
     }
+
 }
 
 // Injecter les styles CSS
@@ -2422,7 +2671,7 @@ function setupButtonSync() {
 
 // Fonction pour afficher le menu
  export function showHamburgerMenu() {
-     console.log("Affichage du menu hamburger via directHamburgerMenu.js");
+     console.log("Affichage du menu hamburger via hamburgerMenu.js");
      
      // Mettre à jour la classe de hauteur
      updateHeightClass();
@@ -2444,6 +2693,10 @@ function setupButtonSync() {
          const rootPersonLink = document.getElementById('menu-root-person-results-container');
          
          if (originalRootResults && rootPersonLink) {
+            //  originalRootResults.style.visibility = 'visible';
+
+            console.log("\n\n debug ! Mise à jour du nom de la personne racine dans le menu hamburger\n\n");
+
              const displayElement = originalRootResults.querySelector('div[style*="border"]');
              if (displayElement) {
                  const span = displayElement.querySelector('span');
@@ -2599,7 +2852,7 @@ export function showHamburgerButtonForcefully() {
 // Initialiser le menu au chargement
 export function initializeHamburgerOnce() {
 if (!state.isHamburgerMenuInitialized) {
-  console.log("Initialisation directHamburgerMenu.js");
+  console.log("Initialisation HamburgerMenu.js");
   createMenuElements();
   state.isHamburgerMenuInitialized = true;
   
@@ -2642,4 +2895,3 @@ export function updateRootPersonNameInMenu() {
         }
     }
 }
-  

@@ -3,8 +3,8 @@ import { startAncestorAnimation } from './treeAnimation.js';
 import { nameCloudState, extractSearchTextFromTitle, filterPeopleByText } from './nameCloud.js'
 import { extractYear } from './nameCloudUtils.js';
 import { removeAllStatsElements } from './nameCloudAverageAge.js';
-import { createDataForHeatMap, createHeatmapDataForPeople, refreshHeatmap } from './geoHeatMapDataProcessor.js';
-import { createImprovedHeatmap, createIndividualLocationMap } from './geoHeatMapUI.js';
+import { createDataForHeatMap, createHeatmapDataForPeople } from './geoHeatMapDataProcessor.js';
+import { createImprovedHeatmap } from './geoHeatMapUI.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
@@ -113,13 +113,11 @@ export function showPersonsList(name, people, config, searchTerm) {
 
     let modalId; 
     // if (existingModal && (window.innerHeight < 800 || window.innerWidth < 800 ) ) { 
-    if (false) {
-        existingModal.remove();
-        modalId = `show-person-list-modal-0`;
-    } else {
-        modalId = `show-person-list-modal-${state.showPersonListModalCounter}`;
-        state.showPersonListModalCounter++;      
-    }
+
+    modalId = `show-person-list-modal-${state.showPersonListModalCounter}`;
+    state.showPersonListModalCounter++;  
+    state.peopleList[state.showPersonListModalCounter] = people;  
+    state.peopleListTitle[state.showPersonListModalCounter] = name;
 
     // Création du modal
     const modal = document.createElement('div');
@@ -232,7 +230,7 @@ export function showPersonsList(name, people, config, searchTerm) {
 
 
 
-    function addElementToList(people) {
+    function addElementToList(people, showPersonListModalIndex = null) {
 
         // Trier les personnes par date
         const peopleWithDates = people.map(person => {
@@ -383,8 +381,11 @@ export function showPersonsList(name, people, config, searchTerm) {
                 localConfig.type = 'name';
                 localConfig.scope = 'all';   
                 localConfig.startDate = null;                
-                localConfig.endDate = null;   
-                const locationIcon = createLocationIcon(true, index, person.name, localConfig, searchTerm, self);
+                localConfig.endDate = null;
+                // console.log('\n\n ------debug call to createLocationIcon from addElementToList, showPersonListModalIndex', showPersonListModalIndex,'\n\n');
+
+                // const locationIcon = createLocationIcon(true, index, person.name, localConfig, searchTerm, self, showPersonListModalIndex);
+                const locationIcon = createLocationIcon(true, index, person.name, localConfig, searchTerm, self, 1, null, null, null, null, showPersonListModalIndex);
                 rightZone.appendChild(locationIcon);
             }
 
@@ -401,38 +402,10 @@ export function showPersonsList(name, people, config, searchTerm) {
 
 
     // Gestionnaire du bouton de geoLocalisation
+    const showPersonListModalIndex = state.showPersonListModalCounter
     geoLocButton.onclick = () => {
         console.log('Clic bouton geoLocalisation');
-        showHeatmapFromShowPersonList();
-        // // if (window.currentSearchResults && window.currentSearchResults.length > 0) {
-        // runCreateHeatmapDataForPeople().then(() => {
-        //     if (heatmapData ) {
-        //         // Fermer la modale de recherche
-        //         // closeSearchModal();
-
-        //         // Ajouter un titre à la carte
-        //         const confLocal = {};
-        //         confLocal.type = 'placeOf';
-        //         const title =  getPersonsListTitle(name, 0 , confLocal) + ' ' + name;
-        //         displayHeatMap(null, heatmapData, true, null, title).then(() => {
-        //             const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-        //             const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
-        //             let modal;
-        //             if (allModals) { modal = allModals[allModals.length - 1]; }
-        //             // const modal = document.getElementById('frequency-stat-modal')
-        //             if (heatmapWrapper && modal ) {
-        //                 adjustSplitScreenLayout(modal, heatmapWrapper, true);
-        //             }
-        //         });
-        //     } 
-        // })
-        
-
-
-
-
-
-
+        showHeatmapFromShowPersonList(showPersonListModalIndex);
     };
     // Initialiser l'affichage des boutons
 
@@ -538,7 +511,11 @@ export function showPersonsList(name, people, config, searchTerm) {
     list.style.borderRadius = '4px';
     list.style.padding = '5px';
     
-    addElementToList(people);
+
+    // console.log('\n\n ------debug call to addElementToList from showPersonsList with showPersonListModalIndex=', showPersonListModalIndex,'\n\n');
+
+
+    addElementToList(people, showPersonListModalIndex);
 
     console.log('\nStatistiques détaillées pour ', title.textContent )
     
@@ -584,11 +561,14 @@ export function showPersonsList(name, people, config, searchTerm) {
     resizeModal(modal, true)
 }
 
-export async function showHeatmapFromShowPersonList() {
+export async function showHeatmapFromShowPersonList(showPersonListModalCounter) {
+    
+    // console.log('\n\n--- debug showHeatmapFromShowPersonList for people list modal counter=', showPersonListModalCounter);//, state.peopleList);
+
     let heatmapData;
     async function runCreateHeatmapDataForPeople() {
-        heatmapData = await createHeatmapDataForPeople(window.currentPeople);
-        console.log(heatmapData);
+        heatmapData = await createHeatmapDataForPeople(state.peopleList[showPersonListModalCounter]);
+        // console.log(heatmapData);
     }
     // if (window.currentSearchResults && window.currentSearchResults.length > 0) {
     runCreateHeatmapDataForPeople().then(() => {
@@ -599,9 +579,9 @@ export async function showHeatmapFromShowPersonList() {
             // Ajouter un titre à la carte
             const confLocal = {};
             confLocal.type = 'placeOf';
-            const title =  getPersonsListTitle(window.currentName, 0 , confLocal) + ' ' + window.currentName;
+            const title =  getPersonsListTitle(state.peopleListTitle[showPersonListModalCounter], 0 , confLocal) + ' ' + state.peopleListTitle[showPersonListModalCounter];
             console.log('-debug call to displayHeatMap from showHeatmapFromShowPersonList');
-            displayHeatMap(null, heatmapData, true, null, title).then(() => {
+            displayHeatMap(null, heatmapData, true, null, title, null, null, showPersonListModalCounter).then(() => {
                 const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
                 let modal;
                 if (allModals) { modal = allModals[allModals.length - 1]; }
@@ -836,7 +816,7 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
                 if (isLandscape) { offsetTop = Math.max( offsetTopInit, (splitHeight - modalItem.offsetHeight)/2); }
                 else { offsetTop = Math.max( offsetTopInit, (splitHeight - localHeight)/2); }
 
-                console.log(' - debug if (heatmapWrapper && modalsLength === 1 && ) offsetTop =', offsetTop, ', splitHeight=',splitHeight, ', offsetHeight=', modalItem.offsetHeight, 'localHeight=', localHeight, ', firstLeft=',firstLeft)
+                // console.log(' - debug if (heatmapWrapper && modalsLength === 1 && ) offsetTop =', offsetTop, ', splitHeight=',splitHeight, ', offsetHeight=', modalItem.offsetHeight, 'localHeight=', localHeight, ', firstLeft=',firstLeft)
             }
 
 
@@ -850,7 +830,7 @@ export function adjustSplitScreenLayout(modal, isFromSearchModal = false) {
                 offsetTop = offsetTop + modalItem.offsetHeight; //localHeight;
                 modalItem.style.width = `${widthToBeApplied}px`;
                 modalItem.style.zIndex = zIndexRef;
-                console.log(' - debug ', modalItem.id,  ',  commonWidth =', commonWidth + 'px,  Height=', localHeight + 'px, offsetTop=',  offsetTop +'px, firstLeft=', firstLeft + 'px');
+                // console.log(' - debug ', modalItem.id,  ',  commonWidth =', commonWidth + 'px,  Height=', localHeight + 'px, offsetTop=',  offsetTop +'px, firstLeft=', firstLeft + 'px');
             }
 
             makeModalInteractive(modalItem);

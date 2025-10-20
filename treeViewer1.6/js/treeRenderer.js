@@ -98,7 +98,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false) {
 
     // Vérifier si une heatmap est déjà affichée
     if (document.getElementById('namecloud-heatmap-wrapper')) {
-        console.log('-debug call to displayHeatMap from drawTree'); //, document.getElementById('namecloud-heatmap-wrapper'));
+        console.log('-debug call to displayHeatMap from drawTree');//, document.getElementById('namecloud-heatmap-wrapper'));
         displayHeatMap(null, false);
     }
 

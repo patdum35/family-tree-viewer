@@ -25,7 +25,7 @@ import {
     saveTargetAncestorId,
     toggleFullScreen,
     resetToDefaultSettings,
-    displayGenealogicTree
+    displayGenealogicTree,
 } from './main.js';
 
 import {
@@ -42,6 +42,10 @@ import {
 import { 
     displayHeatMap 
 } from './geoHeatMapUI.js';
+import {
+    buttonsOnDisplay
+} from './mainUI.js'
+
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
 
@@ -200,6 +204,7 @@ function initializeAppFunctions() {
     window.toggleFullScreen = toggleFullScreen;
     window.resetToDefaultSettings = resetToDefaultSettings;
     window.statsModal = statsModal;
+    window.buttonsOnDisplay = buttonsOnDisplay;
     // window.changeLanguage = changeLanguage;
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);

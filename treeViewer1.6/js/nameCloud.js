@@ -1,5 +1,5 @@
 
-import { state, showToast, trackPageView, hideAndCleanupTreeButtons } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
@@ -59,6 +59,12 @@ export const nameCloudState = {
 }
 
 export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false) {onclick
+    const isForceTreeRadarButton = true;  
+    if (!isCallFromCloudName) {
+        nameCloudState.isButtonOnDisplayBeforeCloud = state.isButtonOnDisplay;
+    }
+    // console.log("\n\n\n\ ########################   Debug  start nuage: state.isButtonOnDisplay",state.isButtonOnDisplay , nameCloudState.isButtonOnDisplayBeforeCloud, ', isCallFromCloudName=',isCallFromCloudName," ###########################\n\n\n");
+    buttonsOnDisplay(true);
 
     if (!config) {
         config = nameCloudState.currentConfig;
@@ -73,13 +79,14 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
         // console.log('\n\n debug state.previousMode = (state.isRadarEnabled) ? radar : tree;', ', previousMode=', state.previousMode, ', isRadarEnabled=',state.isRadarEnabled )
     }
 
+    updateRadarButtonText(isForceTreeRadarButton);
+
     state.isRadarEnabled = false;
 
     // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeClean')
     disableFortuneModeClean();
     // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeWithLever')    
     disableFortuneModeWithLever();
-
 
     hideAndCleanupTreeButtons();
     
@@ -117,13 +124,10 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
         nameCloudState.initialized = true;
     }
 
-
     // if (config.scope != 'all'  && !config.rootPersonId) {
     //     config.rootPersonId = state.rootPersonId;
     //     console.log('\n\n\n -***** - debug  processNamesCloudWithDate: config ', config, state.rootPersonId, '\n\n\n')
     // }
-
-
 
 
     // Logique principale de traitement des données

@@ -17,7 +17,7 @@ import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
     
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { hideLoginBackground } from './eventHandlers.js';
-import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
+import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
@@ -27,6 +27,7 @@ import { cleanupExportControls } from './exportSettings.js';
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
+import { enableBackground } from './backgroundManager.js';
 
 import { 
     displayPersonDetails, 
@@ -48,7 +49,6 @@ import {
 } from './eventHandlers.js';
 
 let stopMonitoring = null;
-
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -75,7 +75,6 @@ if ('serviceWorker' in navigator) {
       });
 }
 
-  
 // for tracking with google Analytics
 export function trackPageView(pagePath) {
     if (window.gtag) {
@@ -86,7 +85,6 @@ export function trackPageView(pagePath) {
         });
     }
 }
-
 
 // Sélection des champs
 const passwordInput = document.getElementById('password');
@@ -205,15 +203,16 @@ export const state = {
     isFullResetAnimationRequested: false,
     firstName: '',
     lastName: '',
-    previousMode: 'tree'
-    // animationMap: null
+    previousMode: 'tree',
+    isButtonOnDisplay: false,    // animationMap: null
+    peopleList: [],
+    peopleListTitle: [],
 
 };
 
 export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Lancer le préchargement des tuiles en tâche de fond
@@ -240,34 +239,31 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
     });
 }
 
-export function updateRadarButtonText() {
+export function updateRadarButtonText(isForceTreeRadarButton = null) {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
     const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
-    if (treeRadarToggleBtn) {
+
+
+    if (treeRadarToggleBtn && !isForceTreeRadarButton) {
         const span = treeRadarToggleBtn.querySelector('span');
         if (span) {
             span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
         }
     }
 
-    if (menu_nameTreeRadarBtn) {
-        // Mettre à jour le bouton du menu hamburger
-        // if (window.innerHeight < 800) {
-        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
-        // } else {
-        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
-        // }
+    let toggleValue = false;
+    if (state.previousMode === 'tree') { toggleValue = true; } 
 
-        // if (window.innerHeight < 800) {
-        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌳' : '  -  🎯';
-        // } else {
-        //     menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
-        // }
+    toggleValue = (isForceTreeRadarButton) ? (toggleValue) : state.isRadarEnabled;    
 
-        menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌳' : '🎯';
-
+    if( window.nameCloudSection && window.nameCloudSection.container ) {
+        window.nameCloudSection.container.querySelector('h3').textContent = toggleValue ? getMenuTranslation('section_namecloud2') : getMenuTranslation('section_namecloud');
     }
 
+    if (menu_nameTreeRadarBtn) {
+        // Mettre à jour le bouton du menu hamburger
+        menu_nameTreeRadarBtn.querySelector('span').textContent = toggleValue ? '🌳' : '🎯';
+    }
 }
 
 /**
@@ -292,13 +288,15 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-
 export function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
     updateRadarButtonText();  
     closeAllModals();
     fullResetAnimationState();
+
+
+
 
     if (state.isRadarEnabled) {
         state.treeModeReal_whenReturnToTree = state.treeMode; 
@@ -326,8 +324,16 @@ export function toggleTreeRadar() {
             state.treeModeReal = state.treeModeReal_whenReturnToTree;  
             state.treeModeReal_backup = state.treeModeReal_whenReturnToTree;  
         } 
-        
+
         displayGenealogicTree(null, true, false);
+
+        if (state.backgroundEnabled) {
+            setTimeout(() => {
+                // Pour ré-activer le fond d'écran
+                console.log("\n\n re-activation du fond d'écran depuis toggleTreeRadar dans main.js \n\n");
+                enableBackground(true, true);
+            }, 200);
+        }
     }
 }
 
@@ -402,8 +408,31 @@ if (window._originalSetupElegantBackground) {
 }
 }
 
-export function toggleFullScreen() {
-    if (!document.fullscreenElement) {
+// export function toggleFullScreen() {
+//     if (!document.fullscreenElement) {
+//         if (document.documentElement.requestFullscreen) {
+//             document.documentElement.requestFullscreen();
+//         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+//             document.documentElement.mozRequestFullScreen();
+//         } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+//             document.documentElement.webkitRequestFullscreen();
+//         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+//             document.documentElement.msRequestFullscreen();
+//         }
+//     } else {
+//         if (document.exitFullscreen) {
+//             document.exitFullscreen();
+//         }
+//     }
+// }
+
+
+export function toggleFullScreen(inversed = false) {
+    
+    let condition = (!document.fullscreenElement)
+    if (inversed) { condition = (document.fullscreenElement) ;}
+    
+    if (condition) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
@@ -419,6 +448,9 @@ export function toggleFullScreen() {
         }
     }
 }
+
+
+
 
 function initialize() {   
      // Initialiser le sélecteur de générations standard d'abord
@@ -440,7 +472,46 @@ function initialize() {
     applyTextDefinitions();
 
 
+    const loadGedcomButton = document.getElementById('load-gedcom-button');
+    loadGedcomButton.style.background = 'transparent';  
+    loadGedcomButton.style.padding = '0px';
+    loadGedcomButton.style.border = 'none';
+    loadGedcomButton.style.borderRadius = '6px';
 
+    const loadGedcomButtonSpan = loadGedcomButton.querySelector('span');
+    loadGedcomButtonSpan.style.display = 'inline-block';
+
+    loadGedcomButtonSpan.style.animation = 'gear-spin 6s linear infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    loadGedcomButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
+
+    // Animation subtile au survol
+    loadGedcomButton.addEventListener('mouseover', () => {
+        loadGedcomButton.style.animation = 'gear-spin 2s linear infinite';
+    });
+    
+    loadGedcomButton.addEventListener('mouseout', () => {
+        loadGedcomButton.style.animation = 'none';
+    });
+
+
+
+
+    // Ajouter l'animation de rotation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes gear-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
 
 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
@@ -480,7 +551,6 @@ function initializeGenerationSelect() {
         select.appendChild(option);
     }
 }
-
 
 export let audio;
 export let audioUnlocked = false;
@@ -647,7 +717,6 @@ export async function loadData(isfromNonEncryptedFile = '') {
 
         state.isRadarEnabled = false;
 
-
         updateRadarButtonText();
 
         state.initialTreeDisplay = true;
@@ -669,18 +738,26 @@ export async function loadData(isfromNonEncryptedFile = '') {
         toggleFullScreen();
 
 
-
-
-
         setTimeout(() => {
             positionRadarButton();
             positionHeatMapButton();
             createAndPositionRadarOverlay();
             createAndPositionHeatMapOverlay();
-            console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
+            // console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
         }, 50);
 
-        
+        setTimeout(() => {
+            buttonsOnDisplay(false);
+        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!   
+
+
+
+        // setTimeout(() => {
+        // }, 3000);
+
+
+        // const originalRootResults = document.getElementById('root-person-results');
+        // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
         
     } catch (error) {
         console.error('Erreur complète:', error);
@@ -829,12 +906,10 @@ async function loadGedcomContent(fileInput, passwordInput, isfromNonEncryptedFil
     }
 }
 
-
 /**
  * Charge le contenu crypté avec logs améliorés
  * @private
  */
-
 async function loadEncryptedContent(password, filename) {
     debugLog(`Tentative de chargement: ${filename}`, 'info');
     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
@@ -1028,6 +1103,7 @@ function fallbackUpdateRootPersonSelector(person) {
 
     // Sélectionner la personne courante
     rootPersonResults.value = person.id;
+    if (rootPersonResults && !state.isButtonOnDisplay) {rootPersonResults.style.visibility = 'hidden';}
 }
 
 /**
@@ -1381,7 +1457,6 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
 }
 
-
 window.displayGenealogicTree = displayGenealogicTree; // Exposer la fonction pour l'utiliser dans d'autres modules
 
 /**
@@ -1476,12 +1551,10 @@ export function updateTreeMode(mode) {
 
 // }
 
-
 export function openSettingsModal() {
     // Option 1: Utiliser directement la nouvelle modal
     createEnhancedSettingsModal();
 }
-
 
 export function closeSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
@@ -1540,12 +1613,9 @@ export function showToast(message, duration = 2500) {
     }
 }
 
-
-
 // Objet pour stocker les compteurs d'actions
 const actionCounters = {};
 const max_count = 3;
-
 
 // Ajouter les messages toast aux boutons et sélecteurs
 document.addEventListener('DOMContentLoaded', function() {
@@ -1562,6 +1632,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showToast(message);
                 }
             }
+            // console.log('\n\n Debug : Change event detected on', this, element);
         });
 
         // Pour les sélecteurs, utiliser l'événement change
@@ -1579,7 +1650,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         showToast(message);
                     }
                 }
-            });
+                // console.log('\n\n Debug : SELECT Change event detected on', this, element);        
+            });    
         }
 
         // Pour les champs de saisie, utiliser l'événement input
@@ -1597,6 +1669,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+            // console.log('\n\n Debug : INPUT Change event detected on', this, element);        
         }
 
         // Garder le clic pour tous
@@ -1612,6 +1685,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showToast(message);
                 }
             }
+            // console.log('\n\n Debug : click Change event detected on', this, element);      
         });
     });
 
@@ -1619,7 +1693,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initNetworkListeners();
     console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
 });
-
 
 
 function detectInputType() {
@@ -1650,7 +1723,6 @@ export function isIOSDevice() {
     debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info")
     return state.isIOS;
 }
-
 
 export function detectDeviceType() {
   state.deviceInfo = {
@@ -1706,12 +1778,10 @@ export function detectDeviceType() {
 }
 
 
-
 // Exposer la fonction et le compteur globalement
 window.showToast = showToast;
 window.actionCounters = actionCounters;
 // window.displayGenealogicTree = displayGenealogicTree;
-
 
 
 // Export des variables et fonctions nécessaires
@@ -1732,11 +1802,7 @@ export {
 };
 
 
-
 window.addEventListener('load', initialize);
-
-
-
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
@@ -1769,7 +1835,6 @@ export function searchRootPersonId(searchStr, isAlert = true) {
         return null;
     }
 }
-
 
 // Gestionnaire des paramètres avec support multi-langues
 // Fonction pour réinitialiser les paramètres
@@ -1828,9 +1893,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = { resetToDefaultSettings };
 }
 
-
-
-
 /**
  * Gestion des erreurs
  */
@@ -1860,7 +1922,6 @@ function showErrorMessage(message) {
     }, 5000);
 }
 
-
 /**
  * Configuration par défaut à adapter selon vos besoins
  */
@@ -1876,7 +1937,6 @@ function showErrorMessage(message) {
 // displayPersonTree('PERSON_ID', 'WheelAncestors');
 // switchTreeMode('WheelDescendants');
 // exportToPDF();
-
 
 function positionRadarButton() {
     const cloudButton = document.getElementById('cloudBtn');
@@ -2035,8 +2095,6 @@ function positionHeatMapButton() {
     }
 }
 
-
-
 export function hideAndCleanupTreeButtons() {
     const buttonListToHide = ['heatMapBtn', 'radarBtn'];
     const overlayListToHide = ['heatMapBtn-overlay', 'radarBtn-overlay'];
@@ -2075,27 +2133,13 @@ export function showAndRestoreTreeButtons() {
     });
 }
 
-
-
-
-// Modifier vos écouteurs existants
-// document.addEventListener('DOMContentLoaded', () => {
-    // positionRadarButton();
-    // positionHeatMapButton();
-    // createAndPositionRadarOverlay();
-    // createAndPositionHeatMapOverlay();
-    // console.log('\n\n\n -**** DEBUG : addEventListener(DOMContentLoaded) for button positionning**********\n\n\n')
-// });
-
-
 window.addEventListener('resize', () => {
     positionRadarButton();
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
-    console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
+    // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
 });
-
 
 
 // window.addEventListener('load', () => {

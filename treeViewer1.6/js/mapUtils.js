@@ -728,7 +728,7 @@ export function clearMap(map) {
  */
 export function addMapTitle(container, title) {
     const existingTitle = container.querySelector('.individual-map-title');
-    console.log('- debug Existing title element:', existingTitle, title);
+    // console.log('- debug Existing title element:', existingTitle, title);
 
     if (existingTitle) existingTitle.remove();
     

@@ -609,10 +609,15 @@ export async function createDataForHeatMap(config, isFromCurrentTree = false, cu
         const locationData = {};
         const originalName = {};
         const stats = { inPeriod: 0 }; // Stats minimal
+
+        // console.log('\n\n -debug  personnes à traiter pour la heatmap:', persons);
         
         // Traiter chaque personne pour extraire ses lieux sans nettoyage
         persons.forEach(person => {
-            processPersonData(person, locationConfig, locationData, stats, { doNotClean: true }, originalName);
+            if (person != undefined) {
+                // console.log('-debug processing person ID:', person, person.id);
+                processPersonData(person, locationConfig, locationData, stats, { doNotClean: true }, originalName);
+            }
         });
         
         // Créer une structure pour stocker les informations détaillées par lieu
@@ -620,54 +625,56 @@ export async function createDataForHeatMap(config, isFromCurrentTree = false, cu
         
         // Collecter les détails des lieux pour chaque personne
         for (const person of persons) {
-            // Fonction pour ajouter les détails d'un lieu
-            const addLocationDetail = (place, type, date) => {
-                if (!place || place.trim() === '') return;
-                
-                if (!locationDetails[place]) {
-                    locationDetails[place] = {
-                        events: [],
-                        families: {}
-                    };
-                }
-                
-                // Extraire l'année si disponible
-                let year = null;
-                if (date) {
-                    const match = date.match(/\d{4}/);
-                    if (match) {
-                        year = match[0];
+            if (person != undefined) {
+                // Fonction pour ajouter les détails d'un lieu
+                const addLocationDetail = (place, type, date) => {
+                    if (!place || place.trim() === '') return;
+                    
+                    if (!locationDetails[place]) {
+                        locationDetails[place] = {
+                            events: [],
+                            families: {}
+                        };
                     }
-                }
+                    
+                    // Extraire l'année si disponible
+                    let year = null;
+                    if (date) {
+                        const match = date.match(/\d{4}/);
+                        if (match) {
+                            year = match[0];
+                        }
+                    }
+                    
+                    // Ajouter l'événement
+                    locationDetails[place].events.push({
+                        type: type,
+                        name: person.name.replace(/\//g, '').trim(),
+                        year: year
+                    });
+                    
+                    // Ajouter le nom de famille
+                    const familyName = person.name.split('/')[1]?.trim().toUpperCase();
+                    if (familyName) {
+                        locationDetails[place].families[familyName] = 
+                            (locationDetails[place].families[familyName] || 0) + 1;
+                    }
+                };
                 
-                // Ajouter l'événement
-                locationDetails[place].events.push({
-                    type: type,
-                    name: person.name.replace(/\//g, '').trim(),
-                    year: year
-                });
+                // Ajouter les détails pour chaque type de lieu
+                if (person.birthPlace) addLocationDetail(person.birthPlace, 'Naissance', person.birthDate);
+                if (person.deathPlace) addLocationDetail(person.deathPlace, 'Décès', person.deathDate);
+                if (person.residPlace1) addLocationDetail(person.residPlace1, 'Résidence', null);
+                if (person.residPlace2) addLocationDetail(person.residPlace2, 'Résidence', null);
+                if (person.residPlace3) addLocationDetail(person.residPlace3, 'Résidence', null);
                 
-                // Ajouter le nom de famille
-                const familyName = person.name.split('/')[1]?.trim().toUpperCase();
-                if (familyName) {
-                    locationDetails[place].families[familyName] = 
-                        (locationDetails[place].families[familyName] || 0) + 1;
-                }
-            };
-            
-            // Ajouter les détails pour chaque type de lieu
-            if (person.birthPlace) addLocationDetail(person.birthPlace, 'Naissance', person.birthDate);
-            if (person.deathPlace) addLocationDetail(person.deathPlace, 'Décès', person.deathDate);
-            if (person.residPlace1) addLocationDetail(person.residPlace1, 'Résidence', null);
-            if (person.residPlace2) addLocationDetail(person.residPlace2, 'Résidence', null);
-            if (person.residPlace3) addLocationDetail(person.residPlace3, 'Résidence', null);
-            
-            // Ajouter les mariages
-            if (person.spouseFamilies) {
-                for (const famId of person.spouseFamilies) {
-                    const family = state.gedcomData.families[famId];
-                    if (family && family.marriagePlace) {
-                        addLocationDetail(family.marriagePlace, 'Mariage', family.marriageDate);
+                // Ajouter les mariages
+                if (person.spouseFamilies) {
+                    for (const famId of person.spouseFamilies) {
+                        const family = state.gedcomData.families[famId];
+                        if (family && family.marriagePlace) {
+                            addLocationDetail(family.marriagePlace, 'Mariage', family.marriageDate);
+                        }
                     }
                 }
             }

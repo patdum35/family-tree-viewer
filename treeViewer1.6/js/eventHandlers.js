@@ -161,6 +161,8 @@ export function selectRootPerson() {
     const resultsSelect = document.getElementById('root-person-results');
     const selectedPersonId = resultsSelect.value;
 
+    if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+
     if (selectedPersonId) {
         // Désactiver le clignotement
         if (typeof resultsSelect.setBlinking === 'function') {
@@ -172,8 +174,12 @@ export function selectRootPerson() {
 
         state.rootPersonId = selectedPersonId;
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in selectRootPerson ################# ')
+        if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+
         displayGenealogicTree(selectedPersonId, true);
-        
+
+        if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}  
+
         resultsSelect.style.display = 'block';
     }
 }
@@ -237,6 +243,8 @@ export function selectFoundPerson(personId) {
         }
     }
     
+    if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+    
     // Afficher la personne comme racine
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
     // displayGenealogicTree(personId, true);
@@ -290,7 +298,6 @@ export function selectFoundPerson(personId) {
         });
     }, 200); // Augmenter le délai pour s'assurer que tout est bien synchronisé
 }
-
 
 /**
  * Gère les mises à jour du nombre de prénoms
@@ -376,7 +383,6 @@ export function resetView() {
     }
 }
 
-
 export function resetViewZoomBeforeExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
@@ -420,8 +426,6 @@ export function resetViewZoomBeforeExport() {
     }
 }
 
-
-
 export function resetViewZoomAfterExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
@@ -444,7 +448,6 @@ export function resetViewZoomAfterExport() {
             .call(zoom.transform, transform);
     }
 }
-
 
 /**
  * Réinitialise le niveau de zoom et la position de l'arbre
@@ -540,7 +543,6 @@ function highlightAndZoomToNode(matchedNode) {
             );
     }
 }
-
 
 export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper = true) {
     // on récupère toutes les modales ouvertes
@@ -638,7 +640,6 @@ export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper
     state.centuryStatsModalCounter = 0; 
 }
 
-
 export async function returnToLogin() {
     // Masquer l'arbre
     document.getElementById('tree-container').style.display = 'none';
@@ -733,25 +734,29 @@ export async function returnToLogin() {
 
 window.returnToLogin = returnToLogin;
 
-export function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-            document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
-            document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-            document.documentElement.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-}
+// export function toggleFullScreen(inversed = false) {
+    
+//     let condition = (!document.fullscreenElement)
+//     if (inversed) { condition = (document.fullscreenElement) ;}
+    
+//     if (condition) {
+//         if (document.documentElement.requestFullscreen) {
+//             document.documentElement.requestFullscreen();
+//         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+//             document.documentElement.mozRequestFullScreen();
+//         } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+//             document.documentElement.webkitRequestFullscreen();
+//         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+//             document.documentElement.msRequestFullscreen();
+//         }
+//     } else {
+//         if (document.exitFullscreen) {
+//             document.exitFullscreen();
+//         }
+//     }
+// }
 
-window.toggleFullScreen = toggleFullScreen;
+// window.toggleFullScreen = toggleFullScreen;
 
 // Fonction pour masquer le fond d'écran de connexion
 export function hideLoginBackground() {
@@ -763,4 +768,3 @@ export function hideLoginBackground() {
 }
 
 // window.hideLoginBackground = hideLoginBackground;
-

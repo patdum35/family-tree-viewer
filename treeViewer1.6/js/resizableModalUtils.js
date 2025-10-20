@@ -4,7 +4,7 @@ export function makeModalInteractive(modal) {
     // modal.style.position = "fixed";   // ou absolute selon ton cas
     state.topZindex++;
     modal.style.zIndex = state.topZindex;
-    console.log('\n\n debug init makeModalInteractive ', modal.id, state.topZindex);
+    // console.log('\n\n debug init makeModalInteractive ', modal.id, state.topZindex);
 
     // écoute tout ce qui se passe dans la modal (y compris header)
 

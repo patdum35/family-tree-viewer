@@ -6,7 +6,7 @@ import { setTargetAncestorId } from './treeAnimation.js';
 import { state, updatePrenoms, toggleTreeRadar } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
 import { initializeAllExportControls } from './exportSettings.js';
-import { makeModalDraggableAndResizable } from './resizableModalUtils.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
 
 // Traductions pour les éléments de l'interface
@@ -355,10 +355,11 @@ export function createEnhancedSettingsModal() {
     // Configurer les événements
     setupModalEvents(modal);
 
-
     // NOUVEAU : Rendre la modal déplaçable et redimensionnable
     const modalHeader = modalContent.querySelector('.modal-header');
     makeModalDraggableAndResizable(modal, modalHeader);
+
+    makeModalInteractive(modal);
     
     return modal;
 }
@@ -369,20 +370,22 @@ function createModalContainer() {
     modal.className = 'enhanced-modal-container';
     modal.style.position = 'fixed';
     modal.style.top = '50px';
-    modal.style.left = '50px';
+    // modal.style.left = '50px';
     modal.style.backgroundColor = 'transparent';
     modal.style.display = 'block';
     modal.style.zIndex = '1000';
    
-    // Gestion responsive de la largeur
-    if (window.innerWidth < 400) {
-        modal.style.width = '350px';
-        modal.style.left = '10px'; // Plus proche du bord sur mobile
-        modal.style.top = '20px';  // Plus haut sur mobile
-    } else {
-        modal.style.width = '500px';
-    }
-    
+    // Gestion responsive de la hauteur
+
+    if (window.innerHeight< 400) {
+        modal.style.top = '40px';  // Plus haut sur mobile landscape
+    } 
+
+    modal.style.width = Math.min(window.innerWidth*0.95 , 500) +'px';
+    modal.style.left = '50%';
+    modal.style.transform = 'translateX(-50%)';
+
+
     modal.style.height = 'auto';
     return modal;
 }
@@ -513,10 +516,11 @@ function createModalContent() {
     content.className = 'enhanced-modal-content';
     content.style.backgroundColor = 'rgba(240, 245, 255, 0.85)';
     content.style.borderRadius = '10px';
-    content.style.padding = '10px';
-    content.style.width = '90%';
-    content.style.maxWidth = '500px';
-    content.style.maxHeight = '70vh';
+    // content.style.padding = '10px'; // '7px 5px';
+    content.style.padding = '10px 6px';
+    content.style.width = '100%';
+    content.style.maxWidth = '400px';
+    content.style.maxHeight = '80vh';
     content.style.overflow = 'auto';
     content.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
     content.style.position = 'relative';
@@ -530,7 +534,7 @@ function createModalContent() {
     header.style.marginBottom = '6px';
     header.style.borderBottom = '1px solid #e0e0e0';
     header.style.paddingBottom = '5px';
-    header.style.backgroundColor = 'white';
+    header.style.backgroundColor = 'lightBlue';
     header.style.padding = '8px';
     header.style.borderRadius = '10px 10px 0 0';
     header.style.marginLeft = '-10px';
@@ -546,6 +550,7 @@ function createModalContent() {
     const titleContainer = document.createElement('div');
     titleContainer.style.display = 'flex';
     titleContainer.style.alignItems = 'center';
+    titleContainer.style.paddingLeft = '30px';
     
     const title = document.createElement('h2');
     // title.textContent = 'Paramètres Avancés';
@@ -1111,6 +1116,28 @@ function setupModalEvents(modal) {
             }
             document.removeEventListener('keydown', handleEscape);
         }
+    });
+
+
+    function moveSelector() {   
+        // Gestion responsive de la hauteur
+        if (window.innerHeight< 400) {
+            modal.style.top = '40px';  // Plus haut sur mobile landscape
+        } else {
+            modal.style.top = '50px';
+        }
+        modal.style.width = Math.min(window.innerWidth*0.95 , 500) +'px';
+        modal.style.left = '50%';
+        modal.style.transform = 'translateX(-50%)';
+        modal.style.height = 'auto';
+    }
+
+    // Appliquer au chargement
+    moveSelector();
+
+    // Appliquer au redimensionnement
+    window.addEventListener('resize', () => {
+        moveSelector();
     });
 }
 

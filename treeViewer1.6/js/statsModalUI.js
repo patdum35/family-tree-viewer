@@ -43,7 +43,7 @@ const translations = {
         helpNbChildren: " sur le nombre d'enfant",
         noSearchTerm: "Veuillez saisir un terme de recherche",
 
-        helpOption : "Optionnel: ",
+        helpOption : "Optionnel avec ⚙️: ",
         helpFiltering : "Affiner les statistiques en filtrant avec un mot, les dates, et un périmètre",
         helpSelect: "Sélection actuelle: ",
         helpSelect1: "Stats sur ",
@@ -53,6 +53,9 @@ const translations = {
         helpSelect5: ", Périmètre: ",
         helpSelect6: " de la racine: ",
         helpGO: "Appuyer sur GO pour lancer les Stats ",
+        none : 'aucun',
+        beforeJC : 'av. JC',
+        today : 'aujourd\'hui',
 
         noResults: "Aucun résultat pour",
         rootPersonSearch: '🔍racine',
@@ -96,7 +99,7 @@ const translations = {
         helpMarriageAge: " on age at marriage",
         helpNbChildren: " on number of children",
         noSearchTerm: "Please enter a search term",
-        helpOption : "Optional: ",
+        helpOption : "Optional with ⚙️: ",
         helpFiltering : "Refine statistics by filtering with a word, dates, and a scope",
         helpSelect: "Current selection: ",
         helpSelect1: "Stats on ",
@@ -106,6 +109,10 @@ const translations = {
         helpSelect5: ", Scope: ",
         helpSelect6: " from the root: ",
         helpGO: "Press GO to launch Stats ",
+        none: 'none',
+        beforeJC: 'b. Chr.',
+        today: 'today',
+
         noResults: "No results for",
         rootPersonSearch: '🔍root',
         person: 'person',
@@ -148,7 +155,7 @@ const translations = {
         helpMarriageAge: " sobre la edad al matrimonio",
         helpNbChildren: " sobre el número de hijos",
         noSearchTerm: "Por favor ingrese un término de búsqueda",
-        helpOption : "Opcional: ",
+        helpOption : "Opcional con ⚙️: ",
         helpFiltering : "Refinar las estadísticas filtrando con una palabra, fechas y un perímetro",
         helpSelect: "Selección actual: ",
         helpSelect1: "Estadísticas sobre ",
@@ -158,6 +165,11 @@ const translations = {
         helpSelect5: ", Perímetro: ",
         helpSelect6: " desde la raíz: ",
         helpGO: "Pulse GO para lanzar las estadísticas ",
+        none: 'ninguno',
+        beforeJC: 'a. Chr.',
+        today: 'hoy',
+
+
         noResults: "Sin resultados para",
         rootPersonSearch: '🔍raíz',
         person: 'persona',
@@ -189,7 +201,7 @@ const translations = {
         statsTypeLabel: "Statisztika típusa",
         dateFilterLabel: "dátum<br>szűrés",
         helpGlobal: "Globális statisztikák",
-    helpPerCentury: "Statisztikák évszázadonként",
+        helpPerCentury: "Statisztikák évszázadonként",
         helpSurname: "Statisztikák a keresztnevekről",
         helpName: " a vezetéknevekről",
         helpPlace: " a születési, halálozási, házassági és lakóhelyi helyekről",
@@ -201,7 +213,7 @@ const translations = {
         helpNbChildren: " a gyermekek számáról",
         noSearchTerm: "Kérjük, adjon meg egy keresési kifejezést",
         noResults: "Nincs találat a következőre:",
-        helpOption : "Opcionális: ",
+        helpOption : "Opcionális a ⚙️-gal: ",
         helpFiltering : "Statisztikák pontosítása szóval, dátumokkal és hatókörrel",
         helpSelect: "Jelenlegi kiválasztás: ",
         helpSelect1: "Statisztika erről: ",
@@ -211,6 +223,10 @@ const translations = {
         helpSelect5: ", Hatókör: ",
         helpSelect6: " a gyökértől: ",
         helpGO: "Nyomd meg a GO-t a statisztikák indításához ",
+        none: 'nincs',
+        beforeJC: 'i. előtt',
+        today: 'ma',
+        
         rootPersonSearch: '🔍gyökér',
         person: 'személy',
         found: 'találat',
@@ -275,26 +291,27 @@ function openStatsModal() {
                 </div>
 
                 <div class="stats-input-section">
-                    <input type="text" id="statsModal-search-input" placeholder="${translations[lang].searchPlaceholder}">
+                    <input type="text" id="statsModal-search-input" placeholder="${translations[lang].searchPlaceholder}" style="display: none;">
                     <button id="statsModal-search-button"> ${translations[lang].searchButton} </button>
-                </div>
+                    <button id="statsModal-settings-button" >⚙️</button>
+                    </div>
 
-                <div class="date-filter-section">
+                <div class="date-filter-section" style="display: none;">
                     <input type="number" id="stats-date-start" placeholder="${translations[lang].yearStartPlaceholder}" min="1000" max="2100">
                     <span><label id="stats-date-label0">-</label></span>
                     <input type="number" id="stats-date-end" placeholder="${translations[lang].yearEndPlaceholder}" min="1000" max="2100">
                     <label id="stats-date-label">${translations[lang].dateFilterLabel}</label>
                 </div>
 
-                <div class="stats-searchRoot-section">
+                <div class="stats-searchRoot-section" style="display: none;">
                     <div id="statsModal-search-scope-container"></div>
                     <input type="text" id="statsModal-search-root" placeholder="">
-                    <label>${translations[lang].perimeterLabel}</label>
+                    <label id="stats-perimeter-label" >${translations[lang].perimeterLabel}</label>
                 </div>
 
-                <div class="stats-statsType-section">
+                <div class="stats-statsType-section" style="display: none;">
                     <div id="statsModal-statsType-container"></div>
-                    <label>${translations[lang].statsTypeLabel}</label>
+                    <label id="stats-type-label" >${translations[lang].statsTypeLabel}</label>
                 </div>
 
                 <div class="stats-help">
@@ -478,12 +495,13 @@ function openStatsModal() {
         
         .stats-help {
             background: #f5f5f5ff;
-            padding: 8px 8px;
+            padding: 8px 4px;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
             font-size: 15px; !important
             color: #000;
         }
+
 
         .stats-results {
             overflow-y: auto;
@@ -533,7 +551,16 @@ function openStatsModal() {
             align-items: center !important;
         }
         #statsModal-search-root {
+            background: #f9c77cff;
             width: 100px;
+
+            padding: 2px;
+            border: 2px solid #db8401ff;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+
+
         }
 
         .stats-statsType-section {
@@ -590,12 +617,6 @@ function openStatsModal() {
                 gap: 5px !important;
                 align-items: center !important;
             }
-
-            #statsModal-search-input {
-                order: 3;
-                width: 180px !important;
-                margin-left: 0px !important;
-            }
             
             #statsModal-search-type {
                 order: 1;
@@ -611,8 +632,18 @@ function openStatsModal() {
                 font-size: 13px !important;
             }
 
-            #statsModal-search-type-label {
+            #statsModal-settings-button {
+                order: 3;
+            }
+
+            #statsModal-search-input {
                 order: 4;
+                width: 180px !important;
+                margin-left: 0px !important;
+            }
+
+            #statsModal-search-type-label {
+                order: 5;
                 font-weight: bold;
                 color: #333;
                 white-space: nowrap;
@@ -623,6 +654,7 @@ function openStatsModal() {
         </style>
     `;
     
+
     // Ajouter les styles au document
     if (!document.getElementById('statsModal-styles')) {
         const styleElement = document.createElement('div');
@@ -631,6 +663,22 @@ function openStatsModal() {
         document.head.appendChild(styleElement);
     }
     
+    const extraStyle = document.createElement('style');
+    extraStyle.textContent = `
+        #statsModal-settings-button {
+            background: #f9efdfff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0px 0px;
+        }
+        #statsModal-settings-button:hover {
+            background: #e0e0e0;
+        }
+    `;
+    document.head.appendChild(extraStyle);
+
     // Ajouter la modale au document
     document.body.appendChild(modal);
 
@@ -645,7 +693,6 @@ function openStatsModal() {
 
     makeModalInteractive(modal);        
    
-    
     if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
         // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début
         //Donner le focus au champ de recherche
@@ -694,13 +741,12 @@ function updatehelpText() {
     if (searchScope.value != 'all') {
         textEnd = translations[lang].helpSelect6 + ' <span style="color:red;"><b>' + state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '') + '</b></span>'
     }
-    let searchTermText = 'none';
+    let searchTermText = translations[lang].none; //'none';
     if (searchTerm) { searchTermText = searchTerm ; }
-    let startYearText = 'av. JC';
+    let startYearText = translations[lang].beforeJC; //'av. JC';
     if (startYear) { startYearText = startYear; }
-    let endYearText = "aujourd'hui";
+    let endYearText = translations[lang].today; // "aujourd'hui";
     if (endYear) { endYearText = endYear; }
-
 
     helpText.innerHTML = 
         helpTextsStatsType[statsType.value] +
@@ -732,11 +778,10 @@ function setupModalEvents() {
             selected: '#e65100'
         }
 
-    const customSelector = createTypeSelect('noms', true, 180, 200, colors);
-    const customScopeSelector = createScopeSelect('all', true, 180, 200, colors);
-    const customStatsTypeSelector = createStatsTypeSelect('all', true, 180, 200, colors);
+    const customSelector = createTypeSelect('noms', true, 180,1); //, colors);
+    const customScopeSelector = createScopeSelect('all', true,  180,1); //, colors);
+    const customStatsTypeSelector = createStatsTypeSelect('all', true, 180,1); // colors);
     //  const typeValues = ['all', 'directAncestors', 'ancestors', 'directDescendants', 'descendants'];
-
 
     // Ajouter l'ID pour la fonction moveSelector
     customSelector.id = 'statsModal-search-type';
@@ -757,16 +802,43 @@ function setupModalEvents() {
     const endYear = document.getElementById('stats-date-end');
     const dateLabel = document.getElementById('stats-date-label');
     const dateLabel0 = document.getElementById('stats-date-label0');
-    
-    // const helpText = document.getElementById('stats-help-text');
 
+    const modal =document.getElementById('stats-modal'); 
+    // Gestion du bouton ⚙️ pour afficher/masquer le filtre par date
+    const settingsButton = modal.querySelector('#statsModal-settings-button');
+    const dateSection = modal.querySelector('.date-filter-section');
+    const searchRootSection = modal.querySelector('.stats-searchRoot-section');
+    const statsTypeSection = modal.querySelector('.stats-statsType-section');
+    const statsHelp = modal.querySelector('.stats-help');
+
+    dateSection.style.display = 'none';
+    searchInput.style.display = 'none';        
+     
+    statsTypeSection.style.visibility  = 'hidden';
+    searchRootSection.style.visibility = 'hidden';   
     const searchRoot = document.getElementById('statsModal-search-root');
-    if (searchScope.value != 'all') {
-        searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
-        searchRoot.style.display =  'flex';
-    } else {
-        searchRoot.style.display =  'none';
-    }
+
+    statsHelp.style.marginTop = '-50px';
+
+    settingsButton.addEventListener('click', () => {
+        const visible = dateSection.style.display !== 'none';
+        dateSection.style.display = visible ? 'none' : 'flex';
+        searchInput.style.display = visible ? 'none' : 'flex';        
+
+        statsTypeSection.style.visibility = visible ? 'hidden' : 'visible';        
+        searchRootSection.style.visibility = visible ? 'hidden' : 'visible';   
+
+        if (visible) { searchRoot.style.display =  'none'; }
+        else if (searchScope.value != 'all') {
+            searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
+            searchRoot.style.display =  'flex';
+        } else {
+            searchRoot.style.display =  'none';
+        }
+        if (!visible) {statsHelp.style.marginTop = '5px';}
+        else  {statsHelp.style.marginTop = '-50px';}
+    });
+
     
     // Changer le texte d'aide selon le type sélectionné
 
@@ -804,12 +876,8 @@ function setupModalEvents() {
             dateLabel.style.display = 'flex';
             dateLabel0.style.display = 'flex';
         }
-
-
         updatehelpText();
     });
-
-
 
 
     // Recherche en appuyant sur Entrée dans le champ de recherche
@@ -866,26 +934,22 @@ function setupModalEvents() {
         const selectorLabel = document.getElementById('statsModal-search-type-label');
         const typeSection = document.querySelector('.stats-type-section');
         const inputSection = document.querySelector('.stats-input-section');
-        const searchButton = document.getElementById('statsModal-search-button');
-        const searchTerm = document.getElementById('statsModal-search-input');
         
         if (typeSection && inputSection)  {
+        // voir la réorganisation dans le css avec des numéros d'ordre pour la /* Réorganisation en mode paysage mobile */
             if (window.innerHeight < 500) {
                 // Hauteur faible (mode paysage) : déplacer le sélecteur
-                // inputSection.appendChild(selectorLabel);
-                // inputSection.appendChild(searchButton);
-                // inputSection.insertBefore(selector, selectorLabel);
                 inputSection.appendChild(selector);
                 inputSection.appendChild(selectorLabel);
                 typeSection.style.display = 'none';
             } else {
                 // Hauteur normale (mode portrait) : remettre le sélecteur
-                // inputSection.insertBefore(searchTerm, searchButton);
                 typeSection.appendChild(selector);
                 typeSection.appendChild(selectorLabel);
                 typeSection.style.display = 'flex';
             }
         }
+
     }
 
     // Appliquer au chargement

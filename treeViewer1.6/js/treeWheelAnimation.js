@@ -4063,7 +4063,8 @@ function showFortuneInstructions() {
     const instructions = document.createElement("div");
     instructions.style.cssText = `
         position: fixed;
-        top: 80px;
+        /* top: 80px; */
+        bottom: 20%;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(0,0,0,0.8);

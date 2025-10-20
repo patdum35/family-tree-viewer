@@ -923,8 +923,6 @@ function adjustModalOnResize(modal, innerContent) {
     }, 200); // Augmenter le délai à 300ms pour plus de sécurité
 }
 
-
-
 async function startQuiz(personId)
 {
     const personData = state.gedcomData.individuals[personId];
@@ -977,8 +975,6 @@ async function readPersonSheet(personId) {
 }
 window.readPersonSheet = readPersonSheet; 
    
-
-
 
 /**
 * Transforme les URLs en liens cliquables

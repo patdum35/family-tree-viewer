@@ -1,4 +1,4 @@
-import { state, showAndRestoreTreeButtons, displayGenealogicTree } from './main.js';
+import { state, showAndRestoreTreeButtons, displayGenealogicTree, updateRadarButtonText } from './main.js';
 import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
@@ -65,7 +65,7 @@ export function getTranslation(key) {
         'expandedOptionAscDir': 'Ascendants directs       de la racine',
         'expandedOptionAscend': 'Ascendants + fratrie     de la racine',
         'expandedOptionDescDir': 'Descendants directs     de la racine',
-        'expandedOptionDescend': 'Descendants + conj.     de la racine',
+        'expandedOptionDescend': 'Descend. + conjoints     de la racine',
 
         'expandedOptionGlobal': 'Statistiques Globales', 
         'expandedOptionPerCentury': 'Statistiques par siècle', 
@@ -131,10 +131,10 @@ export function getTranslation(key) {
         'expandedOptionMariage': 'Age at marriage',
         'expandedOptionNbEnf': 'Number of children',
         'expandedOptionTout': 'All file',
-        'expandedOptionAscDir': 'Direct ancestors of root',
-        'expandedOptionAscend': 'Ancestors + siblings of root',
-        'expandedOptionDescDir': 'Direct descendants of root',
-        'expandedOptionDescend': 'Descendants + spouses of root',
+        'expandedOptionAscDir': 'Direct ancestors         of root',
+        'expandedOptionAscend': 'Ancestors + siblings     of root',
+        'expandedOptionDescDir': 'Direct descendants       of root',
+        'expandedOptionDescend': 'Descendts. + spouses       of root',
 
         'expandedOptionGlobal': 'Global Statistics',
         'expandedOptionPerCentury': 'Statistics by Century',
@@ -195,15 +195,18 @@ export function getTranslation(key) {
         'expandedOptionMetiers': 'Profesiones',
         'expandedOptionLieux': 'Lugares',
         'expandedOptionVie': 'Duración de vida',
-        'expandedOptionProcreat': 'Edades de procreación',
-        'expandedOption1erEnf': 'Edad del primer hijo',
+        'expandedOptionProcreat': 'Edades de procreació',
+        'expandedOption1erEnf':   'Edad del primer hijo',
         'expandedOptionMariage': 'Edad de matrimonio',
         'expandedOptionNbEnf': 'Número de hijos',
         'expandedOptionTout': 'Todo el archivo',
-        'expandedOptionAscDir': 'Ascendientes directos de la raíz',
-        'expandedOptionAscend': 'Ascendientes + hermanos de la raíz',
-        'expandedOptionDescDir': 'Descendientes directos de la raíz',
-        'expandedOptionDescend': 'Descendientes + cónyuges de la raíz',
+
+        'expandedOptionAscDir': 'Ascendient. directos        de la raíz',
+        'expandedOptionAscend': 'Ascend. + hermanos       de la raíz',
+        'expandedOptionDescDir': 'Descendient. directos       de la raíz',
+        'expandedOptionDescend': 'Descend. + cónyuges       de la raíz',
+
+
 
         'expandedOptionGlobal': 'Estadísticas Globales',
         'expandedOptionPerCentury': 'Estadísticas por Siglo',
@@ -264,18 +267,19 @@ export function getTranslation(key) {
         'expandedOptionMetiers': 'Foglalkozások',
         'expandedOptionLieux': 'Helyek',
         'expandedOptionVie': 'Élettartam',
-        'expandedOptionProcreat': 'Szaporodási életkorok',
-        'expandedOption1erEnf': 'Első gyermek életkora',
-        'expandedOptionMariage': 'Házasságkötési életkor',
+        'expandedOptionProcreat': 'Szaporodási életkor.',
+        'expandedOption1erEnf':   'Első gyermek életkora',
+        'expandedOptionMariage':  'Házasságkötési életk.',
         'expandedOptionNbEnf': 'Gyermekek száma',
         'expandedOptionTout': 'Teljes fájl',
-        'expandedOptionAscDir': 'Gyökér közvetlen ősei',
-        'expandedOptionAscend': 'Gyökér ősei + testvérek',
-        'expandedOptionDescDir': 'Gyökér közvetlen utódai',
-        'expandedOptionDescend': 'Gyökér utódai + házastársak',
+     
+        'expandedOptionAscDir': 'Közvetlen ősei             a gyökérnek',
+        'expandedOptionAscend': 'Ősök + testvérek           a gyökérnek',
+        'expandedOptionDescDir': 'Közvetlen utódai           a gyökérnek',
+        'expandedOptionDescend': 'Utódok + házastársak       a gyökérnek',
 
-        'expandedOptionGlobal': 'Globális statisztikák',
-        'expandedOptionPerCentury': 'Statisztikák évszázadonként',
+        'expandedOptionGlobal':     'Globális statisztikák',
+        'expandedOptionPerCentury': 'Századi statisztikák',
 
         'labelPersonneRacine': 'Gyökérszemély',
         'searchPlaceholder': 'gyökér keresése',
@@ -713,10 +717,6 @@ export function closeCloudName() {
     resetHamburgerButtonPosition();
     showHamburgerButtonForcefully();
 
-    // Pour désactiver le fond d'écran
-    console.log("\n\n re-Désactivation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
-    enableBackground(true, true);
-    state.backgroundEnabled = true;
 
     showAndRestoreTreeButtons();
 
@@ -724,7 +724,11 @@ export function closeCloudName() {
 
     setTimeout(() => {
         closeAllModals();
-    }, 300);
+    }, 200);
+
+
+
+
 
     state.isWordCloudEnabled = false; // le nuage de mots est désactivé
 
@@ -748,20 +752,26 @@ export function closeCloudName() {
 
     state.isRadarEnabled = (state.previousMode === 'radar') ? true : false;
 
+    updateRadarButtonText();
+
     if (state.isRadarEnabled) {
         enableFortuneMode();
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+    } 
+
+    buttonsOnDisplay(nameCloudState.isButtonOnDisplayBeforeCloud); 
+
+
+    if (state.backgroundEnabled) {
+        setTimeout(() => {
+            // Pour ré-activer le fond d'écran
+            console.log("\n\n re-activation du fond d'écran depuis setupModalEvents dans nameCloudUI.js \n\n");
+            enableBackground(true, true);
+        }, 200);
     }
 
-}
 
-// // Fonction pour fermer depuis l'extérieur
-// export function closeCurrentNameCloud() {
-//     if (state.currentNameCloudModal) {
-//         closeCloudName(state.currentNameCloudModal);
-//         state.currentNameCloudModal = null;
-//     }
-// }
+}
 
 function setupModalEvents(modal, closeButton, generateNameCloud) {
     // Événement pour le bouton Fermer
@@ -942,30 +952,56 @@ function showNameCloud(nameData, config) {
     // Crée un conteneur searchRootOverlay pour le sélecteur resultsSelectTree 
     let searchRootOverlay = document.getElementById('resultsTreeOverlay');
     if (!searchRootOverlay) {
-    searchRootOverlay = document.createElement('div');
-    searchRootOverlay.id = 'resultsTreeOverlay';
-    searchRootOverlay.style.position = 'fixed';
-    searchRootOverlay.style.top = '-3px';
-    searchRootOverlay.style.left = '250px';
-    searchRootOverlay.style.zIndex = '1100';
-    searchRootOverlay.style.pointerEvents = 'auto'; // <-- cliquable
-    document.body.appendChild(searchRootOverlay);
+        searchRootOverlay = document.createElement('div');
+        searchRootOverlay.id = 'resultsTreeOverlay';
+        searchRootOverlay.style.position = 'fixed';
+        searchRootOverlay.style.left = '235px';
+        searchRootOverlay.style.zIndex = '1100';
+        searchRootOverlay.style.pointerEvents = 'auto'; // <-- cliquable
+        searchRootOverlay.style.display = 'flex ';
+        searchRootOverlay.style.alignItems = 'center '; // petit espace entre les éléments
+        document.body.appendChild(searchRootOverlay);
+        // Mets les sélecteurs dans l'overlay
+        searchRootOverlay.appendChild(nameCloudState.searchInputTree);
+        searchRootOverlay.appendChild(nameCloudState.resultsSelectTree);
     }
 
-    // Mets le sélecteur dans l'overlay
-    searchRootOverlay.appendChild(nameCloudState.resultsSelectTree);
-    searchRootOverlay.appendChild(nameCloudState.searchInputTree);
+    // Ajuste la direction selon la largeur de l’écran
+    function updateOverlayLayout() {
+        if (!state.isWordCloudEnabled) return;
+        if(window.innerWidth > 420) {
+            searchRootOverlay.style.top = '20px';
+            searchRootOverlay.style.flexDirection = 'row';
+            searchRootOverlay.style.gap = '10px';
+            nameCloudState.searchInputTree.style.maxHeight = '26px';
+            // ordre sans déplacer les éléments
+            nameCloudState.searchInputTree.style.order = 0; // search à gauche
+            nameCloudState.resultsSelectTree.style.order = 1; // results à droite
+        } else {
+            searchRootOverlay.style.top = '-3px';
+            searchRootOverlay.style.flexDirection = 'column';
+            searchRootOverlay.style.gap = '0px';
+            nameCloudState.searchInputTree.style.maxHeight = '20px';
+            nameCloudState.searchInputTree.style.marginLeft = '-7px';
+            nameCloudState.searchInputTree.style.marginTop = '1px';
+            nameCloudState.searchInputTree.style.minWidth = '68px';
+            // ordre sans déplacer les éléments
+            nameCloudState.resultsSelectTree.style.order = 0; // results en haut
+            nameCloudState.searchInputTree.style.order = 1; // search en bas
+        }
+    }
 
-    nameCloudState.searchInputTree.style.setProperty('max-height', '20px', 'important');
-    nameCloudState.searchInputTree.style.setProperty('margin-left', '-7px', 'important');  
-    nameCloudState.searchInputTree.style.setProperty('margin-top', '1px', 'important');  
-    nameCloudState.searchInputTree.style.setProperty('min-width', '68px', 'important'); 
+    // Appel initial + écoute du redimensionnement
+    updateOverlayLayout();
+    window.addEventListener('resize', updateOverlayLayout);
+
+
 
     // console.log('\n\n\n *******  -debug in showNameCloud', nameCloudState.searchInputTree, nameCloudState.resultsSelectTree, nameCloudState.originalStyleSearch, nameCloudState.originalInlineStyleSearchCss )
 
     function updateRootPersonVisibility() {
         const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(scopeSelect.value);
-        searchRootOverlay.style.display = isRootPersonNeeded ? 'block' : 'none';
+        searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
 
     }
     scopeSelect.addEventListener('change', updateRootPersonVisibility);
@@ -1282,7 +1318,6 @@ export const createNameCloudUI = {
     }
 };
 
-// Fonction à ajouter dans nameCloudUI.js
 function createMapButton() {
     const mapButton = document.createElement('button');
     mapButton.innerHTML = '🌍'; //'🗺️';

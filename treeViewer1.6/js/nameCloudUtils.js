@@ -241,6 +241,7 @@ export function hasDateInRange(person, config, stats) {
 
     // Vérifier dates directes
     
+    // console.log('\n\n Debug: Checking person ID', person.id, person.name, person);
     if (person.birthDate && isYearIntarget(extractYear(person.birthDate))) {
         // stats.directDates.birth++;
         // stats.directDates.people.add(person.id);

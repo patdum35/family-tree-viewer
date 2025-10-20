@@ -178,7 +178,7 @@ function getUITranslation(key) {
   }
 
 
-export async function displayHeatMap(personId = null, currentSearchResults = null, isResultsFormated = false, newConfig = null, title = null, isOnlyOnePerson = false, personName = null) {
+export async function displayHeatMap(personId = null, currentSearchResults = null, isResultsFormated = false, newConfig = null, title = null, isOnlyOnePerson = false, personName = null, showPersonListModalCounter = null) {
 
 
     // // si le mode animation était lancé, le mettre en pause
@@ -286,7 +286,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
 
             } else {
                 // console.log('- debug isOnlyOnePerson = true call to  createIndividualLocationMap with ', null, heatmapData, isOnlyOnePerson, personName)
-                createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);
+                createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName, showPersonListModalCounter);
             }
 
 
@@ -296,7 +296,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
             if (isOnlyOnePerson) {         
                 // console.log('- debug isOnlyOnePerson = true call to  createIndividualLocationMap with ', null, heatmapData, isOnlyOnePerson, personName)
                 setTimeout(() => {
-                    createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName);  
+                    createIndividualLocationMap(null, heatmapData, isOnlyOnePerson, personName, showPersonListModalCounter);  
                 }, 100); // Petit délai pour s'assurer que le DOM est prêt
             }  
         }
@@ -319,7 +319,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
  * @param {string} personId - ID de la personne
  * @returns {Promise<void>}
  */
-export async function createIndividualLocationMap(personId, heatmapData = null, isOnlyOnePerson = false, personName = null ) {
+export async function createIndividualLocationMap(personId, heatmapData = null, isOnlyOnePerson = false, personName = null , showPersonListModalCounter = null) {
     // Vérifier que le wrapper de la heatmap existe
     const heatmapWrapper = document.getElementById('namecloud-heatmap-wrapper');
     if (!heatmapWrapper) {
@@ -495,7 +495,7 @@ export async function createIndividualLocationMap(personId, heatmapData = null, 
                     const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
                     const isVisible = (allModals) && allModals[allModals.length - 1] && getComputedStyle(allModals[allModals.length - 1]).display !== 'none' && getComputedStyle(allModals[allModals.length - 1]).visibility !== 'hidden';
                     if (isVisible) { 
-                        showHeatmapFromShowPersonList();
+                        showHeatmapFromShowPersonList(showPersonListModalCounter);
                     }
                 } 
 

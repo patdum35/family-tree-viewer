@@ -944,7 +944,7 @@ export function createStatsModal(nameData, type = 'duree_vie', frequencyStatsMod
 
 
 
-export function createLocationIcon(isfromSearch = true, index, text, newConfig, searchTerm, self, nbPeople = 1, originalName = null, currentConfig, filter_string, filter_string2) {
+export function createLocationIcon(isfromSearch = true, index, text, newConfig, searchTerm, self, nbPeople = 1, originalName = null, currentConfig, filter_string, filter_string2, showPersonListModalIndex = null) {
 
     const locationIcon = document.createElement('span');
     locationIcon.className = 'location-icon';
@@ -1020,8 +1020,8 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
                     // console.log('-debug displayHeatMap true =', personList.results, personList.results.length, filter_string, ', firstItemInList= ', (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null )
 
 
-                    console.log('-debug call to displayHeatMap from createLocationIcon');
-                    displayHeatMap(null, personList.results, false, newConfig, filter_string, (nbPeople === 1), (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null).then(() => {
+                    // console.log('\n\n ------debug call to displayHeatMap from createLocationIcon, showPersonListModalIndex', showPersonListModalIndex,'\n\n');
+                    displayHeatMap(null, personList.results, false, newConfig, filter_string, (nbPeople === 1), (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null, showPersonListModalIndex).then(() => {
                         let content;
                         const modal = document.getElementById('search-modal')
                         const isVisible = modal && getComputedStyle(modal).display !== 'none' && getComputedStyle(modal).visibility !== 'hidden';

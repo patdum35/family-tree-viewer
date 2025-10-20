@@ -713,6 +713,7 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
                     } else {
                         autoZoomScale = Math.max(0.3,-(1.2/1000 )*totalWords + 2.2);                    
+                        // autoZoomScale = Math.max(0.3,-(1.2/1000 )*totalWords/2 + 2.2);  
                     }
 
                     // in this case the font is using linear scale : see createFontScale, other case is log scale

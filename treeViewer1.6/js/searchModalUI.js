@@ -723,13 +723,14 @@ export function openSearchModal(firstName = null, lastName = null) {
                 <div class="search-input-section">
                     <input type="text" id="searchModal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
                     <button id="searchModal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
+                    <button id="searchModal-settings-button" >⚙️</button>
                 </div>
 
                 <div class="search-type-section">
                     <div id="searchModal-search-type-container"></div>
                 </div>
 
-                <div class="date-filter-section">
+                <div class="date-filter-section" style="display: none;">
                     <input type="number" id="date-start" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearStartPlaceholder}" min="1000" max="2100">
                     <span>- </span>
                     <input type="number" id="date-end" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].yearEndPlaceholder}" min="1000" max="2100">
@@ -976,7 +977,6 @@ export function openSearchModal(firstName = null, lastName = null) {
                 /* width: 100% !important;*/ /* Utiliser plus de largeur */
                 /*max-width: 700px !important;*/ /* Augmenter la largeur max */
             }   
-
         }
 
 
@@ -1017,13 +1017,10 @@ export function openSearchModal(firstName = null, lastName = null) {
                 /* font-weight: bold; */
                 font-size: 13px;
             }
-
-
         }
         </style>
     `;
-
-    
+ 
     // Ajouter les styles au document
     if (!document.getElementById('searchModal-styles')) {
         const styleElement = document.createElement('div');
@@ -1076,6 +1073,25 @@ export function openSearchModal(firstName = null, lastName = null) {
     `;
     document.head.appendChild(style);
 
+
+    const extraStyle = document.createElement('style');
+    extraStyle.textContent = `
+        #searchModal-settings-button {
+            background: #f9efdfff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0px 0px;
+        }
+        #searchModal-settings-button:hover {
+            background: #e0e0e0;
+        }
+    `;
+    document.head.appendChild(extraStyle);
+
+
+
     // FORCER l'application après le CSS tactile du resizableModalUtils.js dans la function makeModalDraggableAndResizable(modal, handle)
     // car le makeModalDraggableAndResizable rendait le scrollbar invisible
     setTimeout(() => {
@@ -1105,6 +1121,19 @@ export function openSearchModal(firstName = null, lastName = null) {
     setupModalEvents();
 
     makeModalInteractive(modal);   
+
+
+    // Gestion du bouton ⚙️ pour afficher/masquer le filtre par date
+    const settingsButton = modal.querySelector('#searchModal-settings-button');
+    const dateSection = modal.querySelector('.date-filter-section');
+    // dateSection.style.display = 'none';
+
+    settingsButton.addEventListener('click', () => {
+        const visible = dateSection.style.display !== 'none';
+        dateSection.style.display = visible ? 'none' : 'flex';
+    });
+
+
 
     window.addEventListener('resize', () => resizeModal(content, true));
 
