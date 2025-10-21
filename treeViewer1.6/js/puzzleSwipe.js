@@ -6,7 +6,7 @@ style.textContent = `
 body {
     margin: 0;
     font-family: Arial;
-    min-height: 100.5vh;
+    min-height: 120vh;
     background: linear-gradient(to bottom, #87ceeb, #f0e68c);
     overflow-x: hidden;
 }
@@ -22,7 +22,8 @@ body {
     position: fixed;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    touch-action: none;
+    /* touch-action: none; */
+    pointer-events: none;
     cursor: grab;
     z-index: 1;
     text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
@@ -137,7 +138,8 @@ piece.addEventListener('touchmove', e => {
 
     // Déplacer la pièce pour qu'elle suive le doigt (viewport coords)
     const newTop = pieceStartTop - deltaY;
-    piece.style.top = `${newTop}px`;
+    // piece.style.top = `${newTop}px`;
+    slot.style.top = `${newTop}px`;
 
     // Faire scroller la page en parallèle (scroll réel)
     // on scrolle d'une fraction du delta si tu veux adoucir, sinon delta
@@ -153,6 +155,37 @@ piece.addEventListener('touchend', e => {
     piece.classList.remove('dragging');
     checkPieceInSlot() ;
 });
+
+
+
+
+
+
+window.addEventListener('scroll', () => {
+    // const pieceRect = piece.getBoundingClientRect();
+    // const slotRect  = slot.getBoundingClientRect();
+
+    // const inSlot = (
+    //     pieceRect.top + pieceRect.height/8 > slotRect.top &&
+    //     pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
+    //     pieceRect.left + pieceRect.width/8 > slotRect.left &&
+    //     pieceRect.right - pieceRect.width/8 < slotRect.right
+    // );
+
+    // if (inSlot) {
+    //     message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
+    //     spawnConfetti();
+    //     audio.play().catch(()=>{});
+    //     if (navigator.vibrate) navigator.vibrate([100,50,100]);
+    // } else {
+    //     message.textContent = "Glissez plus haut pour cacher la barre";
+    // }
+
+    checkPieceInSlot() ;
+
+
+});
+
 
 
 
