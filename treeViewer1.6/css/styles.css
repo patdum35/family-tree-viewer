@@ -3,7 +3,7 @@ body {
     margin: 0; 
     font-family: Arial;
     /* overflow: hidden; */
-    min-height: 200vh; /* juste pour tester */
+    min-height: 110vh; /* pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
 } 
 
 #tree-svg {

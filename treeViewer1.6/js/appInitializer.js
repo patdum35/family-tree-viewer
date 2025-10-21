@@ -216,7 +216,18 @@ function initializeEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
         const loadDataButton = document.getElementById('loadDataButton');
         if (loadDataButton) {
-            loadDataButton.addEventListener('click', loadData);
+            loadDataButton.addEventListener('click', () => {
+
+                window.scrollTo({
+                    top: 1,
+                    behavior: 'smooth'
+                });
+
+                // Optionnel : reviens en haut après un petit délai
+                setTimeout(() => window.scrollTo(0, 0), 400);
+
+                loadData();
+            });
         } else {
             console.warn("Élément 'loadDataButton' non trouvé");
         }
