@@ -218,15 +218,16 @@ function initializeEventListeners() {
         if (loadDataButton) {
             loadDataButton.addEventListener('click', () => {
 
-                window.scrollTo({
-                    top: 50,
+                // On s'assure que le body est bien plus haut que l’écran
+                document.body.style.minHeight = '150vh';
+
+                // Petit délai pour forcer le navigateur à recalculer la hauteur
+                setTimeout(() => {
+                    window.scrollTo({
+                    top: 200,
                     behavior: 'smooth'
-                });
-
-                // Optionnel : reviens en haut après un petit délai
-                // setTimeout(() => window.scrollTo(0, 0), 400);
-
-                setTimeout(() => console.log('debug'), 200);
+                    });
+                }, 50);
 
                 loadData();
             });
