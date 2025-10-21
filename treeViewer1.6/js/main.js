@@ -477,6 +477,12 @@ function initialize() {
     loadGedcomButton.style.padding = '0px';
     loadGedcomButton.style.border = 'none';
     loadGedcomButton.style.borderRadius = '6px';
+    loadGedcomButton.style.position = 'fixed';
+    loadGedcomButton.style.top = '5px';
+    loadGedcomButton.style.left = '10px';
+    loadGedcomButton.style.zIndex = '1000';
+     
+
 
     const loadGedcomButtonSpan = loadGedcomButton.querySelector('span');
     loadGedcomButtonSpan.style.display = 'inline-block';
@@ -490,6 +496,8 @@ function initialize() {
         1px -1px 0 #716f6fff,
         -1px 1px 0 #716f6fff
     `;
+
+
 
     // Animation subtile au survol
     loadGedcomButton.addEventListener('mouseover', () => {
@@ -512,6 +520,21 @@ function initialize() {
         }
     `;
     document.head.appendChild(style);
+
+
+
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.style.top = window.innerHeight/2 - 30 + 'px'; //'300px';
+    }
+
+    const startTitle = document.getElementById('startTitle')
+    if (startTitle) {
+        startTitle.style.top = window.innerHeight/2 -30 + 125 + 'px'; //'300px';
+    }
+
+
+
 
 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
@@ -2138,6 +2161,18 @@ window.addEventListener('resize', () => {
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
+
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.style.top = window.innerHeight/2 - 30 + 'px'; //'300px';
+    }
+
+    const startTitle = document.getElementById('startTitle')
+    if (startTitle) {
+        startTitle.style.top = window.innerHeight/2 -30 + 125 + 'px'; //'300px';
+    }
+
+
     // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
 });
 

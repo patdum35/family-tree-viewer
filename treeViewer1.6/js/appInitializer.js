@@ -1,5 +1,6 @@
 
 // Importation des fonctions depuis les différents modules
+
 import { processNamesCloudWithDate } from './nameCloud.js';
 import { 
     openGedcomModal,
@@ -47,6 +48,15 @@ import {
 } from './mainUI.js'
 
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
+
+
+
+
+// // ou si tu veux attendre que tout soit chargé
+// document.addEventListener('DOMContentLoaded', () => {
+
+
+// });
 
 
 
@@ -227,6 +237,16 @@ function initializeEventListeners() {
         } else {
             console.warn("Élément 'root-person-results' non trouvé");
         }
+
+
+        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe /n/n/");
+
+        import('./puzzleSwipe.js')
+            .then(() => console.log("PuzzleSwipe chargé"))
+            .catch(err => console.error(err));
+
+
+
     });
 }
 
