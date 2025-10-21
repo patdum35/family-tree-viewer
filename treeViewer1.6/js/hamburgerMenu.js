@@ -1961,14 +1961,14 @@ function syncCustomSelectors() {
                 const originalGen = document.getElementById('generations');
                 originalGen.style.visibility = 'visible';
 
-                // console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
 
                 if (genPlaceholder && originalGen) {
                   const clone = originalGen.cloneNode(true);
                   clone.id = 'menu-generations';
                   
                   genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
-                  // console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                  console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
                   
                   clone.addEventListener('click', (e) => {
                     const currentGen = document.getElementById('generations');

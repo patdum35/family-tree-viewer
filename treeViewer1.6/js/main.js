@@ -735,7 +735,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
         showHamburgerMenu();
 
 
-        toggleFullScreen();
+        // toggleFullScreen();
 
 
         setTimeout(() => {
@@ -2160,3 +2160,13 @@ window.addEventListener('resize', () => {
 
 //     }
 // });
+
+
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+
+    console.log('\n\n\n -**** DEBUG : scrollTo(0,1) after 100ms to hide address bar on iOS **********\n\n\n')
+    window.scrollTo(0, 1); // scroll d’1px pour pousser la barre hors écran
+  }, 100);
+});

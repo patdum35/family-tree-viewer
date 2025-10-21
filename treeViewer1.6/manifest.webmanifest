@@ -3,7 +3,8 @@
   "short_name": "treeViewer",
   "description": "Genealogic Tree Viewer",
   "start_url": "./treeViewer1.6.html",
-  "display": "standalone",
+  "display": "minimal-ui",
+  "scope": "/",
   "background_color": "#ffffff",
   "theme_color": "#4361ee",
   "icons": [
