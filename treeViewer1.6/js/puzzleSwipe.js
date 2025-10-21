@@ -75,6 +75,10 @@ slot.style.filter =  'brightness(5.0)';
 
 document.body.appendChild(slot);
 
+
+const slotInitialTop = slot.offsetTop;
+
+
 const piece = document.createElement('div');
 piece.id = 'piece';
 piece.textContent = "🧩"; // pièce à déplacer
@@ -162,27 +166,9 @@ piece.addEventListener('touchend', e => {
 
 
 window.addEventListener('scroll', () => {
-    // const pieceRect = piece.getBoundingClientRect();
-    // const slotRect  = slot.getBoundingClientRect();
 
-    // const inSlot = (
-    //     pieceRect.top + pieceRect.height/8 > slotRect.top &&
-    //     pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
-    //     pieceRect.left + pieceRect.width/8 > slotRect.left &&
-    //     pieceRect.right - pieceRect.width/8 < slotRect.right
-    // );
-
-    // if (inSlot) {
-    //     message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
-    //     spawnConfetti();
-    //     audio.play().catch(()=>{});
-    //     if (navigator.vibrate) navigator.vibrate([100,50,100]);
-    // } else {
-    //     message.textContent = "Glissez plus haut pour cacher la barre";
-    // }
-
+    slot.style.top = `${slotInitialTop + window.scrollY * 1.0}px`;
     checkPieceInSlot() ;
-
 
 });
 
