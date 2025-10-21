@@ -219,12 +219,14 @@ function initializeEventListeners() {
             loadDataButton.addEventListener('click', () => {
 
                 window.scrollTo({
-                    top: 1,
+                    top: 50,
                     behavior: 'smooth'
                 });
 
                 // Optionnel : reviens en haut après un petit délai
-                setTimeout(() => window.scrollTo(0, 0), 400);
+                // setTimeout(() => window.scrollTo(0, 0), 400);
+
+                setTimeout(() => console.log('debug'), 200);
 
                 loadData();
             });
