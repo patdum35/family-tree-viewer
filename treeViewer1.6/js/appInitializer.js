@@ -226,7 +226,20 @@ function initializeEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
         const loadDataButton = document.getElementById('loadDataButton');
         if (loadDataButton) {
-            loadDataButton.addEventListener('click', loadData);
+            loadDataButton.addEventListener('click', () => { 
+
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+
+                    document.body.style.height = `${window.innerHeight}px`;
+                    document.body.style.overflow = 'hidden'; // empêche le scroll après
+
+
+                    console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                }, 200); 
+
+                loadData();
+                });
         } else {
             console.warn("Élément 'loadDataButton' non trouvé");
         }

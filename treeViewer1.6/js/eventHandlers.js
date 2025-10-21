@@ -645,7 +645,8 @@ export async function returnToLogin() {
     document.getElementById('tree-container').style.display = 'none';
 
 
-    
+    document.body.style.height = `${window.innerHeight + window.innerHeight*0.2}px`;
+    document.body.style.overflow = '';
     
     // Masquer le menu hamburger
     hideHamburgerMenu();
