@@ -216,21 +216,7 @@ function initializeEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
         const loadDataButton = document.getElementById('loadDataButton');
         if (loadDataButton) {
-            loadDataButton.addEventListener('click', () => {
-
-                // // On s'assure que le body est bien plus haut que l’écran
-                // document.body.style.minHeight = '150vh';
-
-                // // Petit délai pour forcer le navigateur à recalculer la hauteur
-                // setTimeout(() => {
-                //     window.scrollTo({
-                //     top: 200,
-                //     behavior: 'smooth'
-                //     });
-                // }, 50);
-
-                loadData();
-            });
+            loadDataButton.addEventListener('click', loadData);
         } else {
             console.warn("Élément 'loadDataButton' non trouvé");
         }
