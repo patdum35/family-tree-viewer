@@ -1,5 +1,8 @@
 /* Contenu du fichier styles.css */
 
+
+:root { color-scheme: light; }
+
 /* Empêche les navigateurs de forcer le mode sombre */
 html {
   color-scheme: light !important;
