@@ -225,6 +225,40 @@ function checkPieceInSlot() {
     } else {
         message.textContent = "Glissez plus haut pour cacher la barre";
     }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        console.log("Mode sombre activé par votre browser Web!");
+        message.style.top = '200px';    
+        message.textContent = "Mode sombre activé par votre browser Web!";
+        // afficher ton message d'avertissement
+    }
+
+
+
+    // créer un div invisible avec couleur connue
+    const testDiv = document.createElement('div');
+    testDiv.style.color = '#ffffff';
+    testDiv.style.display = 'none';
+    document.body.appendChild(testDiv);
+
+    // lire la couleur calculée
+    const computedColor = getComputedStyle(testDiv).color;
+    document.body.removeChild(testDiv);
+
+    if (computedColor !== 'rgb(255, 255, 255)') {
+        console.log("Couleurs transformées, probablement mode sombre forcé !");
+
+        message.style.top = '150px';    
+        message.textContent = "Couleurs transformées, probablement mode sombre forcé par votre browser Web!";
+        // avertir l'utilisateur
+    }
+
+
+
+
+
+
+
 }
 
 console.log("Puzzle amélioré prêt !");
