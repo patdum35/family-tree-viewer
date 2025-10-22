@@ -253,8 +253,35 @@ function checkPieceInSlot() {
         // avertir l'utilisateur
     }
 
+    function detectSamsungDarkMode(callback) {
+        // if (/Samsung/i.test(navigator.userAgent) && window.matchMedia) {
+            // Crée une image SVG blanche de 1x1 px
+            const img = new Image();
+            img.onload = function() {
+            const ctx = document.createElement('canvas').getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+            if (r < 255 || g < 255 || b < 255) {
+                // Le navigateur a transformé la couleur → mode sombre forcé
+                callback();
+            }
+            };
+            img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IndoaXRlIi8+PC9zdmc+';
+        // }
+        console.log('\n\n **** debug dark 2 ')
+    }
 
 
+    detectSamsungDarkMode(() => {
+        console.log('\n\n **** debug dark 1 ')
+        alert("Attention : votre navigateur force le mode sombre. Pour un affichage correct, activez le mode clair ou utilisez Chrome.");
+        
+        // Ou mieux, affiche un bandeau sur la page
+        const banner = document.createElement('div');
+        banner.textContent = "Votre navigateur force le mode sombre. Pour un rendu correct, utilisez Chrome ou désactivez 'Use website dark theme'.";
+        banner.style.cssText = "position:fixed;top:0;left:0;width:100%;background:#ffcc00;color:#000;padding:10px;text-align:center;z-index:10000;";
+        document.body.appendChild(banner);
+    });
 
 
 
