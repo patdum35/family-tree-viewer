@@ -2,8 +2,8 @@
 
 /* Empêche les navigateurs de forcer le mode sombre */
 html {
-  color-scheme: only light;
-  forced-color-adjust: none;
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
 }
 
 
