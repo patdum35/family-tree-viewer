@@ -804,6 +804,7 @@ function checkPieceInSlot() {
 
 
 
+
 }
 
 console.log("Puzzle amélioré prêt !");
