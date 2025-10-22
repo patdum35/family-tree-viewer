@@ -274,97 +274,16 @@ function initializeEventListeners() {
         if (loadDataButton) {
             loadDataButton.addEventListener('click', () => { 
 
-
-
-
-                //   robustScrollTo(50);
-
-
-
-
-                // // setTimeout(() => {
-                // //     window.scrollTo({ top: 0, behavior: 'auto' });
-
-                // //     document.body.style.height = `${window.innerHeight}px`;
-                // //     document.body.style.overflow = 'hidden'; // empêche le scroll après
-
-
-                // //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
-                // // }, 200); 
-
-
-                // setTimeout(() => {
-
-
-
-                //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
-                // }, 600); 
-
-
-
-
-                // robustScrollTo(0);
-
-
-
-                // setTimeout(() => {
-                //     // window.scrollTo({ top: 0, behavior: 'auto' });
-
-                //     document.body.style.height = `${window.innerHeight}px`;
-                //     document.body.style.overflow = 'hidden'; // empêche le scroll après
-
-
-                //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
-                // }, 200); 
-
-
-
-
-                // let lastY = window.scrollY;
-                // let stableCount = 0;
-
-                // const checkStable = () => {
-                //     const currentY = window.scrollY;
-                //     if (Math.abs(currentY - lastY) < 1) stableCount++;
-                //     else stableCount = 0;
-                //     lastY = currentY;
-
-                //     if (stableCount >= 3) {
-                //         // scroll terminé
-                //         window.scrollTo({ top: 0, behavior: 'auto' });
-                //         document.body.style.height = `${window.innerHeight}px`;
-                //         document.body.style.overflow = 'hidden';
-                //     } else {
-                //         requestAnimationFrame(checkStable);
-                //     }
-                // };
-
-                // requestAnimationFrame(checkStable);
-
-
-
-
-
-
-                // 1️⃣ Scroll pour faire disparaître le bandeau
-                robustScrollTo(50);
-
-                // 2️⃣ Attends un peu (le temps que le navigateur réagisse)
                 setTimeout(() => {
-                    robustScrollTo(0); // revient en haut
 
-                    // 3️⃣ Puis bloque le scroll après un petit délai supplémentaire
-                    setTimeout(() => {
-                        document.body.style.height = `${window.innerHeight}px`;
-                        document.body.style.overflow = 'hidden';
-                    }, 400); // laisse un peu de marge pour le retour en haut
-                }, 600); // ce délai dépend du mobile — 500 à 800 ms marche bien
+                    //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+                    window.scrollTo({ top: 0, behavior: 'auto' });
 
-
-
-
-
-
+                     // 2️⃣ Puis bloque le scroll 
+                    document.body.style.height = `${window.innerHeight}px`;
+                    document.body.style.overflow = 'hidden'; // empêche le scroll après
+                    // console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                }, 200); 
 
                 loadData();
                 });

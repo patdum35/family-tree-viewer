@@ -645,7 +645,8 @@ export async function returnToLogin() {
     document.getElementById('tree-container').style.display = 'none';
 
 
-    document.body.style.height = `${window.innerHeight + window.innerHeight*0.2}px`;
+    // remettre l'écran d'accueil en mode scroll vertical avec une taille d'écran plus grande pour autoriser le swipe vers le haut et faire disparaitre le bandeau du browser
+    document.body.style.height = `${window.innerHeight + window.innerHeight*0.2}px`; // on met 120% de hauteur d'écran !
     document.body.style.overflow = '';
     
     // Masquer le menu hamburger
