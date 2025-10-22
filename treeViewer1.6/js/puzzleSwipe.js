@@ -193,7 +193,7 @@ piece.addEventListener('touchend', e => {
 
 window.addEventListener('scroll', () => {
 
-    slot.style.top = `${slotInitialTop + window.scrollY * 1.0}px`;
+    slot.style.top = `${slotInitialTop + window.scrollY * 1.2}px`;
     checkPieceInSlot() ;
 
 });
