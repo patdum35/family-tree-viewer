@@ -323,6 +323,312 @@ function checkPieceInSlot() {
 
 
 
+
+    // async function getActualPixelColor(x, y) {
+    //     // 1. Capturer l'écran
+    //     try {
+    //         const stream = await navigator.mediaDevices.getDisplayMedia({
+    //             video: { 
+    //                 cursor: "never",
+    //                 displaySurface: "browser"
+    //             },
+    //             audio: false
+    //         });
+            
+    //         const video = document.createElement('video');
+    //         video.srcObject = stream;
+    //         await video.play();
+            
+    //         // 2. Créer un canvas pour analyser l'image
+    //         const canvas = document.createElement('canvas');
+    //         const ctx = canvas.getContext('2d');
+            
+    //         canvas.width = video.videoWidth;
+    //         canvas.height = video.videoHeight;
+            
+    //         // 3. Dessiner l'image capturée
+    //         ctx.drawImage(video, 0, 0);
+            
+    //         // 4. Lire le pixel
+    //         const imageData = ctx.getImageData(x, y, 1, 1);
+    //         const pixel = imageData.data;
+            
+    //         // 5. Arrêter le stream
+    //         stream.getTracks().forEach(track => track.stop());
+            
+    //         return {
+    //             r: pixel[0],
+    //             g: pixel[1],
+    //             b: pixel[2],
+    //             a: pixel[3],
+    //             hex: `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`,
+    //             rgba: `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`
+    //         };
+            
+    //     } catch (error) {
+    //         console.error('Erreur de capture:', error);
+    //         return null;
+    //     }
+    // }
+
+    // // Utilisation
+    // getActualPixelColor(100, 150).then(color => {
+    //     console.log('Couleur réelle:', color);
+    // });
+
+
+
+
+
+
+
+    // function getElementActualColor(element, relativeX = 0, relativeY = 0) {
+    //     // const rect = element.getBoundingClientRect();
+
+    //     const rect = piece.getBoundingClientRect();
+    //     // const slotRect  = slot.getBoundingClientRect();
+
+
+        
+    //     // Créer un canvas de la taille de l'élément
+    //     const canvas = document.createElement('canvas');
+    //     const ctx = canvas.getContext('2d');
+        
+    //     canvas.width = rect.width;
+    //     canvas.height = rect.height;
+        
+    //     // Récupérer le style calculé
+    //     const computedStyle = window.getComputedStyle(element);
+        
+    //     // Dessiner l'arrière-plan
+    //     if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+    //         ctx.fillStyle = computedStyle.backgroundColor;
+    //         ctx.fillRect(0, 0, rect.width, rect.height);
+    //     }
+        
+    //     // Si c'est un élément avec du texte
+    //     if (element.textContent && element.textContent.trim() !== '') {
+    //         ctx.fillStyle = computedStyle.color;
+    //         ctx.font = computedStyle.font;
+    //         ctx.textBaseline = 'top';
+            
+    //         // Essayer de positionner le texte approximativement
+    //         const fontSize = parseInt(computedStyle.fontSize) || 16;
+    //         ctx.fillText(element.textContent, 0, fontSize);
+    //     }
+        
+    //     // Si c'est une image
+    //     if (element.tagName === 'IMG' && element.complete) {
+    //         try {
+    //             ctx.drawImage(element, 0, 0, rect.width, rect.height);
+    //         } catch (e) {
+    //             console.warn('Impossible de dessiner l\'image:', e);
+    //         }
+    //     }
+        
+    //     // Lire le pixel
+    //     const imageData = ctx.getImageData(relativeX, relativeY, 1, 1);
+    //     const pixel = imageData.data;
+        
+    //     return {
+    //         r: pixel[0],
+    //         g: pixel[1],
+    //         b: pixel[2],
+    //         a: pixel[3],
+    //         hex: `#${pixel[0].toString(16).padStart(2, '0')}${pixel[1].toString(16).padStart(2, '0')}${pixel[2].toString(16).padStart(2, '0')}`,
+    //         rgba: `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`
+    //     };
+    // }
+
+
+
+
+    // // Lire la couleur de fond d'un élément
+    // const element = slot; //document.getElementById('input-form-firstName');
+    // const color = getElementActualColor(element, 10, 10);
+    // console.log('Couleur au point (10,10):', color);
+    
+    // // Lire la couleur du texte
+    // const textColor = getElementActualColor(element, 5, 15);
+    // console.log('Couleur du texte:', textColor);
+    
+    // // Lire une couleur d'un dégradé
+    // const gradientElement = document.querySelector('.test-div');
+    // const gradientColor1 = getElementActualColor(gradientElement, 10, 10);
+    // const gradientColor2 = getElementActualColor(gradientElement, 250, 10);
+    // console.log('Début du dégradé:', gradientColor1);
+    // console.log('Fin du dégradé:', gradientColor2);
+
+
+
+    window.tesCounter = 0;
+
+    // Fonction pour créer un élément carré blanc
+    function createTestSquare() {
+        const square = document.createElement('div');
+        square.id = 'testSquare';
+        square.style.width = '100px';
+        square.style.height = '100px';
+        square.style.backgroundColor = 'white';
+        square.style.border = '2px solid #333';
+        square.style.margin = '20px';
+        square.style.display = 'flex';
+        square.style.alignItems = 'center';
+        square.style.justifyContent = 'center';
+        square.style.color = 'black';
+        square.style.fontWeight = 'bold';
+        square.textContent = 'Test';
+        square.style.top = '200px';
+        square.style.top = '200px';
+        square.style.position = 'fixed';
+        
+        document.body.appendChild(square);
+        console.log('✅ Carré blanc créé avec succès!');
+        return square;
+    }
+
+    // Fonction pour lire la couleur (version sécurisée)
+    function getElementActualColor(element, relativeX = 0, relativeY = 0) {
+        // Vérification de sécurité
+        if (!element || !(element instanceof Element)) {
+            console.error('❌ Element invalide:', element);
+            return null;
+        }
+        
+        try {
+            const rect = element.getBoundingClientRect();
+            console.log('📏 Dimensions de l\'élément:', rect.width, 'x', rect.height);
+            
+            // Vérifier si l'élément est visible
+            if (rect.width === 0 || rect.height === 0) {
+                console.error('❌ Element invisible ou taille nulle');
+                return null;
+            }
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = Math.max(1, rect.width);
+            canvas.height = Math.max(1, rect.height);
+            
+            // Récupérer le style calculé
+            const computedStyle = window.getComputedStyle(element);
+            console.log('🎨 Couleur de fond calculée:', computedStyle.backgroundColor);
+            
+            // Dessiner l'arrière-plan
+            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                ctx.fillStyle = computedStyle.backgroundColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Dessiner le texte si présent
+            if (element.textContent && element.textContent.trim() !== '') {
+                ctx.fillStyle = computedStyle.color;
+                ctx.font = computedStyle.font;
+                ctx.textBaseline = 'top';
+                ctx.fillText(element.textContent, 10, 10);
+            }
+            
+            // S'assurer que les coordonnées sont dans les limites
+            const safeX = Math.max(0, Math.min(relativeX, canvas.width - 1));
+            const safeY = Math.max(0, Math.min(relativeY, canvas.height - 1));
+            
+            console.log('📍 Lecture du pixel aux coordonnées:', safeX, safeY);
+            
+            const imageData = ctx.getImageData(safeX, safeY, 1, 1);
+            const pixel = imageData.data;
+            
+            const result = {
+                r: pixel[0],
+                g: pixel[1],
+                b: pixel[2],
+                a: pixel[3],
+                hex: `#${pixel[0].toString(16).padStart(2, '0')}${pixel[1].toString(16).padStart(2, '0')}${pixel[2].toString(16).padStart(2, '0')}`,
+                rgba: `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`
+            };
+            
+            console.log('🎯 Couleur lue:', result);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Erreur dans getElementActualColor:', error);
+            return null;
+        }
+    }
+
+    // Fonction de test complète
+    // function testColorReading() {
+
+    if (window.tesCounter === 0) {
+        console.log('🚀 Début du test de lecture de couleur...');
+        
+        // Créer le carré de test
+        const testSquare = createTestSquare();
+        
+        // Attendre que l'élément soit rendu
+        setTimeout(() => {
+            console.log('🔍 Lecture de la couleur du carré...');
+            
+            // Tester plusieurs points
+            const points = [
+                { x: 10, y: 10, description: 'Coin supérieur gauche' },
+                { x: 50, y: 50, description: 'Centre' },
+                { x: 90, y: 90, description: 'Coin inférieur droit' }
+            ];
+            
+            points.forEach(point => {
+                console.log(`\n📌 Test ${point.description}:`);
+                const color = getElementActualColor(testSquare, point.x, point.y);
+                
+                if (color) {
+                    console.log(`✅ ${point.description}: ${color.hex} (RGB: ${color.r}, ${color.g}, ${color.b})`);
+                    
+                    // Vérifier si c'est bien du blanc (ou presque)
+                    if (color.r > 240 && color.g > 240 && color.b > 240) {
+                        console.log('🎉 SUCCÈS: Couleur blanche détectée!');
+                        // alert("🎉 SUCCÈS: Couleur blanche détectée!");
+                        
+                        // Ou mieux, affiche un bandeau sur la page
+                        const banner = document.createElement('div');
+                        banner.textContent = `🎉 SUCCÈS: Couleur blanche détectée!. (RGB: ${color.r}, ${color.g}, ${color.b})`;
+                        banner.style.cssText = "position:fixed;top:340px;left:100px;width:50%;background:#ffcc00;color:#000;padding:10px;text-align:center;z-index:10000;";
+                        document.body.appendChild(banner);
+
+
+                    } else {
+                        console.log('⚠️ ATTENTION: La couleur n\'est pas blanche pure');
+                        // alert("⚠️ ATTENTION: La couleur n\'est pas blanche pure'");
+                        
+                        // Ou mieux, affiche un bandeau sur la page
+                        const banner = document.createElement('div');
+                        banner.textContent = `⚠️ ATTENTION: La couleur n\'est pas blanche pure' (RGB: ${color.r}, ${color.g}, ${color.b})`;
+                        banner.style.cssText = "position:fixed;top:340px;left:100px;width:50%;background:#ffcc00;color:#000;padding:10px;text-align:center;z-index:10000;";
+                        document.body.appendChild(banner);
+
+                    }
+                }
+            });
+            
+        }, 100);
+        window.tesCounter++;
+    // }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 console.log("Puzzle amélioré prêt !");
