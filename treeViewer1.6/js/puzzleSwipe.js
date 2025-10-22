@@ -275,6 +275,7 @@ function checkPieceInSlot() {
 //     }
 
 
+
 //     detectSamsungDarkMode(() => {
 //         console.log('\n\n **** debug dark 1 ')
 //         alert("Attention detectSamsungDarkMode : votre navigateur force le mode sombre. Pour un affichage correct, activez le mode clair ou utilisez Chrome.");

@@ -1,9 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html style="color-scheme: light !important;">
 
 
 <head>
     <!-- Méta tags pour le mode plein écran mobile -->
+
+    <meta name="color-scheme" content="light">
+    <!--  <meta name="theme-color" content="#4361ee"> -->
+
+
+    <style>
+        /* Forcer TOUT à ignorer les ajustements système */
+        *, *::before, *::after {
+        forced-color-adjust: none !important;
+        -webkit-forced-color-adjust: none !important;
+        color-scheme: light !important;
+        -webkit-color-scheme: light !important;
+        }
+        
+        html, body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        }
+    </style>
+
+
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
@@ -74,12 +96,11 @@
         });
     </script>
     <link rel="manifest" href="./manifest.webmanifest">
-    <meta name="theme-color" content="#4361ee">
+
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 
     <script src="js/pwaInstaller_ProgressiveWebApps.js"></script>
 
-    <meta name="color-scheme" content="light dark">
 
 </head>
 
