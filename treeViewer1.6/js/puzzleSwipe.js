@@ -274,7 +274,44 @@ function checkPieceInSlot() {
 
     detectSamsungDarkMode(() => {
         console.log('\n\n **** debug dark 1 ')
-        alert("Attention : votre navigateur force le mode sombre. Pour un affichage correct, activez le mode clair ou utilisez Chrome.");
+        alert("Attention detectSamsungDarkMode : votre navigateur force le mode sombre. Pour un affichage correct, activez le mode clair ou utilisez Chrome.");
+        
+        // Ou mieux, affiche un bandeau sur la page
+        const banner = document.createElement('div');
+        banner.textContent = "Votre navigateur force le mode sombre. Pour un rendu correct, utilisez Chrome ou désactivez 'Use website dark theme'.";
+        banner.style.cssText = "position:fixed;top:0;left:0;width:100%;background:#ffcc00;color:#000;padding:10px;text-align:center;z-index:10000;";
+        document.body.appendChild(banner);
+    });
+
+
+
+    function detectWhiteRendering(callback) {
+        // Créer un canvas et obtenir son contexte
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Définir les dimensions du canvas
+        canvas.width = 1;
+        canvas.height = 1;
+
+        // Remplir le canvas avec une couleur blanche
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 1, 1);
+
+        // Obtenir les données du pixel
+        const pixel = ctx.getImageData(0, 0, 1, 1).data;
+
+        // Vérifier si la couleur est blanche
+        if (pixel[0] !== 255 || pixel[1] !== 255 || pixel[2] !== 255) {
+            callback();
+        }
+
+                console.log('\n\n **** debug dark 4 ')
+    }
+
+    detectWhiteRendering(() => {
+        console.log('\n\n **** debug dark 3 ')
+        alert("Attention detectWhiteRendering : votre navigateur force le mode sombre. Pour un affichage correct, activez le mode clair ou utilisez Chrome.");
         
         // Ou mieux, affiche un bandeau sur la page
         const banner = document.createElement('div');
