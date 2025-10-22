@@ -221,6 +221,52 @@ function initializeAppFunctions() {
     };
 }
 
+
+
+
+
+
+
+function robustScrollTo(targetY = 50, maxFrames = 12) {
+  let attempts = 0;
+
+  function tryOnce() {
+    // différentes tentatives (plus d'une forme aide certains moteurs)
+    window.scrollTo({ top: targetY, behavior: 'auto' });
+    document.documentElement.scrollTop = targetY;
+    document.body.scrollTop = targetY;
+
+    // optionnel fallback : créer un ancre et scrollIntoView
+    // const dummy = document.createElement('div');
+    // dummy.style.position='absolute'; dummy.style.top = targetY + 'px';
+    // document.body.appendChild(dummy);
+    // dummy.scrollIntoView({ behavior: 'auto' });
+    // setTimeout(()=>dummy.remove(), 500);
+
+    // si réussi, on stoppe
+    if (Math.abs(window.scrollY - targetY) <= 2 || attempts >= maxFrames) {
+      return;
+    }
+    attempts++;
+    requestAnimationFrame(tryOnce);
+  }
+
+  // On lance d'abord après un frame (plus sûr que setTimeout court)
+  requestAnimationFrame(tryOnce);
+
+  // backup plus tard si nécessaire
+  setTimeout(() => {
+    if (Math.abs(window.scrollY - targetY) > 2) {
+      // tentative finale
+      window.scrollTo({ top: targetY, behavior: 'auto' });
+    }
+  }, 600);
+}
+
+
+
+
+
 // Initialise les écouteurs d'événements
 function initializeEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
@@ -228,15 +274,97 @@ function initializeEventListeners() {
         if (loadDataButton) {
             loadDataButton.addEventListener('click', () => { 
 
+
+
+
+                //   robustScrollTo(50);
+
+
+
+
+                // // setTimeout(() => {
+                // //     window.scrollTo({ top: 0, behavior: 'auto' });
+
+                // //     document.body.style.height = `${window.innerHeight}px`;
+                // //     document.body.style.overflow = 'hidden'; // empêche le scroll après
+
+
+                // //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                // // }, 200); 
+
+
+                // setTimeout(() => {
+
+
+
+                //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                // }, 600); 
+
+
+
+
+                // robustScrollTo(0);
+
+
+
+                // setTimeout(() => {
+                //     // window.scrollTo({ top: 0, behavior: 'auto' });
+
+                //     document.body.style.height = `${window.innerHeight}px`;
+                //     document.body.style.overflow = 'hidden'; // empêche le scroll après
+
+
+                //     console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                // }, 200); 
+
+
+
+
+                // let lastY = window.scrollY;
+                // let stableCount = 0;
+
+                // const checkStable = () => {
+                //     const currentY = window.scrollY;
+                //     if (Math.abs(currentY - lastY) < 1) stableCount++;
+                //     else stableCount = 0;
+                //     lastY = currentY;
+
+                //     if (stableCount >= 3) {
+                //         // scroll terminé
+                //         window.scrollTo({ top: 0, behavior: 'auto' });
+                //         document.body.style.height = `${window.innerHeight}px`;
+                //         document.body.style.overflow = 'hidden';
+                //     } else {
+                //         requestAnimationFrame(checkStable);
+                //     }
+                // };
+
+                // requestAnimationFrame(checkStable);
+
+
+
+
+
+
+                // 1️⃣ Scroll pour faire disparaître le bandeau
+                robustScrollTo(50);
+
+                // 2️⃣ Attends un peu (le temps que le navigateur réagisse)
                 setTimeout(() => {
-                    window.scrollTo({ top: 0, behavior: 'auto' });
+                    robustScrollTo(0); // revient en haut
 
-                    document.body.style.height = `${window.innerHeight}px`;
-                    document.body.style.overflow = 'hidden'; // empêche le scroll après
+                    // 3️⃣ Puis bloque le scroll après un petit délai supplémentaire
+                    setTimeout(() => {
+                        document.body.style.height = `${window.innerHeight}px`;
+                        document.body.style.overflow = 'hidden';
+                    }, 400); // laisse un peu de marge pour le retour en haut
+                }, 600); // ce délai dépend du mobile — 500 à 800 ms marche bien
 
 
-                    console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
-                }, 200); 
+
+
+
+
 
                 loadData();
                 });

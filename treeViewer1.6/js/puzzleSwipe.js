@@ -69,11 +69,11 @@ document.head.appendChild(style);
 
 
 
-setTimeout(() => {
-    window.scrollTo({ top: window.scrollY + 50, behavior: 'auto' }); 
+// setTimeout(() => {
+//     window.scrollTo({ top: window.scrollY + 50, behavior: 'auto' }); 
 
-},
-500);
+// },
+// 500);
 
 // window.scrollTo({ top: 150, behavior: 'auto' });
 
