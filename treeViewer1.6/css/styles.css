@@ -18,13 +18,15 @@ body {
     font-family: Arial;
     /* overflow: hidden; */
     min-height: 105vh; /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
+
+
 } 
 
 
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #fff !important;
+    background: #e8ecd1 !important;
     color: #000 !important;
   }
 }
@@ -94,14 +96,7 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Style responsive pour le fond d'écran de connexion */
-@media screen and (max-width: 768px) {
-    .form-container {
-        width: 90%;
-        margin: 20px;
-        padding: 20px;
-    }
-}
+
 
 @media (max-width: 400px) {
     /* .form-container { */

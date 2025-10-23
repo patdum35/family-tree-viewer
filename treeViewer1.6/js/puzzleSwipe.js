@@ -7,12 +7,12 @@ body {
     margin: 0;
     font-family: Arial;
     min-height: 120vh;
-    background: linear-gradient(to bottom, #87ceeb, #f0e68c);
+    // background: linear-gradient(to bottom, #87ceeb, #f0e68c);
     overflow-x: hidden;
 }
 #puzzleSlot {
     font-size: 50px; /* taille du slot */
-    position: fixed; top: 40px; left: 50%;
+    position: fixed; top: 50px; left: 50%;
     transform: translateX(-50%) rotate(45deg);
     color: rgba(255,255,255,0.3);
     z-index: 0;
@@ -44,11 +44,11 @@ body {
     text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
 }
 #puzzleMessage {
-    position: fixed; bottom: 10px;
+    position: fixed; 
     font-size: 16px; color: #fff;
     text-align: center;
     text-shadow: 1px 1px 2px #000;
-    z-index: 1;
+    z-index: 0;
 }
 .confetti {
     position: fixed; width: 10px; height: 10px;
@@ -86,7 +86,7 @@ document.body.appendChild(piece);
 
 // Position initiale du carré orange juste sous le slot
 const slotRect = slot.getBoundingClientRect();
-piece.style.top = `${slotRect.bottom -20}px`;
+piece.style.top = `${slotRect.bottom - 30}px`;
 
 
 const message = document.createElement('div');

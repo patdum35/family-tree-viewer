@@ -94,7 +94,7 @@
     <div class="login-background">
         <!-- <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran"> -->
         <!-- <img src="background_images/bois.jpg" class="login-background-image" alt="Fond d'écran">         -->
-        <img src="background_images/tree-logjpg" class="login-background-image" alt="Fond d'écran">  
+        <img src="background_images/tree-log.jpg" class="login-background-image" alt="Fond d'écran">  
         <!-- <img class="login-background-image" alt="Fond d'écran"> -->
     </div>
 
@@ -164,8 +164,8 @@
     <!-- Formulaire de mot de passe -->
     <div id="password-form" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">    
 
-        <div id="language-selector-container" style="position: fixed; top: 0px; margin-top: -10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 999; pointer-events: none;">
-            <div class="language-selector" style="display: inline-flex; background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
+        <div id="language-selector-container" style="display: none; position: fixed; top: 0px; margin-top: -10px;   z-index: 1; pointer-events: none;">
+            <div class="language-selector" style=" background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
                 <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr')"></div>
                 <div class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en')"></div>
                 <div class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es')"></div>
@@ -175,7 +175,7 @@
 
 
 
-        <div class="form-container" style="position: fixed; width: 280px; max-width: 280px; padding: 20px; padding-top: 10px; padding-bottom: 5px; box-sizing: border-box;  overflow-y: auto;">
+        <div class="form-container" style="display: none; position: fixed; width: 280px; max-width: 280px; padding: 20px; padding-top: 10px; padding-bottom: 5px; text-align: center; box-sizing: border-box;  overflow-y: auto;">
             <div class="name-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 4px; max-width: 240px;  height: 40px; width: 100%; margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
                     <small data-text-key="inputFormFirstName" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
@@ -218,7 +218,7 @@
             </div>
         </div>
 
-        <div id="startTitle" style="position: fixed; text-align: center; z-index: 999; ">
+        <div id="startTitle" style="display: none; position: fixed; text-align: center; z-index: 1; ">
             <h2 style="text-align:center; margin-bottom: 10px; margin-left: 0px; padding: 0; font-size: 20px; color: white" 
             data-text-key="startTitle">explore tes origines...</h2>
         </div>

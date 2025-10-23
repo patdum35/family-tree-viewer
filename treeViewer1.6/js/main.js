@@ -453,8 +453,10 @@ export function toggleFullScreen(inversed = false) {
 
 
 function positionFormContainer() {
+    const languageSelectorContainer = document.getElementById('language-selector-container');
     const formContainer = document.querySelector('.form-container');
     const startTitle = document.getElementById('startTitle');
+
     let puzzleSlot, puzzlePiece, puzzleMessage;
     if (state.isPuzzleSwipe) {
         puzzleSlot = document.getElementById('puzzleSlot');
@@ -464,6 +466,9 @@ function positionFormContainer() {
 
 
     if (formContainer && startTitle) {
+        formContainer.style.display = '';
+        startTitle.style.display = '';
+        languageSelectorContainer.style.display = '';
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 50;
         let startTitlePositionTop = window.innerHeight/2 + formContainer.offsetHeight/2 - 50  + 10;
@@ -474,7 +479,16 @@ function positionFormContainer() {
         if (state.isPuzzleSwipe) {
             formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
             startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            puzzleSlot.style.top = '50px';
+            const slotRect = puzzleSlot.getBoundingClientRect();
+            puzzlePiece.style.top = `${slotRect.bottom - 30}px`;
             if (window.innerHeight < 400) { 
+                formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
+                formContainer.style.transform = '';
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
+                startTitle.style.transform = '';
+                languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
+                languageSelectorContainer.style.transform = '';
                 puzzleSlot.style.left = window.innerWidth - 60 + 'px';
                 puzzlePiece.style.left = window.innerWidth - 60 + 'px';
                 // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
@@ -482,6 +496,15 @@ function positionFormContainer() {
                 puzzleMessage.style.width = '130px';
                 puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
             } else {
+                formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+                formContainer.style.transform = 'translateX(-50%)'; // ''; //
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+                startTitle.style.transform = ''; //'translateX(-50%)';
+                // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
+                // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
+                languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+                languageSelectorContainer.style.transform = 'translateX(-50%)';
+
                 puzzleSlot.style.left = '50%';
                 puzzlePiece.style.left = '50%';
                 // puzzleMessage.style.left = '10px';
