@@ -47,7 +47,7 @@ import {
     searchTree,
     closeAllModals
 } from './eventHandlers.js';
-import { resetPuzzle } from './puzzleSwipe.js';
+import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
 
 let stopMonitoring = null;
 
@@ -475,7 +475,7 @@ export function positionFormContainer() {
         languageSelectorContainer.style.display = '';
 
 
-        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight)
+        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' ,state.isPuzzleSwipe)
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
@@ -527,25 +527,11 @@ export function positionFormContainer() {
                 puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
             }
 
-
-
         } else {
             formContainer.style.top = formContainerPositionTop + 'px'; 
             startTitle.style.top = startTitlePositionTop + 'px'; 
         }
-
-
-// if (window.innerHeight < 400 ) {
-//     slot.style.left = window.innerWidth - 100 + 'px';
-//     piece.style.left = window.innerWidth - 100 + 'px';
-// }
-
-
-
     }
-
-
-
 }
 
 
@@ -655,8 +641,9 @@ function initialize() {
     const device = detectDeviceType();
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
     state.isPWA = isPWA();
-    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    if (true) {
+    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    // if (true) {
+    // if (false) {
         setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'auto' });
         }, 200); // Petit délai pour s'assurer que tout est prêt
@@ -668,6 +655,10 @@ function initialize() {
         import('./puzzleSwipe.js')
             .then(() => console.log("PuzzleSwipe chargé"))
             .catch(err => console.error(err));
+
+        initializePuzzleSwipe();
+
+
 
         setTimeout(() => {
             positionFormContainer();
@@ -685,6 +676,9 @@ function initialize() {
     } else {
         // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
         state.isPuzzleSwipe = false;
+        setTimeout(() => {
+            positionFormContainer();
+        }, 200); // Petit délai pour s'assurer que tout est prêt       
     }
 
 
