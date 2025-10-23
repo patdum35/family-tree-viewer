@@ -65,7 +65,9 @@ window.i18n = {
       'iosStep3': '<strong>Faites défiler</strong> et trouvez "Ajouter à l\'écran d\'accueil" ➕',
       'iosStep4': '<strong>Personnalisez le nom</strong> si souhaité',
       'iosStep5': '<strong>Appuyez sur "Ajouter"</strong> ✅',
-
+      'puzzleMessage': 'optionnel:\nglissez la pièce vers le haut pour cacher la barre du navigateur !',
+      'bravoPuzzleMessage': '🎉 Bravo ! La barre devrait disparaître maintenant',
+      'higherPuzzleMessage' : 'Glissez plus haut pour cacher la barre',
     },
     'en': {
       // Page password-form
@@ -124,6 +126,9 @@ window.i18n = {
       'iosStep3': '<strong>Scroll down</strong> and find "Add to Home Screen" ➕',
       'iosStep4': '<strong>Customize the name</strong> if desired',
       'iosStep5': '<strong>Tap "Add"</strong> ✅',
+      'puzzleMessage': 'optional:\nSlide the piece up to hide the browser bar!',
+      'bravoPuzzleMessage': '🎉 Well done! The bar should disappear now',
+      'higherPuzzleMessage': 'Slide higher to hide the bar',
     },
     'es': {
       // Page password-form
@@ -183,7 +188,9 @@ window.i18n = {
       'iosStep3': '<strong>Desplázate hacia abajo</strong> y encuentra "Añadir a pantalla de inicio" ➕',
       'iosStep4': '<strong>Personaliza el nombre</strong> si lo deseas',
       'iosStep5': '<strong>Toca "Añadir"</strong> ✅',
-
+      'puzzleMessage': 'opcional:\nDesliza la pieza hacia arriba para ocultar la barra del navegador!',
+      'bravoPuzzleMessage': '🎉 ¡Enhorabuena! La barra debería desaparecer ahora',
+      'higherPuzzleMessage': 'Desliza más arriba para ocultar la barra',
     },
     'hu': {
       // Page password-form
@@ -242,7 +249,10 @@ window.i18n = {
       'iosStep2': '<strong>Érintse meg a Megosztás ikont</strong> 📤 a képernyő alján',
       'iosStep3': '<strong>Görgessen le</strong> és keresse meg a "Hozzáadás a kezdőképernyőhöz" ➕',
       'iosStep4': '<strong>Személyre szabhatja a nevet</strong> ha szeretné',
-      'iosStep5': '<strong>Érintse meg a "Hozzáadás" gombot</strong> ✅'
+      'iosStep5': '<strong>Érintse meg a "Hozzáadás" gombot</strong> ✅',
+      'puzzleMessage': 'opcionális:\nHúzd feljebb a darabot a böngészősáv elrejtéséhez!',
+      'bravoPuzzleMessage': '🎉 Szuper! A sávnak most el kell tűnnie',
+      'higherPuzzleMessage': 'Húzd feljebb a darabot a sáv elrejtéséhez',
     }
   },
   
@@ -312,13 +322,13 @@ window.i18n = {
         
         // Traiter différemment selon le type d'élément
         if (element.tagName === 'INPUT') {
-          console.log("Mise à jour du placeholder pour: " + key);
+          // console.log("Mise à jour du placeholder pour: " + key);
           element.placeholder = this.translations[this.currentLanguage][key];
         } else if (key === 'nbreGene') {
           // Cas spécial pour les éléments avec HTML (comme <br>)
           element.innerHTML = this.translations[this.currentLanguage][key];
         } else {
-          console.log("Mise à jour du texte pour: " + key);
+          // console.log("Mise à jour du texte pour: " + key);
           element.textContent = this.translations[this.currentLanguage][key];
         }
 
@@ -404,7 +414,8 @@ function updateMainUITexts() {
     'zoomIn', 'zoomOut', 'resetZoom', 'toggleSpeech', 'toggleAnimationPause',
     'openSettingsModal', 'toggleFullScreen', 'processNamesCloudWithDate', 'radar',
     'rootPersonSearch', 'rootPersonResults', 'updateGenerations', 'treeMode',
-    'treeModeAncestors', 'treeModeDescendants', 'treeModeBoth', 'search', 'prenoms'
+    'treeModeAncestors', 'treeModeDescendants', 'treeModeBoth', 'search', 'prenoms', 
+    'puzzleMessage'
   ];
 
   // Mettre à jour l'objet texts avec les traductions actuelles

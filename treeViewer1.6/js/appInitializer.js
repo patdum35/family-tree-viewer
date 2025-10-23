@@ -27,6 +27,8 @@ import {
     toggleFullScreen,
     resetToDefaultSettings,
     displayGenealogicTree,
+    state,
+    detectDeviceType
 } from './main.js';
 
 import {
@@ -222,53 +224,8 @@ function initializeAppFunctions() {
 }
 
 
-
-
-
-
-
-function robustScrollTo(targetY = 50, maxFrames = 12) {
-  let attempts = 0;
-
-  function tryOnce() {
-    // différentes tentatives (plus d'une forme aide certains moteurs)
-    window.scrollTo({ top: targetY, behavior: 'auto' });
-    document.documentElement.scrollTop = targetY;
-    document.body.scrollTop = targetY;
-
-    // optionnel fallback : créer un ancre et scrollIntoView
-    // const dummy = document.createElement('div');
-    // dummy.style.position='absolute'; dummy.style.top = targetY + 'px';
-    // document.body.appendChild(dummy);
-    // dummy.scrollIntoView({ behavior: 'auto' });
-    // setTimeout(()=>dummy.remove(), 500);
-
-    // si réussi, on stoppe
-    if (Math.abs(window.scrollY - targetY) <= 2 || attempts >= maxFrames) {
-      return;
-    }
-    attempts++;
-    requestAnimationFrame(tryOnce);
-  }
-
-  // On lance d'abord après un frame (plus sûr que setTimeout court)
-  requestAnimationFrame(tryOnce);
-
-  // backup plus tard si nécessaire
-  setTimeout(() => {
-    if (Math.abs(window.scrollY - targetY) > 2) {
-      // tentative finale
-      window.scrollTo({ top: targetY, behavior: 'auto' });
-    }
-  }, 600);
-}
-
-
-
-
-
 // Initialise les écouteurs d'événements
-function initializeEventListeners() {
+function initializeAppEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
         const loadDataButton = document.getElementById('loadDataButton');
         if (loadDataButton) {
@@ -291,21 +248,38 @@ function initializeEventListeners() {
             console.warn("Élément 'loadDataButton' non trouvé");
         }
         
-        const rootPersonResults = document.getElementById('root-person-results');
-        if (rootPersonResults) {
-            rootPersonResults.addEventListener('change', handleRootPersonChange);
-        } else {
-            console.warn("Élément 'root-person-results' non trouvé");
+        // const rootPersonResults = document.getElementById('root-person-results');
+        // if (rootPersonResults) {
+        //     rootPersonResults.addEventListener('change', handleRootPersonChange);
+        // } else {
+        //     console.warn("Élément 'root-person-results' non trouvé");
+        // }
+
+
+        const device = detectDeviceType();
+        if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+
+        function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+            return (
+                window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+                window.navigator.standalone === true // Safari iOS
+            );
         }
+        state.isPWA = isPWA();
 
+        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
 
-        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe /n/n/");
-
-        import('./puzzleSwipe.js')
-            .then(() => console.log("PuzzleSwipe chargé"))
-            .catch(err => console.error(err));
-
-
+        // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        if (true) {
+            // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
+            state.isPuzzleSwipe = true;
+            import('./puzzleSwipe.js')
+                .then(() => console.log("PuzzleSwipe chargé"))
+                .catch(err => console.error(err));
+        } else {
+            // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
+            state.isPuzzleSwipe = false;
+        }
 
     });
 }
@@ -326,23 +300,14 @@ function initializeBackgroundLoader() {
 }
 
 // Fonction principale d'initialisation
-function initialize() {
+function initializeApp() {
     initializeAppFunctions();
-    initializeEventListeners();
+    initializeAppEventListeners();
     initializeBackgroundLoader();
         
     // Vous pouvez ajouter d'autres initialisations ici si nécessaire
-    console.log("App Initializer V1.7: fonctions, écouteurs d'événements et chargeur d'image configurés");
+    console.log("App Initializer V1.6: fonctions, écouteurs d'événements et chargeur d'image configurés");
 }
 
 // Exécuter l'initialisation
-initialize();
-
-// Exporter les fonctions si nécessaire
-export {
-    initialize,
-    initializeAppFunctions,
-    initializeEventListeners,
-    initializeBackgroundLoader,
-    attemptBackgroundLoad
-};
+initializeApp();

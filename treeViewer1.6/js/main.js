@@ -140,6 +140,8 @@ export const state = {
     isTouchDevice: false,
     isMobile: false,
     isIOS: false,
+    isPWA: false,
+    isPuzzleSwipe: 'notInitialized',
     initialTreeDisplay: true,
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
@@ -450,6 +452,65 @@ export function toggleFullScreen(inversed = false) {
 }
 
 
+function positionFormContainer() {
+    const formContainer = document.querySelector('.form-container');
+    const startTitle = document.getElementById('startTitle');
+    let puzzleSlot, puzzlePiece, puzzleMessage;
+    if (state.isPuzzleSwipe) {
+        puzzleSlot = document.getElementById('puzzleSlot');
+        puzzlePiece = document.getElementById('puzzlePiece');
+        puzzleMessage = document.getElementById('puzzleMessage');
+    }
+
+
+    if (formContainer && startTitle) {
+
+        let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 50;
+        let startTitlePositionTop = window.innerHeight/2 + formContainer.offsetHeight/2 - 50  + 10;
+        if (window.innerHeight < 400) { 
+            formContainerPositionTop =  60;
+            startTitlePositionTop =  60 + formContainer.offsetHeight + 10;            
+        }
+        if (state.isPuzzleSwipe) {
+            formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            if (window.innerHeight < 400) { 
+                puzzleSlot.style.left = window.innerWidth - 60 + 'px';
+                puzzlePiece.style.left = window.innerWidth - 60 + 'px';
+                // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            } else {
+                puzzleSlot.style.left = '50%';
+                puzzlePiece.style.left = '50%';
+                // puzzleMessage.style.left = '10px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            }
+
+
+
+        } else {
+            formContainer.style.top = formContainerPositionTop + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 'px'; 
+        }
+
+
+// if (window.innerHeight < 400 ) {
+//     slot.style.left = window.innerWidth - 100 + 'px';
+//     piece.style.left = window.innerWidth - 100 + 'px';
+// }
+
+
+
+    }
+
+
+
+}
+
 
 
 function initialize() {   
@@ -522,21 +583,10 @@ function initialize() {
     document.head.appendChild(style);
 
 
+    // if (state.isPuzzleSwipe != 'notInitialized')
 
-    const formContainer = document.querySelector('.form-container');
-    if (formContainer) {
-        formContainer.style.top = window.innerHeight/2 - 30 + 'px'; //'300px';
-    }
-
-    const startTitle = document.getElementById('startTitle')
-    if (startTitle) {
-        startTitle.style.top = window.innerHeight/2 -30 + 125 + 'px'; //'300px';
-    }
-
-
-
-
-
+    positionFormContainer();
+ 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
 
@@ -646,7 +696,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
     state.lastName = document.getElementById('input-form-lastName').value;
 
 
-    console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
+    // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
 
     // toggleFullScreen();
 
@@ -2161,18 +2211,7 @@ window.addEventListener('resize', () => {
     positionHeatMapButton();
     createAndPositionRadarOverlay();
     createAndPositionHeatMapOverlay();
-
-    const formContainer = document.querySelector('.form-container');
-    if (formContainer) {
-        formContainer.style.top = window.innerHeight/2 - 30 + 'px'; //'300px';
-    }
-
-    const startTitle = document.getElementById('startTitle')
-    if (startTitle) {
-        startTitle.style.top = window.innerHeight/2 -30 + 125 + 'px'; //'300px';
-    }
-
-
+    positionFormContainer();
     // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
 });
 

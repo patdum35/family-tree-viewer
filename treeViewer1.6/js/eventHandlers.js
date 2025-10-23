@@ -21,6 +21,7 @@ import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
  * Initialise les gestionnaires d'événements globaux
  */
 export function initializeEventHandlers() {
+
     window.addEventListener('resize', handleWindowResize);
     // window.addEventListener('click', handleModalClick);
     

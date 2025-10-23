@@ -2527,9 +2527,16 @@ function toggleMenu(open) {
       
       sideMenu.classList.add('open');
       menuOverlay.classList.add('open');
+
+      resetHamburgerButtonPosition();
+
     } else {
       sideMenu.classList.remove('open');
       menuOverlay.classList.remove('open');
+      
+      if (state.isWordCloudEnabled ) {
+        offsetHamburgerButtonDown();
+      }
     }
 }
   
@@ -2718,6 +2725,8 @@ function setupButtonSync() {
         //  window.showToast('Menu principal disponible');
         //  window.showToast(getMenuTranslation('menuAvailable'))
      }
+
+
 }
 
 // Fonction pour masquer le menu

@@ -9,6 +9,9 @@ html {
   forced-color-adjust: none !important;
 }
 
+*[translate="no"] {
+  unicode-bidi: isolate;
+}
 
 body { 
     margin: 0; 

@@ -31,7 +31,6 @@ const RESOURCES_TO_CACHE = [
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
   './background_images/bois.jpg',
-  './background_images/contemporain.jpx',
   './background_images/republique.jpg',
   './background_images/fort_lalatte.jpx',
   './background_images/thomas.jpx',
@@ -75,7 +74,8 @@ async function debugCacheContent() {
             const cache = await caches.open(APP_CACHE_NAME);
             const requests = await cache.keys();
             // console.log(`🔍 Contenu du cache ${APP_CACHE_NAME}:`, requests.length, "entrées");
-            requests.forEach(req => console.log("  -", req.url));
+            requests.forEach(req => {
+                if (req.url.includes('arbre.enc')) {console.log("  -in debugCacheContent : ", req.url)}});
         } else {
             console.log("❌ Cache APP_CACHE_NAME introuvable");
         }
@@ -229,8 +229,10 @@ async function preloadAppResources() {
                         
                         // Log détaillé pour les fichiers importants
                         if (resourceUrl.endsWith('.enc')) {
-                            console.log(`✅ Fichier critique mis en cache: ${resourceUrl}`);
-                            log(`✅ Fichier critique mis en cache: ${resourceUrl}`, 'success');
+                            // console.log(`✅ Fichier critique mis en cache: ${resourceUrl}`);
+                            if (resourceUrl.includes('arbre.enc')) {
+                                log(`✅ Fichier critique mis en cache: ${resourceUrl}`, 'success');
+                            }
                         }
                         
                         // Mettre à jour la notification
@@ -279,8 +281,10 @@ async function verifyEncFiles(cache) {
         try {
             const response = await cache.match(file);
             if (response) {
-                console.log(`✅ Fichier .enc trouvé en cache: ${file}`);
-                log(`✅ Fichier .enc trouvé en cache: ${file}`, 'success');
+                // console.log(`✅ Fichier .enc trouvé en cache: ${file}`);
+                if (file.includes('arbre.enc')) {
+                    log(`✅ Fichier .enc trouvé en cache: ${file}`, 'success');
+                }
             } else {
                 console.warn(`⚠️ Fichier .enc NON trouvé en cache: ${file}`);
                 log(`⚠️ Fichier .enc NON trouvé en cache: ${file}`, 'warning');
