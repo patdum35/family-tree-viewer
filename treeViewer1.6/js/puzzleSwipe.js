@@ -214,21 +214,22 @@ export function initializePuzzleSwipe() {
 
 
 
-            // window.innerHeight; : Hauteur totale de la fenêtre (incluant la barre d'adresse)
-            // window.visualViewport.height;: Hauteur visible réelle (sans la barre d'adresse)
-
-            // Si les deux diffèrent, la barre d'adresse est visible
-            const isAddressBarVisible = window.innerHeight > (window.visualViewport.height + 20);
+            // window.innerHeight; Hauteur visible réelle (sans la barre d'adresse)
+            // window.screen.height; Hauteur réelle de l'écran en pixel css
 
             // console.log('Barre visible ?', isAddressBarVisible);
-            // console.log('Hauteur window:', window.innerHeight);
-            // console.log('Hauteur visual:', window.visualViewport.height);
+            // console.log('Hauteur intérieur window:', window.innerHeight);
+            // console.log('Hauteur écranl:', window.screen.height);
 
-            if (!isAddressBarVisible) {
-                message.dataset.textKey = '';
-                message.textContent = `la barre est cachée !!!  ${window.innerHeight - window.visualViewport.height}`;
-            }
+            // Si les deux diffèrent, la barre d'adresse est visible
+            // setTimeout(() => {
+                const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
 
+                if (!isAddressBarVisible) {
+                    message.dataset.textKey = '';
+                    message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
+                }
+            // }, 10);
 
 
             window.i18n.updateUI();
@@ -243,10 +244,24 @@ export function initializePuzzleSwipe() {
 
 export function resetPuzzle() {
     const message = document.getElementById('puzzleMessage');
-    message.dataset.textKey = 'puzzleMessage';
+
+    const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
+    if (!isAddressBarVisible) {
+        message.dataset.textKey = '';
+        message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
+    } else {
+        message.dataset.textKey = 'puzzleMessage';       
+    }
+
+
+    // message.dataset.textKey = 'puzzleMessage';
     window.i18n.updateUI();
     console.log('\n\n **** debug in resetPuzzle \n\n\n')
     state.resetPuzzle = true;
+
+
+
+
 }
 
 console.log("Puzzle prêt !");
