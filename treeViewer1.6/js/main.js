@@ -47,6 +47,7 @@ import {
     searchTree,
     closeAllModals
 } from './eventHandlers.js';
+import { resetPuzzle } from './puzzleSwipe.js';
 
 let stopMonitoring = null;
 
@@ -462,6 +463,9 @@ export function positionFormContainer() {
         puzzleSlot = document.getElementById('puzzleSlot');
         puzzlePiece = document.getElementById('puzzlePiece');
         puzzleMessage = document.getElementById('puzzleMessage');
+        //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        if (puzzleSlot) { resetPuzzle();}
     }
 
 
@@ -482,14 +486,14 @@ export function positionFormContainer() {
         if (state.isPuzzleSwipe) {
             formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
             startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
-            puzzleSlot.style.top = '50px';
+            if (puzzleSlot) {puzzleSlot.style.top = '50px';}
 
             // const slotRect = puzzleSlot.getBoundingClientRect();
             // console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)  
     
             // puzzlePiece.style.top = `${slotRect.bottom - 55}px`;
 
-            puzzlePiece.style.top = '110px';
+            if (puzzleSlot) {puzzlePiece.style.top = '120px';}
 
 
             if (window.innerHeight < 400) { 
@@ -617,7 +621,7 @@ function initialize() {
 
     // if (state.isPuzzleSwipe != 'notInitialized')
 
-    positionFormContainer();
+
  
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
@@ -639,7 +643,50 @@ function initialize() {
 
     setupSearchFieldModal();
 
-    
+
+
+    function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+        return (
+            window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+            window.navigator.standalone === true // Safari iOS
+        );
+    }
+
+    const device = detectDeviceType();
+    if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+    state.isPWA = isPWA();
+    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    if (true) {
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 200); // Petit délai pour s'assurer que tout est prêt
+            
+        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
+
+        // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
+        state.isPuzzleSwipe = true;
+        import('./puzzleSwipe.js')
+            .then(() => console.log("PuzzleSwipe chargé"))
+            .catch(err => console.error(err));
+
+        setTimeout(() => {
+            positionFormContainer();
+        }, 200); // Petit délai pour s'assurer que tout est prêt
+
+
+        // setTimeout(() => {
+        if (state.isPuzzleSwipe) { resetPuzzle(); }
+        // }, 200); // Petit délai pour s'assurer que tout est prêt
+
+
+
+
+
+    } else {
+        // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
+        state.isPuzzleSwipe = false;
+    }
+
 
 }
 

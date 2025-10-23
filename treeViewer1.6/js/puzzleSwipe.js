@@ -1,3 +1,5 @@
+import {state} from './main.js';
+
 console.log("🚀 puzzleSwipe.js mis à jour");
 
 // --- Styles ---
@@ -64,6 +66,9 @@ body {
 document.head.appendChild(style);
 
 
+
+
+
 // --- Éléments ---
 const slot = document.createElement('div');
 slot.id = 'puzzleSlot';
@@ -92,7 +97,7 @@ document.body.appendChild(piece);
 
 // piece.style.top = `${slotRect.bottom - 55}px`;
 
-piece.style.top = '110px';
+piece.style.top = '120px';
 
 const message = document.createElement('div');
 message.id = 'puzzleMessage';
@@ -175,30 +180,46 @@ window.addEventListener('scroll', () => {
 
 // Vérifie si la pièce touche le slot
 function checkPieceInSlot() {
-    const pieceRect = piece.getBoundingClientRect();
-    const slotRect  = slot.getBoundingClientRect();
 
-    // console.log("Vérification position pièce/slot :", pieceRect, slotRect);
+    if (!state.resetPuzzle) {
 
-    // Vérifie chevauchement horizontal et vertical
-    const inSlot = (
-        pieceRect.top + pieceRect.height/8 > slotRect.top &&
-        pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
-        pieceRect.left + pieceRect.width/8 > slotRect.left &&
-        pieceRect.right - pieceRect.width/8 < slotRect.right
-    );
+        const pieceRect = piece.getBoundingClientRect();
+        const slotRect  = slot.getBoundingClientRect();
 
-    if (inSlot) {
-        // message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
-        message.dataset.textKey = 'bravoPuzzleMessage';
-        spawnConfetti();
-        audio.play().catch(()=>{});
-        if (navigator.vibrate) navigator.vibrate([100,50,100]);
-    } else {
-        // message.textContent = "Glissez plus haut pour cacher la barre";
-        message.dataset.textKey = 'higherPuzzleMessage';
+
+        console.log('\n\n **** debug in checkPieceInSlot touchStartY , pieceStartTop, isDragging, pieceRect, slotRect', touchStartY , pieceStartTop , isDragging, pieceRect, slotRect,' \n\n\n')
+
+        // console.log("Vérification position pièce/slot :", pieceRect, slotRect);
+
+        // Vérifie chevauchement horizontal et vertical
+        const inSlot = (
+            pieceRect.top + pieceRect.height/8 > slotRect.top &&
+            pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
+            pieceRect.left + pieceRect.width/8 > slotRect.left &&
+            pieceRect.right - pieceRect.width/8 < slotRect.right
+        );
+
+        if (inSlot) {
+            // message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
+            message.dataset.textKey = 'bravoPuzzleMessage';
+            spawnConfetti();
+            audio.play().catch(()=>{});
+            if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        } else {
+            // message.textContent = "Glissez plus haut pour cacher la barre";
+            message.dataset.textKey = 'higherPuzzleMessage';
+        }
+        window.i18n.updateUI();
     }
-    window.i18n.updateUI();
+    state.resetPuzzle = false;
 }
+
+export function resetPuzzle() {
+    message.dataset.textKey = 'puzzleMessage';
+    window.i18n.updateUI();
+    console.log('\n\n **** debug in resetPuzzle \n\n\n')
+    state.resetPuzzle = true;
+}
+
 console.log("Puzzle prêt !");
 

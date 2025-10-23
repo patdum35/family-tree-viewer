@@ -51,7 +51,7 @@ import {
 
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
-
+import { resetPuzzle } from './puzzleSwipe.js';
 
 
 // // ou si tu veux attendre que tout soit chargé
@@ -235,6 +235,7 @@ function initializeAppEventListeners() {
 
                     //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
                     window.scrollTo({ top: 0, behavior: 'auto' });
+                    if (state.isPuzzleSwipe) {resetPuzzle();}
 
                      // 2️⃣ Puis bloque le scroll 
                     document.body.style.height = `${window.innerHeight}px`;
@@ -256,30 +257,30 @@ function initializeAppEventListeners() {
         // }
 
 
-        const device = detectDeviceType();
-        if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+        // const device = detectDeviceType();
+        // if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
 
-        function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
-            return (
-                window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
-                window.navigator.standalone === true // Safari iOS
-            );
-        }
-        state.isPWA = isPWA();
+        // function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+        //     return (
+        //         window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+        //         window.navigator.standalone === true // Safari iOS
+        //     );
+        // }
+        // state.isPWA = isPWA();
 
-        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
+        // console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
 
-        // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-        if (true) {
-            // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
-            state.isPuzzleSwipe = true;
-            import('./puzzleSwipe.js')
-                .then(() => console.log("PuzzleSwipe chargé"))
-                .catch(err => console.error(err));
-        } else {
-            // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
-            state.isPuzzleSwipe = false;
-        }
+        // // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true) {
+        //     // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
+        //     state.isPuzzleSwipe = true;
+        //     import('./puzzleSwipe.js')
+        //         .then(() => console.log("PuzzleSwipe chargé"))
+        //         .catch(err => console.error(err));
+        // } else {
+        //     // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
+        //     state.isPuzzleSwipe = false;
+        // }
 
     });
 }
