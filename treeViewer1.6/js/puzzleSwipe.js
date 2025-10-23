@@ -225,9 +225,10 @@ export function initializePuzzleSwipe() {
             // setTimeout(() => {
                 const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
 
-                if (!isAddressBarVisible) {
+                // if (!isAddressBarVisible) {
+                if (true) {
                     message.dataset.textKey = '';
-                    message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
+                    message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight} ${window.screen.height} ${window.innerHeight}`;
                 }
             // }, 10);
 
@@ -246,12 +247,16 @@ export function resetPuzzle() {
     const message = document.getElementById('puzzleMessage');
 
     const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
-    if (!isAddressBarVisible) {
+
+    // if (!isAddressBarVisible) {
+    if (true) {
         message.dataset.textKey = '';
-        message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
+        // message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
+        message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight} ${window.screen.height} ${window.innerHeight}`;
     } else {
         message.dataset.textKey = 'puzzleMessage';       
     }
+
 
 
     // message.dataset.textKey = 'puzzleMessage';
