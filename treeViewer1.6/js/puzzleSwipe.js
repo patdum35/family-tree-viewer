@@ -12,7 +12,7 @@ body {
 }
 #puzzleSlot {
     font-size: 50px; /* taille du slot */
-    position: fixed; top: 50px; left: 50%;
+    position: fixed; left: 50%;
     transform: translateX(-50%) rotate(45deg);
     color: rgba(255,255,255,0.3);
     z-index: 0;
@@ -72,10 +72,11 @@ slot.style.background = "transparent";   // fond transparent autour
 slot.textContent = "🧩";
 slot.style.textShadow = '0 0 1px rgba(255, 255, 2555, 1)';
 slot.style.filter =  'brightness(5.0)';
+slot.style.top = '50px';
 
 document.body.appendChild(slot);
 
-const slotInitialTop = slot.offsetTop;
+const slotInitialTop = 50;
 
 const piece = document.createElement('div');
 piece.id = 'puzzlePiece';
@@ -85,9 +86,13 @@ piece.style.animation = 'puzzle-glow 3s ease-in-out infinite';
 document.body.appendChild(piece);
 
 // Position initiale du carré orange juste sous le slot
-const slotRect = slot.getBoundingClientRect();
-piece.style.top = `${slotRect.bottom - 30}px`;
+// const slotRect = slot.getBoundingClientRect();
 
+// console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)
+
+// piece.style.top = `${slotRect.bottom - 55}px`;
+
+piece.style.top = '110px';
 
 const message = document.createElement('div');
 message.id = 'puzzleMessage';
@@ -173,7 +178,7 @@ function checkPieceInSlot() {
     const pieceRect = piece.getBoundingClientRect();
     const slotRect  = slot.getBoundingClientRect();
 
-    console.log("Vérification position pièce/slot :", pieceRect, slotRect);
+    // console.log("Vérification position pièce/slot :", pieceRect, slotRect);
 
     // Vérifie chevauchement horizontal et vertical
     const inSlot = (

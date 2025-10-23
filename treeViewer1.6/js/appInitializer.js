@@ -269,8 +269,8 @@ function initializeAppEventListeners() {
 
         console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
 
-        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-        // if (true) {
+        // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        if (true) {
             // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
             state.isPuzzleSwipe = true;
             import('./puzzleSwipe.js')

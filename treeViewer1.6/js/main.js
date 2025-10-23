@@ -452,7 +452,7 @@ export function toggleFullScreen(inversed = false) {
 }
 
 
-function positionFormContainer() {
+export function positionFormContainer() {
     const languageSelectorContainer = document.getElementById('language-selector-container');
     const formContainer = document.querySelector('.form-container');
     const startTitle = document.getElementById('startTitle');
@@ -470,8 +470,11 @@ function positionFormContainer() {
         startTitle.style.display = '';
         languageSelectorContainer.style.display = '';
 
-        let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 50;
-        let startTitlePositionTop = window.innerHeight/2 + formContainer.offsetHeight/2 - 50  + 10;
+
+        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight)
+
+        let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
+        let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
         if (window.innerHeight < 400) { 
             formContainerPositionTop =  60;
             startTitlePositionTop =  60 + formContainer.offsetHeight + 10;            
@@ -480,8 +483,15 @@ function positionFormContainer() {
             formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
             startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
             puzzleSlot.style.top = '50px';
-            const slotRect = puzzleSlot.getBoundingClientRect();
-            puzzlePiece.style.top = `${slotRect.bottom - 30}px`;
+
+            // const slotRect = puzzleSlot.getBoundingClientRect();
+            // console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)  
+    
+            // puzzlePiece.style.top = `${slotRect.bottom - 55}px`;
+
+            puzzlePiece.style.top = '110px';
+
+
             if (window.innerHeight < 400) { 
                 formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
                 formContainer.style.transform = '';
@@ -533,7 +543,6 @@ function positionFormContainer() {
 
 
 }
-
 
 
 function initialize() {   
