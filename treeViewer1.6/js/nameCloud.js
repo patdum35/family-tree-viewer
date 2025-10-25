@@ -1,7 +1,7 @@
 
 import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
-import { centerCloudNameContainer, handleQuickResize } from './nameCloudRenderer.js';
+import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
 import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
@@ -212,6 +212,9 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     window.addEventListener('resize',() => { 
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
+        buttonsOnDisplay(false);
+
+
 
         // Dimensions de l'écran
         nameCloudState.SVG_width = window.innerWidth;
@@ -231,11 +234,6 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
             svg.setAttribute('height', window.innerHeight);
         }
 
-
-        // Première étape: centrage rapide immédiat (sans écran noir)
-        handleQuickResize();
-
-
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             requestAnimationFrame(() => {
@@ -243,6 +241,13 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
                 createNameCloudUI.renderInContainer(nameData, config, containerElement); 
             });    
         }, 200);
+        buttonsOnDisplay(true);
+
+        // const searchRootOverlay = document.getElementById('resultsTreeOverlay');
+        // const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
+        // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
+
+
     });
 }
 
