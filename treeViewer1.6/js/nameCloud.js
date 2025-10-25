@@ -212,7 +212,9 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     window.addEventListener('resize',() => { 
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
-        buttonsOnDisplay(false);
+        // requestAnimationFrame(() => {
+            buttonsOnDisplay(false);
+        // });
 
 
 
@@ -236,13 +238,21 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
 
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
+
+            requestAnimationFrame(() => {
+                buttonsOnDisplay(false);
+            });
             requestAnimationFrame(() => {
                 console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
                 createNameCloudUI.renderInContainer(nameData, config, containerElement); 
             });    
         }, 200);
-        buttonsOnDisplay(true);
 
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                buttonsOnDisplay(true);
+            });
+        }, 200);
         // const searchRootOverlay = document.getElementById('resultsTreeOverlay');
         // const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
         // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
