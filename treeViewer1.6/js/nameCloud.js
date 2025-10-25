@@ -250,13 +250,13 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
 
         setTimeout(() => {
             requestAnimationFrame(() => {
+                const searchRootOverlay = document.getElementById('resultsTreeOverlay');
+                const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
+                // console.log('\n\n***** debug buttonsOnDisplay nameCloudState.scopeSelect.value', nameCloudState.scopeSelect.value, ', searchRootOverlay=',searchRootOverlay, isRootPersonNeeded)
                 buttonsOnDisplay(true);
+                searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
             });
         }, 200);
-        // const searchRootOverlay = document.getElementById('resultsTreeOverlay');
-        // const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
-        // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
-
 
     });
 }
