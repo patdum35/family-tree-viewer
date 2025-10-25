@@ -96,7 +96,7 @@ export function setupResizeListeners() {
 }
 
 // Fonction pour un simple repositionnement (ultra rapide)
-function handleQuickResize() {
+export function handleQuickResize() {
     const svgElement = document.getElementById('name-cloud-svg');
     if (!svgElement) return;
     

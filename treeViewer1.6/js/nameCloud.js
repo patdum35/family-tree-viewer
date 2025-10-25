@@ -1,7 +1,7 @@
 
 import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
-import { centerCloudNameContainer } from './nameCloudRenderer.js';
+import { centerCloudNameContainer, handleQuickResize } from './nameCloudRenderer.js';
 import { createNameCloudUI } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
 import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
@@ -230,6 +230,11 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
             svg.setAttribute('width', window.innerWidth);
             svg.setAttribute('height', window.innerHeight);
         }
+
+
+        // Première étape: centrage rapide immédiat (sans écran noir)
+        handleQuickResize();
+
 
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
