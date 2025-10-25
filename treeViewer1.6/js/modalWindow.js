@@ -9,6 +9,7 @@ import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from 
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
 import { testSpeechSynthesisHealth, selectVoice, addTooltipTransparencyFix } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne
@@ -862,7 +863,12 @@ export function displayPersonDetails(personId) {
     // Si le resizable/drag util réécrit tout, forcer avec !important
     innerContent.style.setProperty('overflow-y', 'auto', 'important');
 
-    window.addEventListener('resize', () => adjustModalOnResize(modal, innerContent));
+    window.addEventListener('resize', debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug resize ou resize in displayPersonDetails in modalWindow.js  for adjustModalOnResize', modal.id, modal.style.display, modal.offsetParent, '\n\n');        
+            adjustModalOnResize(modal, innerContent);
+        }
+    }, 150)); // Attend 150ms après le dernier resize
 
     let topLocal = 40;
 

@@ -5,6 +5,7 @@ import { showPersonsList, adjustSplitScreenLayout } from './nameCloudInteraction
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { findPersonsBy } from './searchModalUI.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 
 /**
@@ -932,7 +933,12 @@ export function createStatsModal(nameData, type = 'duree_vie', frequencyStatsMod
     
     makeModalInteractive(modal);  
     
-    window.addEventListener('resize', () => resizeModal(modal, true));    
+    window.addEventListener('resize', debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug 1 resize in createStatsModal in nameCloudStatModal for resizeModal \n\n');
+            resizeModal(modal, true);
+        }
+    }, 150));   
 
     resizeModal(modal, true);
 
@@ -1761,7 +1767,12 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
 
     makeModalInteractive(modal);
 
-    window.addEventListener('resize', () => resizeModal(modal, true));
+    window.addEventListener('resize', debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug 2 resize in createFrequencyStatsModal in nameCloudStatModal for resizeModal \n\n');
+            resizeModal(modal, true);
+        }
+    }, 150));
 
     resizeModal(modal, true);
     

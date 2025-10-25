@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap } from './main.js';
+import { state, displayGenealogicTree, hideMap, positionFormContainer } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
@@ -17,14 +17,35 @@ import { generateNameCloudExport } from './nameCloudUI.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 
 
+
+/** function to reduce to call with 'resize' events*  */
+export function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout); // Annule le timer précédent
+        timeout = setTimeout(() => func(...args), wait); // Nouveau timer
+    };
+}
+
+/** function to verify if a modal is visible *  */
+export function isModalVisible(modalId) {
+    const modal = document.getElementById(modalId);
+    return modal && modal.style.display !== 'none'; // && modal.offsetParent !== null;
+}
+
 /**
  * Initialise les gestionnaires d'événements globaux
  */
 export function initializeEventHandlers() {
 
-    window.addEventListener('resize', handleWindowResize);
-    // window.addEventListener('click', handleModalClick);
-    
+    window.addEventListener('resize', debounce(() => {
+      resizeHamburger();
+      if (!state.isWordCloudEnabled) {
+        handleWindowResize();
+      }
+
+    }, 150)); // Attend 150ms après le dernier resize
+
     document.getElementById("root-person-search")
         .addEventListener("keydown", handleSearchKeydown);
     
@@ -56,43 +77,15 @@ export function handleWindowResize() {
     setupElegantBackground(svg);
     initializeAnimationMapPosition();
     updateAnimationMapSize();
-    resizeHamburger();
+    // resizeHamburger();
     repositionAudioPlayerOnResize();
-
-
-    // state.lastVerticalPosition = state.lastVerticalPosition - 300;
 
     state.screenResizeHasOccured = true;
     state.previousWindowInnerWidth = state.lastWindowInnerWidth;
     state.previousWindowInnerHeight = state.lastWindowInnerHeight;
     state.lastWindowInnerWidth = window.innerWidth;
     state.lastWindowInnerHeight = window.innerHeight;
-    console.log("\n\n\n ##### Redimensionnement de la fenêtre, sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
-
-    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight > 0  ) { state.lastVerticalPosition = state.lastVerticalPosition + 100};
-    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight < 0 ) { state.lastVerticalPosition = state.lastVerticalPosition - 100};
-
-    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth > 0  ) { 
-    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
-    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
-    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
-
-    // };
-    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth < 0  ) { 
-    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
-    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
-    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
-    //  };
-
-
-
-
-
-    /* */
-
-    // if (state.isRadarEnabled) {  resetWheelView() } ;// drawWheelTree(true, false); }
-
-
+    console.log("\n\n\n *** debug on resize :  Redimensionnement de la fenêtre ARBRE , sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
 }
 
 /**
@@ -676,7 +669,8 @@ export async function returnToLogin() {
     animationState.isPaused = true;
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     // Mettre à jour le bouton
-    animationPauseBtn.querySelector('span').textContent = '▶️';
+    // animationPauseBtn.querySelector('span').textContent = '▶️';
+    animationPauseBtn.querySelector('span').textContent = '▶';
 
     // Masquer la carte
     hideMap();
@@ -733,6 +727,13 @@ export async function returnToLogin() {
     if (document.fullscreenElement) {
         document.exitFullscreen().catch(err => console.error(err));
     }
+
+
+    state.isTreeEnabled = false;
+
+    positionFormContainer();
+
+
 }
 
 window.returnToLogin = returnToLogin;

@@ -1,6 +1,7 @@
 import { state, updateRadarButtonText, toggleTreeRadar } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
+import { debounce } from './eventHandlers.js';
 
 // Variables pour garder une référence aux éléments
 let hamburgerMenu, sideMenu, menuOverlay;
@@ -225,7 +226,7 @@ export function resizeHamburger() {
     // Synchroniser les sélecteurs si nécessaire
     syncCustomSelectors();
     
-    console.log("Menu hamburger redimensionné avec succès");
+    console.log("\n- debug on resize : Menu hamburger redimensionné avec succès");
   }, 200);
 }
 
@@ -601,7 +602,10 @@ function createMenuElements() {
     updateHeightClass();
     
     // Ajouter un écouteur d'événement pour les changements de taille
-    window.addEventListener('resize', updateHeightClass);
+    window.addEventListener('resize', debounce(() => {
+      console.log('\n\n*** debug resize in createMenuElements in hamburger.js \n\n');
+      updateHeightClass();
+    }, 150)); // Attend 150ms après le dernier resize
     
     // Créer le bouton hamburger
     hamburgerMenu = document.createElement('button');
@@ -953,7 +957,8 @@ function createAudioSection() {
         toggleAnimationPause(); toggleMenu(false);
       }, 
       title: getMenuTranslation('animationPause'), //'Pause animation', 
-      text: '⏸️' 
+      // text: '⏸️', 
+      text: '⏸', 
     },
     { 
       id: 'menu-animationPlayBtn',
@@ -965,7 +970,8 @@ function createAudioSection() {
         toggleAnimationPause(); toggleMenu(false);
       },  
       title: getMenuTranslation('animationPlay'), //'lecture animation', 
-      text: '▶️' 
+      // text: '▶️', 
+      text: '▶', 
     }
   ];
   
@@ -993,6 +999,16 @@ function createAudioSection() {
     if (buttonData.style && buttonData.text === '🗣️') {
       span.style.cssText = buttonData.style; // Appliquer le style au span
     }
+
+    if (buttonData.text === '▶' || buttonData.text === '⏸') {
+      // ajoute ta classe CSS (très important)
+      button.classList.add('play-btn');
+      // maintenant, crée le span pour l’icône
+      span.classList.add('icon');  // indispensable pour appliquer ton .play-btn .icon
+    }
+
+
+
     
     button.appendChild(span);
     
@@ -1621,12 +1637,21 @@ function createDemoSelector() {
     const customSelector = createCustomSelector({
       options: options,
       selectedValue: 'demo1',
+      // colors: {
+      //   main: ' #ff9800',
+
+      //   options: ' #ff9800',
+      //   hover: ' #f57c00',
+      //   selected: ' #e65100'
+      // },
       colors: {
-        main: ' #ff9800',
-        options: ' #ff9800',
-        hover: ' #f57c00',
-        selected: ' #e65100'
+        main: ' #4387fcff',
+        options: '#4387fcff',
+        hover: ' #1760ddff',
+        selected: ' #1149a9ff',
       },
+
+      
       dimensions: selectorSettings.dimensions,
       padding: selectorSettings.padding,
       arrow: selectorSettings.arrow,
@@ -1671,7 +1696,7 @@ function createDemoSelector() {
           // Style de base pour tous les écrans
           Object.assign(displayElement.style, {
             border: 'none',
-            backgroundColor: 'rgba(255, 152, 0, 0.85)',
+            backgroundColor: '#4387fcff',// , 'rgba(255, 152, 0, 0.85)', 
             color: 'white',
             boxSizing: 'border-box',
             fontWeight: 'bold'
@@ -1961,14 +1986,14 @@ function syncCustomSelectors() {
                 const originalGen = document.getElementById('generations');
                 originalGen.style.visibility = 'visible';
 
-                console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                // console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
 
                 if (genPlaceholder && originalGen) {
                   const clone = originalGen.cloneNode(true);
                   clone.id = 'menu-generations';
                   
                   genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
-                  console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                  // console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
                   
                   clone.addEventListener('click', (e) => {
                     const currentGen = document.getElementById('generations');
@@ -2873,13 +2898,15 @@ if (!state.isHamburgerMenuInitialized) {
   });
 
   // Ajouter un écouteur pour les changements de taille de fenêtre
-  window.addEventListener('resize', function() {
-    updateHeightClass();
+  window.addEventListener('resize', debounce(function() {
     // Ajuster les sélecteurs si le menu est ouvert
     if (sideMenu && sideMenu.classList.contains('open')) {
-        setTimeout(syncCustomSelectors, 300);
+      console.log('\n\n*** debug resize in initializeHamburgerOnce in hammburger.js for updateHeightClass \n\n')
+      updateHeightClass();
+      setTimeout(syncCustomSelectors, 300);
     }
-  });
+
+  }, 150));
 
   document.addEventListener('change', function(event) {
     // Vérifier si l'événement provient du sélecteur de personne racine

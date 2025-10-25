@@ -16,7 +16,7 @@ import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
     
     
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
-import { hideLoginBackground } from './eventHandlers.js';
+import { debounce, hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
@@ -159,9 +159,13 @@ export const state = {
     treeOwner: 1,
     isOnLine: false,
     isDebugLog: false,
+
     isRadarEnabled: false,
-    radarStyle: 0,
     isWordCloudEnabled: false,
+    isTreeEnabled: false,
+
+    radarStyle: 0,
+
     WheelMode: {
         maxGenerations: 5,
         showSpouses: true,
@@ -454,8 +458,8 @@ export function toggleFullScreen(inversed = false) {
 
 
 export function positionFormContainer() {
-    const languageSelectorContainer = document.getElementById('language-selector-container');
     const formContainer = document.querySelector('.form-container');
+    const languageSelectorContainer = document.getElementById('language-selector-container');
     const startTitle = document.getElementById('startTitle');
 
     let puzzleSlot, puzzlePiece, puzzleMessage;
@@ -706,6 +710,9 @@ export let audioUnlocked = false;
  */
 export async function loadData(isfromNonEncryptedFile = '') {
 
+
+
+    state.isTreeEnabled = true;
 
     trackPageView('AccueilTreeViewer');
 
@@ -1431,7 +1438,8 @@ export function handleRootPersonChange(event) {
         // Mettre à jour l'état de pause
         const animationPauseBtn = document.getElementById('animationPauseBtn');
         if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
-            animationPauseBtn.querySelector('span').textContent = '⏸️';
+            // animationPauseBtn.querySelector('span').textContent = '⏸️';
+            animationPauseBtn.querySelector('span').textContent = '⏸';
         }
                
         
@@ -2092,7 +2100,8 @@ function positionRadarButton() {
 
     let offsetY = 0;
     let offsetY2 = 5;
-    if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+    // if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+    offsetY = 5; offsetY2 = 0;
 
     if (cloudButton && radarButton && statsButton) {
         const cloudRect = cloudButton.getBoundingClientRect();
@@ -2230,7 +2239,8 @@ function positionHeatMapButton() {
     const heatMapBtn = document.getElementById('heatMapBtn');
 
     let offsetY = 0;
-    if (window.innerWidth < 768) {offsetY = 5;}
+    // if (window.innerWidth < 768) {offsetY = 5;}
+    offsetY = 5;
 
     if (settingsBtn && heatMapBtn) {
         const settingRect = settingsBtn.getBoundingClientRect();
@@ -2279,14 +2289,20 @@ export function showAndRestoreTreeButtons() {
     });
 }
 
-window.addEventListener('resize', () => {
-    positionRadarButton();
-    positionHeatMapButton();
-    createAndPositionRadarOverlay();
-    createAndPositionHeatMapOverlay();
-    positionFormContainer();
+window.addEventListener('resize', debounce(() => {
+    if (!state.isWordCloudEnabled && state.isTreeEnabled) {
+        positionRadarButton();
+        positionHeatMapButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+        console.log('\n\n*** debug resize in main.js  for position buttons and  and map\n\n')          
+    }
+    if (!state.isTreeEnabled) {
+        positionFormContainer();
+        console.log('\n\n*** debug resize in main.js  for positionFormContainerr\n\n')  
+    }
     // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
-});
+}, 150)); // Attend 150ms après le dernier resize
 
 
 // window.addEventListener('load', () => {

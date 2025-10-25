@@ -216,12 +216,12 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     speechToggleBtnSpan.style.animation = 'sound-animate  5s ease-in-out infinite';
 
 
-    const animationPauseBtnSpan = animationPauseBtn.querySelector('span');
-    animationPauseBtnSpan.style.display = 'inline-block';
-    animationPauseBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // const animationPauseBtnSpan = animationPauseBtn.querySelector('span');
+    // animationPauseBtnSpan.style.display = 'inline-block';
+    // animationPauseBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
     // Applique l’animation target 
     // animationPauseBtnSpan.style.animation = 'sound-swing  5s ease-in-out infinite';
-    animationPauseBtnSpan.style.animation = 'play-animate   5s ease-in-out infinite';
+    // animationPauseBtnSpan.style.animation = 'play-animate   5s ease-in-out infinite';
 
 
 

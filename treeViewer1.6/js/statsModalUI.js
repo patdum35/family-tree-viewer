@@ -7,7 +7,7 @@ import { processNamesData } from './nameCloud.js';
 import { ensureStatsExist } from './nameCloudAverageAge.js';
 import { setupSearchFieldModal, findPersonsBy } from './searchModalUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-import { closeAllModals } from './eventHandlers.js';
+import { closeAllModals, debounce, isModalVisible } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
 
@@ -956,9 +956,12 @@ function setupModalEvents() {
     moveSelector();
 
     // Appliquer au redimensionnement
-    window.addEventListener('resize', () => {
-        moveSelector();
-    });
+    window.addEventListener('resize', debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug resize in openStatModal in statsModalUI for moveSelector \n\n'); 
+            moveSelector();
+        }
+    }, 150));
 
 
 

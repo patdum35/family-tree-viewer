@@ -4,6 +4,7 @@ import { showPersonsList } from './nameCloudInteractions.js';
 import { updateTitleText } from './nameCloudUI.js';
 import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js';
 import { addStatisticsLabel } from './nameCloudAverageAge.js';
+import { debounce } from './eventHandlers.js';
 
 let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
@@ -63,30 +64,34 @@ let isResizing = false;
 
 export function setupResizeListeners() {
     ['orientationchange', 'resize'].forEach(event => {
-        window.addEventListener(event, function() {
-            // Annuler tout timer précédent
-            clearTimeout(resizeTimer);
-            
-            // Première étape: centrage rapide immédiat (sans écran noir)
-            handleQuickResize();
-            
-            // Montrer un indicateur de chargement si ce n'est pas déjà fait
-            if (!isResizing) {
-                isResizing = true;
-                if (typeof showToast === 'function') {
-                    showToast("Optimisation en cours...", 2000);
-                }
-            }
-            
-            // Deuxième étape: planifier le redimensionnement complet après un court délai
-            resizeTimer = setTimeout(() => {
-                // Utiliser requestAnimationFrame pour s'assurer que le navigateur est prêt
-                requestAnimationFrame(() => {
-                    handleCompleteResize();
-                    isResizing = false;
-                });
-            }, 300); // Délai avant le redimensionnement complet
-        });
+        window.addEventListener(event, debounce(function() {
+            // if (state.isWordCloudEnabled) {
+            //     console.log('\n\n*** debug orientationchange ou resize in setupResizeListeners in nameCloudRender.js \n\n')
+
+            //     // Annuler tout timer précédent
+            //     clearTimeout(resizeTimer);
+                
+            //     // Première étape: centrage rapide immédiat (sans écran noir)
+            //     handleQuickResize();
+                
+            //     // Montrer un indicateur de chargement si ce n'est pas déjà fait
+            //     if (!isResizing) {
+            //         isResizing = true;
+            //         if (typeof showToast === 'function') {
+            //             showToast("Optimisation en cours...", 2000);
+            //         }
+            //     }
+                
+            //     // Deuxième étape: planifier le redimensionnement complet après un court délai
+            //     resizeTimer = setTimeout(() => {
+            //         // Utiliser requestAnimationFrame pour s'assurer que le navigateur est prêt
+            //         requestAnimationFrame(() => {
+            //             handleCompleteResize();
+            //             isResizing = false;
+            //         });
+            //     }, 300); // Délai avant le redimensionnement complet
+            // }
+        }, 150));
     });
 }
 

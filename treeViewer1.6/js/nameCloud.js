@@ -9,7 +9,7 @@ import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
-import { closeAllModals } from './eventHandlers.js';
+import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 
 export const nameCloudState = {
@@ -57,6 +57,8 @@ export const nameCloudState = {
     
     animationStyle: "none",
 }
+
+let resizeTimeout;
 
 export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false) {onclick
     const isForceTreeRadarButton = true;  
@@ -206,25 +208,37 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     });
     document.dispatchEvent(cloudMapRefreshEvent);
 
-    window.addEventListener('resize', () => {
-        if (state.isWordCloudEnabled) { 
-            console.log('\n\n*** debug resize in processNamesCloudWithDate \n\n')
-            // Dimensions de l'écran
-            nameCloudState.SVG_width = window.innerWidth;
-            nameCloudState.SVG_height = window.innerHeight;
 
-            nameCloudState.mobilePhone = false;
-            if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
-            else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+    window.addEventListener('resize',() => { 
+        if (!state.isWordCloudEnabled) return;
+        if (!containerElement) return;
 
-            // for mobile phone
-            if (nameCloudState.mobilePhone) 
-                { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
-        
-            createNameCloudUI.renderInContainer(nameData, config, containerElement);
+        // Dimensions de l'écran
+        nameCloudState.SVG_width = window.innerWidth;
+        nameCloudState.SVG_height = window.innerHeight;
+        nameCloudState.mobilePhone = false;
+        if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+        else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+
+        // for mobile phone
+        if (nameCloudState.mobilePhone) 
+            { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
+
+        // Redimensionner le SVG existant immédiatement (évite les bandes grises)
+        const svg = containerElement.querySelector('svg');
+        if (svg) {
+            svg.setAttribute('width', window.innerWidth);
+            svg.setAttribute('height', window.innerHeight);
         }
-    });
 
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            requestAnimationFrame(() => {
+                console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
+                createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+            });    
+        }, 200);
+    });
 }
 
 export function processNamesData(config, searchTerm = null, isFromStatsModal = false) {

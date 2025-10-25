@@ -10,7 +10,7 @@ import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor
 import { showHamburgerButtonForcefully, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { enableFortuneMode } from './treeWheelAnimation.js';
-import { closeAllModals } from './eventHandlers.js';
+import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 
 // Fonction pour obtenir les traductions selon la langue actuelle
@@ -993,7 +993,12 @@ function showNameCloud(nameData, config) {
 
     // Appel initial + écoute du redimensionnement
     updateOverlayLayout();
-    window.addEventListener('resize', updateOverlayLayout);
+    window.addEventListener('resize', debounce(() => {
+        if (state.isWordCloudEnabled) {
+            console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
+            updateOverlayLayout();
+        }
+    }, 150));
 
 
 

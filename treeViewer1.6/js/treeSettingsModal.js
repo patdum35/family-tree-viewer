@@ -8,6 +8,7 @@ import { createImageSelectorDialog } from './mainUI.js';
 import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -1136,9 +1137,12 @@ function setupModalEvents(modal) {
     moveSelector();
 
     // Appliquer au redimensionnement
-    window.addEventListener('resize', () => {
-        moveSelector();
-    });
+    window.addEventListener('resize', debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug resize in setupModalEvents in treeSettingsModal for moveSelector \n\n'); 
+            moveSelector();
+        }
+    }, 150));
 }
 
 function createControlSection(title, isInline = false) {

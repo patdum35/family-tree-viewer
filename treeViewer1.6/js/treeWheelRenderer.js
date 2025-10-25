@@ -7,6 +7,7 @@ import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAn
 import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { extractYear } from './utils.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;
@@ -234,10 +235,13 @@ function setupWheelResizeHandler() {
 
         
     // Gestionnaire avec debounce pour éviter trop d'appels
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(handleResize, 200);
-    });
+    window.addEventListener('resize', debounce(() => {
+        if (state.isRadarEnabled) {
+            console.log('\n\n*** debug resize in setupWheelResizeHandler in treeSWheelRenderer for handleResize \n\n'); 
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 200);
+        }
+    }, 150));
     
     resizeHandlerSetup = true;
     console.log('✅ Gestionnaire de redimensionnement configuré pour le radar');

@@ -1,4 +1,5 @@
 import { state } from './main.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 export function makeModalInteractive(modal) {
     // modal.style.position = "fixed";   // ou absolute selon ton cas
@@ -403,7 +404,12 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
         // Ajouter des écouteurs d'événements pour mettre à jour la position des poignées
         window.addEventListener('scroll', updateHandlesPosition);
         document.addEventListener('scroll', updateHandlesPosition, true);
-        window.addEventListener('resize', updateHandlesPosition);
+        window.addEventListener('resize', debounce(() => {
+            if(isModalVisible(modal.id)) {
+                console.log('\n\n*** debug resize in createResizeHandles in resizableModalUtils for updateHandlesPosition \n\n');
+                updateHandlesPosition();
+            }
+        }, 150));
         modal.addEventListener('scroll', updateHandlesPosition);
         
         // Mettre à jour initialement

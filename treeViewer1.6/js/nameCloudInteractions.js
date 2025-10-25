@@ -9,6 +9,7 @@ import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { resizeModal } from './nameCloudStatModal.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 window.lastSelectedLocationId = null;
 window.isIndividualMapMode = false;
@@ -556,7 +557,12 @@ export function showPersonsList(name, people, config, searchTerm) {
 
     makeModalInteractive(modal);
 
-    window.addEventListener('resize', () => resizeModal(modal, true));
+    window.addEventListener('resize',  debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug resize in showPersonsList in nameCloudInteractions for resizeModal \n\n');
+            resizeModal(modal, true);
+        }
+    }, 150)); // Attend 150ms après le dernier resize
 
     resizeModal(modal, true)
 }

@@ -1,7 +1,7 @@
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { state, displayGenealogicTree } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
-import { selectFoundPerson } from './eventHandlers.js';
+import { selectFoundPerson, debounce, isModalVisible } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
@@ -10,6 +10,7 @@ import { adjustSplitScreenLayout } from './nameCloudInteractions.js';
 import { resizeModal } from './nameCloudStatModal.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+
 const searchModalTranslations = {
     fr: {
         title: "Recherche de la pers. racine",
@@ -1135,7 +1136,12 @@ export function openSearchModal(firstName = null, lastName = null) {
 
 
 
-    window.addEventListener('resize', () => resizeModal(content, true));
+    window.addEventListener('resize',  debounce(() => {
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug 2 resize in openSearchModal in searchModalUI for resizeModal \n\n');        
+            resizeModal(content, true);
+        }
+    }, 150));
 
     resizeModal(content, true)    
 
@@ -1300,10 +1306,13 @@ function setupModalEvents() {
     moveSelector();
 
     // Appliquer au redimensionnement
-    window.addEventListener('resize', () => {
-        moveSelector();
-    });
-
+    window.addEventListener('resize', debounce(() => {
+        const modal = document.getElementById('search-modal');
+        if(isModalVisible(modal.id)) {
+            console.log('\n\n*** debug resize in openSearchModal in searchModalUI for moveSelector \n\n');   
+            moveSelector();
+        }
+    }, 150));
 
 
     // // Gestion spéciale pour les champs de dates en mode paysage mobile

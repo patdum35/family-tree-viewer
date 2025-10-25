@@ -4,6 +4,7 @@ import { statsConfig, findPeopleWithName } from './nameCloudAverageAge.js';
 import { showPersonsList } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { resizeModal } from './nameCloudStatModal.js';
+import { debounce, isModalVisible } from './eventHandlers.js';
 
 
 
@@ -838,10 +839,14 @@ export function showCenturyStatsModal(type) {
 
             makeModalInteractive(modal);    
  
-            window.addEventListener('resize', () => resizeModal(modal, true));
+            window.addEventListener('resize', debounce(() => {
+                if( isModalVisible(modal.id)) {
+                    console.log('\n\n*** debug resize in showCenturyStatsModal in nameCloudCentury for resizeModal \n\n');
+                    resizeModal(modal, true);
+                }
+            }, 150)); // Attend 150ms après le dernier resize
 
             resizeModal(modal, true);
-
 
         } catch (error) {
             // En cas d'erreur, supprimer l'indicateur de chargement et afficher l'erreur
@@ -1532,6 +1537,9 @@ function resizeCenturyCharts() {
     
     if (chartContainers.length === 0) return; // Pas de graphique à redimensionner
     
+    console.log('\n\n*** debug resize in nameCloudCentury for resizeCenturyCharts \n\n');
+
+
     chartContainers.forEach(container => {
         // Extraire le type à partir de l'ID du conteneur (format: "century-chart-TYPE")
         const type = container.id.replace('century-chart-', '');
@@ -1574,7 +1582,9 @@ function resizeCenturyCharts() {
 
 
 // Ajouter un écouteur d'événement pour le redimensionnement de la fenêtre
-window.addEventListener('resize', function() {
+window.addEventListener('resize', debounce(function() {
+    // console.log('\n\n*** debug resize in nameCloudCentury for resizeCenturyCharts \n\n');
+
     // Utiliser un délai pour éviter de redessiner trop souvent pendant le redimensionnement
     if (window.centuryChartResizeTimer) {
         clearTimeout(window.centuryChartResizeTimer);
@@ -1583,4 +1593,5 @@ window.addEventListener('resize', function() {
     window.centuryChartResizeTimer = setTimeout(function() {
         resizeCenturyCharts();
     }, 250); // 250ms de délai
-});
+
+}, 150));

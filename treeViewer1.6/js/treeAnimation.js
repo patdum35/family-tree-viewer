@@ -2953,8 +2953,9 @@ export function toggleAnimationPause() {
     animationState.isPaused = !animationState.isPaused;
     
     // Mettre à jour le bouton
-    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
-    
+    // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
+    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '⏸';
+
     if (animationState.isPaused) {
         // Mettre en pause
         stopAnimation();
@@ -3020,7 +3021,8 @@ export function fullResetAnimationState() {
     if (animationController) { animationController.isCancelled = true; }
     
     // Mettre à jour le bouton
-    animationPauseBtn.querySelector('span').textContent = '▶️';
+    // animationPauseBtn.querySelector('span').textContent = '▶️';
+    animationPauseBtn.querySelector('span').textContent = '▶';
 
     state.isFullResetAnimationRequested = true;
 

@@ -13,6 +13,7 @@ import { addTooltipTransparencyFix, toggleAnimationPause, animationState} from '
 import { showHeatmapFromSearch } from './searchModalUI.js';
 import { showHeatmapFromShowPersonList } from './nameCloudInteractions.js';
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { debounce } from './eventHandlers.js';
 
 /**
  * Fonction de traduction spécifique pour geoHeatMapUI.js
@@ -758,10 +759,16 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
     };
 
     // Ajouter l'écouteur
-    window.addEventListener('resize', window._resizeHeatmapListener);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => window._resizeHeatmapListener(), 300);
-    });   
+    window.addEventListener('resize', debounce(() => {
+        console.log('\n\n*** debug resize in window.addEventListener in createImprovedHeatmap in geoHeatMapUI.js \n\n')            
+        window._resizeHeatmapListener();
+    }, 150)); // Attend 150ms après le dernier resize
+    window.addEventListener('orientationchange', debounce(() => {
+        setTimeout(() => {
+            console.log('\n\n*** debug orientationchange in window.addEventListener in createImprovedHeatmap in geoHeatMapUI.js \n\n')            
+            window._resizeHeatmapListener();
+        }, 300);
+    }, 150)); // Attend 150ms après le dernier resize
 
     // Nous créons un titleBar invisible pour permettre le drag même si la barre de titre n'est pas visible
     const titleBar = document.createElement('div');
