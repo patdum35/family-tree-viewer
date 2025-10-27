@@ -959,7 +959,7 @@ function createAudioSection() {
       }, 
       title: getMenuTranslation('animationPause'), //'Pause animation', 
       // text: '⏸️', 
-      text: '\u23F8', //'⏸', 
+      text: '⏸', //'⏸', 
     },
     { 
       id: 'menu-animationPlayBtn',
@@ -1001,7 +1001,15 @@ function createAudioSection() {
       span.style.cssText = buttonData.style; // Appliquer le style au span
     }
 
-    if (buttonData.text === '▶' || buttonData.text === '\u23F8') {
+    if (buttonData.text === '▶' || buttonData.text === '⏸') {
+      if (buttonData.text === '⏸') {
+          span.innerHTML = `
+            <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle">
+              <rect x="6" y="5" width="4" height="14" fill="currentColor"></rect>
+              <rect x="14" y="5" width="4" height="14" fill="currentColor"></rect>
+            </svg>`;
+      }
+
       // ajoute ta classe CSS (très important)
       button.classList.add('play-btn');
       // maintenant, crée le span pour l’icône

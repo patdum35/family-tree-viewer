@@ -2954,7 +2954,13 @@ export function toggleAnimationPause() {
     
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
-    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '\u23F8';
+    // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '\u23F8';
+    if (!animationState.isPaused) {
+        animationPauseBtn.querySelector('span').textContent = '▶';
+    } else {
+        animationPauseBtn.querySelector('span').innerHTML =
+        '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+    }
 
     if (animationState.isPaused) {
         // Mettre en pause
