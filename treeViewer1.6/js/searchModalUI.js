@@ -667,6 +667,8 @@ function moveDownSearchModal() {
     if (state.isMobile && state.isTouchDevice && !(!document.fullscreenElement) && window.innerWidth < 400) {
     // if (true) {
         searchModal.style.top = '50px';
+    } else {
+        searchModal.style.top = '0px';        
     }
 }
 

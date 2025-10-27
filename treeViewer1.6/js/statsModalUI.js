@@ -252,7 +252,10 @@ function moveDownStatsModal() {
     if (state.isMobile && state.isTouchDevice && !(!document.fullscreenElement) && window.innerWidth < 400) {
     // if (true) {
         statsModal.style.top = '50px';
+    } else {
+        statsModal.style.top = '0px';        
     }
+
 }
 
 /**
