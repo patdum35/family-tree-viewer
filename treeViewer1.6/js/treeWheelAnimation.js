@@ -2908,7 +2908,7 @@ export async function readPersonDetails(winner) {
                 white-space: nowrap;
                 flex: 1;
                 max-width: 110px;
-            ">⏸ ${getFortuneText('pause') || 'Pause'}</button>
+            ">\u23F8 ${getFortuneText('pause') || 'Pause'}</button>
             
             <button id="toggle-mute-btn" style="
                 background: rgba(255, 165, 0, 0.3);
@@ -3320,7 +3320,7 @@ export async function readPersonDetails(winner) {
                 window.speechSynthesis.cancel();
             }
         } else {
-            togglePlayPauseBtn.innerHTML = `⏸ ${getFortuneText('pause') || 'Pause'}`;
+            togglePlayPauseBtn.innerHTML = `\u23F8 ${getFortuneText('pause') || 'Pause'}`;
             // Reprendre la lecture si elle était en cours
             if (isReading && currentClueIndex < clues.length - 1) {
                 // La boucle playAllCluesSequentially va reprendre automatiquement

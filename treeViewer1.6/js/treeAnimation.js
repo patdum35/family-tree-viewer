@@ -2954,7 +2954,7 @@ export function toggleAnimationPause() {
     
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
-    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '⏸';
+    animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '\u23F8';
 
     if (animationState.isPaused) {
         // Mettre en pause

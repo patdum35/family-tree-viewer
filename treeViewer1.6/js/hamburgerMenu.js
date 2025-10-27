@@ -938,7 +938,7 @@ function createAudioSection() {
   
   audioControlsContainer.appendChild(demoPlaceholder);
   
-  
+
   // Définir les boutons
   const buttons = [
     { 
@@ -959,7 +959,7 @@ function createAudioSection() {
       }, 
       title: getMenuTranslation('animationPause'), //'Pause animation', 
       // text: '⏸️', 
-      text: '⏸', 
+      text: '\u23F8', //'⏸', 
     },
     { 
       id: 'menu-animationPlayBtn',
@@ -1001,7 +1001,7 @@ function createAudioSection() {
       span.style.cssText = buttonData.style; // Appliquer le style au span
     }
 
-    if (buttonData.text === '▶' || buttonData.text === '⏸') {
+    if (buttonData.text === '▶' || buttonData.text === '\u23F8') {
       // ajoute ta classe CSS (très important)
       button.classList.add('play-btn');
       // maintenant, crée le span pour l’icône
