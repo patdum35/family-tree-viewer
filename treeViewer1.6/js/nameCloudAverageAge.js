@@ -1268,7 +1268,7 @@ function makeElementDraggable(element, type) {
     });
 }
 
-export function addCenturyStatsButton(container, type) {
+export function addCenturyStatsButton(container, type, newConfig) {
     // Récupérer la configuration pour le type actuel
     const cfg = statsConfig[type];
     if (!cfg) return;
@@ -1325,7 +1325,10 @@ export function addCenturyStatsButton(container, type) {
     button.style.top = `${detailedStatsRect.bottom + 5}px`; // 5px de marge
     
     // Ajouter l'événement de clic pour ouvrir le modal des statistiques par siècle
+    nameCloudState.currentConfig = { ...newConfig };
+
     button.onclick = () => {
+        // console.log('\n\n **** debug  call to showCenturyStatsModal, newConfig', newConfig, nameCloudState.currentConfig)
         showCenturyStatsModal(type);
     };
     
@@ -1421,6 +1424,6 @@ export function updateStatsButtons(container, nameData, type, newConfig) {
     // Puis ajouter le bouton des statistiques par siècle avec un petit délai
     // pour permettre au premier bouton d'être positionné correctement
     setTimeout(() => {
-        addCenturyStatsButton(container, type);
+        addCenturyStatsButton(container, type, newConfig);
     }, 50);
 }

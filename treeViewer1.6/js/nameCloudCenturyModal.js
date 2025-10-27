@@ -343,6 +343,7 @@ export function showCenturyStatsModal(type) {
     setTimeout(() => {
         try {
             // Récupérer les statistiques par siècle
+
             const centuryStats = collectCenturyData(type);
             
             // Supprimer l'indicateur de chargement

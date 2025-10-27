@@ -660,6 +660,16 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
 }
 
 
+
+function moveDownSearchModal() {
+    const searchModal = document.getElementById('search-modal') ;
+    // console.log('\n\n **** debug FullScreen= ',!(!document.fullscreenElement),  ',!FullScreen',(!document.fullscreenElement), ', state.isMobile=', state.isMobile, ', state.isTouchDevice=', state.isTouchDevice, searchModal, ', searchModal=', (searchModal!==null), (searchModal) ? searchModal.style.display : null )
+    if (state.isMobile && state.isTouchDevice && !(!document.fullscreenElement) && window.innerWidth < 400) {
+    // if (true) {
+        searchModal.style.top = '50px';
+    }
+}
+
 /**
  * Crée et affiche la modale de recherche
  */
@@ -702,6 +712,7 @@ export function openSearchModal(firstName = null, lastName = null) {
         // verifier si le bouton hamburger se superpose à la modal searchModal
         // dans ce cas chnager le zIndex
         bringToFrontOfHamburgerButton();
+        moveDownSearchModal();
 
         return;
     }
@@ -1123,7 +1134,6 @@ export function openSearchModal(firstName = null, lastName = null) {
 
     makeModalInteractive(modal);   
 
-
     // Gestion du bouton ⚙️ pour afficher/masquer le filtre par date
     const settingsButton = modal.querySelector('#searchModal-settings-button');
     const dateSection = modal.querySelector('.date-filter-section');
@@ -1133,8 +1143,6 @@ export function openSearchModal(firstName = null, lastName = null) {
         const visible = dateSection.style.display !== 'none';
         dateSection.style.display = visible ? 'none' : 'flex';
     });
-
-
 
     window.addEventListener('resize',  debounce(() => {
         if(isModalVisible(modal.id)) {
@@ -1163,6 +1171,9 @@ export function openSearchModal(firstName = null, lastName = null) {
     // verifier si le bouton hamburger se superpose à la modal searchModal
     // dans ce cas chnager le zIndex
     bringToFrontOfHamburgerButton();
+  
+    moveDownSearchModal();
+
 }
 
 /**

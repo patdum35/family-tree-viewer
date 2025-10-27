@@ -245,6 +245,16 @@ const translations = {
 };
 
 
+
+function moveDownStatsModal() {
+    const statsModal = document.getElementById('stats-modal') ;
+    // console.log('\n\n **** debug FullScreen= ',!(!document.fullscreenElement),  ',!FullScreen',(!document.fullscreenElement), ', state.isMobile=', state.isMobile, ', state.isTouchDevice=', state.isTouchDevice, statsModal, ', statsModal=', (statsModal!==null), (statsModal) ? statsModal.style.display : null )
+    if (state.isMobile && state.isTouchDevice && !(!document.fullscreenElement) && window.innerWidth < 400) {
+    // if (true) {
+        statsModal.style.top = '50px';
+    }
+}
+
 /**
  * Crée et affiche la modale de recherche
  */
@@ -270,6 +280,7 @@ function openStatsModal() {
         const searchRoot = document.getElementById('statsModal-search-root');
         searchRoot.value = '🔍'+state.gedcomData.individuals[state.rootPersonId].name.replace(/\//g, '');
         makeModalInteractive(existingModal);  
+        moveDownStatsModal();
         return;
     }
 
@@ -691,7 +702,9 @@ function openStatsModal() {
     // Configurer les événements
     setupModalEvents();
 
-    makeModalInteractive(modal);        
+    makeModalInteractive(modal);     
+    
+    moveDownStatsModal();
    
     if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
         // si mobile phone, ne pas mettre le focus sur l'input pour éviter de voir apparaitre le clavier tactile dès le début

@@ -1158,6 +1158,7 @@ export function resizeModal(modal, isFromSearchModal = false) {
     } else {
         adjustSplitScreenLayout(modal, true);
     }
+
 }
 
 export function colorPerType(type) {

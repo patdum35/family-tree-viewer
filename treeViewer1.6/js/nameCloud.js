@@ -65,7 +65,7 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     if (!isCallFromCloudName) {
         nameCloudState.isButtonOnDisplayBeforeCloud = state.isButtonOnDisplay;
     }
-    // console.log("\n\n\n\ ########################   Debug  start nuage: state.isButtonOnDisplay",state.isButtonOnDisplay , nameCloudState.isButtonOnDisplayBeforeCloud, ', isCallFromCloudName=',isCallFromCloudName," ###########################\n\n\n");
+    console.log("\n\n\n\ ########################   Debug  start nuage: state.isButtonOnDisplay",state.isButtonOnDisplay , nameCloudState.isButtonOnDisplayBeforeCloud, ', isCallFromCloudName=',isCallFromCloudName, config, nameCloudState.currentConfig, " ###########################\n\n\n");
     buttonsOnDisplay(true);
 
     if (!config) {
@@ -1272,6 +1272,8 @@ export function collectCenturyData(type) {
     // Utiliser la fonction getPersonsFromTree pour respecter le scope
     const persons = getPersonsFromTree(currentScope, rootPersonId);
     
+    // console.log('\n\n ***** debug 1rst call to collectCenturyData', nameCloudState.currentConfig,', currentScope=', currentScope, ', rootPersonId=', rootPersonId, persons)
+
     // console.log(`collectCenturyData : Traitement de ${persons.length} personnes pour ${type}`);
     
     // Pour stocker les personnes déjà traitées par siècle (éviter les doublons)
