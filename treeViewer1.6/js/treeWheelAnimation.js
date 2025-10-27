@@ -3320,7 +3320,7 @@ export async function readPersonDetails(winner) {
                 window.speechSynthesis.cancel();
             }
         } else {
-            togglePlayPauseBtn.innerHTML = `\u23F8 ${getFortuneText('pause') || 'Pause'}`;
+            togglePlayPauseBtn.innerHTML = `⏸ ${getFortuneText('pause') || 'Pause'}`;
             // Reprendre la lecture si elle était en cours
             if (isReading && currentClueIndex < clues.length - 1) {
                 // La boucle playAllCluesSequentially va reprendre automatiquement

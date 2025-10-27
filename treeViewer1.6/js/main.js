@@ -1439,15 +1439,12 @@ export function handleRootPersonChange(event) {
         const animationPauseBtn = document.getElementById('animationPauseBtn');
         if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
             // animationPauseBtn.querySelector('span').textContent = '⏸️';
-            // animationPauseBtn.querySelector('span').textContent =  '\u23F8';
-            // animationPauseBtn.querySelector('span').innerHTML  = '&#x23F8';
-
+            // animationPauseBtn.querySelector('span').textContent = '⏸';
             animationPauseBtn.querySelector('span').innerHTML =
             '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
 
         }
                
-
         
         // Redessiner l'arbre d'abord
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
