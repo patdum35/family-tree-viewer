@@ -1990,20 +1990,23 @@ function syncCustomSelectors() {
         
         importPromise.then(mainUI => {
             if (mainUI) {
-                // Synchroniser les sélecteurs de génération
-                const genPlaceholder = document.getElementById('menu-generations-placeholder');
+                // // Synchroniser les sélecteurs de génération
                 const originalGen = document.getElementById('generations');
                 originalGen.style.visibility = 'visible';
 
-                // console.log("\n\n debug genPlaceholder and originalGen", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
+                const existingGenClone = document.getElementById('menu-generations');
+                const genPlaceholder = document.getElementById('menu-generations-placeholder');
 
-                if (genPlaceholder && originalGen) {
+                if (originalGen && (genPlaceholder || existingGenClone)) {
                   const clone = originalGen.cloneNode(true);
                   clone.id = 'menu-generations';
                   
-                  genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
-                  // console.log("\n\n debug genPlaceholder.parentNode.replaceChild(clone, genPlaceholder)", genPlaceholder, originalGen, 'visibility =', originalGen.style.visibility);
-                  
+                  if (existingGenClone) {
+                    existingGenClone.parentNode.replaceChild(clone, existingGenClone);
+                  } else {
+                    genPlaceholder.parentNode.replaceChild(clone, genPlaceholder);
+                  }
+
                   clone.addEventListener('click', (e) => {
                     const currentGen = document.getElementById('generations');
                     if (!currentGen) return;
@@ -2016,18 +2019,27 @@ function syncCustomSelectors() {
                     handleSelectorClick(currentGen, e, currentGen.offsetWidth);
                   });
                 }
+
                 if (originalGen && !state.isButtonOnDisplay) {originalGen.style.visibility = 'hidden';}
-                
+
+
                 // Synchroniser les sélecteurs de mode d'arbre
-                const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
                 const originalMode = document.getElementById('treeMode');
                 originalMode.style.visibility = 'visible';
-                                
-                if (modePlaceholder && originalMode) {
+
+                const existingModeClone = document.getElementById('menu-treeMode');
+                const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
+
+                if (originalMode && (modePlaceholder || existingModeClone)) {
                   const clone = originalMode.cloneNode(true);
                   clone.id = 'menu-treeMode';
                   
-                  modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
+                  // modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
+                  if (existingModeClone) {
+                    existingModeClone.parentNode.replaceChild(clone, existingModeClone);
+                  } else {
+                    modePlaceholder.parentNode.replaceChild(clone, modePlaceholder);
+                  }
                   
                   clone.addEventListener('click', (e) => {
                     const currentTreeMode = document.getElementById('treeMode');

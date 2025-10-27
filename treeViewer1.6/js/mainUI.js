@@ -31,6 +31,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     const radarBtnOverlay = document.getElementById('radarBtn-overlay');
     const statsBtnOverlay = document.getElementById('statsBtn-overlay');
     const heatMapBtnOverlay = document.getElementById('heatMapBtn-overlay');
+    const closeButton = document.getElementById('close-tree-button');
 
     if (isButtonsOnDisplay) {
         speechToggleBtn.style.visibility = 'visible';
@@ -48,8 +49,18 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         if (radarBtnOverlay) {radarBtnOverlay.style.visibility = 'visible';}
         if (statsBtnOverlay) {statsBtnOverlay.style.visibility = 'visible';}        
         if (heatMapBtnOverlay) {heatMapBtnOverlay.style.visibility = 'visible';}
+        // closeButton.style.top = '6px !important'
+        // closeButton.style.right = '6px !important'
         // console.log('\n\n Debug: buttonsOnDisplay set to TRUE ', rootPersonSearch);
         // speechToggleBtn.style.display = 'flex';
+
+        if (window.innerWidth < 400) {
+            closeButton.style.setProperty('top', '48px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important');
+        } else {
+            closeButton.style.setProperty('top', '6px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important'); 
+        }
     } else {
         speechToggleBtn.style.visibility = 'hidden';
         animationPauseBtn.style.visibility = 'hidden';
@@ -67,8 +78,10 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         if (statsBtnOverlay) { statsBtnOverlay.style.visibility = 'hidden'; }
         if (heatMapBtnOverlay) { heatMapBtnOverlay.style.visibility = 'hidden'; }
         // speechToggleBtn.style.display = 'none';
-    }
 
+        closeButton.style.setProperty('top', '6px', 'important');
+        closeButton.style.setProperty('right', '6px', 'important');        
+    }
     
     speechToggleBtn.style.background = 'transparent';
     animationPauseBtn.style.background = 'transparent';
@@ -76,7 +89,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     cloudBtn.style.background = 'transparent';
     heatMapBtn.style.background = 'transparent';
     radarBtn.style.background = 'transparent';
-
 
     const settingsBtnSpan = settingsBtn.querySelector('span');
     settingsBtnSpan.style.display = 'inline-block';
@@ -115,26 +127,16 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     });
 
 
-
-
-
-
     const cloudBtnSpan = cloudBtn.querySelector('span');
     cloudBtnSpan.style.display = 'inline-block';
     // Animation d’oscillation
     cloudBtnSpan.style.animation = 'gear-swing 1s ease-in-out infinite';
-
-
-
 
     // const heatMapBtnSpan = heatMapBtn.querySelector('span');
     // heatMapBtnSpan.style.display = 'inline-block'; // nécessaire pour rotate
     // // Animation de spin 
     // heatMapBtnSpan.style.transformStyle = 'preserve-3d';
     // heatMapBtnSpan.style.animation = 'globe-spin 4s linear infinite';
-
-
-
 
     const heatMapBtnSpan = heatMapBtn.querySelector('span');
     heatMapBtnSpan.style.display = 'inline-block';
@@ -157,10 +159,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
 
     // Lancer le seul intervalle
     window.globeInterval = setInterval(rotateGlobe, 1200);
-
-
-
-
 
     // const heatMapBtnSpan = heatMapBtn.querySelector('span');
     // heatMapBtnSpan.style.display = 'inline-block';
@@ -194,19 +192,11 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     // window.globeInterval = setInterval(rotateGlobe, 1000);
 
 
-
-
-
-
     const radarBtnSpan = radarBtn.querySelector('span');
     radarBtnSpan.style.display = 'inline-block';
     radarBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
     // Applique l’animation target 
     radarBtnSpan.style.animation = 'target-animation 5s ease-in-out infinite';
-
-
-
-
 
     const speechToggleBtnSpan = speechToggleBtn.querySelector('span');
     speechToggleBtnSpan.style.display = 'inline-block';
@@ -222,12 +212,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     // Applique l’animation target 
     // animationPauseBtnSpan.style.animation = 'sound-swing  5s ease-in-out infinite';
     // animationPauseBtnSpan.style.animation = 'play-animate   5s ease-in-out infinite';
-
-
-
-
-
-
     
     // Ajouter l'animation de rotation CSS
     const style = document.createElement('style');
@@ -239,8 +223,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     `;
 
 
-
-
     // Ajout de l’animation d'oscillation CSS
     style.textContent += `
         @keyframes gear-swing {
@@ -249,8 +231,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
             100% { transform: rotate(-10deg); }
         }
     `;
-
-
 
 
     /// Ajout de l’animation spin 3D CSS
@@ -307,20 +287,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         }
     `;
 
-
-
-
     document.head.appendChild(style);
-
-
-
-
-
-
-
-
-
-
 }
 
 export function initializeCustomSelectors() {

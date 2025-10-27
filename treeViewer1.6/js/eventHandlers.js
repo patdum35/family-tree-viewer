@@ -69,6 +69,24 @@ export function initializeHeatmapHandlers() {
  * Gère le redimensionnement de la fenêtre
  */
 export function handleWindowResize() {
+
+
+    const closeButton = document.getElementById('close-tree-button');
+
+    if (state.isButtonOnDisplay) {
+        if (window.innerWidth < 400) {
+            closeButton.style.setProperty('top', '48px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important');
+        } else {
+            closeButton.style.setProperty('top', '6px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important'); 
+        }
+    } else {
+        closeButton.style.setProperty('top', '6px', 'important');
+        closeButton.style.setProperty('right', '6px', 'important');        
+    }
+
+
     d3.select("#tree-svg")
         .attr("width", window.innerWidth)
         .attr("height", window.innerHeight);

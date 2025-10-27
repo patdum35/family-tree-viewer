@@ -851,20 +851,9 @@ input[type=number] {
 }
 
 #close-tree-button {
-        top: 6px !important; 
-        right: 6px !important; 
+    top: 6px; 
+    right: 6px; 
 }
-
-
-/* Descendre le bouton de fermeture sur petits écrans */
-@media screen and (max-width: 400px) {
-    #close-tree-button {
-        top: 48px !important; /* Descendre de 10px à 50px */
-        right: 6px !important; 
-    }
-}
-
-
 
 
 
