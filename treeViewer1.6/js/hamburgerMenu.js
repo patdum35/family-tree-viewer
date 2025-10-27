@@ -938,6 +938,7 @@ function createAudioSection() {
   
   audioControlsContainer.appendChild(demoPlaceholder);
   
+  
   // Définir les boutons
   const buttons = [
     { 

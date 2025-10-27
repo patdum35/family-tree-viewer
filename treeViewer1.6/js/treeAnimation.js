@@ -2963,7 +2963,6 @@ export function toggleAnimationPause() {
         // Reprendre l'animation
         startAncestorAnimation();
     }
-
 }
 
 export function stopAnimation() {

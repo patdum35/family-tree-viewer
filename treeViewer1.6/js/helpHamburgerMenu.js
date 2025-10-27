@@ -189,7 +189,8 @@
         </div>
       </div>
       <div class="help-item">
-        <div class="help-icon-box">⏸️</div>
+        <!-- <div class="help-icon-box">⏸</div> -->
+        <div class=""play-btn"><span class="icon">▶</span></div>
         <div class="help-text">
           <strong>Pause/Lecture</strong>
           <p>Met en pause ou reprend l'animation en cours.</p>
@@ -203,6 +204,7 @@
         </div>
       </div>
     `;
+
     
     sideMenu.appendChild(section.container);
   }

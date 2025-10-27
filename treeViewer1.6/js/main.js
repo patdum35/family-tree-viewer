@@ -1443,6 +1443,7 @@ export function handleRootPersonChange(event) {
         }
                
         
+        
         // Redessiner l'arbre d'abord
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
 

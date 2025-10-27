@@ -2891,7 +2891,6 @@ export async function readPersonDetails(winner) {
     const clues = prepareDetailsForReading(winner);
     console.log("Indices préparés pour", winner.name, ":", clues);
     
-
     quizMessage.innerHTML = `
         <div style="font-size: 32px; margin: 5px 0;">🧠</div>
   
@@ -2909,7 +2908,7 @@ export async function readPersonDetails(winner) {
                 white-space: nowrap;
                 flex: 1;
                 max-width: 110px;
-            ">⏸️ ${getFortuneText('pause') || 'Pause'}</button>
+            ">⏸ ${getFortuneText('pause') || 'Pause'}</button>
             
             <button id="toggle-mute-btn" style="
                 background: rgba(255, 165, 0, 0.3);
@@ -3315,13 +3314,13 @@ export async function readPersonDetails(winner) {
         isPaused = !isPaused;
         
         if (isPaused) {
-            togglePlayPauseBtn.innerHTML = `▶️ ${getFortuneText('play') || 'Lecture'}`;
+            togglePlayPauseBtn.innerHTML = `▶ ${getFortuneText('play') || 'Lecture'}`;
             // Arrêter la synthèse vocale si elle est en cours
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
         } else {
-            togglePlayPauseBtn.innerHTML = `⏸️ ${getFortuneText('pause') || 'Pause'}`;
+            togglePlayPauseBtn.innerHTML = `⏸ ${getFortuneText('pause') || 'Pause'}`;
             // Reprendre la lecture si elle était en cours
             if (isReading && currentClueIndex < clues.length - 1) {
                 // La boucle playAllCluesSequentially va reprendre automatiquement
