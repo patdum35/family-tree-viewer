@@ -1051,6 +1051,24 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         // Ajuster la vue à toutes les coordonnées valides
         try {
             if (coordinates.length > 0) {
+                // CAS SPÉCIAL: Un seul lieu
+                if (coordinates.length === 1) {
+                    const [lat, lon] = coordinates[0];
+                    map.setView([lat, lon], 8); // Zoom 8 pour voir la région
+                    
+                    // Créer la heatmap après positionnement
+                    setTimeout(() => {
+                        const heat = L.heatLayer(
+                            coordinates.map(coords => [...coords, 1]), 
+                            { radius: 25, blur: 15, maxZoom: 1 }
+                        ).addTo(map);
+                        window.heatLayer = heat;
+                    }, 100);
+                    
+                    return; // Sortir de la fonction, pas besoin de bounds
+                }
+
+                // CAS NORMAL: Plusieurs lieux
                 const bounds = L.latLngBounds(coordinates);
                 if (bounds.isValid()) {
                     // Calculer le niveau de zoom idéal pour ces limites
