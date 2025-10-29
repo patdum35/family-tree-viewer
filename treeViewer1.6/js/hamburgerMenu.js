@@ -2056,12 +2056,21 @@ function syncCustomSelectors() {
                 }
                 if (originalMode && !state.isButtonOnDisplay) {originalMode.style.visibility = 'hidden';}
     
+                
+                
+                
                 // Synchronisation du sélecteur de personne racine
                 const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
                 const originalRootResults = document.getElementById('root-person-results');
 
+                const rootResultPersonLink = document.getElementById('menu-root-person-results-clone');
     
+
+
                 if (rootResultsPlaceholder && originalRootResults) {
+
+                    // console.log('\n\n  ********* debug ROOT', rootResultsPlaceholder, originalRootResults)
+
                     // Conteneur principal
                     const rootPersonContainer = document.createElement('div');
                     rootPersonContainer.id = 'menu-root-person-results-container'; // Ajouter un ID
@@ -2105,6 +2114,7 @@ function syncCustomSelectors() {
     
                     // Bouton/div style sélecteur personnalisé
                     const rootPersonLink = document.createElement('div');
+                    rootPersonLink.id = 'menu-root-person-results-clone'
                     
                     // Copier le style du sélecteur original
                     rootPersonLink.style.cursor = 'pointer';
@@ -2226,6 +2236,12 @@ function syncCustomSelectors() {
     
                     // Remplacer le placeholder par le nouveau conteneur
                     rootResultsPlaceholder.parentNode.replaceChild(rootPersonContainer, rootResultsPlaceholder);
+                } else if (originalRootResults && rootResultPersonLink) {
+                    // console.log('\n\n  ********* debug ROOT no rootResultsPlaceholder', rootResultsPlaceholder, originalRootResults, rootResultPersonLink)
+                    // Texte du bouton (nom de la personne racine)
+                    const displayElement = originalRootResults.querySelector('div[style*="border"] span');
+                    const currentText = displayElement ? displayElement.textContent.trim() : 'Sélectionner';
+                    rootResultPersonLink.textContent = currentText;
                 }
 
                 if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}

@@ -14,21 +14,23 @@ import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWhee
 const searchModalTranslations = {
     fr: {
         title: "Recherche de la pers. racine",
-        nameOption: "par Nom/Prénom",
+        nameOption: "par Prénom/Nom",
         placeOption: "par Lieux", 
         occupationOption: "par Profession",
         // nameOptionShort: "par Nom/Pré.",
-        nameOptionShort: "par Nom/Prénom",
+        nameOptionShort: "par Prénom/Nom",
         placeOptionShort: "par Lieux", 
         // occupationOptionShort: "par Profess.",
         occupationOptionShort: "par Profession",
 
         searchPlaceholder: "🔍Tapez votre recherche...",
+        searchSurnamePlaceholder: "🔍prénom",
+        searchNamePlaceholder: "🔍nom",        
         yearStartPlaceholder: "Année début",
         yearEndPlaceholder: "Année fin",
         searchButton: "Search",
         dateFilterLabel: "filtrage<br>par dates",
-        helpName: "Recherche dans les noms et prénoms",
+        helpName: "Recherche dans les prénoms et noms (de jeune fille pour les femmes)",
         helpPlace: "Recherche dans les lieux de naissance, décès, résidence",
         helpOccupation: "Recherche dans les professions, métiers, titres",
         noSearchTerm: "Veuillez saisir un terme de recherche",
@@ -51,18 +53,20 @@ const searchModalTranslations = {
     },
     en: {
         title: "Search for root person",
-        nameOption: "per Name/First name",
+        nameOption: "per First name/Name",
         placeOption: "per Places",
         occupationOption: "per Profession",
-        nameOptionShort: "per Name/First name",
+        nameOptionShort: "per First name/Name",
         placeOptionShort: "per Places",
         occupationOptionShort: "per Profession",
         searchPlaceholder: "🔍Type your search...",
+        searchSurnamePlaceholder: "🔍first n.",
+        searchNamePlaceholder: "🔍name",     
         yearStartPlaceholder: "Start year",
         yearEndPlaceholder: "End year", 
         searchButton: "Search",
         dateFilterLabel: "date<br>filtering",
-        helpName: "Search in names and first names",
+        helpName: "Search in first names and names (maiden for women)",
         helpPlace: "Search in birth, death, residence places",
         helpOccupation: "Search in professions, jobs, titles",
         noSearchTerm: "Please enter a search term",
@@ -92,11 +96,13 @@ const searchModalTranslations = {
         placeOptionShort: "por Lugares",
         occupationOptionShort: "por Profesión",
         searchPlaceholder: "🔍Escriba su búsqueda...",
+        searchSurnamePlaceholder: "🔍nombre", 
+        searchNamePlaceholder: "🔍apellido",
         yearStartPlaceholder: "Año inicio",
         yearEndPlaceholder: "Año fin",
         searchButton: "Ir",
         dateFilterLabel: "filtrado<br>por fechas",
-        helpName: "Búsqueda en nombres y apellidos",
+        helpName: "Búsqueda en nombres y apellidos (de soltera para mujeres)",
         helpPlace: "Búsqueda en lugares de nacimiento, muerte, residencia",
         helpOccupation: "Búsqueda en profesiones, trabajos, títulos",
         noSearchTerm: "Por favor ingrese un término de búsqueda",
@@ -119,18 +125,20 @@ const searchModalTranslations = {
     },
     hu: {
         title: "Gyökérszemély keresése",
-        nameOption: "Név/Keresztnév szerint",
+        nameOption: "Keresztnév/Név szerint",
         placeOption: "Helyek szerint",
         occupationOption: "Foglalkozás szerint",
-        nameOptionShort: "Név/Keresztnév szerint",
+        nameOptionShort: "Keresztnév/Név szerint",
         placeOptionShort: "Helyek szerint",
         occupationOptionShort: "Foglalkozás szerint",
         searchPlaceholder: "🔍Írja be a keresést...",
+        searchSurnamePlaceholder: "🔍keresztnév",
+        searchNamePlaceholder: "🔍név",         
         yearStartPlaceholder: "Kezdő év",
         yearEndPlaceholder: "Befejező év",
         searchButton: "Indul",
         dateFilterLabel: "dátum<br>szűrés",
-        helpName: "Keresés nevekben és keresztnevekben",
+        helpName: "Keresés kereszt- és vezetéknevekben (nők esetén leánykori név)",
         helpPlace: "Keresés születési, halálozási, lakóhelyben",
         helpOccupation: "Keresés foglalkozásokban, munkákban, címekben",
         noSearchTerm: "Kérjük, adjon meg egy keresési kifejezést",
@@ -156,7 +164,7 @@ const searchModalTranslations = {
 /**
  * Fonction de recherche étendue avec filtrage par dates
  */
-export function findPersonsBy(searchTerm, config, searchTermFull, originalName = null, searchFirstName = null, searchLastName = null ) {  
+export function findPersonsBy(searchTerm, config, searchTermFull, originalName = null, searchFirstName = null, searchLastName = null , isFromSearchModal = false) {  
     
     if (!state.gedcomData || !state.gedcomData.individuals) {
         return [];
@@ -182,6 +190,9 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
     // console.log('-debug in findPersonsBy0 searchStr =', searchStr, config, ', searchStrFull=', searchStrFull,  ', searchStrFullFull=', searchStrFullFull, ', originalName=', originalName)
 
     let results = [];
+    let resultsSurnameInLastname = [];
+    let resultsLastnameInSurname = [];
+
     let personWithDate_counter = 0;
     let personWithOccupation_counter = 0;
     let personWithPlace_counter = 0;
@@ -201,12 +212,18 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
     }
    
     let matchCounter = 0;
-    let isMatched1 = false, isMatched2 = false, isMatched3 = false, isMatched4 = false, isMatched5 = false, isMatched6 = false;
-    let bestdate1 = null, bestdate2 = null, bestdate3 = null, bestdate4 = null, bestdate5 = null, bestdate6 = null;
+    let isMatched1 = false, isMatched2 = false, isMatched3 = false, isMatched4 = false, isMatched5 = false, isMatched6 = false, isMatched7 = false;
+    let bestdate1 = null, bestdate2 = null, bestdate3 = null, bestdate4 = null, bestdate5 = null, bestdate6 = null, bestdate7 = null;
+    let isMatchWithSurnameName = false;
+
+    let initialSearchWithPassword = searchFirstName && searchLastName && searchFirstName != '' && searchLastName != '' && !isFromSearchModal;
+    let searchFromSearchModal =  (searchFirstName || searchLastName) && (searchFirstName != '' || searchLastName != '') && isFromSearchModal;    
 
     // Object.values(state.gedcomData.individuals).forEach(person => {
     personList.forEach(person => {
         const matches = [];
+        const matchesSurnameInLastname = [];
+        const matchesLastnameInSurname = [];
         const birthYear = extractYear(person.birthDate);
         const deathYear = extractYear(person.deathDate);
         let marriageYear = null;
@@ -293,7 +310,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                 fullName = person.name.split('/')[0].toLowerCase().replace(/\//g, '')  + ' ' + surn.toLowerCase().replace(/\//g, '');
             } else if (searchType === 'noms') {
                 fullName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
-            } else {
+            } else { // 'name'
                 fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + givn.toLowerCase().replace(/\//g, '') + ' ' + surn.toLowerCase().replace(/\//g, '');
                 firstName = person.name.split('/')[0].toLowerCase().replace(/\//g, '')  + ' ' + surn.toLowerCase().replace(/\//g, '');
                 lastName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
@@ -309,7 +326,12 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                 // if (searchType == 'noms' && searchStrFullFull && fullName.includes(searchStrFullFull)) {
 
                 // cas de la recherche initiale avec password
-                if (searchType === 'name' && searchFirstName && searchLastName && searchFirstName != '' && searchLastName != '') { 
+
+                if ( searchType === 'name' && (initialSearchWithPassword || searchFromSearchModal) ) { 
+
+                    if (searchFromSearchModal) {
+                        isMatched1 = false, isMatched2 = false, isMatched3 = false, isMatched4 = false, isMatched5 = false, isMatched6 = false, isMatched7 = false;
+                    }
 
                     let firstNameWithoutAccent = firstName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     let searchFirstNameWithoutAccent = searchFirstName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -318,84 +340,149 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     let isMatched = false;
                     // console.log('\n\n - debug findBy', searchFirstName, searchLastName)
 
+
+
+                    // 1- recherche prénom/nom avec accent et prénom commençant exactement sur le mot recherché
                     if (new RegExp(`^${searchFirstName}(\\b| |-)`, "i").test(firstName)
                         && lastName.includes(searchLastName) ) {
                         // console.log('\n\n-debug detected with accent :', person.name )
-                        if (!isMatched1 || (bestdate1 && (bestdate < bestdate1) ) ) {
+                        if (initialSearchWithPassword && (!isMatched1 || bestdate1 && (bestdate > bestdate1) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match1: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                             type: 'name',
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched1 = true; bestdate1 = bestdate;
+                        matchCounter++; isMatched = true; isMatched1 = true; bestdate1 = bestdate; isMatchWithSurnameName = true;
                     } 
+                    // 2- recherche prénom/nom sans accent et prénom commençant exactement sur le mot recherché
                     if (!isMatched && !isMatched1 && new RegExp(`^${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
                         && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent :', person.name )
-                        if (!isMatched2 || (bestdate2 && (bestdate < bestdate2) ) ) {
+                        if (initialSearchWithPassword && (!isMatched2 || bestdate2 && (bestdate > bestdate2) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match2: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                             type: 'name',
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched2 = true; bestdate2 = bestdate;
+                        matchCounter++; isMatched = true; isMatched2 = true; bestdate2 = bestdate; isMatchWithSurnameName = true;
                     } 
+
+                    // 3- recherche avec accent et prénom ne commencant par le mot recherché
                     if (!isMatched && !isMatched2 && new RegExp(`\\b${searchFirstName}(\\b| |-)`, "i").test(firstName) 
                         && lastName.includes(searchLastName) ) {
                         // console.log('\n\n-debug detected with accent :', person.name )
-                        if (!isMatched3 || (bestdate3 && (bestdate < bestdate3) ) ) {
+                        if (initialSearchWithPassword && (!isMatched3 || bestdate3 && (bestdate > bestdate3) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match3: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                             type: 'name',
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched3 = true; bestdate3 = bestdate;
+                        matchCounter++; isMatched = true; isMatched3 = true; bestdate3 = bestdate; isMatchWithSurnameName = true;
                     } 
+
+                    // 4- recherche sans accent et prénom ne commencant par le mot recherché
                     if (!isMatched && !isMatched3 && new RegExp(`\\b${searchFirstNameWithoutAccent}(\\b| |-)`, "i").test(firstNameWithoutAccent) 
                         && lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent :', person.name )
-                        if (!isMatched4 || (bestdate4 && (bestdate < bestdate4) ) ) {
+                        if (initialSearchWithPassword && (!isMatched4 || bestdate4 && (bestdate > bestdate4) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match4: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                             type: 'name',
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                        matchCounter++; isMatched = true; isMatched4 = true; bestdate4 = bestdate;
+                        matchCounter++; isMatched = true; isMatched4 = true; bestdate4 = bestdate; isMatchWithSurnameName = true;
                     } 
+
+                    // 5- recherche prénom/nom avec accent et prénom contenant le mot recherché
                     if (!isMatched && !isMatched4 && firstName.includes(searchFirstName) &&
                             lastName.includes(searchLastName) ) {
                         // console.log('\n\n-debug detected with accent et partiel:', person.name )
-                        if (!isMatched5 || (bestdate5 && (bestdate < bestdate5) ) ) {
+                        if (initialSearchWithPassword && (!isMatched5 || bestdate5 && (bestdate > bestdate5) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match5: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                                 type: 'name',
                                 field: 'Nom',
                                 value: person.name.replace(/\//g, '').trim()
                             });
-                        matchCounter++; isMatched = true; isMatched5 = true; bestdate5 = bestdate;            
+                        matchCounter++; isMatched = true; isMatched5 = true; bestdate5 = bestdate; isMatchWithSurnameName = true;            
                     }
+
+
+                    // 6- recherche prénom/nom sans  accent et prénom contenant le prénom  recherché et nom conteant le nom recherché
                     if (!isMatched && !isMatched5 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
                         lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent et partiel:', person.name )
-                        if (!isMatched6 || (bestdate6 && (bestdate < bestdate6) ) ) {
+                        if (initialSearchWithPassword && (!isMatched6 || bestdate6 && (bestdate > bestdate6) ) ) {
                             results = [];
                         }
+                        // console.log('\n\n debug name match6: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+
                         matches.push({
                                 type: 'name',
                                 field: 'Nom',
                                 value: person.name.replace(/\//g, '').trim()
                             });
-                        matchCounter++; isMatched = true; isMatched6 = true; bestdate6 = bestdate;
+                        matchCounter++; isMatched = true; isMatched6 = true; bestdate6 = bestdate; isMatchWithSurnameName = true;
                     }  
+                    
+                    
+                    // 7- recheche avec inversion possible nom/prénom
+                    if (!isMatched && !isMatched6 && !isMatchWithSurnameName && searchFromSearchModal) {
+                       
+                        if (searchFirstName !== '' && searchLastName === '')  {
+
+                            if (lastName.includes(searchStr)) {
+                                // console.log('\n\n debug name matche7 prénom dans nom: ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+                                matchesSurnameInLastname.push({
+                                    type: 'name',
+                                    field: 'Nom',
+                                    value: person.name.replace(/\//g, '').trim()
+                                });
+                                matchCounter++; isMatched = true; isMatched7 = true; bestdate7 = bestdate;
+
+                                resultsSurnameInLastname.push({
+                                    ...person,
+                                    matches: matchesSurnameInLastname
+                                });
+                            } 
+
+                        } else if (searchFirstName === '' && searchLastName != '') {
+                            if (firstName.includes(searchStr)) {
+                                // console.log('\n\n debug name matche7 nom dans prénom : ', searchTerm, config, searchTermFull, originalName, searchFirstName, searchLastName, isFromSearchModal, firstName, lastName, ', fullName=',fullName, 'searchStr=', searchStr,', searchStrFull=',searchStrFull )
+                                matchesLastnameInSurname.push({
+                                    type: 'name',
+                                    field: 'Nom',
+                                    value: person.name.replace(/\//g, '').trim()
+                                });
+                                matchCounter++; isMatched = true; isMatched7 = true; bestdate7 = bestdate;
+
+                                resultsLastnameInSurname.push({
+                                    ...person,
+                                    matches: matchesLastnameInSurname
+                                });
+
+                            } 
+                        }
+                    }
 
                 } else if (searchType == 'noms' && searchStrFullFull) {
                     if (fullName.trim() === searchStrFullFull) {
@@ -411,7 +498,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                             field: 'Nom',
                             value: person.name.replace(/\//g, '').trim()
                         });
-                } 
+                }
 
             } else {
                 if (fullName.includes(searchStr) && fullName.includes(searchStrFull) ) {
@@ -653,6 +740,16 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
 
         }
     });
+    
+    if (results.length === 0  && searchFromSearchModal && searchFirstName !== '' && searchLastName === '' && resultsSurnameInLastname.length > 0)  {
+        results = resultsSurnameInLastname;  
+    } else if (results.length === 0  && searchFromSearchModal && searchFirstName === '' && searchLastName != '' && resultsLastnameInSurname.length > 0)  {
+        results = resultsLastnameInSurname; 
+    }
+
+
+
+
 
     console.log("\n Recherche sur :", Object.keys(state.gedcomData.individuals).length, ' personnes. ', results.length, ' personnes trouvées.', ' withDate=',personWithDate_counter, ', withOccupation=',personWithOccupation_counter, ', withPlace=',personWithPlace_counter, ', homme=',male_counter,  ', FoundWithOccupation=',foundPersonWithOccupation_counter, ', foundWithPlace=',foundPersonWithPlace_counter, ', foundHomme=',foundMale_counter);
 
@@ -736,6 +833,8 @@ export function openSearchModal(firstName = null, lastName = null) {
 
                 <div class="search-input-section">
                     <input type="text" id="searchModal-search-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchPlaceholder}">
+                    <input type="text" id="searchModal-searchSurname-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchSurnamePlaceholder}">
+                    <input type="text" id="searchModal-searchName-input" placeholder="${searchModalTranslations[window.CURRENT_LANGUAGE].searchNamePlaceholder}">
                     <button id="searchModal-search-button"> ${searchModalTranslations[window.CURRENT_LANGUAGE].searchButton} </button>
                     <button id="searchModal-settings-button" >⚙️</button>
                 </div>
@@ -861,6 +960,23 @@ export function openSearchModal(firstName = null, lastName = null) {
             font-size: 14px;
             box-sizing: border-box;
         }      
+        #searchModal-searchSurname-input {
+            width: 80px;
+            padding: 4px;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        #searchModal-searchName-input {
+            width: 80px;
+            padding: 4px;
+            border: 2px solid #ff9800;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
 
         #searchModal-search-type{
             margin-left: -10px;
@@ -1104,6 +1220,7 @@ export function openSearchModal(firstName = null, lastName = null) {
     `;
     document.head.appendChild(extraStyle);
 
+    
 
 
     // FORCER l'application après le CSS tactile du resizableModalUtils.js dans la function makeModalDraggableAndResizable(modal, handle)
@@ -1240,6 +1357,9 @@ function setupModalEvents() {
 
     const searchType = document.getElementById('searchModal-search-type');
     const searchInput = document.getElementById('searchModal-search-input');
+    const searchInputSurname = document.getElementById('searchModal-searchSurname-input');
+    const searchInputName = document.getElementById('searchModal-searchName-input');
+
     const searchButton = document.getElementById('searchModal-search-button');
     const helpText = document.getElementById('search-help-text');
     
@@ -1250,11 +1370,35 @@ function setupModalEvents() {
         'occupation': searchModalTranslations[window.CURRENT_LANGUAGE].helpOccupation
     };
     
+
+    searchInput.style.display = 'none';
+    searchInputSurname.style.display = 'flex';            
+    searchInputName.style.display = 'flex';
+
+    
     // Changer le texte d'aide selon le type sélectionné
     searchType.addEventListener('change', function() {
         helpText.textContent = helpTexts[this.value];
         // Vider le champ de recherche quand on change de type
-        document.getElementById('searchModal-search-input').value = '';
+        if (searchType.value === 'name'){
+            searchInputSurname.value = '';
+            searchInputName.value = '';
+
+            searchInput.style.display = 'none';
+            searchInputSurname.style.display = 'flex';            
+            searchInputName.style.display = 'flex';
+            console.log('\n\n ********** debug name ', searchType.value )
+        } else {
+            searchInput.value = '';
+
+            searchInput.style.display = 'flex';
+            searchInputSurname.style.display = 'none';            
+            searchInputName.style.display = 'none';
+             console.log('\n\n ********** debug !name ', searchType.value )
+        }
+
+
+        // document.getElementById('searchModal-search-input').value = '';
         document.getElementById('searchModal-search-results').innerHTML = '';
     });
 
@@ -1262,7 +1406,12 @@ function setupModalEvents() {
     // Recherche en appuyant sur Entrée dans le champ de recherche
     searchInput.addEventListener('keyup', function(event) {
         if (event.key === 'Enter') {
-            new performModalSearch();
+            // new performModalSearch();
+            if (searchType.value === 'name') {
+                new performModalSearch(searchInputSurname.value, searchInputName.value, true);
+            } else {
+                new performModalSearch();
+            } 
         }
     });
     
@@ -1282,7 +1431,13 @@ function setupModalEvents() {
     // Recherche en cliquant sur le bouton
     // searchButton.addEventListener('click', new performModalSearch);
 
-    searchButton.addEventListener('click', () => { new performModalSearch(); });
+    searchButton.addEventListener('click', () => { 
+        if (searchType.value === 'name') {
+            new performModalSearch(searchInputSurname.value, searchInputName.value, true);
+        } else {
+            new performModalSearch();
+        } 
+    });
 
     
     // // Fermer la modale en cliquant à l'extérieur
@@ -1385,14 +1540,29 @@ export async function showHeatmapFromSearch() {
 /**
  * Effectue la recherche dans la modale
  */
-function performModalSearch(firstName = null, lastName = null) {
+function performModalSearch(firstName = null, lastName = null, isFromSearchModal = false) {
 
     
     let searchTerm = document.getElementById('searchModal-search-input').value.trim();
 
-    if (firstName && lastName && firstName != '' && lastName != '') {
-        searchTerm = firstName + ' ' + lastName;
+    if(!isFromSearchModal) {
+        if (firstName && lastName && firstName != '' && lastName != '') {
+            searchTerm = firstName + ' ' + lastName;
+        }
+    } else {
+        if ((firstName || lastName) && (firstName != '' || lastName != '')) {
+            if (firstName && lastName && firstName != '' && lastName != '') {
+                searchTerm = firstName + ' ' + lastName;
+            } else if (firstName && firstName != '') {
+                searchTerm = firstName;
+            } else if (lastName && lastName != '') {
+                searchTerm = lastName;
+            } else { searchTerm = '';}
+        }
+        // console.log(`\n\n debug prénom nom, firstName=${firstName}, lastName=${lastName}, searchTerm=${searchTerm}, isFromSearchModal=${isFromSearchModal}`); 
     }
+
+
 
     this.name = 'performModalSearch';
     
@@ -1433,7 +1603,7 @@ function performModalSearch(firstName = null, lastName = null) {
 
 
     // Effectuer la recherche avec filtrage par dates
-    const res = findPersonsBy(searchTerm, config, searchTerm, null, firstName, lastName);
+    const res = findPersonsBy(searchTerm, config, searchTerm, null, firstName, lastName, isFromSearchModal);
     const results = res.results;
     // Stocker les résultats pour la heatmap
     window.currentSearchResults = results;
