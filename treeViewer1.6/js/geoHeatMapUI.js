@@ -1066,20 +1066,46 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                     if (finalZoom < idealZoom) {
                         const center = bounds.getCenter();
                         map.setView(center, finalZoom);
+                        // console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )
+
+                    // } else {
+                    //     // Sinon, utiliser fitBounds classique
+                    //     // Correction : recalcul de la vue après affichage complet
+                    //     map.whenReady(() => {
+                    //         if (bounds.isValid()) {
+                    //             map.invalidateSize();
+                    //             map.fitBounds(bounds, {
+                    //                 padding: [50, 50],
+                    //                 maxZoom: maxAllowedZoom
+                    //             });
+                    //         }
+                    //     });
+                    // }
 
                     } else {
-                        // Sinon, utiliser fitBounds classique
-                        // Correction : recalcul de la vue après affichage complet
-                        map.whenReady(() => {
+                        // console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )   
+                        // Forcer un recalcul complet avec double invalidation pour mobile
+                        map.invalidateSize();
+                        
+                        // Attendre que la carte soit prête ET que le DOM soit stabilisé
+                        setTimeout(() => {
+                            map.invalidateSize(true); // Force hard reset
+                            
                             if (bounds.isValid()) {
-                                map.invalidateSize();
-                                map.fitBounds(bounds, {
+                                // Utiliser flyToBounds au lieu de fitBounds pour une transition plus fluide
+                                map.flyToBounds(bounds, {
                                     padding: [50, 50],
-                                    maxZoom: maxAllowedZoom
+                                    maxZoom: maxAllowedZoom,
+                                    duration: 0.5 // Animation rapide
                                 });
                             }
-                        });
+                        }, 500); // Délai augmenté pour mobile
                     }
+
+
+
+
+
                 }
             }
         } catch (error) {
