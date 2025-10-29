@@ -958,6 +958,10 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
  * @param {Function} restoreOriginalZindexes - Fonction pour restaurer les z-index originaux
  */
 function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle, isFromTree = false) {
+    console.log('=== DEBUT initializeLeafletMap ===');
+    console.log('window.heatLayer existe ?', !!window.heatLayer);
+    console.log('heatmapWrapper.map existe ?', !!heatmapWrapper.map);
+    console.log('Nombre de coordonnées:', locationData?.length);
     try {
         // Vérifier si un conteneur de carte existe déjà
         if (mapContainer._leaflet_id) {
@@ -965,6 +969,12 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             
             // Si une carte existe déjà dans ce conteneur, la supprimer
             if (heatmapWrapper.map) {
+                // AJOUT: Effacer immédiatement l'ancienne heatmap
+                if (window.heatLayer) {
+                    // window.heatLayer.setLatLngs([]);
+                    heatmapWrapper.map.removeLayer(window.heatLayer);
+                    window.heatLayer = null;
+                }
                 heatmapWrapper.map.remove();
                 heatmapWrapper.map = null;
             }
@@ -972,7 +982,13 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             // Réinitialiser l'ID Leaflet du conteneur
             delete mapContainer._leaflet_id;
         }
+
+        // AJOUT: Au cas où il y aurait un layer orphelin
+        if (window.heatLayer) {
+            window.heatLayer = null;
+        }
         
+
         // Maintenant, créer la carte
         const map = L.map('ancestors-heatmap').setView([46.2276, 2.2137], 6); // Vue centrée sur la France
 
@@ -1011,15 +1027,6 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
             // return;
         }
 
-        // Créer la couche de chaleur
-        const heat = L.heatLayer(
-            coordinates.map(coords => [...coords, 1]), 
-            {
-                radius: 25,
-                blur: 15,
-                maxZoom: 1,
-            }
-        ).addTo(map);
 
         // Ajouter des marqueurs interactifs
         locationData.forEach(location => {
@@ -1045,12 +1052,6 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         try {
             if (coordinates.length > 0) {
                 const bounds = L.latLngBounds(coordinates);
-                // const bounds = L.latLngBounds(markers.map(m => m.getLatLng()));
-                // if (bounds.isValid()) {
-                //     map.fitBounds(bounds, {
-                //         padding: [50, 50]
-                //     });
-                // }
                 if (bounds.isValid()) {
                     // Calculer le niveau de zoom idéal pour ces limites
                     const idealZoom = map.getBoundsZoom(bounds, false, [50, 50]);
@@ -1066,21 +1067,16 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                     if (finalZoom < idealZoom) {
                         const center = bounds.getCenter();
                         map.setView(center, finalZoom);
-                        // console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )
 
-                    // } else {
-                    //     // Sinon, utiliser fitBounds classique
-                    //     // Correction : recalcul de la vue après affichage complet
-                    //     map.whenReady(() => {
-                    //         if (bounds.isValid()) {
-                    //             map.invalidateSize();
-                    //             map.fitBounds(bounds, {
-                    //                 padding: [50, 50],
-                    //                 maxZoom: maxAllowedZoom
-                    //             });
-                    //         }
-                    //     });
-                    // }
+                        // AJOUT: Créer la heatmap APRÈS setView
+                        setTimeout(() => {
+                            const heat = L.heatLayer(
+                                coordinates.map(coords => [...coords, 1]), 
+                                { radius: 25, blur: 15, maxZoom: 1 }
+                            ).addTo(map);
+                            window.heatLayer = heat;
+                        }, 100);
+
 
                     } else {
                         // console.log('\n\n debug in initializeLeafletMap (finalZoom < idealZoom) ', (finalZoom < idealZoom) )   
@@ -1099,12 +1095,18 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                                     duration: 0.5 // Animation rapide
                                 });
                             }
+
+                            // AJOUT: Créer la heatmap APRÈS flyToBounds
+                            setTimeout(() => {
+                                const heat = L.heatLayer(
+                                    coordinates.map(coords => [...coords, 1]), 
+                                    { radius: 25, blur: 15, maxZoom: 1 }
+                                ).addTo(map);
+                                window.heatLayer = heat;
+                            }, 600); // 500ms du flyToBounds + 100ms de marge
+
                         }, 500); // Délai augmenté pour mobile
                     }
-
-
-
-
 
                 }
             }
@@ -1130,6 +1132,14 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
                 // Restaurer les z-index originaux de tous les éléments
                 restoreOriginalZindexes();
                 
+
+                // Nettoyer la heatmap avant de supprimer le wrapper
+                if (window.heatLayer && heatmapWrapper.map) {
+                    heatmapWrapper.map.removeLayer(window.heatLayer);
+                    window.heatLayer = null;
+                }
+
+
                 // Supprimer la heatmap
 
                 if (heatmapWrapper && document.body.contains(heatmapWrapper)) {
