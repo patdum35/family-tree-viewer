@@ -741,10 +741,10 @@ export async function returnToLogin() {
         }
     }
     
-    // Quitter le mode plein écran si actif
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(err => console.error(err));
-    }
+    // // Quitter le mode plein écran si actif
+    // if (document.fullscreenElement) {
+    //     document.exitFullscreen().catch(err => console.error(err));
+    // }
 
 
     state.isTreeEnabled = false;

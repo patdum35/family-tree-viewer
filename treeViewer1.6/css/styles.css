@@ -97,34 +97,48 @@ body {
 
 
 
-@media (max-width: 400px) {
-    /* .form-container { */
-    /* margin-top: -200px !important; */
-    /* }*/
+
+
+
+
+.settings-Button {
+  cursor: pointer;
+  transition: transform 0.2s ease; /* animation fluide */
+}
+
+.settings-Button:hover {
+  transform: scale(1.4); /* léger grossissement */
 }
 
 
 
-
-/* #password-form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+#loadDataButton {
+  transition: transform 0.2s ease; /* animation fluide */   
 }
 
-.form-container {
-    border: 1px solid #ccc;
-    padding: 30px;
-    border-radius: 10px;
-    width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-} */
+#loadDataButton:hover {
+  transform: scale(1.05); /* léger grossissement */ 
+}
 
+.fullScreen-Button {
+  cursor: pointer;
+  transition: transform 0.2s ease; /* animation fluide */
+}
 
+.browserBar-Button {
+  cursor: pointer;
+  left: 50%;
+  transform: translateX(-50%); /* centré par défaut */
+  transition: transform 0.2s ease; /* animation fluide */
+}
 
+.fullScreen-Button:hover {
+  transform: scale(1.1); /* léger grossissement */
+}
 
+.browserBar-Button:hover {
+  transform: translateX(-50%) scale(1.1); /* léger grossissement */
+}
 
 
 .password-row, .or-row, .file-row, .submit-row {

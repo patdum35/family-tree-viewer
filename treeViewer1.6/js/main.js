@@ -142,7 +142,7 @@ export const state = {
     isMobile: false,
     isIOS: false,
     isPWA: false,
-    isPuzzleSwipe: 'notInitialized',
+    isPuzzleSwipe: false, //'notInitialized',
     initialTreeDisplay: true,
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
@@ -214,6 +214,7 @@ export const state = {
     isButtonOnDisplay: false,    // animationMap: null
     peopleList: [],
     peopleListTitle: [],
+    firstTimePuzzle: true,
 
 };
 
@@ -435,10 +436,26 @@ if (window._originalSetupElegantBackground) {
 
 
 export function toggleFullScreen(inversed = false) {
+
+    console.log('\n\n debug Toggle FullScreen')
     
     let condition = (!document.fullscreenElement)
     if (inversed) { condition = (document.fullscreenElement) ;}
+
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    const fullScreenLabel = document.getElementById('fullScreenLabel');
     
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            span.textContent = (!condition) ? '🖥️' : '↩️';
+        }
+        fullScreenLabel.textContent = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
+        fullScreenLabel.dataset.textKey = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
+        window.i18n.updateUI();
+    }
+
+
     if (condition) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
@@ -454,6 +471,13 @@ export function toggleFullScreen(inversed = false) {
             document.exitFullscreen();
         }
     }
+
+
+
+
+
+
+
 }
 
 
@@ -479,7 +503,7 @@ export function positionFormContainer() {
         languageSelectorContainer.style.display = '';
 
 
-        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' ,state.isPuzzleSwipe)
+        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
@@ -588,7 +612,8 @@ function initialize() {
 
     // Animation subtile au survol
     loadGedcomButton.addEventListener('mouseover', () => {
-        loadGedcomButton.style.animation = 'gear-spin 2s linear infinite';
+        // loadGedcomButton.style.transform = 'scale(1.1)';
+        loadGedcomButton.style.animation = 'gear-spin-fast 2s linear infinite';
     });
     
     loadGedcomButton.addEventListener('mouseout', () => {
@@ -604,6 +629,10 @@ function initialize() {
         @keyframes gear-spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        @keyframes gear-spin-fast {
+            0% { transform: scale(1.1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(360deg); }
         }
     `;
     document.head.appendChild(style);
@@ -645,45 +674,21 @@ function initialize() {
     const device = detectDeviceType();
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
     state.isPWA = isPWA();
+    
+
     if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    // if (true) {
-    // if (false) {
-        setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'auto' });
-        }, 200); // Petit délai pour s'assurer que tout est prêt
-            
-        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
-
-        // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
-        state.isPuzzleSwipe = true;
-        import('./puzzleSwipe.js')
-            .then(() => console.log("PuzzleSwipe chargé"))
-            .catch(err => console.error(err));
-
-        initializePuzzleSwipe();
-
-
-
-        setTimeout(() => {
-            positionFormContainer();
-        }, 200); // Petit délai pour s'assurer que tout est prêt
-
-
-        // setTimeout(() => {
-        if (state.isPuzzleSwipe) { resetPuzzle(); }
-        // }, 200); // Petit délai pour s'assurer que tout est prêt
-
-
-
-
-
+    // if (true){
     } else {
-        // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
-        state.isPuzzleSwipe = false;
-        setTimeout(() => {
-            positionFormContainer();
-        }, 200); // Petit délai pour s'assurer que tout est prêt       
+        const browserBarButton = document.getElementById('browserBar-button');
+        const browserBarLabel = document.getElementById('browserBarLabel'); 
+        browserBarButton.style.display = 'none';  
+        browserBarLabel.style.display = 'none';   
     }
+
+
+    setTimeout(() => {
+        positionFormContainer();
+    }, 200); // Petit délai pour s'assurer que tout est prêt    
 
 
 }

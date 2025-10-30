@@ -732,8 +732,8 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.id = 'show-audio-player-btn';
     toggleButton.innerHTML = '🎵';
     toggleButton.style.position = 'fixed';
-    toggleButton.style.bottom = '20px';
-    toggleButton.style.right = '20px';
+    toggleButton.style.bottom = '5px';
+    toggleButton.style.right = '5px';
     toggleButton.style.backgroundColor = 'rgba(50, 50, 50, 0.85)';
     toggleButton.style.color = 'white';
     toggleButton.style.border = 'none';
@@ -744,6 +744,8 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.style.cursor = 'pointer';
     toggleButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
     toggleButton.style.zIndex = '1499';
+
+
     if (window.CURRENT_LANGUAGE === 'fr') {
         toggleButton.title = 'Afficher le lecteur audio';
     } else if (window.CURRENT_LANGUAGE === 'en') { 
@@ -754,6 +756,18 @@ export async function createAudioPlayerToggleButton() {
         toggleButton.title = 'Audiolejátszó megjelenítése';
     }   
     
+
+
+    // Ajout effet hover (zoom 1.1)
+    toggleButton.addEventListener('mouseover', () => {
+    toggleButton.style.transform = 'scale(1.1)';
+    });
+
+    toggleButton.addEventListener('mouseout', () => {
+    toggleButton.style.transform = 'scale(1)';
+    });
+
+
     // Événement clic
     toggleButton.addEventListener('click', async () => {
         if (isAudioPlayerVisible) {

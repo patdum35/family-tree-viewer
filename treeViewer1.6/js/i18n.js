@@ -67,7 +67,11 @@ window.i18n = {
       'iosStep5': '<strong>Appuyez sur "Ajouter"</strong> ✅',
       'puzzleMessage': 'optionnel:\nglissez la pièce vers le haut pour cacher la barre du navigateur !',
       'bravoPuzzleMessage': '🎉 Bravo ! La barre devrait disparaître maintenant',
-      'higherPuzzleMessage' : 'Glissez plus haut pour cacher la barre',
+      'higherPuzzleMessage': 'Glissez plus haut pour cacher la barre',
+      'fullScreenLabel': 'plein écran',
+      'normalScreenLabel': 'navigateur',
+      'hideBrowserBarLabel': 'masquer la barre\ndu navigateur',
+      'showBrowserBarLabel': 'garder\nla barre',
     },
     'en': {
       // Page password-form
@@ -129,6 +133,10 @@ window.i18n = {
       'puzzleMessage': 'optional:\nSlide the piece up to hide the browser bar!',
       'bravoPuzzleMessage': '🎉 Well done! The bar should disappear now',
       'higherPuzzleMessage': 'Slide higher to hide the bar',
+      'fullScreenLabel': 'full screen',
+      'normalScreenLabel': 'browser',
+      'hideBrowserBarLabel': 'hide \nbrowser bar',
+      'showBrowserBarLabel': 'keep \nbrowser bar',
     },
     'es': {
       // Page password-form
@@ -191,6 +199,10 @@ window.i18n = {
       'puzzleMessage': 'opcional:\nDesliza la pieza hacia arriba para ocultar la barra del navegador!',
       'bravoPuzzleMessage': '🎉 ¡Enhorabuena! La barra debería desaparecer ahora',
       'higherPuzzleMessage': 'Desliza más arriba para ocultar la barra',
+      'fullScreenLabel': 'pantalla completa',
+      'normalScreenLabel': 'navegador',
+      'hideBrowserBarLabel': 'ocultar la barra\n del navegador',
+      'showBrowserBarLabel': 'mantener \nla barra',      
     },
     'hu': {
       // Page password-form
@@ -253,15 +265,13 @@ window.i18n = {
       'puzzleMessage': 'opcionális:\nHúzd feljebb a darabot a böngészősáv elrejtéséhez!',
       'bravoPuzzleMessage': '🎉 Szuper! A sávnak most el kell tűnnie',
       'higherPuzzleMessage': 'Húzd feljebb a darabot a sáv elrejtéséhez',
+      'fullScreenLabel': 'teljes képernyő',
+      'normalScreenLabel': 'böngésző',
+      'hideBrowserBarLabel': 'böngészősáv \nelrejtése',
+      'showBrowserBarLabel': 'böngészősáv \nmegtartása',
     }
   },
   
-
-
-
-
-
-
 
 
 

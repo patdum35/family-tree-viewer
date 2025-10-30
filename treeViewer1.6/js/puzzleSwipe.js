@@ -1,9 +1,78 @@
-import {state} from './main.js';
+import {state, positionFormContainer} from './main.js';
 
 console.log("🚀 puzzleSwipe.js mis à jour");
 
-export function initializePuzzleSwipe() {
 
+
+
+
+export function browserBarPuzzle() {
+    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    // if (true) {
+    // if (false) {
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 200); // Petit délai pour s'assurer que tout est prêt
+            
+        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
+
+        // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
+        if (state.firstTimePuzzle) {
+            state.firstTimePuzzle = false;
+            state.isPuzzleSwipe = true;
+        } else {
+            state.isPuzzleSwipe = !state.isPuzzleSwipe;
+        }
+
+        const browserBarButton = document.getElementById('browserBar-button');
+        const browserBarLabel = document.getElementById('browserBarLabel');
+        
+        if (browserBarButton) {
+            const span = browserBarButton.querySelector('span');
+            if (span) {
+                span.textContent = (!state.isPuzzleSwipe) ? '💻' : '↩️';
+            }
+            // browserBarLabel.textContent = (!state.isPuzzleSwipe) ? 'hideBrowserBarLabel' : 'showBrowserBarLabel';
+            browserBarLabel.dataset.textKey = (!state.isPuzzleSwipe) ? 'hideBrowserBarLabel' : 'showBrowserBarLabel';
+            browserBarLabel.innerHTML = browserBarLabel.dataset.textKey;
+            window.i18n.updateUI();
+        }
+
+
+        if (state.isPuzzleSwipe) {
+            import('./puzzleSwipe.js')
+                .then(() => console.log("PuzzleSwipe chargé"))
+                .catch(err => console.error(err));
+            initializePuzzleSwipe();
+
+            setTimeout(() => {
+                positionFormContainer();
+            }, 200); // Petit délai pour s'assurer que tout est prêt
+
+
+            // setTimeout(() => {
+            if (state.isPuzzleSwipe) { resetPuzzle(); }
+            // }, 200); // Petit délai pour s'assurer que tout est prê
+        } else {
+            const slot = document.getElementById('puzzleSlot'); slot.remove();
+            const piece = document.getElementById('puzzlePiece'); piece.remove();
+            const message = document.getElementById('puzzleMessage'); message.remove();
+        }
+
+
+    } else {
+        // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
+        state.isPuzzleSwipe = false;
+        setTimeout(() => {
+            positionFormContainer();
+        }, 200); // Petit délai pour s'assurer que tout est prêt       
+    }
+
+}
+
+
+
+export function initializePuzzleSwipe() {
     // --- Styles ---
     const style = document.createElement('style');
     style.textContent = `
@@ -113,10 +182,10 @@ export function initializePuzzleSwipe() {
 
     window.i18n.updateUI();
 
-    const audio = document.createElement('audio');
-    audio.src = "https://www.soundjay.com/buttons/sounds/button-3.mp3";
-    audio.preload = "auto";
-    document.body.appendChild(audio);
+    // const audio = document.createElement('audio');
+    // audio.src = "https://www.soundjay.com/buttons/sounds/button-3.mp3";
+    // audio.preload = "auto";
+    // document.body.appendChild(audio);
 
     // --- Confettis ---
     function spawnConfetti() {
@@ -205,7 +274,7 @@ export function initializePuzzleSwipe() {
                 // message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
                 message.dataset.textKey = 'bravoPuzzleMessage';
                 spawnConfetti();
-                audio.play().catch(()=>{});
+                // audio.play().catch(()=>{});
                 if (navigator.vibrate) navigator.vibrate([100,50,100]);
             } else {
                 // message.textContent = "Glissez plus haut pour cacher la barre";

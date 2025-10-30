@@ -345,23 +345,26 @@ function createCloseButton() {
     const closeButton = document.createElement('button');
     closeButton.innerHTML = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '1px';
-    closeButton.style.right = '1px';
-    closeButton.style.background = 'rgba(255, 255, 255, 0.7)';
-    closeButton.style.border = '1px solid #ccc';
+    closeButton.style.top = '6px';
+    closeButton.style.right = '6px';
+    closeButton.style.background =  '#f44336'; //'rgba(255, 255, 255, 0.7)';    
+    closeButton.style.color = 'white'; //'rgba(255, 255, 255, 0.7)';
+    closeButton.style.border = 'none'; //'1px solid #ccc';
     closeButton.style.borderRadius = '50%';
-    closeButton.style.width = '30px';
-    closeButton.style.height = '30px';
+    closeButton.style.width = '32px';
+    closeButton.style.height = '32px';
     closeButton.style.fontSize = '24px';
+    closeButton.style.fontWeight= 'bold';
     closeButton.style.cursor = 'pointer';
     closeButton.style.display = 'flex';
     closeButton.style.justifyContent = 'center';
     closeButton.style.alignItems = 'center';
     closeButton.style.zIndex = '1001';
-    closeButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    closeButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'; //'0 2px 4px rgba(0,0,0,0.2)';
     
     return closeButton;
 }
+
 
 function createNameCloudContainer() {
     const nameCloudContainer = document.createElement('div');
