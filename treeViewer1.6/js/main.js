@@ -441,6 +441,8 @@ export function toggleFullScreen(inversed = false) {
     console.log('\n\n debug Toggle FullScreen')
     
     let condition = (!document.fullscreenElement)
+    // condition is true : si on est pas en fullScreen
+
     if (inversed) { condition = (document.fullscreenElement) ;}
 
     const fullScreenButton = document.getElementById('fullScreen-button');
@@ -449,13 +451,25 @@ export function toggleFullScreen(inversed = false) {
     if (fullScreenButton) {
         const span = fullScreenButton.querySelector('span');
         if (span) {
-            span.textContent = (!condition) ? '🖥️' : '↩️';
+            // span.textContent = (!condition) ? '🖥️' : '↩️';
+            if (!condition) {
+                // Icône plein écran (flèches vers l’extérieur)
+                // span.textContent = '🖥️';
+                span.innerHTML = "";
+                span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+            } else {
+                // Icône sortie plein écran (flèches vers l’intérieur)
+                span.innerHTML = ""; // vider le contenu existant
+                span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward"));            
+            }
         }
         fullScreenLabel.textContent = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
         fullScreenLabel.dataset.textKey = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
         window.i18n.updateUI();
     }
 
+    const browserBarButton = document.getElementById('browserBar-button');
+    const browserBarLabel = document.getElementById('browserBarLabel'); 
 
     if (condition) {
         if (document.documentElement.requestFullscreen) {
@@ -467,18 +481,141 @@ export function toggleFullScreen(inversed = false) {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
+        browserBarButton.style.visibility = 'hidden'; 
+        browserBarLabel.style.visibility = 'hidden';
+        state.isPuzzleSwipe = false; 
+        const slot = document.getElementById('puzzleSlot'); 
+        const piece = document.getElementById('puzzlePiece'); 
+        const message = document.getElementById('puzzleMessage');
+        if (message) {
+            slot.style.visibility = 'hidden';
+            piece.style.visibility = 'hidden';
+            message.style.visibility = 'hidden';
+        }
     } else {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true){
+            browserBarButton.style.visibility = 'visible'; 
+            browserBarLabel.style.visibility = 'visible';
+        }
+    }
+}
+
+
+function createExitFullscreenSVG(
+    width, height,
+    cornerRatio = 0.1, arrowLineRatio = 0.25,
+    strokeWidth = 6, arrowWidth = 6, arrowLength = 6,
+    borderWidth = 2, bgColor = "#3498db", arrowColor = "green",
+    direction = "inward" // "inward" ou "outward"
+) {
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    // rectangle fond + bord noir
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("width", width);
+    rect.setAttribute("height", height);
+    rect.setAttribute("rx", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("ry", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("fill", bgColor);
+    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke-width", borderWidth);
+    svg.appendChild(rect);
+
+    // longueur diagonale pour calcul flèches
+    const diag = Math.sqrt(width*width + height*height);
+    const lineLength = diag * arrowLineRatio;
+
+    // coordonnées des flèches
+    let coords = [
+        { x1: 0.1*width, y1: 0.1*height, dx: lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 },   // haut-gauche
+        { x1: 0.9*width, y1: 0.1*height, dx: -lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 }, // haut-droit
+        { x1: 0.1*width, y1: 0.9*height, dx: lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 }, // bas-gauche
+        { x1: 0.9*width, y1: 0.9*height, dx: -lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 } // bas-droit
+    ];
+
+    if (direction === "outward") {
+        // Transformer (inward base) en outward start/end, puis translater ENTIER SEGMENT de 2px vers le centre.
+        const cx = width / 2;
+        const cy = height / 2;
+        const shift = 4; // pixels toward center
+
+        coords = coords.map(c => {
+            // inward segment was: start_in = (c.x1, c.y1) -> end_in = (c.x1 + c.dx, c.y1 + c.dy)
+            // outward desired segment is start_out = end_in, end_out = start_in (i.e. direction reversed)
+            const startX = c.x1 + c.dx;
+            const startY = c.y1 + c.dy;
+            const endX = c.x1;
+            const endY = c.y1;
+
+            // vector from corner(end) to center (coin -> centre)
+            const vx = cx - endX;
+            const vy = cy - endY;
+            const vlen = Math.hypot(vx, vy) || 1;
+            const ux = vx / vlen;
+            const uy = vy / vlen;
+
+            // translate both endpoints toward center by `shift` px
+            const newStartX = startX + ux * shift;
+            const newStartY = startY + uy * shift;
+            const newEndX = endX + ux * shift;
+            const newEndY = endY + uy * shift;
+
+            return {
+                x1: newStartX,
+                y1: newStartY,
+                dx: newEndX - newStartX,
+                dy: newEndY - newStartY
+            };
+        });
     }
 
 
+    // defs pour les flèches
+    const defs = document.createElementNS(svgNS,"defs");
+    coords.forEach((c,i)=>{
+        const marker = document.createElementNS(svgNS,"marker");
+        marker.setAttribute("id", `arrow-${i}`);
+        marker.setAttribute("markerWidth", arrowWidth);
+        marker.setAttribute("markerHeight", arrowLength);
+        marker.setAttribute("refX", 0);
+        marker.setAttribute("refY", arrowLength/2);
+        marker.setAttribute("orient","auto");
+        marker.setAttribute("markerUnits","strokeWidth");
 
+        const path = document.createElementNS(svgNS,"path");
+        path.setAttribute("d", `M0,0 L${arrowWidth},${arrowLength/2} L0,${arrowLength} z`);
+        path.setAttribute("fill", arrowColor);
+        marker.appendChild(path);
+        defs.appendChild(marker);
+    });
+    svg.appendChild(defs);
 
+    // lignes avec marqueurs
+    coords.forEach((c,i)=>{
+        const line = document.createElementNS(svgNS,"line");
+        line.setAttribute("x1", c.x1);
+        line.setAttribute("y1", c.y1);
+        line.setAttribute("x2", c.x1 + c.dx);
+        line.setAttribute("y2", c.y1 + c.dy);
+        line.setAttribute("stroke", arrowColor);
+        line.setAttribute("stroke-width", strokeWidth);
+        line.setAttribute("stroke-linecap","round");
+        line.setAttribute("stroke-linejoin","round");
+        line.setAttribute("fill","none");
+        line.setAttribute("marker-end",`url(#arrow-${i})`);
+        svg.appendChild(line);
+    });
 
-
-
+    return svg;
 }
 
 
@@ -504,13 +641,13 @@ export function positionFormContainer() {
         languageSelectorContainer.style.display = '';
 
 
-        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
+        // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
         if (window.innerHeight < 400) { 
             formContainerPositionTop =  60;
-            startTitlePositionTop =  60 + formContainer.offsetHeight + 10;            
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 10;            
         }
         if (state.isPuzzleSwipe) {
             formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
@@ -559,6 +696,13 @@ export function positionFormContainer() {
         } else {
             formContainer.style.top = formContainerPositionTop + 'px'; 
             startTitle.style.top = startTitlePositionTop + 'px'; 
+            formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+            formContainer.style.transform = 'translateX(-50%)'; // ''; //
+            startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+            startTitle.style.transform = ''; //'translateX(-50%)';
+            languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+            languageSelectorContainer.style.transform = 'translateX(-50%)';
+
         }
     }
 }
@@ -639,6 +783,17 @@ function initialize() {
     document.head.appendChild(style);
 
 
+    // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = '🖥️';
+            span.innerHTML = "";
+            span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+        }
+    }
+
     // if (state.isPuzzleSwipe != 'notInitialized')
 
 
@@ -677,8 +832,8 @@ function initialize() {
     state.isPWA = isPWA();
     
 
-    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    if (true){
+    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    // if (true){
     } else {
         const browserBarButton = document.getElementById('browserBar-button');
         const browserBarLabel = document.getElementById('browserBarLabel'); 
