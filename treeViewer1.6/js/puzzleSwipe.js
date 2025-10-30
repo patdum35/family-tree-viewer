@@ -280,7 +280,7 @@ export function resetPuzzle() {
     if (!isAddressBarVisible) {
         message.dataset.textKey = '';
         // message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
-        message.textContent = 'bravoPuzzleMessage';
+        message.dataset.textKey = 'bravoPuzzleMessage';
         slot.style.visibility = 'hidden';
         piece.style.visibility = 'hidden'
     } else {

@@ -698,8 +698,8 @@ export function positionFormContainer() {
             startTitle.style.top = startTitlePositionTop + 'px'; 
             formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
             formContainer.style.transform = 'translateX(-50%)'; // ''; //
-            startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
-            startTitle.style.transform = ''; //'translateX(-50%)';
+            startTitle.style.left = '50%'; //window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+            startTitle.style.transform = 'translateX(-50%)';
             languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
             languageSelectorContainer.style.transform = 'translateX(-50%)';
 
@@ -941,7 +941,9 @@ export async function loadData(isfromNonEncryptedFile = '') {
 
     // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
 
-    // toggleFullScreen();
+    if (state.isMobile && state.isTouchDevice ) {
+        toggleFullScreen();
+    }
 
     // for mobile phone
     nameCloudState.mobilePhone = false;

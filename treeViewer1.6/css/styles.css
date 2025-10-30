@@ -1,13 +1,13 @@
 /* Contenu du fichier styles.css */
 
 
-:root { color-scheme: light; }
+/* :root { color-scheme: light; } */
 
 /* Empêche les navigateurs de forcer le mode sombre */
-html {
+/* html {
   color-scheme: light !important;
   forced-color-adjust: none !important;
-}
+} */
 
 *[translate="no"] {
   unicode-bidi: isolate;
@@ -25,7 +25,7 @@ body {
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #fff!important;
+    background:  #000 !important; /* #fff!important;*/
     color: #000 !important;
   }
 }
