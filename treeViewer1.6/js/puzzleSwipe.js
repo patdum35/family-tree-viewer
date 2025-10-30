@@ -7,14 +7,14 @@ console.log("🚀 puzzleSwipe.js mis à jour");
 
 
 export function browserBarPuzzle() {
-    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    // if (true) {
+    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    if (true) {
     // if (false) {
         setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'auto' });
         }, 200); // Petit délai pour s'assurer que tout est prêt
             
-        console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
+        console.log("\n\n ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , 'state.heightDifferenceAtInit=',state.heightDifferenceAtInit, window.screen.height - window.innerHeight, " \n\n ");
 
         // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
         if (state.firstTimePuzzle) {
@@ -254,23 +254,26 @@ export function initializePuzzleSwipe() {
 
         if (!state.resetPuzzle) {
 
-            const pieceRect = piece.getBoundingClientRect();
-            const slotRect  = slot.getBoundingClientRect();
+            // const pieceRect = piece.getBoundingClientRect();
+            // const slotRect  = slot.getBoundingClientRect();
 
 
-            console.log('\n\n **** debug in checkPieceInSlot touchStartY , pieceStartTop, isDragging, pieceRect, slotRect', touchStartY , pieceStartTop , isDragging, pieceRect, slotRect,' \n\n\n')
+            // console.log('\n\n **** debug in checkPieceInSlot touchStartY , pieceStartTop, isDragging, pieceRect, slotRect', touchStartY , pieceStartTop , isDragging, pieceRect, slotRect,' \n\n\n')
 
-            // console.log("Vérification position pièce/slot :", pieceRect, slotRect);
 
-            // Vérifie chevauchement horizontal et vertical
-            const inSlot = (
-                pieceRect.top + pieceRect.height/8 > slotRect.top &&
-                pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
-                pieceRect.left + pieceRect.width/8 > slotRect.left &&
-                pieceRect.right - pieceRect.width/8 < slotRect.right
-            );
+            // // Vérifie chevauchement horizontal et vertical
+            // const inSlot = (
+            //     pieceRect.top + pieceRect.height/8 > slotRect.top &&
+            //     pieceRect.bottom - pieceRect.height/8 < slotRect.bottom &&
+            //     pieceRect.left + pieceRect.width/8 > slotRect.left &&
+            //     pieceRect.right - pieceRect.width/8 < slotRect.right
+            // );
 
-            if (inSlot) {
+            // if (inSlot) {
+
+            const isAddressBarVisible = (state.heightDifferenceAtInit -  (window.screen.height - window.innerHeight) <= 50);
+
+            if (!isAddressBarVisible) {
                 // message.textContent = "🎉 Bravo ! La barre devrait disparaître maintenant";
                 message.dataset.textKey = 'bravoPuzzleMessage';
                 spawnConfetti();
@@ -280,6 +283,7 @@ export function initializePuzzleSwipe() {
                 // message.textContent = "Glissez plus haut pour cacher la barre";
                 message.dataset.textKey = 'higherPuzzleMessage';
             }
+            console.log('\n\n **** debug in checkPieceInSlot touchStartY , pieceStartTop, isDragging, pieceRect, slotRect', touchStartY , pieceStartTop , isDragging, window.screen.height, window.innerHeight,' \n\n\n')
 
 
 
@@ -292,12 +296,12 @@ export function initializePuzzleSwipe() {
 
             // Si les deux diffèrent, la barre d'adresse est visible
             // setTimeout(() => {
-                const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
+                // const isAddressBarVisible = (state.heightDifferenceAtInit -  (window.screen.height - window.innerHeight) <= 50);
 
                 // if (!isAddressBarVisible) {
                 if (true) {
-                    message.dataset.textKey = '';
-                    message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight} ${window.screen.height} ${window.innerHeight}`;
+                    // message.dataset.textKey = '';
+                    // message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight} ${window.screen.height} ${window.innerHeight}`;
                 }
             // }, 10);
 
@@ -315,10 +319,10 @@ export function initializePuzzleSwipe() {
 export function resetPuzzle() {
     const message = document.getElementById('puzzleMessage');
 
-    const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
-
-    // if (!isAddressBarVisible) {
-    if (true) {
+    // const isAddressBarVisible = (window.screen.height > (window.innerHeight + 40));
+    const isAddressBarVisible = (state.heightDifferenceAtInit -  (window.screen.height - window.innerHeight) <= 50);
+    if (!isAddressBarVisible) {
+    // if (true) {
         message.dataset.textKey = '';
         // message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight}`;
         message.textContent = `la barre est cachée !!!  ${window.screen.height - window.innerHeight} ${window.screen.height} ${window.innerHeight}`;

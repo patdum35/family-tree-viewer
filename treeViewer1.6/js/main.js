@@ -215,6 +215,7 @@ export const state = {
     peopleList: [],
     peopleListTitle: [],
     firstTimePuzzle: true,
+    heightDifferenceAtInit: 0,
 
 };
 
@@ -676,14 +677,16 @@ function initialize() {
     state.isPWA = isPWA();
     
 
-    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    // if (true){
+    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    if (true){
     } else {
         const browserBarButton = document.getElementById('browserBar-button');
         const browserBarLabel = document.getElementById('browserBarLabel'); 
         browserBarButton.style.display = 'none';  
         browserBarLabel.style.display = 'none';   
     }
+
+    state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
 
 
     setTimeout(() => {
