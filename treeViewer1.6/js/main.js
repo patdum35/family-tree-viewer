@@ -50,6 +50,7 @@ import {
 import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
 
 let stopMonitoring = null;
+let svgFull, svgExit;
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -417,25 +418,6 @@ if (window._originalSetupElegantBackground) {
 }
 }
 
-// export function toggleFullScreen() {
-//     if (!document.fullscreenElement) {
-//         if (document.documentElement.requestFullscreen) {
-//             document.documentElement.requestFullscreen();
-//         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-//             document.documentElement.mozRequestFullScreen();
-//         } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
-//             document.documentElement.webkitRequestFullscreen();
-//         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-//             document.documentElement.msRequestFullscreen();
-//         }
-//     } else {
-//         if (document.exitFullscreen) {
-//             document.exitFullscreen();
-//         }
-//     }
-// }
-
-
 export function toggleFullScreen(inversed = false) {
 
     console.log('\n\n debug Toggle FullScreen')
@@ -455,12 +437,12 @@ export function toggleFullScreen(inversed = false) {
             if (!condition) {
                 // Icône plein écran (flèches vers l’extérieur)
                 // span.textContent = '🖥️';
-                span.innerHTML = "";
-                span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+                svgFull.style.display = '';
+                svgExit.style.display = 'none';
             } else {
                 // Icône sortie plein écran (flèches vers l’intérieur)
-                span.innerHTML = ""; // vider le contenu existant
-                span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward"));            
+                svgFull.style.display = 'none';
+                svgExit.style.display = '';                
             }
         }
         fullScreenLabel.textContent = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
@@ -505,6 +487,7 @@ export function toggleFullScreen(inversed = false) {
 }
 
 
+
 function createExitFullscreenSVG(
     width, height,
     cornerRatio = 0.1, arrowLineRatio = 0.25,
@@ -513,6 +496,9 @@ function createExitFullscreenSVG(
     direction = "inward" // "inward" ou "outward"
 ) {
     const svgNS = "http://www.w3.org/2000/svg";
+
+    // génère un suffixe unique court pour éviter tout conflit d'ID
+    const uid = 'id' + Math.random().toString(36).slice(2,9);
 
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -534,7 +520,7 @@ function createExitFullscreenSVG(
     const diag = Math.sqrt(width*width + height*height);
     const lineLength = diag * arrowLineRatio;
 
-    // coordonnées des flèches
+    // coordonnées des flèches (inward base)
     let coords = [
         { x1: 0.1*width, y1: 0.1*height, dx: lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 },   // haut-gauche
         { x1: 0.9*width, y1: 0.1*height, dx: -lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 }, // haut-droit
@@ -578,18 +564,18 @@ function createExitFullscreenSVG(
         });
     }
 
-
-    // defs pour les flèches
+    // defs pour les flèches — IDs uniques
     const defs = document.createElementNS(svgNS,"defs");
     coords.forEach((c,i)=>{
         const marker = document.createElementNS(svgNS,"marker");
-        marker.setAttribute("id", `arrow-${i}`);
+        const markerId = `arrow-${uid}-${i}`;               // <--- ID unique ici
+        marker.setAttribute("id", markerId);
         marker.setAttribute("markerWidth", arrowWidth);
         marker.setAttribute("markerHeight", arrowLength);
         marker.setAttribute("refX", 0);
         marker.setAttribute("refY", arrowLength/2);
-        marker.setAttribute("orient","auto");
-        marker.setAttribute("markerUnits","strokeWidth");
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
 
         const path = document.createElementNS(svgNS,"path");
         path.setAttribute("d", `M0,0 L${arrowWidth},${arrowLength/2} L0,${arrowLength} z`);
@@ -599,9 +585,9 @@ function createExitFullscreenSVG(
     });
     svg.appendChild(defs);
 
-    // lignes avec marqueurs
+    // lignes avec marqueurs — utilisent les IDs uniques
     coords.forEach((c,i)=>{
-        const line = document.createElementNS(svgNS,"line");
+        const line = document.createElementNS(svgNS, "line");
         line.setAttribute("x1", c.x1);
         line.setAttribute("y1", c.y1);
         line.setAttribute("x2", c.x1 + c.dx);
@@ -611,7 +597,7 @@ function createExitFullscreenSVG(
         line.setAttribute("stroke-linecap","round");
         line.setAttribute("stroke-linejoin","round");
         line.setAttribute("fill","none");
-        line.setAttribute("marker-end",`url(#arrow-${i})`);
+        line.setAttribute("marker-end", `url(#arrow-${uid}-${i})`); // <--- réf unique
         svg.appendChild(line);
     });
 
@@ -641,7 +627,7 @@ export function positionFormContainer() {
         languageSelectorContainer.style.display = '';
 
 
-        // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
+        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
@@ -698,6 +684,8 @@ export function positionFormContainer() {
             startTitle.style.top = startTitlePositionTop + 'px'; 
             formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
             formContainer.style.transform = 'translateX(-50%)'; // ''; //
+            startTitle.style.padding = '0px';
+            startTitle.style.margin = '0px';            
             startTitle.style.left = '50%'; //window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
             startTitle.style.transform = 'translateX(-50%)';
             languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
@@ -790,7 +778,16 @@ function initialize() {
         if (span) {
             // span.textContent = '🖥️';
             span.innerHTML = "";
-            span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+            // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+
+            // Créer les SVG une seule fois
+            svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
+            svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
+
+            svgExit.style.display = 'none'; // caché par défaut
+
+            span.appendChild(svgFull);
+            span.appendChild(svgExit);
         }
     }
 
