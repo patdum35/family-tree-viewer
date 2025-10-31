@@ -4,10 +4,10 @@
 /* :root { color-scheme: light; } */
 
 /* Empêche les navigateurs de forcer le mode sombre */
-/* html {
+html {
   color-scheme: light !important;
   forced-color-adjust: none !important;
-} */
+}
 
 *[translate="no"] {
   unicode-bidi: isolate;
@@ -23,12 +23,12 @@ body {
 } 
 
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background:  #000 !important; /* #fff!important;*/
-    color: #000 !important;
+/* @media (prefers-color-scheme: dark) {
+  body { */
+    /*background:  #000 !important;*/ /* #fff!important;*/
+    /* color: #000 !important;
   }
-}
+} */
 
 #tree-svg {
     position: absolute;
@@ -941,6 +941,8 @@ input[type=number] {
   }
   
   .lang-flag.active {
+    outline: 2px solid #2196F3;
+    outline-offset: 2px;    
     border-color: #4CAF50;
     opacity: 1;
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
