@@ -373,7 +373,9 @@ export function initNetworkListeners() {
         if (previousOnlineState !== isOnline) {
             console.log("⚠️ Mode hors-ligne détecté");
             showNetworkStatus("Mode hors-ligne");
-            selectVoice();
+            if (state.isSpeechSynthesisAvailable) { 
+                selectVoice();
+            }
         }
     });
 
@@ -1395,163 +1397,167 @@ export async function testSpeechSynthesisHealth(timeout = 1000) {
 
 
 export function selectVoice() {
-    // Sélectionner une voix française si possible
-    let voices = window.speechSynthesis.getVoices();
-    
-    // console.log("Voix disponibles:",voices);
 
-    // debugLog("=== Liste des voix disponibles ===");
-    // voices.forEach(voice => {
-    //     debugLog(`Voix: ${voice.name}
-    //     - Langue: ${voice.lang}
-    //     - Local: ${voice.localService}
-    //     - Par défaut: ${voice.default}
-    //     - URI: ${voice.voiceURI}
-    //     ---------------------`);
-    // });
-
-    // Trouver les voix françaises disponibles
-    // let frenchVoices = voices.filter(voice => 
-    //     // voice.lang.startsWith('fr-FR') && 
-    //     voice.lang.startsWith(voice_language) && !voice.name.includes('ulti'));
-
-    let frenchVoices = voices.filter(voice => 
-        voice.lang.startsWith(voice_language) && 
-        !voice.name.includes('ulti') &&  // Évite Multi/multilingue
-        !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
-    );
-
-
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+        return;
+    } else { 
+        // Sélectionner une voix française si possible
+        let voices = window.speechSynthesis.getVoices();
         
-    // Chercher la première voix contenant 'compact'
-    const compactVoice = frenchVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
+        // console.log("Voix disponibles:",voices);
 
-    if (compactVoice) {
-        // Si on trouve une voix 'compact', la mettre en première position
-        frenchVoices = [
-            compactVoice,
-            ...frenchVoices.filter(voice => voice !== compactVoice)
-        ];
-    }
+        // debugLog("=== Liste des voix disponibles ===");
+        // voices.forEach(voice => {
+        //     debugLog(`Voix: ${voice.name}
+        //     - Langue: ${voice.lang}
+        //     - Local: ${voice.localService}
+        //     - Par défaut: ${voice.default}
+        //     - URI: ${voice.voiceURI}
+        //     ---------------------`);
+        // });
 
+        // Trouver les voix françaises disponibles
+        // let frenchVoices = voices.filter(voice => 
+        //     // voice.lang.startsWith('fr-FR') && 
+        //     voice.lang.startsWith(voice_language) && !voice.name.includes('ulti'));
 
-    let localVoices = voices.filter(voice => voice.localService);
-
-    if (localVoices.length != 0) {
-        console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
-        localVoice = localVoices[0];
-    } 
-
-
-
-
-
-
-
-    // console.log("Voix françaises France disponibles:", frenchVoices, frenchVoices.map(v => v.name));
-
-    if (frenchVoices.length === 0) {
-        frenchVoices = voices.filter(voice => 
-            // voice.lang.startsWith('fr-') || 
-            (voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence')) || 
-            (voice.name.toLowerCase().includes('french') && !voice.voiceURI.includes('eloquence'))
+        let frenchVoices = voices.filter(voice => 
+            voice.lang.startsWith(voice_language) && 
+            !voice.name.includes('ulti') &&  // Évite Multi/multilingue
+            !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
         );
-        // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
-    } 
-    if (frenchVoices.length === 0) {
-        frenchVoices = voices.filter(voice => 
-            voice.lang.startsWith('en-') && !voice.voiceURI.includes('eloquence') );
+
+
+            
+        // Chercher la première voix contenant 'compact'
+        const compactVoice = frenchVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
+
+        if (compactVoice) {
+            // Si on trouve une voix 'compact', la mettre en première position
+            frenchVoices = [
+                compactVoice,
+                ...frenchVoices.filter(voice => voice !== compactVoice)
+            ];
+        }
+
+
+        let localVoices = voices.filter(voice => voice.localService);
+
+        if (localVoices.length != 0) {
+            console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
+            localVoice = localVoices[0];
+        } 
+
+
+
+
+
+
+
+        // console.log("Voix françaises France disponibles:", frenchVoices, frenchVoices.map(v => v.name));
 
         if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice => 
+                // voice.lang.startsWith('fr-') || 
+                (voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence')) || 
+                (voice.name.toLowerCase().includes('french') && !voice.voiceURI.includes('eloquence'))
+            );
+            // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
+        } 
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice => 
+                voice.lang.startsWith('en-') && !voice.voiceURI.includes('eloquence') );
+
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.localService);
+                }
+            // console.log("Voix anglaise ou locales disponibles:", frenchVoices.map(v => v.name));
+        }
+
+        
+        console.log("✅ or ⚠️ Connexion Internet ?", isOnline);
+        
+        
+        if (!isOnline) {
             frenchVoices = voices.filter(voice =>
-                voice.localService);
+                // voice.lang.startsWith('fr-') && voice.localService);
+                voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence') && voice.localService);
+            console.log("Voix disponibles locales fr-:", frenchVoices);
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.lang.startsWith('en-') &&!voice.voiceURI.includes('eloquence') && voice.localService);
+                console.log("Voix disponibles locales en-:", frenchVoices);
             }
-        // console.log("Voix anglaise ou locales disponibles:", frenchVoices.map(v => v.name));
-    }
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.localService);
+                console.log("Voix disponibles locales:", frenchVoices);
+            }   
 
-    
-    console.log("✅ or ⚠️ Connexion Internet ?", isOnline);
-    
-    
-    if (!isOnline) {
-        frenchVoices = voices.filter(voice =>
-            // voice.lang.startsWith('fr-') && voice.localService);
-            voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence') && voice.localService);
-        console.log("Voix disponibles locales fr-:", frenchVoices);
-        if (frenchVoices.length === 0) {
-            frenchVoices = voices.filter(voice =>
-                voice.lang.startsWith('en-') &&!voice.voiceURI.includes('eloquence') && voice.localService);
-            console.log("Voix disponibles locales en-:", frenchVoices);
-        }
-        if (frenchVoices.length === 0) {
-            frenchVoices = voices.filter(voice =>
-                voice.localService);
-            console.log("Voix disponibles locales:", frenchVoices);
-        }   
-
-        // console.log("Voix françaises ou autres locales disponibles hors lignes :", frenchVoices.map(v => v.name));
-    }
-
-
-    if (frenchVoices.length != 0) {
-        console.log("Voix  disponibles:", frenchVoices.map(v => v.name));
-    }
-
-
-
-
-
-
-
-    
-    // Choisir la meilleure voix française  
-    // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
-    if (isOnline) {
-        // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
-        state.frenchVoice = frenchVoices.find(voice => 
-            voice.name.includes('Google') || 
-            voice.name.includes('Microsoft')
-        );
-        
-        if (state.frenchVoice) {
-            console.log("✅ Utilisation de la voix réseau haute qualité:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
-        } else if (frenchVoices.length != 0) {
-            // Sélectionner la première voix française disponible
-            state.frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix  ?:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            // console.log("Voix françaises ou autres locales disponibles hors lignes :", frenchVoices.map(v => v.name));
         }
 
-    } else {
+
         if (frenchVoices.length != 0) {
-            // Sélectionner la première voix française disponible
-            state.frenchVoice = frenchVoices[0];
-            console.log("ℹ️ Utilisation de la voix locale:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
-        } else {
-            console.log("⚠️ Aucune voix disponible hors ligne ");
+            console.log("Voix  disponibles:", frenchVoices.map(v => v.name));
         }
-    }
 
 
-    if (state.frenchVoice) {
-        console.log("Voix  sélectionnée:", state.frenchVoice);
-        debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
-    }
 
-    
-    // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
-    // if (!frenchVoice) {
-    //     // Sélectionner la première voix française disponible
-    //     frenchVoice = frenchVoices[0];
+
+
+
+
         
-    //     if (frenchVoice) {
-    //         console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
-    //     } else {
-    //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
-    //     }
-    // }
+        // Choisir la meilleure voix française  
+        // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
+        if (isOnline) {
+            // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
+            state.frenchVoice = frenchVoices.find(voice => 
+                voice.name.includes('Google') || 
+                voice.name.includes('Microsoft')
+            );
+            
+            if (state.frenchVoice) {
+                console.log("✅ Utilisation de la voix réseau haute qualité:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            } else if (frenchVoices.length != 0) {
+                // Sélectionner la première voix française disponible
+                state.frenchVoice = frenchVoices[0];
+                console.log("ℹ️ Utilisation de la voix  ?:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            }
+
+        } else {
+            if (frenchVoices.length != 0) {
+                // Sélectionner la première voix française disponible
+                state.frenchVoice = frenchVoices[0];
+                console.log("ℹ️ Utilisation de la voix locale:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            } else {
+                console.log("⚠️ Aucune voix disponible hors ligne ");
+            }
+        }
+
+
+        if (state.frenchVoice) {
+            console.log("Voix  sélectionnée:", state.frenchVoice);
+            debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
+        }
+
+        
+        // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
+        // if (!frenchVoice) {
+        //     // Sélectionner la première voix française disponible
+        //     frenchVoice = frenchVoices[0];
+            
+        //     if (frenchVoice) {
+        //         console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        //     } else {
+        //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
+        //     }
+        // }
     
 
-
+    }
 
 
 
@@ -1964,10 +1970,10 @@ export async function startAncestorAnimation() {
     if (window.innerWidth < 400) { deltaXRatio = 2; } // Pour les petits écrans, on
 
 
-    if (state.isSpeechEnabled2) {
+    if (state.isSpeechEnabled2 && state.isSpeechSynthesisAvailable ) {
         selectVoice();
         state.isVoiceSelected = true;
-    }
+    } else { state.isVoiceSelected = false;}
 
     let horizontalShift = 0;
     let verticalShift = 0;
