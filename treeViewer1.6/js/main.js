@@ -218,6 +218,7 @@ export const state = {
     firstTimePuzzle: true,
     heightDifferenceAtInit: 0,
     isbrowserBarHidden: false,
+    isSpeechSynthesisAvailable: true,
 
 };
 

@@ -62,8 +62,13 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
             window.speechSynthesis.cancel();
         }
-        selectVoice();
-        state.isVoiceSelected = true;
+        if (state.isSpeechSynthesisAvailable) {
+            selectVoice();
+            state.isVoiceSelected = true;
+        } else {
+            state.isVoiceSelected = false;
+        }
+
     }
 
     // DIAGNOSTIC SUPPLÉMENTAIRE

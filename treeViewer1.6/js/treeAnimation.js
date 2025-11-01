@@ -1354,12 +1354,12 @@ function noSpeechAvailableMessage() {
 export async function testSpeechSynthesisHealth(timeout = 1000) {
     // console.log("🔍 Test de la santé de la synthèse vocale...");
 
-    // if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
-    if (true) {
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    // if (true) {
         console.warn("Synthèse vocale non supportée par ce navigateur");
         noSpeechAvailableMessage();
         state.isSpeechEnabled = false;
-        state.isSpeechEnabled2 = false;
+        state.isSpeechSynthesisAvailable = false;
         return false;
     }
     return new Promise((resolve) => {
