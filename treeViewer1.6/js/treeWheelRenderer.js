@@ -60,7 +60,9 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
         } else {
             // Chrome est grognon il faut utiliser une méthode de secours
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
-            window.speechSynthesis.cancel();
+            if (state.isSpeechSynthesisAvailable) {
+                window.speechSynthesis.cancel();
+            }
         }
         if (state.isSpeechSynthesisAvailable) {
             selectVoice();
@@ -68,7 +70,6 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
         } else {
             state.isVoiceSelected = false;
         }
-
     }
 
     // DIAGNOSTIC SUPPLÉMENTAIRE

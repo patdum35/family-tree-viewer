@@ -1657,7 +1657,7 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
 
         //Ajouter un timeout de sécurité qui résoudra la promesse après 3 secondes quoi qu'il arrive
         safetyTimeout = setTimeout(() => {
-            window.speechSynthesis.cancel(); // Annuler toute synthèse en cours
+            if (state.isSpeechSynthesisAvailable) {window.speechSynthesis.cancel();} // Annuler toute synthèse en cours
             resolve(); // Résoudre la promesse pour continuer l'animation
         }, timeOutDuration);
 
@@ -1734,12 +1734,14 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
             try {
                 // console.log(`⚙️ DÉBUT adaptiveSpeech avec taux: ${optimalSpeechRate}`);
                 // pour bug de chrome
-                if (!state.isSpeechInGoodHealth) {
-                    const silentUtterance = new SpeechSynthesisUtterance(' ');
-                    window.speechSynthesis.speak(silentUtterance);
-                    window.speechSynthesis.cancel();
+                if (state.isSpeechSynthesisAvailable) {
+                    if (!state.isSpeechInGoodHealth) {
+                        const silentUtterance = new SpeechSynthesisUtterance(' ');
+                        window.speechSynthesis.speak(silentUtterance);
+                        window.speechSynthesis.cancel();
+                    }
+                    const result = await measureSpeechDuration(optimalSpeechRate);
                 }
-                const result = await measureSpeechDuration(optimalSpeechRate);
                 
                 clearTimeout(safetyTimeout); // Annuler le timeout si tout s'est bien passé
                 resolve();
@@ -1816,7 +1818,7 @@ export async function startAncestorAnimation() {
         } else {
             // Chrome est grognon il faut utiliser une méthode de secours
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
-            window.speechSynthesis.cancel();
+            if (state.isSpeechSynthesisAvailable) {window.speechSynthesis.cancel();}
         }
     }
 

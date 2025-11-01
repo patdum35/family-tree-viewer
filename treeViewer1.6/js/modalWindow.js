@@ -946,10 +946,16 @@ async function startQuiz(personId)
         } else {
             // Chrome est grognon il faut utiliser une méthode de secours
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
-            window.speechSynthesis.cancel();
+            if (state.isSpeechSynthesisAvailable) {
+                window.speechSynthesis.cancel();
+            }
         }
-        selectVoice();
-        state.isVoiceSelected = true;
+        if (state.isSpeechSynthesisAvailable) {
+            selectVoice();
+            state.isVoiceSelected = true;
+        } else {
+            state.isVoiceSelected = false;
+        }
     }
     showQuizMessage(person);
 }
@@ -972,10 +978,16 @@ async function readPersonSheet(personId) {
         } else {
             // Chrome est grognon il faut utiliser une méthode de secours
             console.log("⚠️ La synthèse vocale ne fonctionne pas correctement. Utilisation de la méthode de secours.");
-            window.speechSynthesis.cancel();
+            if (state.isSpeechSynthesisAvailable) {
+                window.speechSynthesis.cancel();
+            }
         }
-        selectVoice();
-        state.isVoiceSelected = true;
+        if (state.isSpeechSynthesisAvailable) {
+            selectVoice();
+            state.isVoiceSelected = true;
+        } else {
+            state.isVoiceSelected = false;
+        }
     }
     readPersonDetails(person);  
 }
