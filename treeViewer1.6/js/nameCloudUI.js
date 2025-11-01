@@ -1,5 +1,5 @@
 import { state, showAndRestoreTreeButtons, displayGenealogicTree, updateRadarButtonText } from './main.js';
-import { NameCloud, setupResizeListeners } from './nameCloudRenderer.js';
+import { NameCloud } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
 import { createDateInput } from './dateUI.js';
@@ -1302,9 +1302,6 @@ function showNameCloud(nameData, config) {
 
     // Générer initialement le nuage de mots
     generateNameCloud();
-
-    // Configurer les écouteurs d'événements pour les changements de taille d'écran
-    setupResizeListeners();
 
     // Définir le texte du titre
     updateTitleText(titleElement, config);

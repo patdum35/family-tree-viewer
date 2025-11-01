@@ -180,15 +180,15 @@ async function preloadAppResources() {
     
     // Créer un élément de notification pour l'utilisateur
     let  notification;
-    if (window.CURRENT_LANGUAGE == "fr") {
-        notification = createPreloadNotification("Préchargement des ressources...");
-    } else if (window.CURRENT_LANGUAGE == "en") {
-        notification = createPreloadNotification("Preloading resources...");
-    } else if (window.CURRENT_LANGUAGE == "es") {
-        notification = createPreloadNotification("Precargando recursos...");
-    } else if (window.CURRENT_LANGUAGE == "hu") {
-        notification = createPreloadNotification("Előtolás...");
-    }
+    // if (window.CURRENT_LANGUAGE == "fr") {
+    //     notification = createPreloadNotification("Préchargement des ressources...");
+    // } else if (window.CURRENT_LANGUAGE == "en") {
+    //     notification = createPreloadNotification("Preloading resources...");
+    // } else if (window.CURRENT_LANGUAGE == "es") {
+    //     notification = createPreloadNotification("Precargando recursos...");
+    // } else if (window.CURRENT_LANGUAGE == "hu") {
+    //     notification = createPreloadNotification("Előtolás...");
+    // }
     
     document.body.appendChild(notification);
     
@@ -236,7 +236,7 @@ async function preloadAppResources() {
                         }
                         
                         // Mettre à jour la notification
-                        updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
+                        // updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
                     }
                 } else {
                     // La ressource est déjà en cache
@@ -249,13 +249,13 @@ async function preloadAppResources() {
         }, 2, 100); // Traiter 2 ressources à la fois, avec 100ms de pause entre les lots
         
         // Mise à jour finale de la notification
-        updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
+        // updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
         
         // Faire disparaître la notification après 3 secondes
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 500);
-        }, 3000);
+        // setTimeout(() => {
+        //     notification.style.opacity = '0';
+        //     setTimeout(() => notification.remove(), 500);
+        // }, 3000);
         
         console.log(`✅ Préchargement des ressources terminé: ${loadedCount} nouvelles, ${skippedCount} déjà en cache`);
         log(`✅ Préchargement des ressources terminé: ${loadedCount} nouvelles, ${skippedCount} déjà en cache`, 'success');

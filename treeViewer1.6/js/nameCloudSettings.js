@@ -119,9 +119,6 @@ function translateCloudSettings(key) {
            key;
 }
 
-
-
-
 // Au début du fichier nameCloudSettings.js, après les imports
 // Fonction pour charger les paramètres depuis localStorage
 export function loadSettingsFromLocalStorage() {

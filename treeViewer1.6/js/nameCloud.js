@@ -1458,6 +1458,3 @@ export function collectCenturyData(type) {
     
     return centuryStats;
 }
-
-
-

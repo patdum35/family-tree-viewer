@@ -1301,10 +1301,67 @@ function initSpeechSynthesis(voice) {
         window.speechSynthesis.speak(initUtterance);
     }
 }
-/* */
 
+
+function noSpeechAvailableMessage() {
+    // Crée une petite fenêtre modale
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.5);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 9999;
+        ">
+        <div style="
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            padding: 20px 30px;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-family: sans-serif;
+        ">
+            <h3 style="margin-top:0">Synthèse vocale indisponible 🔇</h3>
+            <p>Ce navigateur ne supporte pas la parole.<br><br>
+            Pour profiter de toutes les fonctionnalités,<br>
+            utilise <b>Google Chrome</b> 🗣️</p>
+            <button id="closeModalBtn" style="
+            margin-top: 10px;
+            background: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            ">OK</button>
+        </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        modal.remove();
+    });
+}
+
+
+/* */
 export async function testSpeechSynthesisHealth(timeout = 1000) {
     // console.log("🔍 Test de la santé de la synthèse vocale...");
+
+    // if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    if (true) {
+        console.warn("Synthèse vocale non supportée par ce navigateur");
+        noSpeechAvailableMessage();
+        state.isSpeechEnabled = false;
+        state.isSpeechEnabled2 = false;
+        return false;
+    }
     return new Promise((resolve) => {
       let ok = false;
   

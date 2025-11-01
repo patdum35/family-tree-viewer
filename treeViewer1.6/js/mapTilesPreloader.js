@@ -86,8 +86,8 @@ async function preloadTilesInBackground(tileUrls) {
     console.log(`🔄 Préchargement de ${tilesToPreload.length} tuiles en tâche de fond...`);
     
     // Créer un élément de notification pour l'utilisateur (optionnel)
-    const notification = createPreloadNotification();
-    document.body.appendChild(notification);
+    // const notification = createPreloadNotification();
+    // document.body.appendChild(notification);
     
     // Ouvrir ou créer le cache
     try {
@@ -121,9 +121,9 @@ async function preloadTilesInBackground(tileUrls) {
                         loadedCount++;
                         
                         // Mettre à jour la notification tous les 10 éléments
-                        if (loadedCount % 10 === 0) {
-                            updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
-                        }
+                        // if (loadedCount % 10 === 0) {
+                        //     updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
+                        // }
                     }
                 } else {
                     // La tuile est déjà en cache
@@ -135,20 +135,51 @@ async function preloadTilesInBackground(tileUrls) {
         }, 10, 20); // Traiter 10 tuiles à la fois, avec 20ms de pause entre les lots
         
         // Mise à jour finale de la notification
-        updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
+        // updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
         
         // Faire disparaître la notification après 3 secondes
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 500);
-        }, 3000);
+        // setTimeout(() => {
+        //     notification.style.opacity = '0';
+        //     setTimeout(() => notification.remove(), 500);
+        // }, 3000);
         
         console.log(`✅ Préchargement terminé: ${loadedCount}/${tilesToPreload.length} tuiles chargées`);
+
+        // // message unique à la fin (localisation simple)
+        // const msg = window.CURRENT_LANGUAGE === 'fr' ? 'Toutes les ressources sont chargées.' : 'All resources are loaded.';
+        // showCompletionNotification(msg);
+
+
     } catch (error) {
         console.error("❌ Erreur lors du préchargement des tuiles:", error);
         notification.remove();
     }
 }
+
+
+
+
+function showCompletionNotification(message) {
+  const n = document.createElement('div');
+  n.style.position = 'fixed';
+  n.style.bottom = '20px';
+  n.style.right = '20px';
+  n.style.padding = '12px 16px';
+  n.style.background = 'rgba(0,0,0,0.85)';
+  n.style.color = 'white';
+  n.style.borderRadius = '6px';
+  n.style.zIndex = 99999;
+  n.style.fontSize = '14px';
+  n.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+  n.style.transition = 'opacity 0.4s';
+  n.textContent = message;
+  document.body.appendChild(n);
+  // disparaît après 2s
+  setTimeout(() => { n.style.opacity = '0'; setTimeout(()=>n.remove(), 400); }, 2000);
+}
+
+
+
 
 /**
  * Traite des éléments par lot pour éviter de bloquer l'interface

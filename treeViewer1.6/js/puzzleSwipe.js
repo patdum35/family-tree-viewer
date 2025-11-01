@@ -267,6 +267,7 @@ export function initializePuzzleSwipe() {
             window.i18n.updateUI();
         }
         state.resetPuzzle = false;
+        state.isbrowserBarHidden = (!isAddressBarVisible);
     }
 }
 
@@ -292,4 +293,5 @@ export function resetPuzzle() {
     window.i18n.updateUI();
     console.log('\n\n **** debug in resetPuzzle \n\n\n')
     state.resetPuzzle = true;
+    state.isbrowserBarHidden = (!isAddressBarVisible);
 }

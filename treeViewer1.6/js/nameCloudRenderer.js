@@ -59,106 +59,6 @@ function setupZoom(svg, width, height) {
     return { zoom, textGroup, applyZoom };
 }
 
-// let resizeTimer;
-// let isResizing = false;
-
-export function setupResizeListeners() {
-//     ['orientationchange', 'resize'].forEach(event => {
-//         window.addEventListener(event, debounce(function() {
-//             // if (state.isWordCloudEnabled) {
-//             //     console.log('\n\n*** debug orientationchange ou resize in setupResizeListeners in nameCloudRender.js \n\n')
-
-//             //     // Annuler tout timer précédent
-//             //     clearTimeout(resizeTimer);
-                
-//             //     // Première étape: centrage rapide immédiat (sans écran noir)
-//             //     handleQuickResize();
-                
-//             //     // Montrer un indicateur de chargement si ce n'est pas déjà fait
-//             //     if (!isResizing) {
-//             //         isResizing = true;
-//             //         if (typeof showToast === 'function') {
-//             //             showToast("Optimisation en cours...", 2000);
-//             //         }
-//             //     }
-                
-//             //     // Deuxième étape: planifier le redimensionnement complet après un court délai
-//             //     resizeTimer = setTimeout(() => {
-//             //         // Utiliser requestAnimationFrame pour s'assurer que le navigateur est prêt
-//             //         requestAnimationFrame(() => {
-//             //             handleCompleteResize();
-//             //             isResizing = false;
-//             //         });
-//             //     }, 300); // Délai avant le redimensionnement complet
-//             // }
-//         }, 150));
-//     });
-}
-
-// // Fonction pour un simple repositionnement (ultra rapide)
-// function handleQuickResize() {
-//     const svgElement = document.getElementById('name-cloud-svg');
-//     if (!svgElement) return;
-    
-//     // Centrer le conteneur
-//     centerCloudNameContainer();
-    
-//     // Mettre à jour le titre si disponible
-//     const titleElement = document.getElementById('name-cloud-title');
-//     if (titleElement) {
-//         updateTitleText(titleElement, nameCloudState.currentConfig);
-//     }
-    
-//     // console.log("Ajustement rapide effectué");
-// }
-
-// // Fonction pour un relayout complet (plus lent mais meilleur résultat)
-// function handleCompleteResize() {
-//     const svgElement = document.getElementById('name-cloud-svg');
-//     const modalContainer = document.querySelector('.modal-container');
-    
-//     if (!svgElement || !modalContainer || !nameCloudState.currentNameData || !nameCloudState.currentConfig) {
-//         return;
-//     }
-    
-//     // Adapter les dimensions du SVG
-//     const newScreenW = window.innerWidth;
-//     const newScreenH = window.innerHeight;
-
-//     // Déterminer les nouvelles dimensions du SVG
-//     let newWidth = newScreenW;
-//     let newHeight = newScreenH;
-
-//     // Mettre à jour la détection de mobile
-//     nameCloudState.mobilePhone = false;
-//     if (Math.min(window.innerWidth, window.innerHeight) < 400) nameCloudState.mobilePhone = 1;
-//     else if (Math.min(window.innerWidth, window.innerHeight) < 600) nameCloudState.mobilePhone = 2;
-
-//     if (nameCloudState.mobilePhone) { 
-//         newWidth = newScreenW + 50; 
-//         newHeight = newScreenH + 50; 
-//     }
-
-//     // Mettre à jour les variables globales
-//     nameCloudState.SVG_width = newWidth;
-//     nameCloudState.SVG_height = newHeight;
-
-//     // Initialiser le SVG et lancer le layout
-//     const layout = initializeCloudAndLayout(
-//         svgElement,
-//         nameCloudState.currentNameData,
-//         nameCloudState.currentConfig,
-//         nameCloudState.SVG_width,
-//         nameCloudState.SVG_height
-//     );
-//     layout.start();
-//     console.log( "words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
-
-    
-//     // Ajuster les offsets pour le centrage
-//     centerCloudNameContainer();
-// }
-
 function drawNameCloud(svg, textGroup, words, color, config) {
     const sortedWords = words.sort((a, b) => b.size - a.size);
     
@@ -518,6 +418,19 @@ export function computeFontScale(nameData) {
         minFontSize = parseInt(minFontSize*scalefactor-1);
         maxFontSize = parseInt(maxFontSize*scalefactor-1);
 
+
+         console.log('\n\n -debug before modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
+
+        if (wordCount > 1000) {
+            minFontSize = minFontSize * 0.8;
+            maxFontSize = maxFontSize * 0.8;
+          console.log('\n\n -debug after modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
+        }
+
+
+
+
+
         // console.log("Font choice: log , screen", Math.min(window.innerWidth, window.innerHeight), ", mobile=",nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=", minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
     }
     nameCloudState.appliedMinFontSize = minFontSize;
@@ -739,13 +652,8 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 // console.log(`Zoom automatique appliqué: ${autoZoomScale} pour ${totalWords} mots`, autoShapeScale);
                 // console.log(`Zoom automatique appliqué: ${autoZoomScale.toFixed(1)} pour ${totalWords} mots`, autoShapeScale.toFixed(1));
             }, 100); // Léger délai pour assurer que le rendu est terminé
-
-
-
-
         });
 
-        
     return layout;
 }
 

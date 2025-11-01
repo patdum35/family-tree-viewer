@@ -217,6 +217,7 @@ export const state = {
     peopleListTitle: [],
     firstTimePuzzle: true,
     heightDifferenceAtInit: 0,
+    isbrowserBarHidden: false,
 
 };
 
@@ -224,9 +225,14 @@ export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
 
+// document.addEventListener('DOMContentLoaded', async () => {
+//     // Lancer le préchargement des tuiles en tâche de fond
+//     initResourcePreloading();
+//     initTilePreloading();
+// });
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // Lancer le préchargement des tuiles en tâche de fond
-    initResourcePreloading();
+    await initResourcePreloading();
     initTilePreloading();
 });
 
@@ -627,7 +633,7 @@ export function positionFormContainer() {
         languageSelectorContainer.style.display = '';
 
 
-        console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
+        // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
@@ -690,7 +696,6 @@ export function positionFormContainer() {
             startTitle.style.transform = 'translateX(-50%)';
             languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
             languageSelectorContainer.style.transform = 'translateX(-50%)';
-
         }
     }
 }
@@ -939,7 +944,10 @@ export async function loadData(isfromNonEncryptedFile = '') {
     // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
 
     if (state.isMobile && state.isTouchDevice ) {
-        toggleFullScreen();
+        if (!state.isPWA && state.isbrowserBarHidden) {
+            // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+        }
+        else { toggleFullScreen();}
     }
 
     // for mobile phone
