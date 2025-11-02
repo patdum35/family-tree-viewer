@@ -9,7 +9,7 @@ import { debounce } from './eventHandlers.js';
 let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
 
-function setupZoom(svg, width, height) {
+export function setupZoom(svg, width, height) {
     const textGroup = svg.append('g')
         .attr('class', 'name-cloud-container')
         .attr('transform', `translate(${width / 2},${height / 2})`);
@@ -50,11 +50,39 @@ function setupZoom(svg, width, height) {
        }, { passive: false });
 
     // Retourner aussi la fonction applyZoom pour permettre un zoom programmé
-    const applyZoom = (scale) => {
+    // const applyZoom = (scale) => {
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(zoom.scaleTo, scale);
+    // }; 
+    
+    
+    //✅ applyTranslate
+    // const applyTranslate = ( shiftX = 0, shiftY = 0) => {
+    //     // console.log('\n\n --------debug applyTranslate ', shiftX, shiftY)
+    //     const transform = d3.zoomIdentity
+    //         .translate(width / 2 + shiftX, height / 2 + shiftY)
+        
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(zoom.transform, transform);
+    // };    
+
+
+
+
+    // ✅ Nouvelle version de applyZoom avec translation
+    const applyZoom = (scale = 1, shiftX = 0, shiftY = 0) => {
+        const transform = d3.zoomIdentity
+            .translate(width / 2 + shiftX, height / 2 + shiftY)
+            .scale(scale);
+        
         svg.transition()
             .duration(750)
-            .call(zoom.scaleTo, scale);
-    };       
+            .call(zoom.transform, transform);
+    };    
+
+
 
     return { zoom, textGroup, applyZoom };
 }
@@ -329,7 +357,7 @@ export const NameCloud = ({ nameData, config }) => {
             nameCloudState.SVG_height
         );   
         layout.start();
-        console.log( "words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
+        console.log( "in NameCloud after initializeCloudAndLayout, words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
 
 
     }, [nameData]);
@@ -409,26 +437,21 @@ export function computeFontScale(nameData) {
             }
         }
 
-        // pour un écran de 1080 ligne on veut scalefactor = 1;
-        // pour un mobile avec width = 360 on veut un scaleFactor = 0.5;
-        // y = A * x + B
-        const scaleFactorA =  1/1440;
-        const scaleFactorB = 180/720;
-        const scalefactor = scaleFactorA * Math.min(window.innerWidth, window.innerHeight) + scaleFactorB;
-        minFontSize = parseInt(minFontSize*scalefactor-1);
-        maxFontSize = parseInt(maxFontSize*scalefactor-1);
+
+        if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+            // pour un écran de 1080 ligne on veut scalefactor = 1;
+            // pour un mobile avec width = 360 on veut un scaleFactor = 0.5;
+            // y = A * x + B
+            const scaleFactorA =  1/1440;
+            const scaleFactorB = 180/720;
+            const scalefactor = scaleFactorA * Math.min(window.innerWidth, window.innerHeight) + scaleFactorB;
+            minFontSize = parseInt(minFontSize*scalefactor-1);
+            maxFontSize = parseInt(maxFontSize*scalefactor-1);
 
 
-         console.log('\n\n -debug before modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
+            //  console.log('\n\n -debug before modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
 
-        if (wordCount > 1000) {
-            minFontSize = minFontSize * 0.8;
-            maxFontSize = maxFontSize * 0.8;
-          console.log('\n\n -debug after modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
         }
-
-
-
 
 
         // console.log("Font choice: log , screen", Math.min(window.innerWidth, window.innerHeight), ", mobile=",nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=", minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
@@ -545,7 +568,10 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
             // Mettre à jour les statistiques
             nameCloudState.totalWords = nameData.length;
-            const totalWords = nameCloudState.totalWords;            
+            const totalWords = nameCloudState.totalWords;   
+            
+            let bboxWidth, bboxHeight, centerX, centerY;
+            let bbox;
             
             if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
                 // Utiliser la disposition en forme personnalisée
@@ -566,8 +592,11 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 // Utiliser la disposition d'origine
                 placedWords = words;
                 
+            }
+
+
                 // Calculer la boîte englobante de tous les mots pour le centrage
-                const bbox = words.reduce((acc, word) => {
+                bbox = words.reduce((acc, word) => {
                     if (!acc) return { 
                         minX: word.x - word.width/2, 
                         maxX: word.x + word.width/2, 
@@ -584,21 +613,23 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 }, null);
 
                 if (bbox) {
-                    const bboxWidth = bbox.maxX - bbox.minX;
-                    const bboxHeight = bbox.maxY - bbox.minY;
-                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+                    bboxWidth = bbox.maxX - bbox.minX;
+                    bboxHeight = bbox.maxY - bbox.minY;
+                    centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                    centerY = height / 2 - (bbox.minY + bboxHeight/2);
 
                     // Ajuster la transformation du groupe de texte pour centrer
                     textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
                 }
-            }
+
 
             // Ajouter les formes concentriques si activé
             if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
                 generateConcentricShapes(textGroup, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
             }
-            
+
+            // console.log('\n\n -debug before modif ******* minFontSize=',nameCloudState.appliedMinFontSize, ', maxFontSize=', nameCloudState.appliedMaxFontSize, ', SVG_width=',  width, ', SVG_height=', height, ', bbox=', bbox, ', W=',bboxWidth,', H=', bboxHeight, ', centerX=',(bbox.minX + bboxWidth/2), ', centerY=',(bbox.minY + bboxHeight/2),  ', zoomW=',window.innerWidth/Math.max(1,bboxWidth), ', zoomH=',window.innerHeight/Math.max(1,bboxHeight) )
+
             // Dessiner le nuage avec les mots positionnés
             drawNameCloud(svg, textGroup, placedWords, color, config);
 
@@ -612,50 +643,67 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 updateTitleText(titleElement, config);
             }
 
-            // Appliquer un zoom automatique en fonction du nombre de mots
-            // Plus il y a de mots, plus on zoome en arrière pour tout voir
+            // Appliquer un zoom automatique 
             setTimeout(() => {
-
-                if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) 
-                {
-                    if (nameCloudState.mobilePhone) {
-                        if (totalWords < 500) {
-                            autoZoomScale = Math.max(0.3,-(1.4/1000 )*totalWords + 2.0);
-                        } else if (totalWords < 700) {
-                            autoZoomScale = Math.max(0.3,-(1.2/1000 )*totalWords + 2.0);
-                        } else if (totalWords < 1000) {
-                            autoZoomScale = Math.max(0.3,-(1.1/1000 )*totalWords + 2.0);
-                        } else {
-                            autoZoomScale = Math.max(0.3,-(1.0/1000 )*totalWords + 2.0);
-                        }
-
-                    } else {
-                        autoZoomScale = Math.max(0.3,-(1.2/1000 )*totalWords + 2.2);                    
-                        // autoZoomScale = Math.max(0.3,-(1.2/1000 )*totalWords/2 + 2.2);  
-                    }
-
-                    // in this case the font is using linear scale : see createFontScale, other case is log scale
-                    if ( nameCloudState.maxCount<=3 ) { 
-                        autoZoomScale = autoZoomScale *0.8
-                    } 
-
-
-                } else { 
-                    autoZoomScale = 1/nameCloudState.autoShapeScale ;
-                }
-
-                nameCloudState.autoZoomScale = autoZoomScale;
                 
                 // Appliquer le zoom avec une transition fluide
-                applyZoom(autoZoomScale);
-                
-                // console.log(`Zoom automatique appliqué: ${autoZoomScale} pour ${totalWords} mots`, autoShapeScale);
-                // console.log(`Zoom automatique appliqué: ${autoZoomScale.toFixed(1)} pour ${totalWords} mots`, autoShapeScale.toFixed(1));
+                autoZoomScale =  Math.min((window.innerWidth-10)/Math.max(1,bboxWidth), (window.innerHeight-55)/Math.max(1,bboxHeight)); //, bboxHeight ;
+
+                nameCloudState.autoZoomScale = autoZoomScale;
+
+                applyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
+
             }, 100); // Léger délai pour assurer que le rendu est terminé
+
+
+
+            // ajustement de la position du nuage si nécessaire ors d'un resize
+            setTimeout(() => {
+                requestAnimationFrame(() => {
+                    const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(svg, textGroup );
+                    const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
+                    const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
+                    const shiftX = (window.innerWidth - groupRect.width)/2;
+                    const shiftY = (window.innerHeight - groupRect.height)/2;
+
+                    if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
+                        && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
+                        // console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+                    } else {
+                        // console.log('applyZoom : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+                        applyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
+                    }
+                });
+            }, 600); // Léger délai pour assurer que le rendu est terminé
+            
         });
 
     return layout;
 }
+
+
+
+function diagnoseCloudPosition(svg, textGroup) {
+  if (!svg || !textGroup || !textGroup.node()) {
+    console.warn('SVG ou textGroup introuvable.');
+    return null;
+  }
+
+  const t = d3.zoomTransform(svg.node()); // {x, y, k}
+   // vrais pixels écran via getBoundingClientRect (ce que voit l'utilisateur)
+  const groupRect = textGroup.node().getBoundingClientRect();
+  
+  // extra debug : transform attr éventuellement appliquée directement sur textGroup
+  const attrTransform = textGroup.attr('transform');
+
+  return {
+    d3Transform: t,
+    groupRect,
+    attrTransform
+  };
+}
+
+
 
 // // This function handles both rotation and position animation for words
 function animateWordsWithBounce(textElements) {

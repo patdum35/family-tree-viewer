@@ -190,7 +190,7 @@ async function preloadAppResources() {
     //     notification = createPreloadNotification("Előtolás...");
     // }
     
-    document.body.appendChild(notification);
+    // document.body.appendChild(notification);
     
     // Ouvrir ou créer le cache
     try {

@@ -2,7 +2,7 @@
 import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
-import { createNameCloudUI } from './nameCloudUI.js';
+import { createNameCloudUI, generateNameCloudExport } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
 import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
@@ -11,6 +11,7 @@ import { translateOccupation } from './occupations.js';
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
 import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
+import { setupZoom } from './nameCloudRenderer.js';
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -139,16 +140,26 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     // console.log("\n\n Données traitées pour le nuage de noms:", nameData);
 
     // Dimensions de l'écran
-    nameCloudState.SVG_width = window.innerWidth;
-    nameCloudState.SVG_height = window.innerHeight;
+    //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
+
+
+
+    let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
+    if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+        ratio = 1;
+    } 
+    nameCloudState.SVG_width = window.innerWidth * ratio;
+    nameCloudState.SVG_height = window.innerHeight * ratio;
+
+    // console.log( '\n\n --- debug in processNamesCloudWithDate, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
 
     nameCloudState.mobilePhone = false;
     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
 
-    // for mobile phone
-    if (nameCloudState.mobilePhone) 
-        { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
+    // // for mobile phone
+    // if (nameCloudState.mobilePhone) 
+    //     { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
 
 
     // Afficher le nuage
@@ -209,45 +220,40 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
     document.dispatchEvent(cloudMapRefreshEvent);
 
 
-    window.addEventListener('resize',() => { 
+    window.addEventListener('resize', debounce(() => {
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
-        // requestAnimationFrame(() => {
-            buttonsOnDisplay(false);
-        // });
-
-
+        
+        buttonsOnDisplay(false);
 
         // Dimensions de l'écran
-        nameCloudState.SVG_width = window.innerWidth;
-        nameCloudState.SVG_height = window.innerHeight;
+        //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
+        let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
+        if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+            ratio = 1;
+            // ratio = Math.sqrt(1920*1080/(window.innerWidth*window.innerHeight ));
+        } 
+        nameCloudState.SVG_width = window.innerWidth * ratio;
+        nameCloudState.SVG_height = window.innerHeight * ratio;
+        // console.log( '\n\n --- debug in resize, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
+
+
         nameCloudState.mobilePhone = false;
         if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
         else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
 
-        // for mobile phone
-        if (nameCloudState.mobilePhone) 
-            { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
-
-        // Redimensionner le SVG existant immédiatement (évite les bandes grises)
-        const svg = containerElement.querySelector('svg');
-        if (svg) {
-            svg.setAttribute('width', window.innerWidth);
-            svg.setAttribute('height', window.innerHeight);
-        }
-
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-
             requestAnimationFrame(() => {
                 buttonsOnDisplay(false);
             });
             requestAnimationFrame(() => {
                 console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
                 createNameCloudUI.renderInContainer(nameData, config, containerElement); 
-            });    
+            }); 
         }, 200);
 
+  
         setTimeout(() => {
             requestAnimationFrame(() => {
                 const searchRootOverlay = document.getElementById('resultsTreeOverlay');
@@ -256,10 +262,11 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
                 buttonsOnDisplay(true);
                 searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
             });
-        }, 200);
+        }, 300);
 
-    });
+    }, 150)); // Attend 150ms après le dernier resize
 }
+
 
 export function processNamesData(config, searchTerm = null, isFromStatsModal = false) {
     const nameFrequency = {};

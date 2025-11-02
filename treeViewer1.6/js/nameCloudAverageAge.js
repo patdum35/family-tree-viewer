@@ -1105,10 +1105,10 @@ export function addStatisticsLabel(svg, textGroup, config) {
     // Mise à jour de globalStatsPosition pour tenir compte de la nouvelle hauteur
     // globalStatsPosition.height = genderText ? 75 : 60; 
 
-    // Ajouter un événement de redimensionnement
-    if (globalResizeListener) {
-        window.removeEventListener('resize', globalResizeListener);
-    }
+    // // Ajouter un événement de redimensionnement
+    // if (globalResizeListener) {
+    //     window.removeEventListener('resize', globalResizeListener);
+    // }
     
     // Créer un nouvel écouteur de redimensionnement
     globalResizeListener = function() {

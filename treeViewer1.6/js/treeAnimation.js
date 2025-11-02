@@ -71,6 +71,9 @@ let voice_language_short = 'fr-';
 let startMessage = "Début de l'animation";
 let endMessage = "Fin de l'animation";
 let reverseMessage = "Animation inversée";
+let noSpeechSynthesisTitle = 'Synthèse vocale indisponible 🔇';
+let noSpeechSynthesisText = 'Ce navigateur ne supporte pas la parole.<br><br>Pour profiter de toutes les fonctionnalités,<br>utilise <b>Google Chrome</b> 🗣️';
+
 
 if (window.CURRENT_LANGUAGE == "fr") {
     voice_language = 'fr-FR';
@@ -78,26 +81,34 @@ if (window.CURRENT_LANGUAGE == "fr") {
     startMessage = 'en /voiture Simone';
     endMessage = 'et /voila !';
     reverseMessage = 'attention / la descente c\'est reparti !';
+    noSpeechSynthesisTitle = 'Synthèse vocale indisponible 🔇';
+    noSpeechSynthesisText = 'Ce navigateur ne supporte pas la parole.<br><br>Pour profiter de toutes les fonctionnalités,<br>utilise <b>Google Chrome</b> 🗣️';
+
 } else if (window.CURRENT_LANGUAGE == "en") {
     voice_language = 'en-US';
     voice_language_short = 'en-'; 
     startMessage = 'let\'s /go';
     endMessage = 'that\'s /it !';
     reverseMessage = 'let\'s /go we\'re going back down';
+    noSpeechSynthesisTitle = 'Speech synthesis unavailable 🔇';
+    noSpeechSynthesisText = 'This browser does not support speech.<br><br>For the best experience,<br>please use <b>Google Chrome</b> 🗣️';
 } else if (window.CURRENT_LANGUAGE == "es") { 
     voice_language = 'es-ES';
     voice_language_short = 'es-';
     startMessage = 'vamos';
     endMessage = 'eso /es todo !';
     reverseMessage = 'vamos /volvemos a bajar';
+    noSpeechSynthesisTitle = 'Síntesis de voz no disponible 🔇';
+    noSpeechSynthesisText = 'Este navegador no admite la voz.<br><br>Para disfrutar de todas las funciones,<br>usa <b>Google Chrome</b> 🗣️';
 } else if (window.CURRENT_LANGUAGE == "hu") {  
     voice_language = 'hu-HU';
     voice_language_short = 'hu-';
     startMessage = 'Menjünk';
     endMessage = 'Ennyi !';
     reverseMessage = 'menjünk /visszamegyünk lemászni';
+    noSpeechSynthesisTitle = 'A beszédszintézis nem elérhető 🔇';
+    noSpeechSynthesisText = 'Ez a böngésző nem támogatja a beszédet.<br><br>A teljes élményhez<br>használd a <b>Google Chrome</b>-ot 🗣️';
 } 
-
 
 
 
@@ -1306,6 +1317,7 @@ function initSpeechSynthesis(voice) {
 
 
 function noSpeechAvailableMessage() {
+
     // Crée une petite fenêtre modale
     const modal = document.createElement('div');
     modal.innerHTML = `
@@ -1327,10 +1339,8 @@ function noSpeechAvailableMessage() {
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             font-family: sans-serif;
         ">
-            <h3 style="margin-top:0">Synthèse vocale indisponible 🔇</h3>
-            <p>Ce navigateur ne supporte pas la parole.<br><br>
-            Pour profiter de toutes les fonctionnalités,<br>
-            utilise <b>Google Chrome</b> 🗣️</p>
+            <h3 style="margin-top:0">${noSpeechSynthesisTitle}</h3>
+            <p>${noSpeechSynthesisText}</p>
             <button id="closeModalBtn" style="
             margin-top: 10px;
             background: #0078d7;
