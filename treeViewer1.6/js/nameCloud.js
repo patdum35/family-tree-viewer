@@ -346,7 +346,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 // }, 100);
                               
             // }); 
-        }, 50);
+        }, 800);
   
         setTimeout(() => {
             // requestAnimationFrame(() => {
@@ -362,7 +362,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
 
                 // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
             // });
-        }, 50);
+        }, 1200);
 
     }, 150)); // Attend 150ms après le dernier resize
 }
