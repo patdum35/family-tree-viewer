@@ -2,17 +2,15 @@
 import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
-import { createNameCloudUI, generateNameCloudExport } from './nameCloudUI.js';
+import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition, showLoader } from './hamburgerMenu.js';
+import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resizeHamburger, resetHamburgerButtonPosition, showLoader } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
 import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
 import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
-import { setupZoom } from './nameCloudRenderer.js';
-import { showToastNew } from './debugLogUtils.js';
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -61,6 +59,7 @@ export const nameCloudState = {
 }
 
 let resizeTimeout;
+let resize_counter = 0;
 
 
 export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false, nameData = null, isNameDataIn = false) {
@@ -281,12 +280,12 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
 
-        const rootPersonSearch = document.getElementById('root-person-search');
-        const rootPersonResults = document.getElementById('root-person-results');
+        // const rootPersonSearch = document.getElementById('root-person-search');
+        // const rootPersonResults = document.getElementById('root-person-results');
         // setTimeout(() => {
             // buttonsOnDisplay(false);
-            rootPersonSearch.style.visibility = 'hidden';
-            rootPersonResults.style.visibility = 'hidden';
+            // rootPersonSearch.style.visibility = 'hidden';
+            // rootPersonResults.style.visibility = 'hidden';
         // }, 0);
 
         // Dimensions de l'écran
@@ -304,14 +303,16 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
         nameCloudState.mobilePhone = false;
         if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
         else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+        resize_counter++;
 
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
+        // clearTimeout(resizeTimeout);
+        // resizeTimeout = setTimeout(() => {
+        setTimeout(() => {
             // requestAnimationFrame(() => {
             //     buttonsOnDisplay(false);
             // });
             // requestAnimationFrame(() => {
-                console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
+                console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
                 // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
 
@@ -346,25 +347,44 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 // }, 100);
                               
             // }); 
-        }, 800);
+        }, 100);
   
+        // setTimeout(() => {
+        //     // requestAnimationFrame(() => {
+        //         const searchRootOverlay = document.getElementById('resultsTreeOverlay');
+        //         const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
+        //         // console.log('\n\n***** debug buttonsOnDisplay nameCloudState.scopeSelect.value', nameCloudState.scopeSelect.value, ', searchRootOverlay=',searchRootOverlay, isRootPersonNeeded)
+        //         // buttonsOnDisplay(true);
+
+        //         if (isRootPersonNeeded) {
+        //             rootPersonSearch.style.visibility = 'visible';
+        //             rootPersonResults.style.visibility = 'visible';
+        //         }
+
+        //         // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
+        //     // });
+        // }, 300);
+
+
+
         setTimeout(() => {
-            // requestAnimationFrame(() => {
-                const searchRootOverlay = document.getElementById('resultsTreeOverlay');
-                const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
-                // console.log('\n\n***** debug buttonsOnDisplay nameCloudState.scopeSelect.value', nameCloudState.scopeSelect.value, ', searchRootOverlay=',searchRootOverlay, isRootPersonNeeded)
-                // buttonsOnDisplay(true);
+            if (state.isWordCloudEnabled) {
+                console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
+                updateOverlayLayout();
+                resizeHamburger();
+            }
+        }, 150);
 
-                if (isRootPersonNeeded) {
-                    rootPersonSearch.style.visibility = 'visible';
-                    rootPersonResults.style.visibility = 'visible';
-                }
 
-                // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
-            // });
-        }, 1200);
 
-    }, 150)); // Attend 150ms après le dernier resize
+    }, 400)); // Attend 150ms après le dernier resize
+
+
+
+
+
+
+
 }
 
 

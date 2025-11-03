@@ -1145,8 +1145,8 @@ export function addStatisticsLabel(svg, textGroup, config) {
     // Ajouter le nouvel écouteur
     window.addEventListener('resize', debounce(() => {
         if(state.isWordCloudEnabled && isModalVisible(container.id)) {
-            console.log('\n\n*** debug resize in addStatisticsLabel in nameCloudAverage for globalResizeListener \n\n');
-            globalResizeListener();
+            // console.log('\n\n*** debug resize in addStatisticsLabel in nameCloudAverage for globalResizeListener \n\n');
+            // globalResizeListener();
         }
     }, 150)); // Attend 150ms après le dernier resize
 

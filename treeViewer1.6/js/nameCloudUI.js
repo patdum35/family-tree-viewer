@@ -917,6 +917,35 @@ export function generateNameCloudExport() {
         }        
 }
 
+
+
+// Ajuste la direction selon la largeur de l’écran
+export function updateOverlayLayout() {
+    if (!state.isWordCloudEnabled) return;
+    let searchRootOverlay = document.getElementById('resultsTreeOverlay');
+    if(window.innerWidth > 420) {
+        searchRootOverlay.style.top = '20px';
+        searchRootOverlay.style.flexDirection = 'row';
+        searchRootOverlay.style.gap = '10px';
+        nameCloudState.searchInputTree.style.maxHeight = '26px';
+        // ordre sans déplacer les éléments
+        nameCloudState.searchInputTree.style.order = 0; // search à gauche
+        nameCloudState.resultsSelectTree.style.order = 1; // results à droite
+    } else {
+        searchRootOverlay.style.top = '-3px';
+        searchRootOverlay.style.flexDirection = 'column';
+        searchRootOverlay.style.gap = '0px';
+        nameCloudState.searchInputTree.style.maxHeight = '20px';
+        nameCloudState.searchInputTree.style.marginLeft = '-7px';
+        nameCloudState.searchInputTree.style.marginTop = '1px';
+        nameCloudState.searchInputTree.style.minWidth = '68px';
+        // ordre sans déplacer les éléments
+        nameCloudState.resultsSelectTree.style.order = 0; // results en haut
+        nameCloudState.searchInputTree.style.order = 1; // search en bas
+    }
+}
+
+
 function showNameCloud(nameData, config) {
     config.scope ='ancestors';
 
@@ -1011,39 +1040,39 @@ function showNameCloud(nameData, config) {
         searchRootOverlay.appendChild(nameCloudState.resultsSelectTree);
     }
 
-    // Ajuste la direction selon la largeur de l’écran
-    function updateOverlayLayout() {
-        if (!state.isWordCloudEnabled) return;
-        if(window.innerWidth > 420) {
-            searchRootOverlay.style.top = '20px';
-            searchRootOverlay.style.flexDirection = 'row';
-            searchRootOverlay.style.gap = '10px';
-            nameCloudState.searchInputTree.style.maxHeight = '26px';
-            // ordre sans déplacer les éléments
-            nameCloudState.searchInputTree.style.order = 0; // search à gauche
-            nameCloudState.resultsSelectTree.style.order = 1; // results à droite
-        } else {
-            searchRootOverlay.style.top = '-3px';
-            searchRootOverlay.style.flexDirection = 'column';
-            searchRootOverlay.style.gap = '0px';
-            nameCloudState.searchInputTree.style.maxHeight = '20px';
-            nameCloudState.searchInputTree.style.marginLeft = '-7px';
-            nameCloudState.searchInputTree.style.marginTop = '1px';
-            nameCloudState.searchInputTree.style.minWidth = '68px';
-            // ordre sans déplacer les éléments
-            nameCloudState.resultsSelectTree.style.order = 0; // results en haut
-            nameCloudState.searchInputTree.style.order = 1; // search en bas
-        }
-    }
+    // // Ajuste la direction selon la largeur de l’écran
+    // function updateOverlayLayout() {
+    //     if (!state.isWordCloudEnabled) return;
+    //     if(window.innerWidth > 420) {
+    //         searchRootOverlay.style.top = '20px';
+    //         searchRootOverlay.style.flexDirection = 'row';
+    //         searchRootOverlay.style.gap = '10px';
+    //         nameCloudState.searchInputTree.style.maxHeight = '26px';
+    //         // ordre sans déplacer les éléments
+    //         nameCloudState.searchInputTree.style.order = 0; // search à gauche
+    //         nameCloudState.resultsSelectTree.style.order = 1; // results à droite
+    //     } else {
+    //         searchRootOverlay.style.top = '-3px';
+    //         searchRootOverlay.style.flexDirection = 'column';
+    //         searchRootOverlay.style.gap = '0px';
+    //         nameCloudState.searchInputTree.style.maxHeight = '20px';
+    //         nameCloudState.searchInputTree.style.marginLeft = '-7px';
+    //         nameCloudState.searchInputTree.style.marginTop = '1px';
+    //         nameCloudState.searchInputTree.style.minWidth = '68px';
+    //         // ordre sans déplacer les éléments
+    //         nameCloudState.resultsSelectTree.style.order = 0; // results en haut
+    //         nameCloudState.searchInputTree.style.order = 1; // search en bas
+    //     }
+    // }
 
     // Appel initial + écoute du redimensionnement
     updateOverlayLayout();
-    window.addEventListener('resize', debounce(() => {
-        if (state.isWordCloudEnabled) {
-            console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
-            updateOverlayLayout();
-        }
-    }, 150));
+    // window.addEventListener('resize', debounce(() => {
+    //     if (state.isWordCloudEnabled) {
+    //         console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
+    //         updateOverlayLayout();
+    //     }
+    // }, 150));
 
 
 

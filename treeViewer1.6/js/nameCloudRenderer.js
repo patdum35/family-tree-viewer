@@ -404,7 +404,7 @@ export const NameCloud = ({ nameData, config }) => {
             nameCloudState.SVG_height
         );   
         layout.start();
-        console.log( "in NameCloud after initializeCloudAndLayout, words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
+        console.log( "in NameCloud after initializeCloudAndLayout", config,", words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
 
 
     }, [nameData]);

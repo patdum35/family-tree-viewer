@@ -39,11 +39,10 @@ export function isModalVisible(modalId) {
 export function initializeEventHandlers() {
 
     window.addEventListener('resize', debounce(() => {
-      resizeHamburger();
-      if (!state.isWordCloudEnabled) {
-        handleWindowResize();
-      }
-
+        if (!state.isWordCloudEnabled) {
+            resizeHamburger();
+            handleWindowResize();
+        }
     }, 150)); // Attend 150ms après le dernier resize
 
     document.getElementById("root-person-search")

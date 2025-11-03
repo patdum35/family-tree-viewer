@@ -601,11 +601,12 @@ function createMenuElements() {
     
     // Mettre à jour la classe de hauteur initiale
     updateHeightClass();
-    
+
+   
     // Ajouter un écouteur d'événement pour les changements de taille
     window.addEventListener('resize', debounce(() => {
-      console.log('\n\n*** debug resize in createMenuElements in hamburger.js \n\n');
-      updateHeightClass();
+        // console.log('\n\n*** debug resize in createMenuElements in hamburger.js, isOpen=', isOpen, ' \n\n');
+        // updateHeightClass();
     }, 150)); // Attend 150ms après le dernier resize
     
     // Créer le bouton hamburger
