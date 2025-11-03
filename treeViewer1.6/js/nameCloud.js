@@ -280,9 +280,14 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
     window.addEventListener('resize', debounce(() => {
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
-        setTimeout(() => {
-            buttonsOnDisplay(false);
-        }, 0);
+
+        const rootPersonSearch = document.getElementById('root-person-search');
+        const rootPersonResults = document.getElementById('root-person-results');
+        // setTimeout(() => {
+            // buttonsOnDisplay(false);
+            rootPersonSearch.style.visibility = 'hidden';
+            rootPersonResults.style.visibility = 'hidden';
+        // }, 0);
 
         // Dimensions de l'écran
         //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
@@ -302,10 +307,10 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
 
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            requestAnimationFrame(() => {
-                buttonsOnDisplay(false);
-            });
-            requestAnimationFrame(() => {
+            // requestAnimationFrame(() => {
+            //     buttonsOnDisplay(false);
+            // });
+            // requestAnimationFrame(() => {
                 console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
                 // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
@@ -340,18 +345,24 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
 
                 // }, 100);
                               
-            }); 
-        }, 300);
+            // }); 
+        }, 50);
   
         setTimeout(() => {
-            requestAnimationFrame(() => {
+            // requestAnimationFrame(() => {
                 const searchRootOverlay = document.getElementById('resultsTreeOverlay');
                 const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
                 // console.log('\n\n***** debug buttonsOnDisplay nameCloudState.scopeSelect.value', nameCloudState.scopeSelect.value, ', searchRootOverlay=',searchRootOverlay, isRootPersonNeeded)
-                buttonsOnDisplay(true);
-                searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
-            });
-        }, 400);
+                // buttonsOnDisplay(true);
+
+                if (isRootPersonNeeded) {
+                    rootPersonSearch.style.visibility = 'visible';
+                    rootPersonResults.style.visibility = 'visible';
+                }
+
+                // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
+            // });
+        }, 50);
 
     }, 150)); // Attend 150ms après le dernier resize
 }
