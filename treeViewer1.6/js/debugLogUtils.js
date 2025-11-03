@@ -1152,9 +1152,10 @@ function getScreenInfo() {
  * @param {string} type Type de message ('info', 'error', 'warning')
  * @param {number} duration Durée d'affichage en ms
  */
-function showToastNew(message, type = 'info', duration = 3000) {
+export function showToastNew(message, type = 'info', duration = 3000) {
     // Créer l'élément toast
     const toast = document.createElement('div');
+    toast.id = 'show-toast-new'
     
     // Appliquer le style selon le type
     toast.style.position = 'fixed';

@@ -10,6 +10,9 @@ let containerHorizontalOffset = 0;
 let containerVerticalOffset = 0;
 
 export function setupZoom(svg, width, height) {
+    let touchStartPos = null;
+    let touchStartTransform = null;
+
     const textGroup = svg.append('g')
         .attr('class', 'name-cloud-container')
         .attr('transform', `translate(${width / 2},${height / 2})`);
@@ -17,6 +20,14 @@ export function setupZoom(svg, width, height) {
     const zoom = d3.zoom()
         .scaleExtent([0.5, 15])
         .translateExtent([[-width, -height], [2 * width, 2 * height]])
+
+        .filter((event) => {
+            // Bloquer le pan tactile avec un seul doigt
+            if (event.type === 'touchstart' || event.type === 'touchmove') {
+                return event.touches.length > 1; // Autorise seulement le pinch (2 doigts)
+            }
+            return true; // Autorise tout le reste (souris, molette)
+        })
         .on('zoom', (event) => {
             textGroup.attr('transform', event.transform);
         });
@@ -44,7 +55,7 @@ export function setupZoom(svg, width, height) {
            }
        }, { passive: false })
        .on('touchmove', (event) => {
-           if (event.touches.length > 1) {
+            if (event.touches.length > 1) {
                event.preventDefault();
            }
        }, { passive: false });
@@ -82,7 +93,43 @@ export function setupZoom(svg, width, height) {
             .call(zoom.transform, transform);
     };    
 
+    
+    // Gestion du pan avec un seul doigt
+    svg.on('touchstart.customPan', (event) => {
+        if (event.touches.length === 1) {
+            touchStartPos = {
+                x: event.touches[0].clientX,
+                y: event.touches[0].clientY
+            };
+            touchStartTransform = d3.zoomTransform(svg.node());
+        }
+    }, { passive: false });
+    
+    svg.on('touchmove.customPan', (event) => {
+        if (event.touches.length === 1 && touchStartPos && touchStartTransform) {
+            const dx = event.touches[0].clientX - touchStartPos.x;
+            const dy = event.touches[0].clientY - touchStartPos.y;
+            
+            // 👇 AJOUTEZ CETTE CONDITION
+            // Ne bloquer que si on a bougé d'au moins 5 pixels
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                event.preventDefault();
+                
+                const newTransform = d3.zoomIdentity
+                    .translate(touchStartTransform.x + dx, touchStartTransform.y + dy)
+                    .scale(touchStartTransform.k);
+                
+                svg.call(zoom.transform, newTransform);
+            }
+            // 👆 FIN DE LA MODIFICATION
+        }
+    }, { passive: false });
 
+    
+    svg.on('touchend.customPan', () => {
+        touchStartPos = null;
+        touchStartTransform = null;
+    });
 
     return { zoom, textGroup, applyZoom };
 }
@@ -495,6 +542,35 @@ export function centerCloudNameContainer() {
 
 // Fonction commune pour initialiser le SVG et créer le nuage de mots
 function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
+    const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+    if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }
+
+    const nameCloudContainer = document.getElementById('name-Cloud-Container');
+    // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
+    const loader = document.createElement('div');
+    loader.id = 'word-cloud-loader';
+    loader.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 64px;
+        z-index: 1000;
+        color: #f63b80ff;
+    `;
+    loader.innerHTML = `
+        <div style="animation: spin 1s linear infinite;">⟳</div>
+        <style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    // containerElement.style.position = 'relative';
+    nameCloudContainer.appendChild(loader);
+
+
     // Nettoyer le SVG existant
     d3.select(svgElement).selectAll('*').remove();
     
@@ -595,32 +671,32 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
             }
 
 
-                // Calculer la boîte englobante de tous les mots pour le centrage
-                bbox = words.reduce((acc, word) => {
-                    if (!acc) return { 
-                        minX: word.x - word.width/2, 
-                        maxX: word.x + word.width/2, 
-                        minY: word.y - word.height/2, 
-                        maxY: word.y + word.height/2 
-                    };
-                    
-                    return {
-                        minX: Math.min(acc.minX, word.x - word.width/2),
-                        maxX: Math.max(acc.maxX, word.x + word.width/2),
-                        minY: Math.min(acc.minY, word.y - word.height/2),
-                        maxY: Math.max(acc.maxY, word.y + word.height/2)
-                    };
-                }, null);
+            // Calculer la boîte englobante de tous les mots pour le centrage
+            bbox = words.reduce((acc, word) => {
+                if (!acc) return { 
+                    minX: word.x - word.width/2, 
+                    maxX: word.x + word.width/2, 
+                    minY: word.y - word.height/2, 
+                    maxY: word.y + word.height/2 
+                };
+                
+                return {
+                    minX: Math.min(acc.minX, word.x - word.width/2),
+                    maxX: Math.max(acc.maxX, word.x + word.width/2),
+                    minY: Math.min(acc.minY, word.y - word.height/2),
+                    maxY: Math.max(acc.maxY, word.y + word.height/2)
+                };
+            }, null);
 
-                if (bbox) {
-                    bboxWidth = bbox.maxX - bbox.minX;
-                    bboxHeight = bbox.maxY - bbox.minY;
-                    centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                    centerY = height / 2 - (bbox.minY + bboxHeight/2);
+            if (bbox) {
+                bboxWidth = bbox.maxX - bbox.minX;
+                bboxHeight = bbox.maxY - bbox.minY;
+                centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                centerY = height / 2 - (bbox.minY + bboxHeight/2);
 
-                    // Ajuster la transformation du groupe de texte pour centrer
-                    textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
-                }
+                // Ajuster la transformation du groupe de texte pour centrer
+                textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+            }
 
 
             // Ajouter les formes concentriques si activé
@@ -675,13 +751,25 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                     }
                 });
             }, 600); // Léger délai pour assurer que le rendu est terminé
+
+
+
+            setTimeout(() => {
+                // Retirer le spinner
+                const loader = document.getElementById('word-cloud-loader');
+                if (loader) {
+                    loader.remove();
+                }
+                const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+                if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
+
+
+            }, 600); // Léger délai pour assurer que le rendu est terminé
             
         });
 
     return layout;
 }
-
-
 
 function diagnoseCloudPosition(svg, textGroup) {
   if (!svg || !textGroup || !textGroup.node()) {
@@ -702,8 +790,6 @@ function diagnoseCloudPosition(svg, textGroup) {
     attrTransform
   };
 }
-
-
 
 // // This function handles both rotation and position animation for words
 function animateWordsWithBounce(textElements) {

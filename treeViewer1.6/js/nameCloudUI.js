@@ -337,6 +337,48 @@ function createMainContainer() {
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.overflow = 'hidden';
+
+    // --- Créer le toast permanent dans le DOM ---
+    const loaderSpinnerOverlay = document.createElement('div');
+    loaderSpinnerOverlay.id = 'loaderSpinnerOverlay';
+    // toast.textContent = 'Chargement...';
+    // Object.assign(toast.style, {
+    //     position: 'fixed',
+    //     top: '100px',
+    //     left: '100px',
+    //     background: 'orange',
+    //     color: 'white',
+    //     padding: '10px 15px',
+    //     borderRadius: '5px',
+    //     fontWeight: 'bold',
+    //     zIndex: 10000,
+    //     display: 'block',        // invisible par défaut
+    //     //   display: 'block',
+    //     boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+    //     visibility: 'hidden',
+    // });
+
+    Object.assign(loaderSpinnerOverlay.style, {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 10000,
+        display: 'block',
+        visibility: 'hidden',   // invisible par défaut
+    });
+
+    // contenu du loader
+    loaderSpinnerOverlay.innerHTML = `
+        <div style="font-size: 64px; color: #3b82f6; animation: spin 1s linear infinite;">⟳</div>
+        <style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    document.body.appendChild(loaderSpinnerOverlay);
     
     return container;
 }
@@ -1040,8 +1082,32 @@ function showNameCloud(nameData, config) {
 
     updateTitleText(titleElement, config);
     
+
+
+
+
+
+
+    // function generateNameCloud() {
+    //     // console.log('\n\n **** debug generateNameCloud', typeSelect.value, nameCloudState.scopeSelect.value )
+    //     console.log('\n\n **** debug generateNameCloud', typeSelect.value, scopeSelect.value ,' root=' , state.rootPersonId)
+
+        
+    // }
+
+
+
+
+
+
+
+
     //*********************************************************************************************************** */
-    function generateNameCloud() {
+    function generateNameCloud(nameData = null, isNameDataIn = false) {
+
+
+        showToast('Patiente un peu, processNamesCloudWithDate  mouline...');
+
         // console.log('\n\n **** debug generateNameCloud', typeSelect.value, nameCloudState.scopeSelect.value )
         console.log('\n\n **** debug generateNameCloud', typeSelect.value, scopeSelect.value ,' root=' , state.rootPersonId)
 
@@ -1057,11 +1123,34 @@ function showNameCloud(nameData, config) {
         updateTitleText(titleElement, newConfig);
 
         // Nettoyer le conteneur
-        nameCloudContainer.innerHTML = '';
+        // nameCloudContainer.innerHTML = '';
+
+        
+
+
+            // const nameCloudContainer = document.getElementById('name-Cloud-Container');
+            // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
+            // const loader2 = document.createElement('div');
+            // loader2.id = 'word-cloud-loader2';
+            // loader2.style.cssText = `
+            //     position: fixed;
+            //     top: 30%;
+            //     left: 30%;
+            //     font-size: 64px;
+            //     z-index: 1000;
+            //     color: #f63b54ff;
+            // `;
+            // loader2.innerHTML = `
+            //     <div >⟳</div>
+            // `;
+            // // containerElement.style.position = 'relative';
+            // nameCloudContainer.appendChild(loader2);
+
+
 
         // Générer le nuage de mots
         const isCallFromCloudName = true;
-        processNamesCloudWithDate(newConfig, nameCloudContainer, isCallFromCloudName);
+        processNamesCloudWithDate(newConfig, nameCloudContainer, isCallFromCloudName, nameData, isNameDataIn);
 
         // Tous les types supportés
         const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
@@ -1301,7 +1390,7 @@ function showNameCloud(nameData, config) {
 
 
     // Générer initialement le nuage de mots
-    generateNameCloud();
+    generateNameCloud(nameData, true);
 
     // Définir le texte du titre
     updateTitleText(titleElement, config);

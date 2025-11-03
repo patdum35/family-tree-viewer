@@ -4,7 +4,7 @@ import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI, generateNameCloudExport } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
+import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition, showLoader } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
@@ -12,6 +12,7 @@ import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWhee
 import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 import { setupZoom } from './nameCloudRenderer.js';
+import { showToastNew } from './debugLogUtils.js';
 
 export const nameCloudState = {
     mobilePhone: false,
@@ -61,13 +62,33 @@ export const nameCloudState = {
 
 let resizeTimeout;
 
-export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false) {onclick
+
+export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false, nameData = null, isNameDataIn = false) {
+
+    const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+    if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility = 'visible'; }
+
+    if (isCallFromCloudName && !isNameDataIn) { 
+        setTimeout(() => {
+            processNamesCloudWithDateInternal(config, containerElement, isCallFromCloudName);
+        }, 0); 
+    } else {
+        processNamesCloudWithDateInternal(config, containerElement, isCallFromCloudName, nameData, isNameDataIn);
+    }
+}
+ 
+
+
+export function processNamesCloudWithDateInternal(config, containerElement = null, isCallFromCloudName = false, nameDataIn = null, isNameDataIn = false) {
+ 
+
     const isForceTreeRadarButton = true;  
     if (!isCallFromCloudName) {
         nameCloudState.isButtonOnDisplayBeforeCloud = state.isButtonOnDisplay;
     }
     console.log("\n\n\n\ ########################   Debug  start nuage: state.isButtonOnDisplay",state.isButtonOnDisplay , nameCloudState.isButtonOnDisplayBeforeCloud, ', isCallFromCloudName=',isCallFromCloudName, config, nameCloudState.currentConfig, " ###########################\n\n\n");
     buttonsOnDisplay(true);
+
 
     if (!config) {
         config = nameCloudState.currentConfig;
@@ -127,6 +148,31 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
         nameCloudState.initialized = true;
     }
 
+
+    // if (containerElement) {
+
+    //     const nameCloudContainer = document.getElementById('name-Cloud-Container');
+    //     console.log('\n\n ------------   debug processNamesCloudWithDate with containerElement' ,nameCloudContainer,' \n\n')
+
+    //     const loader2 = document.createElement('div');
+    //     loader2.id = 'word-cloud-loader2';
+    //     loader2.style.cssText = `
+    //         position: fixed;
+    //         top: 30%;
+    //         left: 30%;
+    //         font-size: 64px;
+    //         z-index: 1000;
+    //         color: #f63b54ff;
+    //     `;
+    //     loader2.innerHTML = `
+    //         <div >⟳</div>
+    //     `;
+    //     // containerElement.style.position = 'relative';
+    //     nameCloudContainer.appendChild(loader2);
+
+    // }
+
+
     // if (config.scope != 'all'  && !config.rootPersonId) {
     //     config.rootPersonId = state.rootPersonId;
     //     console.log('\n\n\n -***** - debug  processNamesCloudWithDate: config ', config, state.rootPersonId, '\n\n\n')
@@ -134,7 +180,18 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
 
 
     // Logique principale de traitement des données
-    const nameData = processNamesData(config);
+
+
+
+    let nameData;
+    if (nameDataIn && isNameDataIn) { nameData = nameDataIn}
+    else { nameData = processNamesData(config);}
+    
+    
+
+    // console.log('\n\n ------------------ debug nameData = processNamesData(config) ------------', nameDataIn, , '\n\n')
+
+    // const nameData = processNamesData(config);
 
 
     // console.log("\n\n Données traitées pour le nuage de noms:", nameData);
@@ -249,10 +306,72 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
             });
             requestAnimationFrame(() => {
                 console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
-                createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+                // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+
+                // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
+                const loader = document.createElement('div');
+                loader.id = 'word-cloud-loader';
+                loader.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 64px;
+                    z-index: 1000;
+                    color: #3b82f6;
+                `;
+                loader.innerHTML = `
+                    <div style="animation: spin 1s linear infinite;">⟳</div>
+                    <style>
+                        @keyframes spin {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                // containerElement.style.position = 'relative';
+                containerElement.appendChild(loader);
+
+
+                // 2. Créer un conteneur temporaire pour le nouveau nuage
+                const tempContainer = document.createElement('div');
+                tempContainer.id = 'temp-container';
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.top = '0';
+                tempContainer.style.left = '0';
+                tempContainer.style.width = '100%';
+                tempContainer.style.height = '100%';
+                tempContainer.style.opacity = '0';
+                tempContainer.style.pointerEvents = 'none';
+                containerElement.appendChild(tempContainer);
+                
+                // 3. Générer le nouveau nuage dans le conteneur temporaire
+                createNameCloudUI.renderInContainer(nameData, config, tempContainer);
+                // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+                
+                // 4. Attendre que le nouveau nuage soit complètement rendu
+                // Observer quand le layout est terminé
+                const checkInterval = setInterval(() => {
+                    clearInterval(checkInterval);
+
+                    // 5. Retirer le spinner
+                    if (loader.parentNode) {
+                        loader.remove();
+                    }
+
+                    // 6. Retirer le container temporaire !!!!! Mais attention je ne comprends pas comment ça marche
+                    tempContainer.remove();
+
+                }, 100);
+                
+                // Timeout de sécurité pour éviter une boucle infinie
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    const loaderStuck = document.getElementById('word-cloud-loader');
+                    if (loaderStuck) loaderStuck.remove();
+                }, 10000);                
             }); 
         }, 200);
-
   
         setTimeout(() => {
             requestAnimationFrame(() => {

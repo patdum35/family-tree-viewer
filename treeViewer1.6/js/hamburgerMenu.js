@@ -2,6 +2,7 @@ import { state, updateRadarButtonText, toggleTreeRadar } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
+import { showToastNew } from './debugLogUtils.js';
 
 // Variables pour garder une référence aux éléments
 let hamburgerMenu, sideMenu, menuOverlay;
@@ -774,6 +775,12 @@ function createSection(title, index = 0) {
   return { container, content };
 }
 
+
+export function showLoader()  {
+    const message1 = " INIT  " ;
+    showToastNew(message1, 'info', 5000)
+}
+
 // Créer la section Navigation
 function createButtonsOnDisplaySection() {
   const height = window.innerHeight;
@@ -787,7 +794,7 @@ function createButtonsOnDisplaySection() {
   const buttons = [
     { onclick: () => {buttonsOnDisplay(true); toggleMenu(false);}, title: getMenuTranslation('buttonOnDisplay'), text: '👆' },
     { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('noButtonOnDisplay'), text: '🚫' },
-    { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
+    { onclick: () => {showLoader(); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
   ];
   
   buttons.forEach(buttonData => {
@@ -1274,7 +1281,11 @@ function createNameCloudSection() {
   const buttons = [
     { 
       id: 'menu-nameCloudBtn',
-      onclick: () => {processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "all" }); toggleMenu(false);},
+      onclick: () => {
+        if (state.isWordCloudEnabled) { closeCloudName(); }
+        processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "all" }); 
+        toggleMenu(false);
+      },
       title: getMenuTranslation('title_nameCloud'), //'Nuage de noms', 
       text: '💖' //🔠💗' 
     },
