@@ -280,8 +280,9 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
     window.addEventListener('resize', debounce(() => {
         if (!state.isWordCloudEnabled) return;
         if (!containerElement) return;
-        
-        buttonsOnDisplay(false);
+        setTimeout(() => {
+            buttonsOnDisplay(false);
+        }, 0);
 
         // Dimensions de l'écran
         //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
@@ -308,30 +309,6 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 console.log('\n\n*** debug resize in processNamesCloudWithDate ################ \n\n')
                 // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
-                // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
-                const loader = document.createElement('div');
-                loader.id = 'word-cloud-loader';
-                loader.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    font-size: 64px;
-                    z-index: 1000;
-                    color: #3b82f6;
-                `;
-                loader.innerHTML = `
-                    <div style="animation: spin 1s linear infinite;">⟳</div>
-                    <style>
-                        @keyframes spin {
-                            from { transform: rotate(0deg); }
-                            to { transform: rotate(360deg); }
-                        }
-                    </style>
-                `;
-                // containerElement.style.position = 'relative';
-                containerElement.appendChild(loader);
-
 
                 // 2. Créer un conteneur temporaire pour le nouveau nuage
                 const tempContainer = document.createElement('div');
@@ -347,31 +324,24 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 
                 // 3. Générer le nouveau nuage dans le conteneur temporaire
                 createNameCloudUI.renderInContainer(nameData, config, tempContainer);
-                // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
                 
-                // 4. Attendre que le nouveau nuage soit complètement rendu
-                // Observer quand le layout est terminé
-                const checkInterval = setInterval(() => {
-                    clearInterval(checkInterval);
+                // // 4. Attendre que le nouveau nuage soit complètement rendu
+                // // Observer quand le layout est terminé
+                // const checkInterval = setInterval(() => {
+                //     clearInterval(checkInterval);
 
-                    // 5. Retirer le spinner
-                    if (loader.parentNode) {
-                        loader.remove();
-                    }
+                //     // // 5. Retirer le spinner
+                //     // if (loader.parentNode) {
+                //     //     loader.remove();
+                //     // }
 
-                    // 6. Retirer le container temporaire !!!!! Mais attention je ne comprends pas comment ça marche
-                    tempContainer.remove();
+                //     // 6. Retirer le container temporaire !!!!! Mais attention je ne comprends pas comment ça marche
+                //     tempContainer.remove();
 
-                }, 100);
-                
-                // Timeout de sécurité pour éviter une boucle infinie
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    const loaderStuck = document.getElementById('word-cloud-loader');
-                    if (loaderStuck) loaderStuck.remove();
-                }, 10000);                
+                // }, 100);
+                              
             }); 
-        }, 200);
+        }, 300);
   
         setTimeout(() => {
             requestAnimationFrame(() => {
@@ -381,7 +351,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 buttonsOnDisplay(true);
                 searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
             });
-        }, 300);
+        }, 400);
 
     }, 150)); // Attend 150ms après le dernier resize
 }

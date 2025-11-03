@@ -545,30 +545,30 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
     if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }
 
-    const nameCloudContainer = document.getElementById('name-Cloud-Container');
-    // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
-    const loader = document.createElement('div');
-    loader.id = 'word-cloud-loader';
-    loader.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 64px;
-        z-index: 1000;
-        color: #f63b80ff;
-    `;
-    loader.innerHTML = `
-        <div style="animation: spin 1s linear infinite;">⟳</div>
-        <style>
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        </style>
-    `;
-    // containerElement.style.position = 'relative';
-    nameCloudContainer.appendChild(loader);
+    // const nameCloudContainer = document.getElementById('name-Cloud-Container');
+    // // 1. Afficher le spinner par-dessus l'ancien nuage (net et visible)
+    // const loader = document.createElement('div');
+    // loader.id = 'word-cloud-loader';
+    // loader.style.cssText = `
+    //     position: fixed;
+    //     top: 50%;
+    //     left: 50%;
+    //     transform: translate(-50%, -50%);
+    //     font-size: 64px;
+    //     z-index: 1000;
+    //     color: #f63b80ff;
+    // `;
+    // loader.innerHTML = `
+    //     <div style="animation: spin 1s linear infinite;">⟳</div>
+    //     <style>
+    //         @keyframes spin {
+    //             from { transform: rotate(0deg); }
+    //             to { transform: rotate(360deg); }
+    //         }
+    //     </style>
+    // `;
+    // // containerElement.style.position = 'relative';
+    // nameCloudContainer.appendChild(loader);
 
 
     // Nettoyer le SVG existant
@@ -756,10 +756,10 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
             setTimeout(() => {
                 // Retirer le spinner
-                const loader = document.getElementById('word-cloud-loader');
-                if (loader) {
-                    loader.remove();
-                }
+                // const loader = document.getElementById('word-cloud-loader');
+                // if (loader) {
+                //     loader.remove();
+                // }
                 const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
                 if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
 

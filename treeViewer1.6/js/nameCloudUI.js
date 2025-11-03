@@ -1105,9 +1105,6 @@ function showNameCloud(nameData, config) {
     //*********************************************************************************************************** */
     function generateNameCloud(nameData = null, isNameDataIn = false) {
 
-
-        showToast('Patiente un peu, processNamesCloudWithDate  mouline...');
-
         // console.log('\n\n **** debug generateNameCloud', typeSelect.value, nameCloudState.scopeSelect.value )
         console.log('\n\n **** debug generateNameCloud', typeSelect.value, scopeSelect.value ,' root=' , state.rootPersonId)
 
