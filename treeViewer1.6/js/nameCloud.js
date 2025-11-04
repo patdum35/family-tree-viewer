@@ -181,10 +181,17 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
     // Logique principale de traitement des données
 
 
+    if (config.scope === 'ancestors' && !config.rootPersonId) {
+        // peut arriver au 1ier démarrage ???
+        config.rootPersonId = state.rootPersonId;
+    }
+    console.log('\n\n debug first processNamesData', config)
 
     let nameData;
     if (nameDataIn && isNameDataIn) { nameData = nameDataIn}
     else { nameData = processNamesData(config);}
+
+    // nameData = processNamesData(config);
     
     
 
@@ -307,70 +314,41 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
 
-            // requestAnimationFrame(() => {
-            //     requestAnimationFrame(() => {
-                resize_counter++;
+            resize_counter++;
 
-                console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
-                // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+            // Affiche le loader avant le rendu
+            const loader = document.getElementById('loaderSpinnerOverlay');
+            if (loader) loader.style.visibility = 'visible';
 
-                // 2. Créer un conteneur temporaire pour le nouveau nuage
-                const tempContainer = document.createElement('div');
-                tempContainer.id = 'temp-container';
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.top = '0';
-                tempContainer.style.left = '0';
-                tempContainer.style.width = '100%';
-                tempContainer.style.height = '100%';
-                tempContainer.style.opacity = '0';
-                tempContainer.style.pointerEvents = 'none';
-                containerElement.appendChild(tempContainer);
-                
-                // 3. Générer le nouveau nuage dans le conteneur temporaire
-                createNameCloudUI.renderInContainer(nameData, config, tempContainer);
-                
-                // // 4. Attendre que le nouveau nuage soit complètement rendu
-                // // Observer quand le layout est terminé
-                // const checkInterval = setInterval(() => {
-                //     clearInterval(checkInterval);
 
-                //     // // 5. Retirer le spinner
-                //     // if (loader.parentNode) {
-                //     //     loader.remove();
-                //     // }
+            console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
 
-                //     // 6. Retirer le container temporaire !!!!! Mais attention je ne comprends pas comment ça marche
-                //     tempContainer.remove();
+            createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
-                // }, 100);
-                              
-            // }); 
-            // }); 
-            }, 150);
+            // 2. Créer un conteneur temporaire pour le nouveau nuage
+            // const tempContainer = document.createElement('div');
+            // tempContainer.id = 'temp-container';
+            // tempContainer.style.position = 'absolute';
+            // tempContainer.style.top = '0';
+            // tempContainer.style.left = '0';
+            // tempContainer.style.width = '100%';
+            // tempContainer.style.height = '100%';
+            // tempContainer.style.opacity = '0';
+            // tempContainer.style.pointerEvents = 'none';
+            // containerElement.appendChild(tempContainer);
+            
+            // // 3. Générer le nouveau nuage dans le conteneur temporaire
+            // createNameCloudUI.renderInContainer(nameData, config, tempContainer);
+                                       
+        }, 150);
   
-        // setTimeout(() => {
-        //     // requestAnimationFrame(() => {
-        //         const searchRootOverlay = document.getElementById('resultsTreeOverlay');
-        //         const isRootPersonNeeded = ['ancestors', 'directAncestors', 'descendants', 'directDescendants'].includes(nameCloudState.scopeSelect.value);
-        //         // console.log('\n\n***** debug buttonsOnDisplay nameCloudState.scopeSelect.value', nameCloudState.scopeSelect.value, ', searchRootOverlay=',searchRootOverlay, isRootPersonNeeded)
-        //         // buttonsOnDisplay(true);
-
-        //         if (isRootPersonNeeded) {
-        //             rootPersonSearch.style.visibility = 'visible';
-        //             rootPersonResults.style.visibility = 'visible';
-        //         }
-
-        //         // searchRootOverlay.style.display = isRootPersonNeeded ? 'flex' : 'none';
-        //     // });
-        // }, 300);
-
 
 
         setTimeout(() => {
             if (state.isWordCloudEnabled) {
                 console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
                 updateOverlayLayout();
-                resizeHamburger();
+                // resizeHamburger();
             }
         }, 150);
 

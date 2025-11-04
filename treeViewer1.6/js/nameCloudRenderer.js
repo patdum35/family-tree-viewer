@@ -404,7 +404,7 @@ export const NameCloud = ({ nameData, config }) => {
             nameCloudState.SVG_height
         );   
         layout.start();
-        console.log( "in NameCloud after initializeCloudAndLayout", config,", words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ', appliedPadding =',nameCloudState.appliedPadding , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
+        console.log( "in NameCloud after initializeCloudAndLayout", config,", words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", Math.max(2, Math.round(nameCloudState.appliedMinFontSize * nameCloudState.fontMultiplier)), "maxFont", Math.max(2, Math.round(nameCloudState.appliedMaxFontSize * nameCloudState.fontMultiplier)) , ', appliedPadding =',nameCloudState.appliedPadding , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
 
 
     }, [nameData]);
@@ -451,7 +451,7 @@ function createColorPalette() {
     ];
 }
 
-export function computeFontScale(nameData) {
+export function computeFontScale(nameData, config = null) {
     const wordCount = nameData.length;
     nameCloudState.maxCount = d3.max(nameData, d => d.size) || 1;
     nameCloudState.minCount = d3.min(nameData, d => d.size) || 1;
@@ -462,10 +462,11 @@ export function computeFontScale(nameData) {
     let minFontSize = nameCloudState.minFontSize || 10;
     let maxFontSize = nameCloudState.maxFontSize || 45;
 
-
     let scale;
     nameCloudState.paddingLocal = nameCloudState.padding;
     
+    let padding = 1;
+
     if (maxCount<=3) {
         minFontSize= minFontSize*3;
         if (nameCloudState.mobilePhone) {
@@ -484,7 +485,6 @@ export function computeFontScale(nameData) {
             }
         }
 
-
         if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
             // pour un écran de 1080 ligne on veut scalefactor = 1;
             // pour un mobile avec width = 360 on veut un scaleFactor = 0.5;
@@ -494,31 +494,72 @@ export function computeFontScale(nameData) {
             const scalefactor = scaleFactorA * Math.min(window.innerWidth, window.innerHeight) + scaleFactorB;
             minFontSize = parseInt(minFontSize*scalefactor-1);
             maxFontSize = parseInt(maxFontSize*scalefactor-1);
-
-
             //  console.log('\n\n -debug before modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
 
         } else {
+            let ratio = Math.sqrt(6000*2500/(window.innerWidth*window.innerHeight));
+            // ratio = 1
+            let min; 
+            let max;
+            // droite MAX  y = a * X  + b,  avec pour x = 110 words --> max = 45, et pour x = 700  words --> max = 9
+            // droite MIN  y = a * X  + b,  avec pour x = 110 words --> min = 10, et pour x = 700  words --> min = 3
+            let maxCoeffA = (9 - 45) /(700 - 110);
+            let maxCoeffB = 9 - maxCoeffA*700 ;
+            let minCoeffA = (3 - 10) /(700 - 110);
+            let minCoeffB = 3 - minCoeffA*700 ;
 
-            let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight));
+            let maxCoeffAb = (3 - 9) /(3000 - 700);
+            let maxCoeffBb = 3 - maxCoeffAb*3000 ;
+            let minCoeffAb = (3 - 3) /(3000 - 700);
+            let minCoeffBb = 3 - minCoeffAb*3000 ;
 
-            minFontSize = Math.max( 3, parseInt(minFontSize/ratio));
-            maxFontSize = Math.max( 14, parseInt(maxFontSize/ratio));
+            if (wordCount < 110) {
+                min = 10; 
+                max = 45;
+            } else {
+                if (wordCount < 700) {
+                    min = Math.max( 3, minCoeffA * wordCount + minCoeffB);
+                    max = Math.max( 3, maxCoeffA * wordCount + maxCoeffB);
+                } else {
+                    min = Math.max( 3, minCoeffAb * wordCount + minCoeffBb);
+                    max = Math.max( 3, maxCoeffAb * wordCount + maxCoeffBb);                    
+                }
+            }
 
+            if (config && config.type === 'professions' ) {
+                max = Math.max( 3, max*0.7);
+                min = Math.max( 3, min*0.7);
+            } else if (config && config.type === 'lieux' ) {
+                max = Math.max( 3, max*0.5);
+                min = Math.max( 3, min*0.5);
+            }
+
+            padding = nameCloudState.mobilePhone ? nameCloudState.padding/8 : nameCloudState.padding/4;
+
+            if (wordCount > 300 ) {           
+                padding = 0.000001;
+            } else if (wordCount < 100 ) {
+                padding = nameCloudState.padding/2;
+            }
+
+            console.log('\n\n ------------- debug ratio=', ratio, 'padding=', padding, ', min=', min, ', max=', max, ', minFontSize/ratio=',minFontSize/ratio, ', maxFontSize/ratio=',maxFontSize/ratio); //, 'padding/ratio=',  padding/ratio );
+
+            minFontSize = parseInt(Math.max( min, minFontSize/ratio));
+            maxFontSize = parseInt(Math.max( max, maxFontSize/ratio));
         }
 
-13
         // console.log("Font choice: log , screen", Math.min(window.innerWidth, window.innerHeight), ", mobile=",nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=", minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
     }
     nameCloudState.appliedMinFontSize = minFontSize;
     nameCloudState.appliedMaxFontSize = maxFontSize;
+    nameCloudState.appliedPadding = padding;
 
     return {minFontSize, maxFontSize} ;
 }
 
-function createFontScale(nameData) {
+function createFontScale(nameData, config = null) {
     
-    const { minFontSize, maxFontSize } = computeFontScale(nameData) ;
+    const { minFontSize, maxFontSize } = computeFontScale(nameData, config) ;
     
     const maxCount=  nameCloudState.maxCount;
     const minCount=  nameCloudState.minCount;
@@ -547,33 +588,240 @@ export function centerCloudNameContainer() {
     }
 }
 
+// // Fonction commune pour initialiser le SVG et créer le nuage de mots
+// function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
+
+//     console.log('\n\n\n\n  ------------- initializeCloudAndLayout is called with WxH=', width, height , '----------------\n\n\n\n');
+
+//     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+//     if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }
+
+//     // Nettoyer le SVG existant
+//     d3.select(svgElement).selectAll('*').remove();
+    
+//     // Initialiser le SVG avec les dimensions
+//     const svg = d3.select(svgElement)
+//         .attr('width', width)
+//         .attr('height', height)
+        
+
+//     // Rectangle de fond transparent
+//     svg.append('rect')
+//         .attr('width', width)
+//         .attr('height', height)
+//         .attr('fill', 'transparent')
+//         .style('touch-action', 'pan-x pan-y pinch-zoom')
+//         .lower();
+        
+//     // Configurer le zoom et créer le textGroup
+//     const { zoom, textGroup, applyZoom } = setupZoom(svg, width, height);
+
+//     // Activer les événements de zoom
+//     svg.call(zoom)
+//        .on('wheel', (event) => event.preventDefault(), { passive: false })
+//        .on('touchstart', (event) => {if (event.touches.length > 1) { event.preventDefault();}}, { passive: false })
+//        .on('touchmove', (event) => { if (event.touches.length > 1) { event.preventDefault(); }}, { passive: false });
+
+//     // Préparer les échelles et couleurs
+//     const fontScale = createFontScale(nameData, config);
+//     const colorPalette = createColorPalette();
+//     const color = d3.scaleOrdinal(colorPalette);
+//     let autoShapeScale = 1; // Échelle par défaut pour les formes
+//     let autoZoomScale = 1; // Échelle par défaut    
+    
+//     // Calculer le padding approprié
+//     let padding = 1;
+//     padding = nameCloudState.appliedPadding;
+
+//     // Créer les données pour le layout
+//     const wordData = nameData.map(d => ({
+//         text: d.text,
+//         size: fontScale(d.size),
+//         originalSize: d.size
+//     }));
+
+    
+    
+    
+    
+//     // Initialiser le layout
+//     const layout = d3.layout.cloud()
+//         .size([width - 20, height - 20])
+//         .words(wordData)
+//         .padding(padding)
+//         // .padding(d => d.size * 0.00001) // padding 5 % de la taille du mot       
+//         .rotate(0)
+//         .fontSize(d => d.size)
+//         .spiral(nameCloudState.cloudShape === 'rectangle' ? 'rectangular' : 'archimedean')
+//         .random(() => 0.5)
+//         .canvas(function() {
+//             const canvas = document.createElement('canvas');
+//             canvas.setAttribute('willReadFrequently', 'true');
+//             return canvas;
+//         })
+//         .on('end', words => {
+//             let placedWords;
+
+//             // Mettre à jour les statistiques
+//             nameCloudState.totalWords = nameData.length;
+//             const totalWords = nameCloudState.totalWords;   
+            
+//             let bboxWidth, bboxHeight, centerX, centerY;
+//             let bbox;
+            
+//             if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+//                 // Utiliser la disposition en forme personnalisée
+
+//                 // Ajuster l'échelle de la forme selon le nombre de mots
+//                 if (totalWords > 250 ) {
+//                     autoShapeScale = Math.min(3, Math.max(0.1,(1/800 )*totalWords + 0.45 )) ; // + 0.25 );
+//                 } else {
+//                     autoShapeScale = Math.min(3, Math.max(0.1,(1/500 )*totalWords + 0.21 )) ; // + 0.25 );                    
+//                 }
+//                 if (( nameCloudState.maxCount<=3 ) && ( totalWords > 12)) { 
+//                     autoShapeScale = Math.min(3, Math.max(0.1,(1/115 )*totalWords + 0.25  ))
+//                 }
+//                 nameCloudState.autoShapeScale = autoShapeScale;
+
+//                 placedWords = placeWordsInShape(words, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+//             } else {
+//                 // Utiliser la disposition d'origine
+//                 placedWords = words;
+                
+//             }
+
+
+//             // Calculer la boîte englobante de tous les mots pour le centrage
+//             bbox = words.reduce((acc, word) => {
+//                 if (!acc) return { 
+//                     minX: word.x - word.width/2, 
+//                     maxX: word.x + word.width/2, 
+//                     minY: word.y - word.height/2, 
+//                     maxY: word.y + word.height/2 
+//                 };
+                
+//                 return {
+//                     minX: Math.min(acc.minX, word.x - word.width/2),
+//                     maxX: Math.max(acc.maxX, word.x + word.width/2),
+//                     minY: Math.min(acc.minY, word.y - word.height/2),
+//                     maxY: Math.max(acc.maxY, word.y + word.height/2)
+//                 };
+//             }, null);
+
+//             if (bbox) {
+//                 bboxWidth = bbox.maxX - bbox.minX;
+//                 bboxHeight = bbox.maxY - bbox.minY;
+//                 centerX = width / 2 - (bbox.minX + bboxWidth/2);
+//                 centerY = height / 2 - (bbox.minY + bboxHeight/2);
+
+//                 // Ajuster la transformation du groupe de texte pour centrer
+//                 textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+//             }
+
+
+//             // Ajouter les formes concentriques si activé
+//             if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+//                 generateConcentricShapes(textGroup, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+//             }
+
+//             // console.log('\n\n -debug before modif ******* minFontSize=',nameCloudState.appliedMinFontSize, ', maxFontSize=', nameCloudState.appliedMaxFontSize, ', SVG_width=',  width, ', SVG_height=', height, ', bbox=', bbox, ', W=',bboxWidth,', H=', bboxHeight, ', centerX=',(bbox.minX + bboxWidth/2), ', centerY=',(bbox.minY + bboxHeight/2),  ', zoomW=',window.innerWidth/Math.max(1,bboxWidth), ', zoomH=',window.innerHeight/Math.max(1,bboxHeight) )
+
+//             // Dessiner le nuage avec les mots positionnés
+//             drawNameCloud(svg, textGroup, placedWords, color, config);
+
+            
+//             // Mettre à jour les statistiques
+//             nameCloudState.placedWords = placedWords.length;
+
+//             // Mettre à jour le titre avec les statistiques
+//             const titleElement = document.getElementById('name-cloud-title');
+//             if (titleElement) {
+//                 updateTitleText(titleElement, config);
+//             }
+
+//             // Appliquer un zoom automatique 
+//             setTimeout(() => {
+                
+//                 // Appliquer le zoom avec une transition fluide
+//                 autoZoomScale =  Math.min((window.innerWidth-10)/Math.max(1,bboxWidth), (window.innerHeight-55)/Math.max(1,bboxHeight)); //, bboxHeight ;
+
+//                 nameCloudState.autoZoomScale = autoZoomScale;
+
+//                 console.log('applyZoom 1 : W=', window.innerWidth, 'x H=', window.innerHeight, ', bboxWidth:', Math.max(1,bboxWidth), 'bboxHeight:', Math.max(1,bboxHeight), ', autoZoomScale=', autoZoomScale);
+
+
+//                 applyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
+
+//             }, 100); // Léger délai pour assurer que le rendu est terminé
+
+
+
+//             // ajustement de la position du nuage si nécessaire lors d'un resize
+//             setTimeout(() => {
+//                 requestAnimationFrame(() => {
+//                     const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(svg, textGroup );
+//                     const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
+//                     const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
+//                     const shiftX = (window.innerWidth - groupRect.width)/2;
+//                     const shiftY = (window.innerHeight - groupRect.height)/2;
+
+//                     if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
+//                         && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
+//                         console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+//                     } else {
+//                         console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+//                         applyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
+//                     }
+//                 });
+//             }, 600); // Léger délai pour assurer que le rendu est terminé
+
+
+
+//             setTimeout(() => {
+//                 // Retirer le spinner
+//                 const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+//                 if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
+
+//             }, 600); // Léger délai pour assurer que le rendu est terminé
+            
+//         });
+
+//     return layout;
+// }
+
+
+
+
+
 // Fonction commune pour initialiser le SVG et créer le nuage de mots
 function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
-
-     console.log('\n\n\n\n  ------------- initializeCloudAndLayout is called with WxH=', width, height , '----------------\n\n\n\n');
-
+    console.log('\n\n\n\n  ------------- initializeCloudAndLayout is called with WxH=', width, height , '----------------\n\n\n\n');
 
     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
     if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }
 
     // Nettoyer le SVG existant
-    d3.select(svgElement).selectAll('*').remove();
+    // d3.select(svgElement).selectAll('*').remove();
     
+
+    // Préparer les échelles et couleurs
+    const fontScale = createFontScale(nameData, config);
+    const colorPalette = createColorPalette();
+    const color = d3.scaleOrdinal(colorPalette);
+    let autoShapeScale = 1; // Échelle par défaut pour les formes
+    let autoZoomScale = 1; // Échelle par défaut    
+    
+    // Calculer le padding approprié
+    let padding = 1;
+    padding = nameCloudState.appliedPadding;
+
+
     // Initialiser le SVG avec les dimensions
     const svg = d3.select(svgElement)
         .attr('width', width)
-        .attr('height', height);
-
-    // // Initialiser le SVG avec un viewBox fluide (évite les flash noirs sur rotation)
-    // const svg = d3.select(svgElement)
-    //     .attr('viewBox', `0 0 ${width} ${height}`)
-    //     .attr('preserveAspectRatio', 'xMidYMid meet')
-    //     .style('width', '100%')
-    //     .style('height', '100%');
-
+        .attr('height', height)
         
-
 
     // Rectangle de fond transparent
     svg.append('rect')
@@ -583,197 +831,499 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
         .style('touch-action', 'pan-x pan-y pinch-zoom')
         .lower();
         
+
     // Configurer le zoom et créer le textGroup
     const { zoom, textGroup, applyZoom } = setupZoom(svg, width, height);
 
     // Activer les événements de zoom
     svg.call(zoom)
        .on('wheel', (event) => event.preventDefault(), { passive: false })
-       .on('touchstart', (event) => {
-           if (event.touches.length > 1) {
-               event.preventDefault();
-           }
-       }, { passive: false })
-       .on('touchmove', (event) => {
-           if (event.touches.length > 1) {
-               event.preventDefault();
-           }
-       }, { passive: false });
+       .on('touchstart', (event) => {if (event.touches.length > 1) { event.preventDefault();}}, { passive: false })
+       .on('touchmove', (event) => { if (event.touches.length > 1) { event.preventDefault(); }}, { passive: false });
 
-    // Préparer les échelles et couleurs
-    const fontScale = createFontScale(nameData);
-    const colorPalette = createColorPalette();
-    const color = d3.scaleOrdinal(colorPalette);
-    let autoShapeScale = 1; // Échelle par défaut pour les formes
-    let autoZoomScale = 1; // Échelle par défaut    
-    
-    // Calculer le padding approprié
-    let padding = 1;
-    if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) {
-        padding = nameCloudState.mobilePhone ? nameCloudState.padding/8 : nameCloudState.padding/4;
-        let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
-        console.log('\n\n ------------- debug ratio=', ratio, 'padding=', padding, 'padding/ratio=',  padding/ratio );
-        padding = padding/(ratio*2);
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            padding = padding/(ratio*4);
-        } else {
-            padding = padding/(ratio*2);
-        }
+
+    // paramètres retry
+    const maxAttempts = 4;
+    const shrinkFactor = 0.85;
+    const minMultiplier = 0.25;
+
+    let stopped = false;
+    let attempt = 0;
+    // let fontMultiplier = 1.0;
+    nameCloudState.fontMultiplier = 1.0;
+
+    function startLayoutAttemptOnce() {
+        if (stopped) return;
+        attempt++;
+        // Créer les données pour le layout
+        const wordData = nameData.map(d => ({
+            text: d.text,
+            size: Math.max(3, Math.round(fontScale(d.size) * nameCloudState.fontMultiplier )),
+            originalSize: d.size
+        }));
+
+
+        const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = Math.max(1, width - 20);
+            tmpCanvas.height = Math.max(1, height - 20);
+            tmpCanvas.setAttribute('willReadFrequently', 'true');
+        
+        // Initialiser le layout
+        const layout = d3.layout.cloud()
+            // .size([width - 20, height - 20])
+            .size([tmpCanvas.width, tmpCanvas.height])
+            .words(wordData)
+            .padding(padding)
+            // .padding(d => d.size * 0.00001) // padding 5 % de la taille du mot       
+            .rotate(0)
+            .fontSize(d => d.size)
+            .spiral(nameCloudState.cloudShape === 'rectangle' ? 'rectangular' : 'archimedean')
+            .random(() => 0.5)
+            // .canvas(function() {
+            //     const canvas = document.createElement('canvas');
+            //     canvas.setAttribute('willReadFrequently', 'true');
+            //     return canvas;
+            // })
+            .canvas(() => tmpCanvas)
+
+            // .on('end', words => {
+            //     if (stopped) return;
+
+            //     let placedWords;
+
+            //     // Mettre à jour les statistiques
+            //     nameCloudState.totalWords = nameData.length;
+            //     nameCloudState.placedWords = words.length;
+            //     const totalWords = nameCloudState.totalWords;   
+                
+            //     let bboxWidth, bboxHeight, centerX, centerY;
+            //     let bbox;
+                
+            //     if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+            //         // Utiliser la disposition en forme personnalisée
+
+            //         // Ajuster l'échelle de la forme selon le nombre de mots
+            //         if (totalWords > 250 ) {
+            //             autoShapeScale = Math.min(3, Math.max(0.1,(1/800 )*totalWords + 0.45 )) ; // + 0.25 );
+            //         } else {
+            //             autoShapeScale = Math.min(3, Math.max(0.1,(1/500 )*totalWords + 0.21 )) ; // + 0.25 );                    
+            //         }
+            //         if (( nameCloudState.maxCount<=3 ) && ( totalWords > 12)) { 
+            //             autoShapeScale = Math.min(3, Math.max(0.1,(1/115 )*totalWords + 0.25  ))
+            //         }
+            //         nameCloudState.autoShapeScale = autoShapeScale;
+
+            //         placedWords = placeWordsInShape(words, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+
+            //         stopped = true;
+            //     } else {
+            //         // Utiliser la disposition d'origine
+            //         placedWords = words;
+
+
+            //         // si on n'a pas placé tous les mots et qu'on peut réessayer
+            //         if (placedWords.length < nameData.length && attempt < maxAttempts && nameCloudState.fontMultiplier  > minMultiplier) {
+            //             nameCloudState.fontMultiplier  = Math.max(minMultiplier, nameCloudState.fontMultiplier  * shrinkFactor);
+            //             console.log( "\n\n ---------- echec 1rst call in  initializeCloudAndLayout", ", words=", nameCloudState.totalWords, ", placed=", placedWords.length, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ', appliedPadding =',nameCloudState.appliedPadding , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1), ', fontMultiplier=',nameCloudState.fontMultiplier,  ", finalMinFont=", Math.max(3, Math.round(nameCloudState.appliedMinFontSize * nameCloudState.fontMultiplier)), "finalMaxFont", Math.max(3, Math.round(nameCloudState.appliedMaxFontSize * nameCloudState.fontMultiplier)) ,' ---------\n\n '   )
+            //             // petit délai pour laisser respirer le navigateur
+            //             if (attempt === (maxAttempts -1)) {
+            //                 //dernier essai
+            //                 // enlargedOnce = true;
+
+            //                 width = Math.round(width * 1.4);
+            //                 height = Math.round(height * 1.4);
+
+            //                 svg.attr('width', width).attr('height', height);
+            //                 // tmpCanvas.width = width;
+            //                 // tmpCanvas.height = height;
+
+            //                 console.warn(`⚙️ Dernier essai : agrandissement du SVG à ${width}x${height}`);
+
+            //             }
+                        
+            //             setTimeout(() => startLayoutAttemptOnce(), 10);
+            //             return;
+            //         }
+            //     }
+
+
+            //     // Calculer la boîte englobante de tous les mots pour le centrage
+            //     bbox = words.reduce((acc, word) => {
+            //         if (!acc) return { 
+            //             minX: word.x - word.width/2, 
+            //             maxX: word.x + word.width/2, 
+            //             minY: word.y - word.height/2, 
+            //             maxY: word.y + word.height/2 
+            //         };
+                    
+            //         return {
+            //             minX: Math.min(acc.minX, word.x - word.width/2),
+            //             maxX: Math.max(acc.maxX, word.x + word.width/2),
+            //             minY: Math.min(acc.minY, word.y - word.height/2),
+            //             maxY: Math.max(acc.maxY, word.y + word.height/2)
+            //         };
+            //     }, null);
+
+            //     if (bbox) {
+            //         bboxWidth = bbox.maxX - bbox.minX;
+            //         bboxHeight = bbox.maxY - bbox.minY;
+            //         centerX = width / 2 - (bbox.minX + bboxWidth/2);
+            //         centerY = height / 2 - (bbox.minY + bboxHeight/2);
+
+            //         // Ajuster la transformation du groupe de texte pour centrer
+            //         // textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+            //     }
+
+
+            //     // Ajouter les formes concentriques si activé
+            //     if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+            //         generateConcentricShapes(textGroup, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+            //     }
+
+            //     // console.log('\n\n -debug before modif ******* minFontSize=',nameCloudState.appliedMinFontSize, ', maxFontSize=', nameCloudState.appliedMaxFontSize, ', SVG_width=',  width, ', SVG_height=', height, ', bbox=', bbox, ', W=',bboxWidth,', H=', bboxHeight, ', centerX=',(bbox.minX + bboxWidth/2), ', centerY=',(bbox.minY + bboxHeight/2),  ', zoomW=',window.innerWidth/Math.max(1,bboxWidth), ', zoomH=',window.innerHeight/Math.max(1,bboxHeight) )
+
+            //     // 1) supprimer l'ancien contenu
+            //     d3.select(svgElement).selectAll('*').remove();
+
+            //     // 2) recréer le svg / fond / textGroup via setupZoom (ne pas réutiliser l'ancienne textGroup)
+            //     const svg = d3.select(svgElement).attr('width', width).attr('height', height);
+            //     svg.append('rect')
+            //     .attr('width', width)
+            //     .attr('height', height)
+            //     .attr('fill', 'transparent')
+            //     .style('touch-action', 'pan-x pan-y pinch-zoom')
+            //     .lower();
+
+            //     const { zoom, textGroup, applyZoom } = setupZoom(svg, width, height);
+            //     svg.call(zoom)
+            //     .on('wheel', (event) => event.preventDefault(), { passive: false })
+            //     .on('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false })
+            //     .on('touchmove', (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false });
+
+            //     // 3) centrer le groupe puis dessiner
+            //     textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+
+
+
+
+            //     // Dessiner le nuage avec les mots positionnés
+            //     drawNameCloud(svg, textGroup, placedWords, color, config);
+
+                
+            //     // Mettre à jour les statistiques
+            //     // nameCloudState.placedWords = placedWords.length;
+
+            //     // Mettre à jour le titre avec les statistiques
+            //     const titleElement = document.getElementById('name-cloud-title');
+            //     if (titleElement) {
+            //         updateTitleText(titleElement, config);
+            //     }
+
+            //     // Appliquer un zoom automatique 
+            //     setTimeout(() => {
+                    
+            //         // Appliquer le zoom avec une transition fluide
+            //         autoZoomScale =  Math.min((window.innerWidth-10)/Math.max(1,bboxWidth), (window.innerHeight-55)/Math.max(1,bboxHeight)); //, bboxHeight ;
+
+            //         nameCloudState.autoZoomScale = autoZoomScale;
+
+            //         console.log('applyZoom 1 : W=', window.innerWidth, 'x H=', window.innerHeight, ', bboxWidth:', Math.max(1,bboxWidth), 'bboxHeight:', Math.max(1,bboxHeight), ', autoZoomScale=', autoZoomScale);
+
+
+            //         applyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
+
+            //     }, 100); // Léger délai pour assurer que le rendu est terminé
+
+
+
+            //     // ajustement de la position du nuage si nécessaire lors d'un resize
+            //     setTimeout(() => {
+            //         requestAnimationFrame(() => {
+            //             const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(svg, textGroup );
+            //             const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
+            //             const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
+            //             const shiftX = (window.innerWidth - groupRect.width)/2;
+            //             const shiftY = (window.innerHeight - groupRect.height)/2;
+
+            //             if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
+            //                 && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
+            //                 console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+            //             } else {
+            //                 console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+            //                 applyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
+            //             }
+            //         });
+            //     }, 600); // Léger délai pour assurer que le rendu est terminé
+
+
+
+            //     setTimeout(() => {
+            //         // Retirer le spinner
+            //         const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+            //         if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
+
+            //     }, 600); // Léger délai pour assurer que le rendu est terminé
+                
+            // });
+
+
+
+
+
+            // === START: callback .on('end', words => { ... }) replacement ===
+            .on('end', words => {
+
+                if (stopped) return;
+
+                let placedWords;
+
+                // Mettre à jour les statistiques
+                nameCloudState.totalWords = nameData.length;
+                nameCloudState.placedWords = words.length;
+                const totalWords = nameCloudState.totalWords;   
+                
+                if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+                    // Utiliser la disposition en forme personnalisée
+
+                    // Ajuster l'échelle de la forme selon le nombre de mots
+                    if (totalWords > 250 ) {
+                        autoShapeScale = Math.min(3, Math.max(0.1,(1/800 )*totalWords + 0.45 )) ; // + 0.25 );
+                    } else {
+                        autoShapeScale = Math.min(3, Math.max(0.1,(1/500 )*totalWords + 0.21 )) ; // + 0.25 );                    
+                    }
+                    if (( nameCloudState.maxCount<=3 ) && ( totalWords > 12)) { 
+                        autoShapeScale = Math.min(3, Math.max(0.1,(1/115 )*totalWords + 0.25  ))
+                    }
+                    nameCloudState.autoShapeScale = autoShapeScale;
+
+                    placedWords = placeWordsInShape(words, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+
+                    stopped = true;
+                } else {
+                    // Utiliser la disposition d'origine
+                    placedWords = words;
+
+                    // si on n'a pas placé tous les mots et qu'on peut réessayer
+                    if (placedWords.length < nameData.length && attempt < maxAttempts && nameCloudState.fontMultiplier  > minMultiplier) {
+                        nameCloudState.fontMultiplier  = Math.max(minMultiplier, nameCloudState.fontMultiplier  * shrinkFactor);
+                        console.log( "\n\n ---------- echec 1rst call in  initializeCloudAndLayout", ", words=", nameCloudState.totalWords, ", placed=", placedWords.length, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ', appliedPadding =',nameCloudState.appliedPadding , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1), ', fontMultiplier=',nameCloudState.fontMultiplier,  ", finalMinFont=", Math.max(3, Math.round(nameCloudState.appliedMinFontSize * nameCloudState.fontMultiplier)), "finalMaxFont", Math.max(3, Math.round(nameCloudState.appliedMaxFontSize * nameCloudState.fontMultiplier)) ,' ---------\n\n '   )
+                        // petit délai pour laisser respirer le navigateur
+                        if (attempt === (maxAttempts -1)) {
+                            //dernier essai
+                            width = Math.round(width * 1.4);
+                            height = Math.round(height * 1.4);
+
+                            svg.attr('width', width).attr('height', height);
+                            console.warn(`⚙️ Dernier essai : agrandissement du SVG à ${width}x${height}`);
+                        }
+                        setTimeout(() => startLayoutAttemptOnce(), 10);
+                        return;
+                    }
+                }
+
+                // calcul bbox (comme avant)
+                const bbox = words.reduce((acc, w) => {
+                    if (!acc) return { 
+                        minX: w.x - w.width/2, 
+                        maxX: w.x + w.width/2, 
+                        minY: w.y - w.height/2, 
+                        maxY: w.y + w.height/2 
+                    };
+                    return {
+                        minX: Math.min(acc.minX, w.x - w.width/2),
+                        maxX: Math.max(acc.maxX, w.x + w.width/2),
+                        minY: Math.min(acc.minY, w.y - w.height/2),
+                        maxY: Math.max(acc.maxY, w.y + w.height/2)
+                    };
+                }, null);
+
+
+
+                // --- Créer un nouveau <svg> DOM hors du DOM existant ---
+                const parent = (svgElement && svgElement.tagName && svgElement.tagName.toLowerCase() === 'svg')
+                    ? svgElement.parentElement
+                    : svgElement;
+                const targetParent = parent || document.getElementById('name-Cloud-Container') || document.body;
+
+                const newSvgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                newSvgEl.setAttribute('width', width);
+                newSvgEl.setAttribute('height', height);
+                newSvgEl.style.display = 'block';
+
+                const newSvg = d3.select(newSvgEl);
+                // fond
+                newSvg.append('rect')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .attr('fill', 'transparent')
+                    .lower();
+
+
+                // obtenir un textGroup compatible pour drawNameCloud (setupZoom retourne textGroup)
+                const { zoom: newZoom, textGroup: newTextGroup, applyZoom: newApplyZoom } = setupZoom(newSvg, width, height);
+                // Note: on n'appelle pas newSvg.call(newZoom) avant le replaceChild
+
+
+                // dessiner via ta fonction (elle attache ses propres handlers)
+                if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+                    // Ajouter les formes concentriques si activé
+                    if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+                        generateConcentricShapes(newTextGroup, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
+                    }
+                    // drawNameCloud(svg, textGroup, placedWords, color, config);
+                    drawNameCloud(newSvg, newTextGroup, placedWords, color, config);
+                } else {
+                    drawNameCloud(newSvg, newTextGroup, words.slice(), color, config);
+                }
+
+
+                // recentrer le groupe si bbox calculée
+                if (bbox) {
+                    const bboxWidth = bbox.maxX - bbox.minX;
+                    const bboxHeight = bbox.maxY - bbox.minY;
+                    const centerX = width / 2 - (bbox.minX + bboxWidth/2);
+                    const centerY = height / 2 - (bbox.minY + bboxHeight/2);
+                    newTextGroup.attr('transform', `translate(${centerX}, ${centerY})`);
+                }
+
+                // --- swap atomique : remplacer ancien SVG par le nouveau ---
+                const oldSvg = (parent && parent.querySelector) ? parent.querySelector('svg') : null;
+                if (oldSvg && parent) {
+                    parent.replaceChild(newSvgEl, oldSvg);
+                } else {
+                    targetParent.appendChild(newSvgEl);
+                }
+
+                // attacher le zoom et les handlers sur le nouveau SVG
+                const d3New = d3.select(newSvgEl);
+                d3New.call(newZoom)
+                    .on('wheel', (event) => event.preventDefault(), { passive: false })
+                    .on('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false })
+                    .on('touchmove', (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false });
+
+                // appliquer auto-zoom si tu veux (garder ta logique)
+                if (bbox) {
+                    try {
+                        const bboxWidth = bbox.maxX - bbox.minX;
+                        const bboxHeight = bbox.maxY - bbox.minY;
+                        const autoZoomScale = Math.min((window.innerWidth - 10) / Math.max(1, bboxWidth),
+                                                    (window.innerHeight - 55) / Math.max(1, bboxHeight));
+                        nameCloudState.autoZoomScale = autoZoomScale;
+
+                        console.log('applyZoom 1 : W=', window.innerWidth, 'x H=', window.innerHeight, ', bboxWidth:', Math.max(1,bboxWidth), 'bboxHeight:', Math.max(1,bboxHeight), ', autoZoomScale=', autoZoomScale);
+
+
+                        if (typeof newApplyZoom === 'function') newApplyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
+                    } catch (e) { /* ignore */ }
+                }
+
+                // MAJ états / titre / stats
+                nameCloudState.totalWords = nameData.length;
+                nameCloudState.placedWords = words.length;
+                const titleElement = document.getElementById('name-cloud-title');
+                if (titleElement) updateTitleText(titleElement, config);
+
+
+                // ajustement de la position du nuage si nécessaire lors d'un resize
+                setTimeout(() => {
+                    requestAnimationFrame(() => {
+                        const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(newSvg, newTextGroup );
+                        const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
+                        const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
+                        const shiftX = (window.innerWidth - groupRect.width)/2;
+                        const shiftY = (window.innerHeight - groupRect.height)/2;
+
+                        if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
+                            && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
+                            console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+                        } else {
+                            console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+                            newApplyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
+                        }
+                    });
+                }, 600); // Léger délai pour assurer que le rendu est terminé
+
+
+
+                // } finally {
+                //     // cleanup : masquer loader
+                //     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+                //     if (loaderSpinnerOverlay) loaderSpinnerOverlay.style.visibility = 'hidden';
+                // }
+
+                setTimeout(() => {
+                    // Retirer le spinner
+                    const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+                    if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
+
+                }, 600); // Léger délai pour assurer que le rendu est terminé
+                
+            }); // fin .on('end'
+            // === END replacement ===
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // démarrer cet essai
+        layout.start();
+
+        // retourner layoutAttempt si tu veux accéder à ses propriétés (optionnel)
+        return layout;
     }
 
-    nameCloudState.appliedPadding = padding;
-
-    // Créer les données pour le layout
-    const wordData = nameData.map(d => ({
-        text: d.text,
-        size: fontScale(d.size),
-        originalSize: d.size
-    }));
-
-    // Initialiser le layout
-    const layout = d3.layout.cloud()
-        .size([width - 20, height - 20])
-        .words(wordData)
-        .padding(padding)
-        .rotate(0)
-        .fontSize(d => d.size)
-        .spiral(nameCloudState.cloudShape === 'rectangle' ? 'rectangular' : 'archimedean')
-        .spiral('rectangular')
-        .random(() => 0.5)
-        .canvas(function() {
-            const canvas = document.createElement('canvas');
-            canvas.setAttribute('willReadFrequently', 'true');
-            return canvas;
-        })
-        .on('end', words => {
-            let placedWords;
-
-            // Mettre à jour les statistiques
-            nameCloudState.totalWords = nameData.length;
-            const totalWords = nameCloudState.totalWords;   
-            
-            let bboxWidth, bboxHeight, centerX, centerY;
-            let bbox;
-            
-            if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
-                // Utiliser la disposition en forme personnalisée
-
-                // Ajuster l'échelle de la forme selon le nombre de mots
-                if (totalWords > 250 ) {
-                    autoShapeScale = Math.min(3, Math.max(0.1,(1/800 )*totalWords + 0.45 )) ; // + 0.25 );
-                } else {
-                    autoShapeScale = Math.min(3, Math.max(0.1,(1/500 )*totalWords + 0.21 )) ; // + 0.25 );                    
-                }
-                if (( nameCloudState.maxCount<=3 ) && ( totalWords > 12)) { 
-                    autoShapeScale = Math.min(3, Math.max(0.1,(1/115 )*totalWords + 0.25  ))
-                }
-                nameCloudState.autoShapeScale = autoShapeScale;
-
-                placedWords = placeWordsInShape(words, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
-            } else {
-                // Utiliser la disposition d'origine
-                placedWords = words;
-                
-            }
 
 
-            // Calculer la boîte englobante de tous les mots pour le centrage
-            bbox = words.reduce((acc, word) => {
-                if (!acc) return { 
-                    minX: word.x - word.width/2, 
-                    maxX: word.x + word.width/2, 
-                    minY: word.y - word.height/2, 
-                    maxY: word.y + word.height/2 
-                };
-                
-                return {
-                    minX: Math.min(acc.minX, word.x - word.width/2),
-                    maxX: Math.max(acc.maxX, word.x + word.width/2),
-                    minY: Math.min(acc.minY, word.y - word.height/2),
-                    maxY: Math.max(acc.maxY, word.y + word.height/2)
-                };
-            }, null);
+    // start/stop exposés : l'appelant (React) s'attend à appeler layout.start()
+    function start() {
+        stopped = false;
+        attempt = 0;
+        nameCloudState.fontMultiplier  = 1.0;
+        // lancer la chaîne d'essais (n'appelle pas directement drawNameCloud ici)
+        startLayoutAttemptOnce();
 
-            if (bbox) {
-                bboxWidth = bbox.maxX - bbox.minX;
-                bboxHeight = bbox.maxY - bbox.minY;
-                centerX = width / 2 - (bbox.minX + bboxWidth/2);
-                centerY = height / 2 - (bbox.minY + bboxHeight/2);
+        // on renvoie un "layout-like" dans lequel on ne peut pas récupérer l'instance d3 precise
+        // si besoin on pourrait stocker la dernière layoutAttempt et la retourner ici
+    }
 
-                // Ajuster la transformation du groupe de texte pour centrer
-                textGroup.attr('transform', `translate(${centerX}, ${centerY})`);
-            }
+    function stop() {
+        stopped = true;
+    }
 
-
-            // Ajouter les formes concentriques si activé
-            if ((nameCloudState.isShapeBorder) && (nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
-                generateConcentricShapes(textGroup, nameCloudState.cloudShape, width*autoShapeScale, height*autoShapeScale);
-            }
-
-            // console.log('\n\n -debug before modif ******* minFontSize=',nameCloudState.appliedMinFontSize, ', maxFontSize=', nameCloudState.appliedMaxFontSize, ', SVG_width=',  width, ', SVG_height=', height, ', bbox=', bbox, ', W=',bboxWidth,', H=', bboxHeight, ', centerX=',(bbox.minX + bboxWidth/2), ', centerY=',(bbox.minY + bboxHeight/2),  ', zoomW=',window.innerWidth/Math.max(1,bboxWidth), ', zoomH=',window.innerHeight/Math.max(1,bboxHeight) )
-
-            // Dessiner le nuage avec les mots positionnés
-            drawNameCloud(svg, textGroup, placedWords, color, config);
-
-            
-            // Mettre à jour les statistiques
-            nameCloudState.placedWords = placedWords.length;
-
-            // Mettre à jour le titre avec les statistiques
-            const titleElement = document.getElementById('name-cloud-title');
-            if (titleElement) {
-                updateTitleText(titleElement, config);
-            }
-
-            // Appliquer un zoom automatique 
-            setTimeout(() => {
-                
-                // Appliquer le zoom avec une transition fluide
-                autoZoomScale =  Math.min((window.innerWidth-10)/Math.max(1,bboxWidth), (window.innerHeight-55)/Math.max(1,bboxHeight)); //, bboxHeight ;
-
-                nameCloudState.autoZoomScale = autoZoomScale;
-
-                console.log('applyZoom 1 : W=', window.innerWidth, 'x H=', window.innerHeight, ', bboxWidth:', Math.max(1,bboxWidth), 'bboxHeight:', Math.max(1,bboxHeight), ', autoZoomScale=', autoZoomScale);
-
-
-                applyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
-
-            }, 100); // Léger délai pour assurer que le rendu est terminé
+    // retourner un objet compatible minimal (start() utilisé par ton React)
+    return { start, stop };
 
 
 
-            // ajustement de la position du nuage si nécessaire lors d'un resize
-            setTimeout(() => {
-                requestAnimationFrame(() => {
-                    const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(svg, textGroup );
-                    const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
-                    const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
-                    const shiftX = (window.innerWidth - groupRect.width)/2;
-                    const shiftY = (window.innerHeight - groupRect.height)/2;
 
-                    if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
-                        && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
-                        console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
-                    } else {
-                        console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
-                        applyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
-                    }
-                });
-            }, 600); // Léger délai pour assurer que le rendu est terminé
-
-
-
-            setTimeout(() => {
-                // Retirer le spinner
-                const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
-                if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'hidden'; }
-
-            }, 600); // Léger délai pour assurer que le rendu est terminé
-            
-        });
-
-    return layout;
 }
+
+
+
+
 
 function diagnoseCloudPosition(svg, textGroup) {
   if (!svg || !textGroup || !textGroup.node()) {

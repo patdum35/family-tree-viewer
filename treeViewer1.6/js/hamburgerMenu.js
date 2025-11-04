@@ -1284,7 +1284,7 @@ function createNameCloudSection() {
       id: 'menu-nameCloudBtn',
       onclick: () => {
         if (state.isWordCloudEnabled) { closeCloudName(); }
-        processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "all" }); 
+        processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "ancestors" }); 
         toggleMenu(false);
       },
       title: getMenuTranslation('title_nameCloud'), //'Nuage de noms', 
@@ -2598,6 +2598,8 @@ function toggleMenu(open) {
     if (isOpen) {
       // Synchroniser les sélecteurs avant d'ouvrir le menu
       syncCustomSelectors();
+
+      resizeHamburger();
       
       sideMenu.classList.add('open');
       menuOverlay.classList.add('open');
