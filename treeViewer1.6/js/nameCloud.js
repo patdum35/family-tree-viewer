@@ -204,8 +204,8 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
     if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
         ratio = 1;
     } 
-    nameCloudState.SVG_width = window.innerWidth * ratio;
-    nameCloudState.SVG_height = window.innerHeight * ratio;
+    nameCloudState.SVG_width = window.innerWidth; // * ratio;
+    nameCloudState.SVG_height = window.innerHeight; // * ratio;
 
     // console.log( '\n\n --- debug in processNamesCloudWithDate, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
 
@@ -295,23 +295,22 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
             ratio = 1;
             // ratio = Math.sqrt(1920*1080/(window.innerWidth*window.innerHeight ));
         } 
-        nameCloudState.SVG_width = window.innerWidth * ratio;
-        nameCloudState.SVG_height = window.innerHeight * ratio;
+        nameCloudState.SVG_width = window.innerWidth; // * ratio;
+        nameCloudState.SVG_height = window.innerHeight; // * ratio;
         // console.log( '\n\n --- debug in resize, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
 
 
         nameCloudState.mobilePhone = false;
         if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
         else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
-        resize_counter++;
 
-        // clearTimeout(resizeTimeout);
-        // resizeTimeout = setTimeout(() => {
-        setTimeout(() => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+
             // requestAnimationFrame(() => {
-            //     buttonsOnDisplay(false);
-            // });
-            // requestAnimationFrame(() => {
+            //     requestAnimationFrame(() => {
+                resize_counter++;
+
                 console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
                 createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
@@ -347,7 +346,8 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 // }, 100);
                               
             // }); 
-        }, 100);
+            // }); 
+            }, 150);
   
         // setTimeout(() => {
         //     // requestAnimationFrame(() => {
@@ -377,7 +377,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
 
 
 
-    }, 400)); // Attend 150ms après le dernier resize
+    }, 150)); // Attend 150ms après le dernier resize
 
 
 

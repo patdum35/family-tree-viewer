@@ -404,7 +404,7 @@ export const NameCloud = ({ nameData, config }) => {
             nameCloudState.SVG_height
         );   
         layout.start();
-        console.log( "in NameCloud after initializeCloudAndLayout", config,", words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
+        console.log( "in NameCloud after initializeCloudAndLayout", config,", words=", nameCloudState.totalWords, ", placed=", nameCloudState.placedWords, ", minFont=", nameCloudState.appliedMinFontSize , "maxFont", nameCloudState.appliedMaxFontSize , ', appliedPadding =',nameCloudState.appliedPadding , ", ShapeScale=", nameCloudState.autoShapeScale.toFixed(1), ", ZoomScale=", nameCloudState.autoZoomScale.toFixed(1)  )
 
 
     }, [nameData]);
@@ -498,9 +498,16 @@ export function computeFontScale(nameData) {
 
             //  console.log('\n\n -debug before modif ******* minFontSize=', minFontSize, ', maxFontSize=', maxFontSize,  ', ameCloudState.minFontSize=', nameCloudState.minFontSize, nameCloudState.maxFontSize)
 
+        } else {
+
+            let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight));
+
+            minFontSize = Math.max( 3, parseInt(minFontSize/ratio));
+            maxFontSize = Math.max( 14, parseInt(maxFontSize/ratio));
+
         }
 
-
+13
         // console.log("Font choice: log , screen", Math.min(window.innerWidth, window.innerHeight), ", mobile=",nameCloudState.mobilePhone, "wordCount=", wordCount, ", maxCount=", maxCount, ", minCount=" ,minCount,   ", minFontSize=", minFontSize, ", maxFontSize=", maxFontSize); // ", scale=", scale) ;//, scale.clamp(true))
     }
     nameCloudState.appliedMinFontSize = minFontSize;
@@ -542,6 +549,11 @@ export function centerCloudNameContainer() {
 
 // Fonction commune pour initialiser le SVG et créer le nuage de mots
 function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
+
+
+     console.log('\n\n\n\n  ------------- initializeCloudAndLayout is called with WxH=', width, height , '----------------\n\n\n\n');
+
+
     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
     if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }
 
@@ -549,10 +561,20 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     d3.select(svgElement).selectAll('*').remove();
     
     // Initialiser le SVG avec les dimensions
+    // const svg = d3.select(svgElement)
+    //     .attr('width', width)
+    //     .attr('height', height);
+
+    // Initialiser le SVG avec un viewBox fluide (évite les flash noirs sur rotation)
     const svg = d3.select(svgElement)
-        .attr('width', width)
-        .attr('height', height);
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('width', '100%')
+        .style('height', '100%');
+
         
+
+
     // Rectangle de fond transparent
     svg.append('rect')
         .attr('width', width)
@@ -589,7 +611,17 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     let padding = 1;
     if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) {
         padding = nameCloudState.mobilePhone ? nameCloudState.padding/8 : nameCloudState.padding/4;
+        let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
+        console.log('\n\n ------------- debug ratio=', ratio, 'padding=', padding, 'padding/ratio=',  padding/ratio );
+        padding = padding/(ratio*2);
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            padding = padding/(ratio*4);
+        } else {
+            padding = padding/(ratio*2);
+        }
     }
+
+    nameCloudState.appliedPadding = padding;
 
     // Créer les données pour le layout
     const wordData = nameData.map(d => ({
@@ -701,13 +733,16 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
                 nameCloudState.autoZoomScale = autoZoomScale;
 
+                console.log('applyZoom 1 : W=', window.innerWidth, 'x H=', window.innerHeight, ', bboxWidth:', Math.max(1,bboxWidth), 'bboxHeight:', Math.max(1,bboxHeight), ', autoZoomScale=', autoZoomScale);
+
+
                 applyZoom(autoZoomScale, -(bbox.minX + bboxWidth/2), 23);
 
             }, 100); // Léger délai pour assurer que le rendu est terminé
 
 
 
-            // ajustement de la position du nuage si nécessaire ors d'un resize
+            // ajustement de la position du nuage si nécessaire lors d'un resize
             setTimeout(() => {
                 requestAnimationFrame(() => {
                     const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(svg, textGroup );
@@ -718,9 +753,9 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
                     if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
                         && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
-                        // console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+                        console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
                     } else {
-                        // console.log('applyZoom : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+                        console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
                         applyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
                     }
                 });
