@@ -561,16 +561,16 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     d3.select(svgElement).selectAll('*').remove();
     
     // Initialiser le SVG avec les dimensions
-    // const svg = d3.select(svgElement)
-    //     .attr('width', width)
-    //     .attr('height', height);
-
-    // Initialiser le SVG avec un viewBox fluide (évite les flash noirs sur rotation)
     const svg = d3.select(svgElement)
-        .attr('viewBox', `0 0 ${width} ${height}`)
-        .attr('preserveAspectRatio', 'xMidYMid meet')
-        .style('width', '100%')
-        .style('height', '100%');
+        .attr('width', width)
+        .attr('height', height);
+
+    // // Initialiser le SVG avec un viewBox fluide (évite les flash noirs sur rotation)
+    // const svg = d3.select(svgElement)
+    //     .attr('viewBox', `0 0 ${width} ${height}`)
+    //     .attr('preserveAspectRatio', 'xMidYMid meet')
+    //     .style('width', '100%')
+    //     .style('height', '100%');
 
         
 
