@@ -312,23 +312,22 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 resize_counter++;
 
                 console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
-                createNameCloudUI.renderInContainer(nameData, config, containerElement); 
-
+                // createNameCloudUI.renderInContainer(nameData, config, containerElement); 
 
                 // 2. Créer un conteneur temporaire pour le nouveau nuage
-                // const tempContainer = document.createElement('div');
-                // tempContainer.id = 'temp-container';
-                // tempContainer.style.position = 'absolute';
-                // tempContainer.style.top = '0';
-                // tempContainer.style.left = '0';
-                // tempContainer.style.width = '100%';
-                // tempContainer.style.height = '100%';
-                // tempContainer.style.opacity = '0';
-                // tempContainer.style.pointerEvents = 'none';
-                // containerElement.appendChild(tempContainer);
+                const tempContainer = document.createElement('div');
+                tempContainer.id = 'temp-container';
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.top = '0';
+                tempContainer.style.left = '0';
+                tempContainer.style.width = '100%';
+                tempContainer.style.height = '100%';
+                tempContainer.style.opacity = '0';
+                tempContainer.style.pointerEvents = 'none';
+                containerElement.appendChild(tempContainer);
                 
-                // // 3. Générer le nouveau nuage dans le conteneur temporaire
-                // createNameCloudUI.renderInContainer(nameData, config, tempContainer);
+                // 3. Générer le nouveau nuage dans le conteneur temporaire
+                createNameCloudUI.renderInContainer(nameData, config, tempContainer);
                 
                 // // 4. Attendre que le nouveau nuage soit complètement rendu
                 // // Observer quand le layout est terminé
