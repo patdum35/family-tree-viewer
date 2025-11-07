@@ -556,15 +556,15 @@ function injectStyles() {
         /* En-tête */
         .modal-header {
             background: var(--color-header-bg);
-            color: white; padding: 20px 30px; display: flex;
+            color: white; padding: 5px 30px; display: flex;
             justify-content: space-between; align-items: center; flex-shrink: 0;
         }
-        .modal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+        .modal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin: 0; line-height: 1.1;}
 
         /* Bouton de Fermeture */
         .close-button {
-            background: #c82333; border: 2px solid white; color: white; font-size: 24px;
-            cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center;
+            background: #c82333; border: 2px solid white; color: white; font-size: 20px;
+            cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center;
             justify-content: center; border-radius: 50%; transition: all 0.3s; line-height: 1; 
         }
         .close-button:hover { background: #a82e38; transform: scale(1.1) rotate(90deg); }
@@ -588,10 +588,10 @@ function injectStyles() {
         /* Navigation par onglets */
         .modal-tabs {
             display: flex; background: #e9ecef; border-bottom: 2px solid #e0e0e0; overflow-x: auto;
-            gap: 1px; flex-shrink: 0;
+            margin-top: -10px; gap: 1px; flex-shrink: 0;
         }
         .tab-button {
-            flex-basis: 0; flex-grow: 1; padding: 15px 10px; border: none; cursor: pointer; font-size: 16px;
+            flex-basis: 0; flex-grow: 1; padding: 5px 10px; border: none; cursor: pointer; font-size: 16px;
             transition: all 0.3s; position: relative; white-space: nowrap; font-weight: 500;
         }
         .tab-button:hover { filter: brightness(1.1); } 
@@ -669,6 +669,60 @@ function injectStyles() {
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(0px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+
+    /* ------------------------------------------- */
+    /* NOUVEAU: Optimisation Mobile (Max 400px) */
+    /* ------------------------------------------- */
+    @media (max-width: 400px), (max-height: 400px) {
+        /* 1. OCCUPER TOUT L'ESPACE & REDUIRE LES ARRONDIS */
+        .modal-overlay.active {
+            padding: 1px; /* Supprime l'espace autour du modal */
+            align-items: stretch; /* Étend le modal pour remplir la hauteur */
+            justify-content: stretch; /* Étend le modal pour remplir la largeur */
+        }
+
+        .help-modal {
+            max-width: 100%; /* Occupe toute la largeur */
+            width: 100%;
+            max-height: 100vh; /* Occupe toute la hauteur de la vue */
+            border-radius: 4px; /* Supprime les coins arrondis */
+            margin: 2px; /* S'assure qu'il n'y a pas de marge */
+            height: 100%; /* Important pour certains navigateurs */
+        }
+
+        /* 2. RÉDUIRE TOUS LES PADDINGS */
+        .modal-header {
+            padding: 7px 15px; /* Réduit le padding de l'en-tête (de 20px 30px à 15px) */
+        }
+
+        .modal-header h2 {
+            font-size: 18px; margin: 0; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
+        }
+
+       .close-button {
+            width: 30px; /* Optionnel: Réduire la taille du bouton de fermeture */
+            height: 30px;
+            font-size: 20px;
+        }
+
+        .tab-button {
+            padding: 5px 5px; /* Réduit le padding des boutons d'onglet (de 15px 10px à 12px 5px) */
+            font-size: 14px; /* Optionnel: Réduire la taille de la police des onglets */
+        }
+
+        .modal-content-container { 
+            padding: 15px; /* Réduit le padding du contenu principal (de 30px à 15px) */
+            /* Recalcul de la hauteur maximale pour remplir tout l'espace */
+            max-height: calc(100vh - 100px); 
+        }
+
+        .help-section h3 {
+            font-size: 18px; /* Optionnel: Réduire la taille des sous-titres */
+        }
+    }
+
+
     `;
     document.head.appendChild(style);
 }
