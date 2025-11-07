@@ -591,7 +591,7 @@ function injectStyles() {
             margin-top: -10px; gap: 1px; flex-shrink: 0;
         }
         .tab-button {
-            flex-basis: 0; flex-grow: 1; padding: 5px 10px; border: none; cursor: pointer; font-size: 16px;
+            flex-basis: 0; flex-grow: 1; padding: 10px 10px; border: none; cursor: pointer; font-size: 16px;
             transition: all 0.3s; position: relative; white-space: nowrap; font-weight: 500;
         }
         .tab-button:hover { filter: brightness(1.1); } 
@@ -707,7 +707,7 @@ function injectStyles() {
         }
 
         .tab-button {
-            padding: 5px 5px; /* Réduit le padding des boutons d'onglet (de 15px 10px à 12px 5px) */
+            padding: 8px 8px; /* Réduit le padding des boutons d'onglet (de 15px 10px à 12px 5px) */
             font-size: 14px; /* Optionnel: Réduire la taille de la police des onglets */
         }
 
