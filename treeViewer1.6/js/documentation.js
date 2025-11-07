@@ -321,7 +321,8 @@ async function runResourceInjection(resourceMetadata) {
 // 4. Fonction principale exportée (MAJ : `async` et appel à l'injection)
 // ----------------------------------------------------
 
-export async function documentation() {
+// export async function documentation() {
+export function documentation() {
     // Détermine la langue (utilise 'fr' par défaut)
     const lang = window.CURRENT_LANGUAGE || 'fr'; 
 
@@ -335,13 +336,24 @@ export async function documentation() {
         addModalListeners();
     }
 
+
+
+    
+
     // Récupère le contenu et met à jour le modal (pour le multilingue ou l'ajout de tabs)
     const content = DOC_CONTENT[lang] || DOC_CONTENT['fr'];
     updateDocumentationContent(content);
     
-    // 💥 NOUVEAU: Lancement du processus d'injection asynchrone des ressources
-    // Nous appelons l'injection ici, APRES que le contenu HTML (les conteneurs vides) soit dans le DOM
-    await runResourceInjection(RESOURCE_METADATA);
+
+    // Afficher le modal immédiatement (TRES IMPORTANT !)
+    document.getElementById('helpModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+
+    //💥 Lancer l'injection en arrière-plan (sans 'await').
+    // L'injection se fait, mais le code CONTINU immédiatement après cette ligne.
+    // await runResourceInjection(RESOURCE_METADATA);
+    runResourceInjection(RESOURCE_METADATA);
 
     // Affiche le modal
     document.getElementById('helpModal').classList.add('active');

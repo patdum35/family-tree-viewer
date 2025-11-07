@@ -222,119 +222,6 @@ let globalStatsPosition = {
 
 let globalResizeListener = null;
 
-// export const statsConfig = {
-//     'prenoms': {
-//         labelId: 'firstname-frequency-label',
-//         buttonId: 'firstname-frequency-button',
-//         buttonClass: 'firstname-frequency-button',
-//         containerClass: 'firstname-frequency-container',
-//         title: 'Prénom le plus fréquent',
-//         modalTitle: 'prénoms',
-//         modalArticle: 'des',
-//         labelText: 'Prénom le plus fréquent',
-//         type: 'frequency'
-//     },
-//     'noms': {
-//         labelId: 'lastname-frequency-label',
-//         buttonId: 'lastname-frequency-button',
-//         buttonClass: 'lastname-frequency-button',
-//         containerClass: 'lastname-frequency-container',
-//         title: 'Nom le plus fréquent',
-//         modalTitle: 'Noms',
-//         modalArticle: 'des',
-//         labelText: 'Nom le plus fréquent',
-//         type: 'frequency'
-//     },
-//     'professions': {
-//         labelId: 'profession-frequency-label',
-//         buttonId: 'profession-frequency-button',
-//         buttonClass: 'profession-frequency-button',
-//         containerClass: 'profession-frequency-container',
-//         title: 'Métier le plus fréquent',
-//         modalTitle: 'métiers',
-//         modalArticle: 'des',
-//         labelText: 'Métier le plus fréquent',
-//         type: 'frequency'
-//     },
-//     'lieux': {
-//         labelId: 'location-frequency-label',
-//         buttonId: 'location-frequency-button',
-//         buttonClass: 'location-frequency-button',
-//         containerClass: 'location-frequency-container',
-//         title: 'Lieu le plus fréquent',
-//         modalTitle: 'Lieux',
-//         modalArticle: 'des',
-//         labelText: 'Lieu le plus fréquent',
-//         type: 'frequency'
-//     },
-//     'duree_vie': {
-//         labelId: 'average-age-label',
-//         buttonId: 'average-age-stats-button',
-//         buttonClass: 'average-age-stats-button',
-//         containerClass: 'average-container',
-//         title: 'Durée de vie moyenne',
-//         modalTitle: 'Durée de vie',
-//         modalArticle: '',
-//         labelText: 'Durée de vie moyenne',
-//         modalStatsPrefix: 'Durée de vie ',
-//         chartId: 'average-age-chart-container',
-//         type: 'age'
-//     },
-//     'age_procreation': {
-//         labelId: 'procreation-age-label',
-//         buttonId: 'procreation-age-stats-button',
-//         buttonClass: 'procreation-age-stats-button',
-//         containerClass: 'procreation-average-container',
-//         title: 'Âge moy. de procréation',
-//         modalTitle: 'Âge de procréat.',
-//         modalArticle: '',
-//         labelText: 'Âge moy. de procréation',
-//         modalStatsPrefix: 'Âge de procréation ',
-//         chartId: 'procreation-age-chart-container',
-//         type: 'age'
-//     },
-//     'age_marriage': {
-//         labelId: 'marriage-age-label',
-//         buttonId: 'marriage-age-stats-button',
-//         buttonClass: 'marriage-age-stats-button',
-//         containerClass: 'marriage-average-container',
-//         title: 'Âge moy. de mariage',
-//         modalTitle: 'Âge de mariage',
-//         modalArticle: '',
-//         labelText: 'Âge moy. de mariage',
-//         modalStatsPrefix: 'Âge de mariage ',
-//         chartId: 'marriage-age-chart-container',
-//         type: 'age'
-//     },
-//     'age_first_child': {
-//         labelId: 'first-child-age-label',
-//         buttonId: 'first-child-age-stats-button',
-//         buttonClass: 'first-child-age-stats-button',
-//         containerClass: 'first-child-average-container',
-//         title: 'Âge moy. au 1er enfant',
-//         modalTitle: 'Âge au 1er enfant',
-//         modalArticle: '',
-//         labelText: 'Âge moy. au 1er enfant',
-//         modalStatsPrefix: 'Âge au 1er enfant ',
-//         chartId: 'first-child-age-chart-container',
-//         type: 'age'
-//     },
-//     'nombre_enfants': {
-//         labelId: 'children-count-label',
-//         buttonId: 'children-count-stats-button',
-//         buttonClass: 'children-count-stats-button',
-//         containerClass: 'children-count-container',
-//         title: 'Nb. moyen d\'enfants',
-//         modalTitle: 'Nbre d\'enfants',
-//         modalArticle: 'du',
-//         labelText: 'Nb. moyen d\'enfants',
-//         modalStatsPrefix: 'Nombre d\'enfants ',
-//         chartId: 'children-count-chart-container',
-//         type: 'age'  // Utiliser le même type 'age' pour profiter des mêmes graphiques de distribution
-//     }
-// };
-
-
 export const statsConfig = {
     'prenoms': {
         labelId: 'firstname-frequency-label',
@@ -892,7 +779,7 @@ export function addStatisticsLabel(svg, textGroup, config) {
         // Position par défaut basée sur la position du SVG
 
         if (window.innerWidth < 400 || window.innerHeight < 400) {
-            initialX = window.innerWidth - 135; // 170px depuis le bord droit
+            initialX = window.innerWidth - 140; // 170px depuis le bord droit
         } else {
             initialX = window.innerWidth - 165; // 170px depuis le bord droit
         }
@@ -963,8 +850,8 @@ export function addStatisticsLabel(svg, textGroup, config) {
 
 
     if (window.innerWidth < 400 || window.innerHeight < 400) {
-        container.style.width = '120px';
-        container.style.height = '40px';
+        container.style.width = '125px';
+        container.style.height = '45px';
         container.style.padding = '1px';
         title.style.fontSize = '11px';
         // title.style.marginBottom = '1px';
