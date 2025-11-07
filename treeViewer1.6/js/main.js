@@ -640,7 +640,7 @@ export function positionFormContainer() {
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
         if (window.innerHeight < 400) { 
             formContainerPositionTop =  60;
-            startTitlePositionTop =  40 + formContainer.offsetHeight + 10;            
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
         }
         if (state.isPuzzleSwipe) {
             formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
