@@ -22,7 +22,7 @@ export function getTranslation(key) {
         'titleMetiers': 'Métiers',
         'titleLieux': 'Lieux',
         'titleDureeVie': 'Durées de vie',
-        'titleAgeProcreation': 'Ages de procréation',
+        'titleAgeProcreation': 'Ages de procré.',
         'titleAgeMariage': 'Ages de mariage', 
         'titleAgePremierEnfant': 'Ages au 1er enfant',
         'titleNombreEnfants': 'Nombres d\'enfants',
@@ -845,7 +845,7 @@ export function updateTitleText(element, cfg) {
     } else if (cfg.type === 'professions') {
         titleText = `${nameCloudState.totalWords} ${getTranslation('titleMetiers')}`;
     } else if (cfg.type === 'lieux'){
-        titleText = `${nameCloudState.totalWords} ${getTranslation('titleLieux')} ${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}`;
+        titleText = `${nameCloudState.totalWords} ${getTranslation('titleLieux')}`; //  ${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}
     } else if (cfg.type === 'duree_vie') {
         titleText = `${nameCloudState.totalWords} ${getTranslation('titleDureeVie')}`;
     } else if (cfg.type === 'age_procreation') {
@@ -904,17 +904,19 @@ export function generateNameCloudExport() {
         const isCallFromCloudName = true;
         processNamesCloudWithDate(newConfig, nameCloudState.nameCloudContainer, isCallFromCloudName);
 
-        // Tous les types supportés
-        const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
+        setTimeout(() => {
+            // Tous les types supportés
+            const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
 
-        if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
-            // Préparer les données statistiques si nécessaire pour les types d'âge
-            if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
-                ensureStatsExist(nameCloudState.currentNameData);
-            }
-            // Ajouter le bouton des statistiques détaillées avec le type approprié
-            updateStatsButtons(nameCloudState.container, nameCloudState.currentNameData, newConfig.type, newConfig);
-        }        
+            if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
+                // Préparer les données statistiques si nécessaire pour les types d'âge
+                if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
+                    ensureStatsExist(nameCloudState.currentNameData);
+                }
+                // Ajouter le bouton des statistiques détaillées avec le type approprié
+                updateStatsButtons(nameCloudState.container, nameCloudState.currentNameData, newConfig.type, newConfig);
+            }  
+        }, 0);               
 }
 
 
@@ -1178,18 +1180,20 @@ function showNameCloud(nameData, config) {
         const isCallFromCloudName = true;
         processNamesCloudWithDate(newConfig, nameCloudContainer, isCallFromCloudName, nameData, isNameDataIn);
 
-        // Tous les types supportés
-        const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
+        setTimeout(() => {
+            // Tous les types supportés
+            const supportedTypes = ['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants', 'prenoms', 'noms', 'professions', 'lieux'];
 
-        if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
-            // Préparer les données statistiques si nécessaire pour les types d'âge
-            if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
-                ensureStatsExist(nameCloudState.currentNameData);
+            if (supportedTypes.includes(newConfig.type) && nameCloudState.currentNameData) {
+                // Préparer les données statistiques si nécessaire pour les types d'âge
+                if (['duree_vie', 'age_procreation', 'age_marriage', 'age_first_child', 'nombre_enfants'].includes(newConfig.type)) {
+                    ensureStatsExist(nameCloudState.currentNameData);
+                }
+                
+                // Ajouter le bouton des statistiques détaillées avec le type approprié
+                updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type, newConfig);
             }
-            
-            // Ajouter le bouton des statistiques détaillées avec le type approprié
-            updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type, newConfig);
-        }
+        }, 0); 
         
     }
 

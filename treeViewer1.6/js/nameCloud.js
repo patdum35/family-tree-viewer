@@ -1,5 +1,5 @@
 
-import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText, toggleFullScreen } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';
@@ -80,7 +80,7 @@ export function processNamesCloudWithDate(config, containerElement = null, isCal
 
 export function processNamesCloudWithDateInternal(config, containerElement = null, isCallFromCloudName = false, nameDataIn = null, isNameDataIn = false) {
  
-
+    state.isToggleFullScreenLaunched = false;
     const isForceTreeRadarButton = true;  
     if (!isCallFromCloudName) {
         nameCloudState.isButtonOnDisplayBeforeCloud = state.isButtonOnDisplay;
@@ -234,7 +234,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
 
     centerCloudNameContainer();
 
-    nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
+    // nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
 
     // const textsArray = nameData.map(item => item.text);
 
@@ -311,6 +311,7 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
         if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
         else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
 
+
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
 
@@ -339,9 +340,8 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
             
             // // 3. Générer le nouveau nuage dans le conteneur temporaire
             // createNameCloudUI.renderInContainer(nameData, config, tempContainer);
-                                       
+                                    
         }, 150);
-  
 
 
         setTimeout(() => {
@@ -351,16 +351,10 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
                 // resizeHamburger();
             }
         }, 150);
-
-
-
     }, 150)); // Attend 150ms après le dernier resize
 
 
-
-
-
-
+    nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
 
 }
 

@@ -428,7 +428,7 @@ if (window._originalSetupElegantBackground) {
 export function toggleFullScreen(inversed = false) {
 
     console.log('\n\n debug Toggle FullScreen')
-    
+
     let condition = (!document.fullscreenElement)
     // condition is true : si on est pas en fullScreen
 
@@ -762,8 +762,52 @@ function initialize() {
 
 
 
+
+
+    const helpButton = document.getElementById('help-button');
+    helpButton.style.background = 'transparent';  
+    helpButton.style.padding = '0px';
+    helpButton.style.border = 'none';
+    helpButton.style.borderRadius = '6px';
+    helpButton.style.position = 'fixed';
+    helpButton.style.top = '5px';
+    helpButton.style.right = '10px';
+    helpButton.style.zIndex = '1000';
+     
+
+
+    const helpButtonSpan = helpButton.querySelector('span');
+    helpButtonSpan.style.display = 'inline-block';
+
+    helpButtonSpan.style.animation = 'lightbulb-glow 3s ease-in-out infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    helpButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
+
+
+
+    // Animation subtile au survol
+    helpButton.addEventListener('mouseover', () => {
+        // helpButton.style.transform = 'scale(1.1)';
+        helpButton.style.animation = 'lightbulb-glow 1s ease-in-out infinite';
+    });
+    
+    helpButton.addEventListener('mouseout', () => {
+        helpButton.style.animation = 'none';
+    });
+
+
+
+
+
+
     // Ajouter l'animation de rotation CSS
-    const style = document.createElement('style');
+    let style = document.createElement('style');
     style.textContent = `
         @keyframes gear-spin {
             0% { transform: rotate(0deg); }
@@ -775,6 +819,42 @@ function initialize() {
         }
     `;
     document.head.appendChild(style);
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+      // Création de la balise <style> pour l'animation CSS
+      style = document.createElement('style');
+      style.textContent += `
+        @keyframes lightbulb-glow {
+          0%, 100% {
+            text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
+            filter: brightness(1);
+          }
+          50% {
+            text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
+            filter: brightness(1.6);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+
+
+
+
+
+
 
 
     // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
@@ -979,6 +1059,12 @@ export async function loadData(isfromNonEncryptedFile = '') {
         if (settingsButton) {
             settingsButton.style.display = 'none';
         }
+
+        const helpButton = document.getElementById('help-button');
+        if (helpButton) {
+            helpButton.style.display = 'none';
+        }
+
 
         document.getElementById('tree-container').style.display = 'block';
 

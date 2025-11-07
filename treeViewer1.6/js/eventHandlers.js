@@ -671,6 +671,12 @@ export async function returnToLogin() {
     if (settingsButton) {
         settingsButton.style.display = 'block';
     }
+
+
+    const helpButton = document.getElementById('help-button');
+    if (helpButton) {
+        helpButton.style.display = 'block';
+    }
     
     // Réinitialiser le champ de mot de passe
     // document.getElementById('password').value = '';

@@ -416,13 +416,19 @@ function showNetworkStatus(message) {
         notification = document.createElement('div');
         notification.id = 'network-status';
         notification.style.position = 'fixed';
-        if (window.innerWidth <400) {
-            notification.style.top = '50px';
-        } else {
+        if (window.innerHeight < 400) {
             notification.style.top = '10px';
+            notification.style.right = '50px';
+            notification.style.transform ='';
+        } else {
+            notification.style.top = '50px';
+            notification.style.left = window.innerWidth/2 - 100  +'px';
+            // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
+            // notification.style.transform = 'translateX(-50%)';
         }
-        notification.style.right = '10px';
-        notification.style.padding = '10px';
+
+
+        notification.style.padding = '5px';
         notification.style.borderRadius = '5px';
         notification.style.zIndex = '9999';
         document.body.appendChild(notification);

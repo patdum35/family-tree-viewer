@@ -52,6 +52,7 @@ import {
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
 import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
+import { documentation } from './documentation.js';
 
 
 // // ou si tu veux attendre que tout soit chargé
@@ -189,6 +190,7 @@ function initializeAppFunctions() {
     window.displayGenealogicTree = displayGenealogicTree;
     window.processNamesCloudWithDate = processNamesCloudWithDate;
     window.openGedcomModal = openGedcomModal;
+    window.documentation = documentation;
     window.closeGedcomModal = closeGedcomModal;
     window.loadData = loadData;
     window.updatePrenoms = updatePrenoms;

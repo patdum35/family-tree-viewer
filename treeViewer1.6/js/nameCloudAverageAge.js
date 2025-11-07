@@ -26,7 +26,7 @@ function getCloudTranslation(key) {
         
         // Textes pour les statistiques d'âge
         'avgLifespan': 'Durée de vie moyenne',
-        'avgProcreationAge': 'Âge moy. de procréation',
+        'avgProcreationAge': 'Âge moy. de procré.',
         'avgMarriageAge': 'Âge moy. de mariage',
         'avgFirstChildAge': 'Âge moy. au 1er enfant',
         'avgChildrenCount': 'Nb. moyen d\'enfants',
@@ -452,20 +452,16 @@ export function removeAllStatsElements() {
     document.querySelectorAll('.html-stats-label').forEach(element => {
         element.remove();
     });
-    
-    // Supprimer tous les boutons de statistiques
-    Object.values(statsConfig).forEach(config => {
-        const button = document.getElementById(config.buttonId);
-        if (button) {
-            button.remove();
-        }
 
-        // Supprimer aussi les boutons de statistiques par siècle
-        const centuryButton = document.getElementById(`century-stats-button-${config.type}`);
-        if (centuryButton) {
-            centuryButton.remove();
-        }
-    });
+    // Supprimer les 2 boutons de statistiques
+    const button = document.getElementById('unique-statsButton');
+    if (button) {
+        button.remove();
+    }
+    const centuryButton = document.getElementById('unique-century-stats-button');
+    if (centuryButton) {
+        centuryButton.remove();
+    }
 }
 
 /**
@@ -515,148 +511,6 @@ function findMostFrequent(nameData) {
 }
 
 /**
- * Ajoute l'étiquette (moyenne d'âge ou élément le plus fréquent)
- * @param {Object} svg - L'élément SVG
- * @param {Object} textGroup - Le groupe de texte
- * @param {Object} config - La configuration
- */
-export function addStatsLabel(svg, textGroup, config) {
-    // Ne rien faire si le type n'est pas supporté
-    if (!statsConfig[config.type]) {
-        return;
-    }
-    
-    // Récupérer la configuration pour ce type
-    const cfg = statsConfig[config.type];
-    
-    // Supprimer l'ancienne étiquette si elle existe
-    svg.selectAll(`.${cfg.containerClass}`).remove();
-    
-    // Variables pour le texte à afficher
-    let valueText = '';
-    let subtitleText = '';
-    let genderText = '';
-    let units = ` ${getCloudTranslation('years')}`; //' ans';
-    if (nameCloudState.currentConfig.type === 'nombre_enfants') { units = ''; }
-    
-    if (cfg.type === 'age') {
-        // Pour les types d'âge (durée de vie, procréation)
-        if (!nameCloudState.currentNameData || !nameCloudState.currentNameData.averageData) {
-            return;
-        }
-        
-        valueText = `${parseFloat(nameCloudState.currentNameData.averageData).toFixed(1)}${units}`;
-
-        // Ajouter les moyennes par sexe si disponibles
-        if (nameCloudState.currentNameData.maleAverageData && 
-            nameCloudState.currentNameData.femaleAverageData) {
-            // genderText = `H: ${nameCloudState.currentNameData.maleAverageData}${units} / F: ${nameCloudState.currentNameData.femaleAverageData}${nits}`;
-            genderText = `${getCloudTranslation('male')}: ${nameCloudState.currentNameData.maleAverageData}${units} / ${getCloudTranslation('female')}: ${nameCloudState.currentNameData.femaleAverageData}${units}`;
-
-        }
-
-    } else {
-        // Pour les types de fréquence (noms, prénoms, métiers, lieux)
-        if (!nameCloudState.currentNameData || nameCloudState.currentNameData.length === 0) {
-            return;
-        }
-        
-        const mostFrequent = findMostFrequent(nameCloudState.currentNameData);
-        valueText = mostFrequent.text;
-        // subtitleText = `(${mostFrequent.size} occurrences)`;
-        subtitleText = `(${mostFrequent.size} ${getCloudTranslation('occurrences')})`;
-    }
-
-    // Calculer la position
-    const labelWidth = 140;
-    const labelHeight = 60;
-    // const labelHeight = genderText ? 75 : 60; // Augmenter la hauteur si on a le texte de genre
-    
-    const xPos = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
-    const yPos = 85; // position fixe en haut
-
-    // Stocker les coordonnées
-    statsPositionsMap[config.type] = {
-        x: xPos,
-        y: yPos,
-        width: labelWidth,
-        height: labelHeight
-    };
-    
-
-    // Créer un élément pour afficher l'information
-    const container = svg.append('g')
-        .attr('class', cfg.containerClass)
-        .attr('id', cfg.labelId)
-        .attr('transform', `translate(${xPos}, ${yPos})`);
-        
-    // Ajouter une classe pour indiquer qu'on peut déplacer l'élément
-    container.style('cursor', 'move');
-    
-    // Fond semi-transparent
-    container.append('rect')
-        .attr('width', labelWidth)
-        .attr('height', labelHeight)
-        .attr('fill', 'rgba(255, 255, 255, 0.8)')
-        .attr('rx', 5)
-        .attr('stroke', '#ccc')
-        .attr('stroke-width', 1);
-    
-
-    
-    // Titre
-    container.append('text')
-        .attr('x', labelWidth / 2)
-        .attr('y', 20)
-        .attr('text-anchor', 'middle')
-        .style('font-family', 'Arial, sans-serif')
-        .style('font-size', '12px')
-        .text(cfg.labelText);
-    
-    // Valeur principale
-    container.append('text')
-        .attr('x', labelWidth / 2)
-        .attr('y', 40)
-        .attr('text-anchor', 'middle')
-        .style('font-family', 'Arial, sans-serif')
-        .style('font-size', '16px')
-        .style('font-weight', 'bold')
-        .style('fill', '#e53e3e')
-        .text(valueText);
-    
-    // Ajouter les moyennes par sexe
-    if (genderText) {
-        container.append('text')
-            .attr('x', labelWidth / 2)
-            .attr('y', 60)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Arial, sans-serif')
-            .style('font-size', '12px')
-            .text(genderText);
-    }
-
-    
-    // Ajouter la fonctionnalité de glisser-déposer
-    makeDraggable(container, config.type);
-    
-
-
-    // Sous-titre (pour les fréquences)
-    if (subtitleText) {
-        container.append('text')
-            .attr('x', labelWidth / 2)
-            .attr('y', 55)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Arial, sans-serif')
-            .style('font-size', '12px')
-            .text(subtitleText);
-    }
-        
-    // Repositionner le bouton si nécessaire
-    setTimeout(() => forceRepositionButton(config.type), 50);
-}
-
-/**
  * Ajoute le bouton des statistiques détaillées
  * @param {HTMLElement} container - Le conteneur parent
  * @param {Object} nameData - Les données à afficher
@@ -674,54 +528,72 @@ export function addStatsButton(container, nameData, type, newConfig) {
     // Récupérer la configuration pour ce type
     const cfg = statsConfig[type];
     
-    
-    // Supprimer TOUS les boutons de statistiques (pour tous les types)
-    Object.values(statsConfig).forEach(config => {
-        const buttons = document.getElementsByClassName(config.buttonClass);
-        Array.from(buttons).forEach(button => button.remove());
-    });
-    
-    // Supprimer l'écouteur global de redimensionnement s'il existe
-    if (globalResizeListener) {
-        window.removeEventListener('resize', globalResizeListener);
-        globalResizeListener = null;
-    }
-    
+
     // Créer le bouton avec un ID fixe
-    const button = document.createElement('button');
-    // button.textContent = 'Statistiques détaillées';
-    button.textContent = getCloudTranslation('statsButtonText');
-    button.id = cfg.buttonId;
-    button.className = cfg.buttonClass;
-    button.style.position = 'absolute';
-    
-    // Fixer la largeur du bouton à la même que l'étiquette
-    button.style.width = `${globalStatsPosition.width}px`;
-    button.style.whiteSpace = 'nowrap';
-    button.style.overflow = 'hidden';
-    button.style.textOverflow = 'ellipsis';
-    
-    // Positionner directement le bouton - via getBoundingClientRect
-    positionButtonRelativeToLabel(button, type);
-    
-    // Styles du bouton
-    button.style.padding = '6px 8px';
-    button.style.height = '30px';
-    button.style.backgroundColor = '#4299e1';
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '4px';
-    button.style.cursor = 'pointer';
-    button.style.fontFamily = 'Arial, sans-serif';
-    button.style.fontSize = '14px';
-    button.style.zIndex = '1000';
-    button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    
-    // Centrer le texte
-    button.style.textAlign = 'center';
-    button.style.display = 'flex';
-    button.style.alignItems = 'center';
-    button.style.justifyContent = 'center';
+    let button = document.getElementById('unique-statsButton'); 
+    if (!button) {
+        button = document.createElement('button');
+
+        // Supprimer l'écouteur global de redimensionnement s'il existe
+        if (globalResizeListener) {
+            window.removeEventListener('resize', globalResizeListener);
+            globalResizeListener = null;
+        }
+
+
+        // button.textContent = 'Statistiques détaillées';
+        button.textContent = getCloudTranslation('statsButtonText');
+        button.id = 'unique-statsButton'; 
+        button.className = 'unique-statsButton';
+        button.style.position = 'absolute';
+        
+        // Fixer la largeur du bouton à la même que l'étiquette
+        button.style.width = `${globalStatsPosition.width}px`;
+        button.style.whiteSpace = 'nowrap';
+        button.style.overflow = 'hidden';
+        button.style.textOverflow = 'ellipsis';
+        
+        // Positionner directement le bouton - via getBoundingClientRect
+        positionButtonRelativeToLabel(button, type);
+        
+        // Styles du bouton
+        button.style.padding = '6px 8px';
+        button.style.height = '30px';
+        button.style.backgroundColor = '#4299e1';
+        button.style.color = 'white';
+        button.style.border = 'none';
+        button.style.borderRadius = '4px';
+        button.style.cursor = 'pointer';
+        button.style.fontFamily = 'Arial, sans-serif';
+        button.style.fontSize = '14px';
+        button.style.zIndex = '1000';
+        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        
+        // Centrer le texte
+        button.style.textAlign = 'center';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = '12px';
+            button.style.height = '22px';
+        }
+
+        
+        // Effets de survol
+        button.onmouseover = () => {
+            button.style.backgroundColor = '#3182ce';
+            button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+        };
+        
+        button.onmouseout = () => {
+            button.style.backgroundColor = '#4299e1';
+            button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        };
+        
+        container.appendChild(button);
+    }
     
     button.onclick = () => {
         if (cfg.type === 'age') {
@@ -729,20 +601,8 @@ export function addStatsButton(container, nameData, type, newConfig) {
         } else {
             new createFrequencyStatsModal(nameData, type, newConfig, null);
         }
-    };
-    
-    // Effets de survol
-    button.onmouseover = () => {
-        button.style.backgroundColor = '#3182ce';
-        button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
-    };
-    
-    button.onmouseout = () => {
-        button.style.backgroundColor = '#4299e1';
-        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    };
-    
-    container.appendChild(button);
+    };    
+
     
     return button;
 }
@@ -1030,9 +890,16 @@ export function addStatisticsLabel(svg, textGroup, config) {
         initialY = globalStatsPosition.y;
     } else {
         // Position par défaut basée sur la position du SVG
-        initialX = window.innerWidth - 165; // 170px depuis le bord droit
+
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            initialX = window.innerWidth - 135; // 170px depuis le bord droit
+        } else {
+            initialX = window.innerWidth - 165; // 170px depuis le bord droit
+        }
+
         initialY = 85;  // 110px depuis le haut
     }
+
 
     // Créer un élément HTML pour les statistiques
     const container = document.createElement('div');
@@ -1072,8 +939,9 @@ export function addStatisticsLabel(svg, textGroup, config) {
     container.appendChild(value);
 
     // Ajouter les moyennes par sexe
+    let gender;
     if (genderText) {
-        const gender = document.createElement('div');
+        gender = document.createElement('div');
         gender.textContent = genderText;
         gender.style.fontSize = '12px';
         gender.style.textAlign = 'center';
@@ -1083,15 +951,37 @@ export function addStatisticsLabel(svg, textGroup, config) {
 
     
     // Ajouter le sous-titre si nécessaire
+    let subtitle;
     if (subtitleText) {
-        const subtitle = document.createElement('div');
+        subtitle = document.createElement('div');
         subtitle.textContent = subtitleText;
         subtitle.style.fontSize = '12px';
         subtitle.style.textAlign = 'center';
         subtitle.style.marginTop = '2px';
         container.appendChild(subtitle);
     }
-    
+
+
+    if (window.innerWidth < 400 || window.innerHeight < 400) {
+        container.style.width = '120px';
+        container.style.height = '40px';
+        container.style.padding = '1px';
+        title.style.fontSize = '11px';
+        // title.style.marginBottom = '1px';
+        title.style.margin = '1px';
+        title.style.padding = '0px'
+        value.style.fontSize = '13px';
+        value.style.marginTop= '0px';
+        value.style.marginBottom = '-3px';
+        if (genderText) {
+            gender.style.fontSize = '10px';
+        }
+        if (subtitleText) {
+            subtitle.style.fontSize = '10px';
+        }
+    }
+
+
     // Ajouter au document
     document.body.appendChild(container);
     
@@ -1134,11 +1024,9 @@ export function addStatisticsLabel(svg, textGroup, config) {
             globalStatsPosition.x = newX;
             globalStatsPosition.y = newY;
             
-            // Repositionner tous les boutons
-            Object.keys(statsConfig).forEach(type => {
-                const button = document.getElementById(statsConfig[type].buttonId);
-                if (button) forceRepositionButton(type);
-            });
+            // Repositionner le bouton
+            const button = document.getElementById('unique-statsButton');
+            if (button) forceRepositionButton(type);
         }
     };
     
@@ -1193,22 +1081,19 @@ function makeElementDraggable(element, type) {
         globalStatsPosition.y = newTop;
         
         // Repositionner les boutons
-        Object.keys(statsConfig).forEach(type => {
-            // D'abord le bouton principal
-            const button = document.getElementById(statsConfig[type].buttonId);
-            if (button) forceRepositionButton(type);
-            
-            // Puis le bouton de statistiques par siècle
-            const centuryButton = document.getElementById(`century-stats-button-${type}`);
-            if (centuryButton) {
-                const mainButton = document.getElementById(statsConfig[type].buttonId);
-                if (mainButton) {
-                    const rect = mainButton.getBoundingClientRect();
-                    centuryButton.style.left = `${rect.left}px`;
-                    centuryButton.style.top = `${rect.bottom + 5}px`;
-                }
+        // D'abord le bouton principal
+        const button = document.getElementById('unique-statsButton');
+        if (button) forceRepositionButton(type);
+        // Puis le bouton de statistiques par siècle
+        const centuryButton = document.getElementById('unique-century-stats-button');
+        if (centuryButton) {
+            if (button) {
+                const rect = button.getBoundingClientRect();
+                centuryButton.style.left = `${rect.left}px`;
+                centuryButton.style.top = `${rect.bottom + 5}px`;
             }
-        });
+        }
+
     });
     
     // Gestionnaire touchmove (Mobile)
@@ -1228,22 +1113,17 @@ function makeElementDraggable(element, type) {
         globalStatsPosition.y = newTop;
         
         // Repositionner les boutons
-        Object.keys(statsConfig).forEach(type => {
-            // D'abord le bouton principal
-            const button = document.getElementById(statsConfig[type].buttonId);
-            if (button) forceRepositionButton(type);
-            
-            // Puis le bouton de statistiques par siècle
-            const centuryButton = document.getElementById(`century-stats-button-${type}`);
-            if (centuryButton) {
-                const mainButton = document.getElementById(statsConfig[type].buttonId);
-                if (mainButton) {
-                    const rect = mainButton.getBoundingClientRect();
-                    centuryButton.style.left = `${rect.left}px`;
-                    centuryButton.style.top = `${rect.bottom + 5}px`;
-                }
+        const button = document.getElementById('unique-statsButton');
+        if (button) forceRepositionButton(type);
+        
+        const centuryButton = document.getElementById('unique-century-stats-button');
+        if (centuryButton) {
+            if (button) {
+                const rect = button.getBoundingClientRect();
+                centuryButton.style.left = `${rect.left}px`;
+                centuryButton.style.top = `${rect.bottom + 5}px`;
             }
-        });
+        }
     }, { passive: false });
     
     // Gestionnaires pour la fin du déplacement
@@ -1274,101 +1154,91 @@ export function addCenturyStatsButton(container, type, newConfig) {
     if (!cfg) return;
     
     // Vérifier si le bouton statistiques détaillées existe
-    const detailedStatsButton = document.getElementById(cfg.buttonId);
+    const detailedStatsButton = document.getElementById('unique-statsButton');
     if (!detailedStatsButton) return;
-    
-    // Créer l'ID et la classe pour le bouton des statistiques par siècle
-    const centuryButtonId = `century-stats-button-${type}`;
-    const centuryButtonClass = `century-stats-button-${type}`;
-    
-    // Supprimer les anciens bouton s'ils existent
-    // const oldButton = document.getElementById(centuryButtonId);
-    // if (oldButton) {
-    //     oldButton.remove();
-    // }
-
-    // Supprimer tous les anciens bouton s'ils existent
-    const existingButtons = document.querySelectorAll(`.${centuryButtonClass}`);
-    existingButtons.forEach(button => {
-        button.remove();
-    });
-    
+        
     // Créer le bouton des statistiques par siècle
-    const button = document.createElement('button');
-    // button.textContent = 'Stat. par siècles';
-    button.textContent = getCloudTranslation('centuryStatsButtonText');
-    button.id = centuryButtonId;
-    button.className = centuryButtonClass;
-    
-    // Appliquer les styles du bouton de statistiques détaillées
-    button.style.position = 'absolute';
-    button.style.padding = '6px 8px';
-    button.style.height = '30px';
-    button.style.backgroundColor = '#7B68EE'; // Couleur violette pour distinguer du bouton principal
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '4px';
-    button.style.cursor = 'pointer';
-    button.style.fontFamily = 'Arial, sans-serif';
-    button.style.fontSize = '14px';
-    button.style.zIndex = '1000';
-    button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    button.style.textAlign = 'center';
-    button.style.display = 'flex';
-    button.style.alignItems = 'center';
-    button.style.justifyContent = 'center';
-    button.style.width = detailedStatsButton.offsetWidth + 'px';
-    
-    // Positionner le bouton sous le bouton des statistiques détaillées
-    const detailedStatsRect = detailedStatsButton.getBoundingClientRect();
-    button.style.left = `${detailedStatsRect.left}px`;
-    button.style.top = `${detailedStatsRect.bottom + 5}px`; // 5px de marge
-    
-    // Ajouter l'événement de clic pour ouvrir le modal des statistiques par siècle
-    nameCloudState.currentConfig = { ...newConfig };
+    let button = document.getElementById('unique-century-stats-button');
+    if (!button) {
+        button = document.createElement('button');
+        // button.textContent = 'Stat. par siècles';
+        button.textContent = getCloudTranslation('centuryStatsButtonText');
+        button.id = 'unique-century-stats-button';
+        button.className = 'unique-century-stats-button';
+        
+        // Appliquer les styles du bouton de statistiques détaillées
+        button.style.position = 'absolute';
+        button.style.padding = '6px 8px';
+        button.style.height = '30px';
+        button.style.backgroundColor = '#7B68EE'; // Couleur violette pour distinguer du bouton principal
+        button.style.color = 'white';
+        button.style.border = 'none';
+        button.style.borderRadius = '4px';
+        button.style.cursor = 'pointer';
+        button.style.fontFamily = 'Arial, sans-serif';
+        button.style.fontSize = '14px';
+        button.style.zIndex = '1000';
+        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        button.style.textAlign = 'center';
+        button.style.display = 'flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        button.style.width = detailedStatsButton.offsetWidth + 'px';
+        
+        // Positionner le bouton sous le bouton des statistiques détaillées
+        const detailedStatsRect = detailedStatsButton.getBoundingClientRect();
+        button.style.left = `${detailedStatsRect.left}px`;
+        button.style.top = `${detailedStatsRect.bottom + 5}px`; // 5px de marge
+        
+        // Ajouter l'événement de clic pour ouvrir le modal des statistiques par siècle
+        nameCloudState.currentConfig = { ...newConfig };
+        
+        // Effets de survol
+        button.onmouseover = () => {
+            button.style.backgroundColor = '#6A5ACD';
+            button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+        };
+        
+        button.onmouseout = () => {
+            button.style.backgroundColor = '#7B68EE';
+            button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        };
 
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = '12px';
+            button.style.height = '22px';
+        }
+  
+        container.appendChild(button);
+        
+        // Assurer que le bouton de statistiques par siècle se déplace avec le bouton principal
+        // Observateur de mutation pour surveiller les changements de position du bouton principal
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    // Repositionner le bouton de statistiques par siècle
+                    const rect = detailedStatsButton.getBoundingClientRect();
+                    button.style.left = `${rect.left}px`;
+                    button.style.top = `${rect.bottom + 5}px`;
+                }
+            });
+        });
+        
+        // Observer les attributs 'style' et 'class' du bouton principal
+        observer.observe(detailedStatsButton, { attributes: true });
+    }
     button.onclick = () => {
         // console.log('\n\n **** debug  call to showCenturyStatsModal, newConfig', newConfig, nameCloudState.currentConfig)
         showCenturyStatsModal(type);
     };
-    
-    // Effets de survol
-    button.onmouseover = () => {
-        button.style.backgroundColor = '#6A5ACD';
-        button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
-    };
-    
-    button.onmouseout = () => {
-        button.style.backgroundColor = '#7B68EE';
-        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    };
-    
-    container.appendChild(button);
-    
-    // Assurer que le bouton de statistiques par siècle se déplace avec le bouton principal
-    // Observateur de mutation pour surveiller les changements de position du bouton principal
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-                // Repositionner le bouton de statistiques par siècle
-                const rect = detailedStatsButton.getBoundingClientRect();
-                button.style.left = `${rect.left}px`;
-                button.style.top = `${rect.bottom + 5}px`;
-            }
-        });
-    });
-    
-    // Observer les attributs 'style' et 'class' du bouton principal
-    observer.observe(detailedStatsButton, { attributes: true });
-    
     return button;
 }
 
 // Mettre à jour forceRepositionButton pour inclure le positionnement du bouton de statistiques par siècle
 function forceRepositionButton(type) {
     const cfg = statsConfig[type];
-    const button = document.getElementById(cfg.buttonId);
-    
+    const button = document.getElementById('unique-statsButton');
+
     if (!button) return;
     
     // Essayer d'abord de trouver l'élément HTML correspondant
@@ -1382,15 +1252,29 @@ function forceRepositionButton(type) {
         button.style.left = `${labelRect.left}px`;
         button.style.top = `${labelRect.bottom + 2}px`; // +2px pour un petit espace
         button.style.width = `${labelRect.width}px`;
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = '12px';
+            button.style.height = '22px';
+        } else {
+            button.style.fontSize = '14px';
+            button.style.height = '30px';                    
+        }
         
         // Repositionner également le bouton de statistiques par siècle
-        const centuryButton = document.getElementById(`century-stats-button-${type}`);
+        const centuryButton = document.getElementById('unique-century-stats-button');
         if (centuryButton) {
             // Obtenir la position exacte du bouton principal
             const buttonRect = button.getBoundingClientRect();
             centuryButton.style.left = `${buttonRect.left}px`;
             centuryButton.style.top = `${buttonRect.bottom + 5}px`;
             centuryButton.style.width = `${buttonRect.width}px`;
+            if (window.innerWidth < 400 || window.innerHeight < 400) {
+                centuryButton.style.fontSize = '12px';
+                centuryButton.style.height = '22px';
+            } else {
+                centuryButton.style.fontSize = '14px';
+                centuryButton.style.height = '30px';                    
+            }
         }
     } else {
         // Fallback si aucun élément n'est trouvé
@@ -1399,25 +1283,34 @@ function forceRepositionButton(type) {
         
         button.style.left = `${buttonX}px`;
         button.style.top = `${buttonY}px`;
-        
+        if (window.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = '12px';
+            button.style.height = '22px';
+        } else {
+            button.style.fontSize = '14px';
+            button.style.height = '30px';                    
+        }
+
         // Repositionner également le bouton de statistiques par siècle
-        const centuryButton = document.getElementById(`century-stats-button-${type}`);
+        const centuryButton = document.getElementById('unique-century-stats-button');
         if (centuryButton) {
             centuryButton.style.left = `${buttonX}px`;
             centuryButton.style.top = `${buttonY + button.offsetHeight + 5}px`;
             centuryButton.style.width = `${button.offsetWidth}px`;
+            if (window.innerWidth < 400 || window.innerHeight < 400) {
+                centuryButton.style.fontSize = '12px';
+                centuryButton.style.height = '22px';
+            } else {
+                centuryButton.style.fontSize = '14px';
+                centuryButton.style.height = '30px';                    
+            }
         }
     }
 }
 
 // Fonction auxiliaire pour mettre à jour la fonction updateStatsButtons
 export function updateStatsButtons(container, nameData, type, newConfig) {
-
-    // Supprimer tous les boutons de statistiques par siècle existants avant d'en créer de nouveaux
-    document.querySelectorAll('[id^="century-stats-button-"]').forEach(button => {
-        button.remove();
-    });
-    
+   
     // D'abord ajouter le bouton des statistiques détaillées
     addStatsButton(container, nameData, type, newConfig);
     

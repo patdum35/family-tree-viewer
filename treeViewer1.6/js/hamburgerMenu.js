@@ -3,6 +3,7 @@ import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
 import { showToastNew } from './debugLogUtils.js';
+import { documentation } from './documentation.js';
 
 // Variables pour garder une référence aux éléments
 let hamburgerMenu, sideMenu, menuOverlay;
@@ -37,7 +38,7 @@ export function getMenuTranslation(key) {
       'zoomOut': 'Zoom arrière',
       'resetView': 'Réinitialiser la vue',
       'fullscreen': 'Plein écran',
-      'backgroundLabel': 'Fond d\'écran',
+      'backgroundLabel': 'Fonds d\'écran',
       'nameCloudLabel': 'Nuage de mots',
       'backToLogin': 'Retour à l\'écran de connexion',
       'menuAvailable': 'Menu principal disponible',
@@ -83,7 +84,7 @@ export function getMenuTranslation(key) {
       'zoomOut': 'Zoom out',
       'resetView': 'Reset view',
       'fullscreen': 'Fullscreen',
-      'backgroundLabel': 'Background',
+      'backgroundLabel': 'Backgrounds',
       'nameCloudLabel': 'Word cloud',
       'backToLogin': 'Back to login screen',
       'menuAvailable': 'Main menu available',
@@ -263,15 +264,17 @@ function updateMenuStyles() {
       heading.style.display = '';
       
       // Masquer certains titres sur petits écrans
-      const title = heading.textContent;
+      // const title = heading.textContent;
+      const title = heading.infoName;
+
       if (height < 400 && (
-          title === 'Animation et audio' || 
-          title === 'Racine' || 
-          title === 'Modes' || 
-          title === 'Nuage de mots' || 
-          title === 'Fonds d\'écran' ||
-          title === 'Affichage'
-      )) {
+          title === 'section_audio' || 
+          title === 'section_root' || 
+          title === 'section_modes' || 
+          title === 'section_display' || 
+          title === 'section_namecloud' ||
+          title === 'section_settings'
+        )) {
         heading.style.display = 'none';
       } else if (height < 400) {
         heading.style.fontSize = '13x';
@@ -313,11 +316,13 @@ function updateMenuStyles() {
   document.querySelectorAll('.side-menu button span').forEach(span => {
     span.style.fontSize = '20px ! important';
     
-    if (height < 400) {
-      span.style.fontSize = '20px ! important';
-    } else if (height < 800) {
-      span.style.fontSize = '20px ! important';
-    } 
+    // if (height < 400) {
+    //   span.style.fontSize = '20px ! important';
+    // } else if (height < 800) {
+    //   span.style.fontSize = '20px ! important';
+    // } else {
+    //   span.style.fontSize = '20px ! important';      
+    // }
   });
 ////////////////////////////////
 
@@ -364,7 +369,7 @@ function updateMenuStyles() {
                 section.removeChild(settingsBtn);
                 
                 const labelContainer = document.createElement('span');
-                labelContainer.textContent = 'Fond d\'écran';
+                labelContainer.textContent = getMenuTranslation('backgroundLabel'); //'Fond d\'écran';
                 labelContainer.style.fontSize = '11px';
                 labelContainer.appendChild(settingsBtn);
                 section.appendChild(labelContainer);
@@ -372,7 +377,7 @@ function updateMenuStyles() {
                 // Ajuster la taille et l'espacement
                 settingsBtn.style.marginRight = '10px';
                 const span = settingsBtn.querySelector('span');
-                if (span) span.style.fontSize = '18px';
+                if (span) span.style.fontSize = '28px';
               }
           }
       }
@@ -590,6 +595,8 @@ function updateHeightClass() {
     document.documentElement.classList.add('small-screen');
   } else if (height < 800) { //mode portrait
     document.documentElement.classList.add('medium-screen');
+  } else {
+      document.documentElement.classList.add('medium-screen');
   }
   // Pas de classe pour les grands écrans pour préserver le layout original
 }
@@ -702,9 +709,12 @@ const sectionBackgroundColors = [
 ];
 
 // Fonction pour créer une section de menu
-function createSection(title, index = 0) {
+function createSection(titleIn, index = 0) {
+
+  const title = getMenuTranslation(titleIn);
   const container = document.createElement('div');
   container.className = 'menu-section';
+  container.infoName = titleIn;
 
   // Appliquer une couleur de fond pâle différente selon l'index
   const colorIndex = index % sectionBackgroundColors.length;
@@ -726,15 +736,16 @@ function createSection(title, index = 0) {
   
   const heading = document.createElement('h3');
   heading.textContent = title;
-  
+  heading.infoName = titleIn;
+
   // En mode petit écran, masquer certains titres spécifiques
   if (height < 400 && (
-      title === 'Animation et audio' || 
-      title === 'Racine' || 
-      title === 'Modes' || 
-      title === 'Affichage' || // || 
-      title === 'Nuage de mots' ||
-      title === 'Fonds d\'écran'
+      titleIn === 'section_audio' || 
+      titleIn === 'section_root' || 
+      titleIn === 'section_modes' || 
+      titleIn === 'section_display' ||
+      titleIn === 'section_namecloud' ||
+      titleIn === 'section_settings'
   )) {
     heading.style.display = 'none'; // Masquer complètement le titre
     // Option alternative : heading.style.height = '0';
@@ -786,7 +797,7 @@ export function showLoader()  {
 function createButtonsOnDisplaySection() {
   const height = window.innerHeight;
   // const section = createSection('Affichage', 3);  // Index 3
-  const section = createSection(getMenuTranslation('section_buttonOnDisplay'), 3);
+  const section = createSection('section_buttonOnDisplay', 3);
 
 
   section.content.classList.add('compact-menu');
@@ -795,7 +806,7 @@ function createButtonsOnDisplaySection() {
   const buttons = [
     { onclick: () => {buttonsOnDisplay(true); toggleMenu(false);}, title: getMenuTranslation('buttonOnDisplay'), text: '👆' },
     { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('noButtonOnDisplay'), text: '🚫' },
-    { onclick: () => {showLoader(); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
+    { onclick: () => {documentation(); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
   ];
   
   buttons.forEach(buttonData => {
@@ -907,7 +918,7 @@ function createButtonsOnDisplaySection() {
 function createAudioSection() {
   const height = window.innerHeight;
   // const section = createSection('Animation et audio', 0);  // Index 4
-  const section = createSection(getMenuTranslation('section_audio'), 0);
+  const section = createSection('section_audio', 0);
   
   // Créer un conteneur flex unique pour tous les éléments
   const audioControlsContainer = document.createElement('div');
@@ -1066,7 +1077,7 @@ function createAudioSection() {
 function createRootSection() {
   const height = window.innerHeight;
   // const section = createSection('Racine', 1);  // Index 1
-  const section = createSection(getMenuTranslation('section_root'), 1);
+  const section = createSection('section_root', 1);
   section.content.style.flexDirection = 'column';
   
   // Créer un div pour contenir le sélecteur de recherche racine
@@ -1128,7 +1139,7 @@ function createRootSection() {
 function createModeSection() {
   const height = window.innerHeight;
   // const section = createSection('Modes', 3);  // Index 3
-  const section = createSection(getMenuTranslation('section_modes'), 3);
+  const section = createSection('section_modes', 3);
   
   // Créer un div pour contenir le sélecteur de mode d'arbre
   const modeDiv = document.createElement('div');
@@ -1268,7 +1279,7 @@ function createModeSection() {
 function createNameCloudSection() {
   const height = window.innerHeight;
   // const section = createSection('Nuage de mots', 0);
-  const section = createSection(getMenuTranslation('section_namecloud'), 0);
+  const section = createSection('section_namecloud', 0);
    
   function enableRadarAndDisplay() {
       state.isRadarEnabled = true;
@@ -1379,7 +1390,7 @@ function createNameCloudSection() {
 function createDisplaySection() {
   const height = window.innerHeight;
   // const section = createSection('Affichage', 3);  // Index 3
-  const section = createSection(getMenuTranslation('section_display'), 3);
+  const section = createSection('section_display', 3);
 
 
   section.content.classList.add('compact-menu');
@@ -1434,7 +1445,7 @@ function createDisplaySection() {
 function createSettingsSection() {
   const height = window.innerHeight;
   // const section = createSection('Fonds d\'écran', 1);
-  const section = createSection(getMenuTranslation('section_settings'), 1);
+  const section = createSection('section_settings', 1);
   
   const buttons = [
     { 
@@ -1476,19 +1487,22 @@ function createSettingsSection() {
     // Pour les grands écrans, on conserve le style original
     
     button.appendChild(span);
-  //   section.content.appendChild(button);
-    // À ajouter juste après la création du bouton ⚙️ et avant de l'ajouter au conteneur
+    // section.content.appendChild(button);
+    // // À ajouter juste après la création du bouton ⚙️ et avant de l'ajouter au conteneur
       if (buttonData.text === '⚙️' && height < 400) {
           // Créer un conteneur pour le label + bouton
           const container = document.createElement('span');
           container.textContent = getMenuTranslation('backgroundLabel');
-          container.style.fontSize = '28px';
+          container.style.fontSize = '13px';
           container.appendChild(button);
           section.content.appendChild(container);
+          // section.content.appendChild(button);
       } else {
           section.content.appendChild(button);
       }
+      
   });
+  
   
   sideMenu.appendChild(section.container);
 }
@@ -1497,7 +1511,7 @@ function createSettingsSection() {
 function createSearchSection() {
   const height = window.innerHeight;
   // const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
-  const section = createSection(getMenuTranslation('section_search'), 2);
+  const section = createSection('section_search', 2);
   
   section.content.style.flexDirection = 'column';
     
@@ -2357,7 +2371,7 @@ function injectStyles() {
         }
         
         .small-screen .side-menu {
-        width: 210px;
+        width: 220px;
         padding: 40px 5px 10px;
         }
         
@@ -2403,7 +2417,7 @@ function injectStyles() {
         }
         
         .medium-screen .side-menu {
-        width: 210px;
+        width: 220px;
         padding: 50px 8px 15px;
         }
         
@@ -2471,7 +2485,7 @@ function injectStyles() {
         position: fixed;
         top: 0;
         left: -250px;
-        width: 210px;
+        width: 220px;
         height: 100vh;
         background-color: white;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);

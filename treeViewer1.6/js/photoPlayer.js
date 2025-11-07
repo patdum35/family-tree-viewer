@@ -116,15 +116,17 @@ export async function getCachedResourceUrl(relativePath) {
     
     // Déterminer le type de fichier
     const fileExtension = normalizedPath.split('.').pop().toLowerCase();
-    const isEncrypted = ['jpx', 'mpx', 'pnx', 'wax'].includes(fileExtension);
+    const isEncrypted = ['jpx', 'mpx', 'mvx', 'pnx', 'wax'].includes(fileExtension);
     
     // Déterminer le type MIME en fonction de l'extension
     let mimeType = 'application/octet-stream';
     if (fileExtension === 'jpx') mimeType = 'image/jpeg';
     else if (fileExtension === 'pnx') mimeType = 'image/png';
     else if (fileExtension === 'mpx') mimeType = 'audio/mpeg';
+    else if (fileExtension === 'mvx') mimeType = 'video/mpeg';
     else if (fileExtension === 'wax') mimeType = 'audio/wav';
     else if (fileExtension === 'jpg' || fileExtension === 'jpeg') mimeType = 'image/jpeg';
+    else if (fileExtension === 'mp4') mimeType = 'video/mpeg';
     else if (fileExtension === 'png') mimeType = 'image/png';
     else if (fileExtension === 'mp3') mimeType = 'audio/mpeg';
     else if (fileExtension === 'wav') mimeType = 'audio/wav';

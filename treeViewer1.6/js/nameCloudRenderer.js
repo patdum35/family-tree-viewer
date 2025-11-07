@@ -394,7 +394,17 @@ export const NameCloud = ({ nameData, config }) => {
 
         const svgElement = document.getElementById('name-cloud-svg');
         if (!svgElement) return;
+
         
+        // FIX : Forcer la hauteur du conteneur React
+        const reactContainer = svgElement.closest('.bg-white');
+        if (reactContainer) {
+            reactContainer.style.height = `${nameCloudState.SVG_height}px`;
+            reactContainer.style.minHeight = `${nameCloudState.SVG_height}px`;
+        }
+
+
+
         // Initialiser le SVG et lancer le layout
         const layout = initializeCloudAndLayout(
             svgElement,
@@ -412,22 +422,30 @@ export const NameCloud = ({ nameData, config }) => {
     return React.createElement('div', { 
         className: 'bg-white p-4 rounded-lg shadow-lg',
         style: { 
+            backgroundColor: '#FFFFFF',
             touchAction: 'pan-x pan-y pinch-zoom',
-            userSelect: 'none'
+            userSelect: 'none',
+            height: `${nameCloudState.SVG_height}px`,  // ✅ FIX ICI AUSSI
+            minHeight: `${nameCloudState.SVG_height}px` // ✅ ET ICI
         }
     },
         React.createElement('div', { 
             className: 'relative w-full ',
             style: { 
+                backgroundColor: '#FFFFFF',
                 touchAction: 'pan-x pan-y pinch-zoom',
-                userSelect: 'none'
+                userSelect: 'none',
+                height: `${nameCloudState.SVG_height}px`,  // ✅ ET ICI
+                minHeight: `${nameCloudState.SVG_height}px` // ✅ ET ICI 
+ 
             }
         },
             React.createElement('svg', {
                 id: 'name-cloud-svg',
                 className: 'w-full h-full',
                 style: { 
-                    backgroundColor: '#f7fafc',
+                    // backgroundColor: '#f7fafc',
+                    backgroundColor: '#FFFFFF',
                     touchAction: 'pan-x pan-y pinch-zoom',
                     userSelect: 'none'
                 }
@@ -820,14 +838,13 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
     // Initialiser le SVG avec les dimensions
     const svg = d3.select(svgElement)
         .attr('width', width)
-        .attr('height', height)
-        
+        .attr('height', height)     
 
     // Rectangle de fond transparent
     svg.append('rect')
         .attr('width', width)
         .attr('height', height)
-        .attr('fill', 'transparent')
+        .attr('fill', 'transparent') 
         .style('touch-action', 'pan-x pan-y pinch-zoom')
         .lower();
         
@@ -867,7 +884,7 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
             tmpCanvas.width = Math.max(1, width - 20);
             tmpCanvas.height = Math.max(1, height - 20);
             tmpCanvas.setAttribute('willReadFrequently', 'true');
-        
+
         // Initialiser le layout
         const layout = d3.layout.cloud()
             // .size([width - 20, height - 20])
@@ -1224,24 +1241,26 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 if (titleElement) updateTitleText(titleElement, config);
 
 
-                // ajustement de la position du nuage si nécessaire lors d'un resize
-                setTimeout(() => {
-                    requestAnimationFrame(() => {
-                        const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(newSvg, newTextGroup );
-                        const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
-                        const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
-                        const shiftX = (window.innerWidth - groupRect.width)/2;
-                        const shiftY = (window.innerHeight - groupRect.height)/2;
+                if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) {
+                    // ajustement de la position du nuage si nécessaire lors d'un resize
+                    setTimeout(() => {
+                        requestAnimationFrame(() => {
+                            const { d3Transform, groupRect, attrTransform } =  diagnoseCloudPosition(newSvg, newTextGroup );
+                            const deltaX = window.innerWidth - 1.5*groupRect.x - groupRect.width;
+                            const deltaY = window.innerHeight - 1.5*groupRect.y - groupRect.height;
+                            const shiftX = (window.innerWidth - groupRect.width)/2;
+                            const shiftY = (window.innerHeight - groupRect.height)/2;
 
-                        if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
-                            && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
-                            console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
-                        } else {
-                            console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
-                            newApplyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
-                        }
-                    });
-                }, 600); // Léger délai pour assurer que le rendu est terminé
+                            if ((groupRect.x + groupRect.width  < window.innerWidth + 10) && (Math.abs(deltaX) < 50) 
+                                && (groupRect.y + groupRect.height  < window.innerHeight + 10) && (Math.abs(deltaY) < 50) ) {
+                                console.log('bien placé  : W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', X:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY);     
+                            } else {
+                                console.log('applyZoom 2: W=', window.innerWidth, 'x H=', window.innerHeight, groupRect,', x:', groupRect.x, 'Y:', groupRect.y, ', deltaX=', deltaX,', deltaY=', deltaY, ',shiftX=', shiftX, ',shiftY=', shiftY);
+                                newApplyZoom(autoZoomScale, -Math.round(groupRect.x) + shiftX, -Math.round(groupRect.y) + shiftY + 38);
+                            }
+                        });
+                    }, 600); // Léger délai pour assurer que le rendu est terminé
+                }
 
 
 
