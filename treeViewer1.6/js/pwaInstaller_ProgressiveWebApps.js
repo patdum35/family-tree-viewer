@@ -5,7 +5,8 @@ class PWAInstaller {
         this.deferredPrompt = null;
         this.installButton = null;
         this.isInitialized = false;
-        
+        this.isInstallationAccepted = localStorage.getItem('pwaAccepted') === 'true';    
+
         // Initialiser quand le DOM est prêt
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
@@ -496,12 +497,13 @@ class PWAInstaller {
     handlePostInstallTransition(initialAttempt = false) {
         
         // 1. Constantes
-        const isRunningAsStandalone = () => (window.matchMedia('(display-mode: standalone)').matches);
+        // const isRunningAsStandalone = () => (window.matchMedia('(display-mode: standalone)').matches);
         const containerId = 'pwa-transition-container';
         let container = document.getElementById(containerId);
 
         // Si l'utilisateur est déjà dans l'application, on masque le conteneur et on arrête
-        if (isRunningAsStandalone()) {
+        // if (isRunningAsStandalone()) {
+        if (this.isAppInstalled() || document.getElementById(containerId)) {
             if (container) container.style.display = 'none';
             return; 
         }
@@ -625,7 +627,7 @@ class PWAInstaller {
                     closeButton.style.borderColor = 'white';
                 }
             }
-        }, 5000); // Délai de sécurité de 5 secondes
+        }, 7000); // Délai de sécurité de 5 secondes
 
         // 6. Rattacher les événements de fermeture (pour l'état initial)
         document.getElementById('hide-pwa-msg').addEventListener('click', () => {
@@ -673,6 +675,10 @@ class PWAInstaller {
                     // Le bouton sera mis à jour par l'événement 'appinstalled'
                     // >>> DÉCLENCHEMENT DÉCALÉ ET CONTRÔLÉ <<<
                     // Maintenant, on est sûr que l'utilisateur a accepté.
+                    // Mémoriser le statut : L'installation a eu lieu  ou a été lancée.
+                    localStorage.setItem('pwaAccepted', 'true');
+                    this.isInstallationAccepted = true;
+
                     this.handlePostInstallTransition(true);
                 } else {
                     console.log('[PWA Installer] Installation refusée par l\'utilisateur');
@@ -681,11 +687,32 @@ class PWAInstaller {
                 this.deferredPrompt = null;
             } catch (error) {
                 console.error('[PWA Installer] Erreur lors de l\'installation:', error);
-                this.showManualInstallInstructions();
+                // this.showManualInstallInstructions();
+                // Si une erreur survient APRÈS l'acceptation, nous assumons que l'installation a eu lieu.
+                if (this.isInstallationAccepted) {
+                    this.handlePostInstallTransition(); // Relancer la transition au lieu des instructions manuelles
+                } else {
+                    this.showManualInstallInstructions();
+                }
+
             }
         } else {
             // Pas d'événement beforeinstallprompt disponible
             this.showManualInstallInstructions();
+
+            // >>> NOUVELLE LOGIQUE POUR LE RE-CLIC SUR LE BOUTON D'INSTALLATION <<<
+            // Si deferredPrompt est null, l'installation a soit été acceptée, soit elle n'est plus disponible.
+            
+            if (this.isInstallationAccepted) {
+                console.log('[PWA Installer] Installation déjà acceptée. Relancement de la transition...');
+                // Si l'utilisateur clique à nouveau, on relance la transition (le message orange/vert)
+                this.handlePostInstallTransition(); 
+            } else {
+                // Pas d'événement disponible ET jamais accepté => Afficher les instructions manuelles
+                this.showManualInstallInstructions();
+            }
+
+
         }
     }
 
@@ -927,11 +954,6 @@ class PWAInstaller {
         setTimeout(closeModal, 15000);
     }
 
-    // isAppInstalled() {
-    //     // Vérifier si l'app est lancée en mode standalone
-    //     return window.matchMedia('(display-mode: standalone)').matches ||
-    //            window.navigator.standalone === true;
-    // }
 
     isAppInstalled() {
         // Méthode standard
