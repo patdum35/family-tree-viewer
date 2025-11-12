@@ -56,13 +56,13 @@ class PWAInstaller {
             this.updateButtonForInstalledState();
             this.deferredPrompt = null;
 
-
-            console.log("PWA installée sur Android, tentative de transition...");
-            this.handlePostInstallTransition();
-
+            // console.log("PWA installée sur Android, tentative de transition...");
+            // this.handlePostInstallTransition();
 
         });
     }
+
+
 
     createInstallButton() {
         // Vérifier si le bouton existe déjà
@@ -414,6 +414,9 @@ class PWAInstaller {
                 if (choiceResult.outcome === 'accepted') {
                     console.log('[PWA Installer] Installation acceptée par l\'utilisateur');
                     // Le bouton sera mis à jour par l'événement 'appinstalled'
+                    // >>> DÉCLENCHEMENT DÉCALÉ ET CONTRÔLÉ <<<
+                    // Maintenant, on est sûr que l'utilisateur a accepté.
+                    this.handlePostInstallTransition();
                 } else {
                     console.log('[PWA Installer] Installation refusée par l\'utilisateur');
                 }
