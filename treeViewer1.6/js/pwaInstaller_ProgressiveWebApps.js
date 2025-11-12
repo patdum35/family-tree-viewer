@@ -297,91 +297,198 @@ class PWAInstaller {
 
 
 
-     handlePostInstallTransition() {
+    //  handlePostInstallTransition() {
 
-        // Constante de vérification si l'utilisateur est en mode PWA standalone
-        const isRunningAsStandalone = () => 
-            (window.matchMedia('(display-mode: standalone)').matches);
+    //     // Constante de vérification si l'utilisateur est en mode PWA standalone
+    //     const isRunningAsStandalone = () => 
+    //         (window.matchMedia('(display-mode: standalone)').matches);
 
-        // Si l'utilisateur est déjà dans l'application, on arrête
-        if (isRunningAsStandalone() || document.getElementById('pwa-transition-container')) {
-            return; 
+    //     // Si l'utilisateur est déjà dans l'application, on arrête
+    //     if (isRunningAsStandalone() || document.getElementById('pwa-transition-container')) {
+    //         return; 
+    //     }
+
+    //     const container = document.createElement('div');
+    //     container.id = 'pwa-transition-container';
+    //     // Initialisation du style (bleu, actif)
+    //     container.style.cssText = `
+    //         position: fixed; 
+    //         top: 0; 
+    //         left: 0; 
+    //         width: 100%; 
+    //         padding: 15px; 
+    //         background-color: #1890ff; 
+    //         color: white; 
+    //         text-align: center; 
+    //         z-index: 9999;
+    //         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    //     `;
+
+    //     // Contenu initial : Bouton Prêt à l'action
+    //     container.innerHTML = `
+    //         <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation terminée !</p>
+    //         <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application.</p>
+    //         <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+    //             Ouvrir l'application
+    //         </button>
+    //     `;
+
+    //     document.body.prepend(container); 
+
+    //     // --- Logique du Clic avec Fallback ---
+    //     document.getElementById('open-app-link').addEventListener('click', () => {
+    //         const button = document.getElementById('open-app-link');
+    //         const initialText = button.textContent;
+
+    //         // 1. Désactiver le bouton pendant la tentative pour éviter un double clic
+    //         button.textContent = "Tentative de lancement...";
+    //         button.disabled = true;
+
+    //         // 2. Tenter le lancement (ouvre un nouvel onglet, que l'OS devrait intercepter)
+    //         window.open(window.location.href, '_blank');
+            
+    //         // 3. Vérification après un court délai (1.5 seconde)
+    //         // L'utilisateur DOIT avoir quitté l'onglet si le lancement a réussi.
+    //         setTimeout(() => {
+    //             // Si l'utilisateur est TOUJOURS dans l'onglet du navigateur (pas en mode standalone)
+    //             if (!isRunningAsStandalone()) {
+    //                 // Échec du lancement (l'app n'est probablement pas encore prête)
+                    
+    //                 // Mettre à jour le message pour le mode "Attente/Réessayer"
+    //                 container.style.backgroundColor = '#ff9900'; // Couleur d'alerte (Orange)
+    //                 container.innerHTML = `
+    //                     <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Application non trouvée.</p>
+    //                     <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes de plus (finalisation Android) et **cliquer à nouveau**.</p>
+    //                     <button id="open-app-link-retry" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+    //                         Réessayer d'ouvrir l'application
+    //                     </button>
+    //                 `;
+                    
+    //                 // Rattacher l'événement de clic pour le bouton de réessai
+    //                 document.getElementById('open-app-link-retry').addEventListener('click', (e) => {
+    //                     // Simplement relancer la fonction de clic principale
+    //                     handlePostInstallTransition(); 
+    //                     e.target.removeEventListener('click', arguments.callee); // Nettoyage de l'ancien listener
+    //                 });
+                    
+    //             } else {
+    //                 // Le lancement a réussi (l'utilisateur est dans l'application)
+    //                 // Cela ne s'exécutera pas car l'utilisateur ne sera plus sur cette page.
+    //                 // Mais par sécurité, si l'on suppose un cas improbable :
+    //                 container.style.display = 'none';
+    //             }
+    //         }, 1500); // 1.5 secondes pour vérifier
+    //     });
+    // }
+
+
+
+
+
+
+
+
+    // NOUVELLE FONCTION OU MISE À JOUR DE CELLE EXISTANTE
+    handlePostInstallTransition(initialAttempt = false) {
+        
+        // 1. Constantes
+        const isRunningAsStandalone = () => (window.matchMedia('(display-mode: standalone)').matches);
+        const containerId = 'pwa-transition-container';
+        let container = document.getElementById(containerId);
+
+        // Si l'utilisateur est déjà dans l'application, on masque le conteneur et on arrête
+        if (isRunningAsStandalone()) {
+             if (container) container.style.display = 'none';
+             return; 
         }
 
-        const container = document.createElement('div');
-        container.id = 'pwa-transition-container';
-        // Initialisation du style (bleu, actif)
+        // 2. Création/Mise à jour du conteneur
+        if (!container) {
+            container = document.createElement('div');
+            container.id = containerId;
+            document.body.prepend(container); 
+            // Ajouter les règles CSS pour l'animation de la roue (à faire une seule fois)
+            if (!document.querySelector('style[data-spinner]')) {
+                 const style = document.createElement('style');
+                 style.setAttribute('data-spinner', true);
+                 style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+                 document.head.appendChild(style);
+            }
+        }
+        
+        // 3. Affichage initial (mode "Attente/Prêt à cliquer")
         container.style.cssText = `
             position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            padding: 15px; 
-            background-color: #1890ff; 
-            color: white; 
-            text-align: center; 
-            z-index: 9999;
+            top: 0; left: 0; width: 100%; padding: 15px; 
+            background-color: #ff9900; /* Orange : Attente active */
+            color: white; text-align: center; z-index: 9999;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         `;
-
-        // Contenu initial : Bouton Prêt à l'action
+        
+        // Contenu initial : État d'attente (avec bouton actif)
         container.innerHTML = `
-            <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation terminée !</p>
-            <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application.</p>
-            <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                Ouvrir l'application
+            <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
+            <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+            <p style="margin: 0 0 15px 0;">Vous pouvez tenter d'ouvrir l'application maintenant ou attendre 5 secondes.</p>
+            <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                Ouvrir l'application (TENTER)
             </button>
         `;
 
-        document.body.prepend(container); 
-
-        // --- Logique du Clic avec Fallback ---
-        document.getElementById('open-app-link').addEventListener('click', () => {
-            const button = document.getElementById('open-app-link');
-            const initialText = button.textContent;
-
-            // 1. Désactiver le bouton pendant la tentative pour éviter un double clic
+        // 4. Logique du Clic (Réessayer/Tenter)
+        document.getElementById('open-app-link-action').addEventListener('click', () => {
+            const button = document.getElementById('open-app-link-action');
             button.textContent = "Tentative de lancement...";
             button.disabled = true;
 
-            // 2. Tenter le lancement (ouvre un nouvel onglet, que l'OS devrait intercepter)
+            // Tenter le lancement
             window.open(window.location.href, '_blank');
             
-            // 3. Vérification après un court délai (1.5 seconde)
-            // L'utilisateur DOIT avoir quitté l'onglet si le lancement a réussi.
+            // Vérification après 1.5 seconde
             setTimeout(() => {
-                // Si l'utilisateur est TOUJOURS dans l'onglet du navigateur (pas en mode standalone)
+                // Si toujours là : Échec (l'app n'est pas prête)
                 if (!isRunningAsStandalone()) {
-                    // Échec du lancement (l'app n'est probablement pas encore prête)
                     
-                    // Mettre à jour le message pour le mode "Attente/Réessayer"
-                    container.style.backgroundColor = '#ff9900'; // Couleur d'alerte (Orange)
+                    container.style.backgroundColor = '#d32f2f'; // Rouge : Échec de la tentative
                     container.innerHTML = `
-                        <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Application non trouvée.</p>
-                        <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes de plus (finalisation Android) et **cliquer à nouveau**.</p>
-                        <button id="open-app-link-retry" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                        <p style="margin: 0 0 10px 0; font-weight: bold;">❌ Lancement échoué.</p>
+                        <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes (finalisation Android) et **cliquer à nouveau**.</p>
+                        <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #d32f2f; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
                             Réessayer d'ouvrir l'application
                         </button>
                     `;
-                    
-                    // Rattacher l'événement de clic pour le bouton de réessai
-                    document.getElementById('open-app-link-retry').addEventListener('click', (e) => {
-                        // Simplement relancer la fonction de clic principale
-                        handlePostInstallTransition(); 
-                        e.target.removeEventListener('click', arguments.callee); // Nettoyage de l'ancien listener
+                    // Rattacher l'événement de clic au nouveau bouton
+                    // On utilise le même ID car l'ancien élément a été remplacé
+                    document.getElementById('open-app-link-action').addEventListener('click', () => {
+                        this.handlePostInstallTransition(true);
                     });
                     
                 } else {
-                    // Le lancement a réussi (l'utilisateur est dans l'application)
-                    // Cela ne s'exécutera pas car l'utilisateur ne sera plus sur cette page.
-                    // Mais par sécurité, si l'on suppose un cas improbable :
+                    // Lancement réussi (le code ne s'exécutera pas car la page est partie)
                     container.style.display = 'none';
                 }
-            }, 1500); // 1.5 secondes pour vérifier
-        });
+            }, 1500); 
+        }, { once: true }); // Exécuter le listener une seule fois
+
+        // 5. Mettre à jour en mode "Prêt" après un délai de sécurité (au cas où l'utilisateur n'ait pas cliqué)
+        setTimeout(() => {
+            if (!isRunningAsStandalone() && document.getElementById(containerId)) {
+                // Si toujours dans le navigateur après 5 secondes, passer au mode "Prêt" (vert)
+                container.style.backgroundColor = '#4CAF50';
+                const button = document.getElementById('open-app-link-action');
+                if (button && button.disabled) { // Si le bouton est encore désactivé (échec du premier clic)
+                     button.textContent = "Ouvrir l'application (PRÊT)";
+                     button.style.color = '#4CAF50';
+                     button.disabled = false;
+                }
+                
+                // Mettre à jour le message d'attente
+                container.querySelector('p:first-child').innerHTML = `✅ **Installation finalisée !**`;
+                if(container.querySelector('#pwa-spinner')) container.querySelector('#pwa-spinner').remove();
+
+            }
+        }, 5000); // Délai de sécurité de 5 secondes
     }
-
-
 
 
 
@@ -416,7 +523,7 @@ class PWAInstaller {
                     // Le bouton sera mis à jour par l'événement 'appinstalled'
                     // >>> DÉCLENCHEMENT DÉCALÉ ET CONTRÔLÉ <<<
                     // Maintenant, on est sûr que l'utilisateur a accepté.
-                    this.handlePostInstallTransition();
+                    this.handlePostInstallTransition(true);
                 } else {
                     console.log('[PWA Installer] Installation refusée par l\'utilisateur');
                 }
