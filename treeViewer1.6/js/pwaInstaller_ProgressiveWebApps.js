@@ -566,7 +566,7 @@ class PWAInstaller {
             // Vérification après 1.5 seconde
             setTimeout(() => {
                 // Si toujours là : Échec (l'app n'est pas prête)
-                if (!isRunningAsStandalone()) {
+                if (!this.isAppInstalled()) {
                     
                     container.style.backgroundColor = '#d32f2f'; // Rouge : Échec de la tentative
                     container.innerHTML = `
@@ -604,7 +604,7 @@ class PWAInstaller {
 
         // 5. Mettre à jour en mode "Prêt" après un délai de sécurité (au cas où l'utilisateur n'ait pas cliqué)
         setTimeout(() => {
-            if (!isRunningAsStandalone() && document.getElementById(containerId)) {
+            if (!this.isAppInstalled() && document.getElementById(containerId)) {
                 // Si toujours dans le navigateur après 5 secondes, passer au mode "Prêt" (vert)
                 container.style.backgroundColor = '#4CAF50';
                 
@@ -627,7 +627,7 @@ class PWAInstaller {
                     closeButton.style.borderColor = 'white';
                 }
             }
-        }, 7000); // Délai de sécurité de 5 secondes
+        }, 6000); // Délai de sécurité de 5 secondes
 
         // 6. Rattacher les événements de fermeture (pour l'état initial)
         document.getElementById('hide-pwa-msg').addEventListener('click', () => {
