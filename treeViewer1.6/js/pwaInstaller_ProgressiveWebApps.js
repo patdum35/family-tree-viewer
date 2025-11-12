@@ -221,76 +221,165 @@ class PWAInstaller {
 
 
 
-    handlePostInstallTransition() {
-        // Le délai typique pour la finalisation d'installation sur Android.
-        const INSTALLATION_SAFETY_DELAY_MS = 5000; 
+    // handlePostInstallTransition() {
+    //     // Le délai typique pour la finalisation d'installation sur Android.
+    //     const INSTALLATION_SAFETY_DELAY_MS = 5000; 
         
-        const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    //     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
 
-        if (!isInStandaloneMode) {
+    //     if (!isInStandaloneMode) {
             
-            // S'assurer de n'ajouter le conteneur qu'une seule fois
-            if (document.getElementById('pwa-transition-container')) {
-                return; 
-            }
+    //         // S'assurer de n'ajouter le conteneur qu'une seule fois
+    //         if (document.getElementById('pwa-transition-container')) {
+    //             return; 
+    //         }
 
-            const container = document.createElement('div');
-            container.id = 'pwa-transition-container';
-            // Styles de base...
-            container.style.cssText = `
-                position: fixed; 
-                top: 0; 
-                left: 0; 
-                width: 100%; 
-                padding: 15px; 
-                background-color: #ff9900; /* Couleur d'alerte/attente */
-                color: white; 
-                text-align: center; 
-                z-index: 9999;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            `;
+    //         const container = document.createElement('div');
+    //         container.id = 'pwa-transition-container';
+    //         // Styles de base...
+    //         container.style.cssText = `
+    //             position: fixed; 
+    //             top: 0; 
+    //             left: 0; 
+    //             width: 100%; 
+    //             padding: 15px; 
+    //             background-color: #ff9900; /* Couleur d'alerte/attente */
+    //             color: white; 
+    //             text-align: center; 
+    //             z-index: 9999;
+    //             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    //         `;
 
-            // Contenu initial : État d'attente
-            container.innerHTML = `
-                <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
-                <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-                <p style="margin: 0;">Veuillez patienter quelques instants.</p>
-            `;
-            document.body.prepend(container);
+    //         // Contenu initial : État d'attente
+    //         container.innerHTML = `
+    //             <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
+    //             <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+    //             <p style="margin: 0;">Veuillez patienter quelques instants.</p>
+    //         `;
+    //         document.body.prepend(container);
 
-            // Ajouter les règles CSS pour l'animation de la roue (spinner)
-            // Note: Vous devrez ajouter cette règle CSS dans votre feuille de style principale ou dans une balise <style>
-            if (!document.querySelector('style[data-spinner]')) {
-                const style = document.createElement('style');
-                style.setAttribute('data-spinner', true);
-                style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-                document.head.appendChild(style);
-            }
+    //         // Ajouter les règles CSS pour l'animation de la roue (spinner)
+    //         // Note: Vous devrez ajouter cette règle CSS dans votre feuille de style principale ou dans une balise <style>
+    //         if (!document.querySelector('style[data-spinner]')) {
+    //             const style = document.createElement('style');
+    //             style.setAttribute('data-spinner', true);
+    //             style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+    //             document.head.appendChild(style);
+    //         }
 
-            // 2. Définir le délai avant d'activer le bouton
-            setTimeout(() => {
-                // Changement d'état : Installation Prête
-                container.style.backgroundColor = '#4CAF50'; // Nouvelle couleur (Succès/Prêt)
+    //         // 2. Définir le délai avant d'activer le bouton
+    //         setTimeout(() => {
+    //             // Changement d'état : Installation Prête
+    //             container.style.backgroundColor = '#4CAF50'; // Nouvelle couleur (Succès/Prêt)
 
-                // Nouveau contenu : Bouton cliquable
-                container.innerHTML = `
-                    <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation prête !</p>
-                    <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application installée.</p>
-                    <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #4CAF50; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                        Ouvrir l'application
-                    </button>
-                `;
+    //             // Nouveau contenu : Bouton cliquable
+    //             container.innerHTML = `
+    //                 <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation prête !</p>
+    //                 <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application installée.</p>
+    //                 <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #4CAF50; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+    //                     Ouvrir l'application
+    //                 </button>
+    //             `;
 
-                // 3. Attacher l'événement au bouton
-                document.getElementById('open-app-link').addEventListener('click', () => {
-                    window.open(window.location.href, '_blank');
-                    container.style.display = 'none';
-                });
+    //             // 3. Attacher l'événement au bouton
+    //             document.getElementById('open-app-link').addEventListener('click', () => {
+    //                 window.open(window.location.href, '_blank');
+    //                 container.style.display = 'none';
+    //             });
 
-            }, INSTALLATION_SAFETY_DELAY_MS);
+    //         }, INSTALLATION_SAFETY_DELAY_MS);
+    //     }
+    // }
+
+
+
+
+
+
+
+     handlePostInstallTransition() {
+
+        // Constante de vérification si l'utilisateur est en mode PWA standalone
+        const isRunningAsStandalone = () => 
+            (window.matchMedia('(display-mode: standalone)').matches);
+
+        // Si l'utilisateur est déjà dans l'application, on arrête
+        if (isRunningAsStandalone() || document.getElementById('pwa-transition-container')) {
+            return; 
         }
-    }
 
+        const container = document.createElement('div');
+        container.id = 'pwa-transition-container';
+        // Initialisation du style (bleu, actif)
+        container.style.cssText = `
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 15px; 
+            background-color: #1890ff; 
+            color: white; 
+            text-align: center; 
+            z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+
+        // Contenu initial : Bouton Prêt à l'action
+        container.innerHTML = `
+            <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation terminée !</p>
+            <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application.</p>
+            <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                Ouvrir l'application
+            </button>
+        `;
+
+        document.body.prepend(container); 
+
+        // --- Logique du Clic avec Fallback ---
+        document.getElementById('open-app-link').addEventListener('click', () => {
+            const button = document.getElementById('open-app-link');
+            const initialText = button.textContent;
+
+            // 1. Désactiver le bouton pendant la tentative pour éviter un double clic
+            button.textContent = "Tentative de lancement...";
+            button.disabled = true;
+
+            // 2. Tenter le lancement (ouvre un nouvel onglet, que l'OS devrait intercepter)
+            window.open(window.location.href, '_blank');
+            
+            // 3. Vérification après un court délai (1.5 seconde)
+            // L'utilisateur DOIT avoir quitté l'onglet si le lancement a réussi.
+            setTimeout(() => {
+                // Si l'utilisateur est TOUJOURS dans l'onglet du navigateur (pas en mode standalone)
+                if (!isRunningAsStandalone()) {
+                    // Échec du lancement (l'app n'est probablement pas encore prête)
+                    
+                    // Mettre à jour le message pour le mode "Attente/Réessayer"
+                    container.style.backgroundColor = '#ff9900'; // Couleur d'alerte (Orange)
+                    container.innerHTML = `
+                        <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Application non trouvée.</p>
+                        <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes de plus (finalisation Android) et **cliquer à nouveau**.</p>
+                        <button id="open-app-link-retry" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            Réessayer d'ouvrir l'application
+                        </button>
+                    `;
+                    
+                    // Rattacher l'événement de clic pour le bouton de réessai
+                    document.getElementById('open-app-link-retry').addEventListener('click', (e) => {
+                        // Simplement relancer la fonction de clic principale
+                        handlePostInstallTransition(); 
+                        e.target.removeEventListener('click', arguments.callee); // Nettoyage de l'ancien listener
+                    });
+                    
+                } else {
+                    // Le lancement a réussi (l'utilisateur est dans l'application)
+                    // Cela ne s'exécutera pas car l'utilisateur ne sera plus sur cette page.
+                    // Mais par sécurité, si l'on suppose un cas improbable :
+                    container.style.display = 'none';
+                }
+            }, 1500); // 1.5 secondes pour vérifier
+        });
+    }
 
 
 
