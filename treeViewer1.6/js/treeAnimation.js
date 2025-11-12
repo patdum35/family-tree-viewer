@@ -3139,5 +3139,4 @@ export function fullResetAnimationState() {
             resetZoom();
         }, 200);
     }
-
 }

@@ -55,6 +55,12 @@ class PWAInstaller {
             console.log('[PWA Installer] Application installée avec succès');
             this.updateButtonForInstalledState();
             this.deferredPrompt = null;
+
+
+            console.log("PWA installée sur Android, tentative de transition...");
+            this.handlePostInstallTransition();
+
+
         });
     }
 
@@ -130,6 +136,28 @@ class PWAInstaller {
         }
     }
 
+
+    handlePostInstallTransition() {
+        // 1. Démarrez un court délai (par sécurité, pour laisser le temps au système)
+        setTimeout(() => {
+            // 2. Tentez une redirection simple vers la même page
+            // Cette action peut parfois inciter le système d'exploitation Android
+            // à intercepter l'URL et à la basculer vers l'application PWA installée.
+            window.location.href = window.location.href; 
+            
+            // 3. Afficher une instruction après un court délai (au cas où la redirection échoue)
+            setTimeout(() => {
+                // Si l'utilisateur est toujours là, donnez-lui l'instruction finale.
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    alert("L'application est installée ! Si vous voyez toujours cet onglet, veuillez le fermer et lancer l'application depuis son icône d'accueil.");
+                }
+            }, 3000); // Délai pour l'instruction
+            
+        }, 500); // Délai initial de 0.5s
+    }
+
+
+
     showInstallButton() {
         if (this.installButton) {
             this.installButton.style.display = 'block';
@@ -174,33 +202,36 @@ class PWAInstaller {
         }
     }
 
-    async uninstallApp() {
-        console.log('[PWA Installer] Tentative de désinstallation...');
-        
-        // Instructions de désinstallation
-        const userAgent = navigator.userAgent.toLowerCase();
-        let instructions = 'Pour désinstaller cette application :\n\n';
-        
-        if (userAgent.includes('chrome') && userAgent.includes('mobile')) {
-            instructions += '1. Maintenez appuyé sur l\'icône de l\'app\n' +
-                          '2. Sélectionnez "Désinstaller" ou glissez vers "Supprimer"\n' +
-                          '3. Confirmez la suppression';
-        } else if (userAgent.includes('safari') && userAgent.includes('mobile')) {
-            instructions += '1. Maintenez appuyé sur l\'icône de l\'app\n' +
-                          '2. Appuyez sur le "X" qui apparaît\n' +
-                          '3. Confirmez la suppression';
-        } else {
-            instructions += '1. Maintenez appuyé sur l\'icône de l\'application\n' +
-                          '2. Sélectionnez "Désinstaller" ou "Supprimer"\n' +
-                          '3. Confirmez la suppression\n\n' +
-                          'Ou allez dans les paramètres du navigateur :\n' +
-                          '• Applications installées\n' +
-                          '• Trouvez cette app et désinstallez-la';
-        }
-        
-        this.showUninstallModal(instructions);
 
-    }
+
+
+    // async uninstallApp() {
+    //     console.log('[PWA Installer] Tentative de désinstallation...');
+        
+    //     // Instructions de désinstallation
+    //     const userAgent = navigator.userAgent.toLowerCase();
+    //     let instructions = 'Pour désinstaller cette application :\n\n';
+        
+    //     if (userAgent.includes('chrome') && userAgent.includes('mobile')) {
+    //         instructions += '1. Maintenez appuyé sur l\'icône de l\'app\n' +
+    //                       '2. Sélectionnez "Désinstaller" ou glissez vers "Supprimer"\n' +
+    //                       '3. Confirmez la suppression';
+    //     } else if (userAgent.includes('safari') && userAgent.includes('mobile')) {
+    //         instructions += '1. Maintenez appuyé sur l\'icône de l\'app\n' +
+    //                       '2. Appuyez sur le "X" qui apparaît\n' +
+    //                       '3. Confirmez la suppression';
+    //     } else {
+    //         instructions += '1. Maintenez appuyé sur l\'icône de l\'application\n' +
+    //                       '2. Sélectionnez "Désinstaller" ou "Supprimer"\n' +
+    //                       '3. Confirmez la suppression\n\n' +
+    //                       'Ou allez dans les paramètres du navigateur :\n' +
+    //                       '• Applications installées\n' +
+    //                       '• Trouvez cette app et désinstallez-la';
+    //     }
+        
+    //     this.showUninstallModal(instructions);
+
+    // }
 
     async uninstallApp() {
         console.log('[PWA Installer] Tentative de désinstallation...');
