@@ -149,6 +149,16 @@ window.i18n = {
       'normalScreenLabel': 'browser',
       'hideBrowserBarLabel': 'hide \nbrowser bar',
       'showBrowserBarLabel': 'keep \nbrowser bar',
+      'finalizeInstall': '⏳ Finalizing app installation...',
+      'appFinalized' : '✅ **Installation finalized!**',
+      'waitForInstall': 'Please wait a few seconds for the installation to finish. You may click the button below to attempt launching.',
+      'openApp' : 'Open the app',
+      'tryLaunching' : 'Attempting launch...',
+      'launchFailed' :'❌ Launch failed. The app is not yet ready',
+      'tryAgain' : 'Please wait a few more seconds (finalizing...) and **click again**.',
+      'ReOpen' : 'Try opening the app again',
+      'appReady' : 'The app is ready! Click the "Open" button below.',
+
     },
     'es': {
       // Page password-form
@@ -215,6 +225,16 @@ window.i18n = {
       'normalScreenLabel': 'navegador',
       'hideBrowserBarLabel': 'ocultar la barra\n del navegador',
       'showBrowserBarLabel': 'mantener \nla barra',      
+      'finalizeInstall': '⏳ Finalizando la instalación de la aplicación...',
+      'appFinalized' : '✅ **¡Instalación finalizada!**',
+      'waitForInstall': 'Espere unos segundos a que finalice la instalación. Puede hacer clic en el botón de abajo para intentar iniciarla.',
+      'openApp' : 'Abrir la aplicación',
+      'tryLaunching' : 'Intentando iniciar...',
+      'launchFailed' :'❌ Error al iniciar. La aplicación aún no está lista',
+      'tryAgain' : 'Espere unos segundos más (finalizando...) y **vuelva a hacer clic**.',
+      'ReOpen' : 'Intentar abrir la aplicación de nuevo',
+      'appReady' : '¡La aplicación está lista! Haga clic en el botón "Abrir" a continuación.',
+
     },
     'hu': {
       // Page password-form
@@ -281,6 +301,16 @@ window.i18n = {
       'normalScreenLabel': 'böngésző',
       'hideBrowserBarLabel': 'böngészősáv \nelrejtése',
       'showBrowserBarLabel': 'böngészősáv \nmegtartása',
+      'finalizeInstall': '⏳ Alkalmazás telepítésének véglegesítése...',
+      'appFinalized' : '✅ **Telepítés befejezve!**',
+      'waitForInstall': 'Várjon néhány másodpercet a telepítés befejezéséig. Az indításhoz kattintson az alábbi gombra.',
+      'openApp' : 'Alkalmazás megnyitása',
+      'tryLaunching' : 'Indítási kísérlet folyamatban...',
+      'launchFailed' :'❌ Indítás sikertelen. Az alkalmazás még nem áll készen',
+      'tryAgain' : 'Várjon még néhány másodpercet (véglegesítés...) és **kattintson újra**.',
+      'ReOpen' : 'Újrapróbálkozás az alkalmazás megnyitásával',
+      'appReady' : 'Az alkalmazás készen áll! Kattintson az alábbi "Megnyitás" gombra.',
+
     }
   },
   

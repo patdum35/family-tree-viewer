@@ -437,7 +437,10 @@ function showNetworkStatus(message) {
     notification.textContent = message;
     notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
     notification.style.color = 'white';
-    
+
+    setTimeout(() => {    
+        notification.style.left = window.innerWidth/2 - (notification.offsetWidth)/2  +'px';
+    }, 50);
     // Faire disparaître la notification après 3 secondes
     setTimeout(() => {
         notification.style.display = 'none';
