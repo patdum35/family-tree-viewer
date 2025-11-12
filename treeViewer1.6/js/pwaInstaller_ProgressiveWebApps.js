@@ -157,65 +157,137 @@ class PWAInstaller {
     // }
 
 
+    // handlePostInstallTransition() {
+    //     // 1. Détecter si l'utilisateur est toujours dans un onglet de navigateur (pas en mode PWA standalone)
+    //     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+
+    //     // Si nous sommes dans le navigateur, nous avons besoin du bouton de transition.
+    //     if (!isInStandaloneMode) {
+            
+    //         // Vérifier si le conteneur a déjà été ajouté pour éviter les duplications
+    //         if (document.getElementById('pwa-transition-container')) {
+    //             // Si le conteneur existe déjà, on arrête
+    //             return; 
+    //         }
+
+    //         // 2. Créer l'élément conteneur
+    //         const container = document.createElement('div');
+    //         container.id = 'pwa-transition-container';
+    //         // Styles pour rendre le message clair et visible
+    //         container.style.cssText = `
+    //             position: fixed; 
+    //             top: 0; 
+    //             left: 0; 
+    //             width: 100%; 
+    //             padding: 15px; 
+    //             background-color: #1890ff; 
+    //             color: white; 
+    //             text-align: center; 
+    //             z-index: 9999;
+    //             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    //         `;
+
+    //         // 3. Ajouter les instructions et le bouton
+    //         container.innerHTML = `
+    //             <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation réussie !</p>
+    //             <p style="margin: 0 0 15px 0;">Veuillez cliquer sur ce bouton pour basculer dans l'application installée.</p>
+    //             <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+    //                 Ouvrir l'application
+    //             </button>
+    //         `;
+
+    //         // 4. Ajouter le conteneur au corps du document
+    //         document.body.prepend(container); 
+
+    //         // 5. Attacher l'événement au bouton
+    //         document.getElementById('open-app-link').addEventListener('click', () => {
+    //             // Tenter d'ouvrir un nouvel onglet avec l'URL actuelle.
+    //             // Ce clic initié par l'utilisateur a de meilleures chances d'être intercepté 
+    //             // par Android pour lancer la PWA au lieu d'un nouvel onglet de navigateur.
+    //             window.open(window.location.href, '_blank');
+                
+    //             // Masquer le message après le clic
+    //             container.style.display = 'none';
+
+    //             // Optionnel : Ajouter un message si l'utilisateur est toujours là
+    //             setTimeout(() => {
+    //                 if (!window.matchMedia('(display-mode: standalone)').matches) {
+    //                     console.log("Le lancement n'a pas basculé. L'utilisateur doit relancer l'application manuellement.");
+    //                 }
+    //             }, 3000); 
+    //         });
+    //     }
+    // }
+
+
+
     handlePostInstallTransition() {
-        // 1. Détecter si l'utilisateur est toujours dans un onglet de navigateur (pas en mode PWA standalone)
+        // Le délai typique pour la finalisation d'installation sur Android.
+        const INSTALLATION_SAFETY_DELAY_MS = 5000; 
+        
         const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
 
-        // Si nous sommes dans le navigateur, nous avons besoin du bouton de transition.
         if (!isInStandaloneMode) {
             
-            // Vérifier si le conteneur a déjà été ajouté pour éviter les duplications
+            // S'assurer de n'ajouter le conteneur qu'une seule fois
             if (document.getElementById('pwa-transition-container')) {
-                // Si le conteneur existe déjà, on arrête
                 return; 
             }
 
-            // 2. Créer l'élément conteneur
             const container = document.createElement('div');
             container.id = 'pwa-transition-container';
-            // Styles pour rendre le message clair et visible
+            // Styles de base...
             container.style.cssText = `
                 position: fixed; 
                 top: 0; 
                 left: 0; 
                 width: 100%; 
                 padding: 15px; 
-                background-color: #1890ff; 
+                background-color: #ff9900; /* Couleur d'alerte/attente */
                 color: white; 
                 text-align: center; 
                 z-index: 9999;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             `;
 
-            // 3. Ajouter les instructions et le bouton
+            // Contenu initial : État d'attente
             container.innerHTML = `
-                <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation réussie !</p>
-                <p style="margin: 0 0 15px 0;">Veuillez cliquer sur ce bouton pour basculer dans l'application installée.</p>
-                <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                    Ouvrir l'application
-                </button>
+                <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
+                <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                <p style="margin: 0;">Veuillez patienter quelques instants.</p>
             `;
+            document.body.prepend(container);
 
-            // 4. Ajouter le conteneur au corps du document
-            document.body.prepend(container); 
+            // Ajouter les règles CSS pour l'animation de la roue (spinner)
+            // Note: Vous devrez ajouter cette règle CSS dans votre feuille de style principale ou dans une balise <style>
+            if (!document.querySelector('style[data-spinner]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-spinner', true);
+                style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
 
-            // 5. Attacher l'événement au bouton
-            document.getElementById('open-app-link').addEventListener('click', () => {
-                // Tenter d'ouvrir un nouvel onglet avec l'URL actuelle.
-                // Ce clic initié par l'utilisateur a de meilleures chances d'être intercepté 
-                // par Android pour lancer la PWA au lieu d'un nouvel onglet de navigateur.
-                window.open(window.location.href, '_blank');
-                
-                // Masquer le message après le clic
-                container.style.display = 'none';
+            // 2. Définir le délai avant d'activer le bouton
+            setTimeout(() => {
+                // Changement d'état : Installation Prête
+                container.style.backgroundColor = '#4CAF50'; // Nouvelle couleur (Succès/Prêt)
 
-                // Optionnel : Ajouter un message si l'utilisateur est toujours là
-                setTimeout(() => {
-                    if (!window.matchMedia('(display-mode: standalone)').matches) {
-                        console.log("Le lancement n'a pas basculé. L'utilisateur doit relancer l'application manuellement.");
-                    }
-                }, 3000); 
-            });
+                // Nouveau contenu : Bouton cliquable
+                container.innerHTML = `
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation prête !</p>
+                    <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application installée.</p>
+                    <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #4CAF50; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                        Ouvrir l'application
+                    </button>
+                `;
+
+                // 3. Attacher l'événement au bouton
+                document.getElementById('open-app-link').addEventListener('click', () => {
+                    window.open(window.location.href, '_blank');
+                    container.style.display = 'none';
+                });
+
+            }, INSTALLATION_SAFETY_DELAY_MS);
         }
     }
 
