@@ -525,7 +525,7 @@ class PWAInstaller {
         // 3. Affichage initial (mode "Attente/Prêt à cliquer")
         container.style.cssText = `
             position: fixed; 
-            top: 0; left: 0; width: 100%; padding: 15px; 
+            top: 0; left: 0; width: 90%; padding: 15px; 
             background-color: #ff9900; /* Orange : Attente active */
             color: white; text-align: center; z-index: 9999;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
