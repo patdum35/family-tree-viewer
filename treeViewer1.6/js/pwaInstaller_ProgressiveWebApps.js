@@ -137,24 +137,90 @@ class PWAInstaller {
     }
 
 
+    // handlePostInstallTransition() {
+    //     // 1. Démarrez un court délai (par sécurité, pour laisser le temps au système)
+    //     setTimeout(() => {
+    //         // 2. Tentez une redirection simple vers la même page
+    //         // Cette action peut parfois inciter le système d'exploitation Android
+    //         // à intercepter l'URL et à la basculer vers l'application PWA installée.
+    //         window.location.href = window.location.href; 
+            
+    //         // 3. Afficher une instruction après un court délai (au cas où la redirection échoue)
+    //         setTimeout(() => {
+    //             // Si l'utilisateur est toujours là, donnez-lui l'instruction finale.
+    //             if (!window.matchMedia('(display-mode: standalone)').matches) {
+    //                 alert("L'application est installée ! Si vous voyez toujours cet onglet, veuillez le fermer et lancer l'application depuis son icône d'accueil.");
+    //             }
+    //         }, 3000); // Délai pour l'instruction
+            
+    //     }, 500); // Délai initial de 0.5s
+    // }
+
+
     handlePostInstallTransition() {
-        // 1. Démarrez un court délai (par sécurité, pour laisser le temps au système)
-        setTimeout(() => {
-            // 2. Tentez une redirection simple vers la même page
-            // Cette action peut parfois inciter le système d'exploitation Android
-            // à intercepter l'URL et à la basculer vers l'application PWA installée.
-            window.location.href = window.location.href; 
+        // 1. Détecter si l'utilisateur est toujours dans un onglet de navigateur (pas en mode PWA standalone)
+        const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+
+        // Si nous sommes dans le navigateur, nous avons besoin du bouton de transition.
+        if (!isInStandaloneMode) {
             
-            // 3. Afficher une instruction après un court délai (au cas où la redirection échoue)
-            setTimeout(() => {
-                // Si l'utilisateur est toujours là, donnez-lui l'instruction finale.
-                if (!window.matchMedia('(display-mode: standalone)').matches) {
-                    alert("L'application est installée ! Si vous voyez toujours cet onglet, veuillez le fermer et lancer l'application depuis son icône d'accueil.");
-                }
-            }, 3000); // Délai pour l'instruction
-            
-        }, 500); // Délai initial de 0.5s
+            // Vérifier si le conteneur a déjà été ajouté pour éviter les duplications
+            if (document.getElementById('pwa-transition-container')) {
+                // Si le conteneur existe déjà, on arrête
+                return; 
+            }
+
+            // 2. Créer l'élément conteneur
+            const container = document.createElement('div');
+            container.id = 'pwa-transition-container';
+            // Styles pour rendre le message clair et visible
+            container.style.cssText = `
+                position: fixed; 
+                top: 0; 
+                left: 0; 
+                width: 100%; 
+                padding: 15px; 
+                background-color: #1890ff; 
+                color: white; 
+                text-align: center; 
+                z-index: 9999;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            `;
+
+            // 3. Ajouter les instructions et le bouton
+            container.innerHTML = `
+                <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation réussie !</p>
+                <p style="margin: 0 0 15px 0;">Veuillez cliquer sur ce bouton pour basculer dans l'application installée.</p>
+                <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                    Ouvrir l'application
+                </button>
+            `;
+
+            // 4. Ajouter le conteneur au corps du document
+            document.body.prepend(container); 
+
+            // 5. Attacher l'événement au bouton
+            document.getElementById('open-app-link').addEventListener('click', () => {
+                // Tenter d'ouvrir un nouvel onglet avec l'URL actuelle.
+                // Ce clic initié par l'utilisateur a de meilleures chances d'être intercepté 
+                // par Android pour lancer la PWA au lieu d'un nouvel onglet de navigateur.
+                window.open(window.location.href, '_blank');
+                
+                // Masquer le message après le clic
+                container.style.display = 'none';
+
+                // Optionnel : Ajouter un message si l'utilisateur est toujours là
+                setTimeout(() => {
+                    if (!window.matchMedia('(display-mode: standalone)').matches) {
+                        console.log("Le lancement n'a pas basculé. L'utilisateur doit relancer l'application manuellement.");
+                    }
+                }, 3000); 
+            });
+        }
     }
+
+
+
 
 
 
