@@ -72,6 +72,18 @@ window.i18n = {
       'normalScreenLabel': 'navigateur',
       'hideBrowserBarLabel': 'masquer la barre\ndu navigateur',
       'showBrowserBarLabel': 'garder\nla barre',
+      'finalizeInstall': '⏳ Finalisation de l\'installation de l\'application...',
+      'appFinalized' : '✅ **Installation finalisée !**',
+      'waitForInstall': 'Veuillez attendre quelques secondes que l\'installation soit installée. Vous pouvez cliquer sur le bouton ci-dessous pour tenter le lancement.',
+      'openApp'  : 'Ouvrir l\'application',
+      'tryLaunching' : 'Tentative de lancement...',
+      'launchFailed' :'❌ Lancement échoué. L\'application n\'est pas encore prête',
+      'tryAgain' : 'Veuillez patienter quelques secondes de plus (finalisation ...) et **cliquer à nouveau**.',
+      'ReOpen' : 'Réessayer d\'ouvrir l\'application',
+      'appReady' : 'L\'application est prête ! Cliquez sur le bouton "Ouvrir" ci-dessous.',
+
+
+
     },
     'en': {
       // Page password-form
@@ -363,7 +375,7 @@ window.i18n = {
   },
   
   // Obtenir une traduction
-  getText: function(key) {
+  getMultilingueText: function(key) {
     if (this.translations[this.currentLanguage] && 
         this.translations[this.currentLanguage][key]) {
       return this.translations[this.currentLanguage][key];

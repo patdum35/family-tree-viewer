@@ -138,364 +138,9 @@ class PWAInstaller {
     }
 
 
-    // handlePostInstallTransition() {
-    //     // 1. Démarrez un court délai (par sécurité, pour laisser le temps au système)
-    //     setTimeout(() => {
-    //         // 2. Tentez une redirection simple vers la même page
-    //         // Cette action peut parfois inciter le système d'exploitation Android
-    //         // à intercepter l'URL et à la basculer vers l'application PWA installée.
-    //         window.location.href = window.location.href; 
-            
-    //         // 3. Afficher une instruction après un court délai (au cas où la redirection échoue)
-    //         setTimeout(() => {
-    //             // Si l'utilisateur est toujours là, donnez-lui l'instruction finale.
-    //             if (!window.matchMedia('(display-mode: standalone)').matches) {
-    //                 alert("L'application est installée ! Si vous voyez toujours cet onglet, veuillez le fermer et lancer l'application depuis son icône d'accueil.");
-    //             }
-    //         }, 3000); // Délai pour l'instruction
-            
-    //     }, 500); // Délai initial de 0.5s
-    // }
-
-
-    // handlePostInstallTransition() {
-    //     // 1. Détecter si l'utilisateur est toujours dans un onglet de navigateur (pas en mode PWA standalone)
-    //     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-
-    //     // Si nous sommes dans le navigateur, nous avons besoin du bouton de transition.
-    //     if (!isInStandaloneMode) {
-            
-    //         // Vérifier si le conteneur a déjà été ajouté pour éviter les duplications
-    //         if (document.getElementById('pwa-transition-container')) {
-    //             // Si le conteneur existe déjà, on arrête
-    //             return; 
-    //         }
-
-    //         // 2. Créer l'élément conteneur
-    //         const container = document.createElement('div');
-    //         container.id = 'pwa-transition-container';
-    //         // Styles pour rendre le message clair et visible
-    //         container.style.cssText = `
-    //             position: fixed; 
-    //             top: 0; 
-    //             left: 0; 
-    //             width: 100%; 
-    //             padding: 15px; 
-    //             background-color: #1890ff; 
-    //             color: white; 
-    //             text-align: center; 
-    //             z-index: 9999;
-    //             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    //         `;
-
-    //         // 3. Ajouter les instructions et le bouton
-    //         container.innerHTML = `
-    //             <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation réussie !</p>
-    //             <p style="margin: 0 0 15px 0;">Veuillez cliquer sur ce bouton pour basculer dans l'application installée.</p>
-    //             <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //                 Ouvrir l'application
-    //             </button>
-    //         `;
-
-    //         // 4. Ajouter le conteneur au corps du document
-    //         document.body.prepend(container); 
-
-    //         // 5. Attacher l'événement au bouton
-    //         document.getElementById('open-app-link').addEventListener('click', () => {
-    //             // Tenter d'ouvrir un nouvel onglet avec l'URL actuelle.
-    //             // Ce clic initié par l'utilisateur a de meilleures chances d'être intercepté 
-    //             // par Android pour lancer la PWA au lieu d'un nouvel onglet de navigateur.
-    //             window.open(window.location.href, '_blank');
-                
-    //             // Masquer le message après le clic
-    //             container.style.display = 'none';
-
-    //             // Optionnel : Ajouter un message si l'utilisateur est toujours là
-    //             setTimeout(() => {
-    //                 if (!window.matchMedia('(display-mode: standalone)').matches) {
-    //                     console.log("Le lancement n'a pas basculé. L'utilisateur doit relancer l'application manuellement.");
-    //                 }
-    //             }, 3000); 
-    //         });
-    //     }
-    // }
-
-
-
-    // handlePostInstallTransition() {
-    //     // Le délai typique pour la finalisation d'installation sur Android.
-    //     const INSTALLATION_SAFETY_DELAY_MS = 5000; 
-        
-    //     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-
-    //     if (!isInStandaloneMode) {
-            
-    //         // S'assurer de n'ajouter le conteneur qu'une seule fois
-    //         if (document.getElementById('pwa-transition-container')) {
-    //             return; 
-    //         }
-
-    //         const container = document.createElement('div');
-    //         container.id = 'pwa-transition-container';
-    //         // Styles de base...
-    //         container.style.cssText = `
-    //             position: fixed; 
-    //             top: 0; 
-    //             left: 0; 
-    //             width: 100%; 
-    //             padding: 15px; 
-    //             background-color: #ff9900; /* Couleur d'alerte/attente */
-    //             color: white; 
-    //             text-align: center; 
-    //             z-index: 9999;
-    //             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    //         `;
-
-    //         // Contenu initial : État d'attente
-    //         container.innerHTML = `
-    //             <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
-    //             <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-    //             <p style="margin: 0;">Veuillez patienter quelques instants.</p>
-    //         `;
-    //         document.body.prepend(container);
-
-    //         // Ajouter les règles CSS pour l'animation de la roue (spinner)
-    //         // Note: Vous devrez ajouter cette règle CSS dans votre feuille de style principale ou dans une balise <style>
-    //         if (!document.querySelector('style[data-spinner]')) {
-    //             const style = document.createElement('style');
-    //             style.setAttribute('data-spinner', true);
-    //             style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-    //             document.head.appendChild(style);
-    //         }
-
-    //         // 2. Définir le délai avant d'activer le bouton
-    //         setTimeout(() => {
-    //             // Changement d'état : Installation Prête
-    //             container.style.backgroundColor = '#4CAF50'; // Nouvelle couleur (Succès/Prêt)
-
-    //             // Nouveau contenu : Bouton cliquable
-    //             container.innerHTML = `
-    //                 <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation prête !</p>
-    //                 <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application installée.</p>
-    //                 <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #4CAF50; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //                     Ouvrir l'application
-    //                 </button>
-    //             `;
-
-    //             // 3. Attacher l'événement au bouton
-    //             document.getElementById('open-app-link').addEventListener('click', () => {
-    //                 window.open(window.location.href, '_blank');
-    //                 container.style.display = 'none';
-    //             });
-
-    //         }, INSTALLATION_SAFETY_DELAY_MS);
-    //     }
-    // }
-
-
-
-
-
-
-
-    //  handlePostInstallTransition() {
-
-    //     // Constante de vérification si l'utilisateur est en mode PWA standalone
-    //     const isRunningAsStandalone = () => 
-    //         (window.matchMedia('(display-mode: standalone)').matches);
-
-    //     // Si l'utilisateur est déjà dans l'application, on arrête
-    //     if (isRunningAsStandalone() || document.getElementById('pwa-transition-container')) {
-    //         return; 
-    //     }
-
-    //     const container = document.createElement('div');
-    //     container.id = 'pwa-transition-container';
-    //     // Initialisation du style (bleu, actif)
-    //     container.style.cssText = `
-    //         position: fixed; 
-    //         top: 0; 
-    //         left: 0; 
-    //         width: 100%; 
-    //         padding: 15px; 
-    //         background-color: #1890ff; 
-    //         color: white; 
-    //         text-align: center; 
-    //         z-index: 9999;
-    //         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    //     `;
-
-    //     // Contenu initial : Bouton Prêt à l'action
-    //     container.innerHTML = `
-    //         <p style="margin: 0 0 10px 0; font-weight: bold;">✅ Installation terminée !</p>
-    //         <p style="margin: 0 0 15px 0;">Cliquez sur ce bouton pour basculer dans l'application.</p>
-    //         <button id="open-app-link" style="padding: 10px 25px; background-color: white; color: #1890ff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //             Ouvrir l'application
-    //         </button>
-    //     `;
-
-    //     document.body.prepend(container); 
-
-    //     // --- Logique du Clic avec Fallback ---
-    //     document.getElementById('open-app-link').addEventListener('click', () => {
-    //         const button = document.getElementById('open-app-link');
-    //         const initialText = button.textContent;
-
-    //         // 1. Désactiver le bouton pendant la tentative pour éviter un double clic
-    //         button.textContent = "Tentative de lancement...";
-    //         button.disabled = true;
-
-    //         // 2. Tenter le lancement (ouvre un nouvel onglet, que l'OS devrait intercepter)
-    //         window.open(window.location.href, '_blank');
-            
-    //         // 3. Vérification après un court délai (1.5 seconde)
-    //         // L'utilisateur DOIT avoir quitté l'onglet si le lancement a réussi.
-    //         setTimeout(() => {
-    //             // Si l'utilisateur est TOUJOURS dans l'onglet du navigateur (pas en mode standalone)
-    //             if (!isRunningAsStandalone()) {
-    //                 // Échec du lancement (l'app n'est probablement pas encore prête)
-                    
-    //                 // Mettre à jour le message pour le mode "Attente/Réessayer"
-    //                 container.style.backgroundColor = '#ff9900'; // Couleur d'alerte (Orange)
-    //                 container.innerHTML = `
-    //                     <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Application non trouvée.</p>
-    //                     <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes de plus (finalisation Android) et **cliquer à nouveau**.</p>
-    //                     <button id="open-app-link-retry" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //                         Réessayer d'ouvrir l'application
-    //                     </button>
-    //                 `;
-                    
-    //                 // Rattacher l'événement de clic pour le bouton de réessai
-    //                 document.getElementById('open-app-link-retry').addEventListener('click', (e) => {
-    //                     // Simplement relancer la fonction de clic principale
-    //                     handlePostInstallTransition(); 
-    //                     e.target.removeEventListener('click', arguments.callee); // Nettoyage de l'ancien listener
-    //                 });
-                    
-    //             } else {
-    //                 // Le lancement a réussi (l'utilisateur est dans l'application)
-    //                 // Cela ne s'exécutera pas car l'utilisateur ne sera plus sur cette page.
-    //                 // Mais par sécurité, si l'on suppose un cas improbable :
-    //                 container.style.display = 'none';
-    //             }
-    //         }, 1500); // 1.5 secondes pour vérifier
-    //     });
-    // }
-
-
-
-
-
-
-
-
-    // // NOUVELLE FONCTION OU MISE À JOUR DE CELLE EXISTANTE
-    // handlePostInstallTransition(initialAttempt = false) {
-        
-    //     // 1. Constantes
-    //     const isRunningAsStandalone = () => (window.matchMedia('(display-mode: standalone)').matches);
-    //     const containerId = 'pwa-transition-container';
-    //     let container = document.getElementById(containerId);
-
-    //     // Si l'utilisateur est déjà dans l'application, on masque le conteneur et on arrête
-    //     if (isRunningAsStandalone()) {
-    //          if (container) container.style.display = 'none';
-    //          return; 
-    //     }
-
-    //     // 2. Création/Mise à jour du conteneur
-    //     if (!container) {
-    //         container = document.createElement('div');
-    //         container.id = containerId;
-    //         document.body.prepend(container); 
-    //         // Ajouter les règles CSS pour l'animation de la roue (à faire une seule fois)
-    //         if (!document.querySelector('style[data-spinner]')) {
-    //              const style = document.createElement('style');
-    //              style.setAttribute('data-spinner', true);
-    //              style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-    //              document.head.appendChild(style);
-    //         }
-    //     }
-        
-    //     // 3. Affichage initial (mode "Attente/Prêt à cliquer")
-    //     container.style.cssText = `
-    //         position: fixed; 
-    //         top: 0; left: 0; width: 100%; padding: 15px; 
-    //         background-color: #ff9900; /* Orange : Attente active */
-    //         color: white; text-align: center; z-index: 9999;
-    //         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    //     `;
-        
-    //     // Contenu initial : État d'attente (avec bouton actif)
-    //     container.innerHTML = `
-    //         <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation...</p>
-    //         <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-    //         <p style="margin: 0 0 15px 0;">Vous pouvez tenter d'ouvrir l'application maintenant ou attendre 5 secondes.</p>
-    //         <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //             Ouvrir l'application (TENTER)
-    //         </button>
-    //     `;
-
-    //     // 4. Logique du Clic (Réessayer/Tenter)
-    //     document.getElementById('open-app-link-action').addEventListener('click', () => {
-    //         const button = document.getElementById('open-app-link-action');
-    //         button.textContent = "Tentative de lancement...";
-    //         button.disabled = true;
-
-    //         // Tenter le lancement
-    //         window.open(window.location.href, '_blank');
-            
-    //         // Vérification après 1.5 seconde
-    //         setTimeout(() => {
-    //             // Si toujours là : Échec (l'app n'est pas prête)
-    //             if (!isRunningAsStandalone()) {
-                    
-    //                 container.style.backgroundColor = '#d32f2f'; // Rouge : Échec de la tentative
-    //                 container.innerHTML = `
-    //                     <p style="margin: 0 0 10px 0; font-weight: bold;">❌ Lancement échoué.</p>
-    //                     <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes (finalisation Android) et **cliquer à nouveau**.</p>
-    //                     <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #d32f2f; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-    //                         Réessayer d'ouvrir l'application
-    //                     </button>
-    //                 `;
-    //                 // Rattacher l'événement de clic au nouveau bouton
-    //                 // On utilise le même ID car l'ancien élément a été remplacé
-    //                 document.getElementById('open-app-link-action').addEventListener('click', () => {
-    //                     this.handlePostInstallTransition(true);
-    //                 });
-                    
-    //             } else {
-    //                 // Lancement réussi (le code ne s'exécutera pas car la page est partie)
-    //                 container.style.display = 'none';
-    //             }
-    //         }, 1500); 
-    //     }, { once: true }); // Exécuter le listener une seule fois
-
-    //     // 5. Mettre à jour en mode "Prêt" après un délai de sécurité (au cas où l'utilisateur n'ait pas cliqué)
-    //     setTimeout(() => {
-    //         if (!isRunningAsStandalone() && document.getElementById(containerId)) {
-    //             // Si toujours dans le navigateur après 5 secondes, passer au mode "Prêt" (vert)
-    //             container.style.backgroundColor = '#4CAF50';
-    //             const button = document.getElementById('open-app-link-action');
-    //             if (button && button.disabled) { // Si le bouton est encore désactivé (échec du premier clic)
-    //                  button.textContent = "Ouvrir l'application (PRÊT)";
-    //                  button.style.color = '#4CAF50';
-    //                  button.disabled = false;
-    //             }
-                
-    //             // Mettre à jour le message d'attente
-    //             container.querySelector('p:first-child').innerHTML = `✅ **Installation finalisée !**`;
-    //             if(container.querySelector('#pwa-spinner')) container.querySelector('#pwa-spinner').remove();
-
-    //         }
-    //     }, 5000); // Délai de sécurité de 5 secondes
-    // }
-
-
-
-    // NOUVELLE FONCTION OU MISE À JOUR DE CELLE EXISTANTE
     handlePostInstallTransition(initialAttempt = false) {
-        
+
+        const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
         // 1. Constantes
         // const isRunningAsStandalone = () => (window.matchMedia('(display-mode: standalone)').matches);
         const containerId = 'pwa-transition-container';
@@ -532,19 +177,21 @@ class PWAInstaller {
         `;
         
         // Contenu initial : État d'attente (avec bouton actif et bouton de fermeture)
+
+        // <button id="close-tree-button" onclick="returnToLogin()" style="position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times;
+        // <button id="close-pwa-msg" style="position: absolute; top: 5px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+
+
         container.innerHTML = `
-            <button id="close-pwa-msg" style="position: absolute; top: 5px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
-            
-            <p style="margin: 0 0 10px 0; font-weight: bold;">⏳ Finalisation de l'installation de l'application...</p>
+            <button id="close-pwa-msg" style="position: absolute; top: 5px; right: 15px; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>                       
+                        
+            <p style="margin: 0 0 10px 0; font-weight: bold;">${getMultilingueText('finalizeInstall')}</p>
             <div id="pwa-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-            <p style="margin: 0 0 15px 0;">Veuillez attendre quelques secondes que l'installation soit terminée. Vous pouvez cliquer sur le bouton ci-dessous pour tenter le lancement.</p>
+            <p style="margin: 0 0 15px 0;">${getMultilingueText('waitForInstall')}</p>
             
             <div>
                 <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #ff9900; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 15px;">
-                    Ouvrir l'application (TENTER)
-                </button>
-                <button id="hide-pwa-msg" style="padding: 10px 25px; background-color: transparent; color: white; border: 1px solid white; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                    Fermer ce message
+                    ${getMultilingueText('openApp')}
                 </button>
             </div>
         `;
@@ -557,7 +204,7 @@ class PWAInstaller {
             const closeButton = document.getElementById('hide-pwa-msg');
             if (closeButton) closeButton.style.display = 'none'; // Cacher le bouton de fermeture pendant la tentative
 
-            button.textContent = "Tentative de lancement...";
+            button.textContent = getMultilingueText('tryLaunching');
             button.disabled = true;
 
             // Tenter le lancement
@@ -570,26 +217,19 @@ class PWAInstaller {
                     
                     container.style.backgroundColor = '#d32f2f'; // Rouge : Échec de la tentative
                     container.innerHTML = `
-                        <button id="close-pwa-msg" style="position: absolute; top: 5px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
-                        
-                        <p style="margin: 0 0 10px 0; font-weight: bold;">❌ Lancement échoué. L'application n'est pas encore prête.</p>
-                        <p style="margin: 0 0 15px 0;">Veuillez patienter quelques secondes de plus (finalisation Android) et **cliquer à nouveau**.</p>
+                        <button id="close-pwa-msg" style="position: absolute; top: 5px; right: 15px; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>                       
+                        <p style="margin: 0 0 10px 0; font-weight: bold;">${getMultilingueText('launchFailed')}</p>
+                        <p style="margin: 0 0 15px 0;">${getMultilingueText('tryAgain')}</p>
                         
                         <div>
                             <button id="open-app-link-action" style="padding: 10px 25px; background-color: white; color: #d32f2f; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 15px;">
-                                Réessayer d'ouvrir l'application
-                            </button>
-                            <button id="hide-pwa-msg" style="padding: 10px 25px; background-color: transparent; color: white; border: 1px solid white; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                                Fermer ce message
+                                >${getMultilingueText('ReOpen')}
                             </button>
                         </div>
                     `;
                     // Rattacher les événements de clic
                     document.getElementById('open-app-link-action').addEventListener('click', () => {
                         this.handlePostInstallTransition(true);
-                    });
-                    document.getElementById('hide-pwa-msg').addEventListener('click', () => {
-                        container.remove();
                     });
                     document.getElementById('close-pwa-msg').addEventListener('click', () => {
                         container.remove();
@@ -609,8 +249,8 @@ class PWAInstaller {
                 container.style.backgroundColor = '#4CAF50';
                 
                 // Mettre à jour le message d'attente
-                container.querySelector('p:first-child').innerHTML = `✅ **Installation finalisée !**`;
-                container.querySelector('p:nth-child(3)').innerHTML = `L'application est prête ! Cliquez sur le bouton "Ouvrir" ci-dessous.`;
+                container.querySelector('p:first-child').innerHTML = getMultilingueText('appFinalized');
+                container.querySelector('p:nth-child(3)').innerHTML = getMultilingueText('appReady');
                 if(container.querySelector('#pwa-spinner')) container.querySelector('#pwa-spinner').remove();
 
                 // Mettre à jour les boutons (vert)
@@ -618,7 +258,7 @@ class PWAInstaller {
                 const closeButton = document.getElementById('hide-pwa-msg');
 
                 if (openButton) { 
-                    openButton.textContent = "Ouvrir l'application (PRÊT)";
+                    openButton.textContent = getMultilingueText('openApp'); 
                     openButton.style.color = '#4CAF50';
                     openButton.disabled = false;
                 }
@@ -627,7 +267,7 @@ class PWAInstaller {
                     closeButton.style.borderColor = 'white';
                 }
             }
-        }, 6000); // Délai de sécurité de 5 secondes
+        }, 6000); // Délai de sécurité de 6 secondes
 
         // 6. Rattacher les événements de fermeture (pour l'état initial)
         document.getElementById('hide-pwa-msg').addEventListener('click', () => {
@@ -637,11 +277,6 @@ class PWAInstaller {
             container.remove();
         });
     }
-
-
-
-
-
 
 
     showInstallButton() {
@@ -694,7 +329,6 @@ class PWAInstaller {
                 } else {
                     this.showManualInstallInstructions();
                 }
-
             }
         } else {
             // Pas d'événement beforeinstallprompt disponible
@@ -711,8 +345,6 @@ class PWAInstaller {
                 // Pas d'événement disponible ET jamais accepté => Afficher les instructions manuelles
                 this.showManualInstallInstructions();
             }
-
-
         }
     }
 
@@ -752,7 +384,7 @@ class PWAInstaller {
         
         // Obtenir les traductions selon la langue actuelle
         const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : 'fr';
-        const getText = (key) => window.i18n ? window.i18n.getText(key) : key;
+        const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
         
         // Détection du navigateur et de la plateforme
         const userAgent = navigator.userAgent.toLowerCase();
@@ -760,25 +392,25 @@ class PWAInstaller {
         const isEdge = userAgent.includes('edg');
         const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
         
-        let instructions = getText('desinstallationInstructions') + '\n\n';
+        let instructions = getMultilingueText('desinstallationInstructions') + '\n\n';
         
         if (isMobile) {
             // Instructions mobiles
             if (userAgent.includes('chrome')) {
-                instructions += getText('chromeMobileDesinstall');
+                instructions += getMultilingueText('chromeMobileDesinstall');
             } else if (userAgent.includes('safari')) {
-                instructions += getText('safariMobileDesinstall');
+                instructions += getMultilingueText('safariMobileDesinstall');
             } else {
-                instructions += getText('genericDesinstall');
+                instructions += getMultilingueText('genericDesinstall');
             }
         } else {
             // Instructions PC
             if (isChrome) {
-                instructions += getText('chromePCDesinstall');
+                instructions += getMultilingueText('chromePCDesinstall');
             } else if (isEdge) {
-                instructions += getText('edgePCDesinstall');
+                instructions += getMultilingueText('edgePCDesinstall');
             } else {
-                instructions += getText('genericDesinstall');
+                instructions += getMultilingueText('genericDesinstall');
             }
         }
         
@@ -887,7 +519,7 @@ class PWAInstaller {
     }
 
     showUninstallModal(instructions) {
-        const getText = (key) => window.i18n ? window.i18n.getText(key) : key;
+        const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
         
         // Créer une modal pour les instructions de désinstallation
         const modal = document.createElement('div');
@@ -916,7 +548,7 @@ class PWAInstaller {
         `;
         
         modalContent.innerHTML = `
-            <h3 style="margin-top: 0; color: #ff4444;">${getText('desinstallationTitle')}</h3>
+            <h3 style="margin-top: 0; color: #ff4444;">${getMultilingueText('desinstallationTitle')}</h3>
             <p style="white-space: pre-line; text-align: left; line-height: 1.4; margin: 15px 0;">${instructions}</p>
             <button id="close-uninstall-modal" style="
                 background-color: #ff4444;
@@ -927,7 +559,7 @@ class PWAInstaller {
                 cursor: pointer;
                 font-weight: bold;
                 margin-top: 10px;
-            ">${getText('compris')}</button>
+            ">${getMultilingueText('compris')}</button>
         `;
         
         modal.appendChild(modalContent);

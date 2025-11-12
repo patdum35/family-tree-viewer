@@ -192,7 +192,7 @@ async function isServerAvailable() {
 //         console.warn('⚠️ Attention: Tentative de vidage du cache sans serveur disponible - BLOQUÉE');
         
 //         // Utiliser la traduction appropriée via i18n
-//         const message = window.i18n ? window.i18n.getText('noServerDetected') : 
+//         const message = window.i18n ? window.i18n.getMultilingueText('noServerDetected') : 
 //             '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server. ou vous ';
         
 //         // const isMobile2 = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
@@ -334,13 +334,13 @@ window.clearAppCache = async function() {
         
         let message;
         if (environment.type === 'development') {
-            message = window.i18n ? window.i18n.getText('noServerDetected') : 
+            message = window.i18n ? window.i18n.getMultilingueText('noServerDetected') : 
                 '⚠️ ATTENTION ⚠️\n\nAucun serveur local n\'a été détecté.\n\nPour le développement, veuillez utiliser VS Code avec Live Server.';
         } else if (environment.type === 'production-web') {
-            message = window.i18n ? window.i18n.getText('noServerDetected2') : 
+            message = window.i18n ? window.i18n.getMultilingueText('noServerDetected2') : 
                 '⚠️ ATTENTION ⚠️\n\nPas de connexion Internet détectée.\n\nLa mise à jour nécessite une connexion pour télécharger les nouvelles ressources depuis GitHub.';
         } else {
-            message = window.i18n ? window.i18n.getText('noServerDetected3') :
+            message = window.i18n ? window.i18n.getMultilingueText('noServerDetected3') :
                 '⚠️ ATTENTION ⚠️\n\nLa mise à jour du logiciel n\'est pas possible dans cet environnement.';
         }
         
@@ -481,7 +481,7 @@ class IOSInstallationManager {
                 // Forcer l'application sur les éléments iOS spécifiquement
                 document.querySelectorAll('#ios-install-banner [data-text-key], #ios-instructions-modal [data-text-key]').forEach(element => {
                     const key = element.getAttribute('data-text-key');
-                    const translation = window.i18n ? window.i18n.getText(key) : element.textContent;
+                    const translation = window.i18n ? window.i18n.getMultilingueText(key) : element.textContent;
                     
                     if (element.tagName === 'INPUT') {
                         element.placeholder = translation;

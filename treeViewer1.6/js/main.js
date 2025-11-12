@@ -2254,10 +2254,10 @@ export function searchRootPersonId(searchStr, isAlert = true) {
 // Fonction pour réinitialiser les paramètres
 export function resetToDefaultSettings() {
     // Obtenir les textes traduits
-    const getText = (key) => window.i18n ? window.i18n.getText(key) : key;
+    const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
     
     // Message de confirmation multilingue
-    const confirmMessage = `${getText('confirmResetSettings')}\n\n${getText('resetWillDo')}:\n• ${getText('deletePrefs')}\n• ${getText('resetLang')}\n• ${getText('clearCustomSettings')}\n\n(${getText('cacheWillBeKept')})`;
+    const confirmMessage = `${getMultilingueText('confirmResetSettings')}\n\n${getMultilingueText('resetWillDo')}:\n• ${getMultilingueText('deletePrefs')}\n• ${getMultilingueText('resetLang')}\n• ${getMultilingueText('clearCustomSettings')}\n\n(${getMultilingueText('cacheWillBeKept')})`;
     
     if (confirm(confirmMessage)) {
         try {
@@ -2275,14 +2275,14 @@ export function resetToDefaultSettings() {
             console.log('Paramètres remis à zéro');
             
             // Afficher un message de confirmation multilingue
-            alert(`${getText('resetSuccess')}\n\n${getText('pageWillReload')}`);
+            alert(`${getMultilingueText('resetSuccess')}\n\n${getMultilingueText('pageWillReload')}`);
             
             // Recharger la page pour appliquer les changements
             window.location.reload();
             
         } catch (error) {
             console.error('Erreur lors de la réinitialisation:', error);
-            alert(getText('resetError'));
+            alert(getMultilingueText('resetError'));
         }
     }
 }

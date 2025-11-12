@@ -148,7 +148,7 @@
                         fileNameDisplay.removeAttribute('data-text-key');
                     } else {
                         // S'il n'y a pas de fichier, remettre le texte par défaut et l'attribut data-text-key
-                        fileNameDisplay.textContent = window.i18n ? window.i18n.getText('aucunFichier') : 'Aucun fichier choisi';
+                        fileNameDisplay.textContent = window.i18n ? window.i18n.getMultilingueText('aucunFichier') : 'Aucun fichier choisi';
                         fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
                     }
                 });

@@ -229,13 +229,13 @@
                 // Vérifier que le système i18n principal est disponible (fenêtre parent ou actuelle)
                 const i18n = window.i18n || (window.parent && window.parent.i18n);
                 
-                if (i18n && typeof i18n.getText === 'function') {
+                if (i18n && typeof i18n.getMultilingueText === 'function') {
                     console.log('Applying iOS translations...');
                     
                     // Appliquer les traductions à tous les éléments avec data-text-key
                     document.querySelectorAll('[data-text-key]').forEach(element => {
                         const key = element.getAttribute('data-text-key');
-                        const translation = i18n.getText(key);
+                        const translation = i18n.getMultilingueText(key);
                         
                         // Log pour débugger
                         console.log(`Translating ${key}: ${translation}`);
