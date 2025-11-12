@@ -201,7 +201,7 @@ class PWAInstaller {
             const button = document.getElementById('open-app-link-action');
             
             // --- NOUVEAU : Récupérer le bouton de fermeture avant qu'il ne soit remplacé ---
-            const closeButton = document.getElementById('hide-pwa-msg');
+            const closeButton = document.getElementById('close-pwa-msg');
             if (closeButton) closeButton.style.display = 'none'; // Cacher le bouton de fermeture pendant la tentative
 
             button.textContent = getMultilingueText('tryLaunching');
@@ -255,7 +255,7 @@ class PWAInstaller {
 
                 // Mettre à jour les boutons (vert)
                 const openButton = document.getElementById('open-app-link-action');
-                const closeButton = document.getElementById('hide-pwa-msg');
+                const closeButton = document.getElementById('close-pwa-msg');
 
                 if (openButton) { 
                     openButton.textContent = getMultilingueText('openApp'); 
@@ -270,9 +270,6 @@ class PWAInstaller {
         }, 6000); // Délai de sécurité de 6 secondes
 
         // 6. Rattacher les événements de fermeture (pour l'état initial)
-        document.getElementById('hide-pwa-msg').addEventListener('click', () => {
-            container.remove();
-        });
         document.getElementById('close-pwa-msg').addEventListener('click', () => {
             container.remove();
         });
@@ -296,6 +293,7 @@ class PWAInstaller {
 
     async installApp() {
         console.log('[PWA Installer] Tentative d\'installation...');
+        // this.handlePostInstallTransition(true);
         
         if (this.deferredPrompt) {
             try {
