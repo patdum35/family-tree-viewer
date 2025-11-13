@@ -327,7 +327,7 @@ self.addEventListener('activate', (event) => {
         './js/nodeStyles.js',
         './js/occupations.js',
         './js/photoPlayer.js',
-        './js/puzzleSwipe.js',
+        // './js/puzzleSwipe.js',
         './js/resizableModalUtils.js',
         './js/searchModalUI.js',
         './js/statsModalUI.js',

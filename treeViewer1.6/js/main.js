@@ -47,7 +47,7 @@ import {
     searchTree,
     closeAllModals
 } from './eventHandlers.js';
-import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
+// import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
 
 let stopMonitoring = null;
 let svgFull, svgExit;
@@ -457,8 +457,8 @@ export function toggleFullScreen(inversed = false) {
         window.i18n.updateUI();
     }
 
-    const browserBarButton = document.getElementById('browserBar-button');
-    const browserBarLabel = document.getElementById('browserBarLabel'); 
+    // const browserBarButton = document.getElementById('browserBar-button');
+    // const browserBarLabel = document.getElementById('browserBarLabel'); 
 
     if (condition) {
         if (document.documentElement.requestFullscreen) {
@@ -470,26 +470,26 @@ export function toggleFullScreen(inversed = false) {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
-        browserBarButton.style.visibility = 'hidden'; 
-        browserBarLabel.style.visibility = 'hidden';
+        // browserBarButton.style.visibility = 'hidden'; 
+        // browserBarLabel.style.visibility = 'hidden';
         state.isPuzzleSwipe = false; 
-        const slot = document.getElementById('puzzleSlot'); 
-        const piece = document.getElementById('puzzlePiece'); 
-        const message = document.getElementById('puzzleMessage');
-        if (message) {
-            slot.style.visibility = 'hidden';
-            piece.style.visibility = 'hidden';
-            message.style.visibility = 'hidden';
-        }
+        // const slot = document.getElementById('puzzleSlot'); 
+        // const piece = document.getElementById('puzzlePiece'); 
+        // const message = document.getElementById('puzzleMessage');
+        // if (message) {
+        //     slot.style.visibility = 'hidden';
+        //     piece.style.visibility = 'hidden';
+        //     message.style.visibility = 'hidden';
+        // }
     } else {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
-        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-        // if (true){
-            browserBarButton.style.visibility = 'visible'; 
-            browserBarLabel.style.visibility = 'visible';
-        }
+        // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // // if (true){
+        //     browserBarButton.style.visibility = 'visible'; 
+        //     browserBarLabel.style.visibility = 'visible';
+        // }
     }
 }
 
@@ -618,14 +618,15 @@ export function positionFormContainer() {
     const startTitle = document.getElementById('startTitle');
 
     let puzzleSlot, puzzlePiece, puzzleMessage;
-    if (state.isPuzzleSwipe) {
-        puzzleSlot = document.getElementById('puzzleSlot');
-        puzzlePiece = document.getElementById('puzzlePiece');
-        puzzleMessage = document.getElementById('puzzleMessage');
-        //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        if (puzzleSlot) { resetPuzzle();}
-    }
+    // // if (state.isPuzzleSwipe) {
+    // if (false) {
+    //     puzzleSlot = document.getElementById('puzzleSlot');
+    //     puzzlePiece = document.getElementById('puzzlePiece');
+    //     puzzleMessage = document.getElementById('puzzleMessage');
+    //     //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+    //     window.scrollTo({ top: 0, behavior: 'auto' });
+    //     if (puzzleSlot) { resetPuzzle();}
+    // }
 
 
     if (formContainer && startTitle) {
@@ -642,49 +643,50 @@ export function positionFormContainer() {
             formContainerPositionTop =  60;
             startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
         }
-        if (state.isPuzzleSwipe) {
-            formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
-            startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
-            if (puzzleSlot) {puzzleSlot.style.top = '50px';}
+        // if (state.isPuzzleSwipe) {
+        if (false) {
+            // formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
+            // startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            // if (puzzleSlot) {puzzleSlot.style.top = '50px';}
 
-            // const slotRect = puzzleSlot.getBoundingClientRect();
-            // console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)  
+            // // const slotRect = puzzleSlot.getBoundingClientRect();
+            // // console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)  
     
-            // puzzlePiece.style.top = `${slotRect.bottom - 55}px`;
+            // // puzzlePiece.style.top = `${slotRect.bottom - 55}px`;
 
-            if (puzzleSlot) {puzzlePiece.style.top = '120px';}
+            // if (puzzleSlot) {puzzlePiece.style.top = '120px';}
 
 
-            if (window.innerHeight < 400) { 
-                formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
-                formContainer.style.transform = '';
-                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
-                startTitle.style.transform = '';
-                languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
-                languageSelectorContainer.style.transform = '';
-                puzzleSlot.style.left = window.innerWidth - 60 + 'px';
-                puzzlePiece.style.left = window.innerWidth - 60 + 'px';
-                // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
-                puzzleMessage.style.top = '70px';
-                puzzleMessage.style.width = '130px';
-                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
-            } else {
-                formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
-                formContainer.style.transform = 'translateX(-50%)'; // ''; //
-                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
-                startTitle.style.transform = ''; //'translateX(-50%)';
-                // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
-                // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
-                languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
-                languageSelectorContainer.style.transform = 'translateX(-50%)';
+            // if (window.innerHeight < 400) { 
+            //     formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
+            //     formContainer.style.transform = '';
+            //     startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
+            //     startTitle.style.transform = '';
+            //     languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
+            //     languageSelectorContainer.style.transform = '';
+            //     puzzleSlot.style.left = window.innerWidth - 60 + 'px';
+            //     puzzlePiece.style.left = window.innerWidth - 60 + 'px';
+            //     // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
+            //     puzzleMessage.style.top = '70px';
+            //     puzzleMessage.style.width = '130px';
+            //     puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            // } else {
+            //     formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+            //     formContainer.style.transform = 'translateX(-50%)'; // ''; //
+            //     startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+            //     startTitle.style.transform = ''; //'translateX(-50%)';
+            //     // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
+            //     // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
+            //     languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+            //     languageSelectorContainer.style.transform = 'translateX(-50%)';
 
-                puzzleSlot.style.left = '50%';
-                puzzlePiece.style.left = '50%';
-                // puzzleMessage.style.left = '10px';
-                puzzleMessage.style.top = '70px';
-                puzzleMessage.style.width = '130px';
-                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
-            }
+            //     puzzleSlot.style.left = '50%';
+            //     puzzlePiece.style.left = '50%';
+            //     // puzzleMessage.style.left = '10px';
+            //     puzzleMessage.style.top = '70px';
+            //     puzzleMessage.style.width = '130px';
+            //     puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            // }
 
         } else {
             formContainer.style.top = formContainerPositionTop + 'px'; 
@@ -820,40 +822,22 @@ function initialize() {
     `;
     document.head.appendChild(style);
 
-
-
-
-
-
-
-
-
-
-
-
-
     
-      // Création de la balise <style> pour l'animation CSS
-      style = document.createElement('style');
-      style.textContent += `
-        @keyframes lightbulb-glow {
-          0%, 100% {
-            text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
-            filter: brightness(1);
-          }
-          50% {
-            text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
-            filter: brightness(1.6);
-          }
+    // Création de la balise <style> pour l'animation CSS
+    style = document.createElement('style');
+    style.textContent += `
+    @keyframes lightbulb-glow {
+        0%, 100% {
+        text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
+        filter: brightness(1);
         }
-      `;
-      document.head.appendChild(style);
-
-
-
-
-
-
+        50% {
+        text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
+        filter: brightness(1.6);
+        }
+    }
+    `;
+    document.head.appendChild(style);
 
 
 
@@ -915,14 +899,14 @@ function initialize() {
     state.isPWA = isPWA();
     
 
-    if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    // if (true){
-    } else {
-        const browserBarButton = document.getElementById('browserBar-button');
-        const browserBarLabel = document.getElementById('browserBarLabel'); 
-        browserBarButton.style.display = 'none';  
-        browserBarLabel.style.display = 'none';   
-    }
+    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+    // // if (true){
+    // } else {
+    //     const browserBarButton = document.getElementById('browserBar-button');
+    //     const browserBarLabel = document.getElementById('browserBarLabel'); 
+    //     browserBarButton.style.display = 'none';  
+    //     browserBarLabel.style.display = 'none';   
+    // }
 
     state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
 

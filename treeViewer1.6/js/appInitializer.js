@@ -51,7 +51,7 @@ import {
 
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
-import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
+// import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
 import { documentation } from './documentation.js';
 
 
@@ -223,7 +223,7 @@ function initializeAppFunctions() {
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);
     };
-    window.browserBarPuzzle = browserBarPuzzle;
+    // window.browserBarPuzzle = browserBarPuzzle;
 }
 
 
@@ -234,17 +234,17 @@ function initializeAppEventListeners() {
         if (loadDataButton) {
             loadDataButton.addEventListener('click', () => { 
 
-                setTimeout(() => {
+                // setTimeout(() => {
 
-                    //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
-                    window.scrollTo({ top: 0, behavior: 'auto' });
-                    if (state.isPuzzleSwipe) {resetPuzzle();}
+                //     //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+                //     window.scrollTo({ top: 0, behavior: 'auto' });
+                //     if (state.isPuzzleSwipe) {resetPuzzle();}
 
-                     // 2️⃣ Puis bloque le scroll 
-                    document.body.style.height = `${window.innerHeight}px`;
-                    document.body.style.overflow = 'hidden'; // empêche le scroll après
-                    // console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
-                }, 200); 
+                //      // 2️⃣ Puis bloque le scroll 
+                //     document.body.style.height = `${window.innerHeight}px`;
+                //     document.body.style.overflow = 'hidden'; // empêche le scroll après
+                //     // console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                // }, 200); 
 
                 loadData();
                 });
