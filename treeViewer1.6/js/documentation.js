@@ -1,161 +1,242 @@
 
 import { getCachedResourceUrl } from './photoPlayer.js';
 
+
 /**
  * @file documentation.js
  * Ce fichier contient la fonction documentation() exportée avec le multilingue intégré.
  */
 
-const DOC_CONTENT = {
-    // --- Français (FR) ---
-    fr: {
-        title: "Aide 🚀",
-        // Clé: ID interne de l'onglet, Valeur: Nom affiché
-        tabs: {
-            summary: '📖Aperçu',
-            login: '🔑login',
-            tree: '🌳Arbre',
-            radar: '🎯Radar',
-            cloud: '💖Nuage',
-            stats: 'Stats',
-            root: '√ Racine',
-            geoloc: '🌍Geoloc',
-            faq: '❓FAQ',
-            contact: '📞Contact',
-        },
+
+const MULTILINGUE_DOC_CONTENT = {
+    // 💥 NOUVEAU : Contient les modèles HTML uniques, indépendants de la langue
+    templates: {
         summary: `
             <div class="help-section">
-                <h3>Première visualisation de votre arbre</h3>
-                <p>Découvrez les différents types de vues pour votre arbre généalogique</p>
+                <h3>{overviewTitle}</h3>
+                <p style="margin-left: 20px;">{discover}</p>
                 <div class="image-example">
                     <div class="media-injection-point tree-image-container"></div>
-                    <p class="caption">Fig. 1: Vue Classique de l'Arbre 🌳</p>
+                    <p class="caption">{classicalTreeView}</p>
                     <br><div class="media-injection-point radar-image-container"></div>
-                    <p class="caption">Fig. 2: Vue de l'arbre en mode radar 🎯</p>
+                    <p class="caption">{radarView}</p>
                     <br><div class="media-injection-point cloudNames-image-container"></div>
-                    <p class="caption">Fig. 3: Vue de l'arbre en mode nuage de mots 💖</p>
+                    <p class="caption">{cloudView}</p>
                     </div>
             </div>
             <div class="help-section">
-                <h3>Interactions et Zoom</h3>
-                <ol>
-                    <li>Cliquez sur un individu pour afficher son profil détaillé.</li>
-                    <li>Utilisez la **molette** pour zoomer, et glissez la souris pour déplacer la vue.</li>
-                    <li>Pour voir une démonstration complète, lancez la vidéo ci-dessous.</li>
+                <h3>{interact}</h3>
+                <ol style="margin-left: 20px;">
+                    <li>{clickOnPeople}</li>
+                    <li>{useMolette}</li>
+                    <li>{videoDemo}</li>
                 </ol>
                 <div class="video-example">
-                    <h4>🎬 Démonstration Rapide des Vues (30s)</h4>
+                    <h4>{quickVideoDemo}</h4>
                     <div class="media-injection-point video-demo-container"></div>
                 </div>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
 
-                `,
+        `,
         login: `
             <div class="help-section">
-                <h3>comment se logger et démarrer</h3>
+                <h3>{howToLogTitle}</h3>
                 <div class="video-example">
-                    <h4>🎬 Démonstration Rapide </h4>
+                    <h4>{logVideoDemo}</h4>
                     <div class="media-injection-point video-demo-container"></div>
                 </div>>
             </div>
 
         `,
+        root: `
+            <div class="help-section">
+                <h3>{rootPersonTitle}</h3>
+                <p style="margin-left: 20px;">{rootPersonIntro}</p>
+                </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
+        `,
         tree: `
             <div class="help-section">
-                <h3>La Vue en arbre 🌳 </h3>
-                <p>C'est la fonctionnalité de base! Elle permet de visualiser jusqu'à 100 générations à perir d'un personne racine.</p>
+                <h3>{treeViewTitle}</h3>
+                <p style="margin-left: 20px;">{treeViewIntro}</p>
                 <div class="image-example">
                     <div class="media-injection-point tree-image-container"></div>
-                    <p class="caption">Fig. 1: Vue de l'arbre en mode 🌳</p>
+                    <p class="caption">{classicalTreeView}</p>
                     <br><div class="media-injection-point treeDetails-image-container"></div>
-                    <p class="caption">Fig. 2: affichage de la fiche détaillés d'une personne de l'arbre 🌳</p>
+                    <p class="caption">{detailPersonView}</p>
                     <br><div class="media-injection-point treeGeoloc-image-container"></div>
-                    <p class="caption">Fig. 3: geolocalistion 🌍 des personnes de l'arbre visibles à l'écran</p>
+                    <p class="caption">{geoLocView}</p>
                 </div>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
-
         radar: `
             <div class="help-section">
-                <h3>La Vue Radiale (Roue) 🎯</h3>
-                <p>C'est notre fonctionnalité signature! Elle permet de visualiser jusqu'à 100 générations autour d'un individu central (racine).</p>
+                <h3>{radarViewTitle}</h3>
+                <p style="margin-left: 20px;">{radarViewIntro}</p>
                 <div class="image-example">
                     <div class="media-injection-point radar-image-container"></div>
                 </div>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
         cloud: `
             <div class="help-section">
-                <h3>La Vue en  nuage de mots 💖 </h3>
-                <p>Elle permet de visualiser l'arbre sous une forme originale en nuage de mots.</p>
+                <h3>{cloudViewTitle}</h3>
+                <p style="margin-left: 20px;">{cloudViewIntro}</p>
                 <div class="image-example">
                     <div class="media-injection-point cloudFirstNames-image-container"></div>
-                    <p class="caption">Fig. 1: Vue en nuage de mots de l'arbre pour les prénoms </p>
+                    <p class="caption">{cloudViewSurname}</p>
                     <br><div class="media-injection-point cloudNames-image-container"></div>
-                    <p class="caption">Fig. 2: Vue en nuage de mots de l'arbre pour les noms </p>
+                    <p class="caption">{cloudViewName}</p>
                     <br><div class="media-injection-point cloudNamesHeatmap-image-container"></div>
-                    <p class="caption">Fig. 3: Vue en nuage de mots de l'arbre pour les noms avec heatmpa </p>
+                    <p class="caption">{cloudViewNameGeo}</p>
                     <br><div class="media-injection-point cloudProfessions-image-container"></div>
-                    <p class="caption">Fig. 4: Vue en nuage de mots de l'arbre pour les métiers </p>
+                    <p class="caption">{cloudViewProfession}</p>
                     <br><div class="media-injection-point cloudLifeSpan-image-container"></div>
-                    <p class="caption">Fig. 5: Vue en nuage de mots de l'arbre pour les durées de vie </p>
+                    <p class="caption">{cloudViewLifeSpan}</p>
                     <br><div class="media-injection-point cloudLifeSpanGraph-image-container"></div>
-                    <p class="caption">Fig. 6: Vue en nuage de mots de l'arbre pour les les durées de vie avec graphe </p>
+                    <p class="caption">{cloudViewLifeSpanGraph}</p>
                     <br><div class="media-injection-point cloudLifeSpanCenturyGraph-image-container"></div>
-                    <p class="caption">Fig. 7: Vue en nuage de mots de l'arbre pour les les durées de vie avec graphe par siècle </p>
+                    <p class="caption">{cloudViewLifeSpanCenturyGraph}</p>
                 </div>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
         stats: `
             <div class="help-section">
-                <h3>Statistiques </h3>
-                <p>Permet de visualiser les statistiques de l'arbre</p>
+                <h3>{statsTitle}</h3>
+                <p style="margin-left: 20px;">{statsIntro}</p>
                 <div class="media-injection-point stats-image-container"></div>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
-        `,
-        root: `
-            <div class="help-section">
-                <h3>changement et recherche d'un personne racine</h3>
-            </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
         geoloc: `
             <div class="help-section">
-                <h3>Géolocalisation</h3>
+                <h3>{geoLocTitle}</h3>
+                <p style="margin-left: 20px;">{geoLocIntro}</p>
             </div>
-            <div class="warning-box">
-                L'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.
-            </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
         faq: `
             <div class="help-section">
-                <h3>Questions les plus féquentes?</h3>
-                <p>Cliquez sur l'icône de la maison (<span style="font-size: 1.2em;">🏠</span>) pour centrer et redimensionner l'arbre complet.</p>
+                <h3>{faqTitle}</h3>
+                <p style="margin-left: 20px;">Cliquez sur l'icône de la maison (<span style="font-size: 1.2em;">🏠</span>) pour centrer et redimensionner l'arbre complet.</p>
             </div>
         `,
         contact: `
             <div class="help-section">
-                <h3>Contact et support technique</h3>
-                <p>Notre équipe est là pour vous aider !</p>
+                <h3>{contactTitle}</h3>
+                <p style="margin-left: 20px;">Notre équipe est là pour vous aider !</p>
             </div>
-        `
+        `,
+    },
+    // --- Français (FR) ---
+    fr: {
+        title: "Aide 🚀",
+        // Clé: ID interne de l'onglet, Valeur: Nom affiché
+        tabs: {
+            summary: { 
+                long: 'aperçu📖', 
+                short: 'Aperçu📖', 
+            },
+            login: { 
+                long: 'login🔒', 
+                short: 'login  🔒',
+            },
+            root: { 
+                long: 'racine🔍', 
+                short: 'Racine 🔍', 
+            },
+            tree: { 
+                long: 'arbre🌳', 
+                short: 'Arbre  🌳',
+            },
+            radar: { 
+                long: 'radar🎯', 
+                short: 'Radar  🎯',
+            },
+            cloud: { 
+                long: 'nuage💖', 
+                short: 'Nuage 💖', 
+            },
+            stats: { 
+                long: 'stats📊', 
+                short: 'Stats.  📊',
+            },
+            geoloc: { 
+                long: 'geoloc🌍', 
+                short: 'Geoloc 🌍',
+            },
+            faq: { 
+                long: 'FAQ❓', 
+                short: 'FAQ.  ❓', 
+            },
+            contact: { 
+                long: 'contact📞', 
+                short: 'Contact 📞',
+            },
+        },
+
+
+
+        overviewTitle : 'Première visualisation de votre arbre',
+        discover :  'Découvrez les différents types de vues pour votre arbre généalogique',
+        classicalTreeView: 'Fig. 1: Vue Classique de l\'Arbre 🌳',
+        radarView : 'Fig. 2: Vue de l\'arbre en mode radar 🎯',
+        cloudView : 'Fig. 3: Vue de l\'arbre en mode nuage de mots 💖',
+        interact : 'Interactions et Zoom',
+        clickOnPeople :'Cliquez sur un individu pour afficher son profil détaillé.',
+        useMolette : 'Utilisez la **molette** pour zoomer, et glissez la souris pour déplacer la vue.',
+        videoDemo : 'Pour voir une démonstration complète, lancez la vidéo ci-dessous.',
+        quickVideoDemo : '🎬 Démonstration Rapide des Vues (30s)',
+        gedcomSize_warning : `l'import de très grands fichiers GEDCOM peut prendre quelques instants selon votre navigateur.`,
+
+        howToLogTitle : 'Comment se logger et démarrer',
+        logVideoDemo : '🎬 Démonstration Rapide',
+
+        rootPersonTitle : 'Changement et recherche d\'un personne racine',
+        rootPersonIntro : 'Cette fonction permet une recherche avancée de la personne racine par prénom et/ou nom, ou par lieu ou par profession. On peut aussi filtrer avec une plage de dates.',
+
+        treeViewTitle : 'La Vue en arbre 🌳',
+        treeViewIntro : 'C\'est la fonctionnalité de base! Elle permet de visualiser jusqu\'à 100 générations à partir d\'une personne racine.',
+        detailPersonView: 'Fig. 2: affichage de la fiche détaillés d\'une personne de l\'arbre 🌳',
+        geoLocView : 'Fig. 3: geolocalistion 🌍 des personnes de l\'arbre visibles à l\'écran',
+
+        radarViewTitle : 'La Vue Radiale (Roue) 🎯',
+        radarViewIntro : 'Cette vue permet de visualiser les ancêtres autour d\'un individu central (racine).',
+
+        cloudViewTitle : 'La Vue en nuage de mots 💖',
+        cloudViewIntro : 'Cette vue permet de visualiser l\'arbre sous une forme originale en nuage de mots. On peut cliquer sur chaque mot du nuage pour faire apparaitre la liste des personnes contenant ce mot. On peut sélectionner une vue en nuage par : prénoms / noms / lieux / métiers / durée de vie / age de procréation / age au 1ier enfant / age de mariage / nombre d\'enfant.  On peut filtrer sur une plage de dates. On peut aussi filter sur tout le fichier gedcom, ou sur la branche ascendante ou descendante d\'une personne racine. En plus de la vue en nuage de mot, on peut sélectionner une statistique globale (bouton "Statistiques détaillées"), ou une statistique par siècles (bouton "Stat. par siècles")',
+        cloudViewSurname : 'Fig. 1: Vue en nuage de mots de l\'arbre pour les prénoms ',
+        cloudViewName : 'Fig. 2: Vue en nuage de mots de l\'arbre pour les noms',
+        cloudViewNameGeo : 'Fig. 3: Vue en nuage de mots de l\'arbre pour les les noms avec carte de chaleur (heatmap)',
+        cloudViewProfession : 'Fig. 4: Vue en nuage de mots de l\'arbre pour les métiers',
+        cloudViewPlace : 'Fig. 5: Vue en nuage de mots de l\'arbre pour les lieux',
+        cloudViewLifeSpan : 'Fig. 6: Vue en nuage de mots de l\'arbre pour les durées de vie',
+        cloudViewLifeSpanGraph : 'Fig. 7: Vue en nuage de mots de l\'arbre pour les durées de vie avec graphe',
+        cloudViewLifeSpanCenturyGraph : 'Fig. 8: Vue en nuage de mots de l\'arbre pour les durées de vie avec graphe par siècle',
+        cloudViewProcreationAge : 'Fig. 9: Vue en nuage de mots de l\'arbre pour les ages de procréation',
+        cloudViewProcreationAge : 'Fig. 10: Vue en nuage de mots de l\'arbre pour les ages au 1ier enfant',    
+        cloudViewMarriageAge : 'Fig. 11: Vue en nuage de mots de l\'arbre pour les agesde mariage',    
+        cloudViewChildrenNumber : 'Fig. 12: Vue en nuage de mots de l\'arbre pour les nombres d\'enfants',    
+
+
+        statsTitle : 'Statistiques',
+        statsIntro : 'Permet de visualiser les statistiques de l\'arbre.\nOn peut sélectionner une statistique par : prénoms / noms / lieux / métiers / durée de vie / age de procréation / age au 1ier enfant / age de mariage / nombre d\'enfant.\nOn peut filter avec un mot de filtrage (ou morceau de mot) sur le nom, le prénom, le lieu, la profession, l\'age, .... \nOn peut aussi filtrer sur une plage de dates. On peut aussi filter sur tout le fichier gedcom, ou sur la branche ascendante ou descendante d\'une personne racine.\nOn peut sélectionner une statistique globale, ou une statistique par siècles',
+
+
+        geoLocTitle : 'Géolocalisation',
+        geoLocIntro : 'Permet d\'afficher une carte avec la localisation des lieux d\'une personne, ou une carte de chaleur (heatmap) quand il y a plusieurs personnes ou un groupe de personnes.',
+
+        faqTitle : 'Questions les plus fréquentes?',
+        faqIntro : '',
+
+        contactTitle : 'Contact et support technique',
+        contactIntro : '',
+
+
     },
     // --- English (EN) --- (Les images doivent aussi être définies ici si nécessaire)
     en: { /* ... contenu anglais inchangé ... */ },
@@ -190,62 +271,64 @@ const RESOURCE_METADATA = [
         targetClass: 'radar-image-container', 
         type: 'image', 
         path: 'doc/images/radar.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },
     { 
         targetClass: 'cloudFirstNames-image-container', 
         type: 'image', 
         path: 'doc/images/nuage_prenoms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },
     { 
         targetClass: 'cloudNames-image-container', 
         type: 'image', 
         path: 'doc/images/nuage_noms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },
     { 
         targetClass: 'cloudNamesHeatmap-image-container', 
         type: 'image', 
         path: 'doc/images/heatmap_noms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },    
     { 
         targetClass: 'cloudProfessions-image-container', 
         type: 'image', 
         path: 'doc/images/nuage_metiers.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },
     { 
         targetClass: 'cloudPlaces-image-container', 
         type: 'image', 
         path: 'doc/images/nuage_lieux.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },
     { 
         targetClass: 'cloudLifeSpan-image-container', 
         type: 'image', 
         path: 'doc/images/nuage_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },     
     { 
         targetClass: 'cloudLifeSpanGraph-image-container', 
         type: 'image', 
         path: 'doc/images/graph_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },    
     { 
         targetClass: 'cloudLifeSpanCenturyGraph-image-container', 
         type: 'image', 
         path: 'doc/images/centuryGraph_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-        styles: 'width: 80%; border: 1px solid #ddd; margin-top: 15px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
     },      
     { 
         targetClass: 'video-demo-container', 
         type: 'video', 
         // path: 'doc/videos/loginTree.mp4', // Vidéo cryptée (ou .mp4 si non cryptée)
         path: 'doc/videos/loginTree.mvx', // Vidéo cryptée (ou .mp4 si non cryptée)
-        styles: 'width: 100%; max-width: 500px; border-radius: 8px;'
+        // styles: 'width: 100%; max-width: 500px; border-radius: 8px;'
+        styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+
     },
 
     // Ajoutez simplement d'autres objets ici pour plus d'images/vidéos
@@ -341,8 +424,8 @@ export function documentation() {
     
 
     // Récupère le contenu et met à jour le modal (pour le multilingue ou l'ajout de tabs)
-    const content = DOC_CONTENT[lang] || DOC_CONTENT['fr'];
-    updateDocumentationContent(content);
+    const multilingueContent = MULTILINGUE_DOC_CONTENT[lang] || MULTILINGUE_DOC_CONTENT['fr'];
+    updateDocumentationContent(multilingueContent);
     
 
     // Afficher le modal immédiatement (TRES IMPORTANT !)
@@ -463,24 +546,68 @@ function updateDocumentationContent(content) {
         // On utilise l'index pour appliquer une classe CSS générique (tab-index-0, tab-index-1, ...)
         btn.className = `tab-button tab-index-${tabIndex % 10}`; // Utiliser le modulo pour recycler les 10 couleurs
         btn.textContent = name;
-        btn.onclick = (e) => switchTab(id, e.target);
+
+        // 💥 MODIFICATION ICI : Insérer le texte long et le texte court avec des classes
+        btn.innerHTML = `<span class="tab-text-long">${name.long}</span><span class="tab-text-short">${name.short}</span>`;
+
+        // btn.onclick = (e) => switchTab(id, e.target);
+        btn.onclick = function(e) {
+            // S'assurer que le bouton est l'élément passé, même si le clic est sur un span
+            const clickedButton = e.currentTarget; 
+            
+            // Le premier argument est l'ID de l'onglet (id), le second est l'élément bouton
+            switchTab(id, clickedButton);
+        };
+
         tabsNav.appendChild(btn);
 
         // Création du contenu (Content Div)
         const tabContentDiv = document.createElement('div');
         tabContentDiv.className = 'tab-content';
         tabContentDiv.id = id; // L'ID sert à lier le bouton au contenu
-        tabContentDiv.innerHTML = content[id] || '';
+        // tabContentDiv.innerHTML = content[id] || '';
+
+        // 💥 NOUVEAU : Récupération du HTML à partir des templates centralisés
+        // On utilise DOC_CONTENT (l'objet global) pour accéder aux templates
+        let htmlContent = MULTILINGUE_DOC_CONTENT.templates[id] || '';
+
+        // 💥 : Remplacement des marqueurs {clé} par la traduction.
+        // On boucle sur TOUTES les propriétés de l'objet de langue (content)
+        // pour remplacer les marqueurs, sauf les propriétés 'tabs' et 'title'.
+        // for (const [key, value] of Object.entries(content)) {
+        //     // On s'assure que la valeur est une chaîne de caractères et qu'elle n'est pas l'objet tabs
+        //     if (typeof value === 'string' && key !== 'title' && key !== id) {
+        //         // Crée une expression régulière globale pour remplacer toutes les occurrences de {clé}
+        //         const regex = new RegExp(`{${key}}`, 'g');
+        //         htmlContent = htmlContent.replace(regex, value);
+        //     }
+        // }
+        for (const [key, value] of Object.entries(content)) {
+            if (typeof value === 'string' && key !== 'title' && key !== id) {
+                
+                // 💥 NOUVEAU : Convertir les retours à la ligne (\n) en balises <br>
+                let translatedText = value.replace(/\n/g, '<br>');
+                
+                const regex = new RegExp(`{${key}}`, 'g');
+                // Utiliser le texte traité (avec les <br>) pour le remplacement
+                htmlContent = htmlContent.replace(regex, translatedText);
+            }
+        }
+
+        tabContentDiv.innerHTML = htmlContent;
+
         contentContainer.appendChild(tabContentDiv);
 
         tabIndex++;
     }
     
-    // Activer le premier onglet par défaut
+    // // Activer le premier onglet par défaut
     const firstButton = tabsNav.querySelector('.tab-button');
     if (firstButton) {
         switchTab(firstTabId, firstButton);
     }
+
+
 }
 
 /**
@@ -495,15 +622,15 @@ function injectStyles() {
         /* ------------------------------------------- */
         :root {
             /* Couleurs Pastels CLAIRES (utilisées sur le tab sélectionné) */
-            --pastel-light-1: 220, 230, 255;  /* Bleu ciel très clair */
-            --pastel-light-2: 220, 255, 230;  /* Vert menthe très clair */
-            --pastel-light-3: 255, 220, 230;  /* Rose blush très clair */
-            --pastel-light-4: 255, 255, 220;  /* Jaune très clair */
-            --pastel-light-5: 245, 230, 255;  /* Lavande très clair */
-            --pastel-light-6: 255, 230, 220;  /* Pêche très clair */
-            --pastel-light-7: 230, 255, 255;  /* Cyan très clair */
-            --pastel-light-8: 255, 220, 255;  /* Magenta doux très clair */
-            --pastel-light-9: 240, 240, 240;  /* Gris très clair */
+            --pastel-light-1: 220, 230, 255; /* Bleu ciel très clair */
+            --pastel-light-2: 220, 255, 230; /* Vert menthe très clair */
+            --pastel-light-3: 255, 220, 230; /* Rose blush très clair */
+            --pastel-light-4: 255, 255, 220; /* Jaune très clair */
+            --pastel-light-5: 245, 230, 255; /* Lavande très clair */
+            --pastel-light-6: 255, 230, 220; /* Pêche très clair */
+            --pastel-light-7: 230, 255, 255; /* Cyan très clair */
+            --pastel-light-8: 255, 220, 255; /* Magenta doux très clair */
+            --pastel-light-9: 240, 240, 240; /* Gris très clair */
             --pastel-light-10: 220, 220, 255; /* Indigo très clair */
 
             /* Couleurs LÉGÈREMENT PLUS SATURÉES (utilisées sur les tabs non sélectionnés) */
@@ -536,7 +663,7 @@ function injectStyles() {
             display: flex; 
             justify-content: center; /* Centre horizontalement */
             align-items: flex-start; /* Commence en haut pour ne pas cacher le haut sur mobile */
-            padding: 5vh 10px; /* Ajoute de l'espace en haut et sur les côtés */
+            padding: 5vh 5px; /* Ajoute de l'espace en haut et sur les côtés */
             overflow-y: auto; /* Permet le défilement si le contenu est trop grand pour l'écran */
         }
 
@@ -585,68 +712,157 @@ function injectStyles() {
             &::-webkit-scrollbar-thumb:hover { background-color: #8f94fb; }
         }
 
-        /* Navigation par onglets */
+
+        /* --- Bloc 1 : .modal-tabs --- */
         .modal-tabs {
-            display: flex; background: #e9ecef; border-bottom: 2px solid #e0e0e0; overflow-x: auto;
-            margin-top: -10px; gap: 1px; flex-shrink: 0;
+            display: flex; 
+            background: #e9ecef; 
+            border-bottom: 2px solid #e0e0e0; 
+            overflow-x: auto;
+            margin-top: -10px; 
+            /* ❌ SUPPRIMER/IGNORER : gap: 1px; */
+            flex-shrink: 0;
+            
+            /* 💥 NOUVEAU : Ajouter un padding à droite pour que le dernier onglet soit visible */
+            padding-right: 20px;
         }
+
+        /* --- Bloc 2 : .tab-button --- */
         .tab-button {
-            flex-basis: 0; flex-grow: 1; padding: 10px 10px; border: none; cursor: pointer; font-size: 16px;
-            transition: all 0.3s; position: relative; white-space: nowrap; font-weight: 500;
+            /* flex-basis: 0; */
+            flex-basis: 0; /*60px;*/
+            flex-grow: 0;
+            flex-shrink: 0;
+            /* min-width: 75px; */
+            padding-top: 10px; 
+            padding-bottom: 10px;
+            padding-left: 4px;
+            padding-right: 0;
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px;
+            transition: all 0.3s; 
+            white-space: nowrap; 
+            font-weight: 500;
+            
+            /* 💥 NOUVEAU : Position relative pour gérer le chevauchement et z-index */
+            position: relative;
+            
+            /* 💥 NOUVEAU : Crée le chevauchement vers la gauche */
+            margin-left: -4px; 
+            
+            /* 💥 NOUVEAU : Ajoute une bordure pour simuler l'épaisseur de la feuille */
+            border-right: 1px solid #d0d0d0 !important; 
+            border-radius: 8px 8px 0 0; /* Arrondi seulement en haut */
         }
+
+
+        /* --- Styles par Défaut (Grand Écran) --- */
+        .tab-button .tab-text-long {
+            display: inline; /* Affiché par défaut sur grand écran */
+        }
+        .tab-button .tab-text-short {
+            display: none; /* Caché par défaut */
+        }
+
         .tab-button:hover { filter: brightness(1.1); } 
 
         /* --- COULEURS GÉNÉRIQUES PAR INDEX --- */
         /* TABS NON SÉLECTIONNÉS (Fond Pastel Moyen/Saturé) */
-        .tab-index-0 { background: var(--pastel-medium-1); color: var(--color-text-dark); }
-        .tab-index-1 { background: var(--pastel-medium-2); color: var(--color-text-dark); }
-        .tab-index-2 { background: var(--pastel-medium-3); color: var(--color-text-dark); }
-        .tab-index-3 { background: var(--pastel-medium-4); color: var(--color-text-dark); }
-        .tab-index-4 { background: var(--pastel-medium-5); color: var(--color-text-dark); }
-        .tab-index-5 { background: var(--pastel-medium-6); color: var(--color-text-dark); }
-        .tab-index-6 { background: var(--pastel-medium-7); color: var(--color-text-dark); }
-        .tab-index-7 { background: var(--pastel-medium-8); color: var(--color-text-dark); }
-        .tab-index-8 { background: var(--pastel-medium-9); color: var(--color-text-dark); }
-        .tab-index-9 { background: var(--pastel-medium-10); color: var(--color-text-dark); }
+        /* 💥 NOUVEAU : Ajoutez un z-index progressif */
+        .tab-index-0 { background: var(--pastel-medium-1); color: var(--color-text-dark); z-index: 9; }
+        .tab-index-1 { background: var(--pastel-medium-2); color: var(--color-text-dark); z-index: 8; }
+        .tab-index-2 { background: var(--pastel-medium-3); color: var(--color-text-dark); z-index: 7; }
+        .tab-index-3 { background: var(--pastel-medium-4); color: var(--color-text-dark); z-index: 6; }
+        .tab-index-4 { background: var(--pastel-medium-5); color: var(--color-text-dark); z-index: 5; }
+        .tab-index-5 { background: var(--pastel-medium-6); color: var(--color-text-dark); z-index: 4; }
+        .tab-index-6 { background: var(--pastel-medium-7); color: var(--color-text-dark); z-index: 3; }
+        .tab-index-7 { background: var(--pastel-medium-8); color: var(--color-text-dark); z-index: 2; }
+        .tab-index-8 { background: var(--pastel-medium-9); color: var(--color-text-dark); z-index: 1; }
+        .tab-index-9 { background: var(--pastel-medium-10); color: var(--color-text-dark); z-index: 0; }
+
 
         /* TABS ACTIFS (Fond Pastel CLAIR) */
         .tab-button.active {
-            color: var(--color-text-dark) !important; /* Texte sombre sur fond clair */
+            color: var(--color-text-dark) !important; 
             font-weight: 700;
             box-shadow: 0 -3px 5px rgba(0, 0, 0, 0.1); 
-            border-bottom: 4px solid #fff; /* Ligne blanche pour le séparer du contenu */
-            filter: none; /* Désactive le survol/brightness sur l'actif */
+            border-bottom: 4px solid #fff; 
+            filter: none;
+            
+            /* 💥 NOUVEAU : Annuler le chevauchement */
+            margin-left: 0;
+            
+            /* 💥 NOUVEAU : Assurer qu'il est au premier plan (z-index élevé) */
+            z-index: 10;
+            
+            /* Assurer que sa bordure n'est pas écrasée */
+            border-right-color: transparent !important; /* Cache la bordure droite du tab actif */
         }
 
-        /* Utilisation des couleurs CLAIRES (light) en fond pour l'actif */
-        .tab-index-0.active { background: rgba(var(--pastel-light-1), 1); }
-        .tab-index-1.active { background: rgba(var(--pastel-light-2), 1); }
-        .tab-index-2.active { background: rgba(var(--pastel-light-3), 1); }
-        .tab-index-3.active { background: rgba(var(--pastel-light-4), 1); }
-        .tab-index-4.active { background: rgba(var(--pastel-light-5), 1); }
-        .tab-index-5.active { background: rgba(var(--pastel-light-6), 1); }
-        .tab-index-6.active { background: rgba(var(--pastel-light-7), 1); }
-        .tab-index-7.active { background: rgba(var(--pastel-light-8), 1); }
-        .tab-index-8.active { background: rgba(var(--pastel-light-9), 1); }
-        .tab-index-9.active { background: rgba(var(--pastel-light-10), 1); }
-        
+
+        /* 💥 CORRECTION (Fond Pastel CLAIR) : Utilisation de la syntaxe correcte rgb(var(--...)) */
+        .tab-index-0.active { background: rgb(var(--pastel-light-1)) !important; }
+        .tab-index-1.active { background: rgb(var(--pastel-light-2)) !important; }
+        .tab-index-2.active { background: rgb(var(--pastel-light-3)) !important; }
+        .tab-index-3.active { background: rgb(var(--pastel-light-4)) !important; }
+        .tab-index-4.active { background: rgb(var(--pastel-light-5)) !important; }
+        .tab-index-5.active { background: rgb(var(--pastel-light-6)) !important; }
+        .tab-index-6.active { background: rgb(var(--pastel-light-7)) !important; }
+        .tab-index-7.active { background: rgb(var(--pastel-light-8)) !important; }
+        .tab-index-8.active { background: rgb(var(--pastel-light-9)) !important; }
+        .tab-index-9.active { background: rgb(var(--pastel-light-10)) !important; }
+
         /* Contenu */
         /* Correction de l'ascenseur vertical */
         .modal-content-container { 
             max-height: calc(90vh - 130px); 
             overflow-y: auto; 
-            padding: 30px;  
+            padding: 0px;  
             flex-grow: 1; 
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
+
         /* Autres styles de contenu */
-        .help-section h3 { color: #4e54c8; font-size: 22px; font-weight: 600; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid #f0f0f0; }
-        .help-section h3::before { content: '🔗'; color: var(--color-warning-border); font-size: 18px; margin-right: 10px; }
-        
+        .help-section  {
+            padding: 10px; 
+        }
+
+        .help-section h3 { 
+            color: #4e54c8; 
+            font-size: 22px; 
+            font-weight: 600; 
+            margin-bottom: 15px; 
+            padding-bottom: 5px; 
+            border-bottom: 1px solid #f0f0f0;
+            
+            /* 💥 NOUVEAU : Positionnement relatif pour l'icône absolue */
+            position: relative; 
+            
+            /* 💥 NOUVEAU : Espace à gauche pour l'icône (20px icône + 10px marge) */
+            padding-left: 30px; 
+        }
+
+        .help-section h3::before { 
+            content: '🔗'; 
+            color: var(--color-warning-border); 
+            font-size: 18px; 
+            /* margin-right: 10px; <--- INUTILE/SUPPRIMÉ grâce au padding-left du h3 */
+            
+            /* 💥 NOUVEAU : Sort l'icône du flux pour la positionner dans le padding */
+            position: absolute;
+            left: 0;
+            top: 50%; /* Centre verticalement (ajustement fin avec transform) */
+            transform: translateY(-50%); /* Ajustement précis du centrage vertical */
+            
+            /* Vous pouvez ajouter une largeur pour garantir l'alignement, si besoin */
+            width: 20px; 
+        }
+
         .image-example, .video-example { 
-            margin: 25px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef; text-align: center; 
+            margin: 25px 0; padding: 0px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef; text-align: center; 
         }
         .image-example .caption, .video-example .caption { 
             font-style: italic; color: #6c757d; margin-top: 10px; font-size: 14px; 
@@ -662,8 +878,6 @@ function injectStyles() {
             margin-right: auto;
         }
 
-
-
         .warning-box { background: #fff3cd; border-left: 4px solid var(--color-warning-border); padding: 15px; border-radius: 4px; margin: 15px 0; }
         .warning-box::before { content: '⚠️ Attention : '; font-weight: 600; color: #856404; }
 
@@ -674,6 +888,36 @@ function injectStyles() {
     /* ------------------------------------------- */
     /* NOUVEAU: Optimisation Mobile (Max 400px) */
     /* ------------------------------------------- */
+    @media (max-width: 400px) {
+        .tab-button {
+            flex-basis: 77px;
+            flex-grow: 0;
+            flex-shrink: 0;
+            min-width: 75px; 
+            padding-top: 10px; 
+            padding-bottom: 10px;
+            padding-left: 2px;
+            padding-right: 0;
+            font-size: 14px;
+            margin-left: -50px; 
+        }
+
+        /* Cacher le texte long et afficher le texte court/icône */
+        .tab-button .tab-text-short {
+            display: inline; /* Afficher le texte court (l'icône) */
+        }
+        .tab-button .tab-text-long {
+            display: none; /* Masquer le texte long */
+        }
+
+    }
+
+    @media (max-height: 400px) {
+        .tab-button {
+            font-size: 14px;
+        }
+    }
+
     @media (max-width: 400px), (max-height: 400px) {
         /* 1. OCCUPER TOUT L'ESPACE & REDUIRE LES ARRONDIS */
         .modal-overlay.active {
@@ -681,7 +925,6 @@ function injectStyles() {
             align-items: stretch; /* Étend le modal pour remplir la hauteur */
             justify-content: stretch; /* Étend le modal pour remplir la largeur */
         }
-
         .help-modal {
             max-width: 100%; /* Occupe toute la largeur */
             width: 100%;
@@ -706,23 +949,20 @@ function injectStyles() {
             font-size: 20px;
         }
 
-        .tab-button {
-            padding: 8px 8px; /* Réduit le padding des boutons d'onglet (de 15px 10px à 12px 5px) */
-            font-size: 14px; /* Optionnel: Réduire la taille de la police des onglets */
-        }
-
         .modal-content-container { 
-            padding: 15px; /* Réduit le padding du contenu principal (de 30px à 15px) */
+            /*padding: 15px;  Réduit le padding du contenu principal (de 30px à 15px) */
             /* Recalcul de la hauteur maximale pour remplir tout l'espace */
             max-height: calc(100vh - 100px); 
+        }
+
+        .help-section  {
+            padding: 2px; 
         }
 
         .help-section h3 {
             font-size: 18px; /* Optionnel: Réduire la taille des sous-titres */
         }
     }
-
-
     `;
     document.head.appendChild(style);
 }

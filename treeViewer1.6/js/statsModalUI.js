@@ -375,7 +375,10 @@ function openStatsModal() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 3px 35px;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 40px;            
+            padding-right: 8px;
             background: #438aee;
             color: white;
         }
@@ -587,9 +590,6 @@ function openStatsModal() {
 
         /* Styles pour mobile en mode paysage */
         @media screen and (max-height: 500px)  {
-            .statsModal-header {
-                padding: 3px 35px !important; /* Réduire de 20px à 10px */
-            }
             
             .statsModal-header h3 {
                 font-size: 16px !important; /* Réduire la taille du titre */

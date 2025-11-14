@@ -313,7 +313,8 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
             } else { // 'name'
                 fullName = person.name.toLowerCase().replace(/\//g, '') + ' ' + givn.toLowerCase().replace(/\//g, '') + ' ' + surn.toLowerCase().replace(/\//g, '');
                 firstName = person.name.split('/')[0].toLowerCase().replace(/\//g, '')  + ' ' + surn.toLowerCase().replace(/\//g, '');
-                lastName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
+                // lastName = person.name.split('/')[1].toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
+                lastName = person.name.substring(name.indexOf('/') + 1).toLowerCase().replace(/\//g, '')  + ' ' + givn.toLowerCase().replace(/\//g, '');
             }
 
 
@@ -326,7 +327,6 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                 // if (searchType == 'noms' && searchStrFullFull && fullName.includes(searchStrFullFull)) {
 
                 // cas de la recherche initiale avec password
-
                 if ( searchType === 'name' && (initialSearchWithPassword || searchFromSearchModal) ) { 
 
                     if (searchFromSearchModal) {
@@ -427,7 +427,7 @@ export function findPersonsBy(searchTerm, config, searchTermFull, originalName =
                     }
 
 
-                    // 6- recherche prénom/nom sans  accent et prénom contenant le prénom  recherché et nom conteant le nom recherché
+                    // 6- recherche prénom/nom sans accent et prénom contenant le prénom recherché et nom contenant le nom recherché
                     if (!isMatched && !isMatched5 &&  firstNameWithoutAccent.includes(searchFirstNameWithoutAccent) &&
                         lastNameWithoutAccent.includes(searchLastNameWithoutAccent) ) {
                         // console.log('\n\n-debug detected without accent et partiel:', person.name )
@@ -884,7 +884,7 @@ export function openSearchModal(firstName = null, lastName = null) {
         .searchModal-content {
             background: white;
             border-radius: 8px;
-            width: 90%;
+            width: 100%;
             max-width: 580px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -904,6 +904,10 @@ export function openSearchModal(firstName = null, lastName = null) {
             padding: 3px 30px;
             background: #ff9800;
             color: white;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 40px;            
+            padding-right: 8px;
         }
         
         .searchModal-header h3 {
@@ -918,7 +922,7 @@ export function openSearchModal(firstName = null, lastName = null) {
             font-size: 30px;
             cursor: pointer;
             /* padding: 0; */
-            padding = '2px 10px';
+            padding = '2px 2px';
             width: 35px;
             height: 35px;
         }
@@ -1102,10 +1106,9 @@ export function openSearchModal(firstName = null, lastName = null) {
         }
 
         /* Styles pour mobile en mode portrait */
-        @media screen and (max-width: 400px) {
+        @media screen and (max-width: 580px) {
             .searchModal-content {
-                /* width: 100% !important;*/ /* Utiliser plus de largeur */
-                /*max-width: 700px !important;*/ /* Augmenter la largeur max */
+                max-width: 97% !important;
             }   
         }
 
@@ -1116,11 +1119,7 @@ export function openSearchModal(firstName = null, lastName = null) {
             .result-name {
                 font-size: 13px;
             }
-
-            .searchModal-header {
-                padding: 3px 30px;
-            }
-            
+           
             .searchModal-header h3 {
                 font-size: 16px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
