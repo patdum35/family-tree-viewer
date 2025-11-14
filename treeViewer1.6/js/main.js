@@ -700,6 +700,8 @@ export function positionFormContainer() {
             languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
             languageSelectorContainer.style.transform = 'translateX(-50%)';
         }
+
+
     }
 }
 
@@ -940,7 +942,8 @@ export let audioUnlocked = false;
  */
 export async function loadData(isfromNonEncryptedFile = '') {
 
-
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    secretTargetArea.style.display = 'none';
 
     state.isTreeEnabled = true;
 
@@ -2087,10 +2090,122 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    secretMode();
 
     initNetworkListeners();
     console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
 });
+
+
+
+
+
+function secretMode() {
+
+    // --- Configuration ---
+    const CLASSE_CACHE = 'expert-hidden';
+    const KEY_STOCKAGE = 'modeExpertActif';
+
+    // Configuration Mobile et PC (click et taps)
+    const TAP_COUNT_NECESSAIRE = 5;
+    let tapCount = 0;
+    let tapTimer = null;
+
+
+
+    // --- Nouvelle fonction pour créer et afficher le pop-up ---
+    const afficherPopup = (message) => {
+        // 1. Créer l'élément (Toaster)
+        const popup = document.createElement('div');
+        popup.textContent = message;
+        popup.id = 'expert-activation-popup';
+        popup.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Vert */
+            color: white;
+            padding: 5px 5px;
+            border-radius: 8px;
+            font-family: sans-serif;
+            font-size: 16px;
+            z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            white-space: pre-line;
+            text-align: center;
+        `;
+
+        document.body.appendChild(popup);
+
+        // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
+        setTimeout(() => {
+            popup.style.opacity = '1';
+        }, 10);
+
+        // 3. Le faire disparaître après 3 secondes
+        setTimeout(() => {
+            popup.style.opacity = '0';
+            // Supprimer l'élément du DOM après la transition de disparition
+            setTimeout(() => {
+                popup.remove();
+            }, 500); // 500ms correspond à la durée de la transition CSS
+        }, 3000); // Reste affiché pendant 3 secondes
+    };
+
+
+    // --- Fonction d'Activation (où la modification a lieu) ---
+    const activerModeExpert = () => {
+        // 1. Afficher tous les éléments
+        document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
+            el.classList.remove(CLASSE_CACHE);
+        });
+
+        // 2. Mémoriser l'état
+        localStorage.setItem(KEY_STOCKAGE, 'true');
+        
+        // 3. Afficher le pop-up sympa !
+        afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    };
+
+
+    // --- 1. Persistance : Vérifier l'état au chargement ---
+    if (localStorage.getItem(KEY_STOCKAGE) === 'true') {
+        activerModeExpert();
+    }
+
+
+    // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+
+    if (secretTargetArea) {
+        secretTargetArea.addEventListener('click', () => {
+
+            console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
+
+            // Empêche l'activation si déjà actif
+            if (localStorage.getItem(KEY_STOCKAGE) === 'true') return;
+
+            tapCount++;
+            
+            // Réinitialise le compteur après un court délai (800ms)
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 800);
+
+            if (tapCount >= TAP_COUNT_NECESSAIRE) {
+                activerModeExpert();
+                tapCount = 0; // Réinitialise
+            }
+        });
+    } else {
+        console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
+    }
+}
+
 
 
 function detectInputType() {

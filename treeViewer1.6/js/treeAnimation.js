@@ -418,11 +418,12 @@ function showNetworkStatus(message) {
         notification.style.position = 'fixed';
         if (window.innerHeight < 400) {
             notification.style.top = '10px';
+            notification.style.left = '';
             notification.style.right = '50px';
-            notification.style.transform ='';
         } else {
             notification.style.top = '50px';
             notification.style.left = window.innerWidth/2 - 100  +'px';
+            notification.style.right = '';
             // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
             // notification.style.transform = 'translateX(-50%)';
         }
@@ -438,9 +439,12 @@ function showNetworkStatus(message) {
     notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
     notification.style.color = 'white';
 
-    setTimeout(() => {    
-        notification.style.left = window.innerWidth/2 - (notification.offsetWidth)/2  +'px';
-    }, 50);
+    if (window.innerHeight >= 400) {
+        setTimeout(() => {    
+            notification.style.left = window.innerWidth/2 - (notification.offsetWidth)/2  +'px';
+        }, 50);
+    }
+
     // Faire disparaître la notification après 3 secondes
     setTimeout(() => {
         notification.style.display = 'none';

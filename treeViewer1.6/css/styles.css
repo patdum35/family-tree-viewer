@@ -42,6 +42,10 @@ body {
 
 
 
+.expert-hidden {
+    display: none !important; 
+}
+
 
 
 /* Style pour le fond d'écran de la page de connexion */

@@ -1677,7 +1677,6 @@ function createSlider(value, min, max, step, isCompact = false) {
     return sliderContainer;
 }
 
-
 function createTabContainer() {
     const tabContainer = document.createElement('div');
     tabContainer.className = 'tabs-container';
@@ -1715,15 +1714,24 @@ function createTabContainer() {
         document.head.appendChild(scrollbarStyle);
     }
     
-    const tabs = [
-    { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
-    { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
-    { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
-    { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
-    { id: 'export-tab', label: translateSettings('exportTab'), active: false },
-    { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
-    { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
-];
+    let tabs = [
+        { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
+        { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
+        { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
+        { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
+        { id: 'export-tab', label: translateSettings('exportTab'), active: false },
+        { id: 'target-ancestor-tab', label: translateSettings('diversTab'), active: false },
+        { id: 'geolocation-tab', label: translateSettings('geolocTab'), active: false }
+    ];
+    if (localStorage.getItem('modeExpertActif') != 'true') {
+        tabs = [
+                { id: 'background-tab', label: translateSettings('backgroundTab'), active: true },
+                { id: 'tree-tab', label: translateSettings('treeTab'), active: false },
+                { id: 'radar-tab', label: translateSettings('radarTab'), active: false },
+                { id: 'nuage-tab', label: translateSettings('nuageTab'), active: false },
+                { id: 'export-tab', label: translateSettings('exportTab'), active: false }
+        ];
+    }
     
     // Couleurs plus vives
     const tabColors = [
@@ -1964,9 +1972,11 @@ function initializeControls(modalContent) {
     radarTab.appendChild(createRadarControls());
     nuageTab.appendChild(createNuageControls());
     exportTab.appendChild(createExportControls());
-    targetAncestorTab.appendChild(createTargetAncestorControls());
-    geolocationTab.appendChild(createGeolocationControls());
-
+    // for expert/secret mode only
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        targetAncestorTab.appendChild(createTargetAncestorControls());
+        geolocationTab.appendChild(createGeolocationControls());
+    }
     // Ajouter le conteneur d'onglets au contenu de la modal
     modalContent.appendChild(tabContainer);
 }

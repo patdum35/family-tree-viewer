@@ -129,17 +129,165 @@
 
     
                 <!-- Label pour le fichier GEDCOM -->
-                <label for="gedFile" style="display: block; font-size: 14px; color: #333; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label>
+                <!-- <label for="gedFile" style="display: block; font-size: 14px; color: #333; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label> -->
                 
                 
                 <!-- Créer un bouton personnalisé et un champ de texte -->
-                <div style="display: flex; margin-bottom: 15px; width: 100%;">
+                <!-- <div style="display: flex; margin-bottom: 15px; width: 100%;">
                     <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" style="background-color: #4361ee; color: white; border: none; padding: 8px; border-radius: 4px 0 0 4px; cursor: pointer;">Choisir un fichier</button>
                     <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-radius: 0 4px 4px 0; background-color: #f9f9f9; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" data-text-key="aucunFichier">Aucun fichier choisi</span>
-                </div>
+                </div> -->
                 
+
+
+                <!-- <label for="gedFile" style="display: block; font-size: 14px; color: #333; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label>
+
+                <div style="display: flex; margin-bottom: 15px; width: 100%; align-items: stretch;">
+
+                    <div style="display: flex; flex-grow: 1; margin-right: 10px;"> 
+                        <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" style="background-color: #4361ee; color: white; border: none; padding: 8px; border-radius: 4px 0 0 4px; cursor: pointer; height: auto;">
+                            Choisir un fichier
+                        </button>
+                        <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-radius: 0 4px 4px 0; background-color: #f9f9f9; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: stretch;" data-text-key="aucunFichier">
+                            Aucun fichier choisi
+                        </span>
+                    </div>
+
+                    <button id="showTreeBtn" 
+                            onclick="loadData('nonEncrypted'); closeGedcomModal()" 
+                            data-text-key="afficherArbre" 
+                            style="background-color: #4CAF50; 
+                                color: white; 
+                                border: none; 
+                                padding: 8px 15px; /* Ajuster le padding */
+                                border-radius: 4px; 
+                                cursor: pointer; 
+                                font-weight: bold; 
+                                /* CLÉ DE L'AFFICHAGE CONDITIONNEL */
+                                display: none;"> 
+                        Afficher l'arbre
+                    </button>
+                </div> -->
+
+
+
+
+
+                <label for="gedFile" style="display: block; font-size: 14px; color: #333; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label>
+<!-- 
+                <div style="display: flex; margin-bottom: 10px; width: 100%; align-items: stretch;">
+
+                    <div style="display: flex; flex-grow: 1; min-width: 0;"> 
+                        
+                        <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" style="background-color: #4361ee; color: white; border: none; padding: 8px; border-radius: 4px 0 0 4px; cursor: pointer; height: auto; white-space: nowrap;">
+                            Choisir un fichier
+                        </button>
+                        
+                        <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-right: none; border-radius: 0; background-color: #f9f9f9; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: stretch;">
+                            Aucun fichier choisi
+                        </span>
+                    </div>
+
+                    <button id="showTreeBtn" 
+                            onclick="loadData('nonEncrypted'); closeGedcomModal()" 
+                            data-text-key="afficherArbre" 
+                            style="background-color: #4CAF50; 
+                                color: white; 
+                                border: 1px solid #4CAF50; /* Ajout d'une bordure pour coller proprement à la zone de texte */
+                                border-left: none;
+                                padding: 8px 15px;
+                                border-radius: 0 4px 4px 0; /* Seulement sur le coin droit */
+                                cursor: pointer; 
+                                font-weight: bold; 
+                                /* CLÉ DE L'AFFICHAGE CONDITIONNEL */
+                                display: none;"> 
+                        Afficher l'arbre
+                    </button>
+                </div> -->
+
+
+
+
+                <div style="display: flex; margin-bottom: 10px; width: 100%; align-items: stretch; height: auto;">
+
+                    <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
+                            style="background-color: #4361ee; color: white; border: none; padding: 5px; /* Padding réduit */
+                                border-radius: 4px 0 0 4px; cursor: pointer; 
+                                flex-shrink: 0; /* Empêche le bouton de rétrécir */
+                                width: 80px;  /* LARGEUR FIXE (Égale au bouton vert) */
+                                line-height: 1.2; /* Permet un saut de ligne propre */
+                                height: auto;">
+                        Choisir un fichier </button>
+                    
+                    <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-right: none; 
+                                                    border-radius: 0; background-color: #f9f9f9; text-align: left; 
+                                                    overflow: hidden; /* Permet le saut de ligne */
+                                                    text-overflow: ellipsis; 
+                                                    align-self: stretch;
+                                                    line-height: 1.2; /* Permet le saut de ligne */
+                                                    max-height: 40px; /* Limite la hauteur à environ 2 lignes de texte */
+                                                    white-space: normal;"> Aucun fichier choisi
+                    </span>
+
+                    <button id="showTreeBtn" 
+                            onclick="loadData('nonEncrypted'); closeGedcomModal()" 
+                            data-text-key="afficherArbre" 
+                            style="background-color: #4CAF50; 
+                                color: white; 
+                                border: 1px solid #4CAF50; 
+                                border-left: none;
+                                padding: 5px; /* Padding réduit pour coller au bouton bleu */
+                                border-radius: 0 4px 4px 0; 
+                                cursor: pointer; 
+                                font-weight: bold; 
+                                flex-shrink: 0; /* Empêche le bouton de rétrécir */
+                                width: 80px;  /* LARGEUR FIXE (Égale au bouton bleu) */
+                                line-height: 1.2;
+                                height: auto;
+                                display: none;"> 
+                        Afficher l'arbre
+                    </button>
+                </div>
+    
+
+
+
+
                 <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
                 <script>
+
+                    document.getElementById('gedFile').addEventListener('change', function() {
+                        var fileNameDisplay = document.getElementById('fileNameDisplay');
+                        var showTreeBtn = document.getElementById('showTreeBtn'); // Récupération du bouton
+                        
+                        if (this.files.length > 0) {
+                            // Affichage du nom du fichier
+                            fileNameDisplay.textContent = this.files[0].name;
+                            fileNameDisplay.removeAttribute('data-text-key');
+                            
+                            // Affichage du bouton vert
+                            showTreeBtn.style.display = 'block'; 
+
+                        } else {
+                            // Rétablissement du texte par défaut
+                            fileNameDisplay.textContent = window.i18n ? window.i18n.getMultilingueText('aucunFichier') : 'Aucun fichier choisi';
+                            fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
+                            
+                            // Masquage du bouton vert
+                            showTreeBtn.style.display = 'none'; 
+                        }
+                    });
+
+                </script>
+
+
+
+
+
+
+                
+                <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
+                <!-- <script>
                 document.getElementById('gedFile').addEventListener('change', function() {
                     var fileNameDisplay = document.getElementById('fileNameDisplay');
                     if (this.files.length > 0) {
@@ -152,9 +300,17 @@
                         fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
                     }
                 });
-                </script>
+                </script> -->
 
-                <button onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button>
+
+
+
+
+
+                <!-- <button onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Afficher l'arbre</button> -->
+
+
+
                 <!-- <button id="clearCacheBtn" onclick="clearCacheStorage()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
                 <!-- <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="viderCache" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 240px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Vider le cache</button> -->
                 <button id="clearCacheBtn" onclick="clearAppCache()" data-text-key="SWUpdate" style="background-color: #f44336; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">Mise à jour du logiciel</button>
@@ -162,7 +318,7 @@
                 
                 <button onclick="resetToDefaultSettings()" data-text-key="parametresDefaut"  style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
 
-                <button id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
+                <button id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="background-color: #5f36f4; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
@@ -231,9 +387,12 @@
         <div id="startTitle" style="display: none; position: fixed; top: '80%';  z-index: 1; ">
             <h2 style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
             data-text-key="startTitle">explore tes origines...</h2>
-        </div>       
-
+        </div>  
+        
     </div>
+
+    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 30%; z-index: 9999; cursor: default;" ></div>
+
 
 
     <!-- Conteneur de l'arbre -->
