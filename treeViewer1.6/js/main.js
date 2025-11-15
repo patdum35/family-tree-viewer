@@ -910,6 +910,11 @@ function initialize() {
     state.isPWA = isPWA();
     
 
+
+    secretMode();
+
+
+
     // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
     // // if (true){
     // } else {
@@ -2099,7 +2104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    secretMode();
+    // secretMode();
 
     initNetworkListeners();
     console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
@@ -2217,6 +2222,44 @@ function secretMode() {
     if (localStorage.getItem('hidePasswordActif') === 'true') {
         activerModeExpert('hidePasswordActif');
     }
+
+
+
+    console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+
+    if (state.isMobile && state.isTouchDevice) {
+        const inputField = document.getElementById('input-form-firstName');
+        if (inputField) {
+            // Écouter l'événement directement sur le champ de saisie
+            inputField.addEventListener('keyup', (e) => {
+                const keyPressed = e.key.toUpperCase();
+                
+                // --- Logique de vérification de séquence ---
+                
+                // Ajouter la touche au tableau
+                if (keyPressed.length === 1) { // Ne prend en compte que les caractères simples
+                    sequenceEnCours.push(keyPressed);
+                }
+                
+                // Garde la taille de la séquence
+                if (sequenceEnCours.length > SEQUENCE_SECRETE_PC.length) {
+                    sequenceEnCours.shift();
+                }
+
+                // Vérification de la correspondance
+                if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_PC.join(',')) {
+                    activerModeExpert('hidePasswordActif');
+                    sequenceEnCours = []; // Réinitialise
+                    
+                    // // OPTIONNEL : Retirer le focus ou vider le champ
+                    // inputField.value = ''; 
+                    // inputField.blur();
+                }
+            });
+        }
+
+    }
+
 
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
