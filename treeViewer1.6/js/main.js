@@ -2133,26 +2133,21 @@ function changePasswordVisibility(hidden = false) {
 }
 
 function secretMode() {
-
     // --- Configuration ---
     const CLASSE_CACHE = 'expert-hidden';
     // const KEY_STOCKAGE = 'modeExpertActif';
 
     // Configuration PC (séquence de touches)
-    const SEQUENCE_SECRETE_PC = ['S', 'E', 'C', 'R', 'E', 'T']; // "ADMIN" // attention ce sont les touches qwerty et pas azerti !!!
+    const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; // "ADMIN" // attention ce sont les touches qwerty et pas azerti !!!
     let sequenceEnCours = [];
-
 
     // Configuration Mobile et PC (click et taps)
     const TAP_COUNT_NECESSAIRE = 5;
     let tapCount = 0;
     let tapTimer = null;
 
-
-
     // --- Nouvelle fonction pour créer et afficher le pop-up ---
     const afficherPopup = (message, time = null, top = null) => {
-
         // 1. Créer l'élément (Toaster)
         const popup = document.createElement('div');
         popup.textContent = message;
@@ -2235,89 +2230,43 @@ function secretMode() {
         activerModeExpert('hidePasswordActif');
     }
 
+    // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
 
-    console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
-
-
-
-
-    // if (state.isMobile && state.isTouchDevice) {
-    if (true) {
-        const SEQUENCE_SECRETE_MOBILE = ['S', 'E', 'C', 'R', 'E']; 
-        
+    if (state.isMobile && state.isTouchDevice) {
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
+            // Écouter l'événement directement sur le champ de saisie
+            afficherPopup(`clavier tactile  détectée `, 5000, );
 
+            inputField.addEventListener('input', (e) => {
+                const currentValue = inputField.value;
+                if (currentValue.length === 0) return; // Rien tapé
 
-            // document.addEventListener('DOMContentLoaded', () => {
-                // Écouter l'événement directement sur le champ de saisie
-                afficherPopup(`clavier tactile  détectée `, 5000, );
+                // Obtient le DERNIER caractère tapé
+                const lastKey = currentValue.slice(-1).toUpperCase(); 
+                
+                // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
+                // Utiliser lastKey pour le débogage
+                // afficherPopup(`Touche (Input) détectée : ${lastKey}`, 1000, 30);
 
-                inputField.addEventListener('input', (e) => {
-                    // const keyPressed = e.key.toUpperCase();
-                    
-                    // // --- Logique de vérification de séquence ---
+                // --- Logique de séquence ---
+                // 1. Ajouter la dernière touche à la séquence en cours
+                sequenceEnCours.push(lastKey);
 
-                    // // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
-                    // if (keyPressed.length === 1) {
-                    //     // Affiche la lettre tapée dans un petit toast en bas de l'écran
-                    //     // Assurez-vous que la fonction afficherPopup est bien définie !
-                    //     afficherPopup(`Touche détectée : ${keyPressed}`);
-                    // }
+                // Garde la taille de la séquence
+                if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
+                    sequenceEnCours.shift();
+                }
 
-
-                    // // Ajouter la touche au tableau
-                    // if (keyPressed.length === 1) { // Ne prend en compte que les caractères simples
-                    //     sequenceEnCours.push(keyPressed);
-                    // }
-
-                    // afficherPopup(`clavier tactile  activé `, 5000);
-
-                    const currentValue = inputField.value;
-                    if (currentValue.length === 0) return; // Rien tapé
-
-                    // Obtient le DERNIER caractère tapé
-                    const lastKey = currentValue.slice(-1).toUpperCase(); 
-                    
-                    // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
-                    // Utiliser lastKey pour le débogage
-                    afficherPopup(`Touche (Input) détectée : ${lastKey}`, 1000, 30);
-
-
-                    // --- Logique de séquence ---
-
-                    // 1. Ajouter la dernière touche à la séquence en cours
-                    sequenceEnCours.push(lastKey);
-
-
-
-
-
-
-
-                    
-                    // Garde la taille de la séquence
-                    if (sequenceEnCours.length > SEQUENCE_SECRETE_MOBILE.length) {
-                        sequenceEnCours.shift();
-                    }
-
-                    // Vérification de la correspondance
-                    if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_MOBILE.join(',')) {
-                        activerModeExpert('hidePasswordActif');
-                        sequenceEnCours = []; // Réinitialise
-                        
-                        // // OPTIONNEL : Retirer le focus ou vider le champ
-                        // inputField.value = ''; 
-                        // inputField.blur();
-                    }
-                });
-            // });
+                // Vérification de la correspondance
+                if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
+                    activerModeExpert('hidePasswordActif');
+                    sequenceEnCours = []; // Réinitialise
+                }
+            });
         }
-
     }
-
-
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
     document.addEventListener('keydown', (e) => {
@@ -2327,22 +2276,21 @@ function secretMode() {
         // console.log('\n\n debug secret mode keydown **************', keyPressed)
 
         // Seules les lettres, chiffres et symboles peuvent faire partie de la séquence
-        if (keyPressed.length === 1 || SEQUENCE_SECRETE_PC.includes(keyPressed)) {
+        if (keyPressed.length === 1 || SEQUENCE_SECRETE.includes(keyPressed)) {
             sequenceEnCours.push(keyPressed);
         }
 
         // Garde la taille de la séquence à vérifier
-        if (sequenceEnCours.length > SEQUENCE_SECRETE_PC.length) {
+        if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
             sequenceEnCours.shift();
         }
 
         // Vérification de la correspondance
-        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_PC.join(',')) {
+        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
             activerModeExpert('hidePasswordActif');
             sequenceEnCours = []; // Réinitialise pour éviter une nouvelle activation
         }
     });
-
 
 
     // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
