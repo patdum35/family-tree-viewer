@@ -436,7 +436,7 @@ export function toggleFullScreen(state = null) {
         isFullSreenRequested = false;
     }
 
-//    console.log('\n\n debug Toggle FullScreen', state, ',condition=', isFullSreenRequested)
+   console.log('\n\n debug Toggle FullScreen with state=', state, ',isFullSreenRequested=', isFullSreenRequested)
 
 
     const fullScreenButton = document.getElementById('fullScreen-button');
@@ -488,9 +488,13 @@ export function toggleFullScreen(state = null) {
         //     message.style.visibility = 'hidden';
         // }
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
+        // if (document.exitFullscreen) {
+        //     document.exitFullscreen();
+        // }
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(err => console.error(err));
         }
+
         // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
         // // if (true){
         //     browserBarButton.style.visibility = 'visible'; 
