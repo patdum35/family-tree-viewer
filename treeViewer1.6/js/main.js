@@ -2151,7 +2151,8 @@ function secretMode() {
 
 
     // --- Nouvelle fonction pour créer et afficher le pop-up ---
-    const afficherPopup = (message) => {
+    const afficherPopup = (message, time = null, top = null) => {
+
         // 1. Créer l'élément (Toaster)
         const popup = document.createElement('div');
         popup.textContent = message;
@@ -2175,6 +2176,11 @@ function secretMode() {
             text-align: center;
         `;
 
+        if (top) {
+            popup.style.bottom =  '';
+            popup.style.top = top +'px';
+        }
+
         document.body.appendChild(popup);
 
         // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
@@ -2183,13 +2189,19 @@ function secretMode() {
         }, 10);
 
         // 3. Le faire disparaître après 3 secondes
+        let duration = 3000;
+        if (time) {
+            console.log('\n\n   debug 2 afficherPopup ', time)
+            duration = time; 
+        }
+
         setTimeout(() => {
             popup.style.opacity = '0';
             // Supprimer l'élément du DOM après la transition de disparition
             setTimeout(() => {
                 popup.remove();
             }, 500); // 500ms correspond à la durée de la transition CSS
-        }, 3000); // Reste affiché pendant 3 secondes
+        }, duration); // Reste affiché pendant 3 secondes
     };
 
 
@@ -2230,46 +2242,77 @@ function secretMode() {
 
 
 
-    if (state.isMobile && state.isTouchDevice) {
+    // if (state.isMobile && state.isTouchDevice) {
+    if (true) {
+        const SEQUENCE_SECRETE_MOBILE = ['S', 'E', 'C', 'R', 'E']; 
+        
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
 
-            afficherPopup(`clavier tactile  détectée `);
 
-            // Écouter l'événement directement sur le champ de saisie
-            inputField.addEventListener('keyup', (e) => {
-                const keyPressed = e.key.toUpperCase();
-                
-                // --- Logique de vérification de séquence ---
+            // document.addEventListener('DOMContentLoaded', () => {
+                // Écouter l'événement directement sur le champ de saisie
+                afficherPopup(`clavier tactile  détectée `, 5000, );
 
-                // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
-                if (keyPressed.length === 1) {
-                    // Affiche la lettre tapée dans un petit toast en bas de l'écran
-                    // Assurez-vous que la fonction afficherPopup est bien définie !
-                    afficherPopup(`Touche détectée : ${keyPressed}`);
-                }
-
-
-                // Ajouter la touche au tableau
-                if (keyPressed.length === 1) { // Ne prend en compte que les caractères simples
-                    sequenceEnCours.push(keyPressed);
-                }
-                
-                // Garde la taille de la séquence
-                if (sequenceEnCours.length > SEQUENCE_SECRETE_PC.length) {
-                    sequenceEnCours.shift();
-                }
-
-                // Vérification de la correspondance
-                if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_PC.join(',')) {
-                    activerModeExpert('hidePasswordActif');
-                    sequenceEnCours = []; // Réinitialise
+                inputField.addEventListener('input', (e) => {
+                    // const keyPressed = e.key.toUpperCase();
                     
-                    // // OPTIONNEL : Retirer le focus ou vider le champ
-                    // inputField.value = ''; 
-                    // inputField.blur();
-                }
-            });
+                    // // --- Logique de vérification de séquence ---
+
+                    // // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
+                    // if (keyPressed.length === 1) {
+                    //     // Affiche la lettre tapée dans un petit toast en bas de l'écran
+                    //     // Assurez-vous que la fonction afficherPopup est bien définie !
+                    //     afficherPopup(`Touche détectée : ${keyPressed}`);
+                    // }
+
+
+                    // // Ajouter la touche au tableau
+                    // if (keyPressed.length === 1) { // Ne prend en compte que les caractères simples
+                    //     sequenceEnCours.push(keyPressed);
+                    // }
+
+                    // afficherPopup(`clavier tactile  activé `, 5000);
+
+                    const currentValue = inputField.value;
+                    if (currentValue.length === 0) return; // Rien tapé
+
+                    // Obtient le DERNIER caractère tapé
+                    const lastKey = currentValue.slice(-1).toUpperCase(); 
+                    
+                    // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
+                    // Utiliser lastKey pour le débogage
+                    afficherPopup(`Touche (Input) détectée : ${lastKey}`, 1000, 30);
+
+
+                    // --- Logique de séquence ---
+
+                    // 1. Ajouter la dernière touche à la séquence en cours
+                    sequenceEnCours.push(lastKey);
+
+
+
+
+
+
+
+                    
+                    // Garde la taille de la séquence
+                    if (sequenceEnCours.length > SEQUENCE_SECRETE_MOBILE.length) {
+                        sequenceEnCours.shift();
+                    }
+
+                    // Vérification de la correspondance
+                    if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_MOBILE.join(',')) {
+                        activerModeExpert('hidePasswordActif');
+                        sequenceEnCours = []; // Réinitialise
+                        
+                        // // OPTIONNEL : Retirer le focus ou vider le champ
+                        // inputField.value = ''; 
+                        // inputField.blur();
+                    }
+                });
+            // });
         }
 
     }
