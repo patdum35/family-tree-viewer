@@ -1,5 +1,5 @@
 
-import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText, toggleFullScreen } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';

@@ -1396,12 +1396,7 @@ function createDisplaySection() {
   section.content.classList.add('compact-menu');
   document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
   
-  // const buttons = [
-  //   { onclick: 'zoomIn()', title: 'Zoom avant', text: '➕' },
-  //   { onclick: 'zoomOut()', title: 'Zoom arrière', text: '➖' },
-  //   { onclick: 'resetZoom()', title: 'Réinitialiser la vue', text: '🏠' },
-  //   { onclick: 'toggleFullScreen()', title: 'Plein écran', text: '⛶' }
-  // ];
+
   const buttons = [
     { onclick: () => {zoomIn();}, title: getMenuTranslation('zoomIn'), text: '➕' },
     { onclick: () => {zoomOut();}, title: getMenuTranslation('zoomOut'), text: '➖' },

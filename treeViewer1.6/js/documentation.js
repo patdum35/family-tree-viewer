@@ -400,6 +400,8 @@ async function runResourceInjection(resourceMetadata) {
 }
 
 
+let expertModeDisplayValue;
+
 // ----------------------------------------------------
 // 4. Fonction principale exportée (MAJ : `async` et appel à l'injection)
 // ----------------------------------------------------
@@ -408,6 +410,24 @@ async function runResourceInjection(resourceMetadata) {
 export function documentation() {
     // Détermine la langue (utilise 'fr' par défaut)
     const lang = window.CURRENT_LANGUAGE || 'fr'; 
+
+
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    // Lis la valeur de 'display' depuis les styles calculés
+    expertModeDisplayValue = window.getComputedStyle(secretTargetArea).getPropertyValue('display'); 
+
+    // Vous pouvez maintenant tester la valeur sans risque :
+    if (expertModeDisplayValue === 'none') {
+        console.log("L'élément est masqué (display: none)");
+    } else {
+        console.log(`L'élément est affiché (display: ${expertModeDisplayValue})`);
+    }
+
+    secretTargetArea.style.display = 'none';
+
+
+
+
 
     // Injecte les styles une seule fois
     if (!document.getElementById('doc-style')) {
@@ -454,6 +474,17 @@ function closeHelp() {
         modal.classList.remove('active');
     }
     document.body.style.overflow = '';
+
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+
+    // Vous pouvez maintenant tester la valeur sans risque :
+    if (expertModeDisplayValue === 'none') {
+        console.log("L'élément etair masqué (display: none)");
+    } else {
+        console.log(`L'élément doit être affiché (display: ${expertModeDisplayValue})`);
+        secretTargetArea.style.display = expertModeDisplayValue;
+    }
+
 }
 
 function closeHelpOnOverlay(event) {

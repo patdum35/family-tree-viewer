@@ -425,14 +425,19 @@ if (window._originalSetupElegantBackground) {
 }
 }
 
-export function toggleFullScreen(inversed = false) {
+export function toggleFullScreen(state = null) {
 
-    console.log('\n\n debug Toggle FullScreen')
+    // state can be 'fullScreenRequired' ou 'exitfullScreenRequired'
+    let isFullSreenRequested = (!document.fullscreenElement)
+    // isFullSreenRequested is true : si on est pas en fullScreen
+    if (state && state === 'fullScreenRequired') {
+        isFullSreenRequested = true;
+    } else if (state && state === 'exitfullScreenRequired') {
+        isFullSreenRequested = false;
+    }
 
-    let condition = (!document.fullscreenElement)
-    // condition is true : si on est pas en fullScreen
+//    console.log('\n\n debug Toggle FullScreen', state, ',condition=', isFullSreenRequested)
 
-    if (inversed) { condition = (document.fullscreenElement) ;}
 
     const fullScreenButton = document.getElementById('fullScreen-button');
     const fullScreenLabel = document.getElementById('fullScreenLabel');
@@ -441,7 +446,7 @@ export function toggleFullScreen(inversed = false) {
         const span = fullScreenButton.querySelector('span');
         if (span) {
             // span.textContent = (!condition) ? '🖥️' : '↩️';
-            if (!condition) {
+            if (!isFullSreenRequested) {
                 // Icône plein écran (flèches vers l’extérieur)
                 // span.textContent = '🖥️';
                 svgFull.style.display = '';
@@ -452,15 +457,16 @@ export function toggleFullScreen(inversed = false) {
                 svgExit.style.display = '';                
             }
         }
-        fullScreenLabel.textContent = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
-        fullScreenLabel.dataset.textKey = (!condition) ? 'fullScreenLabel' : 'normalScreenLabel';
+        // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
+        fullScreenLabel.textContent = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        fullScreenLabel.dataset.textKey = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
         window.i18n.updateUI();
     }
 
     // const browserBarButton = document.getElementById('browserBar-button');
     // const browserBarLabel = document.getElementById('browserBarLabel'); 
 
-    if (condition) {
+    if (isFullSreenRequested) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
@@ -472,7 +478,7 @@ export function toggleFullScreen(inversed = false) {
         }
         // browserBarButton.style.visibility = 'hidden'; 
         // browserBarLabel.style.visibility = 'hidden';
-        state.isPuzzleSwipe = false; 
+        // state.isPuzzleSwipe = false; 
         // const slot = document.getElementById('puzzleSlot'); 
         // const piece = document.getElementById('puzzlePiece'); 
         // const message = document.getElementById('puzzleMessage');
@@ -639,8 +645,11 @@ export function positionFormContainer() {
 
         let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
         let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
-        if (window.innerHeight < 400) { 
+        if (window.innerHeight < 400 && !document.fullscreenElement) { 
             formContainerPositionTop =  60;
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
+        } else if (window.innerHeight < 400 && document.fullscreenElement) { 
+            formContainerPositionTop =  50;
             startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
         }
         // if (state.isPuzzleSwipe) {
@@ -2098,13 +2107,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
+/**
+ * Bascule l'affichage du mot de passe entre 'text' (visible) et 'password' (masqué).
+ */
+function changePasswordVisibility(hidden = false) {
+    const passwordInput = document.getElementById('password');
+    
+    if (passwordInput) {
+        // Si l'input est 'text', on le passe en 'password' (masqué)
+        if (hidden) {
+            passwordInput.type = 'password';
+            console.log("Mode mot de passe : Masqué");
+        } 
+        // Si l'input est 'password', on le passe en 'text' (visible)
+        else {
+            passwordInput.type = 'text';
+            console.log("Mode mot de passe : Visible");
+        }
+    }
+}
 
 function secretMode() {
 
     // --- Configuration ---
     const CLASSE_CACHE = 'expert-hidden';
-    const KEY_STOCKAGE = 'modeExpertActif';
+    // const KEY_STOCKAGE = 'modeExpertActif';
+
+    // Configuration PC (séquence de touches)
+    const SEQUENCE_SECRETE_PC = ['S', 'E', 'C', 'R', 'E', 'T']; // "ADMIN" // attention ce sont les touches qwerty et pas azerti !!!
+    let sequenceEnCours = [];
+
 
     // Configuration Mobile et PC (click et taps)
     const TAP_COUNT_NECESSAIRE = 5;
@@ -2157,24 +2189,60 @@ function secretMode() {
 
 
     // --- Fonction d'Activation (où la modification a lieu) ---
-    const activerModeExpert = () => {
-        // 1. Afficher tous les éléments
+    const activerModeExpert = (mode) => {
+        // 1. si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
         document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
             el.classList.remove(CLASSE_CACHE);
         });
 
         // 2. Mémoriser l'état
-        localStorage.setItem(KEY_STOCKAGE, 'true');
+        localStorage.setItem(mode, 'true');
         
         // 3. Afficher le pop-up sympa !
-        afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        if (mode === 'modeExpertActif') {
+            afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'hidePasswordActif') {
+            changePasswordVisibility(true);
+            afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else {
+            changePasswordVisibility(false);
+        }
     };
 
 
     // --- 1. Persistance : Vérifier l'état au chargement ---
-    if (localStorage.getItem(KEY_STOCKAGE) === 'true') {
-        activerModeExpert();
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        activerModeExpert('modeExpertActif');
     }
+    if (localStorage.getItem('hidePasswordActif') === 'true') {
+        activerModeExpert('hidePasswordActif');
+    }
+
+
+    // ---2.  Activation PC : Écoute de la séquence de touches ---
+    document.addEventListener('keydown', (e) => {
+        // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
+        // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
+        const keyPressed = e.key.toUpperCase();
+        // console.log('\n\n debug secret mode keydown **************', keyPressed)
+
+        // Seules les lettres, chiffres et symboles peuvent faire partie de la séquence
+        if (keyPressed.length === 1 || SEQUENCE_SECRETE_PC.includes(keyPressed)) {
+            sequenceEnCours.push(keyPressed);
+        }
+
+        // Garde la taille de la séquence à vérifier
+        if (sequenceEnCours.length > SEQUENCE_SECRETE_PC.length) {
+            sequenceEnCours.shift();
+        }
+
+        // Vérification de la correspondance
+        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE_PC.join(',')) {
+            activerModeExpert('hidePasswordActif');
+            sequenceEnCours = []; // Réinitialise pour éviter une nouvelle activation
+        }
+    });
+
 
 
     // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
@@ -2183,10 +2251,10 @@ function secretMode() {
     if (secretTargetArea) {
         secretTargetArea.addEventListener('click', () => {
 
-            console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
+            // console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
 
             // Empêche l'activation si déjà actif
-            if (localStorage.getItem(KEY_STOCKAGE) === 'true') return;
+            if (localStorage.getItem('modeExpertActif') === 'true') return;
 
             tapCount++;
             
@@ -2197,7 +2265,7 @@ function secretMode() {
             }, 800);
 
             if (tapCount >= TAP_COUNT_NECESSAIRE) {
-                activerModeExpert();
+                activerModeExpert('modeExpertActif');
                 tapCount = 0; // Réinitialise
             }
         });
