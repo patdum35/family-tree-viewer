@@ -50,7 +50,6 @@ import {
 // import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
 
 let stopMonitoring = null;
-let svgFull, svgExit;
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -219,7 +218,8 @@ export const state = {
     heightDifferenceAtInit: 0,
     isbrowserBarHidden: false,
     isSpeechSynthesisAvailable: true,
-
+    svgFull: null,
+    svgExit: null,
 };
 
 export { geocodeLocation };
@@ -425,18 +425,18 @@ if (window._originalSetupElegantBackground) {
 }
 }
 
-export function toggleFullScreen(state = null) {
+export function toggleFullScreen(requestedstate = null) {
 
-    // state can be 'fullScreenRequired' ou 'exitfullScreenRequired'
+    // requestedstate can be 'fullScreenRequired' ou 'exitfullScreenRequired'
     let isFullSreenRequested = (!document.fullscreenElement)
     // isFullSreenRequested is true : si on est pas en fullScreen
-    if (state && state === 'fullScreenRequired') {
+    if (requestedstate && requestedstate === 'fullScreenRequired') {
         isFullSreenRequested = true;
-    } else if (state && state === 'exitfullScreenRequired') {
+    } else if (requestedstate && requestedstate === 'exitfullScreenRequired') {
         isFullSreenRequested = false;
     }
 
-   console.log('\n\n debug Toggle FullScreen with state=', state, ',isFullSreenRequested=', isFullSreenRequested)
+   console.log('\n\n debug Toggle FullScreen with requestedstate=', requestedstate, ',isFullSreenRequested=', isFullSreenRequested)
 
 
     const fullScreenButton = document.getElementById('fullScreen-button');
@@ -449,12 +449,12 @@ export function toggleFullScreen(state = null) {
             if (!isFullSreenRequested) {
                 // Icône plein écran (flèches vers l’extérieur)
                 // span.textContent = '🖥️';
-                svgFull.style.display = '';
-                svgExit.style.display = 'none';
+                state.svgFull.style.display = '';
+                state.svgExit.style.display = 'none';
             } else {
                 // Icône sortie plein écran (flèches vers l’intérieur)
-                svgFull.style.display = 'none';
-                svgExit.style.display = '';                
+                state.svgFull.style.display = 'none';
+                state.svgExit.style.display = '';                
             }
         }
         // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
@@ -488,11 +488,8 @@ export function toggleFullScreen(state = null) {
         //     message.style.visibility = 'hidden';
         // }
     } else {
-        // if (document.exitFullscreen) {
-        //     document.exitFullscreen();
-        // }
-        if (document.fullscreenElement) {
-            document.exitFullscreen().catch(err => console.error(err));
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
         }
 
         // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
@@ -866,13 +863,13 @@ function initialize() {
             // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
 
             // Créer les SVG une seule fois
-            svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
-            svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
+            state.svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
+            state.svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
 
-            svgExit.style.display = 'none'; // caché par défaut
+            state.svgExit.style.display = 'none'; // caché par défaut
 
-            span.appendChild(svgFull);
-            span.appendChild(svgExit);
+            span.appendChild(state.svgFull);
+            span.appendChild(state.svgExit);
         }
     }
 

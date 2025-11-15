@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap, positionFormContainer } from './main.js';
+import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
@@ -482,11 +482,11 @@ export function resetZoom() {
         loginBackground.remove();
     }
     
-    // Supprimer également tout autre conteneur de fond d'écran existant
-    const existingBackgroundContainer = document.querySelector('.background-container');
-    if (existingBackgroundContainer) {
-        existingBackgroundContainer.remove();
-    }
+    // // Supprimer également tout autre conteneur de fond d'écran existant
+    // const existingBackgroundContainer = document.querySelector('.background-container');
+    // if (existingBackgroundContainer) {
+    //     existingBackgroundContainer.remove();
+    // }
     
     // S'assurer que le body a la classe indiquant qu'on est en mode arbre
     document.body.classList.add('tree-view');
@@ -698,9 +698,6 @@ export async function returnToLogin() {
     // Masquer la carte
     hideMap();
 
-
-
-
     state.isRadarEnabled = false;
     disableFortuneModeWithLever();
     state.isRadarEnabled = false;
@@ -710,7 +707,11 @@ export async function returnToLogin() {
 
     disableFortuneModeClean();
 
-
+    // Supprimer également tout autre conteneur de fond d'écran existant
+    const existingBackgroundContainer = document.querySelector('.background-container');
+    if (existingBackgroundContainer) {
+        existingBackgroundContainer.remove();
+    }
 
     closeAllModals();
 
@@ -746,44 +747,41 @@ export async function returnToLogin() {
         }
     }
     
-    // // Quitter le mode plein écran si actif
+    // Quitter le mode plein écran si actif
     // if (document.fullscreenElement) {
     //     document.exitFullscreen().catch(err => console.error(err));
+
+    //     const fullScreenButton = document.getElementById('fullScreen-button');
+    //     const fullScreenLabel = document.getElementById('fullScreenLabel');
+    //     // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
+
+    //     if (fullScreenButton) {
+    //         const span = fullScreenButton.querySelector('span');
+    //         if (span) {
+    //             // Icône  plein écran (flèches vers l’extérieur)
+    //             state.svgFull.style.display = '';
+    //             state.svgExit.style.display = 'none';             
+    //         }
+
+    //         fullScreenLabel.textContent = 'fullScreenLabel';
+    //         fullScreenLabel.dataset.textKey = 'fullScreenLabel';
+    //         window.i18n.updateUI();
+    //     }
     // }
+
+    toggleFullScreen('exitfullScreenRequired');
 
 
     state.isTreeEnabled = false;
 
     positionFormContainer();
 
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    secretTargetArea.style.display = '';
 
 }
 
 window.returnToLogin = returnToLogin;
-
-// export function toggleFullScreen(inversed = false) {
-    
-//     let condition = (!document.fullscreenElement)
-//     if (inversed) { condition = (document.fullscreenElement) ;}
-    
-//     if (condition) {
-//         if (document.documentElement.requestFullscreen) {
-//             document.documentElement.requestFullscreen();
-//         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-//             document.documentElement.mozRequestFullScreen();
-//         } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
-//             document.documentElement.webkitRequestFullscreen();
-//         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-//             document.documentElement.msRequestFullscreen();
-//         }
-//     } else {
-//         if (document.exitFullscreen) {
-//             document.exitFullscreen();
-//         }
-//     }
-// }
-
-// window.toggleFullScreen = toggleFullScreen;
 
 // Fonction pour masquer le fond d'écran de connexion
 export function hideLoginBackground() {
