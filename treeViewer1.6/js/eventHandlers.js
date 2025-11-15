@@ -748,27 +748,6 @@ export async function returnToLogin() {
     }
     
     // Quitter le mode plein écran si actif
-    // if (document.fullscreenElement) {
-    //     document.exitFullscreen().catch(err => console.error(err));
-
-    //     const fullScreenButton = document.getElementById('fullScreen-button');
-    //     const fullScreenLabel = document.getElementById('fullScreenLabel');
-    //     // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
-
-    //     if (fullScreenButton) {
-    //         const span = fullScreenButton.querySelector('span');
-    //         if (span) {
-    //             // Icône  plein écran (flèches vers l’extérieur)
-    //             state.svgFull.style.display = '';
-    //             state.svgExit.style.display = 'none';             
-    //         }
-
-    //         fullScreenLabel.textContent = 'fullScreenLabel';
-    //         fullScreenLabel.dataset.textKey = 'fullScreenLabel';
-    //         window.i18n.updateUI();
-    //     }
-    // }
-
     toggleFullScreen('exitfullScreenRequired');
 
 

@@ -488,7 +488,8 @@ export function toggleFullScreen(requestedstate = null) {
         //     message.style.visibility = 'hidden';
         // }
     } else {
-        if (document.exitFullscreen) {
+        // if (document.exitFullscreen) {
+        if (document.fullscreenElement) {
             document.exitFullscreen();
         }
 
@@ -1030,7 +1031,12 @@ export async function loadData(isfromNonEncryptedFile = '') {
         if (!state.isPWA && state.isbrowserBarHidden) {
             // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
         }
-        else { toggleFullScreen();}
+        else { 
+            if (localStorage.getItem('noFullScreenActif') === 'true') {
+            } else {
+                toggleFullScreen('fullScreenRequired');
+            }
+        }
     }
 
     // for mobile phone
@@ -2139,9 +2145,11 @@ function secretMode() {
     // const KEY_STOCKAGE = 'modeExpertActif';
 
     // Configuration PC (séquence de touches)
-    const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; // "ADMIN" // attention ce sont les touches qwerty et pas azerti !!!
-    let sequenceEnCours = [];
+    const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
+    const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
 
+    let sequenceEnCours = [];
+    let sequenceNoFullScreenEnCours = [];
     // Configuration Mobile et PC (click et taps)
     const TAP_COUNT_NECESSAIRE = 5;
     let tapCount = 0;
@@ -2217,6 +2225,8 @@ function secretMode() {
         } else if (mode === 'hidePasswordActif') {
             changePasswordVisibility(true);
             afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'noFullScreenActif') {
+            afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
         } else {
             changePasswordVisibility(false);
         }
@@ -2230,7 +2240,9 @@ function secretMode() {
     if (localStorage.getItem('hidePasswordActif') === 'true') {
         activerModeExpert('hidePasswordActif');
     }
-
+    if (localStorage.getItem('noFullScreenActif') === 'true') {
+        activerModeExpert('noFullScreenActif');
+    }
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
 
@@ -2254,10 +2266,14 @@ function secretMode() {
                 // --- Logique de séquence ---
                 // 1. Ajouter la dernière touche à la séquence en cours
                 sequenceEnCours.push(lastKey);
+                sequenceNoFullScreenEnCours.push(lastKey);
 
                 // Garde la taille de la séquence
                 if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
                     sequenceEnCours.shift();
+                }
+                if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
+                    sequenceNoFullScreenEnCours.shift();
                 }
 
                 // Vérification de la correspondance
@@ -2265,6 +2281,11 @@ function secretMode() {
                     activerModeExpert('hidePasswordActif');
                     sequenceEnCours = []; // Réinitialise
                 }
+                if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
+                    activerModeExpert('noFullScreenActif');
+                    sequenceNoFullScreenEnCours = []; // Réinitialise
+                }
+
             });
         }
     }
@@ -2280,10 +2301,16 @@ function secretMode() {
         if (keyPressed.length === 1 || SEQUENCE_SECRETE.includes(keyPressed)) {
             sequenceEnCours.push(keyPressed);
         }
+        if (keyPressed.length === 1 || SEQUENCE_NOFULLSCREEN.includes(keyPressed)) {
+            sequenceNoFullScreenEnCours.push(keyPressed);
+        }
 
         // Garde la taille de la séquence à vérifier
         if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
             sequenceEnCours.shift();
+        }
+        if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
+            sequenceNoFullScreenEnCours.shift();
         }
 
         // Vérification de la correspondance
@@ -2291,6 +2318,11 @@ function secretMode() {
             activerModeExpert('hidePasswordActif');
             sequenceEnCours = []; // Réinitialise pour éviter une nouvelle activation
         }
+        if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
+            activerModeExpert('noFullScreenActif');
+            sequenceNoFullScreenEnCours = []; // Réinitialise
+        }
+
     });
 
 
