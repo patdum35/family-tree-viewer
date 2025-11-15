@@ -2227,15 +2227,29 @@ function secretMode() {
 
     console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
+
+
+
     if (state.isMobile && state.isTouchDevice) {
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
+
+            afficherPopup(`clavier tactile  détectée `);
+
             // Écouter l'événement directement sur le champ de saisie
             inputField.addEventListener('keyup', (e) => {
                 const keyPressed = e.key.toUpperCase();
                 
                 // --- Logique de vérification de séquence ---
-                
+
+                // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
+                if (keyPressed.length === 1) {
+                    // Affiche la lettre tapée dans un petit toast en bas de l'écran
+                    // Assurez-vous que la fonction afficherPopup est bien définie !
+                    afficherPopup(`Touche détectée : ${keyPressed}`);
+                }
+
+
                 // Ajouter la touche au tableau
                 if (keyPressed.length === 1) { // Ne prend en compte que les caractères simples
                     sequenceEnCours.push(keyPressed);
