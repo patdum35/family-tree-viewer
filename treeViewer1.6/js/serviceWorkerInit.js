@@ -263,7 +263,7 @@ async function isServerAvailable() {
 
 
 // Fonction principale pour vider le cache
-window.clearAppCache = async function() {
+window.SWUpdate = async function() {
     console.log('🔍 Vérification de l\'environnement...');
     
     // Détecter l'environnement d'exécution
@@ -347,7 +347,7 @@ window.clearAppCache = async function() {
         window.alert(message);
         
         // Fermer la modal si elle est ouverte
-        const modal = document.getElementById('gedcom-modal');
+        const modal = document.getElementById('advanced-settings-modal');
         if (modal && modal.style.display === 'block') {
             closeGedcomModal();
         }

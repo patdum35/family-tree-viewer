@@ -70,7 +70,7 @@ class PWAInstaller {
         if (this.installButton) return;
 
         // Trouver le conteneur dans la modal gedcom
-        const modalContent = document.querySelector('#gedcom-modal div[style*="padding: 20px"]');
+        const modalContent = document.querySelector('#advanced-settings-modal div[style*="padding: 20px"]');
         if (!modalContent) {
             console.warn('[PWA Installer] Conteneur de modal non trouvé, tentative différée...');
             // Réessayer plus tard
@@ -107,9 +107,9 @@ class PWAInstaller {
         });
         
         // Insérer le bouton avant le bouton "Activer les logs"
-        const debugBtn = document.getElementById('activateDebugLogsBtn');
-        if (debugBtn) {
-            debugBtn.parentNode.insertBefore(this.installButton, debugBtn);
+        const labelGedFile = document.getElementById('labelGedFile');
+        if (labelGedFile) {
+            labelGedFile.parentNode.insertBefore(this.installButton, labelGedFile);
         } else {
             // Fallback : ajouter à la fin du conteneur
             modalContent.appendChild(this.installButton);

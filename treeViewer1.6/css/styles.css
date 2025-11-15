@@ -100,7 +100,30 @@ body {
 }
 
 
+#advancedSettingsClose-btn {
+    /* BASE : PLUS GROS */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px; /* Augmenté à 40px */
+    height: 40px; /* Augmenté à 40px */
+    border-radius: 50%; 
+    font-size: 36px !important; /* Rendre le 'X' plus visible */
+    
+    /* COULEURS AU REPOS (Gris/Transparent pour la discrétion) */
+    background-color: transparent; 
+    color: #333 !important; 
+    border: 1px solid #B0BEC5; /* AJOUT : Bordure ronde grise claire */
 
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s; /* Ajout du border-color à la transition */
+    margin-left: 10px;
+}
+
+/* Style de survol (Hover effect) : Rond rouge, X blanc */
+#advancedSettingsClose-btn:hover {
+    background-color: #F44336; /* Rouge vif au survol */
+    color: white !important; /* X blanc au survol */
+}
 
 
 

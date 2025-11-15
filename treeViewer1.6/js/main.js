@@ -239,11 +239,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 function openGedcomModal() {
-    document.getElementById('gedcom-modal').style.display = 'block';
+    document.getElementById('advanced-settings-modal').style.display = 'block';
 }
 
 function closeGedcomModal() {
-    document.getElementById('gedcom-modal').style.display = 'none';
+    document.getElementById('advanced-settings-modal').style.display = 'none';
 }
 
 // ajoutez des options pour différents types de heatmap
