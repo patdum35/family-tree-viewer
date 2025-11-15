@@ -2237,7 +2237,7 @@ function secretMode() {
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
             // Écouter l'événement directement sur le champ de saisie
-            afficherPopup(`clavier tactile  détectée `, 5000, );
+            // afficherPopup(`clavier tactile  détectée `, 5000, );
 
             inputField.addEventListener('input', (e) => {
                 const currentValue = inputField.value;
