@@ -1033,7 +1033,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
         }
         else { 
             if (localStorage.getItem('noFullScreenActif') === 'true') {
-            } else {
+            } else if (window.innerWidth < 500 && window.innerHeight > 600) { // mode portrait
                 toggleFullScreen('fullScreenRequired');
             }
         }
@@ -1156,6 +1156,10 @@ export async function loadData(isfromNonEncryptedFile = '') {
         // toggleFullScreen();
 
 
+
+
+
+
         setTimeout(() => {
             positionRadarButton();
             positionHeatMapButton();
@@ -1167,6 +1171,27 @@ export async function loadData(isfromNonEncryptedFile = '') {
         setTimeout(() => {
             buttonsOnDisplay(false);
         }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!   
+
+
+        
+
+        // pour bug flash noir en mode mobile landscape
+        if (state.isMobile && state.isTouchDevice ) {
+            if (!state.isPWA && state.isbrowserBarHidden) {
+                // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+            }
+            else { 
+                if (localStorage.getItem('noFullScreenActif') === 'true') {
+                } else if (window.innerWidth > 600 && window.innerHeight < 500) { // mode lanscape
+                    setTimeout(() => {
+                        toggleFullScreen('fullScreenRequired');
+                    }, 300); 
+                }
+            }
+        }
+
+
+
 
 
 
