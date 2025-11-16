@@ -2143,7 +2143,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
 /**
  * Bascule l'affichage du mot de passe entre 'text' (visible) et 'password' (masqué).
  */
@@ -2167,9 +2166,8 @@ function changePasswordVisibility(hidden = false) {
 function secretMode() {
     // --- Configuration ---
     const CLASSE_CACHE = 'expert-hidden';
-    // const KEY_STOCKAGE = 'modeExpertActif';
 
-    // Configuration PC (séquence de touches)
+    // Configuration séquence de touches
     const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
     const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
 
@@ -2233,7 +2231,6 @@ function secretMode() {
         }, duration); // Reste affiché pendant 3 secondes
     };
 
-
     // --- Fonction d'Activation (où la modification a lieu) ---
     const activerModeExpert = (mode) => {
         // 1. si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
@@ -2270,13 +2267,10 @@ function secretMode() {
     }
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
-
     if (state.isMobile && state.isTouchDevice) {
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
             // Écouter l'événement directement sur le champ de saisie
-            // afficherPopup(`clavier tactile  détectée `, 5000, );
-
             inputField.addEventListener('input', (e) => {
                 const currentValue = inputField.value;
                 if (currentValue.length === 0) return; // Rien tapé
@@ -2310,7 +2304,6 @@ function secretMode() {
                     activerModeExpert('noFullScreenActif');
                     sequenceNoFullScreenEnCours = []; // Réinitialise
                 }
-
             });
         }
     }
@@ -2347,9 +2340,7 @@ function secretMode() {
             activerModeExpert('noFullScreenActif');
             sequenceNoFullScreenEnCours = []; // Réinitialise
         }
-
     });
-
 
     // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
     const secretTargetArea = document.getElementById('secret-trigger-area');
@@ -2358,7 +2349,6 @@ function secretMode() {
         secretTargetArea.addEventListener('click', () => {
 
             // console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
-
             // Empêche l'activation si déjà actif
             if (localStorage.getItem('modeExpertActif') === 'true') return;
 
@@ -2379,7 +2369,6 @@ function secretMode() {
         console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
     }
 }
-
 
 
 function detectInputType() {

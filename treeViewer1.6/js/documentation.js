@@ -508,8 +508,8 @@ function addModalListeners() {
 
 function switchTab(tabName, clickedButton) {
     // 1. Désactiver tous les onglets
-    document.querySelectorAll('.modal-tabs .tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.modal-content-container .tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.docModal-tabs .docTab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.docModal-content-container .docTab-content').forEach(content => content.classList.remove('active'));
 
     // 2. Activer l'onglet sélectionné
     if (clickedButton) {
@@ -537,18 +537,18 @@ function switchTab(tabName, clickedButton) {
 function createDocumentationModal() {
     // Crée la structure principale du modal
     const modalHTML = `
-        <div class="modal-overlay" id="helpModal">
+        <div class="docModal-overlay" id="helpModal">
             <div class="help-modal">
-                <div class="modal-header">
-                    <h2 id="modal-title"></h2>
+                <div class="docModal-header">
+                    <h2 id="docModal-title"></h2>
                     <button class="close-button" onclick="closeHelp()">&times;</button>
                 </div>
 
-                <div class="modal-tabs" id="modal-tabs-nav">
-                    </div>
+                <div class="docModal-tabs" id="docModal-tabs-nav">
+                </div>
 
-                <div class="modal-content-container" id="modal-content-container"> 
-                    </div>
+                <div class="docModal-content-container" id="docModal-content-container"> 
+                </div>
             </div>
         </div>
     `;
@@ -559,10 +559,10 @@ function createDocumentationModal() {
  * Met à jour le contenu avec l'objet de contenu de la langue sélectionnée et génère les tabs.
  */
 function updateDocumentationContent(content) {
-    document.getElementById('modal-title').innerHTML = content.title;
+    document.getElementById('docModal-title').innerHTML = content.title;
 
-    const tabsNav = document.getElementById('modal-tabs-nav');
-    const contentContainer = document.getElementById('modal-content-container');
+    const tabsNav = document.getElementById('docModal-tabs-nav');
+    const contentContainer = document.getElementById('docModal-content-container');
     tabsNav.innerHTML = '';
     contentContainer.innerHTML = ''; 
     
@@ -575,7 +575,7 @@ function updateDocumentationContent(content) {
         // Création du bouton (Tab)
         const btn = document.createElement('button');
         // On utilise l'index pour appliquer une classe CSS générique (tab-index-0, tab-index-1, ...)
-        btn.className = `tab-button tab-index-${tabIndex % 10}`; // Utiliser le modulo pour recycler les 10 couleurs
+        btn.className = `docTab-button tab-index-${tabIndex % 10}`; // Utiliser le modulo pour recycler les 10 couleurs
         btn.textContent = name;
 
         // 💥 MODIFICATION ICI : Insérer le texte long et le texte court avec des classes
@@ -594,7 +594,7 @@ function updateDocumentationContent(content) {
 
         // Création du contenu (Content Div)
         const tabContentDiv = document.createElement('div');
-        tabContentDiv.className = 'tab-content';
+        tabContentDiv.className = 'docTab-content';
         tabContentDiv.id = id; // L'ID sert à lier le bouton au contenu
         // tabContentDiv.innerHTML = content[id] || '';
 
@@ -633,7 +633,7 @@ function updateDocumentationContent(content) {
     }
     
     // // Activer le premier onglet par défaut
-    const firstButton = tabsNav.querySelector('.tab-button');
+    const firstButton = tabsNav.querySelector('.docTab-button');
     if (firstButton) {
         switchTab(firstTabId, firstButton);
     }
@@ -682,15 +682,17 @@ function injectStyles() {
             --color-text-dark: #333;
         }
     
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* //  * { margin: 0; padding: 0; box-sizing: border-box; } */     /* le box-sizing: border-box; provoque un bug sur la barre de titre des autres modals */
+
+        * { margin: 0; padding: 0; }
         
         /* CORRECTION MAJEURE: Centrage Vertical/Horizontal et positionnement */
-        .modal-overlay {
+        .docModal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
             z-index: 2000; animation: fadeIn 0.3s ease;
         }
-        .modal-overlay.active {
+        .docModal-overlay.active {
             display: flex; 
             justify-content: center; /* Centre horizontalement */
             align-items: flex-start; /* Commence en haut pour ne pas cacher le haut sur mobile */
@@ -712,12 +714,17 @@ function injectStyles() {
         }
 
         /* En-tête */
-        .modal-header {
+        .docModal-header {
             background: var(--color-header-bg);
             color: white; padding: 5px 30px; display: flex;
             justify-content: space-between; align-items: center; flex-shrink: 0;
+
+            // border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+
+
         }
-        .modal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin: 0; line-height: 1.1;}
+        .docModal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin: 0; line-height: 1.1;}
 
         /* Bouton de Fermeture */
         .close-button {
@@ -728,12 +735,12 @@ function injectStyles() {
         .close-button:hover { background: #a82e38; transform: scale(1.1) rotate(90deg); }
 
         /* Style des Scrollbars Modernes */
-        .modal-content-container, .modal-tabs, .modal-overlay.active { 
+        .docModal-content-container, .docModal-tabs, .docModal-overlay.active { 
             /* Règle CSS pour cibler tous les conteneurs avec scroll */
             scrollbar-width: thin; /* Firefox */
             scrollbar-color: #c4c4c4 transparent; /* Firefox */
         }
-        .modal-content-container, .modal-tabs, .modal-overlay.active { 
+        .docModal-content-container, .docModal-tabs, .docModal-overlay.active { 
             /* Scrollbar pour Webkit (Chrome, Safari, Edge) */
             &::-webkit-scrollbar { width: 5px; height: 5px; }
             &::-webkit-scrollbar-track { background: transparent; }
@@ -744,8 +751,8 @@ function injectStyles() {
         }
 
 
-        /* --- Bloc 1 : .modal-tabs --- */
-        .modal-tabs {
+        /* --- Bloc 1 : .docModal-tabs --- */
+        .docModal-tabs {
             display: flex; 
             background: #e9ecef; 
             border-bottom: 2px solid #e0e0e0; 
@@ -758,8 +765,8 @@ function injectStyles() {
             padding-right: 20px;
         }
 
-        /* --- Bloc 2 : .tab-button --- */
-        .tab-button {
+        /* --- Bloc 2 : .docTab-button --- */
+        .docTab-button {
             /* flex-basis: 0; */
             flex-basis: 0; /*60px;*/
             flex-grow: 0;
@@ -789,14 +796,14 @@ function injectStyles() {
 
 
         /* --- Styles par Défaut (Grand Écran) --- */
-        .tab-button .tab-text-long {
+        .docTab-button .tab-text-long {
             display: inline; /* Affiché par défaut sur grand écran */
         }
-        .tab-button .tab-text-short {
+        .docTab-button .tab-text-short {
             display: none; /* Caché par défaut */
         }
 
-        .tab-button:hover { filter: brightness(1.1); } 
+        .docTab-button:hover { filter: brightness(1.1); } 
 
         /* --- COULEURS GÉNÉRIQUES PAR INDEX --- */
         /* TABS NON SÉLECTIONNÉS (Fond Pastel Moyen/Saturé) */
@@ -814,7 +821,7 @@ function injectStyles() {
 
 
         /* TABS ACTIFS (Fond Pastel CLAIR) */
-        .tab-button.active {
+        .docTab-button.active {
             color: var(--color-text-dark) !important; 
             font-weight: 700;
             box-shadow: 0 -3px 5px rgba(0, 0, 0, 0.1); 
@@ -846,14 +853,14 @@ function injectStyles() {
 
         /* Contenu */
         /* Correction de l'ascenseur vertical */
-        .modal-content-container { 
+        .docModal-content-container { 
             max-height: calc(90vh - 130px); 
             overflow-y: auto; 
             padding: 0px;  
             flex-grow: 1; 
         }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        .docTab-content { display: none; }
+        .docTab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
 
         /* Autres styles de contenu */
@@ -920,7 +927,7 @@ function injectStyles() {
     /* NOUVEAU: Optimisation Mobile (Max 400px) */
     /* ------------------------------------------- */
     @media (max-width: 400px) {
-        .tab-button {
+        .docTab-button {
             flex-basis: 77px;
             flex-grow: 0;
             flex-shrink: 0;
@@ -934,24 +941,24 @@ function injectStyles() {
         }
 
         /* Cacher le texte long et afficher le texte court/icône */
-        .tab-button .tab-text-short {
+        .docTab-button .tab-text-short {
             display: inline; /* Afficher le texte court (l'icône) */
         }
-        .tab-button .tab-text-long {
+        .docTab-button .tab-text-long {
             display: none; /* Masquer le texte long */
         }
 
     }
 
     @media (max-height: 400px) {
-        .tab-button {
+        .docTab-button {
             font-size: 14px;
         }
     }
 
     @media (max-width: 400px), (max-height: 400px) {
         /* 1. OCCUPER TOUT L'ESPACE & REDUIRE LES ARRONDIS */
-        .modal-overlay.active {
+        .docModal-overlay.active {
             padding: 1px; /* Supprime l'espace autour du modal */
             align-items: stretch; /* Étend le modal pour remplir la hauteur */
             justify-content: stretch; /* Étend le modal pour remplir la largeur */
@@ -966,11 +973,11 @@ function injectStyles() {
         }
 
         /* 2. RÉDUIRE TOUS LES PADDINGS */
-        .modal-header {
+        .docModal-header {
             padding: 7px 15px; /* Réduit le padding de l'en-tête (de 20px 30px à 15px) */
         }
 
-        .modal-header h2 {
+        .docModal-header h2 {
             font-size: 18px; margin: 0; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
         }
 
@@ -980,7 +987,7 @@ function injectStyles() {
             font-size: 20px;
         }
 
-        .modal-content-container { 
+        .docModal-content-container { 
             /*padding: 15px;  Réduit le padding du contenu principal (de 30px à 15px) */
             /* Recalcul de la hauteur maximale pour remplir tout l'espace */
             max-height: calc(100vh - 100px); 
