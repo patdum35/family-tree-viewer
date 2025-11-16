@@ -5,7 +5,6 @@ import { testRealConnectivity } from './treeAnimation.js'
 import { fetchResourceWithCache } from './resourcePreloader.js';
 
 
-
 /**
  * Obtient simplement le chemin du répertoire du HTML actuel
  * @returns {string} Le chemin du répertoire
@@ -25,8 +24,6 @@ function getCurrentDirectory() {
     // Si pas de barre, retourner l'URL complète (cas rare)
     return currentUrl;
 }
-
-
 
 /**
  * Récupère le toto
@@ -249,9 +246,6 @@ export async function getCachedResourceUrl(relativePath) {
     }
 }
 
-
-
-
 /**
  * Résout simplement un chemin relatif par rapport au répertoire actuel
  * @param {string} relativePath - Chemin relatif (avec ou sans /)
@@ -264,7 +258,6 @@ function getResourceUrl(relativePath) {
     // Combiner avec le répertoire courant
     return `${getCurrentDirectory()}${normalizedPath}`;
 }
-
 
 /**
  * Affiche une image dans un conteneur déplaçable et redimensionnable
@@ -410,7 +403,6 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     return photoContainer;
 }
 
-
 /**
  * Ferme la photo d'animationk
  */
@@ -428,7 +420,6 @@ export function closeAnimationPhoto() {
         photoContainer.parentNode.removeChild(photoContainer);
     }
 }
-
 
 /**
  * Configure le redimensionnement manuel de la photo
@@ -541,12 +532,6 @@ function setupPhotoResize(container, handle) {
     }
 }
 
-
-
-
-
-
-
 /**
  * Appeler cette fonction à la fin de startAncestorAnimation pour afficher la photo
  */
@@ -647,4 +632,3 @@ export async function showEndAnimationPhoto(nodeName) {
         // Afficher un message d'erreur ou une image par défaut
     }
 }
-

@@ -730,7 +730,7 @@ function initialize() {
                     loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
                 }
             }
-        }, 10); // Petit délai pour s'assurer que tout est prêt   
+        }, 100); // Petit délai pour s'assurer que tout est prêt   
     }
      // Initialiser le sélecteur de générations standard d'abord
     // (nécessaire pour sa création avant de le remplacer)

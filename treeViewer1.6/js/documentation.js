@@ -689,8 +689,11 @@ function injectStyles() {
         /* CORRECTION MAJEURE: Centrage Vertical/Horizontal et positionnement */
         .docModal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
-            z-index: 2000; animation: fadeIn 0.3s ease;
+            /*  background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); */
+            background: rgba(150, 150, 150, 0.3); backdrop-filter: none; 
+            /* Gris léger (150, 150, 150) et très transparent (0.2) */
+            z-index: 2000; animation: none
+            animation: fadeIn 0.3s ease; 
         }
         .docModal-overlay.active {
             display: flex; 
@@ -706,7 +709,7 @@ function injectStyles() {
             max-height: 90vh; /* Augmenté légèrement pour mieux s'adapter */
             overflow: hidden; 
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
             margin: 0; /* Supprime l'ancienne marge */
             /* Ajout pour la correction de l'ascenseur vertical */
             display: flex; 

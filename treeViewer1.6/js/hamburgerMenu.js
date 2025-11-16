@@ -591,12 +591,25 @@ function updateHeightClass() {
   const height = window.innerHeight;
   document.documentElement.classList.remove('small-screen', 'medium-screen');
   
+  const demoSelector = document.getElementById('menu-demo-selector')
   if (height < 400) { // mode paysage
     document.documentElement.classList.add('small-screen');
+    if (demoSelector) {
+      demoSelector.setDropdownMaxHeight('170px');
+      // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
+    }
   } else if (height < 800) { //mode portrait
     document.documentElement.classList.add('medium-screen');
+    if (demoSelector) {
+      demoSelector.setDropdownMaxHeight('300px');
+      // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
+    }
   } else {
-      document.documentElement.classList.add('medium-screen');
+    document.documentElement.classList.add('medium-screen');
+    if (demoSelector) {
+      demoSelector.setDropdownMaxHeight('300px');
+      // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
+    }
   }
   // Pas de classe pour les grands écrans pour préserver le layout original
 }
@@ -1553,7 +1566,7 @@ function createDemoSelector() {
   // Vérifier si le sélecteur existe déjà
   if (document.getElementById('menu-demo-selector')) {
     console.log("Le sélecteur de démo existe déjà");
-    return; // Ne pas recréer s'il existe déjà
+    // return; // Ne pas recréer s'il existe déjà
   }
 
   // Vérifier si le placeholder existe
@@ -1628,10 +1641,11 @@ function createDemoSelector() {
     // On ne change les valeurs que pour les petits écrans
     let selectorSettings = {
       dimensions: {
-        width: '50px', // Valeur originale
-        height: '25px', // Valeur originale
+        width: '60px', // Valeur originale
+        height: '30px', // '25px' Valeur originale
         dropdownWidth: '190px', // Valeur originale
-        dropdownHeight: '100px' // Valeur originale
+        // dropdownHeight: '100px' // Valeur originale
+        dropdownMaxHeight: '300px' // Valeur originale
       },
       padding: {
         display: { x: 4, y: 1 }, // Valeurs originales
@@ -1646,21 +1660,23 @@ function createDemoSelector() {
     
     // Modifier seulement pour les petits écrans
     if (height < 400) {
-      selectorSettings.dimensions.width = '45px';
-      selectorSettings.dimensions.height = '20px';
+      selectorSettings.dimensions.width = '60px'; //'45px';
+      selectorSettings.dimensions.height = '30px'; //'20px';
       selectorSettings.dimensions.dropdownWidth = '180px';
-      selectorSettings.dimensions.dropdownHeight = '160px';
+      // selectorSettings.dimensions.dropdownHeight = '50px';
+      selectorSettings.dimensions.dropdownMaxHeight = '170px';
       selectorSettings.padding.display.x = 3;
-      selectorSettings.arrow.size = 4;
-      selectorSettings.arrow.offset.x = -4;
+      selectorSettings.arrow.size = 5; //4;
+      selectorSettings.arrow.offset.x = -5; //-4;
     } else if (height < 800) {
-      selectorSettings.dimensions.width = '45px';
-      selectorSettings.dimensions.height = '22px';
+      selectorSettings.dimensions.width = '60px'; //'45px';
+      selectorSettings.dimensions.height = '30px'; //'22px';
       selectorSettings.dimensions.dropdownWidth = '180px';
-      selectorSettings.dimensions.dropdownHeight = '240px';
+      // selectorSettings.dimensions.dropdownHeight = '240px';
+      selectorSettings.dimensions.dropdownMaxHeight = '300px';
       selectorSettings.padding.display.x = 3;
       selectorSettings.arrow.size = 5;
-      selectorSettings.arrow.offset.x = -4;
+      selectorSettings.arrow.offset.x = -5; //-4;
     }
     
     // Configurer le sélecteur personnalisé directement avec la fonction importée
@@ -1690,10 +1706,10 @@ function createDemoSelector() {
         optionElement.style.textAlign = 'center';
         
         if (window.innerHeight < 400) {
-          optionElement.style.padding = '6px 8px';
-          optionElement.style.fontSize = '12px';
+          optionElement.style.padding = '10px 8px'; //'6px 8px';
+          optionElement.style.fontSize = '13px'; //'12px';
         } else if (window.innerHeight < 800) {
-          optionElement.style.padding = '7px 8px';
+          optionElement.style.padding = '10px 8px'; //'7px 8px';
           optionElement.style.fontSize = '13px';
         } else {  
           // Valeurs originales pour les grands écrans

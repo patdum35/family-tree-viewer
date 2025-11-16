@@ -1431,31 +1431,75 @@ export function createImageSelectorDialog(onSelect) {
     dialog.style.left = '50%';
     dialog.style.transform = 'translate(-50%, -50%)';
     dialog.style.backgroundColor = 'white';
-    dialog.style.padding = '20px';
+    dialog.style.padding = '10px';
     dialog.style.borderRadius = '8px';
     dialog.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
     dialog.style.zIndex = '10000';
-    dialog.style.maxWidth = '90%';
+    dialog.style.maxWidth = '92%';
+    dialog.style.minWidth = '300px';
     dialog.style.maxHeight = '80%';
     dialog.style.overflow = 'auto';
     
     // Titre
     const title = document.createElement('h3');
     title.textContent = 'Sélectionner une image de fond';
-    title.style.marginTop = '0';
-    title.style.marginBottom = '10px';
+    title.style.marginTop = '-10px';
+    title.style.marginLeft = '-10px';
+    title.style.marginRight = '-10px';
+    title.style.marginBottom = '5px';
+    title.style.paddingLeft = '15px';
+    title.style.paddingRight = '40px';
+    title.style.paddingTop= '10px';
+    title.style.paddingBottom = '10px';
+    title.style.fontSize = '18px';
+    title.style.backgroundColor = '#c9e6f6ff';
     dialog.appendChild(title);
     
     // Bouton de fermeture
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
+    closeButton.style.top = '5px';
+    closeButton.style.right = '3px';
     closeButton.style.border = 'none';
     closeButton.style.background = 'none';
-    closeButton.style.fontSize = '20px';
+    closeButton.style.width = '32px';
+    closeButton.style.height = '32px';
+    closeButton.style.fontSize = '28px';
+    closeButton.style.lineHeight = '32px'; // Pour centrer le '×'
+    closeButton.style.textAlign = 'center';
+    closeButton.style.border = '1px solid #a09f9fff'; // Bordure
+    closeButton.style.borderRadius = '50%'; // Cercle
+    closeButton.style.backgroundColor = '#c9e6f6ff';
+    closeButton.style.color = '#333';
     closeButton.style.cursor = 'pointer';
+
+    // Gestion de l'effet HOVER en JS
+    const defaultStyles = {
+        borderColor: '#a09f9fff',
+        backgroundColor: '#c9e6f6ff',
+        color: '#333',
+        // transform: 'scale(1)',
+    };
+
+    const hoverStyles = {
+        borderColor: '#c0392b',
+        backgroundColor: '#e74c3c',
+        color: 'white',
+        // transform: 'scale(1.1)',
+    };
+
+    // Fonction pour appliquer les styles au survol
+    closeButton.addEventListener('mouseover', () => {
+        Object.assign(closeButton.style, hoverStyles);
+    });
+
+    // Fonction pour remettre les styles par défaut
+    closeButton.addEventListener('mouseout', () => {
+        Object.assign(closeButton.style, defaultStyles);
+    });
+
+
     closeButton.onclick = () => dialog.remove();
     dialog.appendChild(closeButton);
     
@@ -1463,8 +1507,8 @@ export function createImageSelectorDialog(onSelect) {
     const imageContainer = document.createElement('div');
     imageContainer.style.display = 'grid';
     imageContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-    imageContainer.style.gap = '10px';
-    imageContainer.style.marginTop = '15px';
+    imageContainer.style.gap = '7px';
+    imageContainer.style.marginTop = '5px';
     dialog.appendChild(imageContainer);
     
     
@@ -1472,7 +1516,7 @@ export function createImageSelectorDialog(onSelect) {
     // Option pour télécharger une image personnalisée
     const uploadSection = document.createElement('div');
     uploadSection.style.gridColumn = '1 / -1';
-    uploadSection.style.marginTop = '20px';
+    uploadSection.style.marginTop = '5px';
     uploadSection.style.padding = '10px';
     uploadSection.style.backgroundColor = '#f5f5f5';
     uploadSection.style.borderRadius = '4px';
@@ -1481,14 +1525,14 @@ export function createImageSelectorDialog(onSelect) {
     const uploadTitle = document.createElement('h4');
     uploadTitle.textContent = 'Télécharger une image';
     uploadTitle.style.marginTop = '0';
-    uploadTitle.style.marginBottom = '10px';
+    uploadTitle.style.marginBottom = '5px';
     uploadSection.appendChild(uploadTitle);
     
     const uploadInput = document.createElement('input');
     uploadInput.type = 'file';
     uploadInput.accept = 'image/*';
     uploadInput.style.width = '100%';
-    uploadInput.style.marginBottom = '10px';
+    uploadInput.style.marginBottom = '5px';
     uploadSection.appendChild(uploadInput);
     
     uploadInput.addEventListener('change', function(event) {
@@ -1507,10 +1551,18 @@ export function createImageSelectorDialog(onSelect) {
     
     
     // Liste des dossiers à explorer
-    const folders = [
-        'background_images',
+    let folders = [
+        'background_images/highQuality',
         // 'background_images_download'
     ];
+
+    if (window.innerWidth < 500 || window.innerHeight < 500 ) {
+       folders = [
+        'background_images/lowQuality',
+        // 'background_images_download'
+        ];  
+    }
+
     
     // Créer un titre pour chaque dossier
     folders.forEach(folder => {
@@ -1519,21 +1571,17 @@ export function createImageSelectorDialog(onSelect) {
         folderTitle.textContent = folder === 'background_images' ? 'Images intégrées' : 'Images téléchargées';
         folderTitle.style.gridColumn = '1 / -1';
         folderTitle.style.marginBottom = '5px';
-        folderTitle.style.marginTop = '15px';
+        folderTitle.style.marginTop = '5px';
         imageContainer.appendChild(folderTitle);
         
 
         // Simuler une liste d'images car la plupart des serveurs ne permettent pas 
         // de lister le contenu du répertoire
         const potentialImages = [
-            'contemporain.jpg',
-            'republique.jpg',
-            'tree-log.jpg',
-            'angelot.jpg',
             'ange.jpg',
             'cupidon.jpg',
             "brick-wall.jpg",
-            "small-circles.png",
+            "small-circles.jpg",
             "ai-lambris.jpg",
             "crocodile-skin.jpg",
             "ecorce-chene.jpg",
@@ -1550,14 +1598,14 @@ export function createImageSelectorDialog(onSelect) {
             "ecorce.jpg",
             "dry-ground.jpg",
             "marble.jpg",
-            "texture-peiture_colorée.jpg",
+            "texture-peinture_coloree.jpg",
             "silk.jpg",
             "elephant-skin.jpg",
             "aluminum-foil.jpg",
             "wood-lambris-vertical.jpg",
             "texture-ciment.jpg",
             "roses.jpg",
-            "flowers.png",
+            "flowers.jpg",
             "feuilles.jpg",
             "parquet.jpg"
         ];

@@ -379,6 +379,14 @@ export function createCustomSelector(config) {
     if (typeof config.onCreated === 'function') {
         config.onCreated(selectContainer);
     }
+
+
+    // Ajouter une méthode pour changer la hauteur maximale
+    selectContainer.setDropdownMaxHeight = function(newHeight) {
+        // La référence à optionsContainer est accessible ici (closure)
+        optionsContainer.style.maxHeight = newHeight;
+    };
+
     
     return selectContainer;
 }
