@@ -720,11 +720,15 @@ export function positionFormContainer() {
 function initialize() {   
 
     // on met à jour l'image de fond en bonne qualité si l'écran est grand
-    if (window.innerWidth > 512  && window.innerHeight > 512) {
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
         setTimeout(() => {
             const loginBackground = document.getElementById('login-background-image');
             if (loginBackground) {
-                loginBackground.src = 'background_images/tree-log.jpg';  
+                if (window.innerWidth > 800 ||  window.innerHeight > 800)  {
+                    loginBackground.src = 'background_images/tree-log.jpg';  
+                } else {
+                    loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+                }
             }
         }, 10); // Petit délai pour s'assurer que tout est prêt   
     }

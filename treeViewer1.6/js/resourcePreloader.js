@@ -29,6 +29,7 @@ const RESOURCES_TO_CACHE = [
 
   // Images
   './background_images/tree-log-lowQuality.jpg',
+  './background_images/tree-log-mediumQuality.jpg',
   './background_images/tree-log.jpg',
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
