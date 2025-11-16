@@ -85,7 +85,8 @@ async function loadBackgroundImageFromCache() {
                     // const cachedResponse = await cache.match('background_images/fort_lalatte.jpg');
                     // const cachedResponse = await cache.match('background_images/lichen-red.jpg');   
                     // const cachedResponse = await cache.match('background_images/bois.jpg');                    
-                    const cachedResponse = await cache.match('background_images/tree-log.jpg');  
+                    // const cachedResponse = await cache.match('background_images/tree-log.jpg');  
+                    const cachedResponse = await cache.match('background_images/tree-log-lowQuality.jpg');  
                     if (cachedResponse) {
                         // Image trouvée dans ce cache !
                         const blob = await cachedResponse.blob();
@@ -123,7 +124,9 @@ async function loadBackgroundImageFromCache() {
         // existingImage.src = 'background_images/fort_lalatte.jpg';
         // existingImage.src = 'background_images/lichen-red.jpg';
         // existingImage.src = 'background_images/bois.jpg';
-        existingImage.src = 'background_images/tree-log.jpg';
+        // existingImage.src = 'background_images/tree-log.jpg';
+        existingImage.src = 'background_images/tree-log-lowQuality.jpg';
+
         console.log('[Background Loader] Image chargée avec URL normale');
         return true;
     }
@@ -173,7 +176,8 @@ function setupBackgroundDebugFunctions() {
                 // const hasImage = await cache.match('background_images/fort_lalatte.jpg');
                 // const hasImage = await cache.match('background_images/lichen-red.jpg');
                 // const hasImage = await cache.match('background_images/bois.jpg');
-                const hasImage = await cache.match('background_images/tree-log.jpg');                
+                // const hasImage = await cache.match('background_images/tree-log.jpg');                
+                const hasImage = await cache.match('background_images/tree-log-lowQuality.jpg');  
                 console.log(`📦 ${cacheName}: ${hasImage ? '✅ HAS IMAGE' : '❌ no image'}`);
             }
         } catch (error) {

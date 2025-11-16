@@ -28,9 +28,10 @@ const RESOURCES_TO_CACHE = [
   './geolocalisationLE.json',
 
   // Images
+  './background_images/tree-log-lowQuality.jpg',
+  './background_images/tree-log.jpg',
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
-  './background_images/bois.jpg',
   './background_images/republique.jpg',
   './background_images/fort_lalatte.jpx',
   './background_images/thomas.jpx',

@@ -570,9 +570,10 @@ export async function showEndAnimationPhoto(nodeName) {
     // Trouver la correspondance dans le mapping
     let imagePath = null;
     const name = nodeName.toLowerCase();
+    const nameWithoutAccent = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
     for (const [key, path] of Object.entries(imageMapping)) {
-        if (name.includes(key)) {
+        if (nameWithoutAccent.includes(key)) {
             imagePath = path;
             break;
         }

@@ -735,7 +735,8 @@ export async function returnToLogin() {
             // const imagePath = 'background_images/fort_lalatte.jpx';
             // const imagePath = 'background_images/lichen-red.jpg';
             // const imagePath = 'background_images/bois.jpg';
-            backgroundImage.src = 'background_images/tree-log.jpg';
+            // backgroundImage.src = 'background_images/tree-log.jpg';
+            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
             // backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
@@ -743,7 +744,8 @@ export async function returnToLogin() {
             // backgroundImage.src = 'background_images/fort_lalatte.jpg';
             // backgroundImage.src = 'background_images/lichen-red.jpg';
             // backgroundImage.src = 'background_images/bois.jpg';
-            backgroundImage.src = 'background_images/tree-log.jpg';
+            // backgroundImage.src = 'background_images/tree-log.jpg';
+            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
         }
     }
     
@@ -757,6 +759,16 @@ export async function returnToLogin() {
 
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = '';
+
+    // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512  && window.innerHeight > 512) {
+        setTimeout(() => {
+            const loginBackground = document.querySelector('.login-background-image');
+            if (loginBackground) {
+                loginBackground.src = 'background_images/tree-log.jpg';  
+            }
+        }, 50); // Petit délai pour s'assurer que tout est prêt   
+    }
 
 }
 

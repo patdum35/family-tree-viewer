@@ -718,6 +718,16 @@ export function positionFormContainer() {
 
 
 function initialize() {   
+
+    // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512  && window.innerHeight > 512) {
+        setTimeout(() => {
+            const loginBackground = document.getElementById('login-background-image');
+            if (loginBackground) {
+                loginBackground.src = 'background_images/tree-log.jpg';  
+            }
+        }, 10); // Petit délai pour s'assurer que tout est prêt   
+    }
      // Initialiser le sélecteur de générations standard d'abord
     // (nécessaire pour sa création avant de le remplacer)
     initializeGenerationSelect();
@@ -927,6 +937,7 @@ function initialize() {
     // }
 
     state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
+
 
 
     setTimeout(() => {
