@@ -51,7 +51,7 @@ import {
 
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
-// import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
+import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
 import { documentation } from './documentation.js';
 
 
@@ -227,7 +227,7 @@ function initializeAppFunctions() {
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);
     };
-    // window.browserBarPuzzle = browserBarPuzzle;
+    window.browserBarPuzzle = browserBarPuzzle;
 }
 
 
