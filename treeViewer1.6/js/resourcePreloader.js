@@ -33,7 +33,6 @@ const RESOURCES_TO_CACHE = [
   './background_images/tree-log.jpg',
   './background_images/contemporain.jpg',
   './background_images/fort_lalatte.jpg',
-  './background_images/republique.jpg',
   './background_images/fort_lalatte.jpx',
   './background_images/thomas.jpx',
   './background_images/steph.jpx',

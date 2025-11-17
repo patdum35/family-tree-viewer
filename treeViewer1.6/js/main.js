@@ -47,9 +47,7 @@ import {
     searchTree,
     closeAllModals
 } from './eventHandlers.js';
-// import { initializePuzzleSwipe, resetPuzzle } from './puzzleSwipe.js';
-
-let stopMonitoring = null;
+import { resetPuzzle } from './puzzleSwipe.js';
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -143,6 +141,7 @@ export const state = {
     isIOS: false,
     isPWA: false,
     isPuzzleSwipe: false, //'notInitialized',
+    isPuzzleSwipeFromSecret: false,
     initialTreeDisplay: true,
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
@@ -463,8 +462,8 @@ export function toggleFullScreen(requestedstate = null) {
         window.i18n.updateUI();
     }
 
-    // const browserBarButton = document.getElementById('browserBar-button');
-    // const browserBarLabel = document.getElementById('browserBarLabel'); 
+    const browserBarButton = document.getElementById('browserBar-button');
+    const browserBarLabel = document.getElementById('browserBarLabel'); 
 
     if (isFullSreenRequested) {
         if (document.documentElement.requestFullscreen) {
@@ -476,28 +475,29 @@ export function toggleFullScreen(requestedstate = null) {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
-        // browserBarButton.style.visibility = 'hidden'; 
-        // browserBarLabel.style.visibility = 'hidden';
-        // state.isPuzzleSwipe = false; 
-        // const slot = document.getElementById('puzzleSlot'); 
-        // const piece = document.getElementById('puzzlePiece'); 
-        // const message = document.getElementById('puzzleMessage');
-        // if (message) {
-        //     slot.style.visibility = 'hidden';
-        //     piece.style.visibility = 'hidden';
-        //     message.style.visibility = 'hidden';
-        // }
+        if (state.isPuzzleSwipeFromSecret) {
+            browserBarButton.style.visibility = 'hidden'; 
+            browserBarLabel.style.visibility = 'hidden';
+            state.isPuzzleSwipe = false; 
+            const slot = document.getElementById('puzzleSlot'); 
+            const piece = document.getElementById('puzzlePiece'); 
+            const message = document.getElementById('puzzleMessage');
+            if (message) {
+                slot.style.visibility = 'hidden';
+                piece.style.visibility = 'hidden';
+                message.style.visibility = 'hidden';
+            }
+        }
     } else {
         // if (document.exitFullscreen) {
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
 
-        // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-        // // if (true){
-        //     browserBarButton.style.visibility = 'visible'; 
-        //     browserBarLabel.style.visibility = 'visible';
-        // }
+        if (state.isPuzzleSwipeFromSecret && state.isMobile && state.isTouchDevice && !state.isPWA) {
+            browserBarButton.style.visibility = 'visible'; 
+            browserBarLabel.style.visibility = 'visible';
+        }
     }
 }
 
@@ -626,22 +626,19 @@ export function positionFormContainer() {
     const startTitle = document.getElementById('startTitle');
 
     let puzzleSlot, puzzlePiece, puzzleMessage;
-    // // if (state.isPuzzleSwipe) {
-    // if (false) {
-    //     puzzleSlot = document.getElementById('puzzleSlot');
-    //     puzzlePiece = document.getElementById('puzzlePiece');
-    //     puzzleMessage = document.getElementById('puzzleMessage');
-    //     //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
-    //     window.scrollTo({ top: 0, behavior: 'auto' });
-    //     if (puzzleSlot) { resetPuzzle();}
-    // }
-
+    if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+        puzzleSlot = document.getElementById('puzzleSlot');
+        puzzlePiece = document.getElementById('puzzlePiece');
+        puzzleMessage = document.getElementById('puzzleMessage');
+        //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        if (puzzleSlot) { resetPuzzle();}
+    }
 
     if (formContainer && startTitle) {
         formContainer.style.display = '';
         startTitle.style.display = '';
         languageSelectorContainer.style.display = '';
-
 
         // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
 
@@ -654,51 +651,43 @@ export function positionFormContainer() {
             formContainerPositionTop =  50;
             startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
         }
-        // if (state.isPuzzleSwipe) {
-        if (false) {
-            // formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
-            // startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
-            // if (puzzleSlot) {puzzleSlot.style.top = '50px';}
+        if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+            formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            if (puzzleSlot) {puzzleSlot.style.top = '50px';}
 
-            // // const slotRect = puzzleSlot.getBoundingClientRect();
-            // // console.log('\n\n $$$$$$$$$$$   debug slotRect = slot.getBoundingClientRect();', slotRect)  
-    
-            // // puzzlePiece.style.top = `${slotRect.bottom - 55}px`;
+            if (puzzleSlot) {puzzlePiece.style.top = '120px';}
 
-            // if (puzzleSlot) {puzzlePiece.style.top = '120px';}
+            if (window.innerHeight < 400) { 
+                formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
+                formContainer.style.transform = '';
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
+                startTitle.style.transform = '';
+                languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
+                languageSelectorContainer.style.transform = '';
+                puzzleSlot.style.left = window.innerWidth - 60 + 'px';
+                puzzlePiece.style.left = window.innerWidth - 60 + 'px';
+                // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            } else {
+                formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+                formContainer.style.transform = 'translateX(-50%)'; // ''; //
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+                startTitle.style.transform = ''; //'translateX(-50%)';
+                // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
+                // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
+                languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+                languageSelectorContainer.style.transform = 'translateX(-50%)';
 
-
-            // if (window.innerHeight < 400) { 
-            //     formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
-            //     formContainer.style.transform = '';
-            //     startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
-            //     startTitle.style.transform = '';
-            //     languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
-            //     languageSelectorContainer.style.transform = '';
-            //     puzzleSlot.style.left = window.innerWidth - 60 + 'px';
-            //     puzzlePiece.style.left = window.innerWidth - 60 + 'px';
-            //     // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
-            //     puzzleMessage.style.top = '70px';
-            //     puzzleMessage.style.width = '130px';
-            //     puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
-            // } else {
-            //     formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
-            //     formContainer.style.transform = 'translateX(-50%)'; // ''; //
-            //     startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
-            //     startTitle.style.transform = ''; //'translateX(-50%)';
-            //     // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
-            //     // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
-            //     languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
-            //     languageSelectorContainer.style.transform = 'translateX(-50%)';
-
-            //     puzzleSlot.style.left = '50%';
-            //     puzzlePiece.style.left = '50%';
-            //     // puzzleMessage.style.left = '10px';
-            //     puzzleMessage.style.top = '70px';
-            //     puzzleMessage.style.width = '130px';
-            //     puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
-            // }
-
+                puzzleSlot.style.left = '50%';
+                puzzlePiece.style.left = '50%';
+                // puzzleMessage.style.left = '10px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            }
         } else {
             formContainer.style.top = formContainerPositionTop + 'px'; 
             startTitle.style.top = startTitlePositionTop + 'px'; 
@@ -711,14 +700,10 @@ export function positionFormContainer() {
             languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
             languageSelectorContainer.style.transform = 'translateX(-50%)';
         }
-
-
     }
 }
 
-
 function initialize() {   
-
     // on met à jour l'image de fond en bonne qualité si l'écran est grand
     if (window.innerWidth > 512 || window.innerHeight > 512) {
         setTimeout(() => {
@@ -887,10 +872,6 @@ function initialize() {
             span.appendChild(state.svgExit);
         }
     }
-
-    // if (state.isPuzzleSwipe != 'notInitialized')
-
-
  
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
@@ -931,14 +912,16 @@ function initialize() {
 
 
 
-    // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-    // // if (true){
-    // } else {
-    //     const browserBarButton = document.getElementById('browserBar-button');
-    //     const browserBarLabel = document.getElementById('browserBarLabel'); 
-    //     browserBarButton.style.display = 'none';  
-    //     browserBarLabel.style.display = 'none';   
-    // }
+    if (state.isPuzzleSwipeFromSecret) {
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true){
+        } else {
+            const browserBarButton = document.getElementById('browserBar-button');
+            const browserBarLabel = document.getElementById('browserBarLabel'); 
+            browserBarButton.style.display = 'none';  
+            browserBarLabel.style.display = 'none';   
+        }
+    }
 
     state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
 
@@ -972,6 +955,8 @@ export let audioUnlocked = false;
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData(isfromNonEncryptedFile = '') {
+
+    // keepSilentAudioAlive();
 
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = 'none';
@@ -1167,13 +1152,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
         initializeHamburgerOnce();
         showHamburgerMenu();
 
-
         // toggleFullScreen();
-
-
-
-
-
 
         setTimeout(() => {
             positionRadarButton();
@@ -1185,10 +1164,7 @@ export async function loadData(isfromNonEncryptedFile = '') {
 
         setTimeout(() => {
             buttonsOnDisplay(false);
-        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!   
-
-
-        
+        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!          
 
         // pour bug flash noir en mode mobile landscape
         if (state.isMobile && state.isTouchDevice ) {
@@ -1204,15 +1180,6 @@ export async function loadData(isfromNonEncryptedFile = '') {
                 }
             }
         }
-
-
-
-
-
-
-        // setTimeout(() => {
-        // }, 3000);
-
 
         // const originalRootResults = document.getElementById('root-person-results');
         // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
@@ -2151,8 +2118,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // secretMode();
-
     initNetworkListeners();
     console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
 });
@@ -2185,9 +2150,11 @@ function secretMode() {
     // Configuration séquence de touches
     const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
     const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
+    const SEQUENCE_PUZZLE = ['P', 'U', 'Z', 'Z', 'L', 'E']; 
 
     let sequenceEnCours = [];
     let sequenceNoFullScreenEnCours = [];
+    let sequencePuzzleEnCours = [];
     // Configuration Mobile et PC (click et taps)
     const TAP_COUNT_NECESSAIRE = 5;
     let tapCount = 0;
@@ -2264,6 +2231,24 @@ function secretMode() {
             afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
         } else if (mode === 'noFullScreenActif') {
             afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'puzzleActif') {
+            afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+            state.isPuzzleSwipeFromSecret = true;
+
+            const browserBarLabel = document.getElementById('browserBarLabel');
+            browserBarLabel.style.display = '';
+            const browserBarButton = document.getElementById('browserBar-button');
+            browserBarButton.style.display = '';
+
+
+            const bodyElement = document.body;
+            // Augmenter min-height à 105vh
+            bodyElement.style.minHeight = '105vh';
+            // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
+            // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
+            // 'visible' est souvent la valeur par défaut du navigateur.
+            bodyElement.style.overflow = 'visible';
+
         } else {
             changePasswordVisibility(false);
         }
@@ -2279,6 +2264,9 @@ function secretMode() {
     }
     if (localStorage.getItem('noFullScreenActif') === 'true') {
         activerModeExpert('noFullScreenActif');
+    }
+    if (localStorage.getItem('puzzleActif') === 'true') {
+        activerModeExpert('puzzleActif');
     }
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
@@ -2301,13 +2289,16 @@ function secretMode() {
                 // 1. Ajouter la dernière touche à la séquence en cours
                 sequenceEnCours.push(lastKey);
                 sequenceNoFullScreenEnCours.push(lastKey);
-
+                sequencePuzzleEnCours.push(lastKey);
                 // Garde la taille de la séquence
                 if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
                     sequenceEnCours.shift();
                 }
                 if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
                     sequenceNoFullScreenEnCours.shift();
+                }
+                if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
+                    sequencePuzzleEnCours.shift();
                 }
 
                 // Vérification de la correspondance
@@ -2318,6 +2309,10 @@ function secretMode() {
                 if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
                     activerModeExpert('noFullScreenActif');
                     sequenceNoFullScreenEnCours = []; // Réinitialise
+                }
+                if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
+                    activerModeExpert('puzzleActif');
+                    sequencePuzzleEnCours = []; // Réinitialise
                 }
             });
         }
@@ -2337,6 +2332,9 @@ function secretMode() {
         if (keyPressed.length === 1 || SEQUENCE_NOFULLSCREEN.includes(keyPressed)) {
             sequenceNoFullScreenEnCours.push(keyPressed);
         }
+        if (keyPressed.length === 1 || SEQUENCE_PUZZLE.includes(keyPressed)) {
+            sequencePuzzleEnCours.push(keyPressed);
+        }
 
         // Garde la taille de la séquence à vérifier
         if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
@@ -2344,6 +2342,9 @@ function secretMode() {
         }
         if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
             sequenceNoFullScreenEnCours.shift();
+        }
+        if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
+            sequencePuzzleEnCours.shift();
         }
 
         // Vérification de la correspondance
@@ -2354,6 +2355,10 @@ function secretMode() {
         if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
             activerModeExpert('noFullScreenActif');
             sequenceNoFullScreenEnCours = []; // Réinitialise
+        }
+        if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
+            activerModeExpert('puzzleActif');
+            sequencePuzzleEnCours = []; // Réinitialise
         }
     });
 
@@ -2383,6 +2388,7 @@ function secretMode() {
     } else {
         console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
     }
+
 }
 
 
@@ -2855,6 +2861,42 @@ window.addEventListener('resize', debounce(() => {
 //             setTimeout(() => location.reload(), 100); // petit délai pour laisser la console écrire
 //         }, 1000);
 //         alert('DEBUG: reload after 1s');
+
+
+
+// function to generate a constant silent audio for HDMI to avoid TV to switch between audio or non audio and to display a black banner on the top 
+export function keepSilentAudioAlive() {
+
+    console.log('\n\n\n  ------ activate silent audio for HDMI ----------\n,\n');
+    // 1. Initialiser le contexte audio
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    // 2. Créer l'oscillateur (le son)
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine';
+    // Fréquence haute (ex: 15000 Hz) : plus difficile à entendre pour l'oreille humaine que 440 Hz.
+    oscillator.frequency.setValueAtTime(15000, audioCtx.currentTime); 
+
+    // 3. Créer un nœud de Gain (Volume)
+    const gainNode = audioCtx.createGain();
+
+    // Régler le volume à un niveau EXTRÊMEMENT BAS. 
+    // 0.0001 est généralement le bon compromis entre "inaudible" et "signal actif".
+    gainNode.gain.setValueAtTime(0.0001, audioCtx.currentTime); 
+
+    // 4. Connexion et lancement
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    // Le son est lancé en continu
+    oscillator.start(0);
+
+    // Mettre à jour le statut
+    // document.getElementById('status-message').textContent = "Statut : Flux audio actif (Gain minime). Le bandeau Sony ne devrait plus apparaître.";
+    
+    return oscillator;
+}
 
 
 

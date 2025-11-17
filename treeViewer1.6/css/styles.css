@@ -17,9 +17,9 @@ body {
     margin: 0; 
     font-family: Arial;
     /* overflow: hidden; */
-    min-height: 105vh; /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
-
-
+    overflow: hidden;
+    /* min-height: 105vh; */ /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
+    min-height: 100vh; /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
 } 
 
 

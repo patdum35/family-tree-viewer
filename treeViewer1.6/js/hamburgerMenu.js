@@ -1,4 +1,4 @@
-import { state, updateRadarButtonText, toggleTreeRadar } from './main.js';
+import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
@@ -54,7 +54,8 @@ export function getMenuTranslation(key) {
       'title_stats': 'Statistiques',
       'buttonOnDisplay': 'Afficher les boutons sur l\'écran',
       'noButtonOnDisplay': 'Ne pas afficher les boutons sur l\'écran',
-      'tutoDocumention': 'Tutoriel / Documentation'
+      'tutoDocumention': 'Tutoriel / Documentation',
+      'keepSilentAudio': 'audio constant sur HDMI',
 
     },
     'en': {
@@ -100,8 +101,8 @@ export function getMenuTranslation(key) {
       'title_stats': 'Stats',
       'buttonOnDisplay': 'Show buttons on screen',
       'noButtonOnDisplay': 'Do not show buttons on screen',
-      'tutoDocumention': 'Tutorial / Documentation'     
-
+      'tutoDocumention': 'Tutorial / Documentation',     
+      'keepSilentAudio': 'constant audio on HDMI',
     },
     'es': {
       'menuTitle': 'Menú del árbol',
@@ -146,7 +147,8 @@ export function getMenuTranslation(key) {
       'title_stats': 'Estadísticas',
       'buttonOnDisplay': 'Mostrar botones en pantalla',
       'noButtonOnDisplay': 'Desactivar botones en pantalla',
-      'tutoDocumention': 'Tutorial / Documentación'
+      'tutoDocumention': 'Tutorial / Documentación',
+      'keepSilentAudio': 'audio constante en HDMI',   
     },
     'hu': {
       'menuTitle': 'Fa menü',
@@ -191,7 +193,8 @@ export function getMenuTranslation(key) {
       'title_stats': 'Statisztika',
       'buttonOnDisplay': 'Gombok megjelenítése a képernyőn',
       'noButtonOnDisplay': 'Gombok elrejtése a képernyőn',
-      'tutoDocumention': 'Bemutató / Dokumentáció'
+      'tutoDocumention': 'Bemutató / Dokumentáció',
+      'keepSilentAudio': 'állandó hang HDMI-n',
     }
   };
 
@@ -413,21 +416,22 @@ function updateMenuStyles() {
       //         }
       //     }
       // }
+    
       
       // Ajuster les boutons d'affichage
-      document.querySelectorAll('.menu-section h3').forEach(heading => {
-          if (heading.textContent === 'Affichage') {
-              const section = heading.closest('.menu-section');
-              if (section) {
-                const buttons = section.querySelectorAll('button');
-                buttons.forEach(button => {
-                    button.style.marginRight = '8px';
-                    const span = button.querySelector('span');
-                    if (span) span.style.fontSize = '20px';
-                });
-              }
-          }
-      });
+      // document.querySelectorAll('.menu-section h3').forEach(heading => {
+      //     if (heading.textContent === 'Affichage') {
+      //         const section = heading.closest('.menu-section');
+      //         if (section) {
+      //           const buttons = section.querySelectorAll('button');
+      //           buttons.forEach(button => {
+      //               button.style.marginRight = '8px';
+      //               const span = button.querySelector('span');
+      //               if (span) span.style.fontSize = '20px';
+      //           });
+      //         }
+      //     }
+      // });
 
 
 
@@ -1407,14 +1411,16 @@ function createDisplaySection() {
 
 
   section.content.classList.add('compact-menu');
-  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
+  document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 10px !important}</style>');
   
 
   const buttons = [
     { onclick: () => {zoomIn();}, title: getMenuTranslation('zoomIn'), text: '➕' },
     { onclick: () => {zoomOut();}, title: getMenuTranslation('zoomOut'), text: '➖' },
     { onclick: () => {resetZoom(); toggleMenu(false);}, title: getMenuTranslation('resetView'), text: '🏠' },
-    { onclick: () => {toggleFullScreen();}, title: getMenuTranslation('fullscreen'), text: '⛶' }
+    // { onclick: () => {toggleFullScreen();}, title: getMenuTranslation('fullscreen'), text: '⛶' },
+    { onclick: () => {keepSilentAudioAlive();}, title: getMenuTranslation('keepSilentAudio'), text: '🔌📺' }
+    
   ];
   
   buttons.forEach(buttonData => {
@@ -1428,18 +1434,23 @@ function createDisplaySection() {
     
     // // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      span.style.fontSize = '25px';
+      span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';
     } else if (height < 800) {
-      span.style.fontSize = '25px';
+      span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';
     } else {
-      span.style.fontSize = '25px';
+      span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
       button.style.marginRight = '2px';     
     }
+
+    if (buttonData.text === '➕' || buttonData.text === '➖' ) { 
+      span.style.fontSize = '16px';
+    }
+
     // Pour les grands écrans, on conserve le style original
     
     button.appendChild(span);
