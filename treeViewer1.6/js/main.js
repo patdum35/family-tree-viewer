@@ -956,8 +956,6 @@ export let audioUnlocked = false;
  */
 export async function loadData(isfromNonEncryptedFile = '') {
 
-    // keepSilentAudioAlive();
-
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = 'none';
 
@@ -2243,7 +2241,7 @@ function secretMode() {
 
             const bodyElement = document.body;
             // Augmenter min-height à 105vh
-            bodyElement.style.minHeight = '105vh';
+            bodyElement.style.minHeight = '110vh'; //'15vh';
             // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
             // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
             // 'visible' est souvent la valeur par défaut du navigateur.

@@ -265,9 +265,10 @@ export function initializePuzzleSwipe() {
             }
             // console.log('\n\n **** debug in checkPieceInSlot touchStartY , pieceStartTop, isDragging, pieceRect, slotRect', touchStartY , pieceStartTop , isDragging, window.screen.height, window.innerHeight,' \n\n\n')
             window.i18n.updateUI();
+            state.isbrowserBarHidden = (!isAddressBarVisible);
         }
         state.resetPuzzle = false;
-        state.isbrowserBarHidden = (!isAddressBarVisible);
+        // state.isbrowserBarHidden = (!isAddressBarVisible);
     }
 }
 
