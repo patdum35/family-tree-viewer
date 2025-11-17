@@ -2213,16 +2213,17 @@ function secretMode() {
 
     // --- Fonction d'Activation (où la modification a lieu) ---
     const activerModeExpert = (mode) => {
-        // 1. si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
-        document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
-            el.classList.remove(CLASSE_CACHE);
-        });
 
-        // 2. Mémoriser l'état
+
+        // Mémoriser l'état
         localStorage.setItem(mode, 'true');
         
-        // 3. Afficher le pop-up sympa !
+        // Afficher le pop-up sympa !
         if (mode === 'modeExpertActif') {
+            // si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
+            document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
+                el.classList.remove(CLASSE_CACHE);
+            });
             afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
         } else if (mode === 'hidePasswordActif') {
             changePasswordVisibility(true);
@@ -2231,22 +2232,20 @@ function secretMode() {
             afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
         } else if (mode === 'puzzleActif') {
             afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-            state.isPuzzleSwipeFromSecret = true;
-
-            const browserBarLabel = document.getElementById('browserBarLabel');
-            browserBarLabel.style.display = '';
-            const browserBarButton = document.getElementById('browserBar-button');
-            browserBarButton.style.display = '';
-
-
-            const bodyElement = document.body;
-            // Augmenter min-height à 105vh
-            bodyElement.style.minHeight = '110vh'; //'15vh';
-            // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
-            // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
-            // 'visible' est souvent la valeur par défaut du navigateur.
-            bodyElement.style.overflow = 'visible';
-
+            if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+                state.isPuzzleSwipeFromSecret = true;
+                const browserBarLabel = document.getElementById('browserBarLabel');
+                browserBarLabel.style.display = '';
+                const browserBarButton = document.getElementById('browserBar-button');
+                browserBarButton.style.display = '';
+                const bodyElement = document.body;
+                // Augmenter min-height à 105vh
+                bodyElement.style.minHeight = '110vh'; //'15vh';
+                // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
+                // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
+                // 'visible' est souvent la valeur par défaut du navigateur.
+                bodyElement.style.overflow = 'visible';
+            }
         } else {
             changePasswordVisibility(false);
         }
