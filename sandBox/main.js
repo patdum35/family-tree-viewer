@@ -9,14 +9,15 @@ import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPos
     toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
 import { nameCloudState } from './nameCloud.js';
+import { closeCloudName } from './nameCloudUI.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
-import { setupSearchFieldModal } from './searchModalUI.js';
+import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
     
     
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
-import { hideLoginBackground } from './eventHandlers.js';
-import { showHamburgerMenu, initializeHamburgerOnce } from './hamburgerMenu.js';
+import { debounce, hideLoginBackground } from './eventHandlers.js';
+import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
@@ -24,8 +25,9 @@ import { createAudioElement } from './audioPlayer.js';
 import { cleanupExportControls } from './exportSettings.js';
 
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
-import { enableFortuneMode, disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
+import { enableBackground } from './backgroundManager.js';
 
 import { 
     displayPersonDetails, 
@@ -45,9 +47,7 @@ import {
     searchTree,
     closeAllModals
 } from './eventHandlers.js';
-
-let stopMonitoring = null;
-
+import { resetPuzzle } from './puzzleSwipe.js';
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -72,9 +72,8 @@ if ('serviceWorker' in navigator) {
       .catch(error => {
         console.error('Échec de l\'enregistrement du Service Worker:', error);
       });
-  }
+}
 
-  
 // for tracking with google Analytics
 export function trackPageView(pagePath) {
     if (window.gtag) {
@@ -86,8 +85,29 @@ export function trackPageView(pagePath) {
     }
 }
 
+// Sélection des champs
+const passwordInput = document.getElementById('password');
+const firstNameInput = document.getElementById('input-form-firstName');
+const lastNameInput = document.getElementById('input-form-lastName');
 
+// Charger les valeurs stockées au chargement de la page
+window.addEventListener('DOMContentLoaded', () => {
+    const savedPassword  = localStorage.getItem('password');
+    const savedFirstName = localStorage.getItem('firstName');
+    const savedLastName = localStorage.getItem('lastName');
+    if (savedPassword) passwordInput.value = savedPassword;
+    if (savedFirstName) firstNameInput.value = savedFirstName;
+    if (savedLastName) lastNameInput.value = savedLastName;
+});
 
+// Sauvegarder les valeurs dès qu’elles changent
+[passwordInput, firstNameInput, lastNameInput].forEach(input => {
+    input.addEventListener('input', () => {
+        localStorage.setItem('password', passwordInput.value);
+        localStorage.setItem('firstName', firstNameInput.value);
+        localStorage.setItem('lastName', lastNameInput.value);
+    });
+});
 
 export const state = {
     gedcomData: null,
@@ -102,7 +122,8 @@ export const state = {
     boxHeight: 50,
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
-    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'    
+    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'   
+    treeModeReal_whenReturnToTree: 'ancestors', // ou 'descendants' ou 'both'   
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
@@ -118,6 +139,9 @@ export const state = {
     isTouchDevice: false,
     isMobile: false,
     isIOS: false,
+    isPWA: false,
+    isPuzzleSwipe: false, //'notInitialized',
+    isPuzzleSwipeFromSecret: false,
     initialTreeDisplay: true,
     isHamburgerMenuInitialized: false,
     menuHamburgerInitialized: false,
@@ -134,9 +158,13 @@ export const state = {
     treeOwner: 1,
     isOnLine: false,
     isDebugLog: false,
+
     isRadarEnabled: false,
-    radarStyle: 0,
     isWordCloudEnabled: false,
+    isTreeEnabled: false,
+
+    radarStyle: 0,
+
     WheelMode: {
         maxGenerations: 5,
         showSpouses: true,
@@ -169,8 +197,12 @@ export const state = {
     currentScale: 1.0,
     currentX: 0,
     currentY: 0,
-    nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    // nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    nodeStyle: 'classic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+
     linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
+    treeShapeStyle: 'normal',  //'straight'
+    addLeaves: false,
     frequencyStatsModalCounter: 0,
     showPersonListModalCounter: 0,
     graphStatsModalCounter: 0,
@@ -179,28 +211,45 @@ export const state = {
     minModalWidth: 250,
     minModalHeight: 40,
     isFullResetAnimationRequested: false,
-    // animationMap: null
-
+    firstName: '',
+    lastName: '',
+    previousMode: 'tree',
+    isButtonOnDisplay: false,    // animationMap: null
+    peopleList: [],
+    peopleListTitle: [],
+    firstTimePuzzle: true,
+    heightDifferenceAtInit: 0,
+    isbrowserBarHidden: false,
+    isSpeechSynthesisAvailable: true,
+    svgFull: null,
+    svgExit: null,
+    lastTransform: null,
+    zoom: null,
+    layoutResult: null,
 };
 
 export { geocodeLocation };
 
 window.toggleAnimationPause = toggleAnimationPause;
 
+// document.addEventListener('DOMContentLoaded', async () => {
+//     // Lancer le préchargement des tuiles en tâche de fond
+//     initResourcePreloading();
+//     initTilePreloading();
+// });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Lancer le préchargement des tuiles en tâche de fond
-    initResourcePreloading();
+    await initResourcePreloading();
     initTilePreloading();
 });
 
 
 function openGedcomModal() {
-    document.getElementById('gedcom-modal').style.display = 'block';
+    document.getElementById('advanced-settings-modal').style.display = 'block';
 }
 
 function closeGedcomModal() {
-    document.getElementById('gedcom-modal').style.display = 'none';
+    document.getElementById('advanced-settings-modal').style.display = 'none';
 }
 
 // ajoutez des options pour différents types de heatmap
@@ -213,25 +262,31 @@ export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
     });
 }
 
-export function updateRadarButtonText() {
+export function updateRadarButtonText(isForceTreeRadarButton = null) {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
     const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
-    if (treeRadarToggleBtn) {
+
+
+    if (treeRadarToggleBtn && !isForceTreeRadarButton) {
         const span = treeRadarToggleBtn.querySelector('span');
         if (span) {
             span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
         }
     }
 
-    if (menu_nameTreeRadarBtn) {
-        // Mettre à jour le bouton du menu hamburger
-        if (window.innerHeight < 800) {
-            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '  -  🌿🌳' : '  -  🕸️🎯';
-        } else {
-            menu_nameTreeRadarBtn.querySelector('span').textContent = state.isRadarEnabled ? '🌿🌳' : '🕸️🎯';
-        }
+    let toggleValue = false;
+    if (state.previousMode === 'tree') { toggleValue = true; } 
+
+    toggleValue = (isForceTreeRadarButton) ? (toggleValue) : state.isRadarEnabled;    
+
+    if( window.nameCloudSection && window.nameCloudSection.container ) {
+        window.nameCloudSection.container.querySelector('h3').textContent = toggleValue ? getMenuTranslation('section_namecloud2') : getMenuTranslation('section_namecloud');
     }
 
+    if (menu_nameTreeRadarBtn) {
+        // Mettre à jour le bouton du menu hamburger
+        menu_nameTreeRadarBtn.querySelector('span').textContent = toggleValue ? '🌳' : '🎯';
+    }
 }
 
 /**
@@ -256,7 +311,6 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-
 export function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
@@ -264,68 +318,81 @@ export function toggleTreeRadar() {
     closeAllModals();
     fullResetAnimationState();
 
+
+
+
     if (state.isRadarEnabled) {
-        state.treeModeReal_backup = state.treeMode;        
+        state.treeModeReal_whenReturnToTree = state.treeMode; 
+        state.treeModeReal_backup = state.treeMode; 
+        state.nombre_generation = 4;       
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
 
     } else {
 
-        if ((state.treeModeReal_backup.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
+        disableFortuneModeClean();
+
+        if ((state.treeModeReal_whenReturnToTree.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
             state.treeMode = 'ancestors';
             state.treeModeReal = 'ancestors';
             state.treeModeReal_backup = 'ancestors';
+            state.treeModeReal_whenReturnToTree = 'ancestors';
 
-        } else if ((state.treeModeReal_backup.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
+        } else if ((state.treeModeReal_whenReturnToTree.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
             state.treeMode = 'descendants';
             state.treeModeReal = 'descendants';
             state.treeModeReal_backup = 'descendants';
+            state.treeModeReal_whenReturnToTree = 'descendants';
         } else {
-            state.treeMode = state.treeModeReal_backup;
-            state.treeModeReal = state.treeModeReal_backup;  
-        }      
+            state.treeMode = state.treeModeReal_whenReturnToTree;
+            state.treeModeReal = state.treeModeReal_whenReturnToTree;  
+            state.treeModeReal_backup = state.treeModeReal_whenReturnToTree;  
+        } 
+
         displayGenealogicTree(null, true, false);
+
+        if (state.backgroundEnabled) {
+            setTimeout(() => {
+                // Pour ré-activer le fond d'écran
+                console.log("\n\n re-activation du fond d'écran depuis toggleTreeRadar dans main.js \n\n");
+                enableBackground(true, true);
+            }, 200);
+        }
     }
 }
 
 // Fonction pour basculer le son
 export function toggleSpeech() {
-    const speechToggleBtn = document.getElementById('speechToggleBtn');
-    
-    // Basculer l'état du son
-    state.isSpeechEnabled = !state.isSpeechEnabled;
+    if (state.isRadarEnabled) {
+        disableFortuneModeClean();
+    } else {
+        const speechToggleBtn = document.getElementById('speechToggleBtn');
+        
+        // Basculer l'état du son
+        state.isSpeechEnabled = !state.isSpeechEnabled;
 
-
-
-
-    
-    // Mettre à jour le bouton
-    speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
-
-
+        // Mettre à jour le bouton
+        speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
+    }
 }
 
 // Fonction pour desactiver complètement le son dans l'animation
 export function toggleSpeech2() {
-    const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
-    
-    // Basculer l'état du son
-    state.isSpeechEnabled2 = !state.isSpeechEnabled2;
-
-
-
-
-    
-    // Mettre à jour le bouton
-    menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
-    // Appliquer le style uniquement pour l'emoji 🗣️
-    if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
-        menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+    if (state.isRadarEnabled) {
+        disableFortuneModeClean();
     } else {
-        menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+        const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
+        // Basculer l'état du son
+        state.isSpeechEnabled2 = !state.isSpeechEnabled2;
+  
+        // Mettre à jour le bouton
+        menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
+        // Appliquer le style uniquement pour l'emoji 🗣️
+        if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+        } else {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+        }
     }
-
-
-
 }
 
 // Pour arrêter le monitoring
@@ -364,8 +431,48 @@ if (window._originalSetupElegantBackground) {
 }
 }
 
-export function toggleFullScreen() {
-    if (!document.fullscreenElement) {
+export function toggleFullScreen(requestedstate = null) {
+
+    // requestedstate can be 'fullScreenRequired' ou 'exitfullScreenRequired'
+    let isFullSreenRequested = (!document.fullscreenElement)
+    // isFullSreenRequested is true : si on est pas en fullScreen
+    if (requestedstate && requestedstate === 'fullScreenRequired') {
+        isFullSreenRequested = true;
+    } else if (requestedstate && requestedstate === 'exitfullScreenRequired') {
+        isFullSreenRequested = false;
+    }
+
+   console.log('\n\n debug Toggle FullScreen with requestedstate=', requestedstate, ',isFullSreenRequested=', isFullSreenRequested)
+
+
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    const fullScreenLabel = document.getElementById('fullScreenLabel');
+    
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = (!condition) ? '🖥️' : '↩️';
+            if (!isFullSreenRequested) {
+                // Icône plein écran (flèches vers l’extérieur)
+                // span.textContent = '🖥️';
+                state.svgFull.style.display = '';
+                state.svgExit.style.display = 'none';
+            } else {
+                // Icône sortie plein écran (flèches vers l’intérieur)
+                state.svgFull.style.display = 'none';
+                state.svgExit.style.display = '';                
+            }
+        }
+        // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
+        fullScreenLabel.textContent = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        fullScreenLabel.dataset.textKey = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        window.i18n.updateUI();
+    }
+
+    const browserBarButton = document.getElementById('browserBar-button');
+    const browserBarLabel = document.getElementById('browserBarLabel'); 
+
+    if (isFullSreenRequested) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
         } else if (document.documentElement.mozRequestFullScreen) { // Firefox
@@ -375,14 +482,248 @@ export function toggleFullScreen() {
         } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
             document.documentElement.msRequestFullscreen();
         }
+        if (state.isPuzzleSwipeFromSecret) {
+            browserBarButton.style.visibility = 'hidden'; 
+            browserBarLabel.style.visibility = 'hidden';
+            state.isPuzzleSwipe = false; 
+            const slot = document.getElementById('puzzleSlot'); 
+            const piece = document.getElementById('puzzlePiece'); 
+            const message = document.getElementById('puzzleMessage');
+            if (message) {
+                slot.style.visibility = 'hidden';
+                piece.style.visibility = 'hidden';
+                message.style.visibility = 'hidden';
+            }
+        }
     } else {
-        if (document.exitFullscreen) {
+        // if (document.exitFullscreen) {
+        if (document.fullscreenElement) {
             document.exitFullscreen();
+        }
+
+        if (state.isPuzzleSwipeFromSecret && state.isMobile && state.isTouchDevice && !state.isPWA) {
+            browserBarButton.style.visibility = 'visible'; 
+            browserBarLabel.style.visibility = 'visible';
+        }
+    }
+}
+
+
+
+function createExitFullscreenSVG(
+    width, height,
+    cornerRatio = 0.1, arrowLineRatio = 0.25,
+    strokeWidth = 6, arrowWidth = 6, arrowLength = 6,
+    borderWidth = 2, bgColor = "#3498db", arrowColor = "green",
+    direction = "inward" // "inward" ou "outward"
+) {
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    // génère un suffixe unique court pour éviter tout conflit d'ID
+    const uid = 'id' + Math.random().toString(36).slice(2,9);
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    // rectangle fond + bord noir
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("width", width);
+    rect.setAttribute("height", height);
+    rect.setAttribute("rx", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("ry", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("fill", bgColor);
+    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke-width", borderWidth);
+    svg.appendChild(rect);
+
+    // longueur diagonale pour calcul flèches
+    const diag = Math.sqrt(width*width + height*height);
+    const lineLength = diag * arrowLineRatio;
+
+    // coordonnées des flèches (inward base)
+    let coords = [
+        { x1: 0.1*width, y1: 0.1*height, dx: lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 },   // haut-gauche
+        { x1: 0.9*width, y1: 0.1*height, dx: -lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 }, // haut-droit
+        { x1: 0.1*width, y1: 0.9*height, dx: lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 }, // bas-gauche
+        { x1: 0.9*width, y1: 0.9*height, dx: -lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 } // bas-droit
+    ];
+
+    if (direction === "outward") {
+        // Transformer (inward base) en outward start/end, puis translater ENTIER SEGMENT de 2px vers le centre.
+        const cx = width / 2;
+        const cy = height / 2;
+        const shift = 4; // pixels toward center
+
+        coords = coords.map(c => {
+            // inward segment was: start_in = (c.x1, c.y1) -> end_in = (c.x1 + c.dx, c.y1 + c.dy)
+            // outward desired segment is start_out = end_in, end_out = start_in (i.e. direction reversed)
+            const startX = c.x1 + c.dx;
+            const startY = c.y1 + c.dy;
+            const endX = c.x1;
+            const endY = c.y1;
+
+            // vector from corner(end) to center (coin -> centre)
+            const vx = cx - endX;
+            const vy = cy - endY;
+            const vlen = Math.hypot(vx, vy) || 1;
+            const ux = vx / vlen;
+            const uy = vy / vlen;
+
+            // translate both endpoints toward center by `shift` px
+            const newStartX = startX + ux * shift;
+            const newStartY = startY + uy * shift;
+            const newEndX = endX + ux * shift;
+            const newEndY = endY + uy * shift;
+
+            return {
+                x1: newStartX,
+                y1: newStartY,
+                dx: newEndX - newStartX,
+                dy: newEndY - newStartY
+            };
+        });
+    }
+
+    // defs pour les flèches — IDs uniques
+    const defs = document.createElementNS(svgNS,"defs");
+    coords.forEach((c,i)=>{
+        const marker = document.createElementNS(svgNS,"marker");
+        const markerId = `arrow-${uid}-${i}`;               // <--- ID unique ici
+        marker.setAttribute("id", markerId);
+        marker.setAttribute("markerWidth", arrowWidth);
+        marker.setAttribute("markerHeight", arrowLength);
+        marker.setAttribute("refX", 0);
+        marker.setAttribute("refY", arrowLength/2);
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
+
+        const path = document.createElementNS(svgNS,"path");
+        path.setAttribute("d", `M0,0 L${arrowWidth},${arrowLength/2} L0,${arrowLength} z`);
+        path.setAttribute("fill", arrowColor);
+        marker.appendChild(path);
+        defs.appendChild(marker);
+    });
+    svg.appendChild(defs);
+
+    // lignes avec marqueurs — utilisent les IDs uniques
+    coords.forEach((c,i)=>{
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("x1", c.x1);
+        line.setAttribute("y1", c.y1);
+        line.setAttribute("x2", c.x1 + c.dx);
+        line.setAttribute("y2", c.y1 + c.dy);
+        line.setAttribute("stroke", arrowColor);
+        line.setAttribute("stroke-width", strokeWidth);
+        line.setAttribute("stroke-linecap","round");
+        line.setAttribute("stroke-linejoin","round");
+        line.setAttribute("fill","none");
+        line.setAttribute("marker-end", `url(#arrow-${uid}-${i})`); // <--- réf unique
+        svg.appendChild(line);
+    });
+
+    return svg;
+}
+
+
+export function positionFormContainer() {
+    const formContainer = document.querySelector('.form-container');
+    const languageSelectorContainer = document.getElementById('language-selector-container');
+    const startTitle = document.getElementById('startTitle');
+
+    let puzzleSlot, puzzlePiece, puzzleMessage;
+    if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+        puzzleSlot = document.getElementById('puzzleSlot');
+        puzzlePiece = document.getElementById('puzzlePiece');
+        puzzleMessage = document.getElementById('puzzleMessage');
+        //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        if (puzzleSlot) { resetPuzzle();}
+    }
+
+    if (formContainer && startTitle) {
+        formContainer.style.display = '';
+        startTitle.style.display = '';
+        languageSelectorContainer.style.display = '';
+
+        // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
+
+        let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
+        let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
+        if (window.innerHeight < 400 && !document.fullscreenElement) { 
+            formContainerPositionTop =  60;
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
+        } else if (window.innerHeight < 400 && document.fullscreenElement) { 
+            formContainerPositionTop =  50;
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
+        }
+        if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+            formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            if (puzzleSlot) {puzzleSlot.style.top = '50px';}
+
+            if (puzzleSlot) {puzzlePiece.style.top = '120px';}
+
+            if (window.innerHeight < 400) { 
+                formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
+                formContainer.style.transform = '';
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
+                startTitle.style.transform = '';
+                languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
+                languageSelectorContainer.style.transform = '';
+                puzzleSlot.style.left = window.innerWidth - 60 + 'px';
+                puzzlePiece.style.left = window.innerWidth - 60 + 'px';
+                // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            } else {
+                formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+                formContainer.style.transform = 'translateX(-50%)'; // ''; //
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+                startTitle.style.transform = ''; //'translateX(-50%)';
+                // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
+                // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
+                languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+                languageSelectorContainer.style.transform = 'translateX(-50%)';
+
+                puzzleSlot.style.left = '50%';
+                puzzlePiece.style.left = '50%';
+                // puzzleMessage.style.left = '10px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            }
+        } else {
+            formContainer.style.top = formContainerPositionTop + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 'px'; 
+            formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+            formContainer.style.transform = 'translateX(-50%)'; // ''; //
+            startTitle.style.padding = '0px';
+            startTitle.style.margin = '0px';            
+            startTitle.style.left = '50%'; //window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+            startTitle.style.transform = 'translateX(-50%)';
+            languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+            languageSelectorContainer.style.transform = 'translateX(-50%)';
         }
     }
 }
 
 function initialize() {   
+    // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
+        setTimeout(() => {
+            const loginBackground = document.getElementById('login-background-image');
+            if (loginBackground) {
+                if (window.innerWidth > 800 ||  window.innerHeight > 800)  {
+                    loginBackground.src = 'background_images/tree-log.jpg';  
+                } else {
+                    loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+                }
+            }
+        }, 100); // Petit délai pour s'assurer que tout est prêt   
+    }
      // Initialiser le sélecteur de générations standard d'abord
     // (nécessaire pour sa création avant de le remplacer)
     initializeGenerationSelect();
@@ -402,18 +743,154 @@ function initialize() {
     applyTextDefinitions();
 
 
+    const loadGedcomButton = document.getElementById('load-gedcom-button');
+    loadGedcomButton.style.background = 'transparent';  
+    loadGedcomButton.style.padding = '0px';
+    loadGedcomButton.style.border = 'none';
+    loadGedcomButton.style.borderRadius = '6px';
+    loadGedcomButton.style.position = 'fixed';
+    loadGedcomButton.style.top = '5px';
+    loadGedcomButton.style.left = '10px';
+    loadGedcomButton.style.zIndex = '1000';
+     
+
+
+    const loadGedcomButtonSpan = loadGedcomButton.querySelector('span');
+    loadGedcomButtonSpan.style.display = 'inline-block';
+
+    loadGedcomButtonSpan.style.animation = 'gear-spin 6s linear infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    loadGedcomButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
 
 
 
+    // Animation subtile au survol
+    loadGedcomButton.addEventListener('mouseover', () => {
+        // loadGedcomButton.style.transform = 'scale(1.1)';
+        loadGedcomButton.style.animation = 'gear-spin-fast 2s linear infinite';
+    });
+    
+    loadGedcomButton.addEventListener('mouseout', () => {
+        loadGedcomButton.style.animation = 'none';
+    });
+
+
+
+
+
+
+    const helpButton = document.getElementById('help-button');
+    helpButton.style.background = 'transparent';  
+    helpButton.style.padding = '0px';
+    helpButton.style.border = 'none';
+    helpButton.style.borderRadius = '6px';
+    helpButton.style.position = 'fixed';
+    helpButton.style.top = '5px';
+    helpButton.style.right = '10px';
+    helpButton.style.zIndex = '1000';
+     
+
+
+    const helpButtonSpan = helpButton.querySelector('span');
+    helpButtonSpan.style.display = 'inline-block';
+
+    helpButtonSpan.style.animation = 'lightbulb-glow 3s ease-in-out infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    helpButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
+
+
+
+    // Animation subtile au survol
+    helpButton.addEventListener('mouseover', () => {
+        // helpButton.style.transform = 'scale(1.1)';
+        helpButton.style.animation = 'lightbulb-glow 1s ease-in-out infinite';
+    });
+    
+    helpButton.addEventListener('mouseout', () => {
+        helpButton.style.animation = 'none';
+    });
+
+
+
+
+
+
+    // Ajouter l'animation de rotation CSS
+    let style = document.createElement('style');
+    style.textContent = `
+        @keyframes gear-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes gear-spin-fast {
+            0% { transform: scale(1.1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    
+    // Création de la balise <style> pour l'animation CSS
+    style = document.createElement('style');
+    style.textContent += `
+    @keyframes lightbulb-glow {
+        0%, 100% {
+        text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
+        filter: brightness(1);
+        }
+        50% {
+        text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
+        filter: brightness(1.6);
+        }
+    }
+    `;
+    document.head.appendChild(style);
+
+
+
+    // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = '🖥️';
+            span.innerHTML = "";
+            // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+
+            // Créer les SVG une seule fois
+            state.svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
+            state.svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
+
+            state.svgExit.style.display = 'none'; // caché par défaut
+
+            span.appendChild(state.svgFull);
+            span.appendChild(state.svgExit);
+        }
+    }
+ 
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
+
+
     if (passwordInput) {
-        console.log("Password input trouvé, ajout de l'écouteur d'événement pour Enter");
+        console.log(" - Password input trouvé, ajout de l'écouteur d'événement pour Enter");
         passwordInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 console.log("Touche Enter détectée");
                 event.preventDefault();
-                loadData();
+                loadData(false);
             }
         });
     } else {
@@ -423,7 +900,52 @@ function initialize() {
 
     setupSearchFieldModal();
 
+
+
+    function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+        return (
+            window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+            window.navigator.standalone === true // Safari iOS
+        );
+    }
+
+    const device = detectDeviceType();
+    if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+    state.isPWA = isPWA();
     
+
+
+    secretMode();
+
+
+
+    if (state.isPuzzleSwipeFromSecret) {
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true){
+        } else {
+            const browserBarButton = document.getElementById('browserBar-button');
+            const browserBarLabel = document.getElementById('browserBarLabel'); 
+            browserBarButton.style.display = 'none';  
+            browserBarLabel.style.display = 'none';   
+        }
+    }
+
+    state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
+
+
+
+    state.nodeStyle = localStorage.getItem('treeNodeStyle') || 'classic';
+    if (!localStorage.getItem('treeDressingStyle')) { state.addLeaves = false;} 
+    else if (localStorage.getItem('treeDressingStyle') === 'leaves') { state.addLeaves = true;}
+    state.linkStyle = localStorage.getItem('treeLinkStyle') || 'normal-dark';
+    state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
+    state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
+
+
+    setTimeout(() => {
+        positionFormContainer();
+    }, 200); // Petit délai pour s'assurer que tout est prêt    
+
 
 }
 
@@ -441,15 +963,18 @@ function initializeGenerationSelect() {
     }
 }
 
-
 export let audio;
 export let audioUnlocked = false;
 
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
-export async function loadData() {
+export async function loadData(isfromNonEncryptedFile = '') {
 
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    secretTargetArea.style.display = 'none';
+
+    state.isTreeEnabled = true;
 
     trackPageView('AccueilTreeViewer');
 
@@ -506,8 +1031,26 @@ export async function loadData() {
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
   
     const fileInput = document.getElementById('gedFile');
+
     const passwordInput = document.getElementById('password');
-    // toggleFullScreen();
+    
+    state.firstName = document.getElementById('input-form-firstName').value;
+    state.lastName = document.getElementById('input-form-lastName').value;
+
+
+    // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
+
+    if (state.isMobile && state.isTouchDevice ) {
+        if (!state.isPWA && state.isbrowserBarHidden) {
+            // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+        }
+        else { 
+            if (localStorage.getItem('noFullScreenActif') === 'true') {
+            } else if (window.innerWidth < 500 && window.innerHeight > 600) { // mode portrait
+                toggleFullScreen('fullScreenRequired');
+            }
+        }
+    }
 
     // for mobile phone
     nameCloudState.mobilePhone = false;
@@ -515,7 +1058,7 @@ export async function loadData() {
     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
     
     try {
-        let gedcomContent = await loadGedcomContent(fileInput, passwordInput);
+        let gedcomContent = await loadGedcomContent(fileInput, passwordInput, (isfromNonEncryptedFile==='nonEncrypted'));
         state.gedcomData = parseGEDCOM(gedcomContent);
 
 
@@ -537,6 +1080,12 @@ export async function loadData() {
         if (settingsButton) {
             settingsButton.style.display = 'none';
         }
+
+        const helpButton = document.getElementById('help-button');
+        if (helpButton) {
+            helpButton.style.display = 'none';
+        }
+
 
         document.getElementById('tree-container').style.display = 'block';
 
@@ -599,7 +1148,6 @@ export async function loadData() {
 
         state.isRadarEnabled = false;
 
-
         updateRadarButtonText();
 
         state.initialTreeDisplay = true;
@@ -617,9 +1165,37 @@ export async function loadData() {
         initializeHamburgerOnce();
         showHamburgerMenu();
 
+        // toggleFullScreen();
 
-        toggleFullScreen();
-        
+        setTimeout(() => {
+            positionRadarButton();
+            positionHeatMapButton();
+            createAndPositionRadarOverlay();
+            createAndPositionHeatMapOverlay();
+            // console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
+        }, 50);
+
+        setTimeout(() => {
+            buttonsOnDisplay(false);
+        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!          
+
+        // pour bug flash noir en mode mobile landscape
+        if (state.isMobile && state.isTouchDevice ) {
+            if (!state.isPWA && state.isbrowserBarHidden) {
+                // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+            }
+            else { 
+                if (localStorage.getItem('noFullScreenActif') === 'true') {
+                } else if (window.innerWidth > 600 && window.innerHeight < 500) { // mode lanscape
+                    setTimeout(() => {
+                        toggleFullScreen('fullScreenRequired');
+                    }, 300); 
+                }
+            }
+        }
+
+        // const originalRootResults = document.getElementById('root-person-results');
+        // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
         
     } catch (error) {
         console.error('Erreur complète:', error);
@@ -661,8 +1237,8 @@ window.addEventListener('load', injectCustomStyle);
  * Charge le contenu du fichier GEDCOM
  * @private
  */
-async function loadGedcomContent(fileInput, passwordInput) {
-    if ((!passwordInput.value) && (!fileInput.files[0])) {
+async function loadGedcomContent(fileInput, passwordInput, isfromNonEncryptedFile = false ) {
+    if( ((!passwordInput.value) && (!fileInput.files[0]))  ||  ((isfromNonEncryptedFile) && (!fileInput.files[0])) ){
         if (window.CURRENT_LANGUAGE === 'fr') {
             throw new Error('Veuillez sélectionner un fichier ou entrer un mot de passe');
         } else if (window.CURRENT_LANGUAGE === 'en') {
@@ -674,7 +1250,8 @@ async function loadGedcomContent(fileInput, passwordInput) {
         }
     }
 
-    if (passwordInput.value) {
+
+    if (passwordInput.value && !isfromNonEncryptedFile) {
         try {
             // Essayer d'abord avec arbre.enc
             const content = await loadEncryptedContent(passwordInput.value, 'arbre.enc');
@@ -759,7 +1336,7 @@ async function loadGedcomContent(fileInput, passwordInput) {
                 throw error;
             }
         }
-    } else {
+    } else if (isfromNonEncryptedFile) {
         // Pour un fichier téléchargé, définir treeOwner = 0 (ou autre valeur par défaut)
         state.treeOwner = 0;
         console.log("Fichier GEDCOM personnalisé chargé. Owner: 0");
@@ -767,12 +1344,10 @@ async function loadGedcomContent(fileInput, passwordInput) {
     }
 }
 
-
 /**
  * Charge le contenu crypté avec logs améliorés
  * @private
  */
-
 async function loadEncryptedContent(password, filename) {
     debugLog(`Tentative de chargement: ${filename}`, 'info');
     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
@@ -966,6 +1541,7 @@ function fallbackUpdateRootPersonSelector(person) {
 
     // Sélectionner la personne courante
     rootPersonResults.value = person.id;
+    if (rootPersonResults && !state.isButtonOnDisplay) {rootPersonResults.style.visibility = 'hidden';}
 }
 
 /**
@@ -1065,7 +1641,7 @@ export function handleRootPersonChange(event) {
             } else if (selectedValue === 'demo3'){ // 'comme un ouragan'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('bertrand gouyon');
-                cousin = searchRootPersonId('stephanie marie elisabeth grimaldi');
+                cousin = searchRootPersonId('stéphanie marie elisabeth grimaldi');
             } else if (selectedValue === 'demo4'){  //'Espace'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('charles lebon');
@@ -1123,6 +1699,16 @@ export function handleRootPersonChange(event) {
         // Réinitialiser l'état de l'animation avant de démarrer
         resetAnimationState();
 
+        if (state.isRadarEnabled) {
+            disableFortuneModeClean();
+            disableFortuneModeWithLever();
+            // displayGenealogicTree(null, true, false, true);
+            toggleTreeRadar();
+        }
+
+        if (state.isWordCloudEnabled) { closeCloudName(); }
+
+
         state.isAnimationLaunched = true;
         
         // Forcer 2 générations
@@ -1137,7 +1723,11 @@ export function handleRootPersonChange(event) {
         // Mettre à jour l'état de pause
         const animationPauseBtn = document.getElementById('animationPauseBtn');
         if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
-            animationPauseBtn.querySelector('span').textContent = '⏸️';
+            // animationPauseBtn.querySelector('span').textContent = '⏸️';
+            // animationPauseBtn.querySelector('span').textContent = '⏸';
+            animationPauseBtn.querySelector('span').innerHTML =
+            '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+
         }
                
         
@@ -1196,21 +1786,36 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
 
 
-    let person; 
-    if (state.treeOwner === 6) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? findYoungestPerson() : findYoungestPerson());
-    } else if (state.treeOwner === 5) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
-    } else if (state.treeOwner === 4) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
-    } else if (state.treeOwner === 3) {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
-    } else {
-        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+
+    let personInit = null; 
+    // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
+    if (state.firstName != '' && state.lastName!= '') {
+        openSearchModal(state.firstName,  state.lastName );
+        if (window.currentSearchResults.length === 1) {
+           personInit = window.currentSearchResults[0];
+        }
     }
+
+    let person = null; 
+    if (state.treeOwner === 6) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 5) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("giovanna san") || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 4) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Nadine C") || findYoungestPerson()) : findYoungestPerson());
+    } else if (state.treeOwner === 3) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Léon Mo") || findYoungestPerson()) : findYoungestPerson());
+    } else {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
+    }
+
     // Important : toujours sauvegarder l'ID de la personne courante
     if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
-        state.rootPersonId = rootPersonId || person.id;
+        if (rootPersonId || person) {
+            state.rootPersonId = rootPersonId || person.id;
+        } else if (state.rootPersonId.id) {
+            person = state.rootPersonId; 
+        }
         state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
     } 
 
@@ -1389,12 +1994,10 @@ export function updateTreeMode(mode) {
 
 // }
 
-
 export function openSettingsModal() {
     // Option 1: Utiliser directement la nouvelle modal
     createEnhancedSettingsModal();
 }
-
 
 export function closeSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
@@ -1453,12 +2056,9 @@ export function showToast(message, duration = 2500) {
     }
 }
 
-
-
 // Objet pour stocker les compteurs d'actions
 const actionCounters = {};
 const max_count = 3;
-
 
 // Ajouter les messages toast aux boutons et sélecteurs
 document.addEventListener('DOMContentLoaded', function() {
@@ -1475,6 +2075,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showToast(message);
                 }
             }
+            // console.log('\n\n Debug : Change event detected on', this, element);
         });
 
         // Pour les sélecteurs, utiliser l'événement change
@@ -1492,7 +2093,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         showToast(message);
                     }
                 }
-            });
+                // console.log('\n\n Debug : SELECT Change event detected on', this, element);        
+            });    
         }
 
         // Pour les champs de saisie, utiliser l'événement input
@@ -1510,6 +2112,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+            // console.log('\n\n Debug : INPUT Change event detected on', this, element);        
         }
 
         // Garder le clic pour tous
@@ -1525,14 +2128,270 @@ document.addEventListener('DOMContentLoaded', function() {
                     showToast(message);
                 }
             }
+            // console.log('\n\n Debug : click Change event detected on', this, element);      
         });
     });
-
 
     initNetworkListeners();
     console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
 });
 
+
+/**
+ * Bascule l'affichage du mot de passe entre 'text' (visible) et 'password' (masqué).
+ */
+function changePasswordVisibility(hidden = false) {
+    const passwordInput = document.getElementById('password');
+    
+    if (passwordInput) {
+        // Si l'input est 'text', on le passe en 'password' (masqué)
+        if (hidden) {
+            passwordInput.type = 'password';
+            console.log("Mode mot de passe : Masqué");
+        } 
+        // Si l'input est 'password', on le passe en 'text' (visible)
+        else {
+            passwordInput.type = 'text';
+            console.log("Mode mot de passe : Visible");
+        }
+    }
+}
+
+function secretMode() {
+    // --- Configuration ---
+    const CLASSE_CACHE = 'expert-hidden';
+
+    // Configuration séquence de touches
+    const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
+    const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
+    const SEQUENCE_PUZZLE = ['P', 'U', 'Z', 'Z', 'L', 'E']; 
+    const SEQUENCE_LEAVES = ['L', 'E', 'A', 'V', 'E', 'S']; 
+
+    let sequenceEnCours = [];
+    let sequenceNoFullScreenEnCours = [];
+    let sequencePuzzleEnCours = [];
+    let sequenceLeavesEnCours = [];
+    // Configuration Mobile et PC (click et taps)
+    const TAP_COUNT_NECESSAIRE = 5;
+    let tapCount = 0;
+    let tapTimer = null;
+
+    // --- Nouvelle fonction pour créer et afficher le pop-up ---
+    const afficherPopup = (message, time = null, top = null) => {
+        // 1. Créer l'élément (Toaster)
+        const popup = document.createElement('div');
+        popup.textContent = message;
+        popup.id = 'expert-activation-popup';
+        popup.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Vert */
+            color: white;
+            padding: 5px 5px;
+            border-radius: 8px;
+            font-family: sans-serif;
+            font-size: 16px;
+            z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            white-space: pre-line;
+            text-align: center;
+        `;
+
+        if (top) {
+            popup.style.bottom =  '';
+            popup.style.top = top +'px';
+        }
+
+        document.body.appendChild(popup);
+
+        // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
+        setTimeout(() => {
+            popup.style.opacity = '1';
+        }, 10);
+
+        // 3. Le faire disparaître après 3 secondes
+        let duration = 3000;
+        if (time) {
+            console.log('\n\n   debug 2 afficherPopup ', time)
+            duration = time; 
+        }
+
+        setTimeout(() => {
+            popup.style.opacity = '0';
+            // Supprimer l'élément du DOM après la transition de disparition
+            setTimeout(() => {
+                popup.remove();
+            }, 500); // 500ms correspond à la durée de la transition CSS
+        }, duration); // Reste affiché pendant 3 secondes
+    };
+
+
+    function checkSequence(keyPressed) {
+        sequenceEnCours.push(keyPressed);
+        sequenceNoFullScreenEnCours.push(keyPressed);
+        sequencePuzzleEnCours.push(keyPressed);
+        sequenceLeavesEnCours.push(keyPressed);
+
+        // Garde la taille de la séquence
+        if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
+            sequenceEnCours.shift();
+        }
+        if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
+            sequenceNoFullScreenEnCours.shift();
+        }
+        if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
+            sequencePuzzleEnCours.shift();
+        }
+        if (sequenceLeavesEnCours.length > SEQUENCE_LEAVES.length) {
+            sequenceLeavesEnCours.shift();
+        }
+
+
+        // Vérification de la correspondance
+        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
+            activerModeExpert('hidePasswordActif');
+            sequenceEnCours = []; // Réinitialise
+        }
+        if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
+            activerModeExpert('noFullScreenActif');
+            sequenceNoFullScreenEnCours = []; // Réinitialise
+        }
+        if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
+            activerModeExpert('puzzleActif');
+            sequencePuzzleEnCours = []; // Réinitialise
+        }
+        if (sequenceLeavesEnCours.join(',') === SEQUENCE_LEAVES.join(',')) {
+            activerModeExpert('leavesActif');
+            sequenceLeavesEnCours = []; // Réinitialise
+        }
+    }
+
+    // --- Fonction d'Activation (où la modification a lieu) ---
+    const activerModeExpert = (mode) => {
+        // Mémoriser l'état
+        localStorage.setItem(mode, 'true');
+        
+        // Afficher le pop-up sympa !
+        if (mode === 'modeExpertActif') {
+            // si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
+            document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
+                el.classList.remove(CLASSE_CACHE);
+            });
+            afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'hidePasswordActif') {
+            changePasswordVisibility(true);
+            afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'noFullScreenActif') {
+            afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        } else if (mode === 'puzzleActif') {
+            afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+            if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+                state.isPuzzleSwipeFromSecret = true;
+                const browserBarLabel = document.getElementById('browserBarLabel');
+                browserBarLabel.style.display = '';
+                const browserBarButton = document.getElementById('browserBar-button');
+                browserBarButton.style.display = '';
+                const bodyElement = document.body;
+                // Augmenter min-height à 105vh
+                bodyElement.style.minHeight = '110vh'; //'15vh';
+                // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
+                // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
+                // 'visible' est souvent la valeur par défaut du navigateur.
+                bodyElement.style.overflow = 'visible';
+            }
+        } else if (mode === 'leavesActif') {
+            afficherPopup('Mode leaves Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+            state.addLeaves = true;
+        } else {
+            changePasswordVisibility(false);
+        }
+    };
+
+
+    // --- 1. Persistance : Vérifier l'état au chargement ---
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        activerModeExpert('modeExpertActif');
+    }
+    if (localStorage.getItem('hidePasswordActif') === 'true') {
+        activerModeExpert('hidePasswordActif');
+    }
+    if (localStorage.getItem('noFullScreenActif') === 'true') {
+        activerModeExpert('noFullScreenActif');
+    }
+    if (localStorage.getItem('puzzleActif') === 'true') {
+        activerModeExpert('puzzleActif');
+    }
+    if (localStorage.getItem('leavesActif') === 'true') {
+        activerModeExpert('leavesActif');
+    }
+
+    // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+
+    if (state.isMobile && state.isTouchDevice) {
+        const inputField = document.getElementById('input-form-firstName');
+        if (inputField) {
+            // Écouter l'événement directement sur le champ de saisie
+            inputField.addEventListener('input', (e) => {
+                const currentValue = inputField.value;
+                if (currentValue.length === 0) return; // Rien tapé
+
+                // Obtient le DERNIER caractère tapé
+                const lastKey = currentValue.slice(-1).toUpperCase(); 
+                // --- Logique de séquence ---
+                // 1. Ajouter la dernière touche à la séquence en cours
+                // sequenceEnCours.push(lastKey);
+                // sequenceNoFullScreenEnCours.push(lastKey);
+                // sequencePuzzleEnCours.push(lastKey);
+
+                checkSequence(lastKey);
+            });
+        }
+    }
+
+    // ---2.  Activation PC : Écoute de la séquence de touches ---
+    document.addEventListener('keydown', (e) => {
+        // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
+        // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
+        const keyPressed = e.key.toUpperCase();
+        
+        // sequenceEnCours.push(keyPressed);
+        // sequenceNoFullScreenEnCours.push(keyPressed);
+        // sequencePuzzleEnCours.push(keyPressed);
+
+        checkSequence(keyPressed);
+    });
+
+    // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+
+    if (secretTargetArea) {
+        secretTargetArea.addEventListener('click', () => {
+
+            // console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
+            // Empêche l'activation si déjà actif
+            if (localStorage.getItem('modeExpertActif') === 'true') return;
+            tapCount++;
+            
+            // Réinitialise le compteur après un court délai (800ms)
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 800);
+
+            if (tapCount >= TAP_COUNT_NECESSAIRE) {
+                activerModeExpert('modeExpertActif');
+                tapCount = 0; // Réinitialise
+            }
+        });
+    } else {
+        console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
+    }
+
+}
 
 
 function detectInputType() {
@@ -1564,10 +2423,10 @@ export function isIOSDevice() {
     return state.isIOS;
 }
 
-
 export function detectDeviceType() {
-  const deviceInfo = {
+  state.deviceInfo = {
     isMobile: false,
+    isIOS: false,
     hasTouchScreen: false,
     inputType: "inconnu",
     viewportWidth: window.innerWidth,
@@ -1577,27 +2436,28 @@ export function detectDeviceType() {
   // Détection par user-agent
 //   deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+  state.deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
   
   // Détection de l'écran tactile
-  deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
+  state.deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
                               (navigator.maxTouchPoints > 0) || 
                               (navigator.msMaxTouchPoints > 0);
   
-  state.isMobile = deviceInfo.isMobile;
+  state.isMobile = state.deviceInfo.isMobile;
   debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
-  state.isIOS = isIOSDevice();
+  state.deviceInfo.isIOS = isIOSDevice();
+  state.isIOS = state.deviceInfo.isIOS;
 
   // Détection du type d'entrée principal
   if (window.matchMedia) {
     if (window.matchMedia('(pointer: fine)').matches) {
-      deviceInfo.inputType = "souris";
+      state.deviceInfo.inputType = "souris";
     } else if (window.matchMedia('(pointer: coarse)').matches) {
-      deviceInfo.inputType = "tactile";
+      state.deviceInfo.inputType = "tactile";
     }
   }
   
-  
+ console.log(`ℹ️  isMobile : ${state.deviceInfo.isMobile}, ℹ️  isIOS : ${state.deviceInfo.isIOS} ,  ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen},  ℹ️  isIOS: ${state.deviceInfo.isIOS}, ℹ️  inputType: ${state.deviceInfo.inputType}, W : ${state.deviceInfo.viewportWidth} x H : ${state.deviceInfo.viewportHeight}`)
   
   // // Utilisation
   // if (hasTouchScreen()) {
@@ -1613,16 +2473,14 @@ export function detectDeviceType() {
 
 
   
-  return deviceInfo;
+  return state.deviceInfo;
 }
-
 
 
 // Exposer la fonction et le compteur globalement
 window.showToast = showToast;
 window.actionCounters = actionCounters;
 // window.displayGenealogicTree = displayGenealogicTree;
-
 
 
 // Export des variables et fonctions nécessaires
@@ -1643,11 +2501,7 @@ export {
 };
 
 
-
 window.addEventListener('load', initialize);
-
-
-
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
@@ -1681,15 +2535,14 @@ export function searchRootPersonId(searchStr, isAlert = true) {
     }
 }
 
-
 // Gestionnaire des paramètres avec support multi-langues
 // Fonction pour réinitialiser les paramètres
 export function resetToDefaultSettings() {
     // Obtenir les textes traduits
-    const getText = (key) => window.i18n ? window.i18n.getText(key) : key;
+    const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
     
     // Message de confirmation multilingue
-    const confirmMessage = `${getText('confirmResetSettings')}\n\n${getText('resetWillDo')}:\n• ${getText('deletePrefs')}\n• ${getText('resetLang')}\n• ${getText('clearCustomSettings')}\n\n(${getText('cacheWillBeKept')})`;
+    const confirmMessage = `${getMultilingueText('confirmResetSettings')}\n\n${getMultilingueText('resetWillDo')}:\n• ${getMultilingueText('deletePrefs')}\n• ${getMultilingueText('resetLang')}\n• ${getMultilingueText('clearCustomSettings')}\n\n(${getMultilingueText('cacheWillBeKept')})`;
     
     if (confirm(confirmMessage)) {
         try {
@@ -1707,14 +2560,14 @@ export function resetToDefaultSettings() {
             console.log('Paramètres remis à zéro');
             
             // Afficher un message de confirmation multilingue
-            alert(`${getText('resetSuccess')}\n\n${getText('pageWillReload')}`);
+            alert(`${getMultilingueText('resetSuccess')}\n\n${getMultilingueText('pageWillReload')}`);
             
             // Recharger la page pour appliquer les changements
             window.location.reload();
             
         } catch (error) {
             console.error('Erreur lors de la réinitialisation:', error);
-            alert(getText('resetError'));
+            alert(getMultilingueText('resetError'));
         }
     }
 }
@@ -1738,9 +2591,6 @@ if (document.readyState === 'loading') {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { resetToDefaultSettings };
 }
-
-
-
 
 /**
  * Gestion des erreurs
@@ -1771,7 +2621,6 @@ function showErrorMessage(message) {
     }, 5000);
 }
 
-
 /**
  * Configuration par défaut à adapter selon vos besoins
  */
@@ -1788,8 +2637,7 @@ function showErrorMessage(message) {
 // switchTreeMode('WheelDescendants');
 // exportToPDF();
 
-
-function positionRadarButton() {
+export function positionRadarButton() {
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
@@ -1797,7 +2645,8 @@ function positionRadarButton() {
 
     let offsetY = 0;
     let offsetY2 = 5;
-    if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+    // if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+    offsetY = 5; offsetY2 = 0;
 
     if (cloudButton && radarButton && statsButton) {
         const cloudRect = cloudButton.getBoundingClientRect();
@@ -1808,8 +2657,12 @@ function positionRadarButton() {
 
 
         statsButton.style.position = 'fixed';
-        statsButton.style.left = cloudRect.left + 37 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 12 - offsetY2) + 'px';
+        // statsButton.style.left = cloudRect.left + 37 + 'px';
+        // statsButton.style.top = (cloudRect.bottom + 11 - offsetY2) + 'px';
+
+        statsButton.style.left = cloudRect.left + 47 + 'px';
+        statsButton.style.top = (cloudRect.bottom + 8 - offsetY2) + 'px';
+
         statsButton.style.zIndex = '1001';
     }
 
@@ -1824,15 +2677,15 @@ function createAndPositionRadarOverlay() {
     const statsButton = document.getElementById('statsBtn');
 
     // Forcer padding/marges/tailles (avec !important)
-    statsButton.style.setProperty('padding-top', '0px', 'important');
-    statsButton.style.setProperty('padding-bottom', '0px', 'important');
-    statsButton.style.setProperty('padding-left', '0px', 'important');
-    statsButton.style.setProperty('padding-right', '0px', 'important');
+    // statsButton.style.setProperty('padding-top', '0px', 'important');
+    // statsButton.style.setProperty('padding-bottom', '0px', 'important');
+    // statsButton.style.setProperty('padding-left', '0px', 'important');
+    // statsButton.style.setProperty('padding-right', '0px', 'important');
 
-    statsButton.style.setProperty('border-radius', '4px', 'important');
+    // statsButton.style.setProperty('border-radius', '4px', 'important');
 
-    statsButton.style.setProperty('min-width', '67px', 'important');
-    statsButton.style.setProperty('height', '27px', 'important');
+    // statsButton.style.setProperty('min-width', '67px', 'important');
+    // statsButton.style.setProperty('height', '27px', 'important');
 
 
     // Vérifier que les boutons existent
@@ -1890,8 +2743,11 @@ function createAndPositionRadarOverlay() {
     }
     
     // Positionner l'overlay
-    overlay.style.top = `${cloudRect.bottom + 10}px`;
-    overlay.style.left = `${cloudRect.left + 40}px`;
+    // overlay.style.top = `${cloudRect.bottom + 10}px`;
+    // overlay.style.left = `${cloudRect.left + 40}px`;
+    overlay.style.top = `${cloudRect.bottom + 15}px`;
+    overlay.style.left = `${cloudRect.left + 45}px`;
+
     overlay.style.width = `${statsButton.offsetWidth}px`;
     overlay.style.height = `${statsButton.offsetHeight}px`;
 
@@ -1930,23 +2786,22 @@ function createAndPositionHeatMapOverlay() {
     overlay.style.height = `${rect.height + 20}px`;
 }
 
-function positionHeatMapButton() {
-    // const settingsBtn = document.getElementById('settingsBtn');
+export function positionHeatMapButton() {
+    const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
 
     let offsetY = 0;
-    if (window.innerWidth < 768) {offsetY = 5;}
+    // if (window.innerWidth < 768) {offsetY = 5;}
+    offsetY = 5;
 
     if (settingsBtn && heatMapBtn) {
         const settingRect = settingsBtn.getBoundingClientRect();
         heatMapBtn.style.position = 'fixed';
         heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
-        heatMapBtn.style.top = (settingRect.bottom + 5 + offsetY) + 'px';
+        heatMapBtn.style.top = (settingRect.bottom + 3 + offsetY) + 'px';
         heatMapBtn.style.zIndex = '1001';
     }
 }
-
-
 
 export function hideAndCleanupTreeButtons() {
     const buttonListToHide = ['heatMapBtn', 'radarBtn'];
@@ -1986,20 +2841,71 @@ export function showAndRestoreTreeButtons() {
     });
 }
 
+window.addEventListener('resize', debounce(() => {
+    if (!state.isWordCloudEnabled && state.isTreeEnabled) {
+        positionRadarButton();
+        positionHeatMapButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+        console.log('\n\n*** debug resize in main.js  for position buttons and  and map\n\n')          
+    }
+    if (!state.isTreeEnabled) {
+        positionFormContainer();
+        console.log('\n\n*** debug resize in main.js  for positionFormContainerr\n\n')  
+    }
+    // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
+}, 150)); // Attend 150ms après le dernier resize
+
+
+// window.addEventListener('load', () => {
+//     if (!sessionStorage.getItem('reloadedOnce')) {
+//         sessionStorage.setItem('reloadedOnce', 'true');
+//         // setTimeout(() => {
+//         //     console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//         //     location.reload();
+//         // }, 1000);
+
+//         setTimeout(() => {
+//             console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//             setTimeout(() => location.reload(), 100); // petit délai pour laisser la console écrire
+//         }, 1000);
+//         alert('DEBUG: reload after 1s');
 
 
 
-// Modifier vos écouteurs existants
-document.addEventListener('DOMContentLoaded', () => {
-    positionRadarButton();
-    positionHeatMapButton();
-    createAndPositionRadarOverlay();
-    createAndPositionHeatMapOverlay();
-});
+// function to generate a constant silent audio for HDMI to avoid TV to switch between audio or non audio and to display a black banner on the top 
+export function keepSilentAudioAlive() {
 
-window.addEventListener('resize', () => {
-    positionRadarButton();
-    positionHeatMapButton();
-    createAndPositionRadarOverlay();
-    createAndPositionHeatMapOverlay();
-});
+    console.log('\n\n\n  ------ activate silent audio for HDMI ----------\n,\n');
+    // 1. Initialiser le contexte audio
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    // 2. Créer l'oscillateur (le son)
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine';
+    // Fréquence haute (ex: 15000 Hz) : plus difficile à entendre pour l'oreille humaine que 440 Hz.
+    oscillator.frequency.setValueAtTime(15000, audioCtx.currentTime); 
+
+    // 3. Créer un nœud de Gain (Volume)
+    const gainNode = audioCtx.createGain();
+
+    // Régler le volume à un niveau EXTRÊMEMENT BAS. 
+    // 0.0001 est généralement le bon compromis entre "inaudible" et "signal actif".
+    gainNode.gain.setValueAtTime(0.0001, audioCtx.currentTime); 
+
+    // 4. Connexion et lancement
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    // Le son est lancé en continu
+    oscillator.start(0);
+
+    // Mettre à jour le statut
+    // document.getElementById('status-message').textContent = "Statut : Flux audio actif (Gain minime). Le bandeau Sony ne devrait plus apparaître.";
+    
+    return oscillator;
+}
+
+
+

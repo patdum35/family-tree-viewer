@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap } from './main.js';
+import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
@@ -10,18 +10,41 @@ import { animationState, stopAnimation, initializeAnimationMapPosition, updateAn
 import { repositionAudioPlayerOnResize } from './audioPlayer.js'
 import { getCachedResourceUrl } from './photoPlayer.js';
 import { setMaxGenerations, removeSpinningImage } from './treeWheelRenderer.js'
-import { disableFortuneModeWithLever } from './treeWheelAnimation.js'
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { enableBackground } from './backgroundManager.js';
 import { calculateFullTreeDimensions } from './exportManager.js';
+import { generateNameCloudExport } from './nameCloudUI.js';
+import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
 
+
+
+/** function to reduce to call with 'resize' events*  */
+export function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout); // Annule le timer précédent
+        timeout = setTimeout(() => func(...args), wait); // Nouveau timer
+    };
+}
+
+/** function to verify if a modal is visible *  */
+export function isModalVisible(modalId) {
+    const modal = document.getElementById(modalId);
+    return modal && modal.style.display !== 'none'; // && modal.offsetParent !== null;
+}
 
 /**
  * Initialise les gestionnaires d'événements globaux
  */
 export function initializeEventHandlers() {
-    window.addEventListener('resize', handleWindowResize);
-    window.addEventListener('click', handleModalClick);
-    
+
+    window.addEventListener('resize', debounce(() => {
+        if (!state.isWordCloudEnabled) {
+            resizeHamburger();
+            handleWindowResize();
+        }
+    }, 150)); // Attend 150ms après le dernier resize
+
     document.getElementById("root-person-search")
         .addEventListener("keydown", handleSearchKeydown);
     
@@ -45,6 +68,24 @@ export function initializeHeatmapHandlers() {
  * Gère le redimensionnement de la fenêtre
  */
 export function handleWindowResize() {
+
+
+    const closeButton = document.getElementById('close-tree-button');
+
+    if (state.isButtonOnDisplay) {
+        if (window.innerWidth < 400) {
+            closeButton.style.setProperty('top', '48px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important');
+        } else {
+            closeButton.style.setProperty('top', '6px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important'); 
+        }
+    } else {
+        closeButton.style.setProperty('top', '6px', 'important');
+        closeButton.style.setProperty('right', '6px', 'important');        
+    }
+
+
     d3.select("#tree-svg")
         .attr("width", window.innerWidth)
         .attr("height", window.innerHeight);
@@ -53,54 +94,26 @@ export function handleWindowResize() {
     setupElegantBackground(svg);
     initializeAnimationMapPosition();
     updateAnimationMapSize();
-    resizeHamburger();
+    // resizeHamburger();
     repositionAudioPlayerOnResize();
-
-
-    // state.lastVerticalPosition = state.lastVerticalPosition - 300;
 
     state.screenResizeHasOccured = true;
     state.previousWindowInnerWidth = state.lastWindowInnerWidth;
     state.previousWindowInnerHeight = state.lastWindowInnerHeight;
     state.lastWindowInnerWidth = window.innerWidth;
     state.lastWindowInnerHeight = window.innerHeight;
-    console.log("\n\n\n ##### Redimensionnement de la fenêtre, sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
-
-    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight > 0  ) { state.lastVerticalPosition = state.lastVerticalPosition + 100};
-    // if (state.lastWindowInnerHeight - state.previousWindowInnerHeight < 0 ) { state.lastVerticalPosition = state.lastVerticalPosition - 100};
-
-    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth > 0  ) { 
-    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
-    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
-    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
-
-    // };
-    // if (state.lastWindowInnerWidth - state.previousWindowInnerWidth < 0  ) { 
-    //     let  lastHorizontalPositionLocal  = state.lastHorizontalPosition;
-    //     state.lastHorizontalPosition = Math.max(0, state.lastHorizontalPosition + state.lastWindowInnerWidth - state.previousWindowInnerWidth); 
-    //     console.log("\n\n\n ##### Repositionnement arbre = ", lastHorizontalPositionLocal, state.lastHorizontalPosition,  '########\n\n\n');
-    //  };
-
-
-
-
-
-    /* */
-
-    // if (state.isRadarEnabled) {  resetWheelView() } ;// drawWheelTree(true, false); }
-
-
+    console.log("\n\n\n *** debug on resize :  Redimensionnement de la fenêtre ARBRE , sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
 }
 
 /**
  * Gère les clics sur la modale
  */
-export function handleModalClick(event) {
-    const modal = document.getElementById('person-details-modal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
+// export function handleModalClick(event) {
+//     const modal = document.getElementById('person-details-modal');
+//     if (event.target === modal) {
+//         modal.style.display = 'none';
+//     }
+// }
 
 /**
  * Gère les touches du clavier pour la recherche
@@ -159,6 +172,8 @@ export function selectRootPerson() {
     const resultsSelect = document.getElementById('root-person-results');
     const selectedPersonId = resultsSelect.value;
 
+    if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+
     if (selectedPersonId) {
         // Désactiver le clignotement
         if (typeof resultsSelect.setBlinking === 'function') {
@@ -170,8 +185,12 @@ export function selectRootPerson() {
 
         state.rootPersonId = selectedPersonId;
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in selectRootPerson ################# ')
+        if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+
         displayGenealogicTree(selectedPersonId, true);
-        
+
+        if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}  
+
         resultsSelect.style.display = 'block';
     }
 }
@@ -235,14 +254,32 @@ export function selectFoundPerson(personId) {
         }
     }
     
+    if (resultsSelect && !state.isButtonOnDisplay) {resultsSelect.style.visibility = 'hidden';}
+    
     // Afficher la personne comme racine
     console.log('\n\n\n\n ###################   CALL displayGenealogicTree in searchRootPerson ################# ')
     // displayGenealogicTree(personId, true);
+    // if (state.isRadarEnabled) {
+    //     displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
+    // } else {
+    //     displayGenealogicTree(personId, true, false);
+    // }
+
     if (state.isRadarEnabled) {
         displayGenealogicTree(personId, false, false,  false, 'WheelAncestors');
+    } else if (state.isWordCloudEnabled) {
+        state.rootPersonId = personId;
+        state.rootPerson = state.gedcomData.individuals[personId];
+        generateNameCloudExport();
+        // Vérifier si une heatmap est déjà affichée
+        if (document.getElementById('namecloud-heatmap-wrapper')) {
+            // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+            refreshHeatmap();
+        }
     } else {
         displayGenealogicTree(personId, true, false);
     }
+
 
     
     // Attendre que l'arbre soit affiché et que l'historique soit mis à jour
@@ -273,12 +310,12 @@ export function selectFoundPerson(personId) {
     }, 200); // Augmenter le délai pour s'assurer que tout est bien synchronisé
 }
 
-
 /**
  * Gère les mises à jour du nombre de prénoms
  */
 export function updatePrenoms(value) {
     state.nombre_prenoms = parseInt(value);
+    localStorage.setItem('nombre_prenoms', value);
     displayGenealogicTree(null, false, false);
 }
 
@@ -358,7 +395,6 @@ export function resetView() {
     }
 }
 
-
 export function resetViewZoomBeforeExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
@@ -402,8 +438,6 @@ export function resetViewZoomBeforeExport() {
     }
 }
 
-
-
 export function resetViewZoomAfterExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
@@ -427,7 +461,6 @@ export function resetViewZoomAfterExport() {
     }
 }
 
-
 /**
  * Réinitialise le niveau de zoom et la position de l'arbre
  * à leurs valeurs par défaut selon le mode d'affichage
@@ -450,11 +483,11 @@ export function resetZoom() {
         loginBackground.remove();
     }
     
-    // Supprimer également tout autre conteneur de fond d'écran existant
-    const existingBackgroundContainer = document.querySelector('.background-container');
-    if (existingBackgroundContainer) {
-        existingBackgroundContainer.remove();
-    }
+    // // Supprimer également tout autre conteneur de fond d'écran existant
+    // const existingBackgroundContainer = document.querySelector('.background-container');
+    // if (existingBackgroundContainer) {
+    //     existingBackgroundContainer.remove();
+    // }
     
     // S'assurer que le body a la classe indiquant qu'on est en mode arbre
     document.body.classList.add('tree-view');
@@ -523,11 +556,10 @@ function highlightAndZoomToNode(matchedNode) {
     }
 }
 
-
-export function closeAllModals(isCloseAnimationmap = true) {
+export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper = true) {
     // on récupère toutes les modales ouvertes
     //
-    const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-details-modal"]'); 
+    const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-fullDetails-modal"]'); 
     // const modals = document.querySelectorAll('div[id*="stats-modal"], div[id*="search-modal"], div[id*="show-person-list-modal"], div[id*="frequency-stat-modal"], div[id*="graph-stats-modal"], div[id*="century-stats-modal"], div[id*="person-details-modal"]'); 
 
    //[class*="searchModal-content"]
@@ -568,12 +600,13 @@ export function closeAllModals(isCloseAnimationmap = true) {
     });
 
 
+    if (isCloseHeatMapWrapper) {
+        const heatMapWrapper = document.getElementById('namecloud-heatmap-wrapper');
+        if (heatMapWrapper) {
+            heatMapWrapper.remove();
+            console.log('-debug closeAllModals remove heatMapWrapper', document.getElementById('namecloud-heatmap-wrapper'));
 
-    const heatMapWrapper = document.getElementById('namecloud-heatmap-wrapper');
-    if (heatMapWrapper) {
-        heatMapWrapper.remove();
-        console.log('-debug closeAllModals remove heatMapWrapper', document.getElementById('namecloud-heatmap-wrapper'));
-
+        }
     }
 
     if (isCloseAnimationmap) {
@@ -619,13 +652,14 @@ export function closeAllModals(isCloseAnimationmap = true) {
     state.centuryStatsModalCounter = 0; 
 }
 
-
 export async function returnToLogin() {
     // Masquer l'arbre
     document.getElementById('tree-container').style.display = 'none';
 
 
-    
+    // remettre l'écran d'accueil en mode scroll vertical avec une taille d'écran plus grande pour autoriser le swipe vers le haut et faire disparaitre le bandeau du browser
+    document.body.style.height = `${window.innerHeight + window.innerHeight*0.2}px`; // on met 120% de hauteur d'écran !
+    document.body.style.overflow = '';
     
     // Masquer le menu hamburger
     hideHamburgerMenu();
@@ -638,9 +672,15 @@ export async function returnToLogin() {
     if (settingsButton) {
         settingsButton.style.display = 'block';
     }
+
+
+    const helpButton = document.getElementById('help-button');
+    if (helpButton) {
+        helpButton.style.display = 'block';
+    }
     
     // Réinitialiser le champ de mot de passe
-    document.getElementById('password').value = '';
+    // document.getElementById('password').value = '';
     
     // Réinitialiser rootPersonId dans l'objet state
     state.rootPersonId = null;
@@ -653,7 +693,8 @@ export async function returnToLogin() {
     animationState.isPaused = true;
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     // Mettre à jour le bouton
-    animationPauseBtn.querySelector('span').textContent = '▶️';
+    // animationPauseBtn.querySelector('span').textContent = '▶️';
+    animationPauseBtn.querySelector('span').textContent = '▶';
 
     // Masquer la carte
     hideMap();
@@ -664,6 +705,14 @@ export async function returnToLogin() {
     state.treeMode = 'ancestors';
     state.treeModeReal = 'ancestors';
     removeSpinningImage();
+
+    disableFortuneModeClean();
+
+    // Supprimer également tout autre conteneur de fond d'écran existant
+    const existingBackgroundContainer = document.querySelector('.background-container');
+    if (existingBackgroundContainer) {
+        existingBackgroundContainer.remove();
+    }
 
     closeAllModals();
 
@@ -687,7 +736,8 @@ export async function returnToLogin() {
             // const imagePath = 'background_images/fort_lalatte.jpx';
             // const imagePath = 'background_images/lichen-red.jpg';
             // const imagePath = 'background_images/bois.jpg';
-            backgroundImage.src = 'background_images/tree-log.jpg';
+            // backgroundImage.src = 'background_images/tree-log.jpg';
+            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
             // backgroundImage.src = await getCachedResourceUrl(imagePath);
         } catch (error) {
             console.error("Erreur lors du chargement de l'image de fond:", error);
@@ -695,37 +745,39 @@ export async function returnToLogin() {
             // backgroundImage.src = 'background_images/fort_lalatte.jpg';
             // backgroundImage.src = 'background_images/lichen-red.jpg';
             // backgroundImage.src = 'background_images/bois.jpg';
-            backgroundImage.src = 'background_images/tree-log.jpg';
+            // backgroundImage.src = 'background_images/tree-log.jpg';
+            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
         }
     }
     
     // Quitter le mode plein écran si actif
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(err => console.error(err));
+    toggleFullScreen('exitfullScreenRequired');
+
+
+    state.isTreeEnabled = false;
+
+    positionFormContainer();
+
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    secretTargetArea.style.display = '';
+
+    // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
+        setTimeout(() => {
+            const loginBackground = document.querySelector('.login-background-image');
+            if (loginBackground) {
+                if (window.innerWidth > 800 || window.innerHeight > 800)  {
+                    loginBackground.src = 'background_images/tree-log.jpg';  
+                } else {
+                    loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+                }
+            }
+        }, 50); // Petit délai pour s'assurer que tout est prêt   
     }
+
 }
 
 window.returnToLogin = returnToLogin;
-
-export function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-            document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
-            document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-            document.documentElement.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-}
-
-window.toggleFullScreen = toggleFullScreen;
 
 // Fonction pour masquer le fond d'écran de connexion
 export function hideLoginBackground() {
@@ -737,4 +789,3 @@ export function hideLoginBackground() {
 }
 
 // window.hideLoginBackground = hideLoginBackground;
-

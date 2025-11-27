@@ -1,5 +1,6 @@
 
 // Importation des fonctions depuis les différents modules
+
 import { processNamesCloudWithDate } from './nameCloud.js';
 import { 
     openGedcomModal,
@@ -25,7 +26,9 @@ import {
     saveTargetAncestorId,
     toggleFullScreen,
     resetToDefaultSettings,
-    displayGenealogicTree
+    displayGenealogicTree,
+    state,
+    detectDeviceType
 } from './main.js';
 
 import {
@@ -42,6 +45,22 @@ import {
 import { 
     displayHeatMap 
 } from './geoHeatMapUI.js';
+import {
+    buttonsOnDisplay
+} from './mainUI.js'
+
+import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
+
+import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
+import { documentation } from './documentation.js';
+
+
+// // ou si tu veux attendre que tout soit chargé
+// document.addEventListener('DOMContentLoaded', () => {
+
+
+// });
+
 
 
 // import { changeLanguage } from './i18n.js';
@@ -66,7 +85,8 @@ async function loadBackgroundImageFromCache() {
                     // const cachedResponse = await cache.match('background_images/fort_lalatte.jpg');
                     // const cachedResponse = await cache.match('background_images/lichen-red.jpg');   
                     // const cachedResponse = await cache.match('background_images/bois.jpg');                    
-                    const cachedResponse = await cache.match('background_images/tree-log.jpg');  
+                    // const cachedResponse = await cache.match('background_images/tree-log.jpg');  
+                    const cachedResponse = await cache.match('background_images/tree-log-lowQuality.jpg');  
                     if (cachedResponse) {
                         // Image trouvée dans ce cache !
                         const blob = await cachedResponse.blob();
@@ -104,7 +124,9 @@ async function loadBackgroundImageFromCache() {
         // existingImage.src = 'background_images/fort_lalatte.jpg';
         // existingImage.src = 'background_images/lichen-red.jpg';
         // existingImage.src = 'background_images/bois.jpg';
-        existingImage.src = 'background_images/tree-log.jpg';
+        // existingImage.src = 'background_images/tree-log.jpg';
+        existingImage.src = 'background_images/tree-log-lowQuality.jpg';
+
         console.log('[Background Loader] Image chargée avec URL normale');
         return true;
     }
@@ -154,7 +176,8 @@ function setupBackgroundDebugFunctions() {
                 // const hasImage = await cache.match('background_images/fort_lalatte.jpg');
                 // const hasImage = await cache.match('background_images/lichen-red.jpg');
                 // const hasImage = await cache.match('background_images/bois.jpg');
-                const hasImage = await cache.match('background_images/tree-log.jpg');                
+                // const hasImage = await cache.match('background_images/tree-log.jpg');                
+                const hasImage = await cache.match('background_images/tree-log-lowQuality.jpg');  
                 console.log(`📦 ${cacheName}: ${hasImage ? '✅ HAS IMAGE' : '❌ no image'}`);
             }
         } catch (error) {
@@ -171,6 +194,7 @@ function initializeAppFunctions() {
     window.displayGenealogicTree = displayGenealogicTree;
     window.processNamesCloudWithDate = processNamesCloudWithDate;
     window.openGedcomModal = openGedcomModal;
+    window.documentation = documentation;
     window.closeGedcomModal = closeGedcomModal;
     window.loadData = loadData;
     window.updatePrenoms = updatePrenoms;
@@ -181,6 +205,7 @@ function initializeAppFunctions() {
     window.resetZoom = resetZoom;
     window.displayHeatMap = displayHeatMap;
     window.toggleTreeRadar = toggleTreeRadar;
+    window.toggleTreeRadarFromHamburger = toggleTreeRadarFromHamburger;
     window.toggleSpeech = toggleSpeech;
     window.toggleSpeech2 = toggleSpeech2;
     window.toggleAnimationPause = toggleAnimationPause;
@@ -197,28 +222,73 @@ function initializeAppFunctions() {
     window.toggleFullScreen = toggleFullScreen;
     window.resetToDefaultSettings = resetToDefaultSettings;
     window.statsModal = statsModal;
+    window.buttonsOnDisplay = buttonsOnDisplay;
     // window.changeLanguage = changeLanguage;
     window.startAnimation = () => {
         startAncestorAnimation().catch(console.error);
     };
+    window.browserBarPuzzle = browserBarPuzzle;
 }
 
+
 // Initialise les écouteurs d'événements
-function initializeEventListeners() {
+function initializeAppEventListeners() {
     document.addEventListener('DOMContentLoaded', () => {
         const loadDataButton = document.getElementById('loadDataButton');
         if (loadDataButton) {
-            loadDataButton.addEventListener('click', loadData);
+            loadDataButton.addEventListener('click', () => { 
+
+                // setTimeout(() => {
+
+                //     //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+                //     window.scrollTo({ top: 0, behavior: 'auto' });
+                //     if (state.isPuzzleSwipe) {resetPuzzle();}
+
+                //      // 2️⃣ Puis bloque le scroll 
+                //     document.body.style.height = `${window.innerHeight}px`;
+                //     document.body.style.overflow = 'hidden'; // empêche le scroll après
+                //     // console.log('\n\n\n *** debug document.body.style.height = ${window.innerHeight}px \n\n')
+                // }, 200); 
+
+                loadData();
+                });
         } else {
             console.warn("Élément 'loadDataButton' non trouvé");
         }
         
-        const rootPersonResults = document.getElementById('root-person-results');
-        if (rootPersonResults) {
-            rootPersonResults.addEventListener('change', handleRootPersonChange);
-        } else {
-            console.warn("Élément 'root-person-results' non trouvé");
-        }
+        // const rootPersonResults = document.getElementById('root-person-results');
+        // if (rootPersonResults) {
+        //     rootPersonResults.addEventListener('change', handleRootPersonChange);
+        // } else {
+        //     console.warn("Élément 'root-person-results' non trouvé");
+        // }
+
+
+        // const device = detectDeviceType();
+        // if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+
+        // function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+        //     return (
+        //         window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+        //         window.navigator.standalone === true // Safari iOS
+        //     );
+        // }
+        // state.isPWA = isPWA();
+
+        // console.log("/n/n/ ***** debug :  appel de PuzzleSwipe:  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA ",  state.isTouchDevice, state.isMobile, state.isIOS, state.isPWA , " /n/n/");
+
+        // // if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true) {
+        //     // 👉 activer le puzzle pour faire disparaitre la barre du navigateur
+        //     state.isPuzzleSwipe = true;
+        //     import('./puzzleSwipe.js')
+        //         .then(() => console.log("PuzzleSwipe chargé"))
+        //         .catch(err => console.error(err));
+        // } else {
+        //     // 👉 ignorer le puzzle : inutile car la barre du navigateur est déjà cachée en PWA, et sur PC c'est inutile car l'écran est grand
+        //     state.isPuzzleSwipe = false;
+        // }
+
     });
 }
 
@@ -238,23 +308,14 @@ function initializeBackgroundLoader() {
 }
 
 // Fonction principale d'initialisation
-function initialize() {
+function initializeApp() {
     initializeAppFunctions();
-    initializeEventListeners();
+    initializeAppEventListeners();
     initializeBackgroundLoader();
         
     // Vous pouvez ajouter d'autres initialisations ici si nécessaire
-    console.log("App Initializer V1.7: fonctions, écouteurs d'événements et chargeur d'image configurés");
+    console.log("App Initializer V1.6: fonctions, écouteurs d'événements et chargeur d'image configurés");
 }
 
 // Exécuter l'initialisation
-initialize();
-
-// Exporter les fonctions si nécessaire
-export {
-    initialize,
-    initializeAppFunctions,
-    initializeEventListeners,
-    initializeBackgroundLoader,
-    attemptBackgroundLoad
-};
+initializeApp();

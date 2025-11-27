@@ -1,16 +1,307 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree, showToast } from './main.js';
+import { state, displayGenealogicTree, showToast, positionRadarButton, positionHeatMapButton } from './main.js';
 import { nameCloudState } from './nameCloud.js';
+import { generateNameCloudExport } from './nameCloudUI.js';
 import { selectFoundPerson } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
+import { refreshHeatmap  } from './geoHeatMapDataProcessor.js';
 
 // Variable pour suivre si les sélecteurs ont été initialisés
 let selectorsInitialized = false;
 
 // Variable pour stocker une référence au sélecteur de personnes racines
 let rootPersonSelector = null;
+
+export function buttonsOnDisplay(isButtonsOnDisplay = false) {
+    state.isButtonOnDisplay = isButtonsOnDisplay; 
+    const controlsRow1 = document.querySelector('.controls-row-1'); 
+    const controlsRow2 = document.querySelector('.controls-row-2'); 
+    const speechToggleBtn = document.getElementById('speechToggleBtn');
+    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const cloudBtn = document.getElementById('cloudBtn');
+    const rootPersonSearch = document.getElementById('root-person-search');
+    const rootPersonResults = document.getElementById('root-person-results');
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    const radarBtn = document.getElementById('radarBtn');
+    const statsBtn = document.getElementById('statsBtn');
+    const generations = document.getElementById('generations');
+    const generationsLabel = document.getElementById('generationsLabel');
+    const treeMode = document.getElementById('treeMode');
+    const radarBtnOverlay = document.getElementById('radarBtn-overlay');
+    const statsBtnOverlay = document.getElementById('statsBtn-overlay');
+    const heatMapBtnOverlay = document.getElementById('heatMapBtn-overlay');
+    const closeButton = document.getElementById('close-tree-button');
+
+
+    if (isButtonsOnDisplay) {
+        controlsRow1.style.display = '';
+        controlsRow2.style.display = ''; 
+        speechToggleBtn.style.visibility = 'visible';
+        animationPauseBtn.style.visibility = 'visible';
+        settingsBtn.style.visibility = 'visible';
+        cloudBtn.style.visibility = 'visible';
+        rootPersonSearch.style.visibility = 'visible';
+        rootPersonResults.style.visibility = 'visible';
+        heatMapBtn.style.visibility = 'visible';
+        radarBtn.style.visibility = 'visible';
+        statsBtn.style.visibility = 'visible';
+        generations.style.visibility = 'visible';
+        treeMode.style.visibility = 'visible';
+        generationsLabel.style.visibility = 'visible';
+        if (radarBtnOverlay) {radarBtnOverlay.style.visibility = 'visible';}
+        if (statsBtnOverlay) {statsBtnOverlay.style.visibility = 'visible';}        
+        if (heatMapBtnOverlay) {heatMapBtnOverlay.style.visibility = 'visible';}
+        // closeButton.style.top = '6px !important'
+        // closeButton.style.right = '6px !important'
+        // console.log('\n\n Debug: buttonsOnDisplay set to TRUE ', rootPersonSearch);
+        // speechToggleBtn.style.display = 'flex';
+
+
+        if (window.innerWidth < 400) {
+            closeButton.style.setProperty('top', '48px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important');
+        } else {
+            closeButton.style.setProperty('top', '6px', 'important');
+            closeButton.style.setProperty('right', '6px', 'important'); 
+        }
+
+        positionRadarButton();
+        positionHeatMapButton();
+
+
+    } else {
+        speechToggleBtn.style.visibility = 'hidden';
+        animationPauseBtn.style.visibility = 'hidden';
+        settingsBtn.style.visibility = 'hidden';
+        cloudBtn.style.visibility = 'hidden';
+        rootPersonSearch.style.visibility = 'hidden';
+        rootPersonResults.style.visibility = 'hidden';
+        heatMapBtn.style.visibility = 'hidden';
+        radarBtn.style.visibility = 'hidden';
+        statsBtn.style.visibility = 'hidden';
+        generations.style.visibility = 'hidden';
+        treeMode.style.visibility = 'hidden';
+        generationsLabel.style.visibility = 'hidden';
+        if (radarBtnOverlay) { radarBtnOverlay.style.visibility = 'hidden'; }
+        if (statsBtnOverlay) { statsBtnOverlay.style.visibility = 'hidden'; }
+        if (heatMapBtnOverlay) { heatMapBtnOverlay.style.visibility = 'hidden'; }
+        // speechToggleBtn.style.display = 'none';
+
+        closeButton.style.setProperty('top', '6px', 'important');
+        closeButton.style.setProperty('right', '6px', 'important');
+        controlsRow1.style.display = 'none';
+        controlsRow2.style.display = 'none';        
+    }
+    
+    speechToggleBtn.style.background = 'transparent';
+    animationPauseBtn.style.background = 'transparent';
+    settingsBtn.style.background = 'transparent';
+    cloudBtn.style.background = 'transparent';
+    heatMapBtn.style.background = 'transparent';
+    radarBtn.style.background = 'transparent';
+
+    const settingsBtnSpan = settingsBtn.querySelector('span');
+    settingsBtnSpan.style.display = 'inline-block';
+    settingsBtn.style.setProperty('font-size', '32px', 'important');
+    settingsBtnSpan.style.setProperty('font-size', '32px', 'important');
+    
+    settingsBtnSpan.style.animation = 'gear-spin 6s linear infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    settingsBtnSpan.style.textShadow = `
+        1px 1px 0 #a3a2a2ff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #a3a2a2ff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #a3a2a2ff,
+        -1px 1px 0 #a3a2a2ff
+    `;
+
+
+    // settingsBtnSpan.style.textShadow = `
+    // 1px 1px 0 #2004f9,   /* décalage sombre à droite/bas */
+    // -1px -1px 0 #2004f9, /* décalage sombre à gauche/haut */
+    // 1px -1px 0 #2004f9,
+    // -1px 1px 0 #2004f9
+    // `;
+
+    
+    // Optionnel : plus de glow
+    // gearSpan.style.textShadow += ', 0 0 5px #fff';
+
+    // Animation subtile au survol
+    settingsBtn.addEventListener('mouseover', () => {
+        settingsBtn.style.animation = 'gear-spin 2s linear infinite';
+    });
+    
+    settingsBtn.addEventListener('mouseout', () => {
+        settingsBtn.style.animation = 'none';
+    });
+
+
+    const cloudBtnSpan = cloudBtn.querySelector('span');
+    cloudBtnSpan.style.display = 'inline-block';
+    // Animation d’oscillation
+    cloudBtnSpan.style.animation = 'gear-swing 1s ease-in-out infinite';
+
+    // const heatMapBtnSpan = heatMapBtn.querySelector('span');
+    // heatMapBtnSpan.style.display = 'inline-block'; // nécessaire pour rotate
+    // // Animation de spin 
+    // heatMapBtnSpan.style.transformStyle = 'preserve-3d';
+    // heatMapBtnSpan.style.animation = 'globe-spin 4s linear infinite';
+
+    const heatMapBtnSpan = heatMapBtn.querySelector('span');
+    heatMapBtnSpan.style.display = 'inline-block';
+    heatMapBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+
+    // Tableau des globes
+    const globes = ['🌍',  '🌏', '🌎'];
+    let i = 0;
+
+    // Fonction pour faire tourner la Terre
+    function rotateGlobe() {
+        // console.log('Changement de globe', i, globes[i]);
+        heatMapBtnSpan.textContent = globes[i];
+        i = (i + 1) % globes.length;
+    }
+
+    // Intervalle pour l’animation (par ex. toutes les 300ms)
+    // Nettoyer un éventuel intervalle existant
+    if (window.globeInterval) clearInterval(window.globeInterval);
+
+    // Lancer le seul intervalle
+    window.globeInterval = setInterval(rotateGlobe, 1200);
+
+    // const heatMapBtnSpan = heatMapBtn.querySelector('span');
+    // heatMapBtnSpan.style.display = 'inline-block';
+    // // heatMapBtnSpan.style.transition = 'opacity 0.3s ease-in-out';
+    // heatMapBtnSpan.style.fontSize = '24px';
+    // heatMapBtnSpan.style.textShadow = '1px 1px 2px #000';
+    // heatMapBtnSpan.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+
+    // const globes = ['🌍', '🌏','🌎'];
+    // let i = 0;
+
+    // function rotateGlobe() {
+    //     // Petit swing pour donner l’illusion de rotation
+    //     heatMapBtnSpan.style.transform = 'rotateY(20deg)';
+    //     heatMapBtnSpan.style.opacity = 0.8; // légère diminution d’opacité
+
+    //     setTimeout(() => {
+    //         // Changer l’emoji
+    //         i = (i + 1) % globes.length;
+    //         heatMapBtnSpan.textContent = globes[i];
+
+    //         // Revenir à la position normale
+    //         heatMapBtnSpan.style.transform = 'rotateY(0deg)';
+    //         heatMapBtnSpan.style.opacity = 1;
+    //     }, 100); // correspond à la durée de transition
+    // }
+
+    // // Intervalle de rotation
+    // if (window.globeInterval) clearInterval(window.globeInterval);
+    // // Lancer le seul intervalle
+    // window.globeInterval = setInterval(rotateGlobe, 1000);
+
+
+    const radarBtnSpan = radarBtn.querySelector('span');
+    radarBtnSpan.style.display = 'inline-block';
+    radarBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // Applique l’animation target 
+    radarBtnSpan.style.animation = 'target-animation 5s ease-in-out infinite';
+
+    const speechToggleBtnSpan = speechToggleBtn.querySelector('span');
+    speechToggleBtnSpan.style.display = 'inline-block';
+    speechToggleBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // Applique l’animation target 
+    // speechToggleBtnSpan.style.animation = 'sound-swing  5s ease-in-out infinite';
+    speechToggleBtnSpan.style.animation = 'sound-animate  5s ease-in-out infinite';
+
+
+    // const animationPauseBtnSpan = animationPauseBtn.querySelector('span');
+    // animationPauseBtnSpan.style.display = 'inline-block';
+    // animationPauseBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // Applique l’animation target 
+    // animationPauseBtnSpan.style.animation = 'sound-swing  5s ease-in-out infinite';
+    // animationPauseBtnSpan.style.animation = 'play-animate   5s ease-in-out infinite';
+    
+    // Ajouter l'animation de rotation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes gear-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+
+
+    // Ajout de l’animation d'oscillation CSS
+    style.textContent += `
+        @keyframes gear-swing {
+            0% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+            100% { transform: rotate(-10deg); }
+        }
+    `;
+
+
+    /// Ajout de l’animation spin 3D CSS
+    style.textContent += `
+        @keyframes globe-spin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+    `;
+
+    // Animation radar combinée pulse + oscillation + glow 
+    style.textContent += `
+        @keyframes target-animation {
+            0%   { transform: scale(1) rotate(-10deg); text-shadow: 0 0 2px #000; }
+            25%  { transform: scale(1.1) rotate(5deg); text-shadow: 0 0 4px red; }
+            50%  { transform: scale(1.2) rotate(10deg); text-shadow: 0 0 8px red; }
+            75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px red; }
+            100% { transform: scale(1) rotate(-10deg); text-shadow: 0 0 2px #000; }
+        }
+    `;
+
+
+    // Animation petit haut-parleur qui vibre 
+    style.textContent += `
+        @keyframes sound-swing {
+        0%   { transform: rotate(-10deg); }
+        50%  { transform: rotate(10deg); }
+        100% { transform: rotate(-10deg); }
+        }
+    `;
+
+
+
+    // Animation petit haut-parleur qui vibre Pulse + swing + glow subtil :
+    style.textContent += `
+        @keyframes sound-animate {
+        0%   { transform: scale(1) rotate(0deg); text-shadow: 0 0 2px #000; }
+        25%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px yellow; }
+        50%  { transform: scale(1.2) rotate(5deg); text-shadow: 0 0 6px yellow; }
+        75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px yellow; }
+        100% { transform: scale(1) rotate(0deg); text-shadow: 0 0 2px #000; }
+        }
+    `;
+
+
+    // Animation bouton Play : Pulse + léger déplacement + glow : :
+    style.textContent += `
+        @keyframes play-animate {
+        0%   { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
+        25%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
+        50%  { transform: scale(1.2) translateX(2px); text-shadow: 0 0 6px green; }
+        75%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
+        100% { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
 
 export function initializeCustomSelectors() {
     if (selectorsInitialized) return;
@@ -147,9 +438,10 @@ function replaceGenerationSelector() {
 
     // Remplacer le sélecteur original par le sélecteur personnalisé
     const parentElement = originalSelect.parentElement;
+    if (originalSelect && !state.isButtonOnDisplay) {originalSelect.style.visibility = 'hidden';}
     parentElement.replaceChild(customSelector, originalSelect);
+    if (customSelector && !state.isButtonOnDisplay) {customSelector.style.visibility = 'hidden';}
 }
-
 
 // Fonction pour mettre à jour l'affichage du sélecteur de générations
 export function updateGenerationSelector(newValue) {
@@ -308,9 +600,19 @@ function replaceTreeModeSelector() {
 
     // Remplacer le sélecteur original par le sélecteur personnalisé
     const parentElement = originalSelect.parentElement;
-    parentElement.replaceChild(customSelector, originalSelect);   
-}
+    if (originalSelect && !state.isButtonOnDisplay) {originalSelect.style.visibility = 'hidden';}
 
+    parentElement.replaceChild(customSelector, originalSelect);  
+
+    if (customSelector && !state.isButtonOnDisplay) {customSelector.style.visibility = 'hidden';}
+
+    
+    if (!state.isButtonOnDisplay) {
+        setTimeout(() => {
+            buttonsOnDisplay(false);
+        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!   
+    }
+}
 
 // Fonction pour mettre à jour l'affichage du sélecteur
 export function updateTreeModeSelector(newValue) {
@@ -378,7 +680,6 @@ export function updateSelectorDisplayText(selector, text) {
         displayElement.textContent = truncateText(text);
     }
 }
-
 
 /**
  * Met à jour la valeur du sélecteur de générations
@@ -528,6 +829,15 @@ export function replaceRootPersonSelector(customOptions = null) {
                     // displayGenealogicTree(value, true);
                     if (state.isRadarEnabled) {
                         displayGenealogicTree(value, false, false,  false, 'WheelAncestors');
+                    } else if (state.isWordCloudEnabled) {
+                        state.rootPersonId = value;
+                        state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
+                        generateNameCloudExport();
+                        // Vérifier si une heatmap est déjà affichée
+                        if (document.getElementById('namecloud-heatmap-wrapper')) {
+                            // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+                            refreshHeatmap();
+                        }
                     } else {
                         displayGenealogicTree(value, true, false);
                     }
@@ -949,7 +1259,7 @@ export function replaceRootPersonSelector(customOptions = null) {
     });
     document.dispatchEvent(event);
 
-
+    if (customSelector && !state.isButtonOnDisplay) {customSelector.style.visibility = 'hidden';}
 
     return customSelector;
 }
@@ -1116,8 +1426,6 @@ function setupPaperTextureBackground(svg) {
         .attr("pointer-events", "none");
 }
 
-
-
 /**
  * Crée et affiche un dialogue pour sélectionner une image de fond
  * @param {Function} onSelect - Fonction à appeler avec le chemin de l'image sélectionnée
@@ -1136,31 +1444,75 @@ export function createImageSelectorDialog(onSelect) {
     dialog.style.left = '50%';
     dialog.style.transform = 'translate(-50%, -50%)';
     dialog.style.backgroundColor = 'white';
-    dialog.style.padding = '20px';
+    dialog.style.padding = '10px';
     dialog.style.borderRadius = '8px';
     dialog.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
     dialog.style.zIndex = '10000';
-    dialog.style.maxWidth = '90%';
+    dialog.style.maxWidth = '92%';
+    dialog.style.minWidth = '300px';
     dialog.style.maxHeight = '80%';
     dialog.style.overflow = 'auto';
     
     // Titre
     const title = document.createElement('h3');
     title.textContent = 'Sélectionner une image de fond';
-    title.style.marginTop = '0';
-    title.style.marginBottom = '10px';
+    title.style.marginTop = '-10px';
+    title.style.marginLeft = '-10px';
+    title.style.marginRight = '-10px';
+    title.style.marginBottom = '5px';
+    title.style.paddingLeft = '15px';
+    title.style.paddingRight = '40px';
+    title.style.paddingTop= '10px';
+    title.style.paddingBottom = '10px';
+    title.style.fontSize = '18px';
+    title.style.backgroundColor = '#c9e6f6ff';
     dialog.appendChild(title);
     
     // Bouton de fermeture
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
+    closeButton.style.top = '5px';
+    closeButton.style.right = '3px';
     closeButton.style.border = 'none';
     closeButton.style.background = 'none';
-    closeButton.style.fontSize = '20px';
+    closeButton.style.width = '32px';
+    closeButton.style.height = '32px';
+    closeButton.style.fontSize = '28px';
+    closeButton.style.lineHeight = '32px'; // Pour centrer le '×'
+    closeButton.style.textAlign = 'center';
+    closeButton.style.border = '1px solid #a09f9fff'; // Bordure
+    closeButton.style.borderRadius = '50%'; // Cercle
+    closeButton.style.backgroundColor = '#c9e6f6ff';
+    closeButton.style.color = '#333';
     closeButton.style.cursor = 'pointer';
+
+    // Gestion de l'effet HOVER en JS
+    const defaultStyles = {
+        borderColor: '#a09f9fff',
+        backgroundColor: '#c9e6f6ff',
+        color: '#333',
+        // transform: 'scale(1)',
+    };
+
+    const hoverStyles = {
+        borderColor: '#c0392b',
+        backgroundColor: '#e74c3c',
+        color: 'white',
+        // transform: 'scale(1.1)',
+    };
+
+    // Fonction pour appliquer les styles au survol
+    closeButton.addEventListener('mouseover', () => {
+        Object.assign(closeButton.style, hoverStyles);
+    });
+
+    // Fonction pour remettre les styles par défaut
+    closeButton.addEventListener('mouseout', () => {
+        Object.assign(closeButton.style, defaultStyles);
+    });
+
+
     closeButton.onclick = () => dialog.remove();
     dialog.appendChild(closeButton);
     
@@ -1168,8 +1520,8 @@ export function createImageSelectorDialog(onSelect) {
     const imageContainer = document.createElement('div');
     imageContainer.style.display = 'grid';
     imageContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
-    imageContainer.style.gap = '10px';
-    imageContainer.style.marginTop = '15px';
+    imageContainer.style.gap = '7px';
+    imageContainer.style.marginTop = '5px';
     dialog.appendChild(imageContainer);
     
     
@@ -1177,7 +1529,7 @@ export function createImageSelectorDialog(onSelect) {
     // Option pour télécharger une image personnalisée
     const uploadSection = document.createElement('div');
     uploadSection.style.gridColumn = '1 / -1';
-    uploadSection.style.marginTop = '20px';
+    uploadSection.style.marginTop = '5px';
     uploadSection.style.padding = '10px';
     uploadSection.style.backgroundColor = '#f5f5f5';
     uploadSection.style.borderRadius = '4px';
@@ -1186,14 +1538,14 @@ export function createImageSelectorDialog(onSelect) {
     const uploadTitle = document.createElement('h4');
     uploadTitle.textContent = 'Télécharger une image';
     uploadTitle.style.marginTop = '0';
-    uploadTitle.style.marginBottom = '10px';
+    uploadTitle.style.marginBottom = '5px';
     uploadSection.appendChild(uploadTitle);
     
     const uploadInput = document.createElement('input');
     uploadInput.type = 'file';
     uploadInput.accept = 'image/*';
     uploadInput.style.width = '100%';
-    uploadInput.style.marginBottom = '10px';
+    uploadInput.style.marginBottom = '5px';
     uploadSection.appendChild(uploadInput);
     
     uploadInput.addEventListener('change', function(event) {
@@ -1212,10 +1564,18 @@ export function createImageSelectorDialog(onSelect) {
     
     
     // Liste des dossiers à explorer
-    const folders = [
-        'background_images',
+    let folders = [
+        'background_images/highQuality',
         // 'background_images_download'
     ];
+
+    if (window.innerWidth < 500 || window.innerHeight < 500 ) {
+       folders = [
+        'background_images/lowQuality',
+        // 'background_images_download'
+        ];  
+    }
+
     
     // Créer un titre pour chaque dossier
     folders.forEach(folder => {
@@ -1224,21 +1584,17 @@ export function createImageSelectorDialog(onSelect) {
         folderTitle.textContent = folder === 'background_images' ? 'Images intégrées' : 'Images téléchargées';
         folderTitle.style.gridColumn = '1 / -1';
         folderTitle.style.marginBottom = '5px';
-        folderTitle.style.marginTop = '15px';
+        folderTitle.style.marginTop = '5px';
         imageContainer.appendChild(folderTitle);
         
 
         // Simuler une liste d'images car la plupart des serveurs ne permettent pas 
         // de lister le contenu du répertoire
         const potentialImages = [
-            'contemporain.jpg',
-            'republique.jpg',
-            'tree-log.jpg',
-            'angelot.jpg',
             'ange.jpg',
             'cupidon.jpg',
             "brick-wall.jpg",
-            "small-circles.png",
+            "small-circles.jpg",
             "ai-lambris.jpg",
             "crocodile-skin.jpg",
             "ecorce-chene.jpg",
@@ -1255,14 +1611,14 @@ export function createImageSelectorDialog(onSelect) {
             "ecorce.jpg",
             "dry-ground.jpg",
             "marble.jpg",
-            "texture-peiture_colorée.jpg",
+            "texture-peinture_coloree.jpg",
             "silk.jpg",
             "elephant-skin.jpg",
             "aluminum-foil.jpg",
             "wood-lambris-vertical.jpg",
             "texture-ciment.jpg",
             "roses.jpg",
-            "flowers.png",
+            "flowers.jpg",
             "feuilles.jpg",
             "parquet.jpg"
         ];
@@ -1347,8 +1703,6 @@ export function createImageSelectorDialog(onSelect) {
     
     return dialog;
 }
-
-
 
 // Définir les textes pour les attributs title (tooltip) et data-action (toast)
 export const texts = {
@@ -1489,33 +1843,53 @@ export const texts = {
           es: "número de nombres entre 1 y 4, para optimizar el ancho de las casillas del árbol",
           hu: "keresztnevek száma 1 és 4 között, a fa mezőinek szélességének optimalizálásához"
         });
+      },
+      get heatmap() {
+        return getLocalizedText({
+          fr: "afficher la carte de chaleur des lieux des personnes de l'arbre",
+          en: "show heatmap of places of people in the tree",
+          es: "mostrar mapa de calor de los lugares de las personas en el árbol",
+          hu: "a fa személyeinek helyeinek hőtérképének megjelenítése"
+        });
+      },
+      get radar() {
+        return getLocalizedText({
+          fr: "afficher l'arbre en mode radar/roue",
+          en: "show radar/wheel mode for the tree",
+          es: "mostrar el modo radar/rueda para el árbol",
+          hu: "a fa radar/kerek módjának megjelenítése"
+        });
+      },
+      get stats() {
+        return getLocalizedText({
+          fr: "afficher les statistiques de l'arbre généalogique",
+          en: "show genealogy tree statistics",
+          es: "mostrar estadísticas del árbol genealógico",
+          hu: "a családfa statisztikáinak megjelenítése"
+        });
       }
-  };
+};
+ 
+// Ajouter cette fonction d'aide pour récupérer le texte dans la langue actuelle
+function getLocalizedText(translations) {
+// Récupérer la langue actuelle depuis la variable globale ou utiliser 'fr' par défaut
+const currentLang = window.CURRENT_LANGUAGE || 'fr';
 
 
+// console.log("\n\n\n\n Langue actuelle:", currentLang, "\n\n\n\n");
 
-  
-  
-  // Ajouter cette fonction d'aide pour récupérer le texte dans la langue actuelle
-  function getLocalizedText(translations) {
-    // Récupérer la langue actuelle depuis la variable globale ou utiliser 'fr' par défaut
-    const currentLang = window.CURRENT_LANGUAGE || 'fr';
+// Retourner la traduction dans la langue actuelle ou en français par défaut
+return translations[currentLang] || translations['fr'];
+}
 
-
-    // console.log("\n\n\n\n Langue actuelle:", currentLang, "\n\n\n\n");
-    
-    // Retourner la traduction dans la langue actuelle ou en français par défaut
-    return translations[currentLang] || translations['fr'];
-  }
-  
-  // Modifier la fonction applyTextDefinitions pour utiliser les getters dynamiques
-  export function applyTextDefinitions() {
-    document.querySelectorAll('[data-text-key]').forEach(element => {
-      const key = element.getAttribute('data-text-key');
-      if (texts[key]) {
-        // Les propriétés sont maintenant des getters qui retournent le texte dans la langue actuelle
-        element.setAttribute('title', texts[key]);
-        element.setAttribute('data-action', texts[key]);
-      }
-    });
-  }
+// Modifier la fonction applyTextDefinitions pour utiliser les getters dynamiques
+export function applyTextDefinitions() {
+document.querySelectorAll('[data-text-key]').forEach(element => {
+    const key = element.getAttribute('data-text-key');
+    if (texts[key]) {
+    // Les propriétés sont maintenant des getters qui retournent le texte dans la langue actuelle
+    element.setAttribute('title', texts[key]);
+    element.setAttribute('data-action', texts[key]);
+    }
+});
+}

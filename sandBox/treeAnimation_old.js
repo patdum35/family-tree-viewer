@@ -3,8 +3,7 @@
 // ====================================
 import { state, searchRootPersonId, trackPageView, toggleTreeRadar } from './main.js';
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
-import { cleanIdForSelector } from './nodeRenderer.js';
-import { getZoom, getLastTransform, setLastTransform, drawTree, hardResetZoom } from './treeRenderer.js';
+import { getZoom, getLastTransform, drawTree } from './treeRenderer.js';
 import { buildDescendantTree, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
 // import { geocodeLocation } from './modalWindow.js';
 import { geocodeLocation } from './geoLocalisation.js';
@@ -59,7 +58,6 @@ export let animationState = {
     cousinPath: [], // Le chemin complet du cousin vers l'ancetre commun
     cousinDescendantPath: [], // Le chemin complet descendant de l'ancetre vers le cousin
     currentIndex: 0,   // L'index du nœud actuel
-    cousinCurrentIndex: 0, // L'index du nœud actuel dans la descente vers le cousin
     isPaused: true,
     currentHighlightedNodeId: null,  // Ajout de cette propriété pour suivre le nœud actuellement mis en évidence
     visitedAncestorNodeIds: null, //: new Set(), // Ensemble pour conserver l'historique des nœuds ancestors visités
@@ -82,8 +80,7 @@ if (window.CURRENT_LANGUAGE == "fr") {
     voice_language_short = 'fr-';
     startMessage = 'en /voiture Simone';
     endMessage = 'et /voila !';
-    // reverseMessage = 'attention / la descente c\'est reparti !';
-    reverseMessage = 'l\'ancêtre / commun a été atteint, on redescend vers le cousin';
+    reverseMessage = 'attention / la descente c\'est reparti !';
     noSpeechSynthesisTitle = 'Synthèse vocale indisponible 🔇';
     noSpeechSynthesisText = 'Ce navigateur ne supporte pas la parole.<br><br>Pour profiter de toutes les fonctionnalités,<br>utilise <b>Google Chrome</b> 🗣️';
 
@@ -92,8 +89,7 @@ if (window.CURRENT_LANGUAGE == "fr") {
     voice_language_short = 'en-'; 
     startMessage = 'let\'s /go';
     endMessage = 'that\'s /it !';
-    // reverseMessage = 'let\'s /go we\'re going back down';
-    reverseMessage = 'the common / ancestor has been reached, we\'re going back down to the cousin';
+    reverseMessage = 'let\'s /go we\'re going back down';
     noSpeechSynthesisTitle = 'Speech synthesis unavailable 🔇';
     noSpeechSynthesisText = 'This browser does not support speech.<br><br>For the best experience,<br>please use <b>Google Chrome</b> 🗣️';
 } else if (window.CURRENT_LANGUAGE == "es") { 
@@ -101,8 +97,7 @@ if (window.CURRENT_LANGUAGE == "fr") {
     voice_language_short = 'es-';
     startMessage = 'vamos';
     endMessage = 'eso /es todo !';
-    // reverseMessage = 'vamos /volvemos a bajar';
-    reverseMessage = 'se ha alcanzado el /ancestro común, volvemos a bajar al primo';
+    reverseMessage = 'vamos /volvemos a bajar';
     noSpeechSynthesisTitle = 'Síntesis de voz no disponible 🔇';
     noSpeechSynthesisText = 'Este navegador no admite la voz.<br><br>Para disfrutar de todas las funciones,<br>usa <b>Google Chrome</b> 🗣️';
 } else if (window.CURRENT_LANGUAGE == "hu") {  
@@ -110,8 +105,7 @@ if (window.CURRENT_LANGUAGE == "fr") {
     voice_language_short = 'hu-';
     startMessage = 'Menjünk';
     endMessage = 'Ennyi !';
-    // reverseMessage = 'menjünk /visszamegyünk lemászni';
-    reverseMessage = 'elértük a közös /ősöt, visszamászunk a unokatestvérhez';
+    reverseMessage = 'menjünk /visszamegyünk lemászni';
     noSpeechSynthesisTitle = 'A beszédszintézis nem elérhető 🔇';
     noSpeechSynthesisText = 'Ez a böngésző nem támogatja a beszédet.<br><br>A teljes élményhez<br>használd a <b>Google Chrome</b>-ot 🗣️';
 } 
@@ -532,17 +526,6 @@ function saveAnimationMapPosition() {
     console.log("Position de la carte d'animation sauvegardée:", animationMapPosition);
 }
 
-export function getAnimationMapPosition(mapWrapperName) {
-    const existingContainer = document.getElementById(mapWrapperName); //'animation-map-container');
-    // console.log('\n\n *** DEBUG  getAnimationMapPosition*** ', existingContainer, '\n\n');
-    if (!existingContainer) return [null, null, null, null];
-    // Obtenir la position et les dimensions réelles de l'élément
-    const rect = existingContainer.getBoundingClientRect();
-    // console.log('\n\n *** DEBUG  getAnimationMapPosition rect *** ', existingContainer, rect, rect.top, rect.left, rect.width, rect.height,  '\n\n');
-    return [rect.left, rect.top, rect.width, rect.height];
-}
-
-
 function initAnimationMap() {
     // Supprimer proprement toute carte existante
     const existingContainer = document.getElementById('animation-map-container');
@@ -657,6 +640,25 @@ function initAnimationMap() {
     
     // Ajouter le bouton au conteneur
     mapContainer.appendChild(closeButton);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     // Ajouter les poignées de déplacement et redimensionnement
     
@@ -1179,8 +1181,7 @@ function buildPathWithSpouses(nodesPath, idsPath) {
                 name: firstSpouse.name,
                 birthDate: firstSpouse.birthDate,
                 deathDate: firstSpouse.deathDate,
-                sex: firstSpouse.sex,
-                mainBranch: 100,
+                sex: firstSpouse.sex
             };
         } 
         // Pour les autres nœuds, chercher le conjoint de cette personne
@@ -1201,8 +1202,7 @@ function buildPathWithSpouses(nodesPath, idsPath) {
                                 name: spouse.name,
                                 birthDate: spouse.birthDate,
                                 deathDate: spouse.deathDate,
-                                sex: spouse.sex,
-                                mainBranch: 110,
+                                sex: spouse.sex
                             };
                         }
                     }
@@ -1226,8 +1226,7 @@ function buildPathWithSpouses(nodesPath, idsPath) {
                                 name: spouse.name,
                                 birthDate: spouse.birthDate,
                                 deathDate: spouse.deathDate,
-                                sex: spouse.sex,
-                                mainBranch: 120,
+                                sex: spouse.sex
                             };
                         }
                     }
@@ -1240,8 +1239,7 @@ function buildPathWithSpouses(nodesPath, idsPath) {
                 name: person.name,
                 birthDate: person.birthDate,
                 deathDate: person.deathDate,
-                sex: person.sex,
-                mainBranch: 130,
+                sex: person.sex
             },
             spouse: spouseInfo
         });
@@ -1793,20 +1791,17 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
 let origineGenNb;
 let treeModeBackup;
 
-
-
-// Fonction utilitaire pour créer un délai bloquant
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 //#####################################################
 export async function startAncestorAnimation() {
+
+
     disableFortuneModeClean();
     disableFortuneModeWithLever();
 
     origineGenNb = state.nombre_generation;
+
     console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex);
+
 
     if (animationState.currentIndex === 0) {
         state.nombre_generation = 2;
@@ -1841,6 +1836,8 @@ export async function startAncestorAnimation() {
     animationState.direction = 'ancestor';
     addHighlightStyle();
 
+
+
     if (state.isSpeechEnabled2)
     {
         state.isSpeechInGoodHealth = await testSpeechSynthesisHealth();
@@ -1853,6 +1850,8 @@ export async function startAncestorAnimation() {
             if (state.isSpeechSynthesisAvailable) {window.speechSynthesis.cancel();}
         }
     }
+
+
 
     initAnimationMap();
     initBackgroundContainer(); // Initialiser le conteneur de fond
@@ -1871,6 +1870,7 @@ export async function startAncestorAnimation() {
         }
     };
 
+
     treeModeBackup =  state.treeModeReal;
 
     let rootId = state.rootPersonId.id;
@@ -1885,6 +1885,8 @@ export async function startAncestorAnimation() {
         //Pour affichage du path  : a supprimer en opérationnel
         // console.log("Chemins trouvé et conjoints  avec", rootId, "et ", state.targetAncestorId, findAncestorPathNew(rootId, state.targetAncestorId));
    
+        
+
         // si la personne root ne permet pas de faire la démo, on change avec la personne root de base
         if (!animationState.path) {
 
@@ -1927,10 +1929,12 @@ export async function startAncestorAnimation() {
                  rootId = state.rootPersonId.id;
                 //Pour affichage du path  : a supprimer en opérationnel
                 // console.log("Chemins trouvé et conjoints  avec", rootId, "et ", state.targetAncestorId, findAncestorPathNew(rootId, state.targetAncestorId));
+
             }
         }
 
         if (animationState.path) {
+        
             /////////////////
             //Pour affichage du path  : a supprimer en opérationnel
             const [unused1, unused2, pathWithSpouses] = findAncestorPathNew(rootId, state.targetAncestorId);
@@ -1958,6 +1962,10 @@ export async function startAncestorAnimation() {
             console.log("Chemin trouvé:", animationState.path);
             console.log("Chemin trouvé avec noms:", pathWithName);
 
+
+
+
+
             // console.log("Chemin trouvé descendant:", animationState.descendpath);
             if (state.targetCousinId != null) {
                 [animationState.cousinPath, animationState.cousinDescendantPath] = findAncestorPath(state.targetCousinId, state.targetAncestorId);
@@ -1966,6 +1974,7 @@ export async function startAncestorAnimation() {
                 console.log("Chemin cousin trouvé descendant:", animationState.cousinDescendantPath);
             }
             
+            
             if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
                 animationState.path = animationState.descendpath;
             }
@@ -1973,8 +1982,9 @@ export async function startAncestorAnimation() {
         else {
             return;
         }  
+
+
         animationState.currentIndex = 0;
-        animationState.cousinCurrentIndex = 0;        
         animationState.isPaused = false;
     }
 
@@ -1988,23 +1998,26 @@ export async function startAncestorAnimation() {
         state.isVoiceSelected = true;
     } else { state.isVoiceSelected = false;}
 
+    let horizontalShift = 0;
+    let verticalShift = 0;
     let svg = d3.select("#tree-svg");
-    state.lastTransform = getLastTransform() || d3.zoomIdentity;  
+    let lastTransform = getLastTransform() || d3.zoomIdentity;  
     state.previousWindowInnerWidthInMap = window.innerWidth;
     state.previousWindowInnerHeightInMap = window.innerHeight;
-    state.prevPrevWindowInnerWidthInMap = window.innerWidth;
-    state.prevPrevWindowInnerHeightInMap = window.innerHeight;
+
 
     return new Promise(async (resolve, reject) => {
         try {
+            // Nettoyer les timeouts existants
+            animationTimeouts.forEach(timeout => clearTimeout(timeout));
+            animationTimeouts = [];
             let i;
             let nodeId;
             let node
 
-            //#############################   montée vers l'ancêtre   ############################################//
             // Reprendre à partir de l'index actuel
             for (i = animationState.currentIndex; i < animationState.path.length; i++) {
-              
+                
                 animationState.currentIndex = i;
 
                 // pour le mode 'cousin', 4 avant la fin on passe en mode Ancestors pour laisser apparaitre les siclings qui vont permettre la descente
@@ -2015,11 +2028,13 @@ export async function startAncestorAnimation() {
                 }
                 // Vérifier si l'animation a été annulée ou mise en pause
                 if (animationController.isCancelled || animationState.isPaused) {
+                    // animationState.currentIndex = i;
                     break;
                 }
 
                 nodeId = animationState.path[i];
                 node = findNodeInTree(nodeId);
+                // console.log("Noeud trouvé ? :",i,  nodeId, node);
 
                 if (node) {
 
@@ -2039,19 +2054,18 @@ export async function startAncestorAnimation() {
                     // Utiliser la fonction centralisée pour collecter les lieux
                     const validLocations = collectPersonLocations(person, state.gedcomData.families);
 
+
                     // Mettre à jour la carte
                     if (validLocations.length > 0) {
                         // updateAnimationMapLocations(validLocations, locationSymbols);
                         updateAnimationMapLocations(validLocations);
                     }
 
+
                     let zoom = getZoom();
 
-                    state.lastTransform = getLastTransform() || d3.zoomIdentity;  
-
-                    // zoom = getZoom();
-
                     let shiftAterRescale = false
+
                     let horizontalShiftAfterScreenRescale = 0;
                     let verticalShiftAfterScreenRescale = 0;
 
@@ -2080,7 +2094,7 @@ export async function startAncestorAnimation() {
 
                     // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
                     if (zoom && ( (animationState.currentIndex === 0 ) || shiftAterRescale ) ) {
-                        state.lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                        lastTransform = getLastTransform() || d3.zoomIdentity;                      
                     
                         offsetY = 0;
                         if (animationState.currentIndex === 0) {
@@ -2092,141 +2106,193 @@ export async function startAncestorAnimation() {
                                 offsetY = -100;
                             }
                         }
+
                         const horizontalShift = 0; 
                         const verticalShift = - offsetY; 
 
-                        const transition = svg.transition()
+                        svg.transition()
                             .duration(750)
                             .call(zoom.transform, 
-                                state.lastTransform.translate(- horizontalShift - horizontalShiftAfterScreenRescale, - verticalShift - verticalShiftAfterScreenRescale)
+                                lastTransform.translate(- horizontalShift - horizontalShiftAfterScreenRescale, - verticalShift - verticalShiftAfterScreenRescale)
                             );
-                        await transition.end();
-
                         state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
                         state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
                     }
 
-                    if (animationState.currentIndex === 0 ) {
-                        // Créer une promesse qui simule la lecture vocale si le son est coupé
-                        const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                            ? speakPersonName(node.data.name)
-                            : new Promise(resolve => setTimeout(resolve, 1500*step_duration));
-                        // Attendre la lecture ou le délai
-                        await voicePromise;
-                    }
 
-                    const marginX = state.boxWidth/2;
-                    const marginY = state.boxHeight/2;
-                    let  nodeScreenPos = getNodeScreenPosition(node);
-                    const [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');
-                    let deltaX = nodeScreenPos.x - (window.innerWidth - state.boxWidth*1.2);
-                    let deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2 - mapH);
-                    if ((nodeScreenPos.x > mapX + mapW)  && (nodeScreenPos.x < (window.innerWidth - marginX))) {
-                        deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2);
-                    }
-                    let minX = 20;
-                    let minY = 50;
+                    // Avant le 1ier affichage créer une promesse qui simule la lecture vocale pour un message de démarrage : en voiture Simone
+                    // if (animationState.currentIndex === 0) {
+                    //     const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                    //         ? speakPersonName(startMessage)
+                    //         : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
+                        
+                    //     // Attendre la lecture ou le délai
+                    //     await voicePromiseStart;
+                    // }
 
-                    console.log('\n\n *** DEBUG *** Le nœud ' , node.data.name,' etait à la position:  nodeScreenPos.x = ', nodeScreenPos.x, ', nodeScreenPos.y=', nodeScreenPos.y, ', deltaX=', deltaX, ', deltaY=', deltaY, ', screen=', window.innerWidth, window.innerHeight, 'map x y w h', mapX, mapY, mapW, mapH , ', nodeScreenPos.x=', nodeScreenPos.x , ', mapX=', mapX,', mapX + mapW=', mapX + mapW,'\n\n');
-
-                    if ((nodeScreenPos.x > (window.innerWidth +500)) || (nodeScreenPos.x < -500) || (nodeScreenPos.y > (window.innerHeight+500)) || (nodeScreenPos.y < -500) ) {
-                        console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de la fenêtre position x=", nodeScreenPos.x, ", y=", nodeScreenPos.y, " , mapX=", mapX, " , mapY=", mapY, " , mapW=", mapW, " , mapH=", mapH );
-                        hardResetZoom();
-                    }  
-
-                    zoom = getZoom();
-                    // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
-                    if (zoom) {
-                        const svg = d3.select("#tree-svg");
-                           
-                        if  (((deltaX > 0)  ||  (deltaY > 0) || nodeScreenPos.x < minX || nodeScreenPos.y < minY) && (animationState.currentIndex != 0 ) ){  
-                                    
-                            let horizontalShift = 0; 
-                            let verticalShift = 0;
-                            if (deltaX > 0) { horizontalShift = deltaX;}
-                            if (deltaY > 0) { verticalShift = deltaY;}
-
-                            if (nodeScreenPos.x < minX) { horizontalShift = -(minX - nodeScreenPos.x); }
-                            if (nodeScreenPos.y < minY) { verticalShift = -(minY - nodeScreenPos.y); } 
-
-                            state.lastTransform = getLastTransform() || d3.zoomIdentity;  
-
-                            const transition = svg.transition()
-                                .duration(750)
-                                .call(zoom.transform, 
-                                    state.lastTransform.translate(-horizontalShift, -verticalShift) // <-- Utilise l'état AVANT la transition
-                                );
-                            await transition.end();
-
-                            nodeScreenPos = getNodeScreenPosition(node);
-
-                            console.log('\n\n ****** SHIFT X,Y =', -horizontalShift, -verticalShift, ' Le nœud ', node.data.name,'est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
-                        }
-                    }
-
+                    // Créer une promesse qui simule la lecture vocale si le son est coupé
+                    const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                        ? speakPersonName(node.data.name)
+                        : new Promise(resolve => setTimeout(resolve, 1500*step_duration));
+                    
+                    // Attendre la lecture ou le délai
+                    await voicePromise;
+                    
                     // Actions sur le nœud pour faire apparaitre le nouvel ascendant puis redessine l'arbre avec drawTree
                     if (!node.data.children || node.data.children.length === 0) {
                         const event = new Event('click');
-                        // await delay(100);
-                        // Créer une promesse qui simule la lecture vocale si le son est coupé
-                        const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                            ? speakPersonName(node.data.name)
-                            : new Promise(resolve => setTimeout(resolve, 1500*step_duration));
-                        
-                        // Attendre la lecture ou le délai
-                        await voicePromise;
-
-                        handleAncestorsClick(event, node);
-                        // drawTree();
+                        if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+                            // handleNonRootDescendants(event, node);
+                            // console.log("debug handleDescendants", node);
+                            handleDescendants(node);
+                        } else {
+                            handleAncestorsClick(event, node);
+                        }
+                        drawTree();
                     }
-                    
+
+                    let recalageX = 0;
+                    let recalageY = 0;
+                    zoom = getZoom();
+
+
+                    // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
+                    if (zoom) {
+                        const svg = d3.select("#tree-svg");
+                        const lastTransform = getLastTransform() || d3.zoomIdentity;
+                        
+                        // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
+                        if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x  > window.innerHeight - state.boxHeight*1.2))  
+                                && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
+   
+                            if (firstTimeShift) {
+                                offsetX = (node.y - state.lastHorizontalPosition)
+                                offsetY = (node.x - state.lastVerticalPosition)
+                            }
+                            firstTimeShift = false;
+                            const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  + (state.boxWidth*2) ;
+                            const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
+
+                            svg.transition()
+                                .duration(750)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(-horizontalShift, -verticalShift)
+                                );
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+
+                            const nodeScreenPos = getNodeScreenPosition(node);
+                            const marginX = state.boxWidth/2;
+                            const marginY = state.boxHeight/2;
+                            console.log('\n\n ****** Le nœud est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
+                            console.log("initialAnimationMapPosition.left=", initialAnimationMapPosition.left, "initialAnimationMapPosition.top=", initialAnimationMapPosition.top, "initialAnimationMapPosition.width=", initialAnimationMapPosition.width, "initialAnimationMapPosition.height=", initialAnimationMapPosition.height);
+
+                            // vérifier si le noeud est bien visible dans la fenêtre
+                            if ( nodeScreenPos.x < marginX || nodeScreenPos.y < marginY || nodeScreenPos.x > (window.innerWidth - marginX) ||  nodeScreenPos.y > (window.innerHeight-marginY) ) {
+                                if ( nodeScreenPos.x < marginX) {
+                                    recalageX = - nodeScreenPos.x + window.innerWidth - state.boxWidth*2;
+                                } else if (nodeScreenPos.x > (window.innerWidth - marginX)) {
+                                    recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
+                                }
+                                if ( nodeScreenPos.y < marginY) {
+                                    recalageY = - nodeScreenPos.y + window.innerHeight/2 - state.boxHeight*2;
+                                } else if (nodeScreenPos.y > (window.innerHeight - marginY)) {
+                                    recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
+                                }
+                                console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de l'écran, recalage de l'arbre avec shift :", recalageX, recalageY );
+
+                                //vérifier si le noeud n'est pascaché derrière la carte
+                                zoom = getZoom();
+                                svg.transition()
+                                .duration(250)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(recalageX, recalageY)
+                                );
+                            }
+
+
+                            //vérifier si le noeud n'est pas caché derrière la carte
+                            else if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width) &&
+                                (nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
+
+                                if ((nodeScreenPos.x > initialAnimationMapPosition.left) && (nodeScreenPos.x < initialAnimationMapPosition.left+initialAnimationMapPosition.width)) {
+                                    recalageX = - (nodeScreenPos.x - window.innerWidth) - state.boxWidth*2;
+                                } 
+
+                                if ((nodeScreenPos.y > initialAnimationMapPosition.top) && (nodeScreenPos.y < initialAnimationMapPosition.top+initialAnimationMapPosition.height) ) {
+                                    recalageY = - (nodeScreenPos.y - window.innerHeight) - window.innerHeight/2 - state.boxHeight*2;
+                                }
+                                console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est derrière la map, recalage de l'arbre avec shift :", recalageX, recalageY );
+
+                                zoom = getZoom();
+                                svg.transition()
+                                .duration(250)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(recalageX, recalageY)
+                                );
+                            }
+
+                        }
+                    }
+
+                    state.prevPrevWindowInnerWidthInMap = state.previousWindowInnerWidthInMap;
+                    state.prevPrevWindowInnerHeightInMap =  state.previousWindowInnerHeightInMap;
+                    state.previousWindowInnerWidthInMap = window.innerWidth;
+                    state.previousWindowInnerHeightInMap = window.innerHeight;
                 } 
             }
 
+
             // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
+
+
             if (state.targetCousinId==null && i >= (animationState.path.length) && (!state.isFullResetAnimationRequested))
             {
                 // arrêter l'audio si néccessaire
-                if (node) {
-                    playEndOfAnimationSound();
-                    showEndAnimationPhoto(node.data.name);
-                }
+                playEndOfAnimationSound();
+                showEndAnimationPhoto(node.data.name);
             }
 
 
+
+            if (!state.isFullResetAnimationRequested) {
+                // const voicePromiseStart = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                //     ? speakPersonName(endMessage)
+                //     : new Promise(resolve => setTimeout(resolve, 1600*step_duration));
+                // // Attendre la lecture ou le délai
+                // await voicePromiseStart;
+            }
+
+            
+            
+            
+            
+            
+            
             //####################################################################################################//
             //#############################   descente vers le cousin ############################################//
             
             if (state.targetCousinId!=null && i >= (animationState.path.length) ) {
 
-                // console.log('\n\n\n\n ########## DÉBUT de la DESCENTE vers le cousin ###########', i, animationState.currentIndex,animationState.path.length,animationState.cousinDescendantPath.length, animationState.cousinCurrentIndex, ' \n\n');
-
-                highlightAnimationNode(nodeId, true);
                 animationState.direction = 'descendant';
+                const voicePromiseEnd = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
+                ? speakPersonName(reverseMessage)
+                : new Promise(resolve => setTimeout(resolve, 3500*step_duration));
+                // Attendre la lecture ou le délai
+                await voicePromiseEnd;
 
-                if (animationState.cousinCurrentIndex === 0 ) {
-                // if(true) {
-                    const voicePromiseEnd = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
-                    ? speakPersonName(reverseMessage)
-                    : new Promise(resolve => setTimeout(resolve, 3500*step_duration));
-                    // Attendre la lecture ou le délai
-                    await voicePromiseEnd;
-                }
 
                 // Reprendre à partir de l'index actuel
-                let j = animationState.cousinCurrentIndex;
+                let j =0;
                 let lastName;
-                let lastNodeIdOK = null;
-                let lastNodeOK = null;
-                for (let i = animationState.currentIndex; i < animationState.path.length + animationState.cousinDescendantPath.length -1; i++) {
+                for (let i = animationState.currentIndex; i < animationState.path.length + animationState.cousinDescendantPath.length; i++) {
                     
                     animationState.currentIndex = i;
-                    animationState.cousinCurrentIndex = j;
                     if (animationState.currentIndex > animationState.path.length + 3 ) 
-                    { 
-                        state.treeModeReal = 'directAncestors';
-                        console.log("\n\n debug -- passage en mode state.treeModeReal = 'directAncestors'")
-                    }
+                        { 
+                            state.treeModeReal = 'directAncestors';
+                            console.log("\n\n debug -- passage en mode state.treeModeReal = 'directAncestors'")
+                        }
 
                     // Vérifier si l'animation a été annulée ou mise en pause
                     if (animationController.isCancelled || animationState.isPaused) {
@@ -2234,8 +2300,9 @@ export async function startAncestorAnimation() {
                         break;
                     }
 
-                    nodeId = animationState.cousinDescendantPath[j]; 
+                    nodeId = animationState.cousinDescendantPath[j]; //i-animationState.cousinDescendantPath.length];
                     node = findNodeInTree(nodeId);
+                    // console.log("Noeud trouvé ? :",i,  nodeId, node);
 
                     if (node) {
 
@@ -2244,6 +2311,16 @@ export async function startAncestorAnimation() {
 
                         // Chercher un lieu à afficher
                         const person = state.gedcomData.individuals[node.data.id];
+
+                        // console.log("\\Noeud descendant cousin trouvé ? :",i, j, nodeId, node, person.name);
+                        // Mettre à jour l'image de fond en fonction de la date de naissance de la personne
+                        // if (person && person.birthDate) {
+                        //     const year = extractYear(person.birthDate);
+                        //     if (year) {
+                        //         updateBackgroundImage(year);
+                        //     }
+                        // }
+
                         // Utiliser la fonction centralisée pour collecter les lieux
                         const validLocations = collectPersonLocations(person, state.gedcomData.families);
 
@@ -2254,26 +2331,64 @@ export async function startAncestorAnimation() {
                             updateAnimationMapLocations(validLocations);
                         }
 
+
                         let zoom = getZoom();
-                        const marginX = state.boxWidth/2;
-                        const marginY = state.boxHeight/2;
-                        let  nodeScreenPos = getNodeScreenPosition(node);
-                        const [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');
-                        let deltaX = nodeScreenPos.x - (window.innerWidth - state.boxWidth*1.2);
-                        let deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2 - mapH);
-                        if ((nodeScreenPos.x > mapX + mapW)  && (nodeScreenPos.x < (window.innerWidth - marginX))) {
-                            deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2);
+
+                        let shiftAterRescale = false
+
+                        let horizontalShiftAfterScreenRescale = 0;
+                        let verticalShiftAfterScreenRescale = 0;
+
+                        // si resize de l'écran il faut appliquer des offset sur la position de l'arbre
+                        if (zoom && state.screenResizeHasOccured && (animationState.currentIndex > 2) ) {
+                            state.screenResizeHasOccured = false;
+
+                            if (window.innerWidth - state.prevPrevWindowInnerWidthInMap < -30) {
+                                horizontalShiftAfterScreenRescale =   -(window.innerWidth - state.prevPrevWindowInnerWidthInMap)  + (state.boxWidth*1);
+                            } else if (window.innerWidth - state.prevPrevWindowInnerWidthInMap > 30) {    
+                                horizontalShiftAfterScreenRescale =  -(window.innerWidth - state.prevPrevWindowInnerWidthInMap) ; 
+                            }
+
+                            if (window.innerHeight - state.prevPrevWindowInnerHeightInMap < -30) {
+                                verticalShiftAfterScreenRescale  =  -(window.innerHeight - state.prevPrevWindowInnerHeightInMap)/2; 
+                            } else  if (window.innerHeight - state.prevPrevWindowInnerHeightInMap > 30) {    
+                                verticalShiftAfterScreenRescale  = -(window.innerHeight - state.prevPrevWindowInnerHeightInMap)/2; 
+                            }
+
+                            if (horizontalShiftAfterScreenRescale != 0 || verticalShiftAfterScreenRescale != 0) { 
+                                shiftAterRescale = true; 
+                            }                            
+                            console.log("\n\n\n\n\n #############   Recalage suite à changement de taille d'écran ############### ", shiftAterRescale, ', new:', window.innerWidth, window.innerHeight,", old=", state.prevPrevWindowInnerWidthInMap, state.prevPrevWindowInnerHeightInMap,", offset X=", -horizontalShiftAfterScreenRescale ,", offset Y=", -verticalShiftAfterScreenRescale, "\n\n\n\n\n");   
                         }
-                        let minX = state.boxWidth*1.5;
-                        let minY = state.boxHeight*1.5;
 
-                        console.log('\n\n *** DEBUG *** Le nœud ' , node.data.name,' etait à la position:  nodeScreenPos.x = ', nodeScreenPos.x, ', nodeScreenPos.y=', nodeScreenPos.y, ', deltaX=', deltaX, ', deltaY=', deltaY, ', screen=', window.innerWidth, window.innerHeight, 'map x y w h', mapX, mapY, mapW, mapH , ', nodeScreenPos.x=', nodeScreenPos.x , ', mapX=', mapX,', mapX + mapW=', mapX + mapW,'\n\n');
 
-                        if ((nodeScreenPos.x > (window.innerWidth + 500 )) && (nodeScreenPos.x < -500) && (nodeScreenPos.y > (window.innerHeight + 500)) && (nodeScreenPos.y < - 500) ) {
-                            console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de la fenêtre position x=", nodeScreenPos.x, ", y=", nodeScreenPos.y, " , mapX=", mapX, " , mapY=", mapY, " , mapW=", mapW, " , mapH=", mapH );
-                        } 
+                        // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
+                        if (zoom && ( (animationState.currentIndex === 0 ) || shiftAterRescale ) ) {
+                            lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                        
+                            offsetY = 0;
+                            if (animationState.currentIndex === 0) {
+                                if (window.innerHeight > 1000) {
+                                    offsetY = -450;
+                                } else if (window.innerHeight > 800) {
+                                    offsetY = -300;
+                                } else {
+                                    offsetY = -100;
+                                }
+                            }
 
-                        zoom = getZoom();
+                            const horizontalShift = 0; 
+                            const verticalShift = - offsetY; 
+
+                            svg.transition()
+                                .duration(750)
+                                .call(zoom.transform, 
+                                    lastTransform.translate(- horizontalShift - horizontalShiftAfterScreenRescale, - verticalShift - verticalShiftAfterScreenRescale)
+                                );
+                            state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                            state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+                        }
+
 
                         // Créer une promesse qui simule la lecture vocale si le son est coupé
                         const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
@@ -2283,14 +2398,52 @@ export async function startAncestorAnimation() {
                         // Attendre la lecture ou le délai
                         await voicePromise;
                         
-                        // Actions sur le nœud pour faire apparaitre le nouvel descendant puis redessine l'arbre 
+                        // Actions sur le nœud pour faire apparaitre le nouvel ascendant puis redessine l'arbre avec drawTree
                         const event = new Event('click');
                         if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
+                            // handleNonRootDescendants(event, node);
                             console.log("debug handleDescendants", node);
                             handleDescendants(node);
                         } else {
+                            // handleAncestorsClick(event, node);
                             const nextNodeId = animationState.cousinDescendantPath[Math.min(j+1, animationState.cousinDescendantPath.length-1)];
-                            await handleDescendantsClick(event, node, true, nextNodeId);
+                            handleDescendantsClick(event, node, true, nextNodeId);
+                        }
+
+                        let recalageX = 0;
+                        let recalageY = 0;
+                        zoom = getZoom();
+
+
+                        // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
+                        if (zoom) {
+                            const svg = d3.select("#tree-svg");
+                            const lastTransform = getLastTransform() || d3.zoomIdentity;
+                            
+                            // si le noeud le plus plus à droite est trop près du bord droit on décale vers la gauche
+                            if  (((node.y > window.innerWidth - state.boxWidth*deltaXRatio)  ||  (node.x  > window.innerHeight - state.boxHeight*1.2))  
+                                    && ( (node.y + state.boxWidth - state.lastHorizontalPosition > state.boxWidth*0.2 ) || (node.x - state.lastVerticalPosition > state.boxHeight*0.2 )) )  {                                       
+    
+
+                                firstTimeShift = false;
+                                const horizontalShift = (node.y - state.lastHorizontalPosition) - offsetX  - (state.boxWidth*2) ;
+                                const verticalShift = (node.x - state.lastVerticalPosition) - offsetY + (state.boxHeight)*2 ;
+
+                                svg.transition()
+                                    .duration(750)
+                                    .call(zoom.transform, 
+                                        lastTransform.translate(-horizontalShift, -verticalShift)
+                                    );
+                                state.lastHorizontalPosition = state.lastHorizontalPosition + horizontalShift;
+                                state.lastVerticalPosition = state.lastVerticalPosition + verticalShift;
+
+                                const nodeScreenPos = getNodeScreenPosition(node);
+                                const marginX = state.boxWidth/2;
+                                const marginY = state.boxHeight/2;
+                                console.log('\n\n ****** Le nœud est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
+                                console.log("initialAnimationMapPosition.left=", initialAnimationMapPosition.left, "initialAnimationMapPosition.top=", initialAnimationMapPosition.top, "initialAnimationMapPosition.width=", initialAnimationMapPosition.width, "initialAnimationMapPosition.height=", initialAnimationMapPosition.height);
+
+                            }
                         }
 
                         state.prevPrevWindowInnerWidthInMap = state.previousWindowInnerWidthInMap;
@@ -2299,105 +2452,12 @@ export async function startAncestorAnimation() {
                         state.previousWindowInnerHeightInMap = window.innerHeight;
 
                         lastName = node.data.name
-                        lastNodeIdOK = nodeId;
-                        lastNodeOK = node;
                     } else {
                         console.log("\\  !!!! Noeud descendant cousin NON trouvé ? :",i,  nodeId, node);
                     }
                     j++;
-                }
-
-                console.log("\\  !!!! recalage pour dernier noeud:",  lastNodeIdOK);
-
-               // nodeId = animationState.cousinDescendantPath[j]; 
-                nodeId = lastNodeIdOK;
-                node = lastNodeOK;
-
-                node = findNodeInTree(nodeId);
-
-                if (node) {
-
-                    // Mettre en évidence le nœud actuel
-                    highlightAnimationNode(nodeId, true);
-
-                    // Chercher un lieu à afficher
-                    const person = state.gedcomData.individuals[node.data.id];
-                    // Utiliser la fonction centralisée pour collecter les lieux
-                    const validLocations = collectPersonLocations(person, state.gedcomData.families);
-
-
-                    // Mettre à jour la carte
-                    if (validLocations.length > 0) {
-                        // updateAnimationMapLocations(validLocations, locationSymbols);
-                        updateAnimationMapLocations(validLocations);
-                    }
-
-
-                    // let zoom = getZoom();
-
-
-                    // const marginX = state.boxWidth/2;
-                    // const marginY = state.boxHeight/2;
-                    // let  nodeScreenPos = getNodeScreenPosition(node);
-                    // const [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');
-                    // let deltaX = nodeScreenPos.x - (window.innerWidth - state.boxWidth*1.2);
-                    // let deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2 - mapH);
-                    // if ((nodeScreenPos.x > mapX + mapW)  && (nodeScreenPos.x < (window.innerWidth - marginX))) {
-                    //     deltaY =  nodeScreenPos.y - (window.innerHeight - state.boxHeight*2);
-                    // }
-                    // let minX = state.boxWidth*1.5;
-                    // let minY = state.boxHeight*1.5;
-
-                    // console.log('\n\n *** DEBUG *** Le nœud ' , node.data.name,' etait à la position:  nodeScreenPos.x = ', nodeScreenPos.x, ', nodeScreenPos.y=', nodeScreenPos.y, ', deltaX=', deltaX, ', deltaY=', deltaY, ', screen=', window.innerWidth, window.innerHeight, 'map x y w h', mapX, mapY, mapW, mapH , ', nodeScreenPos.x=', nodeScreenPos.x , ', mapX=', mapX,', mapX + mapW=', mapX + mapW,'\n\n');
-
-                    // if ((nodeScreenPos.x > (window.innerWidth - marginX)) && (nodeScreenPos.x < marginX) && (nodeScreenPos.y > (window.innerHeight-marginY)) && (nodeScreenPos.y < marginY) ) {
-                    //     console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de la fenêtre position x=", nodeScreenPos.x, ", y=", nodeScreenPos.y, " , mapX=", mapX, " , mapY=", mapY, " , mapW=", mapW, " , mapH=", mapH );
-                    // } 
-
-                    // zoom = getZoom();
-
-                    // // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
-                    // if (false) {
-                    // // if (zoom) {
-                    //     const svg = d3.select("#tree-svg");
-                    //     state.lastTransform = getLastTransform() || d3.zoomIdentity;  
-                        
-                    //     if  (((deltaX > 0)  ||  (deltaY > 0) || nodeScreenPos.x < minX || nodeScreenPos.y < minY) && (animationState.currentIndex != 0 ) ){  
-                                    
-                    //         let horizontalShift = 0; 
-                    //         let verticalShift = 0;
-                    //         if (deltaX > 0) { horizontalShift = deltaX;}
-                    //         if (deltaY > 0) { verticalShift = deltaY;}
-                    //         if (nodeScreenPos.x < minX) { 
-                    //             if(nodeScreenPos.x < 0)  {horizontalShift = nodeScreenPos.x - minX*3;}
-                    //             else {horizontalShift = -minX;}}
-                    //         if (nodeScreenPos.y < minY) {                        
-                    //             if(nodeScreenPos.y < 0)  {verticalShift = nodeScreenPos.y - minY*2;}
-                    //             else {verticalShift = -minY;}}
-
-                    //         const transition = svg.transition()
-                    //             .duration(750)
-                    //             .call(zoom.transform, 
-                    //                 state.lastTransform.translate(-horizontalShift, -verticalShift) // <-- Utilise l'état AVANT la transition
-                    //             );
-                    //         await transition.end();
-
-                    //         nodeScreenPos = getNodeScreenPosition(node);
-
-                    //         console.log('\n\n ****** SHIFT X,Y =', -horizontalShift, -verticalShift, ' Le nœud ', node.data.name,'est maintenant à la position: ', nodeScreenPos.x, nodeScreenPos.y, 'screen=', window.innerWidth, window.innerHeight ,  '\n\n');
-                    //     }
-                    // }
-
 
                 }
-
-
-
-
-
-
-
-
 
 
                 // A la fin créer une promesse qui simule la lecture vocale pour un message de fin : et voila
@@ -2418,12 +2478,11 @@ export async function startAncestorAnimation() {
             }
 
 
-            //####################################################################################################//
-            // Si l'animation est terminée, réinitialiser l'état
-            // console.log("\n\n\n\n ########## FIN de l'ANIMATION ###########", state.targetCousinId, i, animationState.currentIndex, animationState.cousinCurrentIndex ,animationState.path.length, ' \n\n');
 
-            if ((state.targetCousinId!=null && animationState.cousinCurrentIndex >= ( animationState.cousinDescendantPath.length -1)) || 
-                (state.targetCousinId === null && animationState.currentIndex >= (animationState.path.length -1 )) ) {
+
+
+            // Si l'animation est terminée, réinitialiser l'état
+            if (animationState.currentIndex >= animationState.path.length) {
                 // Démarquer le dernier nœud
                 if (animationState.currentHighlightedNodeId) {
                     highlightAnimationNode(animationState.currentHighlightedNodeId, false);
@@ -2432,81 +2491,40 @@ export async function startAncestorAnimation() {
                 // Réinitialiser l'état
                 animationState.path = [];
                 animationState.currentIndex = 0;
-                animationState.cousinCurrentIndex = 0;
                 animationState.currentHighlightedNodeId = null;
-                animationState.isPaused = true;
-                displayPauseButton();
             }
+            
             resolve(); // Résoudre la promesse une fois terminé
         } catch (error) {
             console.error('Erreur dans l\'animation:', error);
             reject(error); // Rejeter en cas d'erreur
-            startAncestorAnimation();
-
         }
+
+
         state.treeModeReal = treeModeBackup;
     });
+
+
+
 }
 //######################################################
 
 
 
 
-
-/**
- * Retourne la position X/Y réelle du centre du nœud à l'écran
- * en utilisant getBoundingClientRect() sur l'élément SVG.
- */
-export function getNodeScreenPosition(node) {
-    const cleanedId = cleanIdForSelector(node.data.id);
-    const selector = `#node-${cleanedId}`;
-    const nodeElement = d3.select(selector).node();
+function getNodeScreenPosition(node) {
+    const lastTransform = getLastTransform() || d3.zoomIdentity;
     
-    // --- Vérification du Fallback ---
-    if (!nodeElement) {
-        console.warn(`Élément de nœud SVG non trouvé pour ID: ${node.data.id}. Tentative de fallback...`);
-        
-        // --- NOUVELLE LOGIQUE DE FALLBACK SÉCURISÉE ---
-        
-        // 1. Vérifier que les coordonnées D3 (x, y) existent et sont numériques
-        const d3X = parseFloat(node.y); // y est l'axe horizontal (X)
-        const d3Y = parseFloat(node.x); // x est l'axe vertical (Y)
-        
-        if (isNaN(d3X) || isNaN(d3Y)) {
-            console.error(`Coordonnées D3 manquantes ou invalides pour le nœud: ${node.data.id}. Retourne {0, 0}.`);
-            // Si le layout n'a pas encore calculé les positions, on retourne un point sûr.
-            return { x: 0, y: 0 }; 
-        }
-
-        // 2. Si les coordonnées D3 existent, appliquer la transformation du zoom
-        const lastTransform = getLastTransform() || d3.zoomIdentity;
-        const screenX = lastTransform.applyX(d3X);
-        const screenY = lastTransform.applyY(d3Y);
-        
-        // 3. Retourner la position calculée
-        return { x: screenX, y: screenY };
-    }
-    // --- Fin de la vérification du Fallback ---
-
-    // 2. Si l'élément est trouvé, utiliser getBoundingClientRect() (Méthode préférée)
-    const rect = nodeElement.getBoundingClientRect();
-    
-    // 3. Retourner le centre du nœud
-    // Vérification de sécurité pour getBoundingClientRect
-    if (isNaN(rect.x) || isNaN(rect.width) || isNaN(rect.y) || isNaN(rect.height)) {
-         console.error(`getBoundingClientRect() a retourné des NaN. Élément trouvé mais dimensions invalides. Retourne {0, 0}.`);
-         return { x: 0, y: 0 };
-    }
+    // Appliquer la transformation actuelle aux coordonnées du nœud
+    // Note: dans d3.tree, y est horizontal et x est vertical
+    const screenX = lastTransform.applyX(node.y);
+    const screenY = lastTransform.applyY(node.x);
     
     return {
-        x: rect.x + rect.width / 2, 
-        y: rect.y + rect.height / 2 
+        x: screenX,
+        y: screenY
     };
 }
-
-
-
-
 
 export async function prepareAnimationDemo() {
     console.log("🔄 Préparation de la démo d'animation");
@@ -3040,15 +3058,8 @@ export function toggleAnimationPause() {
         // Reprendre l'animation
         startAncestorAnimation();
     }
+
 }
-
-
-
-export function displayPauseButton() {
-    const animationPauseBtn = document.getElementById('animationPauseBtn');
-    animationPauseBtn.querySelector('span').textContent = '▶';
-}
-
 
 export function stopAnimation() {
     // Démarquer le nœud actuellement en surbrillance

@@ -5,7 +5,6 @@ import { testRealConnectivity } from './treeAnimation.js'
 import { fetchResourceWithCache } from './resourcePreloader.js';
 
 
-
 /**
  * Obtient simplement le chemin du répertoire du HTML actuel
  * @returns {string} Le chemin du répertoire
@@ -25,8 +24,6 @@ function getCurrentDirectory() {
     // Si pas de barre, retourner l'URL complète (cas rare)
     return currentUrl;
 }
-
-
 
 /**
  * Récupère le toto
@@ -116,15 +113,17 @@ export async function getCachedResourceUrl(relativePath) {
     
     // Déterminer le type de fichier
     const fileExtension = normalizedPath.split('.').pop().toLowerCase();
-    const isEncrypted = ['jpx', 'mpx', 'pnx', 'wax'].includes(fileExtension);
+    const isEncrypted = ['jpx', 'mpx', 'mvx', 'pnx', 'wax'].includes(fileExtension);
     
     // Déterminer le type MIME en fonction de l'extension
     let mimeType = 'application/octet-stream';
     if (fileExtension === 'jpx') mimeType = 'image/jpeg';
     else if (fileExtension === 'pnx') mimeType = 'image/png';
     else if (fileExtension === 'mpx') mimeType = 'audio/mpeg';
+    else if (fileExtension === 'mvx') mimeType = 'video/mpeg';
     else if (fileExtension === 'wax') mimeType = 'audio/wav';
     else if (fileExtension === 'jpg' || fileExtension === 'jpeg') mimeType = 'image/jpeg';
+    else if (fileExtension === 'mp4') mimeType = 'video/mpeg';
     else if (fileExtension === 'png') mimeType = 'image/png';
     else if (fileExtension === 'mp3') mimeType = 'audio/mpeg';
     else if (fileExtension === 'wav') mimeType = 'audio/wav';
@@ -247,9 +246,6 @@ export async function getCachedResourceUrl(relativePath) {
     }
 }
 
-
-
-
 /**
  * Résout simplement un chemin relatif par rapport au répertoire actuel
  * @param {string} relativePath - Chemin relatif (avec ou sans /)
@@ -262,7 +258,6 @@ function getResourceUrl(relativePath) {
     // Combiner avec le répertoire courant
     return `${getCurrentDirectory()}${normalizedPath}`;
 }
-
 
 /**
  * Affiche une image dans un conteneur déplaçable et redimensionnable
@@ -408,7 +403,6 @@ function displayEndAnimationPhoto(imagePath, options = {}) {
     return photoContainer;
 }
 
-
 /**
  * Ferme la photo d'animationk
  */
@@ -426,7 +420,6 @@ export function closeAnimationPhoto() {
         photoContainer.parentNode.removeChild(photoContainer);
     }
 }
-
 
 /**
  * Configure le redimensionnement manuel de la photo
@@ -539,12 +532,6 @@ function setupPhotoResize(container, handle) {
     }
 }
 
-
-
-
-
-
-
 /**
  * Appeler cette fonction à la fin de startAncestorAnimation pour afficher la photo
  */
@@ -568,9 +555,10 @@ export async function showEndAnimationPhoto(nodeName) {
     // Trouver la correspondance dans le mapping
     let imagePath = null;
     const name = nodeName.toLowerCase();
+    const nameWithoutAccent = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
     for (const [key, path] of Object.entries(imageMapping)) {
-        if (name.includes(key)) {
+        if (nameWithoutAccent.includes(key)) {
             imagePath = path;
             break;
         }
@@ -644,4 +632,3 @@ export async function showEndAnimationPhoto(nodeName) {
         // Afficher un message d'erreur ou une image par défaut
     }
 }
-

@@ -1,15 +1,15 @@
 
-import { state, showToast, trackPageView, hideAndCleanupTreeButtons } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
-import { createNameCloudUI } from './nameCloudUI.js';
+import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';
 import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resetHamburgerButtonPosition } from './hamburgerMenu.js';
+import { hideHamburgerButtonForcefully, offsetHamburgerButtonDown, resizeHamburger, resetHamburgerButtonPosition, showLoader } from './hamburgerMenu.js';
 import { enableBackground } from './backgroundManager.js';
 import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
 import { translateOccupation } from './occupations.js'; 
-import { disableFortuneModeWithLever } from './treeWheelAnimation.js';
-import { closeAllModals } from './eventHandlers.js';
+import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
 
 export const nameCloudState = {
@@ -58,10 +58,58 @@ export const nameCloudState = {
     animationStyle: "none",
 }
 
-export function processNamesCloudWithDate(config, containerElement = null) {onclick
+let resizeTimeout;
+let resize_counter = 0;
 
-    closeAllModals();
+
+export function processNamesCloudWithDate(config, containerElement = null, isCallFromCloudName = false, nameData = null, isNameDataIn = false) {
+
+    const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
+    if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility = 'visible'; }
+
+    if (isCallFromCloudName && !isNameDataIn) { 
+        setTimeout(() => {
+            processNamesCloudWithDateInternal(config, containerElement, isCallFromCloudName);
+        }, 0); 
+    } else {
+        processNamesCloudWithDateInternal(config, containerElement, isCallFromCloudName, nameData, isNameDataIn);
+    }
+}
+ 
+
+
+export function processNamesCloudWithDateInternal(config, containerElement = null, isCallFromCloudName = false, nameDataIn = null, isNameDataIn = false) {
+ 
+    state.isToggleFullScreenLaunched = false;
+    const isForceTreeRadarButton = true;  
+    if (!isCallFromCloudName) {
+        nameCloudState.isButtonOnDisplayBeforeCloud = state.isButtonOnDisplay;
+    }
+    console.log("\n\n\n\ ########################   Debug  start nuage: state.isButtonOnDisplay",state.isButtonOnDisplay , nameCloudState.isButtonOnDisplayBeforeCloud, ', isCallFromCloudName=',isCallFromCloudName, config, nameCloudState.currentConfig, " ###########################\n\n\n");
+    buttonsOnDisplay(true);
+
+
+    if (!config) {
+        config = nameCloudState.currentConfig;
+    }
+
+    const isCloseHeatMapWrapper = !isCallFromCloudName;
+    closeAllModals(true, isCloseHeatMapWrapper);
     fullResetAnimationState();
+
+    if(!isCallFromCloudName) {
+        state.previousMode = (state.isRadarEnabled) ? 'radar' : 'tree';
+        // console.log('\n\n debug state.previousMode = (state.isRadarEnabled) ? radar : tree;', ', previousMode=', state.previousMode, ', isRadarEnabled=',state.isRadarEnabled )
+    }
+
+    updateRadarButtonText(isForceTreeRadarButton);
+
+    state.isRadarEnabled = false;
+
+    // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeClean')
+    disableFortuneModeClean();
+    // console.log('\n debug 🔄 Désactivation du mode Fortune... disableFortuneModeWithLever')    
+    disableFortuneModeWithLever();
 
     hideAndCleanupTreeButtons();
     
@@ -72,12 +120,8 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     // Pour désactiver le fond d'écran
     enableBackground(false);
 
-    disableFortuneModeWithLever();
-
     // Appeler la fonction au chargement du module
     loadSettingsFromLocalStorage();
-
-
 
     // Masquer le menu hamburger
     console.log("Masquer le menu hamburger");
@@ -104,23 +148,81 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     }
 
 
+    // if (containerElement) {
+
+    //     const nameCloudContainer = document.getElementById('name-Cloud-Container');
+    //     console.log('\n\n ------------   debug processNamesCloudWithDate with containerElement' ,nameCloudContainer,' \n\n')
+
+    //     const loader2 = document.createElement('div');
+    //     loader2.id = 'word-cloud-loader2';
+    //     loader2.style.cssText = `
+    //         position: fixed;
+    //         top: 30%;
+    //         left: 30%;
+    //         font-size: 64px;
+    //         z-index: 1000;
+    //         color: #f63b54ff;
+    //     `;
+    //     loader2.innerHTML = `
+    //         <div >⟳</div>
+    //     `;
+    //     // containerElement.style.position = 'relative';
+    //     nameCloudContainer.appendChild(loader2);
+
+    // }
+
+
+    // if (config.scope != 'all'  && !config.rootPersonId) {
+    //     config.rootPersonId = state.rootPersonId;
+    //     console.log('\n\n\n -***** - debug  processNamesCloudWithDate: config ', config, state.rootPersonId, '\n\n\n')
+    // }
+
+
     // Logique principale de traitement des données
-    const nameData = processNamesData(config);
+
+
+    if (config.scope === 'ancestors' && !config.rootPersonId) {
+        // peut arriver au 1ier démarrage ???
+        config.rootPersonId = state.rootPersonId;
+    }
+    console.log('\n\n debug first processNamesData', config)
+
+    let nameData;
+    if (nameDataIn && isNameDataIn) { nameData = nameDataIn}
+    else { nameData = processNamesData(config);}
+
+    // nameData = processNamesData(config);
+    
+    
+
+    // console.log('\n\n ------------------ debug nameData = processNamesData(config) ------------', nameDataIn, , '\n\n')
+
+    // const nameData = processNamesData(config);
 
 
     // console.log("\n\n Données traitées pour le nuage de noms:", nameData);
 
     // Dimensions de l'écran
-    nameCloudState.SVG_width = window.innerWidth;
-    nameCloudState.SVG_height = window.innerHeight;
+    //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
+
+
+
+    let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
+    if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+        ratio = 1;
+    } 
+    nameCloudState.SVG_width = window.innerWidth; // * ratio;
+    nameCloudState.SVG_height = window.innerHeight; // * ratio;
+
+    // console.log( '\n\n --- debug in processNamesCloudWithDate, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
 
     nameCloudState.mobilePhone = false;
     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
 
-    // for mobile phone
-    if (nameCloudState.mobilePhone) 
-        { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
+    // // for mobile phone
+    // if (nameCloudState.mobilePhone) 
+    //     { nameCloudState.SVG_width = window.innerWidth + 50; nameCloudState.SVG_height = window.innerHeight + 50; }
 
 
     // Afficher le nuage
@@ -132,7 +234,7 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
 
     centerCloudNameContainer();
 
-    nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
+    // nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
 
     // const textsArray = nameData.map(item => item.text);
 
@@ -180,7 +282,82 @@ export function processNamesCloudWithDate(config, containerElement = null) {oncl
     });
     document.dispatchEvent(cloudMapRefreshEvent);
 
+
+    window.addEventListener('resize', debounce(() => {
+        if (!state.isWordCloudEnabled) return;
+        if (!containerElement) return;
+
+        // const rootPersonSearch = document.getElementById('root-person-search');
+        // const rootPersonResults = document.getElementById('root-person-results');
+        // setTimeout(() => {
+            // buttonsOnDisplay(false);
+            // rootPersonSearch.style.visibility = 'hidden';
+            // rootPersonResults.style.visibility = 'hidden';
+        // }, 0);
+
+        // Dimensions de l'écran
+        //Il faut au moins une surface de 3000 x 1500 pixel pour contenir 2000 mots
+        let ratio = Math.sqrt(3000*1500/(window.innerWidth*window.innerHeight ));
+        if ((nameCloudState.cloudShape != 'rectangle') && (nameCloudState.cloudShape != 'ellipse')) {
+            ratio = 1;
+            // ratio = Math.sqrt(1920*1080/(window.innerWidth*window.innerHeight ));
+        } 
+        nameCloudState.SVG_width = window.innerWidth; // * ratio;
+        nameCloudState.SVG_height = window.innerHeight; // * ratio;
+        // console.log( '\n\n --- debug in resize, SVG ratio= ', ratio, ', SVG=', nameCloudState.SVG_width, nameCloudState.SVG_height)
+
+
+        nameCloudState.mobilePhone = false;
+        if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+        else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;
+
+
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+
+            resize_counter++;
+
+            // Affiche le loader avant le rendu
+            const loader = document.getElementById('loaderSpinnerOverlay');
+            if (loader) loader.style.visibility = 'visible';
+
+
+            console.log('\n\n\n  *** debug resize in processNamesCloudWithDate ', resize_counter, '################ \n\n\n')
+
+            createNameCloudUI.renderInContainer(nameData, config, containerElement); 
+
+            // 2. Créer un conteneur temporaire pour le nouveau nuage
+            // const tempContainer = document.createElement('div');
+            // tempContainer.id = 'temp-container';
+            // tempContainer.style.position = 'absolute';
+            // tempContainer.style.top = '0';
+            // tempContainer.style.left = '0';
+            // tempContainer.style.width = '100%';
+            // tempContainer.style.height = '100%';
+            // tempContainer.style.opacity = '0';
+            // tempContainer.style.pointerEvents = 'none';
+            // containerElement.appendChild(tempContainer);
+            
+            // // 3. Générer le nouveau nuage dans le conteneur temporaire
+            // createNameCloudUI.renderInContainer(nameData, config, tempContainer);
+                                    
+        }, 150);
+
+
+        setTimeout(() => {
+            if (state.isWordCloudEnabled) {
+                console.log('\n\n*** debug resize in showNameCloud in nameCloudUI for updateOverlayLayout \n\n');
+                updateOverlayLayout();
+                // resizeHamburger();
+            }
+        }, 150);
+    }, 150)); // Attend 150ms après le dernier resize
+
+
+    nameCloudState.currentNameData = nameData; // Sauvegarder les données du nuage
+
 }
+
 
 export function processNamesData(config, searchTerm = null, isFromStatsModal = false) {
     const nameFrequency = {};
@@ -1187,11 +1364,14 @@ export function collectCenturyData(type) {
     
     // Obtenir les personnes selon le scope actuel
     const currentScope = nameCloudState.currentConfig ? nameCloudState.currentConfig.scope : 'all';
+
     const rootPersonId = nameCloudState.currentConfig ? nameCloudState.currentConfig.rootPersonId : null;
     
     // Utiliser la fonction getPersonsFromTree pour respecter le scope
     const persons = getPersonsFromTree(currentScope, rootPersonId);
     
+    // console.log('\n\n ***** debug 1rst call to collectCenturyData', nameCloudState.currentConfig,', currentScope=', currentScope, ', rootPersonId=', rootPersonId, persons)
+
     // console.log(`collectCenturyData : Traitement de ${persons.length} personnes pour ${type}`);
     
     // Pour stocker les personnes déjà traitées par siècle (éviter les doublons)
