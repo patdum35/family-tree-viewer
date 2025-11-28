@@ -40,7 +40,11 @@ const VoiceSelectorUI = (function() {
             testPhrase: "Bonjour, ceci est la voix sélectionnée.",
             btnRecord: "Enregistrer la Voix",
             statusRecording: "🎙️ Écoute en cours...",
-            statusReady: "Appuyez sur le micro pour parler."
+            statusReady: "Appuyez sur le micro pour parler.",
+            alertSttInitSuccess: "✅ Reconnaissance Vocale initialisée ! Langue cible : ",
+            alertSttInitFail: "❌ Erreur : Reconnaissance Vocale non supportée sur ce navigateur." ,
+            alertSttStart: "🎙️ Démarrage de l'écoute. Parlez maintenant en "
+
         },
         'en': {
             title: "Select a Voice",
@@ -626,25 +630,33 @@ const VoiceSelectorUI = (function() {
     function initializeSpeechRecognition() {
         // Vérifie la compatibilité et utilise le préfixe si nécessaire
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        //  MAPPING DES LANGUES ---
+        // Le format complet est plus fiable sur mobile
+        const langMap = {
+            'fr': 'fr-FR',
+            'en': 'en-US',
+            'es': 'es-ES',
+            'hu': 'hu-HU'
+        };
+        const currentLang = window.CURRENT_LANGUAGE || 'fr';
+        const targetLang = langMap[currentLang] || currentLang;
+
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             
- 
-            // --- MODIFICATION 1 : MAPPING DES LANGUES ---
-            // Le format complet est plus fiable sur mobile
-            const langMap = {
-                'fr': 'fr-FR',
-                'en': 'en-US',
-                'es': 'es-ES',
-                'hu': 'hu-HU'
-            };
-            const currentLang = window.CURRENT_LANGUAGE || 'fr';
-            // Utilise le format complet si disponible, sinon le code court.
-            recognition.lang = langMap[currentLang] || currentLang; 
+            // Appliquer la langue au moment de l'initialisation
+            recognition.lang = targetLang; 
             
-            console.log(`STT initialisé pour la langue: ${recognition.lang}`);
-            // ---------------------------------------------
+            // --- NOUVEAU : ALERTE DE DÉBOGAGE ---
+            alert(translate('alertSttInitSuccess') + targetLang); 
+            // ------------------------------------
+
+            // // Utilise le format complet si disponible, sinon le code court.
+            // recognition.lang = langMap[currentLang] || currentLang; 
+            
+            // console.log(`STT initialisé pour la langue: ${recognition.lang}`);
+            // // ---------------------------------------------
             
  
             // Paramètres de base
@@ -678,6 +690,8 @@ const VoiceSelectorUI = (function() {
 
         } else {
             console.error("Speech Recognition non supporté par ce navigateur.");
+
+            alert(translate('alertSttInitFail'));
             // Désactiver le bouton si non supporté
             const recordButton = document.getElementById('record-voice-button');
             if (recordButton) recordButton.disabled = true;
