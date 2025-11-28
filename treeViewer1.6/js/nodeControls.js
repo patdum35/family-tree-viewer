@@ -3,9 +3,10 @@
 // ====================================
 import { findDescendants, findSiblings, findGenealogicalParent  } from './treeOperations.js';
 import { extractYear } from './utils.js';
-import { drawTree, getZoom, getLastTransform  } from './treeRenderer.js';
+import { drawTree, calculateLayout, getZoom, getLastTransform } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
 import { updateSelectorValue } from './UIutils.js';
+import { getNodeScreenPosition, getAnimationMapPosition } from './treeAnimation.js'; 
 
 
 
@@ -118,11 +119,12 @@ export function addDescendantsControls(nodeGroups) {
                 });
             })
             .attr("class", "toggle-text-left")
-            .attr("x", -state.boxWidth/2 - 9)
-            .attr("y", -state.boxHeight/2 + 15)
+            .attr("x", -state.boxWidth/2 - 11)
+            .attr("y", -state.boxHeight/2 + 18)
             .attr("text-anchor", "middle")
             .style("cursor", "pointer")
-            .style("font-size", "20px")
+            .style("font-size", "28px")  // Taille agrandie
+            .style("font-weight", "bold")  // Optionnel : rendre plus visible
             .style("fill", "#6495ED")
             .text(d => {
                 // Texte existant inchangé
@@ -239,6 +241,7 @@ function createPersonNode(personId, generation, options = {}) {
         birthDate: person.birthDate,
         deathDate: person.deathDate,
         sex: person.sex,
+        mainBranch: 40,
         ...(options.isSpouse && { 
             isSpouse: true,
             spouseOf: options.spouseOf 
@@ -253,31 +256,18 @@ function createPersonNode(personId, generation, options = {}) {
  * @param {Event} event - L'événement de clic
  * @param {Object} d - Les données du nœud cliqué
  */
-export function handleDescendantsClick(event, d, isAnimation = false, nextNodeId) {
+export async function handleDescendantsClick(event, d, isAnimation = false, nextNodeId) {
     event.stopPropagation();
 
-    // // Ajouter un log pour le diagnostic
-    // console.log("Clic sur bouton descendant pour:", d.data.id, d.data.name, 
-    //     "isLeftDescendant:", !!d.data.isLeftDescendant,
-    //     "depth:", d.depth,
-    //     "isSibling:", !!d.data.isSibling,
-    //     "hasChildren:", !!(d.data.children && d.data.children.length > 0));
-    
     if (state.treeModeReal  === 'descendants' || state.treeModeReal === 'directDescendants') {
         handleDescendants(d)
     } else {
         // Mode ascendant : comportement original
-        handleDescendantsOnLeft(d, isAnimation, nextNodeId);
+
+        // isAnimation = true;  /// A SUPPRIMER APRÈS TESTS
+        await handleDescendantsOnLeft(d, isAnimation, nextNodeId);
     }
-
-    // console.log("Après traitement pour :" , d.data.id, d.data.name, 
-    //     "isLeftDescendant:", !!d.data.isLeftDescendant,
-    //     "depth:", d.depth,
-    //     "isSibling:", !!d.data.isSibling,
-    //     "hasChildren:", !!(d.data.children && d.data.children.length > 0),
-    //     "hasHiddenDescendants:", !!d.data._hiddenDescendants);
 }
-
 
 
 
@@ -286,17 +276,37 @@ export function handleDescendantsClick(event, d, isAnimation = false, nextNodeId
  * En restructurant l'arbre pour permettre des générations antérieures
  * @param {Object} d - Le nœud D3 cliqué
  */
-function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
-    
+async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
+
+    let clickedNodeInInitialScreenPos;
+    clickedNodeInInitialScreenPos = getNodeScreenPosition(d);
+    let [mapX, mapY, mapW, mapH] = [null, null, null, null];
+    if (!isAnimation) {
+        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('namecloud-heatmap-wrapper');
+    } else {
+        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');       
+    }
+
+
+    const clickedNodeInInitialLayoutX = d.y;
+    const clickedNodeInInitialLayoutY = d.x;
+
+    state.lastTransform = getLastTransform() || d3.zoomIdentity;
+
     // Vérifier si le nœud a des descendants généalogiques
     const siblingId = d.data.id;
-    // console.log("Nœud sibling cliqué:", siblingId, d.data.name);
+    let descendantGeneration = 0;
+    let parentGeneration = 0;
+    let descendantsInfo = null;
+    
+    // console.log("\n\n ____________Debug in handleDescendantsOnLeft Nœud sibling cliqué:", siblingId, d.data.name, isAnimation, nextNodeId);
     
     // Vérifier si nous affichons ou cachons les descendants
     if (!d.data._showingLeftDescendants) {
         // Trouver les descendants généalogiques
-        const descendantsInfo = findDescendantsForSibling(siblingId, isAnimation, nextNodeId);
-        
+        descendantsInfo = findDescendantsForSibling(siblingId, isAnimation, nextNodeId);
+        // console.log("\n\n ____________Debug in handleDescendantsOnLeft Nœud sibling cliqué:", siblingId, d.data.name, isAnimation, nextNodeId);
+         
         if (descendantsInfo.childrenIds.length === 0) {
             // console.log("Pas de descendants généalogiques trouvés");
             return;
@@ -314,8 +324,12 @@ function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
         }
         
         // Restructurer l'arbre complet
-        // restructureTreeForDescendant(descendantsInfo.childrenData[0], siblingId);
-        restructureTreeForDescendant(descendantsInfo.childrenData, siblingId, d.data.name);
+        if (isAnimation) {
+            restructureTreeForDescendant(descendantsInfo.childrenData, siblingId, d.data.name);
+        } else {
+            [descendantGeneration, parentGeneration] = restructureTreeForDescendant(descendantsInfo.childrenData, siblingId, d.data.name);
+        }
+        // console.log("\n\n ------ debug ------- handleTreeShiftRight: descendantGeneration=", descendantGeneration, ', parentGeneration=',parentGeneration);
         
         // Marquer que les descendants sont affichés
         d.data._showingLeftDescendants = true;
@@ -329,10 +343,558 @@ function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
             d.data._showingLeftDescendants = false;
         }
     }
+
+    // Mesure PRÉDICTIVE de la position du node cliqué et de ses descendants dans le d3 layout (pas encore dans l'écran)
+    // const newLayoutRoot = calculateLayout(state.currentTree); 
+    calculateLayout();
+
+    if (!state.layoutResult) return; // Sécurité
+
+    // Trouver le nœud cliqué dans le nouveau layout
+    const clickedNodeInNewLayout = state.layoutResult.descendants().find(n => n.data.id === d.data.id);
+
+    let minYnewDesc = 10000;
+    let maxYnewDesc = 0;
+    let middleYnewDesc = 0;
+    let newDescNodeX = 0;
+
+    // Trouver les nœuds des descendants du noeud cliqué dans le nouveau layout
+    if (descendantsInfo.childrenIds) {
+        descendantsInfo.childrenIds.forEach(id=> {
+            let newDescNodeInNewLayout = state.layoutResult.descendants().find(n => n.data.id === id);
+            newDescNodeX = newDescNodeInNewLayout ? newDescNodeInNewLayout.y : 0;
+            let newDescNodeY = newDescNodeInNewLayout ? newDescNodeInNewLayout.x : 0;
+            minYnewDesc = Math.min(newDescNodeY, minYnewDesc);
+            maxYnewDesc = Math.max(newDescNodeY, maxYnewDesc);            
+        });
+        middleYnewDesc = (maxYnewDesc + minYnewDesc)/2;
+    }
+
+    const clickedNodeInNewLayoutX = clickedNodeInNewLayout ? clickedNodeInNewLayout.y : clickedNodeInInitialLayoutX;
+    const clickedNodeInNewLayoutY = clickedNodeInNewLayout ? clickedNodeInNewLayout.x : clickedNodeInInitialLayoutY;
+
+
+    let clickedNodePredictedInScreenX = clickedNodeInInitialScreenPos.x + (clickedNodeInNewLayoutX - clickedNodeInInitialLayoutX)*state.lastTransform.k;
+    let clickedNodePredictedInScreenY = clickedNodeInInitialScreenPos.y + (clickedNodeInNewLayoutY - clickedNodeInInitialLayoutY)*state.lastTransform.k; 
+
+    let descNodePredictedInScreenX = clickedNodePredictedInScreenX - (clickedNodeInNewLayoutX - newDescNodeX)*state.lastTransform.k;  
+    let descNodePredictedInScreenY = clickedNodePredictedInScreenY - (clickedNodeInNewLayoutY - middleYnewDesc)*state.lastTransform.k; 
+    let descNodePredictedInScreenMinY = clickedNodePredictedInScreenY - (clickedNodeInNewLayoutY - minYnewDesc)*state.lastTransform.k; 
+
+
+
+    console.log("\n\n ------ debug handleDescendantsOnLeft ------- : avant décalage, nodeScreenPos=", clickedNodeInInitialScreenPos, 'predictedX=',clickedNodePredictedInScreenX , 'predictedY=',clickedNodePredictedInScreenY , 'predictedDESCX=',descNodePredictedInScreenX , 'predictedDESC_avgY=',descNodePredictedInScreenY , 'predictedDESC_MINY=', descNodePredictedInScreenMinY, d.data.name, 'clickedNodeInInitialLayoutX=', clickedNodeInInitialLayoutX, 'clickedNodeInInitialLayoutY=', clickedNodeInInitialLayoutY, 'lastTransform=' ,state.lastTransform, 'clickedNodeInNewLayoutY=',clickedNodeInNewLayoutY, clickedNodeInNewLayout.x, 'minYnewDesc=',minYnewDesc, 'maxYnewDesc=',maxYnewDesc, 'middleYnewDesc=',middleYnewDesc, 'nb_descd=',descendantsInfo.childrenIds.length, mapX, mapY, mapW, mapH);
+
+
+    let shiftInScreenX = 0; 
+    let shiftInScreenY = 0; 
+    let marginX = state.boxWidth/2 + 35;
+    let marginY = state.boxHeight/2 + 35;
+    let marginYtop = state.boxHeight/2 + 35;
+    let marginShiftX = marginX + state.boxWidth * 1.4 * state.lastTransform.k;
+
+    if (window.innerWidth > 700) {
+        marginX = marginX + 50;
+        marginShiftX = marginShiftX + 50;
+    }
+    if (window.innerHeight > 700) {
+        marginY = marginY + 50;
+        marginYtop = marginYtop + 50;
+    }
+
+    if (state.isButtonOnDisplay) { marginYtop = marginYtop + 50; }
+
+    let shiftLeftX = -state.boxWidth * 1.4 * state.lastTransform.k;
+
+
+    let shiftX , shiftX2, shiftXSmall, shiftX2Small;
+    // Calcul du Décalage en X et Y à annuler
+    const dxLayoutShift = -(clickedNodeInNewLayoutX - clickedNodeInInitialLayoutX)*state.lastTransform.k; 
+    let dyLayoutShift = -(clickedNodeInNewLayoutY - clickedNodeInInitialLayoutY)*state.lastTransform.k; 
+
+    if (descNodePredictedInScreenMinY < marginYtop) {
+        dyLayoutShift =  ( marginYtop - descNodePredictedInScreenMinY);
+    }
+
+    // quand le noeud cliqué complétement à gauche
+    // dans ce cas le drawTree ajoute automatiquement la nouvelle génération N-1 à gauche et va se positionner au même endroit donc le node cliqué se déplace vers la droite
+    // donc avant le drawtree il faut simuler le déplacement lent vers la droite du noeud cliqué avec shiftX et revenir très vite à gauche avec shiftX2 pour que le drawtree positionne l'arbre au bin endroit  
+    shiftX = state.boxWidth * 1.4 * state.lastTransform.k + (dxLayoutShift + state.boxWidth * 1.4 * state.lastTransform.k);
+    shiftX2 = -state.boxWidth * 1.4 * state.lastTransform.k;
+
+    shiftXSmall = state.boxWidth * 0.4 * state.lastTransform.k 
+    shiftX2Small = -state.boxWidth * 0.4 * state.lastTransform.k;
+
+    if (descendantGeneration >= 0) {
+        // dans ce cas le drawTree ne déplace pas l'arbre car on ajoute pas de nouvelle génération N-1. Donc le noeud cliqué reste au même endroit
+        // dans ce cas on simule un petite mouvement vers la droite et on revient au point de départ
+        shiftX = shiftXSmall;
+        if (descNodePredictedInScreenX < marginX) { shiftX = shiftX - (descNodePredictedInScreenX - marginX);}
+        shiftX2 = shiftX2Small;
+        shiftLeftX = 0;
+    }
+
+    if (clickedNodeInInitialLayoutX === 0) { // uniquement pour corriger un problème d'init
+        shiftX = shiftX + state.boxWidth * 1.4 * state.lastTransform.k;
+        shiftX2 = shiftX2*2 - 30;
+    }
+
+   // pour éviter que les noeuds descendants du node cliqué sortent de l'écran
+   //descNodePredictedInScreenX < marginX  ||
+//    if ( descNodePredictedInScreenX > window.innerWidth - marginX || descNodePredictedInScreenY < marginY ||  descNodePredictedInScreenY > window.innerHeight - marginY - mapH) {
+//         // if (descNodePredictedInScreenX < 0 ) { // ||  descNodePredictedInScreenX > window.innerWidth -10) {
+//         //     shiftInScreenX = -descNodePredictedInScreenX + marginX;
+//         // } else if (descNodePredictedInScreenX < marginX ) {
+//         //     shiftInScreenX = marginX;
+//         // } else 
+//         if (descNodePredictedInScreenX > window.innerWidth - marginX ) {
+//             shiftInScreenX = -(descNodePredictedInScreenX -(window.innerWidth - marginX));
+//         } else if (descNodePredictedInScreenY < 0 ) { // ||  descNodePredictedInScreenX > window.innerWidth -10) {
+//             shiftInScreenY = -descNodePredictedInScreenY + marginY;
+//         } else if (descNodePredictedInScreenY < marginY ) {
+//             shiftInScreenY = marginY;
+//         } else if (descNodePredictedInScreenY > window.innerHeight - marginY ) {
+//             shiftInScreenY = -(descNodePredictedInScreenY -(window.innerHeight - marginY));
+//         }
+//         console.log("\n\n ------ 0 debug in handleDescendantsOnLeft : Avoid out of screen  **************************** shiftInScreen=", shiftInScreenX, shiftInScreenY);
+//         await handleTreeXYShift(shiftInScreenX, shiftInScreenY, 550);
+//     }
+
+
+    if (descNodePredictedInScreenX < marginShiftX  || ( clickedNodeInInitialScreenPos.x < marginShiftX && clickedNodeInInitialLayoutX === 0)) {
+    // quand le noeud cliqué est à tout à gauche, et qu'il n'y a pas assez de place pour le noeud descendant, donner un effet de mouvement vers la droite avant de faire apparaitre le nouveau descendant à gauche
+        console.log('\n\n ------  1 debug in handleDescendantsOnLeft  : slow shift right effect + fast shift Left   ------- slow shiftX=', shiftX , 'shiftY=', 0, 'then fast shiftX2=', shiftX2 , 'shiftY=', dyLayoutShift); 
+
+        // décalage pour donner un effet de mouvement vers la droite avant de faire apparaitre le nouveau descendant à gauche
+        await handleTreeXYShift(shiftX, 0, 450);
+        // décalage vers la gauche et remmettre le nouveau descendant au même endoit que le précédent
+        await handleTreeXYShift(shiftX2, dyLayoutShift, 0);
+
+    } else if ( clickedNodeInInitialScreenPos.x >= marginShiftX && clickedNodeInInitialLayoutX === 0) {
+    // quand il y a assez de place à gauche pour le noeud descendant, décaler l'arbre vers la gauche à la position attendue
+
+        // décalage pour donner un effet de mouvement vers la droite avant de faire apparaitre le nouveau descendant à gauche
+        console.log('\n\n ------ 2 debug in handleDescendantsOnLeft  : slow shift right effect  + fast BIG double shift Left------- slow shiftX=', shiftXSmall , 'shiftY=', 0, 'then fast BIG shiftX2=', shiftX2Small + shiftLeftX*2.5 , 'shiftY=', dyLayoutShift); 
+        await handleTreeXYShift(shiftXSmall, 0, 450);
+        // console.log('\n\n ------ debug in handleDescendantsOnLeft  : fast shiftX left ------- shiftX=', shiftLeftX , 'shiftY=', dyLayoutShift);
+        await handleTreeXYShift(shiftX2Small + shiftLeftX*2.5, dyLayoutShift, 0);
+        // await handleTreeXYShift(shiftLeftX*2.5, dyLayoutShift, 0);    
     
+    } else if (descNodePredictedInScreenX >= marginShiftX) {
+        // quand il y a assez de place à gauche pour le noeud descendant 
+        let shiftLeftXInt;
+        if (descendantGeneration < 0) {
+            // si descendantGeneration < 0, dans ce cas le drawTree ajoute automatiquement la nouvelle génération N-1 à gauche et va se positionner au même endroit donc le node cliqué se déplace vers la droite
+            // comme il y a assez de place à gauche pour le noeud descendant, il faut donc décaler l'arbre vers shiftLeftX   
+            shiftLeftXInt = shiftLeftX;
+        } else {
+            // si descendantGeneration >=0, dans ce cas le drawTree n'ajoute pas de nouvelle génération N-1 et donc le drawTree ne va pas déplacer l'arbre
+            // comme il y a assez de place à gauche pour le noeud descendant, il faut donc juste faire un petit effet de déplacement à droite et retour à gauche avec shiftXSmall et shiftX2Small  
+            shiftLeftXInt = 0;
+        }
+
+        // décalage pour donner un effet de mouvement vers la droite avant de faire apparaitre le nouveau descendant à gauche
+        console.log('\n\n ------ 3 debug in handleDescendantsOnLeft  : slow shift right effect  + fast BIG shift Left------- slow shiftX=', shiftXSmall , 'shiftY=', 0, 'then fast BIG shiftX2=', shiftXSmall + shiftLeftX , 'shiftY=', dyLayoutShift); 
+        await handleTreeXYShift(shiftXSmall, 0, 450);
+        // console.log('\n\n ------ debug in handleDescendantsOnLeft  : fast shiftX left ------- shiftX=', shiftLeftX , 'shiftY=', dyLayoutShift);
+        await handleTreeXYShift(shiftX2Small + shiftLeftXInt, dyLayoutShift, 0);
+    }
+
+
     // Redessiner l'arbre
-    drawTree(false, isAnimation);
+    // drawTree(false, isAnimation);
+    drawTree(false, isAnimation, true); 
+    state.layoutResult = null;
+
+    // rattrapage en Y  pour le cas (clickedNodeInInitialLayoutX === 0 && clickedNodeInInitialLayoutY === 0) : innexplicable ????
+    if (clickedNodeInInitialLayoutX === 0) {
+        await delay(10);
+        const clickedNodeInFinalcreenPos = getNodeScreenPosition(d);
+        if (Math.abs(clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos.y) > 5) {
+            await handleTreeXYShift(0, clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos.y, 0);
+            console.log('\n\n ------ 4 debug in handleDescendantsOnLeft  : after drawTree, additionnal fast shift Y  ------- shiftY=', clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos.y,'clickedNodeInFinalcreenPos.y=' ,clickedNodeInFinalcreenPos.y); 
+        }
+        if (Math.abs(clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos.y) > 5) {
+            await delay(10);
+            const clickedNodeInFinalcreenPos2 = getNodeScreenPosition(d);
+            await handleTreeXYShift(0, clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos2.y, 0);
+            console.log('\n\n ------ 5 debug in handleDescendantsOnLeft  : after drawTree, 2nd additionnal fast shift Y  ------- shiftY=', clickedNodeInInitialScreenPos.y - clickedNodeInFinalcreenPos.y,'clickedNodeInFinalcreenPos2.y=' ,clickedNodeInFinalcreenPos2.y); 
+        }
+    }
+    await delay(10);
+    const clickedNodeInFinalcreenPos = getNodeScreenPosition(d);
+    const descNodeInFinalcreenPosX = clickedNodeInFinalcreenPos.x - (clickedNodeInNewLayoutX - newDescNodeX)*state.lastTransform.k; 
+    const descNodeInFinalcreenPosY = clickedNodeInFinalcreenPos.y - (clickedNodeInNewLayoutY - minYnewDesc)*state.lastTransform.k; 
+    console.log("\n\n ------ debug handleDescendantsOnLeft  ------- final after drawTree après décalage, clickedNodeInFinalcreenPos=", clickedNodeInFinalcreenPos, 'screenW=', window.innerWidth, 'screenH=', window.innerHeight, 'marginX=', marginX, 'marginX=',marginY , 'descNodeInFinalcreenPosX=',descNodeInFinalcreenPosX,'descNodeInFinalcreenPosY=', descNodeInFinalcreenPosY,d.data.name);
+
+
+
+   // control final après drawTree pour être sûr que le noeud descendant ne sort pas de l'écran : si c'est le cas on le met au centre de l'écran
+   //descNodePredictedInScreenX < marginX  ||
+   shiftInScreenX = 0; shiftInScreenY = 0;
+    if ( descNodeInFinalcreenPosX < marginX  || descNodeInFinalcreenPosX > window.innerWidth - marginX || descNodeInFinalcreenPosY < marginYtop ||  descNodeInFinalcreenPosY > window.innerHeight - marginY - mapH) {
+
+        if (descNodeInFinalcreenPosX < marginX) {
+            shiftInScreenX = marginX - descNodeInFinalcreenPosX; 
+            console.log('\n\n ------ 6-1 debug '); 
+       
+        } else if ( descNodeInFinalcreenPosX > window.innerWidth - marginX ) {
+            shiftInScreenX = window.innerWidth - marginX - descNodeInFinalcreenPosX; 
+            console.log('\n\n ------ 6-2 debug '); 
+        }
+
+        if (descNodeInFinalcreenPosY < marginYtop) {
+            shiftInScreenY = marginYtop - descNodeInFinalcreenPosY;
+            console.log('\n\n ------ 6-3 debug '); 
+
+        } else if (descNodeInFinalcreenPosY > window.innerHeight - marginY - mapH) {
+            shiftInScreenY = window.innerHeight - marginY - mapH  - descNodeInFinalcreenPosY;
+            console.log('\n\n ------ 6-3 debug ');       
+        }
+        // shiftInScreenY = window.innerHeight - marginY - mapH  - clickedNodeInFinalcreenPos.y;      
+        console.log('\n\n ------ 6 debug in handleDescendantsOnLeft : Avoid out of screen  **************************** shiftInScreen=', shiftInScreenX, shiftInScreenY);
+        await handleTreeXYShift(shiftInScreenX, shiftInScreenY, 250);
+    }
+
 }
+
+
+/**
+ * Attend un ou deux cycles de rendu du navigateur.
+ * C'est le moyen le plus sûr de garantir que getBoundingClientRect() sera précis.
+ * @param {number} frames - Nombre de frames à attendre (1 ou 2)
+ * @returns {Promise<void>}
+ */
+function waitForRender(frames = 2) {
+    return new Promise(resolve => {
+        let count = 0;
+        const step = () => {
+            count++;
+            if (count >= frames) {
+                // On utilise setTimeout(0) en plus pour revenir à la fin de la file d'attente du navigateur
+                setTimeout(resolve, 0); 
+            } else {
+                requestAnimationFrame(step);
+            }
+        };
+        requestAnimationFrame(step);
+    });
+}
+
+
+
+// Fonction utilitaire pour créer un délai bloquant
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+
+
+// J'ai un problème avec mon code d'affichage d'un arbre généalogique de la gauche vers la droite ( descendants à gauche, ascendants à droite)
+// Quand l'arbre est affiché, je peux cliquer sur un bouton d'un node à gauche pour faire apparaitre un nouveau descendant à sa gauche et ré-afficher l'arbre.
+// Tout ça marche bien : un nouvel arbre avec un nouveau descendant à gauche est bien affiché et l'arbre est bien shifté vers la droite pour laisser apparaitre le nouveau node à gauche
+
+// Quand je mesure la position  du node départ (le node cliqué) avec nodeScreenPos = getNodeScreenPosition(d), avant le restructureTreeForDescendant et le drawTree, la position affichée dans le console log est correcte et reflète bien la position du node avnat le click: OK
+
+// MAIS , et c'est là mon problème, quand je re-mesure la position  du node départ (le node cliqué) avec nodeScreenPos = getNodeScreenPosition(d), après le drawTree(), la position affiché dans le console log est la même qu'avant, alors que visuellement le node a bien été déplacé. Pourquoi ?
+
+// Reformule ma problématique  et trouve moi une solution
+
+
+
+// //#################################################################################
+// async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
+//     let nodeScreenPos = getNodeScreenPosition(d);
+//     console.log("\n\n ------ debug handleDescendantsOnLeft ------- before handleTreeShiftRight: avant décalage, nodeScreenPos=", nodeScreenPos, d.data.name);
+    
+//     // Vérifier si le nœud a des descendants généalogiques
+//     const siblingId = d.data.id;
+//     let descendantGeneration = 0, parentGeneration = 0;
+    
+//     // Trouver les descendants généalogiques
+//     const descendantsInfo = findDescendantsForSibling(siblingId, isAnimation, nextNodeId);
+        
+//     if (descendantsInfo.childrenIds.length === 0) {
+//         // console.log("Pas de descendants généalogiques trouvés");
+//         return;
+//     }
+   
+//     // Sauvegarder l'état actuel pour pouvoir revenir en arrière
+//     if (!state._originalTree) {
+//         state._originalTree = JSON.parse(JSON.stringify(state.currentTree));
+//         state._originalRootId = state.rootPersonId;
+//     }
+    
+//     // Restructurer l'arbre complet
+//     [descendantGeneration, parentGeneration] = restructureTreeForDescendant(descendantsInfo.childrenData, siblingId, d.data.name);
+
+//     // Marquer que les descendants sont affichés
+//     d.data._showingLeftDescendants = true;
+
+
+//     // Redessiner l'arbre
+//     drawTree(false, isAnimation);
+
+
+//     nodeScreenPos = getNodeScreenPosition(d);
+//     console.log("\n\n ------ debug handleDescendantsOnLeft  ------- after drawTree après décalage, nodeScreenPos=", nodeScreenPos, d.data.name);
+// }
+
+
+
+// /**
+//  * Retourne la position X/Y réelle du centre du nœud à l'écran
+//  * en utilisant getBoundingClientRect() sur l'élément SVG.
+//  */
+// function getNodeScreenPosition(node) {
+//     // 1. Sélectionner l'élément DOM du nœud par son ID unique
+//     // NOTE: L'ID doit correspondre à celui défini dans drawNodes
+//     // 1. Appliquer la même fonction de nettoyage à l'ID
+//     const cleanedId = cleanIdForSelector(node.data.id);
+//     const selector = `#node-${cleanedId}`;
+    
+//     // 2. Sélectionner l'élément DOM du nœud par son ID nettoyé
+//     const nodeElement = d3.select(selector).node();
+
+
+//     if (!nodeElement) {
+//         console.warn(`Élément de nœud SVG non trouvé pour ID: ${node.data.id}`);
+//         // Fallback: si l'élément n'est pas dans le DOM, utilisez l'ancienne logique
+//         const lastTransform = getLastTransform() || d3.zoomIdentity;
+//         const screenX = lastTransform.applyX(node.y);
+//         const screenY = lastTransform.applyY(node.x);
+//         return { x: screenX, y: screenY };
+//     }
+
+//     // 2. Utiliser getBoundingClientRect() pour obtenir la position à l'écran
+//     // Cette méthode prend en compte toutes les transformations (translate, zoom, etc.)
+//     const rect = nodeElement.getBoundingClientRect();
+    
+//     // 3. Retourner le centre du nœud (si vous voulez la position du centre)
+//     // Cela donne la position en pixels par rapport au coin supérieur gauche de la fenêtre
+//     return {
+//         // x = centre horizontal
+//         x: rect.x + rect.width / 2, 
+//         // y = centre vertical
+//         y: rect.y + rect.height / 2 
+//     };
+// }
+
+
+// import {drawNodeBoxes, drawNodeContent, addControlButtons} from './nodeRenderer.js';
+// import {drawLinks} from './treeRenderer.js';
+// let zoom;
+// let lastTransform = null;
+
+// /**
+//  * Initialise et dessine l'arbre selon le mode sélectionné
+//  */
+// function drawTree(isZoomRefresh = false, isAnimation = false) {
+//     if (!state.currentTree) return;
+    
+
+//     // Logique existante pour les modes descendants et ascendants
+//     const rootHierarchy = d3.hierarchy(state.currentTree, node => node.children);   
+    
+//     // processSiblings(rootHierarchy);
+//     // processSpouses(rootHierarchy);
+
+//     const svg = setupSVG();
+//     const mainGroup = createMainGroup(svg);
+//     const treeLayout = createTreeLayout();
+    
+//     // Appliquer le layout une seule fois
+//     const layoutResult = treeLayout(rootHierarchy);
+
+
+//     drawNodes(mainGroup, layoutResult);
+//     drawLinks(mainGroup, layoutResult);
+    
+//     // if (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants') {
+//     //     adjustLevel0SiblingsPosition(mainGroup);
+//     // }
+
+//     // if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants') {
+//     //     drawSpouseLinks(mainGroup, layoutResult);
+//     // } else {
+//     //     drawSiblingLinks(mainGroup, layoutResult);
+//     //     drawLevel0SiblingLinks(mainGroup, layoutResult);
+//     // }
+
+//     setupZoom(svg, mainGroup);
+//     // setupZoom(svg, mainGroup, false);
+
+
+// }
+
+
+// /**
+//  * Configure le SVG initial
+//  * @private
+//  */
+// function setupSVG() {
+//     const width = window.innerWidth;
+//     const height = window.innerHeight;
+    
+//     const svg = d3.select("#tree-svg")
+//         .attr("width", width)
+//         .attr("height", height);
+    
+//     svg.selectAll("*").remove();
+//     return svg;
+// }
+
+// /**
+//  * Crée le groupe principal pour le contenu
+//  * @private
+//  */
+// function createMainGroup(svg) {
+//     return svg.append("g")
+//         .attr("transform", `translate(${state.boxWidth},${window.innerHeight/2})`);
+// }
+
+// /**
+//  * Crée la mise en page de l'arbre
+//  * @private
+//  */
+
+// function createTreeLayout() {
+//     let layout = d3.tree()
+//         .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.4]);
+
+//     // Inverser la direction pour le mode descendants
+//     if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
+//         layout.nodeSize([state.boxHeight * 1.4, -state.boxWidth * 1.4]);
+//     }
+
+//     layout.separation((a, b) => {
+//         if (state.treeModeReal  === 'both') {
+//         // Pour le mode both, on va gérer les descendants différemment
+//         layout = d3.tree()
+//             .nodeSize([state.boxHeight * 1.8, state.boxWidth * 1.4])
+//             .separation((a, b) => {
+//                 // Si l'un est un descendant et l'autre non
+//                 const aIsDescendant = a.data.isDescendant;
+//                 const bIsDescendant = b.data.isDescendant;
+                
+//                 if (aIsDescendant !== bIsDescendant) {
+//                     return 3; // Grand espacement entre ascendants et descendants
+//                 }
+                
+//                 // Si les deux sont du même côté, espacement normal
+//                 return 1;
+//             });
+
+//         }
+
+//         if (state.treeModeReal  === 'descendants' || state.treeModeReal  === 'directDescendants') {
+//             // Pour les couples entrelacés (personne + spouse)
+//             if (a.data.isSpouse || b.data.isSpouse) {
+//                 return 0.8;  // Espacement réduit entre une personne et son spouse
+//             }
+//             // Entre différentes familles
+//             if (a.parent === b.parent) {
+//                 return 0.8;  // Espacement entre frères/soeurs
+//             }
+//             return 1.0;  // Espacement entre branches différentes
+//         } else {
+//             // Mode ascendant : garder la logique existante
+//             if (a.data.isSibling || b.data.isSibling) {
+//                 return 0.65;
+//             }
+//             if (a.depth === (state.nombre_generation-1) && b.depth === (state.nombre_generation-1) && a.parent !== b.parent) {
+//                 return 0.7;
+//             }
+//             if (a.parent === b.parent) {
+                
+//                 // ATTENTION ce calcul n'est pas clair pour calculer l'écartement entre 2 parents. Il faudra revoir ça
+                
+//                 const scale = Math.max(0.60, (state.nombre_generation - a.depth) / state.nombre_generation);
+//                 return scale * (a.depth === b.depth ? 1.1 : 1.5);
+//             }
+//             return 1;
+//         }
+//     });
+
+//     return layout;
+// }
+
+// // Fonction utilitaire pour nettoyer l'ID
+// function cleanIdForSelector(id) {
+//     // S'assurer que l'ID est une chaîne de caractères
+//     const strId = String(id);
+//     // Remplacer les caractères non autorisés (ici, tout sauf lettres, chiffres, tirets, underscores)
+//     // Le '@' sera remplacé.
+//     return strId.replace(/[^a-zA-Z0-9\-\_]/g, '_'); 
+//     // Par exemple: "@I1@" devient "_I1_"
+// }
+
+// /**
+//  * Dessine les nœuds de l'arbre
+//  * @param {Object} group - Le groupe SVG principal
+//  * @param {Object} root - La racine de l'arbre
+//  * @param {Object} treeLayout - La mise en page de l'arbre
+//  */
+// function drawNodes(group, layout, isAnimation = false) {
+
+//     const nodeGroups = group.selectAll(".node")
+//         .data(layout.descendants())
+//         .join("g")
+//         // .filter(d => !d.data._isDescendantNode)
+//         // .filter(d => !d.data._isDescendantNode && !d.data.isDescendantContainer) // Ajout du filtre
+//         .filter(d => !d.data._isDescendantNode && 
+//             !d.data.isDescendantContainer && 
+//             !d.data.isVirtualRoot)  
+
+//         .attr("class", "node")
+//         .attr("id", d => `node-${cleanIdForSelector(d.data.id)}`)
+//         .attr("transform", d => `translate(${d.y},${d.x})`)
+
+
+//     drawNodeBoxes(nodeGroups);
+//     drawNodeContent(nodeGroups);
+//     addControlButtons(nodeGroups);
+
+
+// }
+
+// /**
+//  * Configure le zoom
+//  * @private
+//  */
+// function setupZoom(svg, mainGroup, applyInitialTransform = true) {
+//     zoom = d3.zoom()
+//         .scaleExtent([0.1, 3])
+//         .on("zoom", ({transform}) => {
+//             lastTransform = transform;
+//             mainGroup.attr("transform", transform);
+//         });
+
+//     svg.call(zoom);
+    
+//     const initialTransform = lastTransform || d3.zoomIdentity
+//         .translate(state.boxWidth, window.innerHeight/2)
+//         .scale(0.8);
+
+//     // recalage de l'arbre avce zoom 0.8, au milieu en hauteur et à une case à gauche!
+//     if (applyInitialTransform) { 
+//         svg.call(zoom.transform, initialTransform);
+//     }
+// }
+// //#################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Trouve les descendants généalogiques d'un sibling
@@ -677,7 +1239,8 @@ function convertToVirtualRootTree(inputTree) {
         name: '',
         generation: -1,
         isVirtualRoot: true,
-        children: []
+        children: [],
+        mainBranch: 0,
     };
 
     // Ajouter d'abord les siblings triés par date de naissance
@@ -702,7 +1265,8 @@ function convertToVirtualRootTree(inputTree) {
             virtualRootTree.children.push({
                 ...sibling,
                 generation: inputTree.generation,
-                isSibling: true
+                isSibling: true,
+                mainBranch: 50,
             });
         });
     }
@@ -724,7 +1288,8 @@ function convertToVirtualRootTree(inputTree) {
                 ...spouse,
                 generation: rootNode.generation,
                 isSpouse: true,
-                spouseOf: rootNode.id
+                spouseOf: rootNode.id,
+                mainBranch: 1,
             });
         });
     }
@@ -866,7 +1431,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                         deathDate: spouse.deathDate || "",
                         generation: 0,
                         isSpouse: true,
-                        spouseOf: descendantData_all[0].id
+                        spouseOf: descendantData_all[0].id,
+                        mainBranch: 2,
                     });
                 }
             });
@@ -895,7 +1461,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                     deathDate: spouse.deathDate || "",
                     generation: 1,
                     isSpouse: true,
-                    spouseOf: parentSiblingId
+                    spouseOf: parentSiblingId,
+                    mainBranch: 4,
                 });
             }
         });
@@ -950,7 +1517,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 // siblingReferenceId: descendantData_all[0].id,
                 appearedOnLeftClick: true,
                 // isLeftDescendant: true,
-                children: []
+                children: [],
+                mainBranch: 2,
             };
            
 
@@ -963,6 +1531,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 childSpouseNodes[i].forEach(spouseFamId => {
                     spouse = state.gedcomData.individuals[childSpouseNodes[i][index].id];
                     childSpouseNodes[i][index].sex = spouse.sex; 
+                    childSpouseNodes[i][index].mainBranch = 2; 
                     index++;   
                 });
                 newTree.push(...childSpouseNodes[i]) ; 
@@ -1020,7 +1589,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
             name: '',
             generation: -1,
             isVirtualRoot: true,
-            children: Array.isArray(newTree) ? [...newTree] : [newTree]
+            children: Array.isArray(newTree) ? [...newTree] : [newTree],
+            mainBranch: 0,
         };
 
     }
@@ -1072,7 +1642,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 genealogicalFatherId: genealogicalParents.father,
                 genealogicalMotherId: genealogicalParents.mother,
                 children: [],
-                appearedOnLeftClick : true
+                appearedOnLeftClick : true,
+                mainBranch: 2,
             };
             if (i === 0) {
 
@@ -1094,7 +1665,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 parentNode[0].isLeftDescendant = true;
                 if (isSibling)  { parentNode[0].isSiblingSpouse = true;}
                 parentNode[0].isSpouse = true;
-                parentNode[0].spouseOf = parentSiblingId;      
+                parentNode[0].spouseOf = parentSiblingId;
+                parentNode[0].mainBranch = 8;      
 
 
                 // vérifier si le 2 ième parent existe déjà dans l'arbre
@@ -1304,7 +1876,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 genealogicalMotherId: genealogicalParents.mother, 
                 isLeftDescendant: true, 
                 children: [],
-                appearedOnLeftClick : true
+                appearedOnLeftClick : true,
+                mainBranch: 2,
             };
         
 
@@ -1347,7 +1920,8 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                         spouseForSex = state.gedcomData.individuals[spouse.id];
                         spouse.sex = spouseForSex.sex;
                         spouse.isLeftDescendant = true;   
-                        spouse.generation = parentInfo.parentArray[parentInfo.index].generation;   
+                        spouse.generation = parentInfo.parentArray[parentInfo.index].generation;  
+                        spouse.mainBranch = 2; 
                         if (parentInfo.parentArray[parentInfo.index].isSibling) { spouse.isSiblingSpouse = true; }
                         const spouseExists = findNodeInTree(originalTree, spouse.id);
                         if (!spouseExists) {
@@ -1416,6 +1990,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                             spouseForSex = state.gedcomData.individuals[childSpouseNodes[i][j].id];
                             childSpouseNodes[i][j].sex = spouseForSex.sex;
                             childSpouseNodes[i][j].generation = 1;
+                            childSpouseNodes[i][j].mainBranch = 2;
                         }
                         originalTree.children[targetBranchIndex].children.splice(insertIndex+1, 0, ...childSpouseNodes[i]);
                     }
@@ -1449,6 +2024,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                                 spouseForSex = state.gedcomData.individuals[childSpouseNodes[i][j].id];
                                 childSpouseNodes[i][j].sex = spouseForSex.sex;
                                 childSpouseNodes[i][j].generation = descendantGeneration;
+                                childSpouseNodes[i][j].mainBranch = 2;
                             }
                             parentAnchorNode.children.splice(descendantIndex + 1, 0, ...childSpouseNodes[i]);
                             // console.log(`Ajout de ${childSpouseNodes[i].length} spouse(s) après ${descendantNode.name}`);
@@ -1468,6 +2044,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
     }   
     
     
+    return [descendantGeneration, parentGeneration];
 
     // console.log("⭐ Structure finale:", JSON.stringify(state.currentTree, null, 2));
     // console.log("Arbre restructuré avec descendant:", state.currentTree);
@@ -1699,7 +2276,8 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                     // children: [],
                     isSpouse: node.isSpouse,
                     spouseOf: node.spouseOf,
-                    name: node.name  // Ajout du nom
+                    name: node.name,  // Ajout du nom
+                    mainBranch: 14,
                 });
     
                 if (node.isSpouse && node.spouseOf) {
@@ -1786,7 +2364,8 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                 sex: node.sex,
                 genealogicalParentId: node.genealogicalParentId,
                 genealogicalMotherId: node.genealogicalMotherId,
-                genealogicalFatherId: node.genealogicalFatherId
+                genealogicalFatherId: node.genealogicalFatherId,
+                mainBranch: 15,
             };
             
             // Pour les nœuds non-spouses ou spouses avec un parentId défini
@@ -1817,6 +2396,7 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                     nodeInfo.genealogicalParentId = parentId;
                     nodeInfo.genealogicalMotherId = motherId;
                     nodeInfo.genealogicalFatherId = parentId;
+                    nodeInfo.mainBranch = 16;
                     childrenByParent.get(parentId).push(nodeInfo);
                 }
             }
@@ -1840,7 +2420,8 @@ function analyzeGenEnfantVsGenParentsNew(tree, newDescendant, genEnfant, genPare
                         // Utiliser le même parent que le nœud principal
                         genealogicalParentId: node.genealogicalParentId,
                         genealogicalMotherId: node.genealogicalMotherId,
-                        genealogicalFatherId: node.genealogicalFatherId
+                        genealogicalFatherId: node.genealogicalFatherId,
+                        mainBranch: 17,
                     };
                     
                     // Ajouter le spouse au même parent que le nœud principal
@@ -2014,7 +2595,8 @@ function findGeneologicalParents(personId) {
                         generation: 1, // génération du père
                         birthDate: father.birthDate || "",
                         deathDate: father.deathDate || "",
-                        type: 'father'
+                        type: 'father',
+                        mainBranch: 20,
                     });
                 }
                 if (family.wife) {
@@ -2025,7 +2607,8 @@ function findGeneologicalParents(personId) {
                         generation: 1, // génération de la mère
                         birthDate: mother.birthDate || "",
                         deathDate: mother.deathDate || "",
-                        type: 'mother'
+                        type: 'mother',
+                        mainBranch: 21,
                     });
                 }
             }
@@ -2206,7 +2789,8 @@ export function handleDescendants(d)
                         if (spouseId) {
                             const spouseNode = createPersonNode(spouseId, targetNode.data.generation + 1, {
                                 isSpouse: true,
-                                spouseOf: childId
+                                spouseOf: childId,
+                                mainBranch: 22,
                             });
                             childrenWithSpouses.push(spouseNode);
                         }
@@ -2230,6 +2814,7 @@ export function handleDescendants(d)
         if (d.data.isSpouse) {
             d.data._originalChildren = d.data.children;
             d.data.children = [];
+            d.data.mainBranch = 23;
         }
     }
 
@@ -2254,7 +2839,7 @@ function handleTreeLeftShift() {
 // Fonction auxiliaire qui contient la logique actuelle
 function applyTreeLeftShift() {
     const svg = d3.select("#tree-svg");
-    const lastTransform = getLastTransform() || d3.zoomIdentity;
+    state.lastTransform = getLastTransform() || d3.zoomIdentity;
     const zoom = getZoom();
     
     // Trouver les nœuds du niveau le plus à gauche
@@ -2279,7 +2864,7 @@ function applyTreeLeftShift() {
                 svg.transition()
                     .duration(750)
                     .call(zoom.transform, 
-                        lastTransform.translate(shiftAmount, 0)
+                        state.lastTransform.translate(shiftAmount, 0)
                     );
             }
         }
@@ -2843,41 +3428,154 @@ function updateGenerationSelector(value) {
     updateSelectorValue('generations', value.toString());
 }
 
+
+
+/**
+ * Extrait les coordonnées X et Y de l'attribut transform d'un élément SVG.
+ * @param {Element} node - L'élément DOM (<g class="node">)
+ * @returns {{x: number, y: number}|null} Les coordonnées.
+ */
+function getCoordsFromTransform(node) {
+    const transformAttr = node.getAttribute('transform');
+    if (!transformAttr) return null;
+
+    // RegEx pour capturer les valeurs X et Y dans translate(X,Y)
+    const match = transformAttr.match(/translate\(([^,]+),([^)]+)\)/);
+    
+    if (match && match.length === 3) {
+        // match[1] est X, match[2] est Y
+        const x = parseFloat(match[1]);
+        const y = parseFloat(match[2]);
+        if (!isNaN(x) && !isNaN(y)) {
+            return { x, y, node: node }; // Retourne aussi l'élément DOM original
+        }
+    }
+    return null;
+}
+
+
+/**
+ * Trouve le nœud DOM le plus haut parmi les plus à droite en lisant l'attribut 'transform'.
+ * (Méthode de lecture du DOM optimisée, car elle évite getBoundingClientRect).
+ */
+function findTopMostRightMostNode() {
+    // console.log("--- Début du diagnostic (Lecture de l'attribut transform) ---");
+    
+    // 1. Sélectionner tous les éléments DOM et mapper leurs coordonnées
+    const nodes = d3.selectAll(".node").nodes();
+    const nodeCoords = nodes.map(node => getCoordsFromTransform(node)).filter(c => c !== null);
+
+    // console.log(`LOG 1 : ${nodes.length} nœuds DOM trouvés. ${nodeCoords.length} nœuds avec coordonnées valides.`);
+
+    if (nodeCoords.length === 0) {
+        console.error("LOG 1 : Aucun nœud avec un attribut transform valide n'a été trouvé.");
+        return null;
+    }
+
+    // 2. Déterminer la coordonnée X maximale (le plus à droite)
+    const max_x = nodeCoords.reduce((max, coords) => Math.max(max, coords.x), -Infinity);
+    // console.log(`LOG 2 : Coordonnée X maximale (le plus à droite) trouvée : ${max_x}`);
+
+    // Utilisation d'une petite tolérance pour les problèmes de virgule flottante
+    const epsilon = 1e-6; 
+
+    // 3. Filtrer les nœuds à cette coordonnée X maximale
+    const rightmostNodes = nodeCoords.filter(coords => Math.abs(coords.x - max_x) < epsilon);
+    
+    // console.log(`LOG 3 : ${rightmostNodes.length} nœuds trouvés sur la ligne la plus à droite (avec tolérance ${epsilon}).`);
+
+    if (rightmostNodes.length === 0) {
+        console.error("LOG 3 : Filtration échouée.");
+        return null;
+    }
+
+    // 4. Parmi ces nœuds, trouver celui avec la coordonnée Y minimale (le plus haut)
+    const topmostRightNodeCoords = rightmostNodes.reduce((topmost, coords) => {
+        if (!topmost || coords.y < topmost.y) {
+            return coords;
+        }
+        return topmost;
+    }, null);
+
+    // 5. Retourner l'élément DOM original
+    if (topmostRightNodeCoords) {
+        // console.log("LOG 4 : Nœud final trouvé (x, y) :", topmostRightNodeCoords.x, topmostRightNodeCoords.y, topmostRightNodeCoords.node);
+        // Vous retournez l'élément DOM <g> correspondant
+        return topmostRightNodeCoords.node; 
+    }
+    
+    return null;
+}
+
+
 /**
  * Gère le décalage horizontal de l'arbre si les nœuds sont trop proches du bord droit
  * Applique une transition animée si nécessaire
  */
-function handleTreeShift() {
+function handleTreeShift(direction = 'left') {
     const svg = d3.select("#tree-svg");
     const lastTransform = getLastTransform() || d3.zoomIdentity;
     const zoom = getZoom();
-    const screenWidth = window.innerWidth;
     
     // Trouver les nœuds du niveau le plus profond
     const nodes = d3.selectAll(".node").nodes();
-    const rightmostNode = nodes.reduce((rightmost, node) => {
-        const rect = node.getBoundingClientRect();
-        if (!rightmost || rect.right > rightmost.right) {
-            return rect;
-        }
-        return rightmost;
-    }, null);
 
-    if (rightmostNode) {
-        const margin = 100;
-        // console.log("Position droite:", rightmostNode.right, "Écran:", screenWidth - margin);
+    const topMostRightMostNode = findTopMostRightMostNode(nodes);
+    if (topMostRightMostNode) {
+        const rect = topMostRightMostNode.getBoundingClientRect();
+        const marginRight = 60;
+        const marginTop = 20;
 
-        if (rightmostNode.right > (screenWidth - margin)) {
-            const shiftAmount = state.boxWidth * 1.3;
+        let shiftAmountX = 0;
+        let shiftAmountY = 0;
+        if (rect.right > (window.innerWidth - marginRight) || rect.top <  marginTop  || rect.bottom > (window.innerHeight - marginTop) ) {
+            if ( rect.right > (window.innerWidth - marginRight) ) {
+                shiftAmountX = state.boxWidth * 1.4;
+            }
+
+            if (rect.top <  marginTop ) {
+                shiftAmountY = state.boxHeight* 1.4;                
+            }
+
+            if (rect.bottom > (window.innerHeight - marginTop)) {
+                shiftAmountY = -state.boxHeight* 1.4;                 
+            }
             
             if (zoom) {
                 svg.transition()
                     .duration(750)
                     .call(zoom.transform, 
-                        lastTransform.translate(-shiftAmount, 0)
+                        lastTransform.translate(-shiftAmountX, shiftAmountY)
                     );
             }
         }
+        // console.log("\n\n ------ DEBUG findTopMostRightMostNode Position droite:", topMostRightMostNode,-shiftAmountX, shiftAmountY );
+    }
+}
+
+
+/**
+ * Gère le décalage horizontal de l'arbre si les nœuds sont trop proches du bord droit
+ * Applique une transition animée si nécessaire
+ */
+async function handleTreeXYShift(shiftAmountX = 0, shiftAmountY = 0, duration = 750) {
+    const svg = d3.select("#tree-svg");
+    const lastTransform = getLastTransform() || d3.zoomIdentity;
+    const zoom = getZoom();
+    const screenWidth = window.innerWidth;
+    
+ 
+    // const shiftAmount =state.boxWidth * 1.3 ;
+    
+    if (zoom) {
+        // console.log("\n\n ------ debug ------- Shifting tree to the right by:", shiftAmount);
+        const transition =  svg.transition()
+            .duration(duration)
+            .ease(d3.easeCubicInOut) // Type d'animation (facultatif mais recommandé)
+            .call(zoom.transform, 
+                lastTransform.translate(shiftAmountX, shiftAmountY)
+            );
+        await transition.end();
     }
 }
 
@@ -2917,6 +3615,7 @@ function handleNormalAncestors(node) {
     if (node.children?.length) {
         node._hiddenChildren = node.children;
         node.children = [];
+        node.mainBranch = 24;
     } else {
         if (node._hiddenChildren) {
             restoreHiddenChildren(node);
@@ -3019,8 +3718,8 @@ function buildNewAncestors(ddata) {
                     hasParents: true,
                     genealogicalParentId: genealogicalParents.original,
                     genealogicalFatherId: genealogicalParents.father,
-                    genealogicalMotherId: genealogicalParents.mother
- 
+                    genealogicalMotherId: genealogicalParents.mother,
+                    mainBranch: 1, 
                 });
             }
 
@@ -3049,8 +3748,8 @@ function buildNewAncestors(ddata) {
                     hasParents: true,
                     genealogicalParentId: genealogicalParents.original,
                     genealogicalFatherId: genealogicalParents.father,
-                    genealogicalMotherId: genealogicalParents.mother
- 
+                    genealogicalMotherId: genealogicalParents.mother,
+                    mainBranch: 1,
                 });
             }
         }
@@ -3077,7 +3776,8 @@ function addSiblingsToNode(siblings, node, parentId, genealogicalParents) {
             genealogicalParentId: genealogicalParents.original,
             genealogicalFatherId: genealogicalParents.father,
             genealogicalMotherId: genealogicalParents.mother,
-            siblingReferenceId: parentId
+            siblingReferenceId: parentId,
+            mainBranch: 1,
         });
     });
 }
@@ -3099,7 +3799,8 @@ function addOtherSpouses(personId, excludeSpouseId, node) {
                     children: [],
                     birthDate: spouse.birthDate,
                     deathDate: spouse.deathDate,
-                    sex: spouse.sex
+                    sex: spouse.sex,
+                    mainBranch: 31,
                 });
             }
         });

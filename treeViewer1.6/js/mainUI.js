@@ -1,7 +1,7 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree, showToast } from './main.js';
+import { state, displayGenealogicTree, showToast, positionRadarButton, positionHeatMapButton } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { generateNameCloudExport } from './nameCloudUI.js';
 import { selectFoundPerson } from './eventHandlers.js';
@@ -16,6 +16,8 @@ let rootPersonSelector = null;
 
 export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     state.isButtonOnDisplay = isButtonsOnDisplay; 
+    const controlsRow1 = document.querySelector('.controls-row-1'); 
+    const controlsRow2 = document.querySelector('.controls-row-2'); 
     const speechToggleBtn = document.getElementById('speechToggleBtn');
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     const settingsBtn = document.getElementById('settingsBtn');
@@ -33,7 +35,10 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     const heatMapBtnOverlay = document.getElementById('heatMapBtn-overlay');
     const closeButton = document.getElementById('close-tree-button');
 
+
     if (isButtonsOnDisplay) {
+        controlsRow1.style.display = '';
+        controlsRow2.style.display = ''; 
         speechToggleBtn.style.visibility = 'visible';
         animationPauseBtn.style.visibility = 'visible';
         settingsBtn.style.visibility = 'visible';
@@ -54,6 +59,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         // console.log('\n\n Debug: buttonsOnDisplay set to TRUE ', rootPersonSearch);
         // speechToggleBtn.style.display = 'flex';
 
+
         if (window.innerWidth < 400) {
             closeButton.style.setProperty('top', '48px', 'important');
             closeButton.style.setProperty('right', '6px', 'important');
@@ -61,6 +67,11 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
             closeButton.style.setProperty('top', '6px', 'important');
             closeButton.style.setProperty('right', '6px', 'important'); 
         }
+
+        positionRadarButton();
+        positionHeatMapButton();
+
+
     } else {
         speechToggleBtn.style.visibility = 'hidden';
         animationPauseBtn.style.visibility = 'hidden';
@@ -80,7 +91,9 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         // speechToggleBtn.style.display = 'none';
 
         closeButton.style.setProperty('top', '6px', 'important');
-        closeButton.style.setProperty('right', '6px', 'important');        
+        closeButton.style.setProperty('right', '6px', 'important');
+        controlsRow1.style.display = 'none';
+        controlsRow2.style.display = 'none';        
     }
     
     speechToggleBtn.style.background = 'transparent';

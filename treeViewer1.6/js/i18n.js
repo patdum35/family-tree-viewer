@@ -8,7 +8,7 @@ window.i18n = {
   translations: {
     'fr': {
       // Page password-form
-      'motDePasse': 'Mot de passe',
+      'motDePasse': 'Mot de passe 🔒',
       'visualiserArbre': 'Entrez', 
       'startTitle': 'explore tes origines...',
       'inputFormFirstName': 'prénom',
@@ -87,7 +87,7 @@ window.i18n = {
     },
     'en': {
       // Page password-form
-      'motDePasse': 'Password',
+      'motDePasse': 'Password 🔒',
       'visualiserArbre': 'Enter', //'View family tree',
       'startTitle': 'explore your origins...',
       'inputFormFirstName': 'first name',
@@ -162,7 +162,7 @@ window.i18n = {
     },
     'es': {
       // Page password-form
-      'motDePasse': 'Contraseña',
+      'motDePasse': 'Contraseña 🔒',
       'visualiserArbre': 'Entrar', //'Ver árbol genealógico',
       'startTitle': 'explora tus orígenes...',
       'inputFormFirstName': 'nombre',
@@ -238,7 +238,7 @@ window.i18n = {
     },
     'hu': {
       // Page password-form
-      'motDePasse': 'Jelszó',
+      'motDePasse': 'Jelszó 🔒',
       'visualiserArbre': 'Belépés', //'Családfa megtekintése',
       'startTitle': 'fedezd fel az eredeted...',
       'inputFormFirstName': 'keresztnév',

@@ -6,14 +6,25 @@ import { state } from './main.js';
 import { addRootChangeButton, addDescendantsControls, addAncestorsControls } from './nodeControls.js';
 
 
+
+
+// Fonction utilitaire pour nettoyer l'ID
+export function cleanIdForSelector(id) {
+    // S'assurer que l'ID est une chaîne de caractères
+    const strId = String(id);
+    // Remplacer les caractères non autorisés (ici, tout sauf lettres, chiffres, tirets, underscores)
+    // Le '@' sera remplacé.
+    return strId.replace(/[^a-zA-Z0-9\-\_]/g, '_'); 
+    // Par exemple: "@I1@" devient "_I1_"
+}
+
 /**
  * Dessine les nœuds de l'arbre
  * @param {Object} group - Le groupe SVG principal
  * @param {Object} root - La racine de l'arbre
  * @param {Object} treeLayout - La mise en page de l'arbre
  */
-export function drawNodes(group, layout) {
-    // const nodes = treeLayout(root);
+export function drawNodes(group, layout, isAnimation = false) {
 
     const nodeGroups = group.selectAll(".node")
         .data(layout.descendants())
@@ -25,6 +36,7 @@ export function drawNodes(group, layout) {
             !d.data.isVirtualRoot)  
 
         .attr("class", "node")
+        .attr("id", d => `node-${cleanIdForSelector(d.data.id)}`)
         .attr("transform", d => `translate(${d.y},${d.x})`)
         .on("click", function(event, d) {
             // Ajout de l'appel à displayPersonDetails lors du clic
@@ -64,12 +76,7 @@ export function drawNodes(group, layout) {
         drawNodeContent(spouseNodes);
         addControlButtons(spouseNodes);
     }
-
-
 }
-
-
-
 
 
 /**
@@ -116,7 +123,6 @@ export function drawNodeContent(nodeGroups) {
 
             if (!match) {
                 console.log("Nom de famille non trouvé pour", d.data.name, ":", d.data.id, d.data.name2, d.data.title, d.data.title2);
-
             }
             
             if (match) {
@@ -204,7 +210,6 @@ function capitalizeFirstLetter(word) {
  * @private
  */
 function drawDates(text, data) {
-
     // if no birth or death dates, we look for marriage date
     let marriageYear = false;
     if (!data.birthDate && !data.deathDate)
@@ -220,10 +225,7 @@ function drawDates(text, data) {
                 }
             });
         }
-
-
     }
-
 
     if (!data.birthDate && !data.deathDate && !marriageYear) return;
     
@@ -254,7 +256,7 @@ function drawDates(text, data) {
  * @private
  */
 
-function addControlButtons(nodeGroups) {
+export function addControlButtons(nodeGroups) {
     addRootChangeButton(nodeGroups);
     addDescendantsControls(nodeGroups);
     addAncestorsControls(nodeGroups);
@@ -262,66 +264,7 @@ function addControlButtons(nodeGroups) {
 
 
 /**
- * Dessine les rectangles des nœuds
- * @private
- */
-// export function drawNodeBoxes(nodeGroups) {
-//     // Définir un filtre pour l'ombre portée
-//     const defs = d3.select("svg").append("defs");
-    
-//     // Créer un filtre pour l'ombre
-//     const filter = defs.append("filter")
-//         .attr("id", "drop-shadow")
-//         .attr("height", "125%"); // Légèrement réduit
-    
-//     // Ajouter les composants du filtre
-//     filter.append("feGaussianBlur")
-//         .attr("in", "SourceAlpha")
-//         .attr("stdDeviation", 2) // Ombre plus fine
-//         .attr("result", "blur");
-        
-//     filter.append("feOffset")
-//         .attr("in", "blur")
-//         .attr("dx", 2) // Décalage horizontal plus petit
-//         .attr("dy", 2) // Décalage vertical plus petit
-//         .attr("result", "offsetBlur");
-        
-//     // Contrôler l'opacité de l'ombre
-//     filter.append("feComponentTransfer")
-//         .append("feFuncA")
-//         .attr("type", "linear")
-//         .attr("slope", "0.5"); // Opacité à 50%
-        
-//     // Fusionner l'original avec l'ombre
-//     const feMerge = filter.append("feMerge");
-//     feMerge.append("feMergeNode")
-//         .attr("in", "offsetBlur");
-//     feMerge.append("feMergeNode")
-//         .attr("in", "SourceGraphic");
-    
-//     // Ajouter les rectangles avec effet d'ombre
-//     nodeGroups.append("rect")
-//         .attr("class", d => {
-//             if (!d.data) return "person-box";
-//             const classes = ["person-box"];
-//             if (d.data.isSpouse) classes.push("spouse");
-//             else if (d.data.isSibling) classes.push("sibling");
-//             else if (d.data.duplicate) classes.push("duplicate");
-//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
-//             else classes.push("normal");
-//             return classes.join(" ");
-//         })
-//         .attr("x", -state.boxWidth/2)
-//         .attr("y", -state.boxHeight/2)
-//         .attr("width", state.boxWidth)
-//         .attr("height", state.boxHeight)
-//         .attr("rx", 3) // Coins arrondis
-//         .style("filter", "url(#drop-shadow)") // Appliquer l'ombre
-//         // Ne pas définir stroke et stroke-width ici pour préserver les styles CSS des classes
-// }
-
-/**
- * Version modifiée de drawNodeBoxes - ÉTAPE 1 : Blasons seulement
+ *  * Dessine les rectangles des nœuds
  */
 export function drawNodeBoxes(nodeGroups) {
     // Votre code d'ombre existant (gardez-le tel quel)
@@ -360,8 +303,6 @@ export function drawNodeBoxes(nodeGroups) {
         drawBubble(nodeGroups);
     } else if (state.nodeStyle === 'hextech') {
         drawHextech(nodeGroups);
-    } else if (state.nodeStyle === 'organic') {
-        drawOrganic(nodeGroups);
     } else if (state.nodeStyle === 'heraldic') {
         drawHeraldic(nodeGroups);
     } else {
@@ -369,29 +310,6 @@ export function drawNodeBoxes(nodeGroups) {
         drawClassic(nodeGroups);
     }
 }
-
-// /**
-//  * Votre style rectangles existant (inchangé)
-//  */
-// function drawClassic(nodeGroups) {
-//     nodeGroups.append("rect")
-//         .attr("class", d => {
-//             if (!d.data) return "person-box";
-//             const classes = ["person-box"];
-//             if (d.data.isSpouse) classes.push("spouse");
-//             else if (d.data.isSibling) classes.push("sibling");
-//             else if (d.data.duplicate) classes.push("duplicate");
-//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
-//             else classes.push("normal");
-//             return classes.join(" ");
-//         })
-//         .attr("x", -state.boxWidth/2)
-//         .attr("y", -state.boxHeight/2)
-//         .attr("width", state.boxWidth)
-//         .attr("height", state.boxHeight)
-//         .attr("rx", 3)
-//         .style("filter", "url(#drop-shadow)");
-// }
 
 
 
@@ -436,94 +354,88 @@ function drawClassic(nodeGroups) {
         })
         .style("stroke-width", 1)
         .style("filter", "url(#drop-shadow)");
+        if (state.addLeaves) {
+            addLeavesAroundRectangle(nodeGroups);
+        }
+ }
+
+
+
+/**
+ * Ajoute des petites feuilles autour d'un rectangle
+ */
+function addLeavesAroundRectangle(nodeGroups) {
+    nodeGroups.each(function(d) {
+        const group = d3.select(this);
+        const numLeaves = 4 + Math.floor(Math.random() * 3); // 4-6 feuilles
+        
+        for(let i = 0; i < numLeaves; i++) {
+            addRandomLeaf(group);
+        }
+    });
 }
 
 
-
-// /**
-//  * NOUVEAU : Style blasons
-//  */
-// function drawHeraldic(nodeGroups) {
-//     // Créer les dégradés pour les blasons
-//     createHeraldcGradients();
+/**
+ * Ajoute une feuille de chêne réaliste avec nervures
+ */
+function addRandomLeaf(group) {
+    const side = Math.floor(Math.random() * 4);
+    let x, y, rotation;
     
-//     nodeGroups.append("path")
-//         .attr("class", d => {
-//             if (!d.data) return "person-box heraldic";
-//             const classes = ["person-box", "heraldic"];
-//             if (d.data.isSpouse) classes.push("spouse");
-//             else if (d.data.isSibling) classes.push("sibling");
-//             else if (d.data.duplicate) classes.push("duplicate");
-//             else if (state.rootPersonId && d.data.id === state.rootPersonId) classes.push("root");
-//             else classes.push("normal");
-//             return classes.join(" ");
-//         })
-//         .attr("d", () => {
-//             // Forme de blason améliorée
-//             const w = state.boxWidth;
-//             const h = state.boxHeight;
-//             const halfW = w / 2;
-//             const halfH = h / 2;
-            
-//             return `M ${-halfW} ${-halfH}
-//                     L ${halfW} ${-halfH}
-//                     L ${halfW} ${halfH * 0.2}
-//                     L ${halfW * 0.8} ${halfH * 0.6}
-//                     Q ${halfW * 0.5} ${halfH * 0.9} 0 ${halfH}
-//                     Q ${-halfW * 0.5} ${halfH * 0.9} ${-halfW * 0.8} ${halfH * 0.6}
-//                     L ${-halfW} ${halfH * 0.2}
-//                     Z`;
-//         })
-//         .style("fill", d => {
-//             // DEBUG : afficher les données disponibles
-//             console.log("Données personne:", d, d.data, d.data.name, "Gender:", d.data.gender, "Sex:", d.data.sex, "Sexe:", d.data.sexe);
-            
-//             // Couleurs selon le genre
-//             if (d.data.gender === 'F' || d.data.sex === 'F' || d.data.sexe === 'F') return "url(#heraldic-female)";
-//             if (d.data.gender === 'M' || d.data.sex === 'M' || d.data.sexe === 'M') return "url(#heraldic-male)";
-//             return "url(#heraldic-neutral)";
-//         })
-//         .style("stroke", "#B8860B") // Or terne au lieu d'or vif
-//         .style("stroke-width", 1.5) // Bordure plus fine
-//         .style("filter", "url(#drop-shadow)");
-// }
-
-
-// /**
-//  * Crée les dégradés pour les blasons
-//  */
-// function createHeraldcGradients() {
-//     // Éviter de recréer s'ils existent déjà
-//     if (d3.select("#heraldic-male").node()) return;
+    switch(side) {
+        case 0: // Haut
+            x = (Math.random() - 0.5) * state.boxWidth;
+            y = -state.boxHeight/2;
+            rotation = Math.random() * 60 - 30;
+            break;
+        case 1: // Droite  
+            x = state.boxWidth/2;
+            y = (Math.random() - 0.5) * state.boxHeight;
+            rotation = 90 + Math.random() * 60 - 30;
+            break;
+        case 2: // Bas
+            x = (Math.random() - 0.5) * state.boxWidth;
+            y = state.boxHeight/2;
+            rotation = 180 + Math.random() * 60 - 30;
+            break;
+        case 3: // Gauche
+            x = -state.boxWidth/2;
+            y = (Math.random() - 0.5) * state.boxHeight;
+            rotation = 270 + Math.random() * 60 - 30;
+            break;
+    }
     
-//     const defs = d3.select("svg defs").empty() ? 
-//         d3.select("svg").append("defs") : 
-//         d3.select("svg defs");
-    
-//     // Dégradé masculin (bleu clair vers or clair)
-//     const maleGrad = defs.append("linearGradient")
-//         .attr("id", "heraldic-male")
-//         .attr("x1", "0%").attr("y1", "0%")
-//         .attr("x2", "0%").attr("y2", "100%");
-//     maleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#87CEEB"); // Bleu ciel
-//     maleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F0E68C"); // Kaki clair
-    
-//     // Dégradé féminin (rose clair vers blanc rosé)
-//     const femaleGrad = defs.append("linearGradient")
-//         .attr("id", "heraldic-female")
-//         .attr("x1", "0%").attr("y1", "0%")
-//         .attr("x2", "0%").attr("y2", "100%");
-//     femaleGrad.append("stop").attr("offset", "0%").attr("stop-color", "#FFB6C1"); // Rose clair
-//     femaleGrad.append("stop").attr("offset", "100%").attr("stop-color", "#FFF0F5"); // Blanc lavande
-    
-//     // Dégradé neutre (gris très clair)
-//     const neutralGrad = defs.append("linearGradient")
-//         .attr("id", "heraldic-neutral")
-//         .attr("x1", "0%").attr("y1", "0%")
-//         .attr("x2", "0%").attr("y2", "100%");
-//     neutralGrad.append("stop").attr("offset", "0%").attr("stop-color", "#E6E6FA"); // Lavande
-//     neutralGrad.append("stop").attr("offset", "100%").attr("stop-color", "#F5F5DC"); // Beige
-// }
+    // Contour de la feuille de chêne
+    group.append("path")
+        .attr("class", "leaf-decoration")
+        .attr("d", "M0,-8 Q3,-7 4,-5 Q6,-3 4,-1 Q5,1 3,3 Q1,5 0,8 Q-1,5 -3,3 Q-5,1 -4,-1 Q-6,-3 -4,-5 Q-3,-7 0,-8 Z")
+        .attr("transform", `translate(${x},${y}) rotate(${rotation})`)
+        .style("fill", "#81C784")
+        .style("stroke", "#4CAF50") 
+        .style("stroke-width", 0.5)
+        .style("pointer-events", "none");
+        
+    // Nervure centrale
+    group.append("path")
+        .attr("class", "leaf-vein-main")
+        .attr("d", "M0,-8 L0,8")
+        .attr("transform", `translate(${x},${y}) rotate(${rotation})`)
+        .style("stroke", "#2E7D32")
+        .style("stroke-width", 0.8)
+        .style("fill", "none")
+        .style("pointer-events", "none");
+        
+    // Nervures secondaires (4 de chaque côté)
+    group.append("path")
+        .attr("class", "leaf-vein-secondary")
+        .attr("d", "M0,-6 L2,-4 M0,-3 L3,-1 M0,0 L3,2 M0,3 L2,5 M0,-6 L-2,-4 M0,-3 L-3,-1 M0,0 L-3,2 M0,3 L-2,5")
+        .attr("transform", `translate(${x},${y}) rotate(${rotation})`)
+        .style("stroke", "#388E3C")
+        .style("stroke-width", 0.3)
+        .style("fill", "none")
+        .style("pointer-events", "none");
+}
 
 
 // /**
@@ -629,10 +541,6 @@ function createImprovedHeraldcGradients() {
     neutralGrad.append("stop").attr("offset", "0%").attr("stop-color", "#F0F0FF"); // Au lieu de #F8F8FF
     neutralGrad.append("stop").attr("offset", "100%").attr("stop-color", "#E0E0F0"); // Au lieu de #E6E6FA
 }
-
-
-
-
 
 
 /**

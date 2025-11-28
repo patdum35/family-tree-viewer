@@ -9,6 +9,7 @@ import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
 import { debounce, isModalVisible } from './eventHandlers.js';
+import { speakText } from './voiceSelect.js';
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -78,7 +79,28 @@ const settingsTranslations = {
         'blueStyle': 'Style bleu', 
         'greenStyle': 'Style bleu/Rose', 
         'orangeStyle': 'Style bleu/orange', 
-        'blueRedStyle':'Style bleu/rouge'
+        'blueRedStyle':'Style bleu/rouge',
+
+        'treeNodeStyle': 'Style des cases', 
+        'treeDressingStyle': 'Habillage', 
+        'treeLinkStyle': 'Style des liens',
+        'treeShapeStyle': 'Style de l\'arbre',
+        'classic': 'classique',
+        'heraldic': 'héraldique',
+        'diamond': 'diamant',
+        'bubble': 'bulle',
+        'hextech': 'hextech',
+        'galaxy' :'galaxie',
+        'noDressing': 'aucun', 
+        'leaves': 'feuilles',
+        'normal-dark': 'normal-sombre', 
+        'thin-dark': 'fin-sombre', 
+        'thick-light': 'épais-clair',
+        'veryThick-light': 'trèsÉpais-clair', 
+        'veryThick-colored': 'trèsÉpais-coloré',
+        'normal': 'normal',
+        'straight': 'en ligne droite',
+
     },
     'en': {
         'settingsTitle': 'Advanced Settings',
@@ -145,7 +167,27 @@ const settingsTranslations = {
         'blueStyle': 'blue style', 
         'greenStyle': 'blue/pink style', 
         'orangeStyle': 'blue/orange style', 
-        'blueRedStyle':'blue/red style'
+        'blueRedStyle':'blue/red style',
+
+        'treeNodeStyle': 'Node Styles',
+        'treeDressingStyle': 'Dressing',
+        'treeLinkStyle': 'Link Styles',
+        'treeShapeStyle': 'Tree shape style',
+        'classic': 'classic',
+        'heraldic': 'heraldic',
+        'diamond': 'diamond',
+        'bubble': 'bubble',
+        'hextech': 'hextech',
+        'galaxy' : 'galaxy',
+        'noDressing': 'none',
+        'leaves': 'leaves',
+        'normal-dark': 'normal-dark',
+        'thin-dark': 'thin-dark',
+        'thick-light': 'thick-light',
+        'veryThick-light': 'veryThick-light',
+        'veryThick-colored': 'veryThick-colored',
+        'normal': 'normal',
+        'straight': 'straight line',              
     },
     'es': {
         'settingsTitle': 'Configuración Avanzada',
@@ -212,7 +254,27 @@ const settingsTranslations = {
         'blueStyle': 'Estilo azul', 
         'greenStyle': 'Estilo azul/rosa', 
         'orangeStyle': 'Estilo azul/naranja', 
-        'blueRedStyle':'Estilo azul/rojo'
+        'blueRedStyle':'Estilo azul/rojo',
+       
+        'treeNodeStyle': 'Estilos de las cajas',
+        'treeDressingStyle': 'Decoración',
+        'treeLinkStyle': 'Estilos de los enlaces',
+        'treeShapeStyle': 'Estilo del árbol',
+        'classic': 'clásico',
+        'heraldic': 'heráldico',
+        'diamond': 'diamante',
+        'bubble': 'burbuja',
+        'hextech': 'hextech',
+        'galaxy' :'galaxia',
+        'noDressing': 'ninguno',
+        'leaves': 'hojas',
+        'normal-dark': 'normal-oscuro',
+        'thin-dark': 'fino-oscuro',
+        'thick-light': 'grueso-claro',
+        'veryThick-light': 'muyGrueso-claro',
+        'veryThick-colored': 'muyGrueso-colorido', 
+        'normal': 'normal',
+        'straight': 'en línea recta',       
     },
     'hu': {
         'settingsTitle': 'Speciális Beállítások',
@@ -280,6 +342,27 @@ const settingsTranslations = {
         'greenStyle': 'Kék/rózsaszín stílus',
         'orangeStyle': 'Kék/narancs stílus',
         'blueRedStyle': 'Kék/piros stílus',
+
+        'treeNodeStyle': 'Mezőstílusok',
+        'treeDressingStyle': 'Díszítés',
+        'treeLinkStyle': 'Kapcsolatstílusok',
+        'treeShapeStyle': 'A fa alakjának stílusa',
+
+        'classic': 'klasszikus',
+        'heraldic': 'heraldikus',
+        'diamond': 'gyémánt',
+        'bubble': 'buborék',
+        'hextech': 'hextech',
+        'galaxy' :'galaxis',
+        'noDressing': 'nincs',
+        'leaves': 'levelek',
+        'normal-dark': 'normál-sötét',
+        'thin-dark': 'vékony-sötét',
+        'thick-light': 'vastag-világos',
+        'veryThick-light': 'nagyonVastag-világos',
+        'veryThick-colored': 'nagyonVastag-színes',
+        'normal': 'normál',
+        'straight': 'egyenes vonal',        
     }
 };
 
@@ -860,50 +943,483 @@ function createTreeControls() {
     container.style.gap = '15px';
     container.style.padding = '15px';
     
-    // Section pour le nombre de prénoms (déplacée depuis createTargetAncestorControls)
-    const prenomsSection = createControlSection(translateSettings('firstNameCount'));
-    
-    const prenomsSelector = document.createElement('select');
-    prenomsSelector.id = 'prenoms';
-    prenomsSelector.style.width = '100%';
-    prenomsSelector.style.padding = '8px 12px';
-    prenomsSelector.style.border = '1px solid #ccc';
-    prenomsSelector.style.borderRadius = '4px';
-    prenomsSelector.style.fontSize = '14px';
-    
-    for (let i = 1; i <= 4; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        if (i === parseInt(localStorage.getItem('nombre_prenoms') || 2)) {
-            option.selected = true;
-        }
-        prenomsSelector.appendChild(option);
-    }
-    
-    prenomsSelector.addEventListener('change', () => {
-        updatePrenoms(prenomsSelector.value);
-        showFeedback(translateSettings('firstNameCountUpdated'), 'success');
+    // Section pour le nombre de prénoms
+    const prenomsSection = createControlSection(translateSettings('firstNameCount'), true, '15px', '160px');
+    const prenomsSelector = createPrenomSelect({
+        style: localStorage.getItem('nombre_prenoms') || '2'
     });
-    
     prenomsSection.appendChild(prenomsSelector);
     container.appendChild(prenomsSection);
+
+   // Style des noeuds de l'arbre
+    const treeNodeStyleSection = createControlSection(translateSettings('treeNodeStyle'), true, '15px', '120px');
+    const treeNodeStyleSelector = createTreeNodeStyleSelect({
+        style: localStorage.getItem('treeNodeStyle') || 'classic'
+    });
+    treeNodeStyleSection.appendChild(treeNodeStyleSelector);
+    container.appendChild(treeNodeStyleSection);
+
+    // Style des liens de l'arbre
+    const treeDressingStyleSection = createControlSection(translateSettings('treeDressingStyle'), true, '15px', '120px');
+    const treeDressingStyleSelector = createTreeDressingStyleSelect({
+        style: localStorage.getItem('treeDressingStyle') || 'noDressing'
+    });
+    treeDressingStyleSection.appendChild(treeDressingStyleSelector);
+    container.appendChild(treeDressingStyleSection);
+
+    // Style des liens de l'arbre
+    const treeLinkStyleSection = createControlSection(translateSettings('treeLinkStyle'), true, '15px', '120px');
+    const treeLinkStyleSelector = createTreeLinkStyleSelect({
+        style: localStorage.getItem('treeLinkStyle') || 'normal-dark'
+    });
+    treeLinkStyleSection.appendChild(treeLinkStyleSelector);
+    container.appendChild(treeLinkStyleSection);
+
+
+    // Style de l'arbre
+    const treeShapeStyleSection = createControlSection(translateSettings('treeShapeStyle'), true, '15px', '120px');
+    const treeShapeStyleSelector = createTreeShapeStyleSelect({
+        style: localStorage.getItem('treeShapeStyle') || 'normal'
+    });
+    treeShapeStyleSection.appendChild(treeShapeStyleSelector);
+    container.appendChild(treeShapeStyleSection);
+
+
+
+
+    const voiceButton = document.createElement('button');
+    voiceButton.textContent = translateSettings('save');
+    voiceButton.style.padding = '8px 15px';
+    voiceButton.style.backgroundColor = '#4CAF50';
+    voiceButton.style.color = 'white';
+    voiceButton.style.border = 'none';
+    voiceButton.style.borderRadius = '4px';
+    voiceButton.style.cursor = 'pointer';
+    voiceButton.style.fontWeight = 'bold';
     
+    voiceButton.addEventListener('click', () => {
+        speakText('hello');
+    });
+    
+    container.appendChild(voiceButton);
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Vous pouvez ajouter d'autres contrôles liés à l'arbre ici
     // Par exemple :
     
     // Message informatif pour les futurs paramètres
-    const infoText = document.createElement('p');
-    infoText.textContent = 'Autres paramètres de l\'arbre à venir...';
-    infoText.style.margin = '10px 0';
-    infoText.style.fontSize = '14px';
-    infoText.style.color = '#666';
-    infoText.style.fontStyle = 'italic';
+    // const infoText = document.createElement('p');
+    // infoText.textContent = 'Autres paramètres de l\'arbre à venir...';
+    // infoText.style.margin = '10px 0';
+    // infoText.style.fontSize = '14px';
+    // infoText.style.color = '#666';
+    // infoText.style.fontStyle = 'italic';
     
-    container.appendChild(infoText);
-    
+    // container.appendChild(infoText);
     return container;
 }
+
+function createPrenomSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = ['1', '2', '3', '4'];
+    const styleValues = ['1', '2', '3', '4']; 
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: ' #8e44ad', // Violet pour le sélecteur (différent des autres)
+        options: ' #8e44ad', // Violet pour les options
+        hover: ' #9b59b6', // Violet plus clair au survol
+        selected: ' #6c3483' // Violet plus foncé pour l'option sélectionnée
+    };
+    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '180px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+
+        onChange: (value) => {
+            // Configurer la variable globale
+            state.nombre_prenoms = parseInt(value);
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('nombre_prenoms', value);
+
+            // Lancer l'action
+            state.isRadarEnabled = true;
+            toggleTreeRadar();
+            
+            console.log('Style state.nombre_prenomsconfiguré:', state.nombre_prenoms);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function createTreeNodeStyleSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = [translateSettings('classic'), translateSettings('heraldic'), translateSettings('diamond'),  translateSettings('bubble'), translateSettings('hextech'), translateSettings('galaxy')]; //translateSettings('organic'), translateSettings('silhouettes')];
+    const styleValues = ['classic', 'heraldic', 'diamond', 'bubble', 'hextech', 'galaxy']; //, 'organic', 'silhouettes'];
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: ' #4361ee',    // Bleu nameCloudUI
+        options: ' #38b000', // Vert nameCloudUI
+        hover: ' #2e9800',   // Vert plus foncé nameCloudUI 
+        selected: ' #1a4d00' // Vert encore plus foncé nameCloudUI
+    };
+    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '180px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+
+        onChange: (value) => {
+            // Configurer la variable globale
+            // state.nodeStyle = styleMap[value];
+            state.nodeStyle = value;
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('treeNodeStyle', value);
+
+            // Lancer l'action
+            state.isRadarEnabled = true;
+            toggleTreeRadar();
+            
+            console.log('Style treeNode configuré:', state.nodeStyle);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function createTreeDressingStyleSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = [translateSettings('noDressing'), translateSettings('leaves')]; 
+    const styleValues = ['noDressing', 'leaves', ]; 
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: '#4CAF50', // Vert par défaut
+        options: '#4361ee', // Bleu pour les options
+        hover: '#4CAF50', // Vert au survol
+        selected: '#1a237e', // Bleu foncé pour l'option sélectionnée
+    };    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '180px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+
+        onChange: (value) => {
+            // Configurer la variable globale
+            // state.nodeStyle = styleMap[value];
+            if (value === 'noDressing') { state.addLeaves = false;} 
+            else { state.addLeaves = true;}
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('treeDressingStyle', value);
+
+            // Lancer l'action
+            state.isRadarEnabled = true;
+            toggleTreeRadar();
+            
+            console.log('Style treeDressing configuré:', state.addLeaves);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function createTreeLinkStyleSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = [translateSettings('normal-dark'), translateSettings('thin-dark'), translateSettings('thick-light'),  translateSettings('veryThick-light'), translateSettings('veryThick-colored')]; 
+    const styleValues = ['normal-dark', 'thin-dark', 'thick-light','veryThick-light', 'veryThick-colored']; 
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: ' #ff9800',    // Orange pour le sélecteur principal
+        options: ' #ff9800', // Orange pour les options
+        hover: ' #f57c00',   // Orange plus foncé au survol
+        selected: ' #e65100' // Orange encore plus foncé pour l'option sélectionnée
+    };
+    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '180px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+
+        onChange: (value) => {
+            // Configurer la variable globale
+            // state.nodeStyle = styleMap[value];
+            state.linkStyle = value;
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('treeLinkStyle', value);
+
+            // Lancer l'action
+            state.isRadarEnabled = true;
+            toggleTreeRadar();
+            
+            console.log('Style treeLink configuré:', state.linkStyle);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+        }
+    });
+}
+
+function createTreeShapeStyleSelect(config) {
+    // Options du sélecteur radar
+    const styleOptions = [translateSettings('normal'), translateSettings('straight')]; 
+    const styleValues = ['normal', 'straight']; 
+    // Créer les options avec createOptionsFromLists
+    const options = createOptionsFromLists(styleOptions, styleOptions, styleValues);
+
+    // Couleurs pour le sélecteur personnalisé - style nameCloudUI
+    const colors = {
+        main: ' #4361ee',    // Bleu nameCloudUI
+        options: ' #38b000', // Vert nameCloudUI
+        hover: ' #2e9800',   // Vert plus foncé nameCloudUI 
+        selected: ' #1a4d00' // Vert encore plus foncé nameCloudUI
+    };
+    
+    // Dimensions du dropdown
+    let dropdownHeight;
+    if (window.innerHeight < 400) {
+      dropdownHeight = '160px';
+    } else {
+      dropdownHeight = '180px'; // Plus petit que le sélecteur background
+    }
+    
+    return createCustomSelector({
+        options: options,
+        selectedValue: config.style,
+        colors: colors,
+        isMobile: nameCloudState.mobilePhone,
+        dimensions: {
+            width: '180px',
+            height: '25px',
+            dropdownWidth: '170px',
+            dropdownMaxHeight: dropdownHeight,
+        },
+        padding: {
+            display: { x: 4, y: 1 },
+            options: { x: 8, y: 5 }
+        },
+        arrow: {
+            position: 'top-right',
+            size: 5.5,
+            offset: { x: -5, y: 1}
+        },
+        customizeOptionElement: (optionElement, option) => {
+            optionElement.textContent = option.expandedLabel;
+            optionElement.style.textAlign = 'center';
+            optionElement.style.padding = '6px 4px';
+        },
+
+        onChange: (value) => {
+            // Configurer la variable globale
+            state.treeShapeStyle = value;
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('treeShapeStyle', value);
+
+            // Lancer l'action
+            state.isRadarEnabled = true;
+            toggleTreeRadar();
+            
+            console.log('Style treeShape configuré:', state.linkStyle);
+
+            // Fermer la modal settings
+            applyAllSettings();
+            showFeedback(translateSettings('settingsApplied'), 'success');
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('enhanced-settings-modal');
+                if (modalElement) {
+                    document.body.removeChild(modalElement);
+                }
+            }, 1000);
+        }
+    });
+}
+
+
+
+
+
+
+
+
 
 function createRadarControls() {
     const container = document.createElement('div');
@@ -912,7 +1428,7 @@ function createRadarControls() {
     container.style.gap = '0px';
     
     // Style du radar (en ligne)
-    const radarStyleSection = createControlSection(translateSettings('radarStyle'), true);
+    const radarStyleSection = createControlSection(translateSettings('radarStyle'), true,  '15px', '120px');
     
     const radarStyleSelector = createRadarStyleSelect({
         style: localStorage.getItem('radarStyle') || 'styleBleu'
@@ -1009,8 +1525,8 @@ function createRadarStyleSelect(config) {
                     document.body.removeChild(modalElement);
                 }
             }, 1000);
-                }
-            });
+        }
+    });
 }
 
 function createNuageControls() {
@@ -1145,7 +1661,7 @@ function setupModalEvents(modal) {
     }, 150));
 }
 
-function createControlSection(title, isInline = false) {
+function createControlSection(title, isInline = false, titleFontSize, titleWidth) {
     const section = document.createElement('div');
     section.className = 'control-section';
     section.style.marginBottom = '2px';
@@ -1164,12 +1680,18 @@ function createControlSection(title, isInline = false) {
     const sectionTitle = document.createElement('h3');
     sectionTitle.textContent = title;
     sectionTitle.style.fontSize = '12px';
+    if (titleFontSize) {
+        sectionTitle.style.fontSize = titleFontSize;
+    }
     sectionTitle.style.margin = '0';
     sectionTitle.style.color = '#333';
     sectionTitle.style.backgroundColor = 'white';
     
     if (isInline) {
         sectionTitle.style.width = '90px'; // Largeur fixe pour l'alignement
+        if (titleWidth) {
+            sectionTitle.style.width = titleWidth ;
+        }
         sectionTitle.style.flexShrink = '0';
     }
     

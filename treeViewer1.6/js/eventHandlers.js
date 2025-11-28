@@ -315,6 +315,7 @@ export function selectFoundPerson(personId) {
  */
 export function updatePrenoms(value) {
     state.nombre_prenoms = parseInt(value);
+    localStorage.setItem('nombre_prenoms', value);
     displayGenealogicTree(null, false, false);
 }
 

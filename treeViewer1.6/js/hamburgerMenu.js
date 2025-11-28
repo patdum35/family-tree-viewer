@@ -32,13 +32,13 @@ export function getMenuTranslation(key) {
       'section_namecloud': 'nuage / radar / map / stats',
       'section_namecloud2': 'nuage / arbre / map / stats',
       'section_radar': 'radar',
-      'section_settings': 'Fonds d\'écran',
+      'section_settings': 'Fonds d\'écran & Paramètres',
       'section_search': 'Recherche dans l\'arbre',
       'zoomIn': 'Zoom avant',
       'zoomOut': 'Zoom arrière',
       'resetView': 'Réinitialiser la vue',
       'fullscreen': 'Plein écran',
-      'backgroundLabel': 'Fonds d\'écran',
+      'backgroundLabel': '',//'Fonds d\'écran',
       'nameCloudLabel': 'Nuage de mots',
       'backToLogin': 'Retour à l\'écran de connexion',
       'menuAvailable': 'Menu principal disponible',
@@ -79,13 +79,13 @@ export function getMenuTranslation(key) {
       'section_namecloud': 'cloud / radar / map / stats',
       'section_namecloud2': 'cloud / tree / map / stats',
       'section_radar': 'radar chart',
-      'section_settings': 'Backgrounds',
+      'section_settings': 'Backgrounds & Settings',
       'section_search': 'Tree search',
       'zoomIn': 'Zoom in',
       'zoomOut': 'Zoom out',
       'resetView': 'Reset view',
       'fullscreen': 'Fullscreen',
-      'backgroundLabel': 'Backgrounds',
+      'backgroundLabel': '', //'Backgrounds',
       'nameCloudLabel': 'Word cloud',
       'backToLogin': 'Back to login screen',
       'menuAvailable': 'Main menu available',
@@ -125,13 +125,13 @@ export function getMenuTranslation(key) {
       'section_namecloud': 'nube / radar / mapa / stats',
       'section_namecloud2': 'nube / árbol / mapa / stats',
       'section_radar': 'gráfico de radar',
-      'section_settings': 'Fondos de pantalla',
+      'section_settings': 'Fondos de pantalla y configuración',
       'section_search': 'Búsqueda en el árbol',
       'zoomIn': 'Acercar',
       'zoomOut': 'Alejar',
       'resetView': 'Restablecer vista',
       'fullscreen': 'Pantalla completa',
-      'backgroundLabel': 'Fondo de pantalla',
+      'backgroundLabel': '', //'Fondo de pantalla',
       'nameCloudLabel': 'Nube de palabras',
       'backToLogin': 'Volver a la pantalla de inicio',
       'menuAvailable': 'Menú principal disponible',
@@ -171,13 +171,13 @@ export function getMenuTranslation(key) {
       'section_namecloud': 'Szófelhő / radar / térkép /stats',
       'section_namecloud2': 'Szófelhő / fa / térkép / stats',
       'section_radar': 'radardiagram',
-      'section_settings': 'Hátterek',
+      'section_settings': 'Hátterek és beállítások',
       'section_search': 'Fa keresés',
       'zoomIn': 'Nagyítás',
       'zoomOut': 'Kicsinyítés',
       'resetView': 'Nézet visszaállítása',
       'fullscreen': 'Teljes képernyő',
-      'backgroundLabel': 'Háttér',
+      'backgroundLabel': '', //'Háttér',
       'nameCloudLabel': 'Szófelhő',
       'backToLogin': 'Vissza a bejelentkezési képernyőre',
       'menuAvailable': 'Főmenü elérhető',
@@ -354,36 +354,36 @@ function updateMenuStyles() {
   // Gérer  spécifiquement les labels à côté des boutons dans les sections de paramètres et affichage
   if (height < 400) {
       // Gestion du label pour le bouton paramètres
-      let settingsBtn = document.getElementById('menu-settingsBtn');
-      if (settingsBtn) {
-          // Vérifier si le label existe déjà
-          let labelExists = false;
-          let parent = settingsBtn.parentElement;
+      // let settingsBtn = document.getElementById('menu-settingsBtn');
+      // if (settingsBtn) {
+      //     // Vérifier si le label existe déjà
+      //     let labelExists = false;
+      //     let parent = settingsBtn.parentElement;
           
-          // Vérifier si le parent est un SPAN (label)
-          if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
-              labelExists = true;
-          }
+      //     // Vérifier si le parent est un SPAN (label)
+      //     if (parent.tagName === 'SPAN' && parent.childNodes[0].nodeType === Node.TEXT_NODE) {
+      //         labelExists = true;
+      //     }
           
-          // Créer le label s'il n'existe pas
-          if (!labelExists) {
-              const section = settingsBtn.closest('.menu-section-content');
-              if (section) {
-                section.removeChild(settingsBtn);
+      //     // Créer le label s'il n'existe pas
+      //     if (!labelExists) {
+      //         const section = settingsBtn.closest('.menu-section-content');
+      //         if (section) {
+      //           section.removeChild(settingsBtn);
                 
-                const labelContainer = document.createElement('span');
-                labelContainer.textContent = getMenuTranslation('backgroundLabel'); //'Fond d\'écran';
-                labelContainer.style.fontSize = '11px';
-                labelContainer.appendChild(settingsBtn);
-                section.appendChild(labelContainer);
+      //           const labelContainer = document.createElement('span');
+      //           labelContainer.textContent = getMenuTranslation('backgroundLabel'); //'Fond d\'écran';
+      //           labelContainer.style.fontSize = '11px';
+      //           labelContainer.appendChild(settingsBtn);
+      //           section.appendChild(labelContainer);
                 
-                // Ajuster la taille et l'espacement
-                settingsBtn.style.marginRight = '10px';
-                const span = settingsBtn.querySelector('span');
-                if (span) span.style.fontSize = '28px';
-              }
-          }
-      }
+      //           // Ajuster la taille et l'espacement
+      //           settingsBtn.style.marginRight = '10px';
+      //           const span = settingsBtn.querySelector('span');
+      //           if (span) span.style.fontSize = '28px';
+      //         }
+      //     }
+      // }
 
 
       // settingsBtn = document.getElementById('menu-nameCloudBtn');
@@ -984,19 +984,19 @@ function createAudioSection() {
       text: '🗣️', //'🔇' 
       style: 'filter: brightness(2) contrast(0.7) saturate(2);'
     },
-    { 
-      id: 'menu-animationPauseBtn',
-      onclick:  () => {
-        if (state.isWordCloudEnabled) { 
-          state.isRadarEnabled = true;
-          toggleTreeRadarFromHamburger();
-        }
-        toggleAnimationPause(); toggleMenu(false);
-      }, 
-      title: getMenuTranslation('animationPause'), //'Pause animation', 
-      // text: '⏸️', 
-      text: '⏸', //'⏸', 
-    },
+    // { 
+    //   id: 'menu-animationPauseBtn',
+    //   onclick:  () => {
+    //     if (state.isWordCloudEnabled) { 
+    //       state.isRadarEnabled = true;
+    //       toggleTreeRadarFromHamburger();
+    //     }
+    //     toggleAnimationPause(); toggleMenu(false);
+    //   }, 
+    //   title: getMenuTranslation('animationPause'), //'Pause animation', 
+    //   // text: '⏸️', 
+    //   text: '⏸', //'⏸', 
+    // },
     { 
       id: 'menu-animationPlayBtn',
       onclick:  () => {
@@ -1335,7 +1335,7 @@ function createNameCloudSection() {
       id: 'menu-statsBtn',
       onclick:  () => {statsModal(); toggleMenu(false);},
       title: getMenuTranslation('title_stats'), //'stats', 
-      text: 'STATS' 
+      text: '📊' 
     }    
   ];
 
@@ -1358,7 +1358,8 @@ function createNameCloudSection() {
  
 
     // Si c'est le bouton STATS, réduire le texte
-    if (buttonData.id === 'menu-statsBtn') {
+    // if (buttonData.id === 'menu-statsBtn') {
+    if (false) {
         button.textContent = buttonData.text; // on met directement le texte dans le bouton
         button.style.fontSize = '11px'; //(window.innerWidth < 800 || window.innerHeight < 400) ?  '10px' : '12px';
         button.style.backgroundColor = '#438aee';
@@ -2690,16 +2691,19 @@ function setupButtonSync() {
         // }
         
         const originalPauseBtn = document.getElementById('animationPauseBtn');
-        const menuPauseBtn = document.getElementById('menu-animationPauseBtn');
+        // const menuPauseBtn = document.getElementById('menu-animationPauseBtn');
         const menuPlayBtn = document.getElementById('menu-animationPlayBtn');
         
-        if (originalPauseBtn && menuPauseBtn) {
-            const pauseObserver = new MutationObserver(function(mutations) {
+        // if (originalPauseBtn && menuPauseBtn) {
+        if (originalPauseBtn && menuPlayBtn) {
+          const pauseObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        menuPlayBtn.innerHTML = menuPauseBtn.innerHTML;
-                        menuPauseBtn.innerHTML = originalPauseBtn.innerHTML;
-                    }
+                        // menuPlayBtn.innerHTML = menuPauseBtn.innerHTML;
+                        // menuPauseBtn.innerHTML = originalPauseBtn.innerHTML;
+                        menuPlayBtn.innerHTML = originalPauseBtn.innerHTML;
+
+                      }
                 });
             });
             

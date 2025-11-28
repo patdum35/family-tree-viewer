@@ -564,7 +564,7 @@ export async function playEndOfAnimationSound() {
         // S'assurer que le player est bien positionné
         initiallyPositionAudioPlayer();
 
-        showAudioPlayer();
+        showAndMoveAudioPlayer();
         
         // Réinitialiser le son pour être sûr
         audio.currentTime = 0;
@@ -675,13 +675,39 @@ function showAudioPlayer() {
     if (!animationAudioPlayer) {
         animationAudioPlayer = createAudioPlayerGUI();
     }
-    
     // Afficher le lecteur avec animation
     setTimeout(() => {
         animationAudioPlayer.style.transform = 'translateY(0)';
         isAudioPlayerVisible = true;
     }, 100);
 }
+
+
+/**
+ * Affiche , déplace et grossit le lecteur audio
+ */
+function showAndMoveAudioPlayer() {
+    if (!animationAudioPlayer) {
+        animationAudioPlayer = createAudioPlayerGUI();
+    }
+    // Afficher le lecteur avec animation
+    setTimeout(() => {
+        let moveX, moveY, scale; // Déplacer un peu vers le haut
+        if (window.innerHeight < 400) {
+            moveX = 0; // Déplacer vers le centre
+            moveY = 0; // Déplacer un peu vers le haut
+            scale = 1.3; //'';
+            animationAudioPlayer.style.transform = `translate(-${moveX}px, -${moveY}px) scaleY(${scale})`;
+        } else {
+            moveX = window.innerWidth/2 - 75; // Déplacer vers le centre
+            moveY = 20; // Déplacer un peu vers le haut
+            scale = 1.5;
+            animationAudioPlayer.style.transform = `translate(-${moveX}px, -${moveY}px) scale(${scale})`;
+        }
+        isAudioPlayerVisible = true;
+    }, 100);
+}
+
 
 /**
  * Masque le lecteur audio
@@ -772,6 +798,7 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.addEventListener('click', async () => {
         if (isAudioPlayerVisible) {
             hideAudioPlayer();
+            animationAudioPlayer.style.transform = 'translateY(0)';
         } else {
             // Créer et afficher le lecteur si ce n'est pas déjà fait
             if (!animationAudio) {

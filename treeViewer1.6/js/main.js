@@ -28,6 +28,7 @@ import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 import { enableBackground } from './backgroundManager.js';
+import { loadVoices } from './voiceSelect.js';
 
 import { 
     displayPersonDetails, 
@@ -197,8 +198,12 @@ export const state = {
     currentScale: 1.0,
     currentX: 0,
     currentY: 0,
-    nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    // nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    nodeStyle: 'classic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+
     linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
+    treeShapeStyle: 'normal',  //'straight'
+    addLeaves: false,
     frequencyStatsModalCounter: 0,
     showPersonListModalCounter: 0,
     graphStatsModalCounter: 0,
@@ -219,6 +224,11 @@ export const state = {
     isSpeechSynthesisAvailable: true,
     svgFull: null,
     svgExit: null,
+    lastTransform: null,
+    zoom: null,
+    layoutResult: null,
+    selectedVoice: null,
+    selectedVoiceName: null,
 };
 
 export { geocodeLocation };
@@ -925,6 +935,16 @@ function initialize() {
 
     state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
 
+
+
+    state.nodeStyle = localStorage.getItem('treeNodeStyle') || 'classic';
+    if (!localStorage.getItem('treeDressingStyle')) { state.addLeaves = false;} 
+    else if (localStorage.getItem('treeDressingStyle') === 'leaves') { state.addLeaves = true;}
+    state.linkStyle = localStorage.getItem('treeLinkStyle') || 'normal-dark';
+    state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
+    state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
+    state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
+    if (state.selectedVoiceName != null) { loadVoices();}
 
 
     setTimeout(() => {
@@ -1794,12 +1814,13 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || findPersonByName("Emma A") || findYoungestPerson()) : findYoungestPerson());
     }
 
-
-
-
     // Important : toujours sauvegarder l'ID de la personne courante
     if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
-        state.rootPersonId = rootPersonId || person.id;
+        if (rootPersonId || person) {
+            state.rootPersonId = rootPersonId || person.id;
+        } else if (state.rootPersonId.id) {
+            person = state.rootPersonId; 
+        }
         state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
     } 
 
@@ -2149,10 +2170,12 @@ function secretMode() {
     const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
     const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
     const SEQUENCE_PUZZLE = ['P', 'U', 'Z', 'Z', 'L', 'E']; 
+    const SEQUENCE_LEAVES = ['L', 'E', 'A', 'V', 'E', 'S']; 
 
     let sequenceEnCours = [];
     let sequenceNoFullScreenEnCours = [];
     let sequencePuzzleEnCours = [];
+    let sequenceLeavesEnCours = [];
     // Configuration Mobile et PC (click et taps)
     const TAP_COUNT_NECESSAIRE = 5;
     let tapCount = 0;
@@ -2211,10 +2234,49 @@ function secretMode() {
         }, duration); // Reste affiché pendant 3 secondes
     };
 
+
+    function checkSequence(keyPressed) {
+        sequenceEnCours.push(keyPressed);
+        sequenceNoFullScreenEnCours.push(keyPressed);
+        sequencePuzzleEnCours.push(keyPressed);
+        sequenceLeavesEnCours.push(keyPressed);
+
+        // Garde la taille de la séquence
+        if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
+            sequenceEnCours.shift();
+        }
+        if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
+            sequenceNoFullScreenEnCours.shift();
+        }
+        if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
+            sequencePuzzleEnCours.shift();
+        }
+        if (sequenceLeavesEnCours.length > SEQUENCE_LEAVES.length) {
+            sequenceLeavesEnCours.shift();
+        }
+
+
+        // Vérification de la correspondance
+        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
+            activerModeExpert('hidePasswordActif');
+            sequenceEnCours = []; // Réinitialise
+        }
+        if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
+            activerModeExpert('noFullScreenActif');
+            sequenceNoFullScreenEnCours = []; // Réinitialise
+        }
+        if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
+            activerModeExpert('puzzleActif');
+            sequencePuzzleEnCours = []; // Réinitialise
+        }
+        if (sequenceLeavesEnCours.join(',') === SEQUENCE_LEAVES.join(',')) {
+            activerModeExpert('leavesActif');
+            sequenceLeavesEnCours = []; // Réinitialise
+        }
+    }
+
     // --- Fonction d'Activation (où la modification a lieu) ---
     const activerModeExpert = (mode) => {
-
-
         // Mémoriser l'état
         localStorage.setItem(mode, 'true');
         
@@ -2246,6 +2308,9 @@ function secretMode() {
                 // 'visible' est souvent la valeur par défaut du navigateur.
                 bodyElement.style.overflow = 'visible';
             }
+        } else if (mode === 'leavesActif') {
+            afficherPopup('Mode leaves Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+            state.addLeaves = true;
         } else {
             changePasswordVisibility(false);
         }
@@ -2265,6 +2330,10 @@ function secretMode() {
     if (localStorage.getItem('puzzleActif') === 'true') {
         activerModeExpert('puzzleActif');
     }
+    if (localStorage.getItem('leavesActif') === 'true') {
+        activerModeExpert('leavesActif');
+    }
+
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
     if (state.isMobile && state.isTouchDevice) {
@@ -2277,40 +2346,13 @@ function secretMode() {
 
                 // Obtient le DERNIER caractère tapé
                 const lastKey = currentValue.slice(-1).toUpperCase(); 
-                
-                // 🎯 AJOUT DU TOAST DE DÉBOGAGE 🎯
-                // Utiliser lastKey pour le débogage
-                // afficherPopup(`Touche (Input) détectée : ${lastKey}`, 1000, 30);
-
                 // --- Logique de séquence ---
                 // 1. Ajouter la dernière touche à la séquence en cours
-                sequenceEnCours.push(lastKey);
-                sequenceNoFullScreenEnCours.push(lastKey);
-                sequencePuzzleEnCours.push(lastKey);
-                // Garde la taille de la séquence
-                if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
-                    sequenceEnCours.shift();
-                }
-                if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
-                    sequenceNoFullScreenEnCours.shift();
-                }
-                if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
-                    sequencePuzzleEnCours.shift();
-                }
+                // sequenceEnCours.push(lastKey);
+                // sequenceNoFullScreenEnCours.push(lastKey);
+                // sequencePuzzleEnCours.push(lastKey);
 
-                // Vérification de la correspondance
-                if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
-                    activerModeExpert('hidePasswordActif');
-                    sequenceEnCours = []; // Réinitialise
-                }
-                if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
-                    activerModeExpert('noFullScreenActif');
-                    sequenceNoFullScreenEnCours = []; // Réinitialise
-                }
-                if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
-                    activerModeExpert('puzzleActif');
-                    sequencePuzzleEnCours = []; // Réinitialise
-                }
+                checkSequence(lastKey);
             });
         }
     }
@@ -2320,43 +2362,12 @@ function secretMode() {
         // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
         // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
         const keyPressed = e.key.toUpperCase();
-        // console.log('\n\n debug secret mode keydown **************', keyPressed)
+        
+        // sequenceEnCours.push(keyPressed);
+        // sequenceNoFullScreenEnCours.push(keyPressed);
+        // sequencePuzzleEnCours.push(keyPressed);
 
-        // Seules les lettres, chiffres et symboles peuvent faire partie de la séquence
-        if (keyPressed.length === 1 || SEQUENCE_SECRETE.includes(keyPressed)) {
-            sequenceEnCours.push(keyPressed);
-        }
-        if (keyPressed.length === 1 || SEQUENCE_NOFULLSCREEN.includes(keyPressed)) {
-            sequenceNoFullScreenEnCours.push(keyPressed);
-        }
-        if (keyPressed.length === 1 || SEQUENCE_PUZZLE.includes(keyPressed)) {
-            sequencePuzzleEnCours.push(keyPressed);
-        }
-
-        // Garde la taille de la séquence à vérifier
-        if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
-            sequenceEnCours.shift();
-        }
-        if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
-            sequenceNoFullScreenEnCours.shift();
-        }
-        if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
-            sequencePuzzleEnCours.shift();
-        }
-
-        // Vérification de la correspondance
-        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
-            activerModeExpert('hidePasswordActif');
-            sequenceEnCours = []; // Réinitialise pour éviter une nouvelle activation
-        }
-        if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
-            activerModeExpert('noFullScreenActif');
-            sequenceNoFullScreenEnCours = []; // Réinitialise
-        }
-        if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
-            activerModeExpert('puzzleActif');
-            sequencePuzzleEnCours = []; // Réinitialise
-        }
+        checkSequence(keyPressed);
     });
 
     // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
@@ -2368,7 +2379,6 @@ function secretMode() {
             // console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
             // Empêche l'activation si déjà actif
             if (localStorage.getItem('modeExpertActif') === 'true') return;
-
             tapCount++;
             
             // Réinitialise le compteur après un court délai (800ms)
@@ -2632,7 +2642,7 @@ function showErrorMessage(message) {
 // switchTreeMode('WheelDescendants');
 // exportToPDF();
 
-function positionRadarButton() {
+export function positionRadarButton() {
     const cloudButton = document.getElementById('cloudBtn');
     const radarButton = document.getElementById('radarBtn');
     const statsButton = document.getElementById('statsBtn');
@@ -2652,8 +2662,12 @@ function positionRadarButton() {
 
 
         statsButton.style.position = 'fixed';
-        statsButton.style.left = cloudRect.left + 37 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 11 - offsetY2) + 'px';
+        // statsButton.style.left = cloudRect.left + 37 + 'px';
+        // statsButton.style.top = (cloudRect.bottom + 11 - offsetY2) + 'px';
+
+        statsButton.style.left = cloudRect.left + 47 + 'px';
+        statsButton.style.top = (cloudRect.bottom + 8 - offsetY2) + 'px';
+
         statsButton.style.zIndex = '1001';
     }
 
@@ -2668,15 +2682,15 @@ function createAndPositionRadarOverlay() {
     const statsButton = document.getElementById('statsBtn');
 
     // Forcer padding/marges/tailles (avec !important)
-    statsButton.style.setProperty('padding-top', '0px', 'important');
-    statsButton.style.setProperty('padding-bottom', '0px', 'important');
-    statsButton.style.setProperty('padding-left', '0px', 'important');
-    statsButton.style.setProperty('padding-right', '0px', 'important');
+    // statsButton.style.setProperty('padding-top', '0px', 'important');
+    // statsButton.style.setProperty('padding-bottom', '0px', 'important');
+    // statsButton.style.setProperty('padding-left', '0px', 'important');
+    // statsButton.style.setProperty('padding-right', '0px', 'important');
 
-    statsButton.style.setProperty('border-radius', '4px', 'important');
+    // statsButton.style.setProperty('border-radius', '4px', 'important');
 
-    statsButton.style.setProperty('min-width', '67px', 'important');
-    statsButton.style.setProperty('height', '27px', 'important');
+    // statsButton.style.setProperty('min-width', '67px', 'important');
+    // statsButton.style.setProperty('height', '27px', 'important');
 
 
     // Vérifier que les boutons existent
@@ -2734,8 +2748,11 @@ function createAndPositionRadarOverlay() {
     }
     
     // Positionner l'overlay
-    overlay.style.top = `${cloudRect.bottom + 10}px`;
-    overlay.style.left = `${cloudRect.left + 40}px`;
+    // overlay.style.top = `${cloudRect.bottom + 10}px`;
+    // overlay.style.left = `${cloudRect.left + 40}px`;
+    overlay.style.top = `${cloudRect.bottom + 15}px`;
+    overlay.style.left = `${cloudRect.left + 45}px`;
+
     overlay.style.width = `${statsButton.offsetWidth}px`;
     overlay.style.height = `${statsButton.offsetHeight}px`;
 
@@ -2774,7 +2791,7 @@ function createAndPositionHeatMapOverlay() {
     overlay.style.height = `${rect.height + 20}px`;
 }
 
-function positionHeatMapButton() {
+export function positionHeatMapButton() {
     const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
 

@@ -31,6 +31,45 @@ const MULTILINGUE_DOC_CONTENT = {
                     <li>{useMolette}</li>
                     <li>{videoDemo}</li>
                 </ol>
+                <h3>{usedSymbols}</h3>
+                <ol style="margin-left: 20px;">
+                    <li>💾 / 📱{comment installer l'application et faire les mises}</li>
+                    <li>🔒{mot de passe pour ouvrir le fichier gedcom crypté}</li>
+                    <li>🔍{rechercher et sélectioner une personne racine, par prénom + nom,ou lieu,  ou profession, avec geolocalisation}</li>
+                    <li>🌳{vue classique de l'arbre, avec navigation, animation audio, geo localisation et fiches individuelles}</li>
+                    <li>🎯{vue radar/roue de l'arbre, avec jeu de roue de la fortune et quizz audio pour découvrir ses ancètres}</li>                   
+                    <li>💖{vue en nuage de mots par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant. On peut donner au nuage une forme de rectangle, d'ellipse, de coeur ou d'étoile. Permet de cliquer sur les mots et d'avoir les listes de personnes et la géolocalisation. Permet aussi d'avoir des statistiques et des graphes.}</li>
+                    <li>📊{statistiques par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant}</li>
+                    <li>🌍{geolocalisation des personnes de l'arbre, en mode carte de chaleur pour un groupe de personnes, ou lieux précis d'une personne}</li>
+                    <li>❓{FAQ: questions les plus fréquentes}</li>
+                    <li>📞{contact: pour des questions ou demandes}</li>
+                    <li>💡{rechercher et sélectioner une personne racine}</li>
+                    <li>👆🚫{rechercher et sélectioner une personne racine}</li>
+                    <li>🗣️{rechercher et sélectioner une personne racine}</li>
+                    <li>➕,➖{rechercher et sélectioner une personne racine}</li>
+                    <li>🏠{rechercher et sélectioner une personne racine}</li>                                        
+                    <li>🔌📺{rechercher et sélectioner une personne racine}</li>
+                    <li>⚙️{rechercher et sélectioner une personne racine}</li>
+                    <li>🔙{rechercher et sélectioner une personne racine}</li>
+                    <li>🔊{rechercher et sélectioner une personne racine}</li>
+                    <li>▶️{rechercher et sélectioner une personne racine}</li>
+                    <li>⏸️{rechercher et sélectioner une personne racine}</li>
+                    <li>☰{rechercher et sélectioner une personne racine}</li>
+                    <li>🎵{rechercher et sélectioner une personne racine}</li>
+                    <li>🔄{rechercher et sélectioner une personne racine}</li>    
+                    ⤡ 
+                    ✥ 
+                    X
+                    👶
+                    💍
+                    ✝️
+                    🏠 
+                    💼
+                    ✓ ✶ + -
+                    🔤
+                    fullScreen                               
+                    
+                </ol>
                 <div class="video-example">
                     <h4>{quickVideoDemo}</h4>
                     <div class="media-injection-point video-demo-container"></div>
@@ -38,6 +77,13 @@ const MULTILINGUE_DOC_CONTENT = {
             </div>
             <div class="warning-box"> {gedcomSize_warning} </div>
 
+        `,
+        install: `
+            <div class="help-section">
+                <h3>{installTitle}</h3>
+                <p style="margin-left: 20px;">{installIntro}</p>
+                </div>
+            <div class="warning-box"> {gedcomSize_warning} </div>
         `,
         login: `
             <div class="help-section">
@@ -47,7 +93,6 @@ const MULTILINGUE_DOC_CONTENT = {
                     <div class="media-injection-point video-demo-container"></div>
                 </div>>
             </div>
-
         `,
         root: `
             <div class="help-section">
@@ -141,9 +186,13 @@ const MULTILINGUE_DOC_CONTENT = {
                 long: 'aperçu📖', 
                 short: 'Aperçu📖', 
             },
+            install:{
+                long: 'install💾',
+                short: 'Install 💾'
+            },
             login: { 
                 long: 'login🔒', 
-                short: 'login  🔒',
+                short: 'Login  🔒',
             },
             root: { 
                 long: 'racine🔍', 
@@ -575,7 +624,7 @@ function updateDocumentationContent(content) {
         // Création du bouton (Tab)
         const btn = document.createElement('button');
         // On utilise l'index pour appliquer une classe CSS générique (tab-index-0, tab-index-1, ...)
-        btn.className = `docTab-button tab-index-${tabIndex % 10}`; // Utiliser le modulo pour recycler les 10 couleurs
+        btn.className = `docTab-button tab-index-${tabIndex % 11}`; // Utiliser le modulo pour recycler les 10 couleurs
         btn.textContent = name;
 
         // 💥 MODIFICATION ICI : Insérer le texte long et le texte court avec des classes
@@ -727,7 +776,9 @@ function injectStyles() {
 
 
         }
-        .docModal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin: 0; line-height: 1.1;}
+        .docModal-header h2 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin: 0; margin-left: 40px; line-height: 1.1;}
+
+
 
         /* Bouton de Fermeture */
         .close-button {
@@ -790,7 +841,7 @@ function injectStyles() {
             position: relative;
             
             /* 💥 NOUVEAU : Crée le chevauchement vers la gauche */
-            margin-left: -4px; 
+            margin-left: 0px; 
             
             /* 💥 NOUVEAU : Ajoute une bordure pour simuler l'épaisseur de la feuille */
             border-right: 1px solid #d0d0d0 !important; 
@@ -811,17 +862,17 @@ function injectStyles() {
         /* --- COULEURS GÉNÉRIQUES PAR INDEX --- */
         /* TABS NON SÉLECTIONNÉS (Fond Pastel Moyen/Saturé) */
         /* 💥 NOUVEAU : Ajoutez un z-index progressif */
-        .tab-index-0 { background: var(--pastel-medium-1); color: var(--color-text-dark); z-index: 9; }
-        .tab-index-1 { background: var(--pastel-medium-2); color: var(--color-text-dark); z-index: 8; }
-        .tab-index-2 { background: var(--pastel-medium-3); color: var(--color-text-dark); z-index: 7; }
-        .tab-index-3 { background: var(--pastel-medium-4); color: var(--color-text-dark); z-index: 6; }
-        .tab-index-4 { background: var(--pastel-medium-5); color: var(--color-text-dark); z-index: 5; }
-        .tab-index-5 { background: var(--pastel-medium-6); color: var(--color-text-dark); z-index: 4; }
-        .tab-index-6 { background: var(--pastel-medium-7); color: var(--color-text-dark); z-index: 3; }
-        .tab-index-7 { background: var(--pastel-medium-8); color: var(--color-text-dark); z-index: 2; }
-        .tab-index-8 { background: var(--pastel-medium-9); color: var(--color-text-dark); z-index: 1; }
-        .tab-index-9 { background: var(--pastel-medium-10); color: var(--color-text-dark); z-index: 0; }
-
+        .tab-index-0 { background: var(--pastel-medium-1); color: var(--color-text-dark); z-index: 10; }
+        .tab-index-1 { background: var(--pastel-medium-2); color: var(--color-text-dark); z-index: 9; }
+        .tab-index-2 { background: var(--pastel-medium-3); color: var(--color-text-dark); z-index: 8; }
+        .tab-index-3 { background: var(--pastel-medium-4); color: var(--color-text-dark); z-index: 7; }
+        .tab-index-4 { background: var(--pastel-medium-5); color: var(--color-text-dark); z-index: 6; }
+        .tab-index-5 { background: var(--pastel-medium-6); color: var(--color-text-dark); z-index: 5; }
+        .tab-index-6 { background: var(--pastel-medium-7); color: var(--color-text-dark); z-index: 4; }
+        .tab-index-7 { background: var(--pastel-medium-8); color: var(--color-text-dark); z-index: 3; }
+        .tab-index-8 { background: var(--pastel-medium-9); color: var(--color-text-dark); z-index: 2; }
+        .tab-index-9 { background: var(--pastel-medium-10); color: var(--color-text-dark); z-index: 1; }
+        .tab-index-10 { background: var(--pastel-medium-2); color: var(--color-text-dark); z-index: 0; }
 
         /* TABS ACTIFS (Fond Pastel CLAIR) */
         .docTab-button.active {
@@ -853,6 +904,7 @@ function injectStyles() {
         .tab-index-7.active { background: rgb(var(--pastel-light-8)) !important; }
         .tab-index-8.active { background: rgb(var(--pastel-light-9)) !important; }
         .tab-index-9.active { background: rgb(var(--pastel-light-10)) !important; }
+        .tab-index-10.active { background: rgb(var(--pastel-light-2)) !important; }
 
         /* Contenu */
         /* Correction de l'ascenseur vertical */
@@ -981,7 +1033,7 @@ function injectStyles() {
         }
 
         .docModal-header h2 {
-            font-size: 18px; margin: 0; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
+            font-size: 18px; margin: 0; margin-left: 40px; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
         }
 
        .close-button {

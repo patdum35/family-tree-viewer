@@ -150,7 +150,8 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
         birthDate: person.birthDate,
         deathDate: person.deathDate,
         sex: person.sex,
-        duplicate: processed.has(personId) // Marquer comme duplicate si déjà traité
+        duplicate: processed.has(personId), // Marquer comme duplicate si déjà traité
+        mainBranch: 1,
     };
 
     processed.add(personId);
@@ -170,7 +171,8 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
                             name: spouse.name,
                             birthDate: spouse.birthDate,
                             deathDate: spouse.deathDate,
-                            sex: spouse.sex
+                            sex: spouse.sex,
+                            mainBranch: 120,
                         });
                     }
                 }
@@ -210,7 +212,8 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
                                                 birthDate: spouse.birthDate,
                                                 deathDate: spouse.deathDate,
                                                 sex: spouse.sex,
-                                                duplicate: processed.has(spouseId)
+                                                duplicate: processed.has(spouseId),
+                                                mainBranch: 70,
                                             };
                                         }
                                     }
@@ -355,7 +358,8 @@ export function buildCombinedTree(personId) {
                     name: spouse.name,
                     birthDate: spouse.birthDate,
                     deathDate: spouse.deathDate,
-                    sex:spouse.sex
+                    sex:spouse.sex,
+                    mainBranch: 150,
                 };
             }).filter(spouse => spouse !== null) : [] // Filtrer les valeurs null
     };
@@ -401,7 +405,8 @@ function createBaseNode(person, personId, generation) {
         genealogicalParentId: genealogicalParents.original,
         // Ajouter les nouveaux attributs
         genealogicalFatherId: genealogicalParents.father,
-        genealogicalMotherId: genealogicalParents.mother
+        genealogicalMotherId: genealogicalParents.mother,
+        mainBranch: 1,
     };
 }
 
@@ -445,7 +450,8 @@ function processSiblingsAtRoot(node, personId, siblings, familiesWithChildren) {
             genealogicalParentId: genealogicalParents.original,
             genealogicalFatherId: genealogicalParents.father,
             genealogicalMotherId: genealogicalParents.mother,
-            siblingReferenceId: personId
+            siblingReferenceId: personId,
+            mainBranch: 1,
         };
     });
 }
@@ -528,7 +534,8 @@ function processSiblingsAtNonRoot(siblings, personId, familiesWithChildren, pare
             genealogicalParentId: genealogicalParents.original,
             genealogicalFatherId: genealogicalParents.father,
             genealogicalMotherId: genealogicalParents.mother,
-            siblingReferenceId: personId
+            siblingReferenceId: personId,
+            mainBranch: 1,
         });
     });
 }

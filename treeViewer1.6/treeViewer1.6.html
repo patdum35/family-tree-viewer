@@ -282,7 +282,7 @@
         <div class="controls">
             <button id="close-tree-button" onclick="returnToLogin()" style="position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times;
             </button>
-            <div class="controls-row-1" style="position: fixed; top: 5px; left: 40px;" >
+            <div class="controls-row-1" style="position: fixed; top: 5px; left: 40px; width: fit-content;" >
                 <button id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔊</span></button>
                 <!-- <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>▶️</span></button> -->
                 <button class="play-btn" onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span class="icon">▶</span></button>
@@ -303,11 +303,11 @@
                 </button> 
 
                 <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" > 
-                    <span class="wide-span">STATS</span>
+                    <span class="wide-span">📊</span>
                 </button> 
             </div>
             
-            <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px;">                  
+            <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px; width: fit-content;">                  
                 <label id="generationsLabel" for="generations" data-text-key="nbreGene">nbre<br>géné</label>
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
                 <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
