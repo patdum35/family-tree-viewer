@@ -633,7 +633,7 @@ const VoiceSelectorUI = (function() {
         //  MAPPING DES LANGUES ---
         // Le format complet est plus fiable sur mobile
         const langMap = {
-            'fr': 'fr_FR',
+            'fr': 'fr-FR',
             'en': 'en-US',
             'es': 'es-ES',
             'hu': 'hu-HU'
