@@ -9,7 +9,7 @@ import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
 import { debounce, isModalVisible } from './eventHandlers.js';
-import { speakText } from './voiceSelect.js';
+import { VoiceModal } from './voiceSelect.js';
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -998,7 +998,7 @@ function createTreeControls() {
     voiceButton.style.fontWeight = 'bold';
     
     voiceButton.addEventListener('click', () => {
-        speakText('hello');
+        VoiceModal();
     });
     
     container.appendChild(voiceButton);

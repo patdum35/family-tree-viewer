@@ -41,10 +41,6 @@ const VoiceSelectorUI = (function() {
             btnRecord: "Enregistrer la Voix",
             statusRecording: "🎙️ Écoute en cours...",
             statusReady: "Appuyez sur le micro pour parler.",
-            alertSttInitSuccess: "✅ Reconnaissance Vocale initialisée ! Langue cible : ",
-            alertSttInitFail: "❌ Erreur : Reconnaissance Vocale non supportée sur ce navigateur." ,
-            alertSttStart: "🎙️ Démarrage de l'écoute. Parlez maintenant en ",
-            alertSttConfig: "⚙️ DIAGNOSTIC STT ⚙️\nLangue demandée: ", // Nouvelle clé
         },
         'en': {
             title: "Select a Voice",
@@ -649,7 +645,7 @@ const VoiceSelectorUI = (function() {
             recognition.lang = targetLang; 
             
             // --- NOUVEAU : ALERTE DE DÉBOGAGE ---
-            alert(translate('alertSttInitSuccess') + targetLang); 
+            // alert(translate('alertSttInitSuccess') + targetLang); 
             // ------------------------------------
 
             // // Utilise le format complet si disponible, sinon le code court.
@@ -674,13 +670,21 @@ const VoiceSelectorUI = (function() {
             // ----------------------------------------
 
 
-
             // Événement lorsqu'un résultat est obtenu
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 document.getElementById('stt-result-display').textContent = transcript;
                 console.log("Reconnaissance Vocale:", transcript);
+                
+                // --- NOUVEAU : Lire le texte reconnu ---
+                if (typeof speakText === 'function') {
+                    speakText(transcript);
+                } else {
+                    console.warn("La fonction speakText(text) n'est pas accessible globalement.");
+                }
+                // ------------------------------------
             };
+            
 
             // Événement lorsque la reconnaissance s'arrête
             recognition.onend = () => {
@@ -702,7 +706,7 @@ const VoiceSelectorUI = (function() {
         } else {
             console.error("Speech Recognition non supporté par ce navigateur.");
 
-            alert(translate('alertSttInitFail'));
+            // alert(translate('alertSttInitFail'));
             // Désactiver le bouton si non supporté
             const recordButton = document.getElementById('record-voice-button');
             if (recordButton) recordButton.disabled = true;
@@ -733,12 +737,12 @@ const VoiceSelectorUI = (function() {
             recognition.lang = targetLang;
 
             // --- NOUVEAU : POP-UP DE DIAGNOSTIC ---
-            const diagMessage = translate('alertSttConfig') + targetLang +
-                                "\nLangue configurée: " + recognition.lang + 
-                                "\nContinue: " + recognition.continuous +
-                                "\nInterim: " + recognition.interimResults +
-                                "\nPrêt à démarrer.";
-            alert(diagMessage);
+            // const diagMessage = translate('alertSttConfig') + targetLang +
+            //                     "\nLangue configurée: " + recognition.lang + 
+            //                     "\nContinue: " + recognition.continuous +
+            //                     "\nInterim: " + recognition.interimResults +
+            //                     "\nPrêt à démarrer.";
+            // alert(diagMessage);
             // ----------------------------------------
             // Démarrer l'enregistrement
             try {
@@ -789,6 +793,11 @@ const VoiceSelectorUI = (function() {
         }
     }
 
+    // --- NOUVEAU : Créer l'UI dès l'initialisation du module (une seule fois) ---
+    // Ceci garantit que l'objet 'overlay' existe toujours dans le DOM
+    createUIStructure();
+
+
     return {
         showUI: showUI,
         getSelectedVoice: getSelectedVoice,
@@ -798,7 +807,24 @@ const VoiceSelectorUI = (function() {
 })();
 
 
+
 export function speakText(text) {
+    const voiceToUse = VoiceSelectorUI.getSelectedVoice();
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    if (voiceToUse) {
+        utterance.voice = voiceToUse;
+        utterance.lang = voiceToUse.lang;
+    }
+    
+    // Si aucune voix n'est choisie, le navigateur utilisera sa voix par défaut.
+    window.speechSynthesis.speak(utterance);
+}
+
+
+
+
+export function VoiceModal() {
     VoiceSelectorUI.showUI();
 }
 
