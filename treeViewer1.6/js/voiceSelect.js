@@ -630,6 +630,23 @@ const VoiceSelectorUI = (function() {
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             
+ 
+            // --- MODIFICATION 1 : MAPPING DES LANGUES ---
+            // Le format complet est plus fiable sur mobile
+            const langMap = {
+                'fr': 'fr-FR',
+                'en': 'en-US',
+                'es': 'es-ES',
+                'hu': 'hu-HU'
+            };
+            const currentLang = window.CURRENT_LANGUAGE || 'fr';
+            // Utilise le format complet si disponible, sinon le code court.
+            recognition.lang = langMap[currentLang] || currentLang; 
+            
+            console.log(`STT initialisé pour la langue: ${recognition.lang}`);
+            // ---------------------------------------------
+            
+ 
             // Paramètres de base
             recognition.continuous = false; // Arrête après la première phrase
             recognition.interimResults = false; // N'affiche que le résultat final
