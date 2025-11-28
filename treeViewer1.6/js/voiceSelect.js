@@ -43,8 +43,8 @@ const VoiceSelectorUI = (function() {
             statusReady: "Appuyez sur le micro pour parler.",
             alertSttInitSuccess: "✅ Reconnaissance Vocale initialisée ! Langue cible : ",
             alertSttInitFail: "❌ Erreur : Reconnaissance Vocale non supportée sur ce navigateur." ,
-            alertSttStart: "🎙️ Démarrage de l'écoute. Parlez maintenant en "
-
+            alertSttStart: "🎙️ Démarrage de l'écoute. Parlez maintenant en ",
+            alertSttConfig: "⚙️ DIAGNOSTIC STT ⚙️\nLangue demandée: ", // Nouvelle clé
         },
         'en': {
             title: "Select a Voice",
@@ -664,6 +664,17 @@ const VoiceSelectorUI = (function() {
             recognition.interimResults = false; // N'affiche que le résultat final
             recognition.lang = window.CURRENT_LANGUAGE || 'fr-FR'; // Utilise la langue actuelle
 
+
+            // --- NOUVEAU : WORKAROUND DANS ONSTART ---
+            recognition.onstart = () => {
+                // Redéfinit la langue pour forcer le moteur Android à la prendre en compte
+                recognition.lang = targetLang; 
+                console.log(`WORKAROUND: Langue réaffirmée au démarrage: ${recognition.lang}`);
+            };
+            // ----------------------------------------
+
+
+
             // Événement lorsqu'un résultat est obtenu
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
@@ -709,10 +720,30 @@ const VoiceSelectorUI = (function() {
             // Arrêter l'enregistrement
             recognition.stop();
         } else {
+            const langMap = {
+                'fr': 'fr-FR', // On revient au standard
+                'en': 'en-US',
+                'es': 'es-ES',
+                'hu': 'hu-HU'
+            };
+            const currentLang = window.CURRENT_LANGUAGE || 'fr';
+            const targetLang = langMap[currentLang] || currentLang;
+            
+            // Étape 1 : Définir la langue avant de commencer
+            recognition.lang = targetLang;
+
+            // --- NOUVEAU : POP-UP DE DIAGNOSTIC ---
+            const diagMessage = translate('alertSttConfig') + targetLang +
+                                "\nLangue configurée: " + recognition.lang + 
+                                "\nContinue: " + recognition.continuous +
+                                "\nInterim: " + recognition.interimResults +
+                                "\nPrêt à démarrer.";
+            alert(diagMessage);
+            // ----------------------------------------
             // Démarrer l'enregistrement
             try {
                 // S'assurer que la langue est à jour avant de démarrer
-                recognition.lang = window.CURRENT_LANGUAGE || 'fr-FR';
+                // recognition.lang = window.CURRENT_LANGUAGE || 'fr-FR';
                 recognition.start();
                 isRecording = true;
                 document.getElementById('record-icon').textContent = '🔴'; // Icône d'enregistrement
