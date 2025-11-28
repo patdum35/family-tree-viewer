@@ -37,7 +37,10 @@ const VoiceSelectorUI = (function() {
             btnTestDisabled: "Sélectionnez une voix",
             voiceTypeLocal: "(Locale)",
             voiceTypeNetwork: "(Réseau)",
-            testPhrase: "Bonjour, ceci est la voix sélectionnée."
+            testPhrase: "Bonjour, ceci est la voix sélectionnée.",
+            btnRecord: "Enregistrer la Voix",
+            statusRecording: "🎙️ Écoute en cours...",
+            statusReady: "Appuyez sur le micro pour parler."
         },
         'en': {
             title: "Select a Voice",
@@ -52,7 +55,11 @@ const VoiceSelectorUI = (function() {
             btnTestDisabled: "Select a voice",
             voiceTypeLocal: "(Local)",
             voiceTypeNetwork: "(Network)",
-            testPhrase: "Hello, this is the selected voice."
+            testPhrase: "Hello, this is the selected voice.",
+            btnRecord: "Record Voice",
+            statusRecording: "🎙️ Listening...",
+            statusReady: "Press the mic to speak."
+
         },
         'es': {
             title: "Elegir una Voz",
@@ -210,27 +217,80 @@ const VoiceSelectorUI = (function() {
 
         modal.appendChild(header);
         
+        // // --- Zone de Statut et de Liste ---
+        // const contentContainer = document.createElement('div');
+        // contentContainer.style.cssText = 'padding: 0 20px 20px 20px;'; // Padding pour le contenu sous le bandeau
+        
+        // contentContainer.innerHTML = `
+        //     <p id="voice-status-display" style="font-size: 0.9em; color: #666; margin: 10px 0;">${translate('statusLoading')}</p>
+        //     <div id="voice-list-options" style="${styles.voiceList.replace('margin: 15px 20px;', 'margin: 0 0 15px 0; padding-right: 5px;')}">
+        //         </div>
+        //     <button id="test-selected-voice" disabled style="padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; width: 100%;">
+        //         ${translate('btnTestDisabled')}
+        //     </button>
+        // `;
+        
+
+        // modal.appendChild(contentContainer);
+        // overlay.appendChild(modal);
+        // document.body.appendChild(overlay);
+
+        // // Association de l'événement de test au bouton (maintenant dans le contentContainer)
+        // document.getElementById('test-selected-voice').addEventListener('click', testVoice);
+        
+        // return overlay;
+
+
+
+
+        
         // --- Zone de Statut et de Liste ---
         const contentContainer = document.createElement('div');
-        contentContainer.style.cssText = 'padding: 0 20px 20px 20px;'; // Padding pour le contenu sous le bandeau
+        contentContainer.style.cssText = 'padding: 0 20px 20px 20px;';
         
         contentContainer.innerHTML = `
             <p id="voice-status-display" style="font-size: 0.9em; color: #666; margin: 10px 0;">${translate('statusLoading')}</p>
             <div id="voice-list-options" style="${styles.voiceList.replace('margin: 15px 20px;', 'margin: 0 0 15px 0; padding-right: 5px;')}">
                 </div>
-            <button id="test-selected-voice" disabled style="padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; width: 100%;">
-                ${translate('btnTestDisabled')}
-            </button>
+
+            <div id="stt-container" style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
+                <p style="margin-bottom: 5px; font-size: 0.9em; font-weight: bold;">Résultat de la Reconnaissance Vocale:</p>
+                <div id="stt-result-display" style="min-height: 1.2em; color: #333; font-style: italic;">
+                    ${translate('statusReady')}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button id="record-voice-button" style="padding: 12px; background-color: #ffc107; color: black; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; flex-grow: 1; display: flex; align-items: center; justify-content: center;">
+                    <span id="record-icon">🎙️</span>
+                </button>
+
+                <button id="test-selected-voice" disabled style="padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; flex-grow: 3;">
+                    ${translate('btnTestDisabled')}
+                </button>
+            </div>
         `;
 
         modal.appendChild(contentContainer);
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
-        // Association de l'événement de test au bouton (maintenant dans le contentContainer)
+        // Association des événements
         document.getElementById('test-selected-voice').addEventListener('click', testVoice);
-        
-        return overlay;
+        // NOUVEAU: Association de l'événement d'enregistrement
+        document.getElementById('record-voice-button').addEventListener('click', toggleSpeechRecognition);
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 
@@ -554,6 +614,109 @@ const VoiceSelectorUI = (function() {
     function getSelectedVoice() {
         return selectedVoice;
     }
+
+
+
+
+    // Déclaration de l'objet de reconnaissance vocale et de l'état
+    let recognition = null;
+    let isRecording = false;
+
+    // Initialisation de l'API de reconnaissance vocale
+    function initializeSpeechRecognition() {
+        // Vérifie la compatibilité et utilise le préfixe si nécessaire
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            
+            // Paramètres de base
+            recognition.continuous = false; // Arrête après la première phrase
+            recognition.interimResults = false; // N'affiche que le résultat final
+            recognition.lang = window.CURRENT_LANGUAGE || 'fr-FR'; // Utilise la langue actuelle
+
+            // Événement lorsqu'un résultat est obtenu
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('stt-result-display').textContent = transcript;
+                console.log("Reconnaissance Vocale:", transcript);
+            };
+
+            // Événement lorsque la reconnaissance s'arrête
+            recognition.onend = () => {
+                isRecording = false;
+                document.getElementById('record-icon').textContent = '🎙️';
+                document.getElementById('stt-result-display').style.color = '#333';
+                console.log("Reconnaissance Vocale arrêtée.");
+            };
+            
+            // Événement en cas d'erreur
+            recognition.onerror = (event) => {
+                document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
+                document.getElementById('stt-result-display').style.color = 'red';
+                isRecording = false;
+                document.getElementById('record-icon').textContent = '🎙️';
+                console.error("Erreur STT:", event.error);
+            };
+
+        } else {
+            console.error("Speech Recognition non supporté par ce navigateur.");
+            // Désactiver le bouton si non supporté
+            const recordButton = document.getElementById('record-voice-button');
+            if (recordButton) recordButton.disabled = true;
+        }
+    }
+    
+    // Fonction appelée par le clic sur le bouton 'Micro'
+    function toggleSpeechRecognition() {
+        if (!recognition) {
+            initializeSpeechRecognition();
+            if (!recognition) return; // Si non supporté après initialisation
+        }
+
+        if (isRecording) {
+            // Arrêter l'enregistrement
+            recognition.stop();
+        } else {
+            // Démarrer l'enregistrement
+            try {
+                // S'assurer que la langue est à jour avant de démarrer
+                recognition.lang = window.CURRENT_LANGUAGE || 'fr-FR';
+                recognition.start();
+                isRecording = true;
+                document.getElementById('record-icon').textContent = '🔴'; // Icône d'enregistrement
+                document.getElementById('stt-result-display').textContent = translate('statusRecording');
+                document.getElementById('stt-result-display').style.color = '#dc3545';
+                console.log("Reconnaissance Vocale démarrée...");
+
+                // Annuler la parole TTS en cours si on commence l'enregistrement
+                window.speechSynthesis.cancel(); 
+
+            } catch (e) {
+                console.error("Erreur au démarrage de la reconnaissance:", e);
+                document.getElementById('stt-result-display').textContent = "Erreur au démarrage. Veuillez vérifier les permissions.";
+                document.getElementById('stt-result-display').style.color = 'red';
+            }
+        }
+    }
+
+    // ... (Assurez-vous d'appeler initializeSpeechRecognition une fois au chargement du module, 
+    // ou laissez-la dans toggleSpeechRecognition pour une initialisation paresseuse) ...
+    
+    // ... (N'oubliez pas d'ajouter les nouvelles clés dans votre objet i18n) ...
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
