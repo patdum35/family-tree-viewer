@@ -544,6 +544,8 @@ const SpeechRecognitionUI = (function() {
     let recognition = null;
     let isRecording = false;
     let cumulativeTranscript = ''; // Texte accumulé en mode continu
+    let recognitionTimeout = null; // Variable pour le timer de coupure automatique (PC)
+    const PC_MAX_DURATION_MS = 20000; // 20 secondes
     
     // MAPPING DES LANGUES pour STT (plus fiable en format complet, tiré de l'original)
     const langMap = {
@@ -686,9 +688,13 @@ const SpeechRecognitionUI = (function() {
         recognition.grammars = speechRecognitionList;
         // ----------------------------------------------------
 
+
+        const isMobile = state.isMobile;      
+
+
         // --- 2. Configuration et onresult ---
         recognition.lang = targetLang; 
-        recognition.continuous = true; 
+        recognition.continuous = !isMobile; // true pour PC, false pour Mobile 
         recognition.interimResults = true; 
         
         // recognition.onresult = (event) => {
@@ -742,52 +748,68 @@ const SpeechRecognitionUI = (function() {
         };
 
 
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
+        // recognition.onresult = (event) => {
+        //     let interimTranscript = '';
             
-            // --- NOUVEAU : Démarrer la boucle à l'index où le dernier résultat final a été trouvé ---
-            // Sur PC, event.resultIndex est souvent mis à jour automatiquement.
-            // Sur Mobile/Android, cela garantit de ne pas retraiter les anciens résultats finaux.
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
+        //     // --- NOUVEAU : Démarrer la boucle à l'index où le dernier résultat final a été trouvé ---
+        //     // Sur PC, event.resultIndex est souvent mis à jour automatiquement.
+        //     // Sur Mobile/Android, cela garantit de ne pas retraiter les anciens résultats finaux.
+        //     for (let i = event.resultIndex; i < event.results.length; i++) {
+        //         const result = event.results[i];
+        //         const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
 
-                if (result.isFinal) {
+        //         if (result.isFinal) {
                     
-                    // Si c'est une commande, ne pas l'ajouter au transcript
-                    const isCommand = commands.find(cmd => transcriptSegment.includes(cmd));
+        //             // Si c'est une commande, ne pas l'ajouter au transcript
+        //             const isCommand = commands.find(cmd => transcriptSegment.includes(cmd));
                     
-                    if (isCommand) {
-                        // Exécuter l'action et potentiellement arrêter l'écoute
-                        commandActionMap[isCommand](); 
+        //             if (isCommand) {
+        //                 // Exécuter l'action et potentiellement arrêter l'écoute
+        //                 commandActionMap[isCommand](); 
                         
-                    } else {
-                        // Ajouter uniquement si ce n'est PAS une commande
-                        cumulativeTranscript += transcriptSegment + ' '; 
-                    }
+        //             } else {
+        //                 // Ajouter uniquement si ce n'est PAS une commande
+        //                 cumulativeTranscript += transcriptSegment + ' '; 
+        //             }
                     
-                } else {
-                    // C'est un résultat en cours
-                    interimTranscript += transcriptSegment;
-                }
-            }
+        //         } else {
+        //             // C'est un résultat en cours
+        //             interimTranscript += transcriptSegment;
+        //         }
+        //     }
 
-            // Afficher le texte accumulé (final)
-            document.getElementById('stt-result-display').textContent = cumulativeTranscript;
+        //     // Afficher le texte accumulé (final)
+        //     document.getElementById('stt-result-display').textContent = cumulativeTranscript;
             
-            // Afficher le texte provisoire (intermédiaire)
-            document.getElementById('stt-interim-display').textContent = interimTranscript; 
+        //     // Afficher le texte provisoire (intermédiaire)
+        //     document.getElementById('stt-interim-display').textContent = interimTranscript; 
 
 
-            // Note : Le texte final est maintenant dans cumulativeTranscript
-            // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
-            // if (event.results[event.results.length - 1].isFinal) {
-            //     // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
-            //     speakText(cumulativeTranscript);
-            // }
+        //     // Note : Le texte final est maintenant dans cumulativeTranscript
+        //     // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
+        //     // if (event.results[event.results.length - 1].isFinal) {
+        //     //     // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
+        //     //     speakText(cumulativeTranscript);
+        //     // }
 
 
-        };
+        // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -831,21 +853,126 @@ const SpeechRecognitionUI = (function() {
         // };
 
 
+        // recognition.onend = () => {
+        //     // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute' (isRecording est toujours true), on redémarre
+        //     if (isRecording) { 
+        //         console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
+        //         try {
+        //             recognition.start();
+        //         } catch(e) {
+        //             console.warn("Erreur au redémarrage :", e.message);
+        //         }
+        //     } else {
+        //         // Arrêt volontaire
+        //         updateButtonUI(false); // <-- MISE À JOUR VISUELLE POUR L'ARRÊT
+        //         console.log("Reconnaissance Vocale arrêtée volontairement.");
+        //     }
+        // };
+
+
+// DANS speechRecognitionUI.js -> function initializeSpeechRecognition() { ...
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            // Si nous sommes en mode PC (continuous=true), nous gérons le timer de 20s.
+            if (!state.isMobile) {
+                // Réinitialiser le timer de coupure PC au premier résultat pour prolonger l'écoute
+                clearTimeout(recognitionTimeout);
+                recognitionTimeout = setTimeout(() => {
+                    if (isRecording) {
+                        console.log("⏰ PC : Coupure après 20s (limite atteinte).");
+                        isRecording = false; // Arrêt logique
+                        recognition.stop();
+                    }
+                }, PC_MAX_DURATION_MS);
+            }
+            
+            // L'index de départ peut être 0 ou event.resultIndex selon le mode, mais pour simplifier
+            // l'écriture et assurer la compatibilité (car le mode non continu n'a qu'une seule session), 
+            // nous itérons sur tous les résultats non traités pour cette session.
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
+
+                if (result.isFinal) {
+                    
+                    // --- LOGIQUE DE DÉTECTION DE COMMANDE ---
+                    const detectedCommand = commands.find(cmd => transcriptSegment.includes(cmd));
+                    
+                    if (detectedCommand) {
+                        console.log(`Commande Détectée: "${detectedCommand}"`);
+                        commandActionMap[detectedCommand](); 
+                        
+                        // Vider le transcript pour ne pas afficher la commande
+                        // NOTE : Si PC (continuous), cette ligne est importante. Si Mobile (non-continuous),
+                        // la prochaine session réinitialisera l'enregistrement de toute façon.
+                        if (!state.isMobile) {
+                        cumulativeTranscript = '';
+                        }
+                        
+                    } else {
+                        // Ajouter le texte final à la transcription globale
+                        cumulativeTranscript += transcriptSegment + ' '; 
+                    }
+                    
+                } else {
+                    // C'est un résultat en cours (intermédiaire)
+                    interimTranscript += transcriptSegment;
+                }
+            }
+
+            // Afficher le texte accumulé (final)
+            document.getElementById('stt-result-display').textContent = cumulativeTranscript;
+            
+            // Afficher le texte provisoire (intermédiaire)
+            document.getElementById('stt-interim-display').textContent = interimTranscript; 
+        };
+
+
+
         recognition.onend = () => {
-            // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute' (isRecording est toujours true), on redémarre
-            if (isRecording) { 
-                console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
-                try {
-                    recognition.start();
-                } catch(e) {
-                    console.warn("Erreur au redémarrage :", e.message);
+            // Effacer le timer de coupure PC au cas où l'arrêt est volontaire ou naturel
+            clearTimeout(recognitionTimeout); 
+            
+            // Si l'utilisateur a démarré l'écoute
+            if (isRecording) {
+                
+                if (isMobile) {
+                    // --- LOGIQUE MOBILE (onend est appelé dès que l'utilisateur s'arrête de parler) ---
+                    
+                    // Pour prolonger la phase d'écoute mobile après un silence :
+                    console.log("⚠️ Mobile : Détection de fin de session. Redémarrage après 1.5s pour prolonger l'écoute...");
+                    
+                    // On utilise un petit délai pour simuler un mode "semi-continu" sans les bugs de continuous=true
+                    setTimeout(() => {
+                        if (isRecording) { // Si l'utilisateur n'a pas appuyé sur stop pendant ce délai
+                            try {
+                                recognition.start();
+                            } catch(e) {
+                                console.warn("Erreur au redémarrage mobile :", e.message);
+                                isRecording = false; // Échec du redémarrage
+                                updateButtonUI(false);
+                            }
+                        }
+                    }, 1500); // Tente de redémarrer après 1.5s de silence
+                    
+                } else {
+                    // --- LOGIQUE PC (Arrêt volontaire ou Timer/20s) ---
+                    isRecording = false; // L'arrêt est définitif (volontaire ou par timer)
+                    updateButtonUI(false);
+                    console.log("PC : Session terminée ou arrêt volontaire.");
                 }
             } else {
-                // Arrêt volontaire
-                updateButtonUI(false); // <-- MISE À JOUR VISUELLE POUR L'ARRÊT
+                // Arrêt volontaire de l'utilisateur (onend est appelé par recognition.stop() dans toggleSpeechRecognition)
+                updateButtonUI(false); 
                 console.log("Reconnaissance Vocale arrêtée volontairement.");
             }
         };
+
+
+
+
 
 
 
@@ -1006,6 +1133,7 @@ function updateButtonUI(isListening) {
             // Arrêter l'enregistrement
             // Arrêt volontaire
             isRecording = false; // <-- ESSENTIEL : C'est le drapeau pour le onend
+            clearTimeout(recognitionTimeout); // Arrêter le timer PC
             recognition.stop();
         } else {
             
@@ -1023,6 +1151,21 @@ function updateButtonUI(isListening) {
                 // document.getElementById('stt-result-display').style.color = '#dc3545';
                 // document.getElementById('record-voice-button').style.backgroundColor = '#dc3545';
                 // console.log("Reconnaissance Vocale démarrée...");
+
+
+                // Démarrage du timer PC (si non mobile)
+                if (!state.isMobile) {
+                    // Le timer sera géré dans onresult, mais nous le démarrons ici pour la première fois.
+                    clearTimeout(recognitionTimeout);
+                    recognitionTimeout = setTimeout(() => {
+                        if (isRecording) {
+                            console.log("⏰ PC : Coupure après 20s (limite initiale atteinte).");
+                            isRecording = false;
+                            recognition.stop();
+                        }
+                    }, PC_MAX_DURATION_MS);
+                }
+
 
                 // Annuler la parole TTS en cours si on commence l'enregistrement
                 window.speechSynthesis.cancel(); 
