@@ -9,7 +9,6 @@ import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
 import { debounce, isModalVisible } from './eventHandlers.js';
-import { VoiceModal } from './voiceSelect.js';
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -983,36 +982,6 @@ function createTreeControls() {
     });
     treeShapeStyleSection.appendChild(treeShapeStyleSelector);
     container.appendChild(treeShapeStyleSection);
-
-
-
-
-    const voiceButton = document.createElement('button');
-    voiceButton.textContent = translateSettings('save');
-    voiceButton.style.padding = '8px 15px';
-    voiceButton.style.backgroundColor = '#4CAF50';
-    voiceButton.style.color = 'white';
-    voiceButton.style.border = 'none';
-    voiceButton.style.borderRadius = '4px';
-    voiceButton.style.cursor = 'pointer';
-    voiceButton.style.fontWeight = 'bold';
-    
-    voiceButton.addEventListener('click', () => {
-        VoiceModal();
-    });
-    
-    container.appendChild(voiceButton);
-
-
-
-
-
-
-
-
-
-
-
 
 
     // Vous pouvez ajouter d'autres contrôles liés à l'arbre ici

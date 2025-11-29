@@ -53,6 +53,7 @@ import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
 import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
 import { documentation } from './documentation.js';
+import { voiceModal, voiceCommand } from './voiceSelect.js';
 
 
 // // ou si tu veux attendre que tout soit chargé
@@ -228,6 +229,8 @@ function initializeAppFunctions() {
         startAncestorAnimation().catch(console.error);
     };
     window.browserBarPuzzle = browserBarPuzzle;
+    window.voiceModal = voiceModal;
+    window.voiceCommand = voiceCommand;
 }
 
 
