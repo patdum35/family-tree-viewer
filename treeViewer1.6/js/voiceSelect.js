@@ -691,58 +691,167 @@ const SpeechRecognitionUI = (function() {
         recognition.continuous = true; 
         recognition.interimResults = true; 
         
+        // recognition.onresult = (event) => {
+        //     let interimTranscript = '';
+            
+        //     for (let i = event.resultIndex; i < event.results.length; i++) {
+        //         const result = event.results[i];
+        //         const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
+
+        //         if (result.isFinal) {
+        //             // Le segment est final : on l'ajoute à la transcription complète
+        //             cumulativeTranscript += transcriptSegment + ' '; 
+                    
+        //             // === LOGIQUE DE DÉTECTION DE COMMANDE ===
+        //             // Vérifier si la transcription correspond à une commande exacte
+        //             const detectedCommand = commands.find(cmd => transcriptSegment.includes(cmd));
+                    
+        //             if (detectedCommand) {
+        //                 console.log(`Commande Détectée: "${detectedCommand}"`);
+        //                 // Exécuter l'action associée
+        //                 commandActionMap[detectedCommand](); 
+                        
+        //                 // Optionnel : Arrêter l'écoute après une commande pour éviter les interférences
+        //                 // recognition.stop();
+                        
+        //                 // Vider le transcript pour ne pas afficher la commande dans le résultat
+        //                 cumulativeTranscript = '';
+                        
+        //             } else {
+        //                 // Si ce n'est pas une commande, c'est du texte normal
+        //                 console.log("Texte normal reconnu:", transcriptSegment);
+        //             }
+        //             // =========================================
+
+        //         } else {
+        //             interimTranscript += transcriptSegment;
+        //         }
+        //     }
+
+        //     // Mise à jour de l'affichage UI
+        //     document.getElementById('stt-result-display').textContent = cumulativeTranscript;
+        //     document.getElementById('stt-interim-display').textContent = interimTranscript; 
+        // };
+
+
+        recognition.onstart = () => {
+            // Redéfinit la langue (pour la robustesse Android)
+            recognition.lang = targetLang; 
+            // Mise à jour de l'UI au moment où l'écoute commence réellement
+            updateButtonUI(true); // <-- APPEL POUR CHANGER LE TEXTE ET LA COULEUR
+        };
+
+
         recognition.onresult = (event) => {
             let interimTranscript = '';
             
+            // --- NOUVEAU : Démarrer la boucle à l'index où le dernier résultat final a été trouvé ---
+            // Sur PC, event.resultIndex est souvent mis à jour automatiquement.
+            // Sur Mobile/Android, cela garantit de ne pas retraiter les anciens résultats finaux.
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 const result = event.results[i];
                 const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
 
                 if (result.isFinal) {
-                    // Le segment est final : on l'ajoute à la transcription complète
-                    cumulativeTranscript += transcriptSegment + ' '; 
                     
-                    // === LOGIQUE DE DÉTECTION DE COMMANDE ===
-                    // Vérifier si la transcription correspond à une commande exacte
-                    const detectedCommand = commands.find(cmd => transcriptSegment.includes(cmd));
+                    // Si c'est une commande, ne pas l'ajouter au transcript
+                    const isCommand = commands.find(cmd => transcriptSegment.includes(cmd));
                     
-                    if (detectedCommand) {
-                        console.log(`Commande Détectée: "${detectedCommand}"`);
-                        // Exécuter l'action associée
-                        commandActionMap[detectedCommand](); 
-                        
-                        // Optionnel : Arrêter l'écoute après une commande pour éviter les interférences
-                        // recognition.stop();
-                        
-                        // Vider le transcript pour ne pas afficher la commande dans le résultat
-                        cumulativeTranscript = '';
+                    if (isCommand) {
+                        // Exécuter l'action et potentiellement arrêter l'écoute
+                        commandActionMap[isCommand](); 
                         
                     } else {
-                        // Si ce n'est pas une commande, c'est du texte normal
-                        console.log("Texte normal reconnu:", transcriptSegment);
+                        // Ajouter uniquement si ce n'est PAS une commande
+                        cumulativeTranscript += transcriptSegment + ' '; 
                     }
-                    // =========================================
-
+                    
                 } else {
+                    // C'est un résultat en cours
                     interimTranscript += transcriptSegment;
                 }
             }
 
-            // Mise à jour de l'affichage UI
+            // Afficher le texte accumulé (final)
             document.getElementById('stt-result-display').textContent = cumulativeTranscript;
+            
+            // Afficher le texte provisoire (intermédiaire)
             document.getElementById('stt-interim-display').textContent = interimTranscript; 
+
+
+            // Note : Le texte final est maintenant dans cumulativeTranscript
+            // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
+            if (event.results[event.results.length - 1].isFinal) {
+                // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
+                speakText(cumulativeTranscript);
+            }
+
+
         };
 
-        // Événement lorsque la reconnaissance s'arrête
-        recognition.onend = () => {
-            isRecording = false;
-            document.getElementById('record-icon').textContent = '🎙️';
-            document.getElementById('stt-result-display').style.color = '#333';
-            document.getElementById('record-text').textContent = translate('btnRecord');
-            document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-            console.log("Reconnaissance Vocale arrêtée.");
-        };
+
+
+        // // Événement lorsque la reconnaissance s'arrête
+        // recognition.onend = () => {
+        //     isRecording = false;
+        //     document.getElementById('record-icon').textContent = '🎙️';
+        //     document.getElementById('stt-result-display').style.color = '#333';
+        //     document.getElementById('record-text').textContent = translate('btnRecord');
+        //     document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
+        //     console.log("Reconnaissance Vocale arrêtée.");
+        // };
+
         
+
+       // Événement lorsque la reconnaissance s'arrête
+        // recognition.onend = () => {
+            
+        //     // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute', on redémarre
+        //     if (isRecording) {
+        //         console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
+        //         // On redémarre l'écoute immédiatement
+        //         try {
+        //             recognition.start();
+        //         } catch(e) {
+        //             // Empêche les erreurs si on essaie de démarrer pendant une phase d'arrêt
+        //             console.warn("Erreur au redémarrage :", e.message);
+        //         }
+                
+        //     } else {
+        //         // C'est un arrêt volontaire par l'utilisateur (toggleSpeechRecognition)
+        //         console.log("Reconnaissance Vocale arrêtée volontairement.");
+        //         // Réinitialisation de l'UI
+        //         document.getElementById('record-icon').textContent = '🎙️';
+        //         document.getElementById('record-text').textContent = translate('btnRecord');
+        //         document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
+        //     }
+            
+        //     // Note : On ne met plus isRecording à false ici pour ne pas casser le redémarrage.
+        //     // Il sera mis à false seulement dans toggleSpeechRecognition.
+        // };
+
+
+        recognition.onend = () => {
+            // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute' (isRecording est toujours true), on redémarre
+            if (isRecording) { 
+                console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.warn("Erreur au redémarrage :", e.message);
+                }
+            } else {
+                // Arrêt volontaire
+                updateButtonUI(false); // <-- MISE À JOUR VISUELLE POUR L'ARRÊT
+                console.log("Reconnaissance Vocale arrêtée volontairement.");
+            }
+        };
+
+
+
+
+
+
         // Événement en cas d'erreur
         recognition.onerror = (event) => {
             document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
@@ -751,6 +860,8 @@ const SpeechRecognitionUI = (function() {
             document.getElementById('record-icon').textContent = '🎙️';
             document.getElementById('record-text').textContent = translate('btnRecord');
             document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
+
+            updateButtonUI(false); // <-- MISE À JOUR VISUELLE EN CAS D'ERREUR
             console.error("Erreur STT:", event.error);
         };
     }
@@ -849,6 +960,41 @@ const SpeechRecognitionUI = (function() {
     //     }
     // }
     
+
+
+
+// DANS speechRecognitionUI.js (Nouveau bloc à insérer)
+
+// --- Fonction utilitaire de mise à jour de l'UI du bouton ---
+function updateButtonUI(isListening) {
+    const button = document.getElementById('record-voice-button');
+    const icon = document.getElementById('record-icon');
+    const text = document.getElementById('record-text');
+    const resultDisplay = document.getElementById('stt-result-display');
+    
+    if (!button || !icon || !text || !resultDisplay) return;
+
+    if (isListening) {
+        button.style.backgroundColor = '#dc3545'; // Rouge
+        icon.textContent = '🔴'; 
+        text.textContent = "Arrêter l'écoute"; // <-- NOUVEAU TEXTE
+        resultDisplay.textContent = translate('statusRecording');
+        resultDisplay.style.color = '#dc3545';
+    } else {
+        button.style.backgroundColor = '#007bff'; // Bleu
+        icon.textContent = '🎙️'; 
+        text.textContent = translate('btnRecord');
+        resultDisplay.textContent = translate('statusReady');
+        resultDisplay.style.color = '#333';
+    }
+}
+
+
+
+
+
+
+
     // Fonction appelée par le clic sur le bouton 'Micro'
     function toggleSpeechRecognition() {
         if (!recognition) {
@@ -858,24 +1004,25 @@ const SpeechRecognitionUI = (function() {
 
         if (isRecording) {
             // Arrêter l'enregistrement
+            // Arrêt volontaire
+            isRecording = false; // <-- ESSENTIEL : C'est le drapeau pour le onend
             recognition.stop();
         } else {
             
             // Étape 1 : Définir la langue avant de commencer
             recognition.lang = targetLang;
-
+            isRecording = true; // <-- ESSENTIEL : Lève le drapeau pour autoriser le redémarrage
             cumulativeTranscript = '';
             document.getElementById('stt-result-display').textContent = '';
 
             // Démarrer l'enregistrement
             try {
                 recognition.start();
-                isRecording = true;
-                document.getElementById('record-icon').textContent = '🔴'; // Icône d'enregistrement
-                document.getElementById('stt-result-display').textContent = translate('statusRecording');
-                document.getElementById('stt-result-display').style.color = '#dc3545';
-                document.getElementById('record-voice-button').style.backgroundColor = '#dc3545';
-                console.log("Reconnaissance Vocale démarrée...");
+                // document.getElementById('record-icon').textContent = '🔴'; // Icône d'enregistrement
+                // document.getElementById('stt-result-display').textContent = translate('statusRecording');
+                // document.getElementById('stt-result-display').style.color = '#dc3545';
+                // document.getElementById('record-voice-button').style.backgroundColor = '#dc3545';
+                // console.log("Reconnaissance Vocale démarrée...");
 
                 // Annuler la parole TTS en cours si on commence l'enregistrement
                 window.speechSynthesis.cancel(); 
@@ -884,6 +1031,9 @@ const SpeechRecognitionUI = (function() {
                 console.error("Erreur au démarrage de la reconnaissance:", e);
                 document.getElementById('stt-result-display').textContent = "Erreur au démarrage. Veuillez vérifier les permissions.";
                 document.getElementById('stt-result-display').style.color = 'red';
+                isRecording = false; // Échec du démarrage
+                updateButtonUI(false);
+
             }
         }
     }
