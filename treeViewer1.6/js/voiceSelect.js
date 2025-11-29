@@ -781,10 +781,10 @@ const SpeechRecognitionUI = (function() {
 
             // Note : Le texte final est maintenant dans cumulativeTranscript
             // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
-            if (event.results[event.results.length - 1].isFinal) {
-                // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
-                speakText(cumulativeTranscript);
-            }
+            // if (event.results[event.results.length - 1].isFinal) {
+            //     // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
+            //     speakText(cumulativeTranscript);
+            // }
 
 
         };
