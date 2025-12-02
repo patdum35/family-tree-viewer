@@ -1,11 +1,19 @@
-import { state } from './main.js';
+import { state, loadData } from './main.js';
 import { initSpeechSynthesis } from './treeAnimation.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { findPersonsBy } from './searchModalUI.js';
+import { speakPersonName } from './treeAnimation.js';
+
+
+
+
 
 /**
  * Module de gestion de l'interface utilisateur (UI) pour la sélection de voix
  * avec gestion de la connexion, priorisation linguistique et multilinguisme.
  */
 const VoiceSelectorUI = (function() {
+
     let selectedVoice = null;
     const testPhrase = "Ceci est un test de la voix sélectionnée.";
     const appState = {
@@ -30,7 +38,7 @@ const VoiceSelectorUI = (function() {
             voiceTypeLocal: "(Locale)",
             voiceTypeNetwork: "(Réseau)",
             testPhrase: "Bonjour, ceci est la voix sélectionnée.",
-            btnRecord: "Enregistrer la Voix",
+            btnRecord: "Parlez",
             statusRecording: "🎙️ Écoute en cours...",
             statusReady: "Appuyez sur le micro pour parler.",
         },
@@ -48,7 +56,7 @@ const VoiceSelectorUI = (function() {
             voiceTypeLocal: "(Local)",
             voiceTypeNetwork: "(Network)",
             testPhrase: "Hello, this is the selected voice.",
-            btnRecord: "Record Voice",
+            btnRecord: "Speak",
             statusRecording: "🎙️ Listening...",
             statusReady: "Press the mic to speak."
         },
@@ -141,6 +149,7 @@ const VoiceSelectorUI = (function() {
      */
     // Crée la structure HTML de l'overlay et de la fenêtre de sélection
     function createUIStructure() {
+        
         const overlayId = 'voice-selector-overlay';
         let overlay = document.getElementById(overlayId);
 
@@ -528,71 +537,754 @@ const VoiceSelectorUI = (function() {
 
 
 
-
-
-
-
-/**
+/*
  * Module de gestion de l'interface utilisateur (UI) pour la reconnaissance vocale (STT)
+ * VERSION FINALE STABLE V12.2 (Ajout des champs éditables pour la correction manuelle).
  */
+
+let localConfig = null;
 const SpeechRecognitionUI = (function() {
     
-    // NOTE : Utilisation de la fonction translate exportée depuis VoiceSelectorUI
-    const translate = window.translate; 
-    
-    // --- Variables d'État et d'API (extraites de VoiceSelectorUI) ---
+    // --- Variables d'État et d'API Globales ---
+    const translate = window.translate || ((key) => `[${key}]`); 
+   
     let recognition = null;
     let isRecording = false;
-    let cumulativeTranscript = ''; // Texte accumulé en mode continu
-    let recognitionTimeout = null; // Variable pour le timer de coupure automatique (PC)
-    const PC_MAX_DURATION_MS = 20000; // 20 secondes
-    
-    // MAPPING DES LANGUES pour STT (plus fiable en format complet, tiré de l'original)
-    const langMap = {
-        'fr': 'fr-FR',
-        'en': 'en-US',
-        'es': 'es-ES',
-        'hu': 'hu-HU'
-    };
-    const currentLang = window.CURRENT_LANGUAGE || 'fr';
-    const targetLang = langMap[currentLang] || currentLang;
-    
-    // --- Fonctions d'Initialisation et de Structure ---
+    let cumulativeTranscript = ''; 
+    let recognitionTimeout = null; 
+    const PC_MAX_DURATION_MS = 20000; 
 
+    // MAPPING DES LANGUES
+    const langMap = { 'fr': 'fr-FR', 'en': 'en-US', 'es': 'es-ES', 'hu': 'hu-HU' };
+    const targetLang = langMap[window.CURRENT_LANGUAGE || 'fr'] || 'fr-FR';
+
+    // Liste des entités canoniques
+    let entityKeys = ['commande', 'prenom', 'nom', 'lieux', 'profession'];
+    let capturedEntities = entityKeys.reduce((acc, field) => {
+        acc[field] = 'non détecté';
+        return acc;
+    }, {});
+    
+    // --- Variables d'État du Mode Hybride ---
+    let isSpellingMode = false;
+    let pendingSpellingStart = false; 
+    let targetSpellingField = null;
+    let spellingGrammar = null; 
+
+    const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    // =========================================================
+    // NOUVELLE FONCTION CLÉ : Synchronisation Clavier -> État
+    // =========================================================
+
+    /**
+     * Met à jour l'entité capturée lorsque l'utilisateur tape au clavier dans le champ INPUT.
+     * @param {string} fieldName - Le nom de l'entité à mettre à jour ('prénom', 'nom', etc.).
+     * @param {string} newValue - La nouvelle valeur saisie.
+     */
+    function updateCapturedEntity(fieldName, newValue) {
+        
+        // La nouvelle valeur est soit la saisie, soit 'non détecté' si le champ est vide.
+        const valueToStore = newValue.trim() || 'non détecté'; 
+        
+        // 1. Mettre à jour la variable d'état globale
+        capturedEntities[fieldName] = valueToStore;
+        
+        console.log(`[CLAVIER] ${fieldName.toUpperCase()} mis à jour manuellement à: "${valueToStore}"`);
+
+        // Optionnel : s'assurer que si l'utilisateur vide le champ, l'état visuel est mis à jour
+        updateEntityUI(); 
+    }
+
+    // // --- Fonctions d'Action Simples (Stubs) ---
+
+
+    /**
+     * Fonction appelée lorsque l'utilisateur valide la saisie ou ferme la fenêtre.
+     */
+    function handleValidationAndExit() {
+        
+        // 2. Appeler le getter du module
+        const capturedData = SpeechRecognitionUI.getCapturedData();
+        
+        // 3. Stocker les données dans la variable globale de l'application
+        console.log("--- DONNÉES FINALES CAPTURÉES ---");
+       
+        
+        // Exemple d'utilisation :
+        if (capturedData.prenom) {
+            console.log(`Bonjour ${capturedData.prenom} !`);
+        } else {
+            console.log("Aucun prénom n'a été capturé.");
+        }
+
+        loadData(null, capturedData);
+
+        // 4. Masquer l'interface
+        SpeechRecognitionUI.hideUI();
+
+
+    }
+
+    // Assurez-vous d'appeler cette fonction lors de la fermeture de la modale.
+    // Par exemple, en modifiant l'événement 'click' de votre bouton de fermeture :
+    const closeButton = document.getElementById('close-stt-button');
+    if (closeButton) {
+        // Au lieu de la simple hideUI(), on ajoute la récupération des données
+        closeButton.removeEventListener('click', SpeechRecognitionUI.hideUI); // Retirer l'ancien listener si présent
+        closeButton.addEventListener('click', handleValidationAndExit);
+    }
+
+
+    function arreterEcouteAction() { 
+        console.log("[ACTION] Arrêt de l'écoute demandé par l'utilisateur.");
+        isRecording = false; 
+        if (recognition) recognition.stop();
+    }
+
+    // commandActionMap = {
+    //     'go': handleValidationAndExit,
+    //     'entrez': handleValidationAndExit,
+    //     'entrée': handleValidationAndExit,
+    //     'arrêter l\'écoute': arreterEcouteAction 
+    // };
+    // commands = Object.keys(commandActionMap); 
+    
+    
+    // =========================================================
+    // CŒUR 1 : Fonctions de Contrôle de la Bascule (INCHANGÉES)
+    // =========================================================
+
+    function startSpellingCycle(targetField, config = null) {
+        targetSpellingField = targetField;
+        pendingSpellingStart = true; 
+        cumulativeTranscript = '';
+        
+        if (isRecording && recognition) {
+            recognition.stop(); 
+            console.log(`[ACTION] Demande de bascule en Mode Épellation pour: ${targetField}`);
+        } else {
+            toggleSpeechRecognition(); 
+        }
+    }
+
+    
+    function stopSpellingCycle() {
+        const finalValue = capturedEntities[targetSpellingField];
+        
+        isSpellingMode = false;
+        targetSpellingField = null;
+        pendingSpellingStart = false;
+
+        recognition.continuous = !state.isMobile;
+        recognition.grammars = new SpeechGrammarList(); 
+        
+        document.getElementById('stt-result-display').textContent = `✅ Épellation terminée. Valeur enregistrée: "${finalValue}"`;
+        document.getElementById('stt-interim-display').textContent = '';
+        updateEntityUI(); 
+        
+        console.log(`[LOG STT] Valeur finale de l'épellation enregistrée: ${finalValue}`);
+
+        if (isRecording) {
+            recognition.stop(); 
+        }
+    }
+
+
+
+    /**
+     * Génère des alternatives orthographiques basées sur des confusions phonétiques courantes.
+     * Retourne une liste vide si aucune alternative n'est trouvée.
+     * @param {string} word - Le mot transcrit (potentiellement erroné).
+     * @returns {Array<string>} Une liste d'alternatives générées (ou une liste vide si aucune).
+     */
+    function generatePhoneticAlternatives(word) {
+        
+        const generatedAlternatives = new Set(); 
+        const wordLower = word.toLowerCase();
+
+        // 1. Cas ciblé : [C]e[s][C] -> [C]e[C] (le cas de 'dumesnil' -> 'dumenil')
+        // Regex: (.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)
+        const regexES = /(.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)/gi;
+
+        wordLower.replace(regexES, (match, prefix, c1, vowel, c2, suffix) => {
+            
+            // Règle 1: Remplacer 'es' par 'e' (sans accent)
+            if (vowel === 'e') {
+                const alternative = `${prefix}${c1}e${c2}${suffix}`;
+                if (alternative !== wordLower) {
+                    generatedAlternatives.add(alternative);
+                }
+            }
+            
+            // Règle 2: Remplacer 'is' par 'i'
+            else if (vowel === 'i') {
+                const alternative = `${prefix}${c1}i${c2}${suffix}`;
+                if (alternative !== wordLower) {
+                    generatedAlternatives.add(alternative);
+                }
+            }
+        });
+
+        // --- LOGIQUE DE RETOUR MODIFIÉE ---
+        // Retourne la liste des alternatives (ex: ['dumenil']) ou une liste vide si size = 0.
+        return Array.from(generatedAlternatives);
+    }
+
+
+
+
+    function processFullTranscript(transcript) {
+
+        let config = localConfig;
+        let commandActionMap = null;
+
+        if (config === 'start') {
+            commandActionMap = {
+                'go': handleValidationAndExit,
+                'entrez': handleValidationAndExit,
+                'entrée': handleValidationAndExit,
+                'arrêter l\'écoute': arreterEcouteAction 
+            };
+            // commands = Object.keys(commandActionMap); 
+        } else if (config === 'full') {
+            commandActionMap = {};
+            commandActionMap = {
+                // 'go': handleValidationAndExit,
+                // 'entrez': handleValidationAndExit,
+                // 'entrée': handleValidationAndExit,
+                'arrêter l\'écoute': arreterEcouteAction 
+            };
+            // commands = Object.keys(commandActionMap); 
+        }
+
+        const commands = Object.keys(commandActionMap); 
+
+
+        const detectedCommand = commands.find(cmd => transcript.includes(cmd));
+        if (detectedCommand) {
+            commandActionMap[detectedCommand]();
+            return; 
+        }
+
+        const words = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+        if (words.length === 0) return;
+
+        // =========================================================
+        // NOUVEAU MODE : Détection de Séquence Spécifique (Action Prénom Nom GO)
+        // =========================================================
+        const actionKeywords = ['chercher', 'quand est ne', 'quand est mort', 'quand est morte', 'quand est decede', 'quel age a', 'quel age avait', 'ou habite', 'ou habitait', 'quelle est la profession de', 'quel est le metier de', 'quelle etait la profession de', 'quel etait le metier de', 'avec qui est marie', 'avec qui était marie'];
+        const validationSignal = ['go', 'entrez', 'entrée', 'valider'];
+
+        let fullTranscript = transcript.toLowerCase().trim(); // Version propre du transcript
+         fullTranscript = fullTranscript.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+        let detectedAction = null; // Variable pour stocker l'expression d'action qui correspond
+        
+        // --- MODIFICATION CLÉ 2 : Boucle pour trouver l'expression correspondante ---
+        for (const keyword of actionKeywords) {
+            // Vérifie si la phrase commence par cette expression ET si elle est suivie d'un espace (pour éviter les faux positifs)
+            if (fullTranscript.startsWith(keyword + ' ')) {
+                detectedAction = keyword;
+                break; // On a trouvé la meilleure correspondance, on arrête la boucle
+            }
+        }
+        
+        // VÉRIFICATION GLOBALE : Est-ce qu'une action a été détectée ? Et y a-t-il un signal de validation ?
+        if (config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
+            
+            console.log(`[LOG STT] Détection du mode structuré pour l'expression: "${detectedAction.toUpperCase()}"`);
+
+            // 1. Enregistrer l'Action
+            capturedEntities['action'] = detectedAction;
+            
+            // 2. Extraire la partie NOM et PRÉNOM
+            // Enlève l'expression d'action et le signal de validation.
+            let entityPart = fullTranscript.substring(detectedAction.length).trim(); 
+            let entityWords = entityPart.split(/\s+/).slice(0, -1); // Enlève le signal de validation (GO)
+
+            if (entityWords.length >= 2) {
+                // Par convention, le premier mot après l'action est le PRÉNOM
+                capturedEntities['prenom'] = entityWords[0];
+                
+                // Tous les mots restants sont considérés comme le NOM
+                capturedEntities['nom'] = entityWords.slice(1).join(' ');
+            } else if (entityWords.length === 1) {
+                 // S'il n'y a qu'un seul mot (ex: 'chercher Henri GO'), on le met en Nom par défaut ou on gère l'erreur
+                 capturedEntities['prenom'] = entityWords[0];
+                 capturedEntities['nom'] = 'non détecté';
+            } else {
+                 // Aucun nom/prénom détecté entre l'action et la validation.
+                 capturedEntities['prenom'] = 'non détecté';
+                 capturedEntities['nom'] = 'non détecté';
+            }
+            
+            // 3. Enregistrer Validation
+            // capturedEntities['entrez'] = words[words.length - 1]; 
+
+            document.getElementById('stt-result-display').textContent = `✅ Mode structuré détecté. Action: ${detectedAction.toUpperCase()}, Prénom: ${capturedEntities['prénom']}, Nom: ${capturedEntities['nom']}.`;
+            updateEntityUI();
+
+            if (capturedEntities['action'] === 'chercher' && capturedEntities['prenom'] !== 'non détecté' && capturedEntities['nom'] !== 'non détecté') { 
+    
+                const config = {
+                    type: 'name', //state.treeMode,
+                    startDate: -500,
+                    endDate: 3000,
+                    scope: 'all',
+                    rootPersonId: state.rootPersonId, //state.rootPersonId//scopeSelect.value !== 'all' ? finalRootPersonSelect.value : null
+                };
+
+                // Effectuer la recherche avec filtrage par dates
+                let res = null;
+                let res2 = null;
+
+                res = findPersonsBy('', config, '', null, capturedEntities['prenom'], capturedEntities['nom'], true);
+
+                console.log('\n\n\n ------------   debug0 : personne trouvée ??? ---------', res, res.results[0]);
+                let lastAlternativeNameFound = null;
+                if (res.results.length === 0) {
+                    // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
+                    const othernames = generatePhoneticAlternatives(capturedEntities['nom']);
+                    console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
+                    if (othernames.length > 0) {
+                        othernames.forEach(name => { 
+                            lastAlternativeNameFound = name;
+                            res2 = findPersonsBy('', config, '', null, capturedEntities['prenom'], name, true);
+                            console.log('\n\n\n ------------   debug : personne trouvée ??? ---------', res2, res2.results[0]);
+                            if (res2.results.length > 0 ) return;
+                        });
+                    }
+                }
+                if (res.results.length > 0 || res2.results.length > 0 ) {
+                    const name = (res.results.length > 0) ? capturedEntities['nom'] : lastAlternativeNameFound;
+                    let textToTell = 'la personne ' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée !';
+
+                    console.log('\n\n\n ------------   debug : ', textToTell);
+
+                    // textToTell = 'la personne /' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée !';
+
+                    // speakPersonName(textToTell, true, false);
+                    speakText(textToTell);
+                }
+            }
+
+
+            
+            // Arrêter le traitement ici
+            return; 
+        }
+        // =========================================================
+        // FIN DU NOUVEAU MODE
+        // =========================================================
+     
+
+        let newEntities = {};
+        // const words = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+        
+        let keywordMap = {
+            'prénom': 'prenom', 'nom': 'nom', 'non': 'nom', 'lieu': 'lieux', 'lieux': 'lieux', 'profession': 'profession'
+        };
+        if (config === 'start') {
+            keywordMap = {
+                'prénom': 'prenom', 'nom': 'nom', 'non': 'nom', 
+            };
+
+            entityKeys = ['prenom', 'nom'];
+            capturedEntities = entityKeys.reduce((acc, field) => {
+                acc[field] = 'non détecté';
+                return acc;
+            }, {});
+        } 
+        else if (config === 'full') {
+
+                // 'quel est l\'âge de' : 'commande',
+                // 'où habite' : 'commande',
+                // 'recherche' : 'commande',
+                // 'cherche' : 'commande',
+
+            keywordMap = {
+                'action' : 'action',
+                'prénom': 'prenom', 'nom': 'nom', 'non': 'nom', 'lieu': 'lieux', 'lieux': 'lieux', 'profession': 'profession'
+            };
+            // entityKeys = ['commande', 'prenom', 'nom', 'lieux', 'profession'];
+            entityKeys = ['prenom', 'nom', 'lieux', 'profession', 'action'];
+            capturedEntities = entityKeys.reduce((acc, field) => {
+                acc[field] = 'non détecté';
+                return acc;
+            }, {});
+        }
+        
+        let currentEntity = null;
+        let entitiesDetectedCount = 0;
+        
+        entityKeys.forEach(key => newEntities[key] = []);
+
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+
+            if (word === 'lettre' && words[i+1] === 'par' && words[i+2] === 'lettre') {
+                
+                let fieldToSpell = 'entrez'; 
+                
+                if (currentEntity) {
+                    fieldToSpell = currentEntity;
+                    newEntities[currentEntity] = []; 
+                } else if (i > 0) {
+                    const previousWord = words[i - 1];
+                    if (keywordMap[previousWord]) {
+                         fieldToSpell = keywordMap[previousWord];
+                    }
+                }
+                
+                console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
+                startSpellingCycle(fieldToSpell, config); 
+                return; 
+            }
+            
+            else if (keywordMap[word]) {
+                currentEntity = keywordMap[word];
+                
+                capturedEntities[currentEntity] = 'non détecté'; 
+                newEntities[currentEntity] = []; 
+                
+            }
+            else if (currentEntity) {
+                newEntities[currentEntity].push(word);
+            }
+        }
+        
+        entityKeys.forEach(key => {
+            if (newEntities[key].length > 0) {
+                capturedEntities[key] = newEntities[key].join(' ');
+                entitiesDetectedCount++;
+            }
+        });
+
+        if (entitiesDetectedCount > 0) {
+            document.getElementById('stt-result-display').textContent = `✅ ${entitiesDetectedCount} champs mis à jour. (Continuez ou faites une pause)`;
+        } else {
+             document.getElementById('stt-result-display').textContent = `🔍 Analyse en cours. Transcript: "${transcript}"`;
+        }
+        
+        updateEntityUI();
+    }
+
+    
+    // =========================================================
+    // CŒUR 2 : Initialisation et Gestion des Sessions (INCHANGÉES)
+    // =========================================================
+
+    function initializeSpeechRecognition(config = null) {
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+        if (!SpeechRecognition || !SpeechGrammarList) {
+            console.error("Speech Recognition non supporté.");
+            return;
+        }
+        
+        if (recognition) return; 
+
+        recognition = new SpeechRecognition();
+        
+        const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
+        const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+        const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
+
+        spellingGrammar = new SpeechGrammarList();
+        spellingGrammar.addFromString(spellingGrammarString, 1);
+        
+        recognition.grammars = new SpeechGrammarList(); 
+        
+        recognition.lang = targetLang; 
+        recognition.continuous = !state.isMobile; 
+        recognition.interimResults = true; 
+
+        recognition.onstart = () => {
+            updateButtonUI(true); 
+            const display = document.getElementById('stt-result-display');
+            // Ensure the element displays line breaks from textContent
+            if (display) display.style.whiteSpace = 'pre-line';
+            
+            if (isSpellingMode) {
+                display.textContent = `✏️ Mode Épellation (Champ: ${targetSpellingField.toUpperCase()}): Dites une lettre, puis attendez la relance. Dites 'terminer'.`;
+            } else {
+                display.textContent = "🎤 Écoute en cours... Dites par exemple: \n prénom henri \nnom rousseau GO\nPour épeler un mot dites:\nprénom     lettre par lettre    h e n r i   terminer";
+            }
+        };
+
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            if (!state.isMobile) {
+                clearTimeout(recognitionTimeout);
+                recognitionTimeout = setTimeout(() => {
+                    if (isRecording) {
+                        console.log("⏰ PC : Coupure après 20s (limite atteinte).");
+                        isRecording = false;
+                        recognition.stop();
+                    }
+                }, PC_MAX_DURATION_MS);
+            }
+            
+            const lastResultIndex = event.results.length - 1;
+            const result = event.results[lastResultIndex];
+            const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
+
+            if (result.isFinal) {
+                
+                if (isSpellingMode) {
+                    
+                    const recognizedSegment = transcriptSegment; 
+                    
+                    if (recognizedSegment === 'terminer' || recognizedSegment === 'fin' || recognizedSegment === 'fini') {
+                        stopSpellingCycle(); 
+                        return;
+                    }
+                    
+                    let addedChars = '';
+                    let errorDetected = false;
+                    
+                    for (let i = 0; i < recognizedSegment.length; i++) {
+                        const detectedChar = recognizedSegment.charAt(i);
+                        
+                        if (alphabet.includes(detectedChar) || digits.includes(detectedChar)) {
+                            addedChars += detectedChar;
+                        } else {
+                            errorDetected = true;
+                            break; 
+                        }
+                    }
+
+
+                    if (addedChars.length > 0) {
+                        
+                        let currentValue = capturedEntities[targetSpellingField] || '';
+                        if (currentValue === 'non détecté') currentValue = '';
+                        
+                        capturedEntities[targetSpellingField] = currentValue + addedChars; 
+                        
+                        document.getElementById('stt-result-display').textContent = `✅ Ajouté: "${addedChars.toUpperCase()}". Prochaine lettre?`;
+                        document.getElementById('stt-interim-display').textContent = `(Reconnu: "${recognizedSegment}"). Valeur actuelle: ${capturedEntities[targetSpellingField]}`;
+                        updateEntityUI();
+                    } else if (errorDetected) {
+                         document.getElementById('stt-result-display').textContent = `❌ Caractère non reconnu/valide. Veuillez réessayer.`;
+                         document.getElementById('stt-interim-display').textContent = `(Reconnu: "${recognizedSegment}")`;
+                    }
+                    
+                    return; 
+                    
+                } else {
+                    cumulativeTranscript += transcriptSegment + ' ';
+                    processFullTranscript(cumulativeTranscript.trim(), config);
+                }
+                
+            } else {
+                interimTranscript += transcriptSegment;
+            }
+            
+            if (!isSpellingMode) {
+                document.getElementById('stt-interim-display').textContent = interimTranscript;
+                document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
+            }
+        };
+
+
+        recognition.onend = () => {
+            clearTimeout(recognitionTimeout); 
+            
+            if (pendingSpellingStart) {
+                
+                pendingSpellingStart = false; 
+                isSpellingMode = true;       
+
+                recognition.continuous = false; 
+                recognition.grammars = spellingGrammar; 
+                
+                try {
+                    recognition.start();
+                    console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
+                } catch(e) {
+                    console.error("Erreur au démarrage du mode épellation après bascule :", e.message);
+                    isRecording = false; 
+                    isSpellingMode = false;
+                    updateButtonUI(false);
+                }
+                
+            } 
+            
+            else if (isRecording && isSpellingMode) { 
+                
+                try {
+                    recognition.start();
+                    console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
+                } catch(e) {
+                    console.log("[LOG STT] Tentative d'arrêt critique du mode épellation.");
+                    isRecording = false; 
+                    isSpellingMode = false; 
+                    updateButtonUI(false);
+                    document.getElementById('stt-result-display').textContent = `⚠️ Épellation interrompue par erreur critique. Redémarrez manuellement.`;
+                }
+                
+            } 
+            
+            else if (isRecording && !isSpellingMode) { 
+                
+                if (cumulativeTranscript.trim().length > 0) {
+                    processFullTranscript(cumulativeTranscript.trim(), config);
+                    cumulativeTranscript = ''; 
+                }
+
+                if (state.isMobile) {
+                    setTimeout(() => {
+                        if (isRecording) { 
+                            try {
+                                recognition.start();
+                            } catch(e) {
+                                console.warn("Erreur au redémarrage mobile :", e.message);
+                                isRecording = false; updateButtonUI(false);
+                            }
+                        }
+                    }, 1500); 
+
+                } else {
+                    isRecording = false;
+                    updateButtonUI(false);
+                    console.log("[LOG STT] Reconnaissance PC terminée (Silence/Timer).");
+                }
+
+            } else {
+                updateButtonUI(false); 
+                console.log("[LOG STT] Reconnaissance Vocale arrêtée volontairement/finale.");
+            }
+        };
+
+
+        recognition.onerror = (event) => {
+            document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
+            document.getElementById('stt-result-display').style.color = 'red';
+            isRecording = false;
+            isSpellingMode = false; 
+            pendingSpellingStart = false; 
+            updateButtonUI(false); 
+            console.error("[LOG STT] Erreur STT:", event.error);
+            
+            cumulativeTranscript = '';
+        };
+    }
+    
+    // =========================================================
+    // CŒUR 3 : Fonctions UI et Démarrage (MODIFIÉES)
+    // =========================================================
     function createUIStructure() {
         const overlayId = 'stt-only-overlay';
         const existingOverlay = document.getElementById(overlayId);
         if (existingOverlay) return existingOverlay;
         
-        // --- Styles de base pour la modale ---
         const overlay = document.createElement('div');
         overlay.id = overlayId;
+        
+        // --- MODIFICATION CLÉ : Retirer l'overlay bloquant ---
         overlay.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); display: none;
-            justify-content: center; align-items: center; z-index: 10000;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            /* 1. Suppression de la couleur bloquante */
+            background-color: transparent; /* ANCIEN : rgba(0, 0, 0, 0.7); */
+            display: none;
+            justify-content: center; 
+            align-items: center; 
+            /* 2. Permet de cliquer à travers l'overlay vide */
+            pointer-events: none; /* TRÈS IMPORTANT : permet aux clics d'atteindre le contenu sous l'overlay */
         `;
+        // ----------------------------------------------------
 
         const modal = document.createElement('div');
+        modal.id = 'speechRecognitionModal';
         modal.style.cssText = `
-            background-color: white; padding: 20px; border-radius: 12px;
+            background-color: white; padding: 20px; border-radius: 12px; 
             max-width: 400px; width: 90%; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             font-family: Arial, sans-serif;
+            
+            /* 3. Réactiver les clics UNIQUEMENT sur la modale elle-même */
+            pointer-events: auto; /* IMPORTANT : Pour pouvoir interagir avec la modale */
         `;
         
-        // --- Contenu HTML de la modale ---
+        // ... (Reste de modal.innerHTML inchangé) ...
+
+        // Laissez l'écouteur pour fermer la modale si on clique sur l'overlay
+        // (Bien que moins utile maintenant, cela garantit que si l'utilisateur clique
+        // sur une zone de l'écran non occupée par un autre élément, la modale se ferme).
+        overlay.addEventListener('click', (e) => {
+            if (e.target.id === overlayId) hideUI();
+        });
+
+
+
+        //         .docClose-button {
+        //     background: #c82333; border: 2px solid white; color: white; font-size: 20px;
+        //     cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center;
+        //     justify-content: center; border-radius: 50%; transition: all 0.3s; line-height: 1; 
+        // }
+        // .docClose-button:hover { background: #a82e38; transform: scale(1.1) rotate(90deg); }
+       
+        // --- MODIFICATION 1: Structure HTML pour les champs INPUT ---
         modal.innerHTML = `
-            <h3 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
-                Saisie Vocale (Langue : ${targetLang})
-                <button id="close-stt-button" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: #dc3545; padding: 0;">&times;</button>
-            </h3>
+            <style>
+                /* Local modal styles for speech recognition (inline in HTML) */
+                #speechRecognitionModal .stt-close-button {
+                    background: #c82333;
+                    border: 2px solid white;
+                    color: white;
+                    font-size: 20px;
+                    width: 35px;
+                    height: 35px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: transform 0.3s, background 0.3s;
+                    line-height: 1;
+                    padding: 0;
+                }
+                #speechRecognitionModal .stt-close-button:hover {
+                    background: #a82e38;
+                    transform: scale(1.1) rotate(90deg);
+                }
+            </style>
+
             
-            <div id="stt-container" style="margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
-                <p style="margin-bottom: 5px; font-size: 0.9em; font-weight: bold;">Résultat de la Reconnaissance Vocale:</p>
-                <div id="stt-result-display" style="min-height: 1.2em; color: #333; font-style: italic;">
+            <div id="speechRecognitionHeader" style="display: block; font-size: ~1.17em; font-weight: bold; border-radius: 12px 12px 0 0; margin-top: -20px; margin-left: -20px; margin-right: -20px; padding-top: 7px; padding-bottom: 7px; padding-left: 20px; padding-right: 20px; display: flex; justify-content: space-between; align-items: center; background-color: #6fb0f6ff;">
+                Saisie Vocale (Langue : ${targetLang})
+                <button id="close-stt-button" class="stt-close-button" style="cursor: pointer;" onmouseover="this.style.transform='scale(1.1) rotate(90deg)'; this.style.background='#a82e38';" onmouseout="this.style.transform=''; this.style.background='#c82333';">&times;</button>
+            </div>
+
+
+
+
+
+            
+            <div id="stt-container" style="margin-top: 5px; padding: 10px; padding-top: 0px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
+                <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px;  font-size: 0.9em; font-weight: bold;">Résultat de la Reconnaissance Vocale:</div>
+                <div id="stt-result-display" style="margin-top: -5px; padding-top: 0px; min-height: 1.2em; color: #333; font-style: italic; white-space: pre-line;">
                     ${translate('statusReady')}
                 </div>
                 <span id="stt-interim-display" style="color: #888; font-style: italic;"></span>
+            </div>
+
+
+            <div id="stt-entity-panel" style="margin-top: 10px; padding: 10px; border: 1px solid #007bff; border-radius: 6px; background-color: #e6f7ff;">
+                <p style="margin-top: 0; font-weight: bold; color: #007bff;">
+                    ✨ accéssible par la voix (éditable)
+                </p>
+                <ul id="entity-list" style="list-style: none; padding: 0; margin: 0;">
+                    </ul>
             </div>
 
             <div style="display: flex; justify-content: center; margin-top: 20px;">
@@ -603,596 +1295,234 @@ const SpeechRecognitionUI = (function() {
             </div>
         `;
 
-        // 1. Attachement des Événements
-        modal.querySelector('#record-voice-button').addEventListener('click', toggleSpeechRecognition);
+
+        
+        modal.querySelector('#record-voice-button').addEventListener('click', toggleSpeechRecognition );
         modal.querySelector('#close-stt-button').addEventListener('click', hideUI);
         overlay.addEventListener('click', (e) => {
             if (e.target.id === overlayId) hideUI();
         });
 
+
+        updateEntityUI();
+
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
+
+
+
+        // Cibler le vrai conteneur draggable/redimensionnable
+        const content =  document.getElementById('speechRecognitionModal'); //  modal.querySelector('.searchModal-content'); 
+        // content._isVisible = true;
+        const header =  document.getElementById('speechRecognitionHeader'); //modal.querySelector('.searchModal-header');
+        // Rendre la modale déplaçable et redimensionnable
+        makeModalDraggableAndResizable(content, header, false);
+
+        makeModalInteractive(overlay); 
+
         return overlay;
     }
-
-    // --- Fonctions de Reconnaissance Vocale (tirées de l'original) ---
     
+    function updateButtonUI(isListening) {
+        const button = document.getElementById('record-voice-button');
+        const icon = document.getElementById('record-icon');
+        const text = document.getElementById('record-text');
+        const resultDisplay = document.getElementById('stt-result-display');
+        
+        if (!button || !icon || !text || !resultDisplay) return;
 
-
-
-
-
-
-    // --- Fonctions d'Action Simples (À intégrer ou à importer) ---
-    function ouvrirSelectionAction() {
-        console.log("ACTION: Ouverture de la modale de sélection de voix.");
-        // VoiceSelectorUI.showUI(); // Fonction réelle
+        if (isListening) {
+            button.style.backgroundColor = '#dc3545'; 
+            icon.textContent = '🔴'; 
+            text.textContent = "Arrêter l'écoute";
+            resultDisplay.style.color = '#333';
+        } else {
+            button.style.backgroundColor = '#007bff'; 
+            icon.textContent = '🎙️'; 
+            text.textContent = translate('btnRecord');
+            resultDisplay.style.color = '#333';
+            if (!resultDisplay.textContent.startsWith('Erreur') && !resultDisplay.textContent.startsWith('🔍') && !resultDisplay.textContent.startsWith('⚠️') && !resultDisplay.textContent.startsWith('✅')) {
+                resultDisplay.textContent = translate('statusReady');
+            }
+        }
     }
-
-    function voixSuivanteAction() {
-        console.log("ACTION: Passage à la voix TTS suivante (non implémenté ici).");
-        // Logique pour itérer sur state.voices et appeler initSpeechSynthesis(nouvelleVoix)
-    }
-
-    function arreterLectureAction() {
-        console.log("ACTION: Arrêt de la lecture TTS en cours.");
-        window.speechSynthesis.cancel(); 
-    }
-
-    // --- Dictionnaire de Mots-Clés et Actions (Le Cœur du système) ---
-    const commandActionMap = {
-        'ouvrir la sélection': ouvrirSelectionAction,
-        'passer à la voix suivante': voixSuivanteAction,
-        'arrêter la lecture': arreterLectureAction
-        // Ajoutez ici d'autres commandes
-    };
-
-
-
-
-
 
 
     /**
-     * Logique à intégrer dans la fonction initializeSpeechRecognition()
-     * de votre module speechRecognitionUI.js
+     * Met à jour la liste des entités capturées dans l'interface utilisateur.
+     * Crée des champs INPUT éditables et applique la couleur (vert si détecté, gris si vide).
+     * @param {string | null} config - 'start' pour réinitialiser la liste à un sous-ensemble.
      */
-    function initializeSpeechRecognition() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function updateEntityUI(config = null) {
+        const listElement = document.getElementById('entity-list');
+        if (!listElement) return;
 
-        if (!SpeechRecognition) {
-            console.error("Speech Recognition non supporté.");
-            return;
+        // Si la configuration de démarrage est demandée, réinitialiser les entités.
+        if (config === 'start') {
+            entityKeys = ['prenom', 'nom'];
+            capturedEntities = entityKeys.reduce((acc, field) => {
+                acc[field] = 'non détecté';
+                return acc;
+            }, {});
+        } 
+        // else {
+        //     // keywordMap = {
+        //     //     'prénom': 'prenom', 'nom': 'nom', 'non': 'nom', 'lieu': 'lieux', 'lieux': 'lieux', 'profession': 'profession'
+        //     // };
+        //     entityKeys = ['commande', 'prenom', 'nom', 'lieux', 'profession'];
+        //     capturedEntities = entityKeys.reduce((acc, field) => {
+        //         acc[field] = 'non détecté';
+        //         return acc;
+        //     }, {});
+        // }
+
+        else if (config === 'full') {
+            entityKeys = ['prenom', 'nom', 'lieux', 'profession', 'action'];
+            capturedEntities = entityKeys.reduce((acc, field) => {
+                acc[field] = 'non détecté';
+                return acc;
+            }, {});
         }
+
+
+
+        // Vider la liste existante
+        listElement.innerHTML = ''; 
         
-        // Si déjà initialisé, on arrête
-        if (recognition) return; 
-
-        recognition = new SpeechRecognition();
-        
-        // Réinitialisation des variables si elles ne sont pas gérées par la portée du module
-        cumulativeTranscript = ''; 
-        isRecording = false;
-        
-        // --- 1. Dictionnaire de Grammaire (Votre code) ---
-        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-        const commands = Object.keys(commandActionMap); // Utiliser les clés du dictionnaire comme commandes
-        
-        // Création de la grammaire JSGF
-        const grammar = '#JSGF V1.0; grammar commands; public <command> = ' + commands.join(' | ') + ' ;';
-        
-        const speechRecognitionList = new SpeechGrammarList();
-        speechRecognitionList.addFromString(grammar, 1); // Poids (priorité) de 1
-
-        // Ajout de la grammaire à l'objet recognition
-        recognition.grammars = speechRecognitionList;
-        // ----------------------------------------------------
-
-
-        const isMobile = state.isMobile;      
-
-
-        // --- 2. Configuration et onresult ---
-        recognition.lang = targetLang; 
-        recognition.continuous = !isMobile; // true pour PC, false pour Mobile 
-        recognition.interimResults = true; 
-        
-        // recognition.onresult = (event) => {
-        //     let interimTranscript = '';
+        for (const field in capturedEntities) {
+            const value = capturedEntities[field];
+            // Si l'état interne est 'non détecté', l'input doit être vide visuellement.
+            const displayValue = value === 'non détecté' ? '' : value; 
             
-        //     for (let i = event.resultIndex; i < event.results.length; i++) {
-        //         const result = event.results[i];
-        //         const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
-
-        //         if (result.isFinal) {
-        //             // Le segment est final : on l'ajoute à la transcription complète
-        //             cumulativeTranscript += transcriptSegment + ' '; 
-                    
-        //             // === LOGIQUE DE DÉTECTION DE COMMANDE ===
-        //             // Vérifier si la transcription correspond à une commande exacte
-        //             const detectedCommand = commands.find(cmd => transcriptSegment.includes(cmd));
-                    
-        //             if (detectedCommand) {
-        //                 console.log(`Commande Détectée: "${detectedCommand}"`);
-        //                 // Exécuter l'action associée
-        //                 commandActionMap[detectedCommand](); 
-                        
-        //                 // Optionnel : Arrêter l'écoute après une commande pour éviter les interférences
-        //                 // recognition.stop();
-                        
-        //                 // Vider le transcript pour ne pas afficher la commande dans le résultat
-        //                 cumulativeTranscript = '';
-                        
-        //             } else {
-        //                 // Si ce n'est pas une commande, c'est du texte normal
-        //                 console.log("Texte normal reconnu:", transcriptSegment);
-        //             }
-        //             // =========================================
-
-        //         } else {
-        //             interimTranscript += transcriptSegment;
-        //         }
-        //     }
-
-        //     // Mise à jour de l'affichage UI
-        //     document.getElementById('stt-result-display').textContent = cumulativeTranscript;
-        //     document.getElementById('stt-interim-display').textContent = interimTranscript; 
-        // };
-
-
-        recognition.onstart = () => {
-            // Redéfinit la langue (pour la robustesse Android)
-            recognition.lang = targetLang; 
-            // Mise à jour de l'UI au moment où l'écoute commence réellement
-            updateButtonUI(true); // <-- APPEL POUR CHANGER LE TEXTE ET LA COULEUR
-        };
-
-
-        // recognition.onresult = (event) => {
-        //     let interimTranscript = '';
+            const listItem = document.createElement('li');
+            listItem.style.cssText = 'padding: 5px 0; font-size: 0.9em; display: flex; align-items: center; justify-content: space-between;';
             
-        //     // --- NOUVEAU : Démarrer la boucle à l'index où le dernier résultat final a été trouvé ---
-        //     // Sur PC, event.resultIndex est souvent mis à jour automatiquement.
-        //     // Sur Mobile/Android, cela garantit de ne pas retraiter les anciens résultats finaux.
-        //     for (let i = event.resultIndex; i < event.results.length; i++) {
-        //         const result = event.results[i];
-        //         const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
-
-        //         if (result.isFinal) {
-                    
-        //             // Si c'est une commande, ne pas l'ajouter au transcript
-        //             const isCommand = commands.find(cmd => transcriptSegment.includes(cmd));
-                    
-        //             if (isCommand) {
-        //                 // Exécuter l'action et potentiellement arrêter l'écoute
-        //                 commandActionMap[isCommand](); 
-                        
-        //             } else {
-        //                 // Ajouter uniquement si ce n'est PAS une commande
-        //                 cumulativeTranscript += transcriptSegment + ' '; 
-        //             }
-                    
-        //         } else {
-        //             // C'est un résultat en cours
-        //             interimTranscript += transcriptSegment;
-        //         }
-        //     }
-
-        //     // Afficher le texte accumulé (final)
-        //     document.getElementById('stt-result-display').textContent = cumulativeTranscript;
+            // Création du label
+            const label = document.createElement('strong');
+            label.textContent = `${field.toUpperCase()}:`;
+            label.style.width = '70px'; 
             
-        //     // Afficher le texte provisoire (intermédiaire)
-        //     document.getElementById('stt-interim-display').textContent = interimTranscript; 
-
-
-        //     // Note : Le texte final est maintenant dans cumulativeTranscript
-        //     // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
-        //     // if (event.results[event.results.length - 1].isFinal) {
-        //     //     // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
-        //     //     speakText(cumulativeTranscript);
-        //     // }
-
-
-        // };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // // Événement lorsque la reconnaissance s'arrête
-        // recognition.onend = () => {
-        //     isRecording = false;
-        //     document.getElementById('record-icon').textContent = '🎙️';
-        //     document.getElementById('stt-result-display').style.color = '#333';
-        //     document.getElementById('record-text').textContent = translate('btnRecord');
-        //     document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-        //     console.log("Reconnaissance Vocale arrêtée.");
-        // };
-
-        
-
-       // Événement lorsque la reconnaissance s'arrête
-        // recognition.onend = () => {
+            // Création du champ de saisie INPUT
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.id = `input-${field}`; 
+            inputField.value = displayValue;
             
-        //     // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute', on redémarre
-        //     if (isRecording) {
-        //         console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
-        //         // On redémarre l'écoute immédiatement
-        //         try {
-        //             recognition.start();
-        //         } catch(e) {
-        //             // Empêche les erreurs si on essaie de démarrer pendant une phase d'arrêt
-        //             console.warn("Erreur au redémarrage :", e.message);
-        //         }
-                
-        //     } else {
-        //         // C'est un arrêt volontaire par l'utilisateur (toggleSpeechRecognition)
-        //         console.log("Reconnaissance Vocale arrêtée volontairement.");
-        //         // Réinitialisation de l'UI
-        //         document.getElementById('record-icon').textContent = '🎙️';
-        //         document.getElementById('record-text').textContent = translate('btnRecord');
-        //         document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-        //     }
+            // Synchronisation Clavier -> État
+            // La fonction updateCapturedEntity est définie plus haut dans le module.
+            inputField.oninput = (e) => updateCapturedEntity(field, e.target.value);
             
-        //     // Note : On ne met plus isRecording à false ici pour ne pas casser le redémarrage.
-        //     // Il sera mis à false seulement dans toggleSpeechRecognition.
-        // };
-
-
-        // recognition.onend = () => {
-        //     // Si l'utilisateur n'a PAS cliqué sur 'Arrêter l'écoute' (isRecording est toujours true), on redémarre
-        //     if (isRecording) { 
-        //         console.log("⚠️ Redémarrage automatique de la reconnaissance (limite mobile atteinte).");
-        //         try {
-        //             recognition.start();
-        //         } catch(e) {
-        //             console.warn("Erreur au redémarrage :", e.message);
-        //         }
-        //     } else {
-        //         // Arrêt volontaire
-        //         updateButtonUI(false); // <-- MISE À JOUR VISUELLE POUR L'ARRÊT
-        //         console.log("Reconnaissance Vocale arrêtée volontairement.");
-        //     }
-        // };
-
-
-// DANS speechRecognitionUI.js -> function initializeSpeechRecognition() { ...
-
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
+            // Déterminer la couleur : Vert si une valeur est présente, Gris si vide.
+            const isDetected = (value !== 'non détecté' && value.trim() !== '') || (displayValue.trim() !== '');
+            const color = isDetected ? '#28a745' : '#999';
             
-            // Si nous sommes en mode PC (continuous=true), nous gérons le timer de 20s.
-            if (!state.isMobile) {
-                // Réinitialiser le timer de coupure PC au premier résultat pour prolonger l'écoute
-                clearTimeout(recognitionTimeout);
-                recognitionTimeout = setTimeout(() => {
-                    if (isRecording) {
-                        console.log("⏰ PC : Coupure après 20s (limite atteinte).");
-                        isRecording = false; // Arrêt logique
-                        recognition.stop();
-                    }
-                }, PC_MAX_DURATION_MS);
-            }
+            // Style de l'input
+            inputField.style.cssText = `
+                flex-grow: 1; 
+                padding: 5px; 
+                border: 1px solid ${color}; 
+                border-radius: 4px;
+                font-weight: bold;
+                margin-left: 10px;
+                color: ${color}; 
+            `;
             
-            // L'index de départ peut être 0 ou event.resultIndex selon le mode, mais pour simplifier
-            // l'écriture et assurer la compatibilité (car le mode non continu n'a qu'une seule session), 
-            // nous itérons sur tous les résultats non traités pour cette session.
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
-
-                if (result.isFinal) {
-                    
-                    // --- LOGIQUE DE DÉTECTION DE COMMANDE ---
-                    const detectedCommand = commands.find(cmd => transcriptSegment.includes(cmd));
-                    
-                    if (detectedCommand) {
-                        console.log(`Commande Détectée: "${detectedCommand}"`);
-                        commandActionMap[detectedCommand](); 
-                        
-                        // Vider le transcript pour ne pas afficher la commande
-                        // NOTE : Si PC (continuous), cette ligne est importante. Si Mobile (non-continuous),
-                        // la prochaine session réinitialisera l'enregistrement de toute façon.
-                        if (!state.isMobile) {
-                        cumulativeTranscript = '';
-                        }
-                        
-                    } else {
-                        // Ajouter le texte final à la transcription globale
-                        cumulativeTranscript += transcriptSegment + ' '; 
-                    }
-                    
-                } else {
-                    // C'est un résultat en cours (intermédiaire)
-                    interimTranscript += transcriptSegment;
-                }
-            }
-
-            // Afficher le texte accumulé (final)
-            document.getElementById('stt-result-display').textContent = cumulativeTranscript;
-            
-            // Afficher le texte provisoire (intermédiaire)
-            document.getElementById('stt-interim-display').textContent = interimTranscript; 
-        };
-
-
-
-        recognition.onend = () => {
-            // Effacer le timer de coupure PC au cas où l'arrêt est volontaire ou naturel
-            clearTimeout(recognitionTimeout); 
-            
-            // Si l'utilisateur a démarré l'écoute
-            if (isRecording) {
-                
-                if (isMobile) {
-                    // --- LOGIQUE MOBILE (onend est appelé dès que l'utilisateur s'arrête de parler) ---
-                    
-                    // Pour prolonger la phase d'écoute mobile après un silence :
-                    console.log("⚠️ Mobile : Détection de fin de session. Redémarrage après 1.5s pour prolonger l'écoute...");
-                    
-                    // On utilise un petit délai pour simuler un mode "semi-continu" sans les bugs de continuous=true
-                    setTimeout(() => {
-                        if (isRecording) { // Si l'utilisateur n'a pas appuyé sur stop pendant ce délai
-                            try {
-                                recognition.start();
-                            } catch(e) {
-                                console.warn("Erreur au redémarrage mobile :", e.message);
-                                isRecording = false; // Échec du redémarrage
-                                updateButtonUI(false);
-                            }
-                        }
-                    }, 1500); // Tente de redémarrer après 1.5s de silence
-                    
-                } else {
-                    // --- LOGIQUE PC (Arrêt volontaire ou Timer/20s) ---
-                    isRecording = false; // L'arrêt est définitif (volontaire ou par timer)
-                    updateButtonUI(false);
-                    console.log("PC : Session terminée ou arrêt volontaire.");
-                }
-            } else {
-                // Arrêt volontaire de l'utilisateur (onend est appelé par recognition.stop() dans toggleSpeechRecognition)
-                updateButtonUI(false); 
-                console.log("Reconnaissance Vocale arrêtée volontairement.");
-            }
-        };
-
-
-
-
-
-
-
-
-
-
-        // Événement en cas d'erreur
-        recognition.onerror = (event) => {
-            document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
-            document.getElementById('stt-result-display').style.color = 'red';
-            isRecording = false;
-            document.getElementById('record-icon').textContent = '🎙️';
-            document.getElementById('record-text').textContent = translate('btnRecord');
-            document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-
-            updateButtonUI(false); // <-- MISE À JOUR VISUELLE EN CAS D'ERREUR
-            console.error("Erreur STT:", event.error);
-        };
+            listItem.appendChild(label);
+            listItem.appendChild(inputField);
+            listElement.appendChild(listItem);
+        }
     }
 
 
 
-
-
-
-
-
-
-
-    // function initializeSpeechRecognition() {
-    //     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    //     if (SpeechRecognition) {
-    //         recognition = new SpeechRecognition();
-            
-    //         // Appliquer la langue au moment de l'initialisation
-    //         recognition.lang = targetLang; 
-            
-    //         // Paramètres de base
-    //         recognition.continuous = true; 
-    //         recognition.interimResults = true; 
-
-    //         // --- NOUVEAU : WORKAROUND DANS ONSTART ---
-    //         recognition.onstart = () => {
-    //             // Redéfinit la langue pour forcer le moteur Android à la prendre en compte
-    //             recognition.lang = targetLang; 
-    //             document.getElementById('record-text').textContent = 'Arrêter l\'écoute';
-    //         };
-    //         // ----------------------------------------
-
-    //         recognition.onresult = (event) => {
-    //             let interimTranscript = '';
-                
-    //             // Parcourir tous les résultats
-    //             for (let i = event.resultIndex; i < event.results.length; i++) {
-    //                 const result = event.results[i];
-    //                 const transcriptSegment = result[0].transcript; 
-
-    //                 if (result.isFinal) {
-    //                     // Le segment est final : on l'ajoute à la transcription complète
-    //                     cumulativeTranscript += transcriptSegment + ' '; // Ajout d'un espace pour la lisibilité
-    //                 } else {
-    //                     // C'est un résultat en cours
-    //                     interimTranscript += transcriptSegment;
-    //                 }
-    //             }
-
-    //             // Afficher le texte accumulé (final)
-    //             document.getElementById('stt-result-display').textContent = cumulativeTranscript;
-                
-    //             // Afficher le texte provisoire (intermédiaire)
-    //             document.getElementById('stt-interim-display').textContent = interimTranscript; 
-
-
-    //             // Note : Le texte final est maintenant dans cumulativeTranscript
-    //             // Si vous lancez speakText ou la traduction, utilisez cumulativeTranscript
-    //             if (event.results[event.results.length - 1].isFinal) {
-    //                 // Lancer la lecture ou la traduction UNIQUEMENT ici si vous voulez lire la phrase entière
-    //                 speakText(cumulativeTranscript);
-    //             }
-
-
-    //         };
-
-            
-    //         // Événement lorsque la reconnaissance s'arrête
-    //         recognition.onend = () => {
-    //             isRecording = false;
-    //             document.getElementById('record-icon').textContent = '🎙️';
-    //             document.getElementById('stt-result-display').style.color = '#333';
-    //             document.getElementById('record-text').textContent = translate('btnRecord');
-    //             document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-    //             console.log("Reconnaissance Vocale arrêtée.");
-    //         };
-            
-    //         // Événement en cas d'erreur
-    //         recognition.onerror = (event) => {
-    //             document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
-    //             document.getElementById('stt-result-display').style.color = 'red';
-    //             isRecording = false;
-    //             document.getElementById('record-icon').textContent = '🎙️';
-    //             document.getElementById('record-text').textContent = translate('btnRecord');
-    //             document.getElementById('record-voice-button').style.backgroundColor = '#007bff';
-    //             console.error("Erreur STT:", event.error);
-    //         };
-
-    //     } else {
-    //         console.error("Speech Recognition non supporté par ce navigateur.");
-    //         // Désactiver le bouton si non supporté
-    //         const recordButton = document.getElementById('record-voice-button');
-    //         if (recordButton) recordButton.disabled = true;
-    //     }
-    // }
-    
-
-
-
-// DANS speechRecognitionUI.js (Nouveau bloc à insérer)
-
-// --- Fonction utilitaire de mise à jour de l'UI du bouton ---
-function updateButtonUI(isListening) {
-    const button = document.getElementById('record-voice-button');
-    const icon = document.getElementById('record-icon');
-    const text = document.getElementById('record-text');
-    const resultDisplay = document.getElementById('stt-result-display');
-    
-    if (!button || !icon || !text || !resultDisplay) return;
-
-    if (isListening) {
-        button.style.backgroundColor = '#dc3545'; // Rouge
-        icon.textContent = '🔴'; 
-        text.textContent = "Arrêter l'écoute"; // <-- NOUVEAU TEXTE
-        resultDisplay.textContent = translate('statusRecording');
-        resultDisplay.style.color = '#dc3545';
-    } else {
-        button.style.backgroundColor = '#007bff'; // Bleu
-        icon.textContent = '🎙️'; 
-        text.textContent = translate('btnRecord');
-        resultDisplay.textContent = translate('statusReady');
-        resultDisplay.style.color = '#333';
-    }
-}
-
-
-
-
-
-
-
-    // Fonction appelée par le clic sur le bouton 'Micro'
     function toggleSpeechRecognition() {
-        if (!recognition) {
-            initializeSpeechRecognition();
-            if (!recognition) return; // Si non supporté après initialisation
-        }
+
+        // if (!recognition) {
+        let config = localConfig;
+        initializeSpeechRecognition(config);
+            // if (!recognition) return; 
+        // }
 
         if (isRecording) {
-            // Arrêter l'enregistrement
-            // Arrêt volontaire
-            isRecording = false; // <-- ESSENTIEL : C'est le drapeau pour le onend
-            clearTimeout(recognitionTimeout); // Arrêter le timer PC
+            isRecording = false; 
+            isSpellingMode = false;
+            pendingSpellingStart = false; 
+            clearTimeout(recognitionTimeout); 
             recognition.stop();
         } else {
-            
-            // Étape 1 : Définir la langue avant de commencer
             recognition.lang = targetLang;
-            isRecording = true; // <-- ESSENTIEL : Lève le drapeau pour autoriser le redémarrage
+            isRecording = true; 
+            isSpellingMode = false;
+            pendingSpellingStart = false; 
             cumulativeTranscript = '';
+            
+            recognition.continuous = !state.isMobile; 
+            recognition.grammars = new SpeechGrammarList(); 
+            
             document.getElementById('stt-result-display').textContent = '';
 
-            // Démarrer l'enregistrement
             try {
                 recognition.start();
-                // document.getElementById('record-icon').textContent = '🔴'; // Icône d'enregistrement
-                // document.getElementById('stt-result-display').textContent = translate('statusRecording');
-                // document.getElementById('stt-result-display').style.color = '#dc3545';
-                // document.getElementById('record-voice-button').style.backgroundColor = '#dc3545';
-                // console.log("Reconnaissance Vocale démarrée...");
 
-
-                // Démarrage du timer PC (si non mobile)
                 if (!state.isMobile) {
-                    // Le timer sera géré dans onresult, mais nous le démarrons ici pour la première fois.
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
-                            console.log("⏰ PC : Coupure après 20s (limite initiale atteinte).");
                             isRecording = false;
                             recognition.stop();
                         }
                     }, PC_MAX_DURATION_MS);
                 }
 
-
-                // Annuler la parole TTS en cours si on commence l'enregistrement
                 window.speechSynthesis.cancel(); 
 
             } catch (e) {
                 console.error("Erreur au démarrage de la reconnaissance:", e);
                 document.getElementById('stt-result-display').textContent = "Erreur au démarrage. Veuillez vérifier les permissions.";
                 document.getElementById('stt-result-display').style.color = 'red';
-                isRecording = false; // Échec du démarrage
+                isRecording = false; 
                 updateButtonUI(false);
-
             }
         }
     }
 
     // --- Fonctions Publiques ---
 
-    function showUI() {
-        const overlay = createUIStructure();
-        // S'assurer que la reconnaissance est initialisée avant l'affichage
-        if (!recognition) initializeSpeechRecognition(); 
+/**
+     * Récupère les données des entités capturées (Voix ou Clavier).
+     * Nettoie les valeurs "non détecté" ou vides.
+     * @returns {Object} Un objet contenant les paires clé/valeur des entités.
+     */
+    function getCapturedData() {
+        const finalData = {};
         
-        // Réinitialiser le statut affiché
+        for (const field in capturedEntities) {
+            const value = capturedEntities[field].trim();
+            
+            // On ne retourne que les champs qui contiennent une valeur valide
+            if (value && value !== 'non détecté') {
+                finalData[field] = value;
+            }
+        }
+        
+        return finalData;
+    }
+
+
+
+    function showUI(config = null) {
+
+        const overlay = createUIStructure();
+        // if (!recognition) 
+        initializeSpeechRecognition(config); 
+        
         document.getElementById('stt-result-display').textContent = translate('statusReady');
         document.getElementById('stt-result-display').style.color = '#333';
+        document.getElementById('stt-interim-display').textContent = '';
 
         overlay.style.display = 'flex';
+
+        updateEntityUI(config);
     }
 
     function hideUI() {
@@ -1200,29 +1530,26 @@ function updateButtonUI(isListening) {
         if (overlay) {
             overlay.style.display = 'none';
         }
-        // S'assurer que l'enregistrement est coupé lors de la fermeture
         if (isRecording && recognition) {
+            isRecording = false;
             recognition.stop(); 
         }
+        
+        capturedEntities = entityKeys.reduce((acc, field) => {
+            acc[field] = 'non détecté';
+            return acc;
+        }, {});
     }
 
-    // Création de l'UI au chargement du module
-    createUIStructure();
 
     return {
         showUI: showUI,
         hideUI: hideUI,
-        getTranscript: () => cumulativeTranscript // Utile pour récupérer le texte final
+        processTranscript: processFullTranscript, 
+        getCapturedData: getCapturedData
     };
 
 })();
-
-
-
-
-
-
-
 
 
 
@@ -1255,6 +1582,7 @@ export function loadVoices() {
 }
 
 
-export function voiceCommand() {
-    SpeechRecognitionUI.showUI();
+export function voiceCommand(config = null) {
+    localConfig = config;
+    SpeechRecognitionUI.showUI(config);
 }

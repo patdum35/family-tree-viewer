@@ -92,7 +92,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
 
         closeButton.style.setProperty('top', '6px', 'important');
         closeButton.style.setProperty('right', '6px', 'important');
-        controlsRow1.style.display = 'none';
+        // controlsRow1.style.display = 'none';
         controlsRow2.style.display = 'none';        
     }
     

@@ -33,42 +33,40 @@ const MULTILINGUE_DOC_CONTENT = {
                 </ol>
                 <h3>{usedSymbols}</h3>
                 <ol style="margin-left: 20px;">
-                    <li>💾 / 📱{comment installer l'application et faire les mises}</li>
-                    <li>🔒{mot de passe pour ouvrir le fichier gedcom crypté}</li>
-                    <li>🔍{rechercher et sélectioner une personne racine, par prénom + nom,ou lieu,  ou profession, avec geolocalisation}</li>
-                    <li>🌳{vue classique de l'arbre, avec navigation, animation audio, geo localisation et fiches individuelles}</li>
-                    <li>🎯{vue radar/roue de l'arbre, avec jeu de roue de la fortune et quizz audio pour découvrir ses ancètres}</li>                   
-                    <li>💖{vue en nuage de mots par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant. On peut donner au nuage une forme de rectangle, d'ellipse, de coeur ou d'étoile. Permet de cliquer sur les mots et d'avoir les listes de personnes et la géolocalisation. Permet aussi d'avoir des statistiques et des graphes.}</li>
-                    <li>📊{statistiques par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant}</li>
-                    <li>🌍{geolocalisation des personnes de l'arbre, en mode carte de chaleur pour un groupe de personnes, ou lieux précis d'une personne}</li>
-                    <li>❓{FAQ: questions les plus fréquentes}</li>
-                    <li>📞{contact: pour des questions ou demandes}</li>
-                    <li>💡{rechercher et sélectioner une personne racine}</li>
-                    <li>👆🚫{rechercher et sélectioner une personne racine}</li>
-                    <li>🗣️{rechercher et sélectioner une personne racine}</li>
-                    <li>➕,➖{rechercher et sélectioner une personne racine}</li>
-                    <li>🏠{rechercher et sélectioner une personne racine}</li>                                        
-                    <li>🔌📺{rechercher et sélectioner une personne racine}</li>
-                    <li>⚙️{rechercher et sélectioner une personne racine}</li>
-                    <li>🔙{rechercher et sélectioner une personne racine}</li>
-                    <li>🔊{rechercher et sélectioner une personne racine}</li>
-                    <li>▶️{rechercher et sélectioner une personne racine}</li>
-                    <li>⏸️{rechercher et sélectioner une personne racine}</li>
-                    <li>☰{rechercher et sélectioner une personne racine}</li>
-                    <li>🎵{rechercher et sélectioner une personne racine}</li>
-                    <li>🔄{rechercher et sélectioner une personne racine}</li>    
-                    ⤡ 
-                    ✥ 
-                    X
-                    👶
-                    💍
-                    ✝️
-                    🏠 
-                    💼
-                    ✓ ✶ + -
-                    🔤
+                    <li>💾 / 📱 {comment installer l'application et faire les mises à jour logicielles}</li>
+                    <li>🔒 {mot de passe pour ouvrir le fichier gedcom crypté}</li>
+                    <li>🎙️ {commande vocale}
+                    <li>🔍 {rechercher et sélectioner une personne racine, par prénom + nom, ou par lieu, ou par profession, avec geolocalisation}</li>
+                    <li>🌳 {vue classique de l'arbre, avec navigation, animation audio, geo localisation et fiches individuelles}</li>
+                    <li>🎯 {vue radar/roue de l'arbre, avec jeu de roue de la fortune et quizz audio pour découvrir ses ancètres}</li>                   
+                    <li>💖 {vue en nuage de mots par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant. On peut donner au nuage une forme de rectangle, d'ellipse, de coeur ou d'étoile. Permet de cliquer sur les mots et d'avoir les listes de personnes et la géolocalisation. Permet aussi d'avoir des statistiques et des graphes.}</li>
+                    <li>📊 {statistiques par prénoms/noms/lieux/profession/durée de vie/age de procréation/age au 1ier enfant/nombre d'enfant}</li>
+                    <li>🌍 {geolocalisation des personnes de l'arbre, en mode carte de chaleur pour un groupe de personnes, ou lieux précis d'une personne}</li>
+                    <li>❓ {FAQ: questions les plus fréquentes}</li>
+                    <li>📞 {contact: pour des questions ou demandes}</li>
+                    <li>💡 {aide / documentation / tuto}</li>
+                    <li>👆 / 🚫 { 👆 afficher les boutons sur l'écran / 🚫 cacher les boutons}</li>
+                    <li>🗣️ / 🔇 {voix activé / désactivée.  Sélection de la voix}</li>
+                    <li>➕ / ➖ {agrandir / réduire}</li>
+                    <li>🔌📺 {connection HDMI avec une télé}</li>
+                    <li>⚙️ {paramètres}</li>
+                    <li>🔙 {retour}</li>
+                    <li>🔊 / 🔇{ activer / désactiver le son}</li>
+                    <li>▶️ / ⏸️ { play / pause de l'animation}</li>
+                    <li>☰ {menu}</li>
+                    <li>🎵 {player audio}</li>
+                    <li>🔄 {retour arrière / Paramètres par Défaut}</li>    
+                    <li>⤡ {agrandir}</li>    
+                    <li>✥ {déplacer}</li>    
+                    <li>X  {fermer}</li>    
+                    <li>👶 {naissance}</li>    
+                    <li>💍 {marriage}</li>    
+                    <li>✝️ {décès}</li>    
+                    <li>🏠 {résidence}</li>     
+                    <li>💼 {métier}</li>    
+                    <li>✓ ou ✶ {racine}</li> 
+                    <li>🔤 {tri par odre alphabétique}</li>    
                     fullScreen                               
-                    
                 </ol>
                 <div class="video-example">
                     <h4>{quickVideoDemo}</h4>

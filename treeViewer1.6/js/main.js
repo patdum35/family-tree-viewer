@@ -974,7 +974,7 @@ export let audioUnlocked = false;
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
-export async function loadData(isfromNonEncryptedFile = '') {
+export async function loadData(isfromNonEncryptedFile = '', speechCapturedData = null) {
 
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = 'none';
@@ -1041,6 +1041,23 @@ export async function loadData(isfromNonEncryptedFile = '') {
     
     state.firstName = document.getElementById('input-form-firstName').value;
     state.lastName = document.getElementById('input-form-lastName').value;
+
+        
+    console.log('\n\n --------------- debug speechCapturedData', speechCapturedData); 
+    if (speechCapturedData) {
+        if (speechCapturedData.prenom) { 
+            state.firstName = speechCapturedData.prenom ;
+            localStorage.setItem('firstName', speechCapturedData.prenom );
+            document.getElementById('input-form-firstName').value = speechCapturedData.prenom;
+        }
+        if (speechCapturedData.nom) { 
+            state.lastName = speechCapturedData.nom ;
+            localStorage.setItem('lastName', speechCapturedData.nom );
+            document.getElementById('input-form-lastName').value = speechCapturedData.nom;
+        }
+    }
+
+
 
 
     // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
