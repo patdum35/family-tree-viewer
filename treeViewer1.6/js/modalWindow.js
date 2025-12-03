@@ -962,7 +962,8 @@ async function startQuiz(personId)
 window.startQuiz = startQuiz; 
 
 
-async function readPersonSheet(personId) {
+export async function readPersonSheet(personId, detectedAction = null) {
+
     const personData = state.gedcomData.individuals[personId];
     const person = [];
     person.id = personData.id;
@@ -989,7 +990,7 @@ async function readPersonSheet(personId) {
             state.isVoiceSelected = false;
         }
     }
-    readPersonDetails(person);  
+    readPersonDetails(person, detectedAction);  
 }
 window.readPersonSheet = readPersonSheet; 
    

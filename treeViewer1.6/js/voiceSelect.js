@@ -2,7 +2,7 @@ import { state, loadData } from './main.js';
 import { initSpeechSynthesis } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { findPersonsBy } from './searchModalUI.js';
-import { speakPersonName } from './treeAnimation.js';
+import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
 
 
 
@@ -735,7 +735,7 @@ const SpeechRecognitionUI = (function() {
 
 
 
-    function processFullTranscript(transcript) {
+    async function processFullTranscript(transcript) {
 
         let config = localConfig;
         let commandActionMap = null;
@@ -754,7 +754,7 @@ const SpeechRecognitionUI = (function() {
                 // 'go': handleValidationAndExit,
                 // 'entrez': handleValidationAndExit,
                 // 'entrée': handleValidationAndExit,
-                'arrêter l\'écoute': arreterEcouteAction 
+                'arrêter': arreterEcouteAction 
             };
             // commands = Object.keys(commandActionMap); 
         }
@@ -823,10 +823,11 @@ const SpeechRecognitionUI = (function() {
             // 3. Enregistrer Validation
             // capturedEntities['entrez'] = words[words.length - 1]; 
 
-            document.getElementById('stt-result-display').textContent = `✅ Mode structuré détecté. Action: ${detectedAction.toUpperCase()}, Prénom: ${capturedEntities['prénom']}, Nom: ${capturedEntities['nom']}.`;
+            document.getElementById('stt-result-display').textContent = `✅ Mode structuré détecté. Action: ${detectedAction.toUpperCase()}, Prénom: ${capturedEntities['prenom']}, Nom: ${capturedEntities['nom']}.`;
             updateEntityUI();
 
-            if (capturedEntities['action'] === 'chercher' && capturedEntities['prenom'] !== 'non détecté' && capturedEntities['nom'] !== 'non détecté') { 
+            // if (capturedEntities['action'] === 'chercher' && capturedEntities['prenom'] !== 'non détecté' && capturedEntities['nom'] !== 'non détecté') { 
+            if (capturedEntities['prenom'] !== 'non détecté' && capturedEntities['nom'] !== 'non détecté') { 
     
                 const config = {
                     type: 'name', //state.treeMode,
@@ -844,9 +845,10 @@ const SpeechRecognitionUI = (function() {
 
                 console.log('\n\n\n ------------   debug0 : personne trouvée ??? ---------', res, res.results[0]);
                 let lastAlternativeNameFound = null;
+                let othernames = null;
                 if (res.results.length === 0) {
                     // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
-                    const othernames = generatePhoneticAlternatives(capturedEntities['nom']);
+                    othernames = generatePhoneticAlternatives(capturedEntities['nom']);
                     console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
                     if (othernames.length > 0) {
                         othernames.forEach(name => { 
@@ -857,16 +859,27 @@ const SpeechRecognitionUI = (function() {
                         });
                     }
                 }
-                if (res.results.length > 0 || res2.results.length > 0 ) {
+                if (res.results.length > 0 || (othernames && othernames.length > 0 && res2.results.length > 0 )) {
                     const name = (res.results.length > 0) ? capturedEntities['nom'] : lastAlternativeNameFound;
-                    let textToTell = 'la personne ' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée !';
-
+                    let textToTell = 'la personne ' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée ! Voici sa fiche';
+                    arreterEcouteAction();
                     console.log('\n\n\n ------------   debug : ', textToTell);
-
-                    // textToTell = 'la personne /' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée !';
-
                     // speakPersonName(textToTell, true, false);
-                    speakText(textToTell);
+                    // speakText(textToTell);
+                    await speakTextWithWaitToEnd(textToTell);
+                    let personId = (res.results.length > 0) ? res.results[0].id : res2.results[0].id;
+                    displayPersonDetails(personId);
+                    readPersonSheet(personId, detectedAction);
+                    hideUI();
+
+                } else {
+                    let textToTell = 'la personne ' + capturedEntities['prenom'] + ' ' + capturedEntities['nom'] + ' n\'a pas été trouvée ! Ré-essayer';
+                    console.log('\n\n\n ------------   debug : ', textToTell, cumulativeTranscript);
+                    await speakTextWithWaitToEnd(textToTell);
+                    // supprimer le dernier mot d'activatio 'GO', pour éviter de répeter plusieurs la phrase 
+                    // words.pop(); 
+                    cumulativeTranscript = ''; //cumulativeTranscript.trim().split(" ").slice(0, -1).join(" ");
+                    console.log('\n\n\n ------------   debug words after pop: ',  cumulativeTranscript);
                 }
             }
 
@@ -1569,6 +1582,49 @@ export function speakText(text) {
     } else {
         console.warn("Pas de voix sélectionnée pour speakText.");
     }
+}
+
+
+
+/**
+ * Prononce un texte en utilisant la voix sélectionnée et attend la fin de la prononciation.
+ * @param {string} text - Le texte à prononcer.
+ * @returns {Promise<void>} Une promesse qui se résout lorsque la prononciation est terminée.
+ */
+export function speakTextWithWaitToEnd(text) {
+    return new Promise((resolve, reject) => { // La fonction retourne une Promesse
+        
+        const voiceToUse = VoiceSelectorUI.getSelectedVoice();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // --- GESTION DES ÉVÉNEMENTS POUR LA PROMESSE ---
+        
+        // 1. Événement de FIN : Résout la promesse
+        utterance.onend = () => {
+            console.log("Prononciation terminée pour :", text);
+            resolve(); // La prononciation est finie, on résout la Promesse.
+        };
+
+        // 2. Événement d'ERREUR : Rejette la promesse
+        utterance.onerror = (event) => {
+            console.error("Erreur de prononciation:", event.error);
+            // On utilise la fonction reject() pour indiquer l'échec.
+            reject(new Error(`Erreur de synthèse vocale: ${event.error}`)); 
+        };
+        
+        // ------------------------------------------------
+        
+        if (voiceToUse) {
+            utterance.voice = voiceToUse;
+            utterance.lang = voiceToUse.lang;
+            window.speechSynthesis.speak(utterance);
+        } else {
+            const warning = "Pas de voix sélectionnée pour speakText. Résolution immédiate.";
+            console.warn(warning);
+            // Si l'on ne parle pas, on résout immédiatement la Promesse.
+            resolve(); 
+        }
+    });
 }
 
 
