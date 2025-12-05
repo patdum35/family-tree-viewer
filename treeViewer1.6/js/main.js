@@ -28,7 +28,7 @@ import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 import { enableBackground } from './backgroundManager.js';
-import { loadVoices } from './voiceSelect.js';
+import { loadVoices, speakText } from './voiceSelect.js';
 
 import { 
     displayPersonDetails, 
@@ -229,6 +229,7 @@ export const state = {
     layoutResult: null,
     selectedVoice: null,
     selectedVoiceName: null,
+    initialSpeechReconitionIsLaunched: false,
 };
 
 export { geocodeLocation };
@@ -1044,7 +1045,7 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
         
     console.log('\n\n --------------- debug speechCapturedData', speechCapturedData); 
-    if (speechCapturedData) {
+    if (speechCapturedData && state.initialSpeechReconitionIsLaunched) {
         if (speechCapturedData.prenom) { 
             state.firstName = speechCapturedData.prenom ;
             localStorage.setItem('firstName', speechCapturedData.prenom );
@@ -1815,7 +1816,15 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         openSearchModal(state.firstName,  state.lastName );
         if (window.currentSearchResults.length === 1) {
            personInit = window.currentSearchResults[0];
+           if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName + ' a été trouvée')
+           }
+        } else {
+           if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName + ' n\'a pas été trouvée')            
+           }
         }
+        state.initialSpeechReconitionIsLaunched = false;
     }
 
     let person = null; 
