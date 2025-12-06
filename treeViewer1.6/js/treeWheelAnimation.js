@@ -1453,6 +1453,61 @@ function getFortuneText(textType) {
             "es": "Morí",
             "hu": "Meghaltam"
         },
+        clueAge: {
+            "fr": "J'ai",
+            "en": "I am",
+            "es": "Tengo",
+            "hu": "Én vagyok"
+        },
+        clueAgePast: {
+            "fr": "J'ai eu",
+            "en": "I was",
+            "es": "Tuve",
+            "hu": "Voltam"
+        },
+
+
+        AgeNotKnown : {
+            "fr" : "l'age n'est pas connu",
+        },
+        birtDateNotKnown : {
+            "fr" : "la date de maissance n'est pas connue",
+        },
+        deathDateNotKnown : {
+            "fr" : "la date de décès n'est pas connue",
+        },
+        placeNotKnown : {
+            "fr" : "le lieu n'est pas connu",
+        },
+        occupationNotKnown : {
+            "fr" : "le métier n'est pas connu",
+        },
+        spouseNotKnown : {
+            "fr" : "le conjoint n'est pas connu",
+        },
+        childrenNotKnown : {
+            "fr" : "les enfants ne sont pas connus",
+        },
+        fatherNotKnown : {
+            "fr" : "le père n'est pas connu",
+        },
+        motherNotKnown : {
+            "fr" : "la mère n'est pas connue",
+        },
+        siblingsNotKnown : {
+            "fr" : "les frères et soeurs ne sont pas connus",
+        },
+        historicalNotKnown : {
+            "fr" : "le contexte historique n'est pas connu",
+        },
+        noteNotKnown : {
+            "fr" : "il n'y a pas de note connu",
+        },
+
+
+
+
+
         clueLieu: {
             "fr": "à",
             "en": "in",
@@ -1644,7 +1699,14 @@ function getFortuneText(textType) {
             "en": "Show details",
             "es": "Ver ficha", 
             "hu": "Részletek mutatása"
+        },
+        years: {
+            "fr": "ans",
+            "en": "years old",
+            "es": "años", 
+            "hu": "éves"
         }
+
     };
 
     // AJOUT : Vérification de sécurité
@@ -2854,7 +2916,7 @@ export function showQuizMessage(winner) {
 
 
 // Fonction pour afficher le quiz progressif
-export async function readPersonDetails(winner) {
+export async function readPersonDetails(winner, detectedAction = null) {
     const quizMessage = document.createElement("div");
     quizMessage.style.cssText = `
         position: fixed;
@@ -2888,8 +2950,8 @@ export async function readPersonDetails(winner) {
     `;
     
     // Préparer les indices dans l'ordre spécifié
-    const clues = prepareDetailsForReading(winner);
-    console.log("Indices préparés pour", winner.name, ":", clues);
+    const [clues, cluesLabels] = prepareDetailsForReading(winner);
+    console.log("Indices préparés pour", winner.name, ":", clues, cluesLabels, detectedAction);
     
     quizMessage.innerHTML = `
         <div style="font-size: 32px; margin: 5px 0;">🧠</div>
@@ -2991,27 +3053,188 @@ export async function readPersonDetails(winner) {
         
         // Afficher la solution en premier
         await showSolutionAsync();
+
+        //'sex', 'birthDate', 'deathDate', 'occupation_n', 'residences_n', 'children', 'father', 'mother', 'siblings', 'spouse', 'historical','notes'
+
+        let start = 0;
+        let end = clues.length;
+        let idx = -1;
+        console.log('\n\n -----------   debug before detectedAction', detectedAction, cluesLabels)
+
+        if (detectedAction) {
+            if (detectedAction.includes('readSheet')) {
+                idx = -2;
+            } else if (detectedAction.includes('search') || detectedAction.includes('research') ) {
+                idx = 0;
+            } else if (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast') ) {
+                idx = cluesLabels.indexOf('age');
+            } else if (detectedAction.includes('whenBorn') ) {
+                idx = cluesLabels.indexOf('birthDate');
+            } else if (detectedAction.includes('whenDead') || detectedAction.includes('whenDeadW')  || detectedAction.includes('whenDied')) {
+                idx = cluesLabels.indexOf('deathDate');
+
+            } else if (detectedAction.includes('whereLive') || detectedAction.includes('whereLivePast') ) {
+                idx = cluesLabels.indexOf('residences_n');
+            } else if (detectedAction.includes('whatProfession') || detectedAction.includes('whatProfessionPast') || detectedAction.includes('whatOccupation') || detectedAction.includes('whatOccupationPast') ) {
+                idx = cluesLabels.indexOf('occupation_n');
+
+            } else if (detectedAction.includes('whoMarried') || detectedAction.includes('whoMarriedPast')) {
+                idx = cluesLabels.indexOf('spouse');
+            } else if (detectedAction.includes('howManyChildren') || detectedAction.includes('howManyChildrenPast') ) {
+                idx = cluesLabels.indexOf('children');
+            } else if (detectedAction.includes('whoIsFather') || detectedAction.includes('whoIsFatherPast') ) {
+                idx = cluesLabels.indexOf('father');
+            } else if (detectedAction.includes('whoIsMother')  || detectedAction.includes('whoIsMotherPast')) {
+                idx = cluesLabels.indexOf('mother');
+            } else if (detectedAction.includes('whoAreSibling') || detectedAction.includes('whoAreSiblingPast') ) {
+                idx = cluesLabels.indexOf('siblings');
+            } else if (detectedAction.includes('whatIsHistorical') || detectedAction.includes('whatIsHistoricalPast') ) {
+                idx = cluesLabels.indexOf('historical');
+            } else if (detectedAction.includes('whatAreNotes') ) {
+                idx = cluesLabels.indexOf('notes');
+            }
+
+
+            if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
+            if (idx === -2) { start = 0; end = clues.length; }
+        }
         
         // Puis afficher les indices un par un
-        for (let i = 0; i < clues.length; i++) {
+        for (let i = start; i < end; i++) {
             if (isPaused) {
                 // Attendre que la lecture reprenne
                 await waitForResume();
             }
             
             const clue = clues[i];
-            console.log("🧩 Indice ajouté:", clue);
-            await showNextClueAsync();
+            console.log("🧩 Indice ajouté:", clue, i, clues );
+            await showNextClueAsync(start);
             
             // Petite pause entre chaque indice si pas en pause
             if (!isPaused) {
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
         }
+
+
+        if (idx === -1 && detectedAction) {
+            setTimeout(() => {
+                if (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast')) {speakClue(getFortuneText('AgeNotKnown'), false); }
+                else if (detectedAction.includes('whenBorn') ) { speakClue(getFortuneText('birtDateNotKnown'), false); }
+                else if (detectedAction.includes('whenDead') || detectedAction.includes('whenDeadW') ) { speakClue(getFortuneText('deathDateNotKnown'), false); }
+                else if (detectedAction.includes('whereLive') || detectedAction.includes('whereLivepast') ) { speakClue(getFortuneText('placeNotKnown'), false); }
+                else if (detectedAction.includes('whatProfession') || detectedAction.includes('whatProfessionPast') || detectedAction.includes('whatOccupation') || detectedAction.includes('whatOccupationPast') ) { speakClue(getFortuneText('occupationNotKnown'), false); }
+                else if (detectedAction.includes('whoMarried') || detectedAction.includes('whoMarriedPast')) { speakClue(getFortuneText('spouseNotKnown'), false); }
+                else if (detectedAction.includes('howManyChildren') || detectedAction.includes('howManyChildrenPast') ) { speakClue(getFortuneText('childrenNotKnown'), false); }
+                else if (detectedAction.includes('whoIsFather') || detectedAction.includes('whoIsFatherPast')) { speakClue(getFortuneText('fatherNotKnown'), false); }
+                else if (detectedAction.includes('whoIsMother') || detectedAction.includes('whoIsMotherPast')) { speakClue(getFortuneText('motherNotKnown'), false); }
+                else if (detectedAction.includes('whoAreSibling') || detectedAction.includes('whoAreSiblingPast')) { speakClue(getFortuneText('siblingsNotKnown'), false); }
+                else if (detectedAction.includes('whatIsHistorical') || detectedAction.includes('whatIsHistoricalPast') ) { speakClue(getFortuneText('historicalNotKnown'), false); }
+                else if (detectedAction.includes('whatAreNotes') ) { speakClue(getFortuneText('noteNotKnown'), false); }
+            }, 100);
+        }
+
         
         isReading = false;
     }
+
+
+
+
+    // async function playAllCluesSequentially() {
+    //     isReading = true;
+        
+    //     // Afficher la solution en premier
+    //     await showSolutionAsync();
+
+    //     //'sex', 'birthDate', 'deathDate', 'occupation_n', 'residences_n', 'children', 'father', 'mother', 'siblings', 'spouse', 'historical','notes'
+    //     let start = 0;
+    //     let end = clues.length;
+    //     let idx = -1;
+    //     console.log('\n\n -----------   debug before detectedAction', detectedAction, cluesLabels)
+    //     if (detectedAction && (detectedAction.includes('readSheet') || detectedAction.includes('research') )) {
+    //         idx = 0;
+    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, start, end)
+    //     } else if (detectedAction && (detectedAction.includes('search') || detectedAction.includes('research') )) {
+    //         start = 0; end = 0;
+    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, start, end);
+    //         idx = 0;
+    //     } else if (detectedAction && (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast') )) {
+    //         idx = cluesLabels.indexOf('age');
+    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
+    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
+    //     } else if (detectedAction && (detectedAction.includes('whenBorn') )) {
+    //         idx = cluesLabels.indexOf('birthDate');
+    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
+    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
+    //     } else if (detectedAction && (detectedAction.includes('whenDead') || detectedAction.includes('whenDeadW')  || detectedAction.includes('whenDied'))) {
+    //         idx = cluesLabels.indexOf('deathDate'); 
+    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
+    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
+    //     } else
+        
+    //     // Puis afficher les indices un par un
+    //     for (let i = start; i < end; i++) {
+    //         if (isPaused) {
+    //             // Attendre que la lecture reprenne
+    //             await waitForResume();
+    //         }
+            
+    //         const clue = clues[i];
+    //         console.log("🧩 Indice ajouté:", clue, i, clues );
+    //         await showNextClueAsync(start);
+            
+    //         // Petite pause entre chaque indice si pas en pause
+    //         if (!isPaused) {
+    //             await new Promise(resolve => setTimeout(resolve, 500));
+    //         }
+    //     }
+
+    //     setTimeout(() => {
+    //     if (detectedAction && (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast') ) && idx === -1) {
+
+    //             speakClue('l\'age n\'est pas connu', false);
+    //     } 
+    //     }, 100);
+
+        
+    //     isReading = false;
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Fonction pour attendre la reprise de lecture
     function waitForResume() {
         return new Promise(resolve => {
@@ -3027,11 +3250,12 @@ export async function readPersonDetails(winner) {
     }
     
     // Fonction pour afficher l'indice suivant
-    async function showNextClueAsync() {
-        console.log("showNextClue appelée - currentClueIndex:", currentClueIndex, "clues.length:", clues.length, "gameFinished:", gameFinished);
+    async function showNextClueAsync(start = null) {
+        console.log("showNextClue appelée - currentClueIndex:", currentClueIndex, "clues.length:", clues.length, "gameFinished:", gameFinished, 'start:',start);
 
         if (currentClueIndex < clues.length - 1 && !gameFinished) {
-            currentClueIndex++;
+            if (start ===0 ) { currentClueIndex++;}
+            else { currentClueIndex = start;}
             const clue = clues[currentClueIndex];
             
             const clueDiv = document.createElement('div');
@@ -3373,6 +3597,125 @@ export async function readPersonDetails(winner) {
 }
 
 
+
+/**
+ * Tente d'extraire la partie 'YYYY-MM-DD' d'une date GEDCOM brute (avant traduction),
+ * supportant les années entre -500 et 3000 (y compris les années courtes ou négatives).
+ * @param {string} dateStr - Date au format GEDCOM (ex: "ABT 1 JAN 10", "-50", "3 MAR 1930").
+ * @returns {string|null} - Date au format 'YYYY-MM-DD' (ou -YYYY) ou null.
+ */
+function extractStandardDate(dateStr) {
+    if (!dateStr) {
+        return null;
+    }
+
+    const monthReplacementMap = {
+        'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+        'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+        'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+    };
+
+    let cleanedDate = dateStr.toUpperCase();
+    
+    // 1. Nettoyage et normalisation de l'entrée
+    cleanedDate = cleanedDate.replace(/(ABT|ABOUT|BEF|BEFORE|AFT|AFTER|BET|BETWEEN|AND|FROM|TO|EST|ESTIMATED|CAL|CALCULATED)\s+/g, ' ').trim();
+
+    let day = '01';
+    let month = '01';
+    let year;
+    let standardDate;
+
+    // 2. Recherche du format complet: Jour Mois Année (ex: 1 JAN 10)
+    let match = cleanedDate.match(/(\d{1,2})\s(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s(-?\d{1,4})/);
+    
+    if (match) {
+        day = match[1].padStart(2, '0');
+        month = monthReplacementMap[match[2]];
+        year = match[3];
+        standardDate = `${year}-${month}-${day}`;
+        return standardDate;
+    }
+
+    // 3. Recherche du format: Mois Année (ex: JAN 800)
+    match = cleanedDate.match(/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s(-?\d{1,4})/);
+    
+    if (match) {
+        month = monthReplacementMap[match[1]];
+        year = match[2];
+        standardDate = `${year}-${month}-${day}`; // Jour par défaut: 01
+        return standardDate;
+    }
+
+    // 4. Recherche du format: Année seule (ex: 5, -10, 1930)
+    match = cleanedDate.match(/^(-?\d{1,4})$/);
+    
+    if (match) {
+        year = match[1];
+        standardDate = `${year}-${month}-${day}`; // Mois et Jour par défaut: 01-01
+        return standardDate;
+    }
+
+    return null;
+}
+
+
+/**
+ * Calcule l'âge d'une personne en années entières, en gérant les années historiques/négatives.
+ * L'âge est calculé entre la date de naissance et la date de décès,
+ * ou entre la date de naissance et la date du jour si la personne est vivante. 
+* @param {string} birthDateStr - Date de naissance au format GEDCOM BRUT.
+ * @param {string} [deathDateStr] - Date de décès au format GEDCOM BRUT (optionnel).
+ * @returns {number|null} - L'âge en années entières, ou null si la date de naissance est invalide.
+ */
+export function calculateAge(birthDateStr, deathDateStr) {
+    // 1. Extraire les dates au format standard, incluant les années négatives
+    const standardBirthDateStr = extractStandardDate(birthDateStr);
+    if (!standardBirthDateStr) {
+        return null;
+    }
+
+    const standardDeathDateStr = extractStandardDate(deathDateStr);
+    
+    // Déterminer la date de fin
+    const endDateStr = standardDeathDateStr || new Date().toISOString().substring(0, 10);
+
+    // 2. Parser les composants AAAA-MM-JJ
+    const [birthYearStr, birthMonth, birthDay] = standardBirthDateStr.split('-');
+    const [endYearStr, endMonth, endDay] = endDateStr.split('-');
+
+    // Convertir les années. Utiliser parseFloat pour gérer le signe négatif
+    const birthYear = parseFloat(birthYearStr);
+    const endYear = parseFloat(endYearStr);
+
+    // Convertir mois et jour en nombres (le parsing des dates GEDCOM renvoie des chaînes)
+    const bMonth = parseInt(birthMonth);
+    const bDay = parseInt(birthDay);
+    const eMonth = parseInt(endMonth);
+    const eDay = parseInt(endDay);
+
+    // 3. Calcul de la différence d'années (méthode proleptique)
+    // C'est l'opération la plus fiable pour les grandes étendues d'années.
+    let age = endYear - birthYear;
+
+    // 4. Ajustement de l'âge (si l'anniversaire n'est pas encore passé)
+    
+    // On compare le mois de la date de fin avec le mois de naissance
+    if (eMonth < bMonth) {
+        age--;
+    } 
+    // Si les mois sont les mêmes, on compare le jour
+    else if (eMonth === bMonth && eDay < bDay) {
+        age--;
+    }
+
+    // Si la date de naissance est après la date de fin (âge négatif)
+    if (age < 0) {
+        // En généalogie, l'âge négatif est une erreur de donnée
+        return null;
+    }
+    
+    return age;
+}
 
 
 function formatDateForClue(dateString) {
@@ -3795,6 +4138,7 @@ function prepareProgressiveClues(person) {
 // Fonction pour préparer les indices progressifs
 function prepareDetailsForReading(person) {
     const clues = [];
+    const cluesLabels = [];
     console.log("prepareProgressiveClues - person:", person);
     console.log("person.id:", person.id);
     console.log("state.gedcomData.individuals[person.id]:", state.gedcomData.individuals[person.id]);
@@ -3803,7 +4147,7 @@ function prepareDetailsForReading(person) {
     
     if (!personData) {
         console.log("❌ PersonData introuvable pour", person.id);
-        return clues;
+        return [clues, cluesLabels];
     }
     console.log("✅ PersonData trouvée:", personData);
 
@@ -3812,7 +4156,7 @@ function prepareDetailsForReading(person) {
         const sexClue = personData.sex === 'M' 
             ? getFortuneText('clueSexMale') 
             : getFortuneText('clueSexFemale');
-        clues.push(sexClue);
+        clues.push(sexClue); cluesLabels.push('sex');
     }
     
     // 2. Date et lieu de naissance
@@ -3821,7 +4165,7 @@ function prepareDetailsForReading(person) {
         if (personData.birthPlace) {
             clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.birthPlace)}`;
         }
-        clues.push(clue);
+        clues.push(clue); cluesLabels.push('birthDate');
     }
     
     // 3. Date et lieu de décès
@@ -3830,16 +4174,27 @@ function prepareDetailsForReading(person) {
         if (personData.deathPlace) {
             clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(personData.deathPlace)}`;
         }
-        clues.push(clue);
+        clues.push(clue); cluesLabels.push('deathDate');
     }
+
+    // 3bis.age
+    if (personData.birthDate)  {
+        let prefix = (personData.deathDate) ? getFortuneText('clueAgePast') : getFortuneText('clueAge');
+        let clue = `${prefix} ${calculateAge(personData.birthDate, personData.deathDate)} ${getFortuneText('years')}`;
+        if ( (personData.birthDate && personData.deathDate)   ||  (!personData.deathDate && calculateAge(personData.birthDate, personData.deathDate) < 95)) {
+            clues.push(clue); cluesLabels.push('age');
+        }
+    }
+
     
     // 4. Métier
     if (personData.occupationFull) {
         const cleanedProfessions = cleanProfession(personData.occupationFull);
-        cleanedProfessions.forEach(prof => {
+        cleanedProfessions.forEach((prof, index) => {
             if (prof) {
                 const translatedProf = translateOccupation(prof, window.CURRENT_LANGUAGE || 'fr');
-                clues.push(`${getFortuneText('clueMetier')} ${translatedProf}`);
+                clues.push(`${getFortuneText('clueMetier')} ${translatedProf}`); 
+                cluesLabels.push('occupation_'+index);
             }
         });
     }
@@ -3853,8 +4208,9 @@ function prepareDetailsForReading(person) {
     ].filter(r => r.place);
     
     if (residences.length > 0) {
-        residences.forEach(residence => {
+        residences.forEach((residence, index) => {
             clues.push(`${getFortuneText('clueResidence')} ${cleanLocation(residence.place)}`);
+            cluesLabels.push('residences_'+index);
         });
     }
     
@@ -3873,6 +4229,7 @@ function prepareDetailsForReading(person) {
             
             if (childNames) {
                 clues.push(`${getFortuneText('clueEnfants')} ${family.children.length} ${getFortuneText('enfants')} : ${childNames}`);
+                cluesLabels.push('children');
             }
         }
     }
@@ -3890,6 +4247,7 @@ function prepareDetailsForReading(person) {
             if (father) {
                 const fatherName = father.name.replace(/\//g, '');
                 clues.push(`${getFortuneText('cluePere2')} ${fatherName}`);
+                cluesLabels.push('father');
             }
         }
     }
@@ -3902,6 +4260,7 @@ function prepareDetailsForReading(person) {
             if (mother) {
                 const motherName = mother.name.replace(/\//g, '');
                 clues.push(`${getFortuneText('clueMere2')} ${motherName}`);
+                cluesLabels.push('mother');
             }
         }
     }
@@ -3969,7 +4328,7 @@ function prepareDetailsForReading(person) {
                     }
                 }
                 
-                clues.push(siblingClue);
+                clues.push(siblingClue); cluesLabels.push('siblings');
             }
         }
     }
@@ -3990,7 +4349,7 @@ function prepareDetailsForReading(person) {
                     if (family.marriagePlace) {
                         clue += ` ${getFortuneText('clueLieu')} ${cleanLocation(family.marriagePlace)}`;
                     }
-                    clues.push(clue);
+                    clues.push(clue); cluesLabels.push('spouse');
                 }
             }
         }
@@ -4012,7 +4371,7 @@ function prepareDetailsForReading(person) {
                 contextClue += ` ${context.governmentType.type}`;
             }
             
-            clues.push(contextClue);
+            clues.push(contextClue); cluesLabels.push('historical');
         }
     }
 
@@ -4047,14 +4406,12 @@ function prepareDetailsForReading(person) {
                                         : `${noteText}`
                                 ).join('')
                 );
+                cluesLabels.push('notes');
         }
     }
 
-
-
-
     
-    return clues;
+    return [clues, cluesLabels];
 }
 
 // Fonction Instructions pour l'utilisateur  
