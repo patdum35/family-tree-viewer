@@ -1006,8 +1006,7 @@ const SpeechRecognitionUI = (function() {
         targetSpellingField = null;
         pendingSpellingStart = false;
 
-        // recognition.continuous = !state.isMobile;
-        recognition.continuous = true;
+        recognition.continuous = !state.isMobile;
         recognition.grammars = new SpeechGrammarList(); 
         
         document.getElementById('stt-result-display').textContent = `✅ Épellation terminée. Valeur enregistrée: "${finalValue}"`;
@@ -1391,8 +1390,7 @@ const SpeechRecognitionUI = (function() {
                     else { await speakTextWithWaitToEnd(textToTell, 1.0); }
                     // hideUI();
                     recognition.start();
-                    // if (!state.isMobile) {
-                    if (true) {
+                    if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
@@ -1418,8 +1416,7 @@ const SpeechRecognitionUI = (function() {
                     console.log('\n\n\n ------------   debug words after fail: ',  cumulativeTranscript);
 
                     recognition.start();
-                    // if (!state.isMobile) {
-                    if (true) {
+                    if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
@@ -1453,8 +1450,7 @@ const SpeechRecognitionUI = (function() {
                     speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
                 }
                 recognition.start();
-                // if (!state.isMobile) {
-                if (true) {
+                if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
@@ -1633,9 +1629,7 @@ const SpeechRecognitionUI = (function() {
         recognition.grammars = new SpeechGrammarList(); 
         
         recognition.lang = targetLang; 
-        // recognition.continuous = !state.isMobile; 
-        recognition.continuous = true; 
-
+        recognition.continuous = !state.isMobile; 
         recognition.interimResults = true; 
 
         recognition.onstart = () => {
@@ -1655,8 +1649,7 @@ const SpeechRecognitionUI = (function() {
         recognition.onresult = (event) => {
             let interimTranscript = '';
             
-            // if (!state.isMobile) {
-            if (true) {
+            if (!state.isMobile) {
                 clearTimeout(recognitionTimeout);
                 recognitionTimeout = setTimeout(() => {
                     if (isRecording) {
@@ -1812,6 +1805,9 @@ const SpeechRecognitionUI = (function() {
 
 
         recognition.onend = () => {
+            // 🚨 CONSTANTE POUR LE DÉLAI ANTI-BRUIT
+            const ANTI_NOISE_DELAY_MS = 150; // Augmenté à 150ms pour une meilleure stabilisation
+
             clearTimeout(recognitionTimeout); 
             
             if (pendingSpellingStart) {
@@ -1821,7 +1817,7 @@ const SpeechRecognitionUI = (function() {
                 recognition.continuous = false; 
                 recognition.grammars = spellingGrammar; 
                 
-                // 🚨 MODIFICATION : Ajout d'un délai anti-bruit de 50ms avant le start()
+                // 🚨 MODIFICATION : Application du délai anti-bruit (150ms)
                 setTimeout(() => {
                     try {
                         recognition.start();
@@ -1832,13 +1828,13 @@ const SpeechRecognitionUI = (function() {
                         isSpellingMode = false;
                         updateButtonUI(false);
                     }
-                }, 50); // Délai minimal pour stabiliser le micro
+                }, ANTI_NOISE_DELAY_MS);
                 
             } 
             
             else if (isRecording && isSpellingMode) { 
                 
-                // 🚨 MODIFICATION : Ajout d'un délai anti-bruit de 50ms avant le start()
+                // 🚨 MODIFICATION : Application du délai anti-bruit (150ms)
                 setTimeout(() => {
                     try {
                         recognition.start();
@@ -1850,7 +1846,7 @@ const SpeechRecognitionUI = (function() {
                         updateButtonUI(false);
                         document.getElementById('stt-result-display').textContent = `⚠️ Épellation interrompue par erreur critique. Redémarrez manuellement.`;
                     }
-                }, 50); // Délai minimal pour stabiliser le micro
+                }, ANTI_NOISE_DELAY_MS); 
                 
             } 
             
@@ -1861,13 +1857,8 @@ const SpeechRecognitionUI = (function() {
                     processFullTranscript(cumulativeTranscript.trim(), config, 'onEnd');
                 }
 
-                // if (state.isMobile) {
-                if (false) {
-                    // 🚨 VÉRIFICATION : Ce délai est déjà long (1500ms) et ne devrait pas causer de bruit de démarrage.
-                    // Cependant, pour la cohérence, si vous relancez l'écoute SANS le traitement (ligne 32),
-                    // il est mieux de garder un délai long ici, ou d'appliquer un délai court à l'intérieur du setTimeout(1500).
-                    // Nous laissons le délai existant de 1500ms car il sert probablement à attendre la réponse de processFullTranscript.
-                    
+                if (state.isMobile) {
+                    // 🚨 MODIFICATION : Standardisation du délai à 150ms (ou gardez 1500ms si c'est nécessaire pour le traitement métier!)
                     setTimeout(() => {
                         if (isRecording) { 
                             try {
@@ -1877,7 +1868,7 @@ const SpeechRecognitionUI = (function() {
                                 isRecording = false; updateButtonUI(false);
                             }
                         }
-                    }, 1500); // Délai qui semble être lié au traitement
+                    }, ANTI_NOISE_DELAY_MS); // Remplacé 1500ms par 150ms
                     
                 } else {
                     isRecording = false;
@@ -2680,10 +2671,7 @@ function updateEntityUI(config = null) {
             pendingSpellingStart = false; 
             // cumulativeTranscript = '';
             
-            // recognition.continuous = !state.isMobile; 
-            recognition.continuous = true;  
-            
-            
+            recognition.continuous = !state.isMobile; 
             recognition.grammars = new SpeechGrammarList(); 
             
             document.getElementById('stt-result-display').textContent = '';
@@ -2691,8 +2679,7 @@ function updateEntityUI(config = null) {
             try {
                 recognition.start();
 
-                // if (!state.isMobile) {
-                if (true) {
+                if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
