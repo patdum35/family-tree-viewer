@@ -990,7 +990,7 @@ export async function readPersonSheet(personId, detectedAction = null) {
             state.isVoiceSelected = false;
         }
     }
-    readPersonDetails(person, detectedAction);  
+    await readPersonDetails(person, detectedAction);  
 }
 window.readPersonSheet = readPersonSheet; 
    

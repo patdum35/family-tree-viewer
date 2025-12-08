@@ -2918,6 +2918,7 @@ export function showQuizMessage(winner) {
 // Fonction pour afficher le quiz progressif
 export async function readPersonDetails(winner, detectedAction = null) {
     const quizMessage = document.createElement("div");
+    quizMessage.id = 'quizz-message';
     quizMessage.style.cssText = `
         position: fixed;
         top: 50%;
@@ -3037,6 +3038,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
     let isPaused = false;
     let isMuted = false;
     let isReading = false;
+
     
     // Éléments DOM
     const cluesContainer = quizMessage.querySelector('#clues-container');
@@ -3046,7 +3048,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
     const resultContainer = quizMessage.querySelector('#result-container');
 
     // Démarrer par la solution puis les indices
-    playAllCluesSequentially();
+    await playAllCluesSequentially();
 
     async function playAllCluesSequentially() {
         isReading = true;
