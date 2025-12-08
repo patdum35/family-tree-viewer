@@ -2679,6 +2679,8 @@ function updateEntityUI(config = null) {
             try {
                 recognition.start();
 
+                speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.05)
+
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
@@ -2814,7 +2816,7 @@ function updateEntityUI(config = null) {
  * Intègre l'annulation des paroles précédentes pour éviter les conflits.
  * * @param {string} text - Le texte à prononcer.
  */
-export function speakText(text) {
+export function speakText(text, volume = 1.0) {
     if (!text) return;
 
     // 1. Annule toujours toute parole en cours pour éviter la file d'attente (glitch secondaire)
@@ -2836,6 +2838,7 @@ export function speakText(text) {
     if (voiceToUse) {
         utterance.voice = voiceToUse;
         utterance.lang = voiceToUse.lang;
+        utterance.volume = volume;
         
         // Optionnel : ajouter des logs de débogage des événements
         // utterance.onstart = () => console.log('Parole démarrée');
