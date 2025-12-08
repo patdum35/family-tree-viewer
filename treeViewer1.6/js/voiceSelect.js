@@ -1806,7 +1806,7 @@ const SpeechRecognitionUI = (function() {
 
         recognition.onend = () => {
             // 🚨 CONSTANTE POUR LE DÉLAI ANTI-BRUIT
-            const ANTI_NOISE_DELAY_MS = 150; // Augmenté à 150ms pour une meilleure stabilisation
+            const ANTI_NOISE_DELAY_MS = 500; // Augmenté à 150ms pour une meilleure stabilisation
 
             clearTimeout(recognitionTimeout); 
             
