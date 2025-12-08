@@ -872,6 +872,10 @@ const SpeechRecognitionUI = (function() {
     let currentEntity = null;
     const ENTITY_TIMEOUT_MS = 3000; // 2 secondes de timeout
 
+
+    let mediaStream = null; // Stocke la référence au flux audio du microphone
+    const ANTI_SILENCE_DELAY_MS = 2000; // Délai de prolongation du silence (2 secondes)
+
     let previousFullTranscript = null;
     let previousFullTranscriptOnResult = null;
     let previousFullTranscriptOnEnd = null;
@@ -2625,7 +2629,39 @@ function updateEntityUI(config = null) {
 
 
 
+    /**
+     * Ouvre le microphone manuellement via getUserMedia et le maintient ouvert.
+     * C'est l'étape CLÉ qui supprime les jingles.
+     */
+    function openMicrophoneStream() {
+        // Si le flux est déjà ouvert, on ne fait rien
+        if (mediaStream) return Promise.resolve(); 
+        
+        // Demande l'accès au microphone (audio: true)
+        return navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaStream = stream;
+                // Optionnel: Connexion à un AudioContext si vous voulez vraiment garantir l'activité, 
+                // mais souvent, juste l'ouverture du stream suffit.
+                console.log("[MIC CONTROL] Flux microphone ouvert et maintenu.");
+            })
+            .catch(err => {
+                console.error("[MIC CONTROL] Erreur à l'ouverture du microphone:", err.message);
+                // Si l'ouverture échoue (ex: permission refusée), on laisse l'ancienne méthode continuer.
+            });
+    }
 
+    /**
+     * Ferme le microphone stream (à appeler uniquement lors de l'arrêt complet par l'utilisateur).
+     */
+    function closeMicrophoneStream() {
+        if (mediaStream) {
+            // Arrête toutes les pistes (tracks) du flux, fermant physiquement le micro.
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+            console.log("[MIC CONTROL] Flux microphone fermé.");
+        }
+    }
 
 
 
@@ -2687,13 +2723,18 @@ function updateEntityUI(config = null) {
             }
 
             try {
+
+                openMicrophoneStream();
+
                 recognition.start();
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
                 // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
                 // speakText(SUPER_LONG_TEXT, 0.5, 1.0); // Juste un espace ou un son très court et discret
-                speakText(SUPER_LONG_TEXT, 0.005, 0.7); // Juste un espace ou un son très court et discret
+                // speakText(SUPER_LONG_TEXT, 0.005, 0.7); // Juste un espace ou un son très court et discret
                 // startTTSLoop();
                 // speakContinuousLoop('aaaaaaaaaaaaaaa', 0.5, 1.0)
+
+
                 
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
