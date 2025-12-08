@@ -2675,11 +2675,26 @@ function updateEntityUI(config = null) {
             recognition.grammars = new SpeechGrammarList(); 
             
             document.getElementById('stt-result-display').textContent = '';
+            // Définissez cette constante quelque part au début de votre fichier JS
+            // const BARELY_AUDIBLE_SOUND = '.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.'; // 30 répétitions d'une virgule/point
+            const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
+            // Nombre de répétitions souhaitées
+            const REPETITIONS = 20; 
+            let SUPER_LONG_TEXT = LONG_PHRASE;
+            // Utilisation d'une boucle for pour garantir la compatibilité
+            for (let i = 0; i < REPETITIONS; i++) {
+                SUPER_LONG_TEXT += LONG_PHRASE;
+            }
 
             try {
                 recognition.start();
-                speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
-                // speakText(' ', 0.9, 0.5); // Juste un espace ou un son très court et discret
+                // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
+                // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
+                // speakText(SUPER_LONG_TEXT, 0.5, 1.0); // Juste un espace ou un son très court et discret
+                speakText(SUPER_LONG_TEXT, 0.005, 0.7); // Juste un espace ou un son très court et discret
+                // startTTSLoop();
+                // speakContinuousLoop('aaaaaaaaaaaaaaa', 0.5, 1.0)
+                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
@@ -2815,7 +2830,7 @@ function updateEntityUI(config = null) {
  * Intègre l'annulation des paroles précédentes pour éviter les conflits.
  * * @param {string} text - Le texte à prononcer.
  */
-export function speakText(text, volume = 1.0) {
+export function speakText(text, volume = 1.0, rate = 1.0) {
     if (!text) return;
 
     // 1. Annule toujours toute parole en cours pour éviter la file d'attente (glitch secondaire)
@@ -2838,6 +2853,7 @@ export function speakText(text, volume = 1.0) {
         utterance.voice = voiceToUse;
         utterance.lang = voiceToUse.lang;
         utterance.volume = volume;
+        utterance.rate = rate;
         
         // Optionnel : ajouter des logs de débogage des événements
         // utterance.onstart = () => console.log('Parole démarrée');
@@ -2909,6 +2925,145 @@ export function speakTextWithWaitToEnd(text, volume = 1.0) {
         }
     });
 }
+
+
+
+
+
+
+
+
+
+let ttsLoopInterval = null; // Variable pour stocker l'ID de l'intervalle
+
+// /**
+//  * Fonction centrale pour générer la parole TTS
+//  * @param {string} text Le texte à lire (un simple espace pour la discrétion)
+//  * @param {number} volume Le volume (entre 0.0 et 1.0)
+//  * @param {number} rate La vitesse (entre 0.1 et 10.0)
+//  */
+// function speakText(text, volume, rate) {
+//     if ('speechSynthesis' in window) {
+//         window.speechSynthesis.cancel(); // Annule tout ce qui est en cours
+        
+//         const utterance = new SpeechSynthesisUtterance(text);
+//         utterance.volume = volume;
+//         utterance.rate = rate;
+        
+//         // La langue est importante pour que le moteur sache comment interpréter l'espace
+//         utterance.lang = 'fr-FR'; // Assurez-vous que la langue est correcte
+
+//         window.speechSynthesis.speak(utterance);
+//     }
+// }
+
+/**
+ * Démarre la boucle de synthèse vocale pour maintenir le focus audio.
+ * Utilise des paramètres audibles pour le test PC.
+ */
+function startTTSLoop(isMobileTest = false) {
+    // Nettoie l'ancien intervalle
+    if (ttsLoopInterval !== null) {
+        clearInterval(ttsLoopInterval);
+    }
+    
+    // 🚨 PARAMÈTRES POUR LE TEST D'AUDIBILITÉ SUR PC
+    let volumeToUse = 0.5; // 50% du volume pour le test PC
+    let intervalDuration = 2000; // Relance toutes les 2 secondes
+
+    if (isMobileTest) {
+        // Paramètres réels pour l'inaudibilité en mobile
+        volumeToUse = 0.01; 
+        intervalDuration = 2000; 
+    }
+    
+    // Fonction qui relance une parole TTS très courte
+    const playSilentSound = () => {
+        // Un simple espace est utilisé
+        speakText('oooooooooooooooooooooooooooooooooooooooo', volumeToUse, 1.0); 
+    };
+
+    // 1. Lance la première fois immédiatement
+    playSilentSound();
+    
+    // 2. Relance la parole de manière continue
+    ttsLoopInterval = setInterval(playSilentSound, intervalDuration); 
+    console.log(`[TTS LOOP] Boucle de parole de fond démarrée. Volume: ${volumeToUse}`);
+}
+
+
+
+let isLoopActive = false; // Drapeau global pour contrôler l'arrêt
+
+/**
+ * Lit la chaîne de manière continue en utilisant l'événement onend.
+ * @param {string} text La chaîne à lire continuellement (ex: 'oooooooooo')
+ * @param {number} volume Le volume (0.0 à 1.0)
+ * @param {number} rate La vitesse (0.1 à 10.0)
+ */
+function speakContinuousLoop(text, volume, rate) {
+    if (!('speechSynthesis' in window)) {
+        console.error("La synthèse vocale n'est pas supportée dans ce navigateur.");
+        return;
+    }
+    
+    // Annule toute parole en cours pour s'assurer que nous commençons à neuf
+    // window.speechSynthesis.cancel();
+    
+    isLoopActive = true;
+    
+    // Crée l'objet utterance qui servira de modèle pour la boucle
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.volume = volume;
+    utterance.rate = rate;
+    utterance.lang = 'fr-FR'; // Assurez-vous que la langue est correcte
+
+    // 🔑 CLÉ : Définition de l'événement de fin de parole
+    utterance.onend = () => {
+        if (isLoopActive) {
+            // Relance immédiatement la lecture de la même utterance
+            window.speechSynthesis.speak(utterance); 
+        }
+    };
+
+    utterance.onerror = (event) => {
+        console.error("Erreur de parole :", event);
+        isLoopActive = false;
+    };
+
+    // Lance la lecture initiale pour démarrer la boucle
+    window.speechSynthesis.speak(utterance);
+    console.log("Boucle de parole continue démarrée.");
+}
+
+
+
+/**
+ * Arrête la boucle de parole de fond et annule la synthèse en cours.
+ */
+function stopTTSLoop() {
+    if (ttsLoopInterval !== null) {
+        clearInterval(ttsLoopInterval);
+        ttsLoopInterval = null;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); 
+    }
+    console.log("[TTS LOOP] Boucle de parole de fond arrêtée.");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
