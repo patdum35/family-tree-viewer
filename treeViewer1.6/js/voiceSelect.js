@@ -1006,7 +1006,8 @@ const SpeechRecognitionUI = (function() {
         targetSpellingField = null;
         pendingSpellingStart = false;
 
-        recognition.continuous = !state.isMobile;
+        // recognition.continuous = !state.isMobile;
+        recognition.continuous = true;
         recognition.grammars = new SpeechGrammarList(); 
         
         document.getElementById('stt-result-display').textContent = `✅ Épellation terminée. Valeur enregistrée: "${finalValue}"`;
@@ -1390,7 +1391,8 @@ const SpeechRecognitionUI = (function() {
                     else { await speakTextWithWaitToEnd(textToTell, 1.0); }
                     // hideUI();
                     recognition.start();
-                    if (!state.isMobile) {
+                    // if (!state.isMobile) {
+                    if (true) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
@@ -1416,7 +1418,8 @@ const SpeechRecognitionUI = (function() {
                     console.log('\n\n\n ------------   debug words after fail: ',  cumulativeTranscript);
 
                     recognition.start();
-                    if (!state.isMobile) {
+                    // if (!state.isMobile) {
+                    if (true) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
@@ -1450,7 +1453,8 @@ const SpeechRecognitionUI = (function() {
                     speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
                 }
                 recognition.start();
-                if (!state.isMobile) {
+                // if (!state.isMobile) {
+                if (true) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
@@ -1629,7 +1633,9 @@ const SpeechRecognitionUI = (function() {
         recognition.grammars = new SpeechGrammarList(); 
         
         recognition.lang = targetLang; 
-        recognition.continuous = !state.isMobile; 
+        // recognition.continuous = !state.isMobile; 
+        recognition.continuous = true; 
+
         recognition.interimResults = true; 
 
         recognition.onstart = () => {
@@ -1649,7 +1655,8 @@ const SpeechRecognitionUI = (function() {
         recognition.onresult = (event) => {
             let interimTranscript = '';
             
-            if (!state.isMobile) {
+            // if (!state.isMobile) {
+            if (true) {
                 clearTimeout(recognitionTimeout);
                 recognitionTimeout = setTimeout(() => {
                     if (isRecording) {
@@ -1854,7 +1861,8 @@ const SpeechRecognitionUI = (function() {
                     processFullTranscript(cumulativeTranscript.trim(), config, 'onEnd');
                 }
 
-                if (state.isMobile) {
+                // if (state.isMobile) {
+                if (false) {
                     // 🚨 VÉRIFICATION : Ce délai est déjà long (1500ms) et ne devrait pas causer de bruit de démarrage.
                     // Cependant, pour la cohérence, si vous relancez l'écoute SANS le traitement (ligne 32),
                     // il est mieux de garder un délai long ici, ou d'appliquer un délai court à l'intérieur du setTimeout(1500).
@@ -2672,7 +2680,10 @@ function updateEntityUI(config = null) {
             pendingSpellingStart = false; 
             // cumulativeTranscript = '';
             
-            recognition.continuous = !state.isMobile; 
+            // recognition.continuous = !state.isMobile; 
+            recognition.continuous = true;  
+            
+            
             recognition.grammars = new SpeechGrammarList(); 
             
             document.getElementById('stt-result-display').textContent = '';
@@ -2680,7 +2691,8 @@ function updateEntityUI(config = null) {
             try {
                 recognition.start();
 
-                if (!state.isMobile) {
+                // if (!state.isMobile) {
+                if (true) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
