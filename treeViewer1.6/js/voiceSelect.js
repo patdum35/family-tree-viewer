@@ -2678,9 +2678,8 @@ function updateEntityUI(config = null) {
 
             try {
                 recognition.start();
-
                 speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
-
+                // speakText(' ', 0.9, 0.5); // Juste un espace ou un son très court et discret
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
@@ -2691,7 +2690,7 @@ function updateEntityUI(config = null) {
                     }, PC_MAX_DURATION_MS);
                 }
 
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
 
             } catch (e) {
                 console.error("Erreur au démarrage de la reconnaissance:", e);
