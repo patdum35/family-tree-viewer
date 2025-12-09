@@ -1908,6 +1908,130 @@ const SpeechRecognitionUI = (function() {
             // cumulativeTranscript = '';
         };
     }
+
+
+
+
+    // function initializeSpeechRecognition(config = null) {
+
+    //     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    //     const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+    //     if (!SpeechRecognition || !SpeechGrammarList) {
+    //         console.error("Speech Recognition non supporté.");
+    //         return;
+    //     }
+        
+    //     if (recognition) return; 
+
+    //     recognition = new SpeechRecognition();
+        
+    //     const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
+    //     const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+    //     const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
+
+    //     spellingGrammar = new SpeechGrammarList();
+    //     spellingGrammar.addFromString(spellingGrammarString, 1);
+        
+    //     recognition.grammars = new SpeechGrammarList(); 
+        
+    //     recognition.lang = targetLang; 
+    //     recognition.continuous = !state.isMobile; 
+    //     recognition.interimResults = true; 
+
+    //     recognition.onstart = () => {
+    //         updateButtonUI(true); 
+    //         const display = document.getElementById('stt-result-display');
+    //         // Ensure the element displays line breaks from textContent
+    //         if (display) display.style.whiteSpace = 'pre-line';
+    //         display.textContent = "🎤 Écoute en cours... Dites par exemple: \n prénom henri \nnom rousseau GO\nPour épeler un mot dites:\nprénom     lettre par lettre    h e n r i   terminer";
+    //     };
+
+
+    //     recognition.onresult = (event) => {
+    //         let interimTranscript = '';
+            
+    //         if (!state.isMobile) {
+    //             clearTimeout(recognitionTimeout);
+    //             recognitionTimeout = setTimeout(() => {
+    //                 if (isRecording) {
+    //                     console.log("⏰ PC : Coupure après 20s (limite atteinte).");
+    //                     isRecording = false;
+    //                     recognition.stop();
+    //                 }
+    //             }, PC_MAX_DURATION_MS);
+    //         }
+            
+    //         const lastResultIndex = event.results.length - 1;
+    //         const result = event.results[lastResultIndex];
+    //         const transcriptSegment = result[0].transcript.trim().toLowerCase(); 
+
+    //         if (result.isFinal) {
+                
+    //             if (transcriptSegment != '') 
+    //             {
+    //                 cumulativeTranscript += transcriptSegment + ' ';
+    //                 processFullTranscript(cumulativeTranscript.trim(), config, 'onResult');
+    //             }
+    //         } else {
+    //             interimTranscript += transcriptSegment;
+    //         }
+            
+    //         if (!isSpellingMode) {
+    //             document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
+    //         }
+    //     };
+
+
+       
+    //     recognition.onend = () => {
+    //         clearTimeout(recognitionTimeout); 
+            
+    //         if (isRecording) { 
+                
+    //             if (cumulativeTranscript.trim().length > 0) {
+    //                 processFullTranscript(cumulativeTranscript.trim(), config, 'onEnd');
+    //             }
+
+    //             if (state.isMobile) {
+    //                 setTimeout(() => {
+    //                     if (isRecording) { 
+    //                         try {
+    //                             recognition.start();
+    //                         } catch(e) {
+    //                             console.warn("Erreur au redémarrage mobile :", e.message);
+    //                             isRecording = false; updateButtonUI(false);
+    //                         }
+    //                     }
+    //                 }, 1500); 
+
+    //             } else {
+    //                 isRecording = false;
+    //                 updateButtonUI(false);
+    //                 console.log("[LOG STT] Reconnaissance PC terminée (Silence/Timer).");
+    //             }
+
+    //         } else {
+    //             updateButtonUI(false); 
+    //             console.log("[LOG STT] Reconnaissance Vocale arrêtée volontairement/finale.");
+    //         }
+    //     };
+
+
+
+
+    //     recognition.onerror = (event) => {
+    //         document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
+    //         document.getElementById('stt-result-display').style.color = 'red';
+    //         isRecording = false;
+    //         updateButtonUI(false); 
+    //         console.error("[LOG STT] Erreur STT:", event.error);
+    //     };
+    // }
+
+
+
+
     
     // =========================================================
     // Fonctions UI et Démarrage 
@@ -2724,7 +2848,7 @@ function updateEntityUI(config = null) {
 
             try {
 
-                openMicrophoneStream();
+                // openMicrophoneStream();
 
                 recognition.start();
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
