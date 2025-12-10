@@ -987,7 +987,7 @@ const SpeechRecognitionUI = (function() {
 
         if (recognition)  {
             recognition.stop();
-            if (state.isMobile) {
+            if (state.isMobile && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel(); 
             }
         }
@@ -1005,7 +1005,7 @@ const SpeechRecognitionUI = (function() {
         
         if (isRecording && recognition) {
             recognition.stop(); 
-            if (state.isMobile) {
+            if (state.isMobile && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel(); 
             }            
             console.log(`[ACTION] Demande de bascule en Mode Épellation pour: ${targetField}`);
@@ -1033,7 +1033,7 @@ const SpeechRecognitionUI = (function() {
 
         if (isRecording) {
             recognition.stop(); 
-            if (state.isMobile) {
+            if (state.isMobile && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel(); 
             }
         }
@@ -1261,7 +1261,7 @@ const SpeechRecognitionUI = (function() {
         if (isNewCommandToBeExecuted && isNewCommandToBeExecuted2 && config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
 
             if (isRecording) {
-                if (state.isMobile) {
+                if (state.isMobile && window.speechSynthesis.speaking) {
                     window.speechSynthesis.cancel(); 
                 }
             }
@@ -1417,7 +1417,7 @@ const SpeechRecognitionUI = (function() {
                     // hideUI();
                     recognition.start();
                     if (state.isMobile) {
-                        speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                        speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1425,7 +1425,7 @@ const SpeechRecognitionUI = (function() {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
-                                if (state.isMobile) {
+                                if (state.isMobile && window.speechSynthesis.speaking) {
                                     window.speechSynthesis.cancel(); 
                                 }
                             }
@@ -1449,7 +1449,7 @@ const SpeechRecognitionUI = (function() {
 
                     recognition.start();
                     if (state.isMobile) {
-                        speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                        speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1457,7 +1457,7 @@ const SpeechRecognitionUI = (function() {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
-                                if (state.isMobile) {
+                                if (state.isMobile && window.speechSynthesis.speaking) {
                                     window.speechSynthesis.cancel(); 
                                 }
                             }
@@ -1489,7 +1489,7 @@ const SpeechRecognitionUI = (function() {
                 }
                 recognition.start();
                 if (state.isMobile) {
-                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                    speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                 }                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
@@ -1497,7 +1497,7 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
-                            if (state.isMobile) {
+                            if (state.isMobile && window.speechSynthesis.speaking) {
                                 window.speechSynthesis.cancel(); 
                             }
                         }
@@ -1513,7 +1513,7 @@ const SpeechRecognitionUI = (function() {
 
             if (isRecording) {
                 if (state.isMobile) {
-                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                    speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                 }
             }
 
@@ -1710,7 +1710,7 @@ const SpeechRecognitionUI = (function() {
                         console.log("⏰ PC : Coupure après 20s (limite atteinte).");
                         isRecording = false;
                         recognition.stop();
-                        if (state.isMobile) {
+                        if (state.isMobile && window.speechSynthesis.speaking) {
                             window.speechSynthesis.cancel(); 
                         }
                     }
@@ -1879,7 +1879,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile) {
-                            speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                         }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
                     } catch(e) {
@@ -1899,7 +1899,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile) {
-                            speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                         }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
                     } catch(e) {
@@ -1927,7 +1927,7 @@ const SpeechRecognitionUI = (function() {
                             try {
                                 recognition.start();
                                 if (state.isMobile) {
-                                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                                    speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                                 }                                
                             } catch(e) {
                                 console.warn("Erreur au redémarrage mobile :", e.message);
@@ -2862,7 +2862,7 @@ function updateEntityUI(config = null) {
             pendingSpellingStart = false; 
             clearTimeout(recognitionTimeout); 
             recognition.stop();
-            if (state.isMobile) {
+            if (state.isMobile && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel(); 
             }
         } else {
@@ -2914,7 +2914,8 @@ function updateEntityUI(config = null) {
 
                 recognition.start();
                 if (state.isMobile) {
-                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                // if (true) {
+                    speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                 }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
                 // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
@@ -2932,7 +2933,7 @@ function updateEntityUI(config = null) {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
-                            if (state.isMobile) {
+                            if (state.isMobile && window.speechSynthesis.speaking) {
                                 window.speechSynthesis.cancel(); 
                             }
                         }
@@ -2950,7 +2951,7 @@ function updateEntityUI(config = null) {
                 initializeSpeechRecognition(config);
                 recognition.start();
                 if (state.isMobile) {
-                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                    speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                 }
 
                 isRecording = false; 
@@ -3010,7 +3011,7 @@ function updateEntityUI(config = null) {
         if (isRecording && recognition) {
             isRecording = false;
             recognition.stop(); 
-            if (state.isMobile) {
+            if (state.isMobile && window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel(); 
             }
         }
