@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Test Fixed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    #sttResult {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 5px;
+      min-height: 50px;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #333;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 5px;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.ok { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.warning { background: #fff3cd; color: #856404; }
+  </style>
+</head>
+<body>
+  <h2>Test TTS & STT (Capacitor/Cordova)</h2>
+  
+  <div id="status" class="status warning">⏳ Initialisation en cours...</div>
+  
+  <h3>🔊 Text-to-Speech (TTS)</h3>
+  <label for="voices">Choisir la voix TTS :</label>
+  <select id="voices">
+    <option value="">Chargement...</option>
+  </select>
+  
+  <input type="text" id="ttsText" placeholder="Texte à lire" value="Bonjour, test de synthèse vocale">
+  <button id="speakBtn">🔊 Parler</button>
+  
+  <h3>🎤 Speech-to-Text (STT)</h3>
+  <button id="startSTT">▶️ Démarrer STT</button>
+  <button id="stopSTT">⏹️ Arrêter STT</button>
+  <p id="sttResult">Résultats STT apparaîtront ici...</p>
+  
+  <h3>📋 Console de débogage</h3>
+  <div id="log"></div>
+
+<script>
+// =====================================================
+// IMPORTANT : Déclarations globales pour Cordova
+// =====================================================
+let TTS;
+let SpeechRecognition;
+let recognition;
+const isCapacitor = !!window.Capacitor;
+
+// =====================================================
+// Fonction de logging
+// =====================================================
+function log(msg, type = 'info') {
+    console.log('[' + type.toUpperCase() + '] ' + msg);
+    const logDiv = document.getElementById('log');
+    const timestamp = new Date().toLocaleTimeString();
+    logDiv.innerHTML = `[${timestamp}] ${msg}<br>` + logDiv.innerHTML;
+}
+
+function updateStatus(msg, statusType) {
+    const statusDiv = document.getElementById('status');
+    statusDiv.className = 'status ' + statusType;
+    statusDiv.textContent = msg;
+    log(msg, statusType);
+}
+
+// =====================================================
+// TTS Functions
+// =====================================================
+async function populateVoices() {
+    log('🔍 Chargement des voix TTS...');
+    const voicesSelect = document.getElementById('voices');
+    voicesSelect.innerHTML = '';
+    
+    if (!isCapacitor && window.speechSynthesis) {
+        // Web Speech API
+        log('📱 Mode WEB : Utilisation de speechSynthesis');
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            log('⚠️ Aucune voix trouvée, réessai dans 100ms...');
+            setTimeout(populateVoices, 100);
+            return;
+        }
+        voices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = `${v.name} (${v.lang})`;
+            voicesSelect.appendChild(opt);
+        });
+        log('✅ ' + voices.length + ' voix chargées (Web)');
+    } else if (isCapacitor && TTS) {
+        // Capacitor TTS
+        log('📱 Mode CAPACITOR : Utilisation de cordova-plugin-tts');
+        try {
+            // Certains plugins TTS ont une méthode getVoices
+            if (typeof TTS.getVoices === 'function') {
+                const voices = await TTS.getVoices();
+                voices.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.identifier || v.name;
+                    opt.textContent = `${v.name} (${v.language})`;
+                    voicesSelect.appendChild(opt);
+                });
+                log('✅ ' + voices.length + ' voix chargées (Capacitor)');
+            } else {
+                // Voix par défaut si getVoices n'existe pas
+                const opt = document.createElement('option');
+                opt.value = 'fr-FR';
+                opt.textContent = 'Voix par défaut (Android TTS)';
+                voicesSelect.appendChild(opt);
+                log('✅ Voix par défaut configurée');
+            }
+        } catch (err) {
+            log('❌ Erreur chargement voix: ' + err.message, 'error');
+            const opt = document.createElement('option');
+            opt.value = 'fr-FR';
+            opt.textContent = 'Voix par défaut (Android TTS)';
+            voicesSelect.appendChild(opt);
+        }
+    } else {
+        log('❌ Aucun système TTS disponible', 'error');
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'TTS non disponible';
+        voicesSelect.appendChild(opt);
+    }
+}
+
+function speakText() {
+    const text = document.getElementById('ttsText').value;
+    const voiceName = document.getElementById('voices').value;
+
+    if (!text) {
+        log('⚠️ Aucun texte à lire', 'warning');
+        return;
+    }
+
+    log('🔊 Lecture TTS : "' + text + '"');
+
+    if (!isCapacitor && window.speechSynthesis) {
+        // Web Speech Synthesis
+        log('📱 TTS Web : démarrage...');
+        const utter = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        if (voiceName) {
+            const selectedVoice = voices.find(v => v.name === voiceName);
+            if (selectedVoice) {
+                utter.voice = selectedVoice;
+                log('🎙️ Voix sélectionnée : ' + selectedVoice.name);
+            }
+        }
+        utter.onend = () => log('✅ TTS terminée');
+        utter.onerror = (e) => log('❌ Erreur TTS: ' + e.error, 'error');
+        window.speechSynthesis.speak(utter);
+    } else if (isCapacitor && TTS) {
+        // Capacitor TTS
+        log('📱 TTS Capacitor : démarrage...');
+        const options = { 
+            text: text, 
+            locale: voiceName || 'fr-FR', 
+            rate: 1.0 
+        };
+        
+        TTS.speak(options)
+           .then(() => {
+               log('✅ TTS Capacitor : succès');
+               updateStatus('✅ TTS terminée avec succès', 'ok');
+           })
+           .catch(err => {
+               log('❌ Erreur TTS Capacitor: ' + err, 'error');
+               updateStatus('❌ Erreur TTS : ' + err, 'error');
+           });
+    } else {
+        log('❌ TTS non disponible', 'error');
+        updateStatus('❌ TTS non disponible', 'error');
+    }
+}
+
+// =====================================================
+// STT Functions
+// =====================================================
+function initWebSTT() {
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognitionAPI();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                transcript += event.results[i][0].transcript;
+            }
+            document.getElementById('sttResult').textContent = transcript;
+            log('🎤 STT Web : ' + transcript);
+        };
+        
+        recognition.onstart = () => {
+            log('🎤 STT Web : démarrée');
+            updateStatus('🎤 STT en cours...', 'ok');
+        };
+        
+        recognition.onend = () => {
+            log('🎤 STT Web : arrêtée');
+            updateStatus('⏹️ STT arrêtée', 'warning');
+        };
+        
+        recognition.onerror = (event) => {
+            log('❌ Erreur STT Web: ' + event.error, 'error');
+            updateStatus('❌ Erreur STT : ' + event.error, 'error');
+        };
+        
+        log('✅ STT Web initialisée');
+        return true;
+    }
+    return false;
+}
+
+function startSTT() {
+    log('▶️ Démarrage STT...');
+    
+    if (!isCapacitor && recognition) {
+        // Web Speech Recognition
+        try {
+            recognition.start();
+            log('✅ STT Web démarrée');
+        } catch (e) {
+            log('❌ Erreur démarrage STT Web: ' + e.message, 'error');
+        }
+
+    } else if (isCapacitor && SpeechRecognition) {
+
+        log("📱 STT Capacitor : demande permission...");
+
+        SpeechRecognition.requestPermission()
+            .then(() => {
+
+                log("🔄 Permissions OK, démarrage écoute...");
+
+                SpeechRecognition.startListening(
+                    function(matches) {
+                        const txt = Array.isArray(matches) ? matches.join(' ') : matches;
+                        document.getElementById('sttResult').textContent = txt;
+                        log("🎤 STT : " + txt);
+                        updateStatus("🎤 STT reçue", "ok");
+                    },
+                    function(err) {
+                        log("❌ STT Erreur : " + err, "error");
+                        updateStatus("❌ STT Erreur : " + err, "error");
+                    },
+                    {
+                        language: "fr-FR",
+                        matches: 1,
+                        showPartial: true,
+                        showPopup: true
+                    }
+                );
+            })
+            .catch(err => {
+                log("❌ Permission refusée : " + err, "error");
+                updateStatus("❌ Permission STT refusée", "error");
+            });
+
+
+
+
+    } else {
+        log('❌ STT non disponible', 'error');
+        updateStatus('❌ STT non disponible', 'error');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+}
+
+function stopSTT() {
+    log('⏹️ Arrêt STT...');
+    
+    if (!isCapacitor && recognition) {
+        try {
+            recognition.stop();
+            log('✅ STT Web arrêtée');
+        } catch (e) {
+            log('❌ Erreur arrêt STT Web: ' + e.message, 'error');
+        }
+    } else if (isCapacitor && SpeechRecognition) {
+        SpeechRecognition.stopListening()
+            .then(() => {
+                log('✅ STT Capacitor arrêtée');
+                updateStatus('⏹️ STT arrêtée', 'warning');
+            })
+            .catch(err => {
+                log('❌ Erreur arrêt STT Capacitor: ' + err, 'error');
+            });
+    }
+}
+
+// =====================================================
+// Event Listeners
+// =====================================================
+document.getElementById('speakBtn').addEventListener('click', speakText);
+document.getElementById('startSTT').addEventListener('click', startSTT);
+document.getElementById('stopSTT').addEventListener('click', stopSTT);
+
+// =====================================================
+// INITIALISATION PRINCIPALE
+// =====================================================
+function initApp() {
+    log('🚀 Initialisation de l\'application...');
+    log('📱 Mode : ' + (isCapacitor ? 'CAPACITOR' : 'WEB'));
+    
+    if (isCapacitor) {
+        log('⏳ Attente de l\'événement deviceready...');
+    } else {
+        log('🌐 Mode Web détecté, initialisation immédiate');
+        
+        // Init Web STT
+        if (initWebSTT()) {
+            updateStatus('✅ STT Web initialisée', 'ok');
+        } else {
+            updateStatus('⚠️ STT Web non supportée', 'warning');
+        }
+        
+        // Init Web TTS
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = populateVoices;
+            populateVoices();
+            updateStatus('✅ TTS Web initialisée', 'ok');
+        } else {
+            updateStatus('⚠️ TTS Web non supportée', 'warning');
+        }
+    }
+}
+
+// =====================================================
+// Event deviceready pour Capacitor/Cordova
+// =====================================================
+document.addEventListener('deviceready', function() {
+    log('✅ deviceready événement reçu !');
+    
+    // ACCÈS AUX PLUGINS VIA window GLOBAL
+    // Les plugins Cordova sont exposés sur window après deviceready
+    
+    // TTS Plugin
+    if (window.TTS) {
+        TTS = window.TTS;
+        log('✅ Plugin TTS trouvé sur window.TTS');
+        populateVoices();
+    } else if (window.plugins && window.plugins.tts) {
+        TTS = window.plugins.tts;
+        log('✅ Plugin TTS trouvé sur window.plugins.tts');
+        populateVoices();
+    } else {
+        log('❌ Plugin TTS NON TROUVÉ sur window', 'error');
+        log('💡 Vérifiez que cordova-plugin-tts est bien installé', 'warning');
+    }
+    
+    // Speech Recognition Plugin
+    if (window.plugins && window.plugins.speechRecognition) {
+        SpeechRecognition = window.plugins.speechRecognition;
+        log('✅ Plugin SpeechRecognition trouvé');
+        
+        // Vérifier disponibilité
+        SpeechRecognition.isRecognitionAvailable(
+            function(available) {
+                if (available) {
+                    log('✅ STT disponible sur cet appareil');
+                    updateStatus('✅ Plugins initialisés', 'ok');
+                } else {
+                    log('⚠️ STT non disponible sur cet appareil', 'warning');
+                    updateStatus('⚠️ STT non disponible', 'warning');
+                }
+            },
+            function(err) {
+                log('❌ Erreur vérification STT: ' + err, 'error');
+            }
+        );
+    } else {
+        log('❌ Plugin SpeechRecognition NON TROUVÉ', 'error');
+        log('💡 Vérifiez que cordova-plugin-speechrecognition est installé', 'warning');
+    }
+    
+    // Log de tous les plugins disponibles
+    if (window.plugins) {
+        log('📦 Plugins disponibles : ' + Object.keys(window.plugins).join(', '));
+    }
+    
+}, false);
+
+// Initialisation au chargement
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+</script>
+</body>
+</html>
+
+
+
+
+
+
