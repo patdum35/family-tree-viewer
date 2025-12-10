@@ -888,8 +888,10 @@ const SpeechRecognitionUI = (function() {
     const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
     // Nombre de répétitions souhaitées
     const REPETITIONS = 20; 
-    let SUPER_LONG_TEXT = 'parler dans le micro '; //LONG_PHRASE;
-
+    let SUPER_LONG_TEXT = 'parler'; //LONG_PHRASE;
+    // for (let i = 0; i < REPETITIONS; i++) {
+    //     SUPER_LONG_TEXT += LONG_PHRASE;
+    // }
 
     const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'whatisTheUseBis', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
     'whatAge', 'whatAgePast', 'whereLive', 'whereLivePast', 'whatProfession', 'whatOccupation', 'whatProfessionPast', 'whatOccupationPast', 
@@ -2892,9 +2894,7 @@ function updateEntityUI(config = null) {
             // const BARELY_AUDIBLE_SOUND = '.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.'; // 30 répétitions d'une virgule/point
 
             // Utilisation d'une boucle for pour garantir la compatibilité
-            for (let i = 0; i < REPETITIONS; i++) {
-                SUPER_LONG_TEXT += LONG_PHRASE;
-            }
+
 
             try {
 
