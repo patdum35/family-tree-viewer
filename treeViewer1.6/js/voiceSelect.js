@@ -893,6 +893,8 @@ const SpeechRecognitionUI = (function() {
     //     SUPER_LONG_TEXT += LONG_PHRASE;
     // }
 
+    let stopSpeechRecognition = false;
+
     const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'whatisTheUseBis', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
     'whatAge', 'whatAgePast', 'whereLive', 'whereLivePast', 'whatProfession', 'whatOccupation', 'whatProfessionPast', 'whatOccupationPast', 
     'whoMarried', 'whoMarriedPast', 'howManyChildren', 'howManyChildrenPast', 'whoIsFather', 'whoIsFatherPast', 
@@ -1409,6 +1411,7 @@ const SpeechRecognitionUI = (function() {
                     const name = (res.results.length > 0) ? capturedEntities[translate('lastname')] : lastAlternativeNameFound;
                     let textToTell = 'la personne ' + capturedEntities['prenom'] + ' ' + name + ' a été trouvée ! Voici sa fiche';
                     arreterEcouteAction();
+                    stopSpeechRecognition = true;
                     if (state.isMobile ) {
                         window.speechSynthesis.cancel(); 
                     }
@@ -1430,6 +1433,7 @@ const SpeechRecognitionUI = (function() {
                     recognition.start();
                     if (state.isMobile) {
                         // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                        stopSpeechRecognition = false;
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1462,6 +1466,7 @@ const SpeechRecognitionUI = (function() {
                     recognition.start();
                     if (state.isMobile) {
                         // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                        stopSpeechRecognition = false;
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1499,6 +1504,7 @@ const SpeechRecognitionUI = (function() {
                 recognition.start();
                 if (state.isMobile) {
                     // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                    stopSpeechRecognition = false;
                 }                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
@@ -1873,7 +1879,7 @@ const SpeechRecognitionUI = (function() {
                 setTimeout(() => {
                     try {
                         recognition.start();
-                        if (state.isMobile) {
+                        if (state.isMobile && !stopSpeechRecognition) {
                             speakText(SUPER_LONG_TEXT, 0.05, 0.7);
                         }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
@@ -1893,7 +1899,7 @@ const SpeechRecognitionUI = (function() {
                 setTimeout(() => {
                     try {
                         recognition.start();
-                        if (state.isMobile) {
+                        if (state.isMobile && !stopSpeechRecognition) {
                             speakText(SUPER_LONG_TEXT, 0.05, 0.7);
                         }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
@@ -1921,7 +1927,7 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) { 
                             try {
                                 recognition.start();
-                                if (state.isMobile) {
+                                if (state.isMobile && !stopSpeechRecognition) {
                                     speakText(SUPER_LONG_TEXT, 0.05, 0.7);
                                 }                                
                             } catch(e) {
@@ -2906,8 +2912,8 @@ function updateEntityUI(config = null) {
                 // openMicrophoneStream();
 
                 recognition.start();
-                // if (state.isMobile) {
-                if (true) {
+                if (state.isMobile) {
+                // if (true) {
                     speakText(SUPER_LONG_TEXT, 0.05, 0.7);
                 }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
