@@ -885,10 +885,10 @@ const SpeechRecognitionUI = (function() {
 
     let isNewCommandToBeExecuted = true;
     let isNewCommandToBeExecuted2 = true;
-    const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
+    // const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
     // Nombre de répétitions souhaitées
     const REPETITIONS = 20; 
-    let SUPER_LONG_TEXT = 'parler'; //LONG_PHRASE;
+    let SUPER_LONG_TEXT = 'prouter'; //LONG_PHRASE;
     // for (let i = 0; i < REPETITIONS; i++) {
     //     SUPER_LONG_TEXT += LONG_PHRASE;
     // }
