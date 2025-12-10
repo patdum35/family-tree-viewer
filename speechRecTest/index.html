@@ -1965,14 +1965,13 @@ document.addEventListener('visibilitychange', () => {
 
 
 
-<!-- deepseek  4 : ? -->
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speech Test - Hack Anti-Bip</title>
+  <title>Analyse Double Bip - Mode Diagnostic</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -1984,18 +1983,6 @@ document.addEventListener('visibilitychange', () => {
       margin: 5px;
       padding: 10px 20px;
       font-size: 16px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0;
-    }
-    select {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0;
     }
     #sttResult {
       margin-top: 20px;
@@ -2010,10 +1997,11 @@ document.addEventListener('visibilitychange', () => {
       background: #333;
       color: #0f0;
       font-family: monospace;
-      font-size: 12px;
-      max-height: 200px;
+      font-size: 11px;
+      max-height: 300px;
       overflow-y: auto;
       border-radius: 5px;
+      white-space: pre-wrap;
     }
     .status {
       padding: 10px;
@@ -2024,472 +2012,334 @@ document.addEventListener('visibilitychange', () => {
     .status.ok { background: #d4edda; color: #155724; }
     .status.error { background: #f8d7da; color: #721c24; }
     .status.warning { background: #fff3cd; color: #856404; }
-    .hidden-audio {
-      display: none;
+    .event-log {
+      margin: 2px 0;
+      padding: 2px 5px;
+      border-left: 3px solid #666;
     }
+    .event-start { border-left-color: #4CAF50; }
+    .event-end { border-left-color: #FF9800; }
+    .event-error { border-left-color: #F44336; }
+    .event-audio { border-left-color: #2196F3; }
+    .event-bip { border-left-color: #FF4081; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>Test TTS & STT - Hack Anti-Bip</h2>
+  <h2>🔍 Analyse Double Bip - Mode Diagnostic</h2>
   
-  <div id="status" class="status warning">⏳ Initialisation en cours...</div>
+  <div id="status" class="status warning">⏳ Initialisation diagnostic...</div>
   
-  <h3>🔊 Text-to-Speech (TTS)</h3>
-  <label for="voices">Choisir la voix TTS :</label>
-  <select id="voices">
-    <option value="">Chargement...</option>
-  </select>
-  
-  <input type="text" id="ttsText" placeholder="Texte à lire" value="Bonjour, test de synthèse vocale">
-  <button id="speakBtn">🔊 Parler</button>
-  
-  <h3>🎤 Speech-to-Text (STT)</h3>
+  <h3>🎤 Speech-to-Text (STT) - Version Minimaliste</h3>
   <button id="startSTT">▶️ Démarrer STT</button>
   <button id="stopSTT">⏹️ Arrêter STT</button>
+  <button id="clearLog">🧹 Effacer Logs</button>
   <p id="sttResult">Résultats STT apparaîtront ici...</p>
   
-  <h3>📋 Console de débogage</h3>
+  <h3>📊 Logs Événements Détaillés</h3>
   <div id="log"></div>
-
-  <!-- HACK : Élément audio caché pour garder le focus audio -->
-  <audio id="silentAudio" loop class="hidden-audio">
-    <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ" type="audio/wav">
-  </audio>
 
 <script>
 // =====================================================
-// HACK ULTIME : Basé sur une vraie découverte
+// CONFIGURATION DIAGNOSTIC
 // =====================================================
-// Le double bip vient de : 
-// 1. Chrome qui perd le focus audio
-// 2. Chrome qui reprend le focus audio
-// Solution : GARDER LE FOCUS AUDIO TOUT LE TEMPS
-// =====================================================
-
 let recognition;
 let isRecording = false;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-let finalTranscript = '';
-let audioKeepAlive = null;
-let audioContext = null;
-let isAudioContextReady = false;
+let eventHistory = [];
+let lastBipTime = 0;
+let bipCount = 0;
 
 // =====================================================
-// HACK 1 : Garder un contexte audio TOUJOURS actif
+// LOGGING AVANCÉ
 // =====================================================
-async function initAudioContext() {
-    try {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
-        
-        // Créer un son inaudible mais qui garde le contexte actif
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        // 0.001 Hz = complètement inaudible
-        oscillator.frequency.setValueAtTime(0.001, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(0.000001, audioContext.currentTime); // Volume quasi nul
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.start();
-        
-        // Garder une référence
-        audioKeepAlive = { oscillator, gainNode };
-        
-        log('🎵 Contexte audio actif (hack anti-bip)');
-        isAudioContextReady = true;
-        return true;
-    } catch (e) {
-        log('⚠️ AudioContext échoué: ' + e.message);
-        return false;
-    }
-}
-
-// =====================================================
-// HACK 2 : Élément audio silencieux en boucle
-// =====================================================
-function startSilentAudioLoop() {
-    const silentAudio = document.getElementById('silentAudio');
+function logEvent(eventName, details = '', type = 'info') {
+    const now = Date.now();
+    const timestamp = new Date().toLocaleTimeString() + '.' + String(now % 1000).padStart(3, '0');
     
-    try {
-        silentAudio.volume = 0.0001; // Presque muet
-        silentAudio.play().then(() => {
-            log('🔇 Boucle audio silencieuse démarrée');
-        }).catch(e => {
-            log('⚠️ Boucle audio échouée: ' + e.message);
-            // Fallback : démarrer après interaction utilisateur
-            document.body.addEventListener('click', () => {
-                silentAudio.play().catch(() => {});
-            }, { once: true });
-        });
-    } catch (e) {
-        log('⚠️ Erreur boucle audio: ' + e.message);
-    }
-}
-
-// =====================================================
-// HACK 3 : Réduire le volume des bips système
-// =====================================================
-function setupVolumeReduction() {
-    // Cette astuce réduit légèrement le volume GLOBAL
-    // en créant un AudioContext avec gain réduit
-    try {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        
-        // Créer un MediaElementSource depuis un audio silencieux
-        const silentAudio = document.getElementById('silentAudio');
-        const source = audioContext.createMediaElementSource(silentAudio);
-        const gainNode = audioContext.createGain();
-        
-        // Réduire le gain de 20% (0.8)
-        gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-        
-        source.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        log('🔉 Réduction volume système activée (-20%)');
-    } catch (e) {
-        log('⚠️ Réduction volume échouée: ' + e.message);
-    }
-}
-
-// =====================================================
-// HACK 4 : Éviter l'arrêt COMPLET de SpeechRecognition
-// =====================================================
-let isSoftStopping = false;
-let restartImmediately = false;
-
-// =====================================================
-// Fonction de logging
-// =====================================================
-function log(msg, type = 'info') {
-    console.log('[' + type.toUpperCase() + '] ' + msg);
+    // Stocker pour analyse
+    eventHistory.push({
+        time: now,
+        name: eventName,
+        details: details,
+        type: type
+    });
+    
+    // Afficher dans le log
     const logDiv = document.getElementById('log');
-    const timestamp = new Date().toLocaleTimeString();
-    logDiv.innerHTML = `[${timestamp}] ${msg}<br>` + logDiv.innerHTML;
+    const eventDiv = document.createElement('div');
+    eventDiv.className = `event-log event-${type}`;
+    
+    let timeDiff = '';
+    if (eventHistory.length > 1) {
+        const prevEvent = eventHistory[eventHistory.length - 2];
+        const diff = now - prevEvent.time;
+        timeDiff = ` (+${diff}ms)`;
+    }
+    
+    eventDiv.innerHTML = `<strong>[${timestamp}${timeDiff}] ${eventName}</strong> ${details}`;
+    logDiv.appendChild(eventDiv);
+    logDiv.scrollTop = logDiv.scrollHeight;
+    
+    console.log(`[${timestamp}] ${eventName} ${details}`);
+}
+
+function logBip(source) {
+    const now = Date.now();
+    const sinceLastBip = lastBipTime ? now - lastBipTime : 0;
+    lastBipTime = now;
+    bipCount++;
+    
+    logEvent('🚨 BIP DÉTECTÉ', 
+        `Source: ${source} | N°: ${bipCount} | Depuis dernier: ${sinceLastBip}ms`, 
+        'bip');
+    
+    // Analyse des doubles bips
+    if (sinceLastBip > 0 && sinceLastBip < 500) {
+        logEvent('⚠️ DOUBLE BIP POTENTIEL', 
+            `Intervalle: ${sinceLastBip}ms (trop court)`, 
+            'error');
+        
+        // Chercher la cause dans les derniers événements
+        analyzeDoubleBipCause(sinceLastBip);
+    }
+}
+
+function analyzeDoubleBipCause(interval) {
+    const recentEvents = eventHistory.slice(-10);
+    let analysis = 'Derniers événements avant bip:\n';
+    
+    recentEvents.forEach(event => {
+        analysis += `  ${new Date(event.time).toLocaleTimeString()}.${String(event.time % 1000).padStart(3, '0')} - ${event.name}\n`;
+    });
+    
+    logEvent('🔍 ANALYSE DOUBLE BIP', analysis, 'audio');
 }
 
 function updateStatus(msg, statusType) {
     const statusDiv = document.getElementById('status');
     statusDiv.className = 'status ' + statusType;
     statusDiv.textContent = msg;
-    log(msg, statusType);
+    logEvent('STATUS', msg, statusType);
 }
 
 // =====================================================
-// TTS Functions
+// DÉTECTEUR DE BIP MANUEL (par analyse audio)
 // =====================================================
-async function populateVoices() {
-    log('🔍 Chargement des voix TTS...');
-    const voicesSelect = document.getElementById('voices');
-    voicesSelect.innerHTML = '';
-    
-    if (window.speechSynthesis) {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) {
-            log('⚠️ Aucune voix trouvée, réessai dans 100ms...');
-            setTimeout(populateVoices, 100);
-            return;
-        }
-        voices.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.textContent = `${v.name} (${v.lang})`;
-            voicesSelect.appendChild(opt);
-        });
-        log('✅ ' + voices.length + ' voix chargées (Web)');
-    } else {
-        log('❌ TTS non disponible', 'error');
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'TTS non disponible';
-        voicesSelect.appendChild(opt);
-    }
-}
-
-function speakText() {
-    const text = document.getElementById('ttsText').value;
-    const voiceName = document.getElementById('voices').value;
-
-    if (!text) {
-        log('⚠️ Aucun texte à lire', 'warning');
-        return;
-    }
-
-    log('🔊 Lecture TTS : "' + text + '"');
-
-    if (window.speechSynthesis) {
-        const utter = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        if (voiceName) {
-            const selectedVoice = voices.find(v => v.name === voiceName);
-            if (selectedVoice) {
-                utter.voice = selectedVoice;
-                log('🎙️ Voix sélectionnée : ' + selectedVoice.name);
+async function startBipDetector() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let bipDetected = false;
+        let bipTimeout = null;
+        
+        function detectBip() {
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Calculer le volume moyen
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
             }
+            const averageVolume = sum / dataArray.length;
+            
+            // Seuil pour détecter un bip (à ajuster)
+            if (averageVolume > 150 && !bipDetected) {
+                bipDetected = true;
+                logBip('DÉTECTEUR AUDIO');
+                
+                // Éviter la détection multiple
+                if (bipTimeout) clearTimeout(bipTimeout);
+                bipTimeout = setTimeout(() => {
+                    bipDetected = false;
+                }, 500);
+            }
+            
+            requestAnimationFrame(detectBip);
         }
-        utter.onend = () => log('✅ TTS terminée');
-        utter.onerror = (e) => log('❌ Erreur TTS: ' + e.error, 'error');
-        window.speechSynthesis.speak(utter);
-    } else {
-        log('❌ TTS non disponible', 'error');
-        updateStatus('❌ TTS non disponible', 'error');
+        
+        detectBip();
+        logEvent('🔊', 'Détecteur de bip activé', 'audio');
+        
+    } catch (e) {
+        logEvent('⚠️', 'Détecteur de bip échoué: ' + e.message, 'error');
     }
 }
 
 // =====================================================
-// STT Functions - NOUVELLE APPROCHE
+// INITIALISATION STT - VERSION PROPRE
 // =====================================================
-function initWebSTT() {
+function initSTT() {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
         const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognitionAPI();
-        recognition.lang = 'fr-FR';
         
-        // CONFIGURATION SPÉCIALE
-        recognition.continuous = false; // IMPORTANT : false pour éviter les bugs
+        // Configuration minimale
+        recognition.lang = 'fr-FR';
+        recognition.continuous = false;  // On teste avec false
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         
-        log('🎯 STT configurée (continuous=false pour éviter bips)');
-
-        // GESTION DES RÉSULTATS
-        recognition.onresult = (event) => {
-            let newFinalText = '';
-            
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    const transcript = event.results[i][0].transcript.trim();
-                    if (transcript && !finalTranscript.includes(transcript)) {
-                        newFinalText += transcript + ' ';
-                    }
-                }
-            }
-            
-            if (newFinalText) {
-                finalTranscript += newFinalText;
-                document.getElementById('sttResult').textContent = finalTranscript;
-                log('✅ Texte: ' + newFinalText.trim());
-            }
-            
-            // HACK : Redémarrer IMMÉDIATEMENT après un résultat
-            // (pas besoin d'attendre onend)
-            if (isRecording && !isSoftStopping) {
-                setTimeout(() => {
-                    if (isRecording && recognition) {
-                        try {
-                            recognition.stop(); // Arrêt propre
-                            setTimeout(() => {
-                                if (isRecording) {
-                                    recognition.start();
-                                    log('🔄 Redémarrage automatique après résultat');
-                                }
-                            }, 10); // Très court
-                        } catch(e) {}
-                    }
-                }, 50);
-            }
+        // =====================================================
+        // LOGS COMPLETS DE TOUS LES ÉVÉNEMENTS
+        // =====================================================
+        
+        recognition.onaudiostart = () => {
+            logEvent('🎤 onaudiostart', 'Micro activé au niveau système', 'audio');
+        };
+        
+        recognition.onaudioend = () => {
+            logEvent('🎤 onaudioend', 'Micro désactivé au niveau système', 'audio');
+            logBip('onaudioend');
+        };
+        
+        recognition.onsoundstart = () => {
+            logEvent('🔊 onsoundstart', 'Son détecté', 'audio');
+        };
+        
+        recognition.onsoundend = () => {
+            logEvent('🔊 onsoundend', 'Fin de son détecté', 'audio');
+        };
+        
+        recognition.onspeechend = () => {
+            logEvent('💬 onspeechend', 'Fin de parole détectée', 'audio');
+            logBip('onspeechend');
         };
         
         recognition.onstart = () => {
-            log('🎤 STT démarrée');
-            updateStatus('🎤 STT en cours...', 'ok');
-            isSoftStopping = false;
+            logEvent('▶️ onstart', 'Reconnaissance démarrée', 'start');
+            logBip('onstart');
         };
         
-        // HACK CRITIQUE : Gestion MINIMALE de onend
         recognition.onend = () => {
-            log('🔁 Événement onend (normal)');
+            logEvent('⏹️ onend', 'Reconnaissance terminée', 'end');
+            logBip('onend');
+        };
+        
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                transcript += event.results[i][0].transcript;
+            }
             
-            // NE RIEN FAIRE ici !
-            // La gestion du redémarrage se fait dans onresult
-            // pour éviter les bips doubles
+            document.getElementById('sttResult').textContent = transcript;
+            logEvent('📝 onresult', `Texte: "${transcript.substring(0, 50)}..."`, 'info');
         };
         
         recognition.onerror = (event) => {
-            if (event.error === 'no-speech' || event.error === 'audio-capture') {
-                // Normal, redémarrer discrètement
-                if (isRecording) {
-                    setTimeout(() => {
-                        if (isRecording && recognition) {
-                            try {
-                                recognition.start();
-                            } catch(e) {}
-                        }
-                    }, 100);
-                }
+            logEvent('❌ onerror', `Erreur: ${event.error}`, 'error');
+            
+            if (event.error === 'audio-capture') {
+                logBip('onerror-audio-capture');
             }
         };
         
-        // DÉSACTIVER COMPLÈTEMENT
-        recognition.onspeechend = null;
-        recognition.onsoundend = null;
-        recognition.onaudioend = null;
+        // Événements expérimentaux (si disponibles)
+        if ('onnomatch' in recognition) {
+            recognition.onnomatch = () => {
+                logEvent('❓ onnomatch', 'Aucune correspondance trouvée', 'info');
+            };
+        }
         
-        log('✅ STT initialisée avec hacks anti-bip');
+        logEvent('✅', 'STT initialisée avec logging complet', 'ok');
         return true;
     }
     return false;
 }
 
 // =====================================================
-// DÉMARRAGE OPTIMISÉ
+// FONCTIONS DE CONTRÔLE SIMPLES
 // =====================================================
-async function startSTT() {
-    log('▶️ Démarrage STT avec protection anti-bip...');
+function startSTT() {
+    logEvent('=== DÉBUT TEST ===', 'Démarrage manuel', 'start');
+    bipCount = 0;
+    eventHistory = [];
+    document.getElementById('log').innerHTML = '';
     
-    // Activer les hacks audio d'abord
-    await initAudioContext();
-    startSilentAudioLoop();
-    setupVolumeReduction();
-    
-    // Réinitialiser
-    finalTranscript = '';
-    document.getElementById('sttResult').textContent = '';
     isRecording = true;
-    isSoftStopping = false;
     
-    // Démarrer la boucle audio silencieuse
-    startSilentAudioLoop();
-    
-    // Attendre que l'audio soit prêt
-    setTimeout(() => {
-        if (isRecording && recognition) {
-            try {
-                recognition.start();
-                log('🚀 STT démarrée (contexte audio actif)');
-            } catch (e) {
-                log('❌ Erreur démarrage: ' + e.message, 'error');
-                isRecording = false;
-            }
+    if (recognition) {
+        try {
+            recognition.start();
+            logEvent('🚀', 'Commande recognition.start() envoyée', 'start');
+        } catch (e) {
+            logEvent('❌', 'Erreur start(): ' + e.message, 'error');
+            isRecording = false;
         }
-    }, 200); // Délai pour stabiliser l'audio
+    }
 }
 
-// =====================================================
-// ARRÊT OPTIMISÉ - HACK PRINCIPAL
-// =====================================================
 function stopSTT() {
-    log('⏹️ Arrêt STT avec prévention DOUBLE-BIP...');
+    logEvent('=== FIN TEST ===', 'Arrêt manuel', 'end');
     
-    // HACK : Marquer comme "soft stop" pour éviter onend
-    isSoftStopping = true;
+    isRecording = false;
     
-    // HACK : Arrêter GRADUELLEMENT
-    setTimeout(() => {
-        isRecording = false;
-        
-        if (recognition) {
-            try {
-                // 1. D'abord, mettre interimResults à false
-                recognition.interimResults = false;
-                
-                // 2. Attendre un peu
-                setTimeout(() => {
-                    try {
-                        // 3. Arrêter proprement
-                        recognition.stop();
-                        
-                        // 4. Réinitialiser pour la prochaine fois
-                        setTimeout(() => {
-                            initWebSTT();
-                            log('🔄 Instance réinitialisée (prête pour prochain démarrage)');
-                        }, 100);
-                        
-                        log('✅ STT arrêtée (sans double-bip)');
-                        updateStatus('⏹️ STT arrêtée', 'warning');
-                        
-                    } catch (e) {
-                        // Ignorer
-                    }
-                }, 50);
-                
-            } catch (e) {
-                log('⚠️ Erreur lors de l\'arrêt graduel: ' + e.message);
-            }
+    if (recognition) {
+        try {
+            recognition.stop();
+            logEvent('🛑', 'Commande recognition.stop() envoyée', 'end');
+        } catch (e) {
+            logEvent('⚠️', 'Erreur stop(): ' + e.message, 'error');
         }
-    }, 10);
+    }
+    
+    // Afficher le rapport
+    setTimeout(showBipReport, 1000);
 }
 
-// =====================================================
-// Event Listeners
-// =====================================================
-document.getElementById('speakBtn').addEventListener('click', speakText);
-document.getElementById('startSTT').addEventListener('click', startSTT);
-document.getElementById('stopSTT').addEventListener('click', stopSTT);
+function showBipReport() {
+    logEvent('📊 RAPPORT FINAL', 
+        `Total bips détectés: ${bipCount}\n` +
+        `Durée test: ${eventHistory.length > 1 ? 
+            (eventHistory[eventHistory.length-1].time - eventHistory[0].time) + 'ms' : 'N/A'}\n` +
+        `Dernier bip: ${lastBipTime ? new Date(lastBipTime).toLocaleTimeString() : 'Aucun'}`,
+        'info');
+}
 
 // =====================================================
 // INITIALISATION
 // =====================================================
-async function initApp() {
-    log('🚀 Initialisation avec hacks anti-double-bip...');
-    log('📱 Mobile: ' + isMobile);
-    log('🌐 Navigateur: ' + navigator.userAgent.substring(0, 60));
+function initApp() {
+    logEvent('🔧', 'Initialisation diagnostic', 'info');
     
-    // Initialiser le contexte audio en PREMIER
-    await initAudioContext();
-    
-    // Initialiser STT
-    if (initWebSTT()) {
-        updateStatus('✅ STT initialisée (anti-bip activé)', 'ok');
+    if (initSTT()) {
+        updateStatus('✅ STT initialisée - Prêt pour diagnostic', 'ok');
+        
+        // Démarrer le détecteur de bip
+        setTimeout(startBipDetector, 1000);
+        
+        logEvent('💡 INSTRUCTIONS', 
+            '1. Cliquez "Démarrer STT"\n' +
+            '2. Parlez quelques secondes\n' +
+            '3. Cliquez "Arrêter STT"\n' +
+            '4. Analysez les logs pour voir la séquence d\'événements\n' +
+            '5. Identifiez quels événements déclenchent des bips', 
+            'info');
+    } else {
+        updateStatus('❌ STT non supportée', 'error');
     }
-    
-    // Initialiser TTS
-    if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = populateVoices;
-        setTimeout(populateVoices, 100);
-        log('✅ TTS initialisée');
-    }
-    
-    // Forcer l'activation audio au premier clic
-    document.body.addEventListener('click', async () => {
-        if (audioContext && audioContext.state === 'suspended') {
-            await audioContext.resume();
-            log('🎵 AudioContext réactivé par clic');
-        }
-    }, { once: true });
 }
+
+// =====================================================
+// EVENT LISTENERS
+// =====================================================
+document.getElementById('startSTT').addEventListener('click', startSTT);
+document.getElementById('stopSTT').addEventListener('click', stopSTT);
+document.getElementById('clearLog').addEventListener('click', () => {
+    document.getElementById('log').innerHTML = '';
+    eventHistory = [];
+    bipCount = 0;
+    lastBipTime = 0;
+    logEvent('🧹', 'Logs effacés', 'info');
+});
 
 // Démarrer
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
-} else {
-    initApp();
-}
-
-// =====================================================
-// HACK FINAL : Garder l'audio actif pendant la session
-// =====================================================
-let activityTimer;
-function resetActivityTimer() {
-    clearTimeout(activityTimer);
-    activityTimer = setTimeout(() => {
-        // Tous les 30 secondes, jouer un son silencieux
-        // pour garder le contexte audio actif
-        if (isAudioContextReady) {
-            try {
-                const silentAudio = document.getElementById('silentAudio');
-                if (silentAudio.paused) {
-                    silentAudio.play().catch(() => {});
-                }
-            } catch(e) {}
-        }
-    }, 30000);
-}
-
-// Réinitialiser le timer à chaque interaction
-document.addEventListener('click', resetActivityTimer);
-document.addEventListener('touchstart', resetActivityTimer);
-resetActivityTimer();
+initApp();
 </script>
 </body>
 </html>
