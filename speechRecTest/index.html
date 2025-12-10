@@ -1813,43 +1813,62 @@ async function startSTT() {
 // =====================================================
 // NOUVEAU : Fonction d'arrêt optimisée
 // =====================================================
+// function stopSTT() {
+//     log('⏹️ Arrêt STT avec prévention de bip...');
+    
+//     // HACK 1 : Jouer un son silencieux IMMÉDIATEMENT
+//     playSilentBeep();
+    
+//     // HACK 2 : Marquer comme arrêté AVANT d'arrêter
+//     isRecording = false;
+    
+//     // HACK 3 : Arrêter dans un setTimeout pour "découpler" l'événement
+//     setTimeout(() => {
+//         if (recognition) {
+//             try {
+//                 // HACK 4 : Stop doux sans erreur
+//                 recognition.stop();
+                
+//                 // HACK 5 : Réinitialiser pour éviter les états corrompus
+//                 setTimeout(() => {
+//                     try {
+//                         // Réinitialiser l'instance
+//                         initWebSTT();
+//                         log('🔄 Instance STT réinitialisée');
+//                     } catch(e) {}
+//                 }, 100);
+                
+//                 log('✅ STT arrêtée (avec prévention bip)');
+//                 updateStatus('⏹️ STT arrêtée', 'warning');
+                
+//                 // HACK 6 : Jouer un autre son silencieux après l'arrêt
+//                 setTimeout(playSilentBeep, 20);
+                
+//             } catch (e) {
+//                 // Ignorer les erreurs d'arrêt
+//             }
+//         }
+//     }, 10); // Court délai mais après playSilentBeep
+// }
+
+
+// VERSION AGGRESSIVE
 function stopSTT() {
-    log('⏹️ Arrêt STT avec prévention de bip...');
+    // 1. Jouer un son AUDIBLE mais court à volume très bas
+    const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+    audio.volume = 0.01; // 1% volume
+    audio.play().catch(() => {});
     
-    // HACK 1 : Jouer un son silencieux IMMÉDIATEMENT
-    playSilentBeep();
-    
-    // HACK 2 : Marquer comme arrêté AVANT d'arrêter
-    isRecording = false;
-    
-    // HACK 3 : Arrêter dans un setTimeout pour "découpler" l'événement
+    // 2. Attendre 50ms
     setTimeout(() => {
+        isRecording = false;
         if (recognition) {
-            try {
-                // HACK 4 : Stop doux sans erreur
-                recognition.stop();
-                
-                // HACK 5 : Réinitialiser pour éviter les états corrompus
-                setTimeout(() => {
-                    try {
-                        // Réinitialiser l'instance
-                        initWebSTT();
-                        log('🔄 Instance STT réinitialisée');
-                    } catch(e) {}
-                }, 100);
-                
-                log('✅ STT arrêtée (avec prévention bip)');
-                updateStatus('⏹️ STT arrêtée', 'warning');
-                
-                // HACK 6 : Jouer un autre son silencieux après l'arrêt
-                setTimeout(playSilentBeep, 20);
-                
-            } catch (e) {
-                // Ignorer les erreurs d'arrêt
-            }
+            try { recognition.stop(); } catch(e) {}
         }
-    }, 10); // Court délai mais après playSilentBeep
+    }, 50);
 }
+
+
 
 // =====================================================
 // Event Listeners
