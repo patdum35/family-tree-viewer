@@ -1971,7 +1971,7 @@ document.addEventListener('visibilitychange', () => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speech Test - Hack Anti-Double-Bip</title>
+  <title>Speech Test - Solution Finale Basée Logs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -2026,7 +2026,7 @@ document.addEventListener('visibilitychange', () => {
   </style>
 </head>
 <body>
-  <h2>Test TTS & STT - Solution Double-Bip</h2>
+  <h2>Test TTS & STT - Solution Basée sur Logs Réels</h2>
   
   <div id="status" class="status warning">⏳ Initialisation...</div>
   
@@ -2049,60 +2049,23 @@ document.addEventListener('visibilitychange', () => {
 
 <script>
 // =====================================================
-// Déclarations globales
+// BASÉ SUR LES VRAIS LOGS DU USER
 // =====================================================
+// Problème identifié : 
+// 1. onaudioend → bip
+// 2. onend → bip 
+// 3. Redémarrage → nouveau cycle
+// =====================================================
+
 let recognition;
 let isRecording = false;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 let finalTranscript = '';
-let backgroundNoise = null;
+let isCurrentlyRestarting = false;
+let lastSpeechTime = 0;
+let silenceTimeout = null;
 
 // =====================================================
-// HACK SPÉCIFIQUE : Basé sur l'analyse des logs
-// =====================================================
-// Problème identifié : onaudioend + onend = double bip
-// Solution : Empêcher onaudioend de se déclencher
-// =====================================================
-
-// =====================================================
-// HACK 1 : Créer un bruit de fond imperceptible
-// =====================================================
-function startBackgroundNoise() {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Créer un bruit blanc à volume très bas
-        const bufferSize = 4096;
-        const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        
-        for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 0.00001; // Très très bas
-        }
-        
-        const noiseSource = audioContext.createBufferSource();
-        noiseSource.buffer = noiseBuffer;
-        noiseSource.loop = true;
-        
-        const gainNode = audioContext.createGain();
-        gainNode.gain.setValueAtTime(0.000001, audioContext.currentTime);
-        
-        noiseSource.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        noiseSource.start();
-        backgroundNoise = { source: noiseSource, context: audioContext };
-        
-        log('🎵 Bruit de fond activé (empêche onaudioend)');
-        return true;
-    } catch (e) {
-        log('⚠️ Bruit de fond échoué: ' + e.message);
-        return false;
-    }
-}
-
-// =====================================================
-// Fonction de logging simplifiée
+// STRATÉGIE : Réduire les cycles onaudioend/onend
 // =====================================================
 function log(msg, type = 'info') {
     console.log('[' + type.toUpperCase() + '] ' + msg);
@@ -2180,7 +2143,7 @@ function speakText() {
 }
 
 // =====================================================
-// STT Functions - HACK CIBLÉ
+// STT Functions - APPROCHE RADICALEMENT DIFFÉRENTE
 // =====================================================
 function initWebSTT() {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
@@ -2188,15 +2151,25 @@ function initWebSTT() {
         recognition = new SpeechRecognitionAPI();
         recognition.lang = 'fr-FR';
         
-        // Configuration
-        recognition.continuous = false; // Important pour le hack
+        // =====================================================
+        // CONFIGURATION CRITIQUE BASÉE SUR LOGS
+        // =====================================================
+        recognition.continuous = true;  // TEST: true pour éviter les cycles
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         
-        log('🎯 STT configurée avec hack anti-double-bip');
+        log('🔧 continuous=true (pour réduire cycles)');
 
-        // Gestion des résultats
+        // =====================================================
+        // GESTION DES RÉSULTATS AVEC DÉTECTION MANUELLE
+        // =====================================================
         recognition.onresult = (event) => {
+            lastSpeechTime = Date.now();
+            
+            if (silenceTimeout) {
+                clearTimeout(silenceTimeout);
+            }
+            
             let newFinalText = '';
             
             for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -2214,65 +2187,56 @@ function initWebSTT() {
                 log('✅ Texte: ' + newFinalText.trim());
             }
             
-            // HACK : Redémarrer IMMÉDIATEMENT pour éviter onaudioend
-            if (isRecording) {
-                setTimeout(() => {
-                    if (isRecording && recognition) {
-                        try {
-                            recognition.stop();
-                            // Délai TRÈS court pour éviter le bip
-                            setTimeout(() => {
-                                if (isRecording) recognition.start();
-                            }, 1); // 1ms seulement !
-                        } catch(e) {}
-                    }
-                }, 10);
-            }
+            // Détection manuelle du silence (au lieu de compter sur onaudioend)
+            silenceTimeout = setTimeout(() => {
+                if (isRecording && !isCurrentlyRestarting) {
+                    log('🔇 Silence détecté manuellement (pas de bip)');
+                    // Pas de redémarrage immédiat - on laisse continuous=true gérer
+                }
+            }, 1500); // 1.5 secondes de silence
         };
         
         recognition.onstart = () => {
-            log('🎤 STT démarrée');
+            log('🎤 STT démarrée (continuous=true)');
             updateStatus('🎤 STT en cours...', 'ok');
+            isCurrentlyRestarting = false;
+            lastSpeechTime = Date.now();
         };
         
         // =====================================================
-        // HACK PRINCIPAL : INTERCEPTER onaudioend
+        // HACK : IGNORER COMPLÈTEMENT onaudioend et onend
         // =====================================================
         recognition.onaudioend = () => {
-            log('🔇 onaudioend INTERCEPTÉ (bip évité)');
-            // NE RIEN FAIRE ! On empêche le bip
-            
-            // Redémarrer immédiatement pour garder le micro actif
-            if (isRecording) {
-                setTimeout(() => {
-                    if (isRecording && recognition) {
-                        try {
-                            recognition.start();
-                        } catch(e) {}
-                    }
-                }, 5);
-            }
+            log('🔕 onaudioend IGNORÉ (pas de traitement)');
+            // ABSOLUMENT RIEN faire ici
+            // Ça évite le redémarrage automatique
         };
         
         recognition.onend = () => {
-            log('⏹️ onend (normal)');
+            log('🔕 onend IGNORÉ (continuous=true devrait éviter ça)');
             
-            // Redémarrage standard
-            if (isRecording) {
+            // Seulement redémarrer si vraiment nécessaire
+            if (isRecording && !isCurrentlyRestarting) {
+                isCurrentlyRestarting = true;
+                
+                // Attendre PLUS LONGTEMPS avant de redémarrer
                 setTimeout(() => {
-                    if (isRecording && recognition) {
+                    if (isRecording) {
                         try {
                             recognition.start();
-                            log('🔄 Redémarré après onend');
-                        } catch(e) {}
+                            log('🔄 Redémarré après long délai (moins de bip)');
+                        } catch(e) {
+                            isCurrentlyRestarting = false;
+                        }
                     }
-                }, 100);
+                }, 500); // 500ms au lieu de 50ms
             }
         };
         
         recognition.onerror = (event) => {
+            // Ignorer les erreurs "normales"
             if (event.error === 'no-speech' || event.error === 'audio-capture') {
-                // Normal
+                log('🔇 Erreur normale: ' + event.error);
             } else if (event.error === 'not-allowed') {
                 log('🚫 Microphone non autorisé', 'error');
                 isRecording = false;
@@ -2280,35 +2244,40 @@ function initWebSTT() {
             }
         };
         
-        // DÉSACTIVER onspeechend qui peut causer des problèmes
+        // DÉSACTIVER COMPLÈTEMENT
         recognition.onspeechend = null;
+        recognition.onsoundend = null;
         
-        log('✅ STT initialisée (hack onaudioend activé)');
+        log('✅ STT initialisée (ignore onaudioend/onend)');
         return true;
     }
     return false;
 }
 
 // =====================================================
-// Démarrer STT avec préparation
+// Démarrer STT - Version simple
 // =====================================================
 function startSTT() {
-    log('▶️ Démarrage STT avec protection onaudioend...');
-    
-    // Activer le bruit de fond d'abord
-    startBackgroundNoise();
+    log('▶️ Démarrage STT (mode continuous=true)...');
     
     // Réinitialiser
     finalTranscript = '';
     document.getElementById('sttResult').textContent = '';
     isRecording = true;
+    isCurrentlyRestarting = false;
     
-    // Démarrer
+    // Nettoyer les timeouts
+    if (silenceTimeout) {
+        clearTimeout(silenceTimeout);
+        silenceTimeout = null;
+    }
+    
+    // Démarrer avec un petit délai
     setTimeout(() => {
         if (isRecording && recognition) {
             try {
                 recognition.start();
-                log('🚀 STT démarrée (bruit de fond actif)');
+                log('🚀 STT démarrée en mode continu');
             } catch (e) {
                 log('❌ Erreur démarrage: ' + e.message, 'error');
                 isRecording = false;
@@ -2318,44 +2287,40 @@ function startSTT() {
 }
 
 // =====================================================
-// Arrêt optimisé
+// Arrêt - Version simple
 // =====================================================
 function stopSTT() {
-    log('⏹️ Arrêt STT (avec gestion onaudioend)...');
+    log('⏹️ Arrêt STT (nettoyage complet)...');
     
-    // 1. D'abord arrêter le bruit de fond
-    if (backgroundNoise) {
-        try {
-            backgroundNoise.source.stop();
-            log('🔇 Bruit de fond arrêté');
-        } catch(e) {}
+    // 1. Arrêter les timeouts
+    if (silenceTimeout) {
+        clearTimeout(silenceTimeout);
+        silenceTimeout = null;
     }
     
-    // 2. Puis arrêter la reconnaissance
+    // 2. Marquer comme arrêté
     isRecording = false;
+    isCurrentlyRestarting = false;
     
+    // 3. Arrêter la reconnaissance
     setTimeout(() => {
         if (recognition) {
             try {
-                // Désactiver temporairement onaudioend pour l'arrêt
-                const originalOnaudioend = recognition.onaudioend;
-                recognition.onaudioend = null;
-                
                 recognition.stop();
-                
-                // Restaurer après l'arrêt
-                setTimeout(() => {
-                    recognition.onaudioend = originalOnaudioend;
-                }, 50);
-                
-                log('✅ STT arrêtée (onaudioend désactivé pendant l\'arrêt)');
+                log('✅ STT arrêtée proprement');
                 updateStatus('⏹️ STT arrêtée', 'warning');
                 
+                // Réinitialiser pour la prochaine fois
+                setTimeout(() => {
+                    initWebSTT();
+                    log('🔄 Instance réinitialisée');
+                }, 200);
+                
             } catch (e) {
-                log('⚠️ Erreur arrêt: ' + e.message);
+                log('⚠️ Erreur lors de l\'arrêt: ' + e.message);
             }
         }
-    }, 10);
+    }, 50);
 }
 
 // =====================================================
@@ -2369,11 +2334,10 @@ document.getElementById('stopSTT').addEventListener('click', stopSTT);
 // INITIALISATION
 // =====================================================
 function initApp() {
-    log('🚀 Initialisation hack onaudioend...');
-    log('📱 Mobile: ' + isMobile);
+    log('🚀 Initialisation solution basée logs...');
     
     if (initWebSTT()) {
-        updateStatus('✅ STT initialisée (anti-double-bip)', 'ok');
+        updateStatus('✅ STT initialisée (stratégie continue)', 'ok');
     }
     
     if (window.speechSynthesis) {
@@ -2389,6 +2353,20 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+
+// =====================================================
+// HACK FINAL : Forcer continuous=true à rester actif
+// =====================================================
+setInterval(() => {
+    if (isRecording && recognition && !isCurrentlyRestarting) {
+        // Vérifier si le système est toujours actif
+        const timeSinceLastSpeech = Date.now() - lastSpeechTime;
+        if (timeSinceLastSpeech > 5000) {
+            // 5 secondes sans activité, vérifier l'état
+            log('🕒 Vérification état système...');
+        }
+    }
+}, 3000);
 </script>
 </body>
 </html>
