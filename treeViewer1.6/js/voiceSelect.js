@@ -988,7 +988,7 @@ const SpeechRecognitionUI = (function() {
         if (recognition)  {
             recognition.stop();
             if (state.isMobile && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
             }
         }
     }
@@ -1006,7 +1006,7 @@ const SpeechRecognitionUI = (function() {
         if (isRecording && recognition) {
             recognition.stop(); 
             if (state.isMobile && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
             }            
             console.log(`[ACTION] Demande de bascule en Mode Épellation pour: ${targetField}`);
         } else {
@@ -1034,7 +1034,7 @@ const SpeechRecognitionUI = (function() {
         if (isRecording) {
             recognition.stop(); 
             if (state.isMobile && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
             }
         }
     }
@@ -1262,7 +1262,7 @@ const SpeechRecognitionUI = (function() {
 
             if (isRecording) {
                 if (state.isMobile && window.speechSynthesis.speaking) {
-                    window.speechSynthesis.cancel(); 
+                    // window.speechSynthesis.cancel(); 
                 }
             }
 
@@ -1425,9 +1425,6 @@ const SpeechRecognitionUI = (function() {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
-                                if (state.isMobile && window.speechSynthesis.speaking) {
-                                    window.speechSynthesis.cancel(); 
-                                }
                             }
                         }, PC_MAX_DURATION_MS);
                     }
@@ -1457,9 +1454,6 @@ const SpeechRecognitionUI = (function() {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
-                                if (state.isMobile && window.speechSynthesis.speaking) {
-                                    window.speechSynthesis.cancel(); 
-                                }
                             }
                         }, PC_MAX_DURATION_MS);
                     }
@@ -1497,9 +1491,6 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
-                            if (state.isMobile && window.speechSynthesis.speaking) {
-                                window.speechSynthesis.cancel(); 
-                            }
                         }
                     }, PC_MAX_DURATION_MS);
                 }
@@ -1710,9 +1701,6 @@ const SpeechRecognitionUI = (function() {
                         console.log("⏰ PC : Coupure après 20s (limite atteinte).");
                         isRecording = false;
                         recognition.stop();
-                        if (state.isMobile && window.speechSynthesis.speaking) {
-                            window.speechSynthesis.cancel(); 
-                        }
                     }
                 }, PC_MAX_DURATION_MS);
             }
@@ -2863,7 +2851,7 @@ function updateEntityUI(config = null) {
             clearTimeout(recognitionTimeout); 
             recognition.stop();
             if (state.isMobile && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
             }
         } else {
 
@@ -2913,8 +2901,8 @@ function updateEntityUI(config = null) {
                 // openMicrophoneStream();
 
                 recognition.start();
-                if (state.isMobile) {
-                // if (true) {
+                // if (state.isMobile) {
+                if (true) {
                     speakText(SUPER_LONG_TEXT, 0.6, 0.7);
                 }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
@@ -2933,9 +2921,6 @@ function updateEntityUI(config = null) {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
-                            if (state.isMobile && window.speechSynthesis.speaking) {
-                                window.speechSynthesis.cancel(); 
-                            }
                         }
                     }, PC_MAX_DURATION_MS);
                 }
@@ -3012,7 +2997,7 @@ function updateEntityUI(config = null) {
             isRecording = false;
             recognition.stop(); 
             if (state.isMobile && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel(); 
+                // window.speechSynthesis.cancel(); 
             }
         }
         
