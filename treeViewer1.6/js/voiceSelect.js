@@ -1432,7 +1432,7 @@ const SpeechRecognitionUI = (function() {
                     // hideUI();
                     recognition.start();
                     if (state.isMobile) {
-                        // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                        // speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
                         }, 2000);
@@ -1453,6 +1453,7 @@ const SpeechRecognitionUI = (function() {
 
                 } else {
                     recognition.stop()
+                    stopSpeechRecognition = true;
                     if (state.isMobile ) {
                         window.speechSynthesis.cancel(); 
                     }                    
@@ -1467,7 +1468,7 @@ const SpeechRecognitionUI = (function() {
 
                     recognition.start();
                     if (state.isMobile) {
-                        // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                        // speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
                         }, 2000);
@@ -1492,7 +1493,13 @@ const SpeechRecognitionUI = (function() {
 
                 // arreterEcouteAction();
                 recognition.stop()
+                stopSpeechRecognition = true;
+                if (state.isMobile ) {
+                    window.speechSynthesis.cancel(); 
+                }
                 
+
+
                 await speakTextWithWaitToEnd('essai de parole', 0.0); // ppour débugger le son et éviter la 1iere saccade de son
                 // await speakTextWithWaitToEnd(' ', 1); // ppour débugger le son et éviter la 1iere saccade de son
                 if (detectedAction.includes('whoAreYou')) {
@@ -1507,7 +1514,7 @@ const SpeechRecognitionUI = (function() {
                 }
                 recognition.start();
                 if (state.isMobile) {
-                    // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                    // speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                     setTimeout(() => {
                         stopSpeechRecognition = false;
                     }, 2000);
@@ -1886,7 +1893,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile && !stopSpeechRecognition) {
-                            speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                         }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
                     } catch(e) {
@@ -1906,7 +1913,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile && !stopSpeechRecognition) {
-                            speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                         }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
                     } catch(e) {
@@ -1934,7 +1941,7 @@ const SpeechRecognitionUI = (function() {
                             try {
                                 recognition.start();
                                 if (state.isMobile && !stopSpeechRecognition) {
-                                    speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                                    speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                                 }                                
                             } catch(e) {
                                 console.warn("Erreur au redémarrage mobile :", e.message);
@@ -2920,7 +2927,7 @@ function updateEntityUI(config = null) {
                 recognition.start();
                 if (state.isMobile && !stopSpeechRecognition) {
                 // if (true) {
-                    speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                    speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                 }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
                 // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
@@ -2953,7 +2960,7 @@ function updateEntityUI(config = null) {
                 initializeSpeechRecognition(config);
                 recognition.start();
                 if (state.isMobile) {
-                    // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
+                    // speakText(SUPER_LONG_TEXT, 0.01, 0.7);
                 }
 
                 isRecording = false; 
