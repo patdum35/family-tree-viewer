@@ -885,13 +885,13 @@ const SpeechRecognitionUI = (function() {
 
     let isNewCommandToBeExecuted = true;
     let isNewCommandToBeExecuted2 = true;
-    const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
+    const LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés';
     // Nombre de répétitions souhaitées
-    const REPETITIONS = 20; 
+    const REPETITIONS = 1; //20; 
     let SUPER_LONG_TEXT = LONG_PHRASE;
-    // for (let i = 0; i < REPETITIONS; i++) {
-    //     SUPER_LONG_TEXT += LONG_PHRASE;
-    // }
+    for (let i = 0; i < REPETITIONS; i++) {
+        SUPER_LONG_TEXT += LONG_PHRASE;
+    }
 
     let stopSpeechRecognition = false;
 
@@ -1437,6 +1437,7 @@ const SpeechRecognitionUI = (function() {
                         // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
+                            speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         }, 2000);
                     }                    
                     if (!state.isMobile) {
@@ -1471,10 +1472,10 @@ const SpeechRecognitionUI = (function() {
 
                     recognition.start();
                     if (state.isMobile) {
-                        // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
-                        }, 3000);
+                            speakText(SUPER_LONG_TEXT, 0.008, 0.7);
+                        }, 2000);
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1517,10 +1518,11 @@ const SpeechRecognitionUI = (function() {
                 }
                 recognition.start();
                 if (state.isMobile) {
-                    // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
+
                     setTimeout(() => {
                         stopSpeechRecognition = false;
-                    }, 3000);
+                        speakText(SUPER_LONG_TEXT, 0.008, 0.7);
+                    }, 2000);
                 }                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
