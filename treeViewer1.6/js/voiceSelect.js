@@ -885,6 +885,10 @@ const SpeechRecognitionUI = (function() {
 
     let isNewCommandToBeExecuted = true;
     let isNewCommandToBeExecuted2 = true;
+    const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
+    // Nombre de répétitions souhaitées
+    const REPETITIONS = 20; 
+    let SUPER_LONG_TEXT = LONG_PHRASE;
 
 
     const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'whatisTheUseBis', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
@@ -981,7 +985,12 @@ const SpeechRecognitionUI = (function() {
 
 
 
-        if (recognition) recognition.stop();
+        if (recognition)  {
+            recognition.stop();
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
+            }
+        }
     }
 
     
@@ -996,6 +1005,9 @@ const SpeechRecognitionUI = (function() {
         
         if (isRecording && recognition) {
             recognition.stop(); 
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
+            }            
             console.log(`[ACTION] Demande de bascule en Mode Épellation pour: ${targetField}`);
         } else {
             toggleSpeechRecognition(); 
@@ -1021,6 +1033,9 @@ const SpeechRecognitionUI = (function() {
 
         if (isRecording) {
             recognition.stop(); 
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
+            }
         }
     }
 
@@ -1245,6 +1260,13 @@ const SpeechRecognitionUI = (function() {
         // VÉRIFICATION GLOBALE : Est-ce qu'une action a été détectée ? Et y a-t-il un signal de validation ?
         if (isNewCommandToBeExecuted && isNewCommandToBeExecuted2 && config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
 
+            if (isRecording) {
+                if (state.isMobile) {
+                    window.speechSynthesis.cancel(); 
+                }
+            }
+
+
             // // 1. Enregistrer l'Action
             // capturedEntities[translate('question')] = translate(detectedAction);
 
@@ -1394,12 +1416,18 @@ const SpeechRecognitionUI = (function() {
                     else { await speakTextWithWaitToEnd(textToTell, 1.0); }
                     // hideUI();
                     recognition.start();
+                    if (state.isMobile) {
+                        speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                    }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
+                                if (state.isMobile) {
+                                    window.speechSynthesis.cancel(); 
+                                }
                             }
                         }, PC_MAX_DURATION_MS);
                     }
@@ -1420,12 +1448,18 @@ const SpeechRecognitionUI = (function() {
                     console.log('\n\n\n ------------   debug words after fail: ',  cumulativeTranscript);
 
                     recognition.start();
+                    if (state.isMobile) {
+                        speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                    }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
                         recognitionTimeout = setTimeout(() => {
                             if (isRecording) {
                                 isRecording = false;
                                 recognition.stop();
+                                if (state.isMobile) {
+                                    window.speechSynthesis.cancel(); 
+                                }
                             }
                         }, PC_MAX_DURATION_MS);
                     }
@@ -1454,12 +1488,18 @@ const SpeechRecognitionUI = (function() {
                     speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
                 }
                 recognition.start();
+                if (state.isMobile) {
+                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                }                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
+                            if (state.isMobile) {
+                                window.speechSynthesis.cancel(); 
+                            }
                         }
                     }, PC_MAX_DURATION_MS);
                 }
@@ -1468,6 +1508,16 @@ const SpeechRecognitionUI = (function() {
             cumulativeTranscript = newCumulativeTranscript;
 
             console.log ('\n\n\n\n\n\n ++++++++++++++++++++     Final texte === ', cumulativeTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+
+
+
+            if (isRecording) {
+                if (state.isMobile) {
+                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                }
+            }
+
+
 
             return; 
         }
@@ -1660,6 +1710,9 @@ const SpeechRecognitionUI = (function() {
                         console.log("⏰ PC : Coupure après 20s (limite atteinte).");
                         isRecording = false;
                         recognition.stop();
+                        if (state.isMobile) {
+                            window.speechSynthesis.cancel(); 
+                        }
                     }
                 }, PC_MAX_DURATION_MS);
             }
@@ -1825,6 +1878,9 @@ const SpeechRecognitionUI = (function() {
                 setTimeout(() => {
                     try {
                         recognition.start();
+                        if (state.isMobile) {
+                            speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                        }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
                     } catch(e) {
                         console.error("Erreur au démarrage du mode épellation après bascule :", e.message);
@@ -1842,6 +1898,9 @@ const SpeechRecognitionUI = (function() {
                 setTimeout(() => {
                     try {
                         recognition.start();
+                        if (state.isMobile) {
+                            speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                        }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
                     } catch(e) {
                         console.log("[LOG STT] Tentative d'arrêt critique du mode épellation.");
@@ -1867,6 +1926,9 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) { 
                             try {
                                 recognition.start();
+                                if (state.isMobile) {
+                                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                                }                                
                             } catch(e) {
                                 console.warn("Erreur au redémarrage mobile :", e.message);
                                 isRecording = false; updateButtonUI(false);
@@ -2800,6 +2862,9 @@ function updateEntityUI(config = null) {
             pendingSpellingStart = false; 
             clearTimeout(recognitionTimeout); 
             recognition.stop();
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
+            }
         } else {
 
 
@@ -2837,10 +2902,7 @@ function updateEntityUI(config = null) {
             document.getElementById('stt-result-display').textContent = '';
             // Définissez cette constante quelque part au début de votre fichier JS
             // const BARELY_AUDIBLE_SOUND = '.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.'; // 30 répétitions d'une virgule/point
-            const LONG_PHRASE = 'parler dans le micro votre voix est analysée et des mots clé sont détectés';
-            // Nombre de répétitions souhaitées
-            const REPETITIONS = 20; 
-            let SUPER_LONG_TEXT = LONG_PHRASE;
+
             // Utilisation d'une boucle for pour garantir la compatibilité
             for (let i = 0; i < REPETITIONS; i++) {
                 SUPER_LONG_TEXT += LONG_PHRASE;
@@ -2851,9 +2913,13 @@ function updateEntityUI(config = null) {
                 // openMicrophoneStream();
 
                 recognition.start();
+                if (state.isMobile) {
+                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
                 // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
-                // speakText(SUPER_LONG_TEXT, 0.5, 1.0); // Juste un espace ou un son très court et discret
+
+
                 // speakText(SUPER_LONG_TEXT, 0.005, 0.7); // Juste un espace ou un son très court et discret
                 // startTTSLoop();
                 // speakContinuousLoop('aaaaaaaaaaaaaaa', 0.5, 1.0)
@@ -2866,11 +2932,15 @@ function updateEntityUI(config = null) {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
+                            if (state.isMobile) {
+                                window.speechSynthesis.cancel(); 
+                            }
                         }
                     }, PC_MAX_DURATION_MS);
                 }
-
-                // window.speechSynthesis.cancel(); 
+                if (state.isMobile) {
+                    // window.speechSynthesis.cancel(); 
+                }
 
             } catch (e) {
                 console.error("Erreur au démarrage de la reconnaissance:", e);
@@ -2879,6 +2949,9 @@ function updateEntityUI(config = null) {
 
                 initializeSpeechRecognition(config);
                 recognition.start();
+                if (state.isMobile) {
+                    speakText(SUPER_LONG_TEXT, 0.1, 0.7);
+                }
 
                 isRecording = false; 
                 updateButtonUI(false);
@@ -2937,6 +3010,9 @@ function updateEntityUI(config = null) {
         if (isRecording && recognition) {
             isRecording = false;
             recognition.stop(); 
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
+            }
         }
         
         capturedEntities = entityKeys.reduce((acc, field) => {
