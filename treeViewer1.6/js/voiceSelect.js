@@ -1248,7 +1248,8 @@ const SpeechRecognitionUI = (function() {
 
         isNewCommandToBeExecuted2 = true;
         if (detectedAction != null) {
-            if (isOnResult == 'onEnd' && previousTruncatedTranscriptOnResult === truncatedTranscript ) { 
+            // if (isOnResult == 'onEnd' && previousTruncatedTranscriptOnResult === truncatedTranscript ) { 
+            if (previousTruncatedTranscriptOnResult === truncatedTranscript ) { 
                 console.log('\n\n ---- debug 2  : NE PAS EXCECUTER CETTE COMMANDE car c est UN ONEND dupliqué d un ONRESULT déjà excécuté');
                 isNewCommandToBeExecuted2 = false;
             }
@@ -1433,7 +1434,7 @@ const SpeechRecognitionUI = (function() {
                     // hideUI();
                     recognition.start();
                     if (state.isMobile) {
-                        // speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                        // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
                         }, 2000);
@@ -1470,7 +1471,7 @@ const SpeechRecognitionUI = (function() {
 
                     recognition.start();
                     if (state.isMobile) {
-                        // speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                        // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         setTimeout(() => {
                             stopSpeechRecognition = false;
                         }, 3000);
@@ -1516,7 +1517,7 @@ const SpeechRecognitionUI = (function() {
                 }
                 recognition.start();
                 if (state.isMobile) {
-                    // speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                    // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                     setTimeout(() => {
                         stopSpeechRecognition = false;
                     }, 3000);
@@ -1895,7 +1896,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile && !stopSpeechRecognition) {
-                            speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
                     } catch(e) {
@@ -1915,7 +1916,7 @@ const SpeechRecognitionUI = (function() {
                     try {
                         recognition.start();
                         if (state.isMobile && !stopSpeechRecognition) {
-                            speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                            speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                         }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
                     } catch(e) {
@@ -1943,7 +1944,7 @@ const SpeechRecognitionUI = (function() {
                             try {
                                 recognition.start();
                                 if (state.isMobile && !stopSpeechRecognition) {
-                                    speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                                    speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                                 }                                
                             } catch(e) {
                                 console.warn("Erreur au redémarrage mobile :", e.message);
@@ -2929,13 +2930,13 @@ function updateEntityUI(config = null) {
                 recognition.start();
                 if (state.isMobile && !stopSpeechRecognition) {
                 // if (true) {
-                    speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                    speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                 }
                 // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
                 // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
 
 
-                // speakText(SUPER_LONG_TEXT, 0.005, 0.7); // Juste un espace ou un son très court et discret
+                // speakText(SUPER_LONG_TEXT, 0.008, 0.7); // Juste un espace ou un son très court et discret
                 // startTTSLoop();
                 // speakContinuousLoop('aaaaaaaaaaaaaaa', 0.5, 1.0)
 
@@ -2962,7 +2963,7 @@ function updateEntityUI(config = null) {
                 initializeSpeechRecognition(config);
                 recognition.start();
                 if (state.isMobile) {
-                    // speakText(SUPER_LONG_TEXT, 0.005, 0.7);
+                    // speakText(SUPER_LONG_TEXT, 0.008, 0.7);
                 }
 
                 isRecording = false; 
