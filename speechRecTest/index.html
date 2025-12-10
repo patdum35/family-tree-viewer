@@ -1,4 +1,5 @@
-
+<!-- gemini 1 : ok pc, bip et arret sur mobile -->
+<!-- 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -455,4 +456,445 @@ if (document.readyState === 'loading') {
 
 
 
+ -->
 
+
+
+
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Test Fixed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    #sttResult {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 5px;
+      min-height: 50px;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #333;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 5px;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.ok { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.warning { background: #fff3cd; color: #856404; }
+  </style>
+</head>
+<body>
+  <h2>Test TTS & STT (Web Pur)</h2>
+  
+  <div id="status" class="status warning">⏳ Initialisation en cours...</div>
+  
+  <h3>🔊 Text-to-Speech (TTS)</h3>
+  <label for="voices">Choisir la voix TTS :</label>
+  <select id="voices">
+    <option value="">Chargement...</option>
+  </select>
+  
+  <input type="text" id="ttsText" placeholder="Texte à lire" value="Bonjour, test de synthèse vocale">
+  <button id="speakBtn">🔊 Parler</button>
+  
+  <h3>🎤 Speech-to-Text (STT)</h3>
+  <button id="startSTT">▶️ Démarrer STT</button>
+  <button id="stopSTT">⏹️ Arrêter STT</button>
+  <p id="sttResult">Résultats STT apparaîtront ici...</p>
+  
+  <h3>📋 Console de débogage</h3>
+  <div id="log"></div>
+
+<script>
+// =====================================================
+// Déclarations globales
+// =====================================================
+let recognition;
+let isRecording = false;
+let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+let restartTimeout = null;
+let lastRestartTime = 0;
+let consecutiveRestarts = 0;
+
+// =====================================================
+// Fonction de logging
+// =====================================================
+function log(msg, type = 'info') {
+    console.log('[' + type.toUpperCase() + '] ' + msg);
+    const logDiv = document.getElementById('log');
+    const timestamp = new Date().toLocaleTimeString();
+    logDiv.innerHTML = `[${timestamp}] ${msg}<br>` + logDiv.innerHTML;
+}
+
+function updateStatus(msg, statusType) {
+    const statusDiv = document.getElementById('status');
+    statusDiv.className = 'status ' + statusType;
+    statusDiv.textContent = msg;
+    log(msg, statusType);
+}
+
+// =====================================================
+// TTS Functions (inchangé)
+// =====================================================
+async function populateVoices() {
+    log('🔍 Chargement des voix TTS...');
+    const voicesSelect = document.getElementById('voices');
+    voicesSelect.innerHTML = '';
+    
+    if (window.speechSynthesis) {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            log('⚠️ Aucune voix trouvée, réessai dans 100ms...');
+            setTimeout(populateVoices, 100);
+            return;
+        }
+        voices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = `${v.name} (${v.lang})`;
+            voicesSelect.appendChild(opt);
+        });
+        log('✅ ' + voices.length + ' voix chargées (Web)');
+    } else {
+        log('❌ TTS non disponible', 'error');
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'TTS non disponible';
+        voicesSelect.appendChild(opt);
+    }
+}
+
+function speakText() {
+    const text = document.getElementById('ttsText').value;
+    const voiceName = document.getElementById('voices').value;
+
+    if (!text) {
+        log('⚠️ Aucun texte à lire', 'warning');
+        return;
+    }
+
+    log('🔊 Lecture TTS : "' + text + '"');
+
+    if (window.speechSynthesis) {
+        const utter = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        if (voiceName) {
+            const selectedVoice = voices.find(v => v.name === voiceName);
+            if (selectedVoice) {
+                utter.voice = selectedVoice;
+                log('🎙️ Voix sélectionnée : ' + selectedVoice.name);
+            }
+        }
+        utter.onend = () => log('✅ TTS terminée');
+        utter.onerror = (e) => log('❌ Erreur TTS: ' + e.error, 'error');
+        window.speechSynthesis.speak(utter);
+    } else {
+        log('❌ TTS non disponible', 'error');
+        updateStatus('❌ TTS non disponible', 'error');
+    }
+}
+
+// =====================================================
+// STT Functions - HACK AMÉLIORÉ
+// =====================================================
+function initWebSTT() {
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognitionAPI();
+        recognition.lang = 'fr-FR';
+        
+        // CONFIGURATION CRITIQUE pour mobile
+        if (isMobile) {
+            // Sur mobile, continuous=true peut bugger, on utilise une approche hybride
+            recognition.continuous = false;  // On laisse à false pour éviter les bugs
+            recognition.interimResults = true;
+            
+            log('📱 Mode mobile détecté - configuration spéciale activée');
+        } else {
+            // Sur PC, continuous=true marche bien
+            recognition.continuous = true;
+            recognition.interimResults = true;
+        }
+
+        // Gestion des résultats
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    transcript += event.results[i][0].transcript;
+                } else {
+                    // Résultats intermédiaires
+                    transcript += event.results[i][0].transcript;
+                }
+            }
+            
+            if (transcript.trim()) {
+                const currentText = document.getElementById('sttResult').textContent;
+                document.getElementById('sttResult').textContent = currentText + ' ' + transcript;
+                log('🎤 STT : ' + transcript);
+                
+                // Réinitialiser le compteur de redémarrages quand on a du texte
+                consecutiveRestarts = 0;
+            }
+        };
+        
+        recognition.onstart = () => {
+            log('🎤 STT démarrée');
+            updateStatus('🎤 STT en cours...', 'ok');
+            lastRestartTime = Date.now();
+        };
+        
+        // =====================================================
+        // HACK PRINCIPAL : Gestion intelligente de onend
+        // =====================================================
+        recognition.onend = () => {
+            const now = Date.now();
+            const timeSinceRestart = now - lastRestartTime;
+            
+            log(`🔄 STT arrêtée (depuis ${timeSinceRestart}ms)`);
+            
+            if (isRecording) {
+                consecutiveRestarts++;
+                
+                // Calcul du délai dynamique
+                let restartDelay = calculateDynamicRestartDelay();
+                
+                // Si c'était très court (< 500ms), c'est probablement un bug mobile
+                if (timeSinceRestart < 500 && consecutiveRestarts < 5) {
+                    restartDelay = Math.min(restartDelay, 50); // Redémarrage ultra-rapide
+                    log(`⚡ Redémarrage rapide (bug mobile détecté): ${restartDelay}ms`);
+                }
+                
+                // Nettoyer tout timeout existant
+                if (restartTimeout) {
+                    clearTimeout(restartTimeout);
+                }
+                
+                // Redémarrer avec le délai calculé
+                restartTimeout = setTimeout(() => {
+                    if (isRecording) {
+                        try {
+                            recognition.start();
+                            log(`✅ Redémarré après ${restartDelay}ms (tentative ${consecutiveRestarts})`);
+                        } catch (e) {
+                            if (e.message.includes('already started') || e.name === 'InvalidStateError') {
+                                // C'est bon, ça tourne déjà
+                                log('⚠️ Déjà démarré, c\'est normal');
+                            } else {
+                                log('❌ Erreur redémarrage: ' + e.message, 'error');
+                                // Réessayer avec un délai plus long
+                                setTimeout(() => {
+                                    if (isRecording) {
+                                        try { recognition.start(); } catch(e2) {}
+                                    }
+                                }, 500);
+                            }
+                        }
+                    }
+                }, restartDelay);
+            } else {
+                updateStatus('⏹️ STT arrêtée', 'warning');
+            }
+        };
+        
+        recognition.onerror = (event) => {
+            // Ignorer certaines erreurs "normales" sur mobile
+            if (event.error === 'no-speech' || event.error === 'audio-capture') {
+                log('⚠️ ' + event.error + ' (normal sur mobile)', 'warning');
+                // Ne pas arrêter, laisser onend gérer
+            } else if (event.error === 'network') {
+                log('🌐 Erreur réseau, nouvelle tentative...', 'warning');
+                setTimeout(() => {
+                    if (isRecording) {
+                        try { recognition.start(); } catch(e) {}
+                    }
+                }, 1000);
+            } else {
+                log('❌ Erreur STT: ' + event.error, 'error');
+                updateStatus('❌ Erreur STT : ' + event.error, 'error');
+            }
+        };
+        
+        // Désactiver certains événements qui causent des arrêts prématurés
+        recognition.onspeechend = null;
+        recognition.onsoundend = null;
+        
+        log('✅ STT initialisée (mode: ' + (isMobile ? 'mobile' : 'desktop') + ')');
+        return true;
+    }
+    return false;
+}
+
+// =====================================================
+// Fonction de calcul de délai dynamique
+// =====================================================
+function calculateDynamicRestartDelay() {
+    // Base delay
+    let delay = 100; // 100ms de base
+    
+    // Ajustement pour mobile
+    if (isMobile) {
+        delay = 50; // Plus rapide sur mobile
+    }
+    
+    // Si beaucoup de redémarrages consécutifs, augmenter le délai
+    if (consecutiveRestarts > 3) {
+        delay = Math.min(delay * Math.pow(1.5, consecutiveRestarts - 3), 1000);
+        log(`⚠️ Beaucoup de redémarrages (${consecutiveRestarts}), délai augmenté à ${delay}ms`);
+    }
+    
+    // Si le dernier redémarrage était récent, accélérer
+    const timeSinceLastRestart = Date.now() - lastRestartTime;
+    if (timeSinceLastRestart < 300) {
+        delay = Math.max(10, delay / 2); // Au moins 10ms
+    }
+    
+    return Math.round(delay);
+}
+
+// =====================================================
+// Contrôles STT
+// =====================================================
+function startSTT() {
+    log('▶️ Démarrage STT...');
+    
+    isRecording = true;
+    consecutiveRestarts = 0;
+    
+    if (recognition) {
+        try {
+            recognition.start();
+            log('✅ STT démarrée');
+        } catch (e) {
+            if (e.message.includes('already started') || e.name === 'InvalidStateError') {
+                log('⚠️ Déjà démarrée, c\'est normal');
+            } else {
+                log('❌ Erreur démarrage STT: ' + e.message, 'error');
+                isRecording = false;
+            }
+        }
+    } else {
+        log('❌ STT non initialisée', 'error');
+        updateStatus('❌ STT non initialisée', 'error');
+        isRecording = false;
+    }
+}
+
+function stopSTT() {
+    log('⏹️ Arrêt STT...');
+    
+    isRecording = false;
+    consecutiveRestarts = 0;
+    
+    if (restartTimeout) {
+        clearTimeout(restartTimeout);
+        restartTimeout = null;
+    }
+    
+    if (recognition) {
+        try {
+            recognition.stop();
+            log('✅ STT arrêtée');
+            updateStatus('⏹️ STT arrêtée', 'warning');
+        } catch (e) {
+            log('❌ Erreur arrêt STT: ' + e.message, 'error');
+        }
+    }
+}
+
+// =====================================================
+// Event Listeners
+// =====================================================
+document.getElementById('speakBtn').addEventListener('click', speakText);
+document.getElementById('startSTT').addEventListener('click', startSTT);
+document.getElementById('stopSTT').addEventListener('click', stopSTT);
+
+// =====================================================
+// INITIALISATION PRINCIPALE
+// =====================================================
+function initApp() {
+    log('🚀 Initialisation de l\'application...');
+    log('📱 Plateforme : ' + (isMobile ? 'MOBILE' : 'DESKTOP'));
+    
+    // Init STT
+    if (initWebSTT()) {
+        updateStatus('✅ STT initialisée', 'ok');
+    } else {
+        updateStatus('⚠️ STT non supportée', 'warning');
+    }
+    
+    // Init TTS
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = populateVoices;
+        // Charger les voix immédiatement aussi
+        setTimeout(populateVoices, 100);
+        updateStatus('✅ TTS initialisée', 'ok');
+    } else {
+        updateStatus('⚠️ TTS non supportée', 'warning');
+    }
+}
+
+// Initialisation au chargement
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+// Gestion de la visibilité de la page
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isRecording) {
+        log('⚠️ Page cachée, ajustement STT...');
+        // Sur mobile, quand la page est cachée, l'audio peut être suspendu
+        if (isMobile) {
+            setTimeout(() => {
+                if (isRecording && recognition) {
+                    try {
+                        recognition.stop();
+                        setTimeout(() => recognition.start(), 100);
+                    } catch(e) {}
+                }
+            }, 100);
+        }
+    }
+});
+</script>
+</body>
+</html>
