@@ -1433,7 +1433,9 @@ const SpeechRecognitionUI = (function() {
                     recognition.start();
                     if (state.isMobile) {
                         // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
-                        stopSpeechRecognition = false;
+                        setTimeout(() => {
+                            stopSpeechRecognition = false;
+                        }, 2000);
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1466,7 +1468,9 @@ const SpeechRecognitionUI = (function() {
                     recognition.start();
                     if (state.isMobile) {
                         // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
-                        stopSpeechRecognition = false;
+                        setTimeout(() => {
+                            stopSpeechRecognition = false;
+                        }, 2000);
                     }                    
                     if (!state.isMobile) {
                         clearTimeout(recognitionTimeout);
@@ -1504,7 +1508,9 @@ const SpeechRecognitionUI = (function() {
                 recognition.start();
                 if (state.isMobile) {
                     // speakText(SUPER_LONG_TEXT, 0.05, 0.7);
-                    stopSpeechRecognition = false;
+                    setTimeout(() => {
+                        stopSpeechRecognition = false;
+                    }, 2000);
                 }                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
@@ -2912,7 +2918,7 @@ function updateEntityUI(config = null) {
                 // openMicrophoneStream();
 
                 recognition.start();
-                if (state.isMobile) {
+                if (state.isMobile && !stopSpeechRecognition) {
                 // if (true) {
                     speakText(SUPER_LONG_TEXT, 0.05, 0.7);
                 }
