@@ -1971,7 +1971,7 @@ document.addEventListener('visibilitychange', () => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speech Test - Solution Finale Basée Logs</title>
+  <title>Speech Test - Hack TTS Bruit de Fond</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -2023,49 +2023,85 @@ document.addEventListener('visibilitychange', () => {
     .status.ok { background: #d4edda; color: #155724; }
     .status.error { background: #f8d7da; color: #721c24; }
     .status.warning { background: #fff3cd; color: #856404; }
+    .slider-container {
+      margin: 10px 0;
+    }
+    .slider-container label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .slider-value {
+      display: inline-block;
+      width: 40px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
-  <h2>Test TTS & STT - Solution Basée sur Logs Réels</h2>
+  <h2>🎤 STT avec Bruit de Fond TTS</h2>
   
   <div id="status" class="status warning">⏳ Initialisation...</div>
   
-  <h3>🔊 Text-to-Speech (TTS)</h3>
-  <label for="voices">Choisir la voix TTS :</label>
-  <select id="voices">
-    <option value="">Chargement...</option>
-  </select>
+  <h3>🔊 Bruit de Fond TTS (anti-bip)</h3>
+  <div class="slider-container">
+    <label>Volume du bruit de fond: <span id="volumeValue" class="slider-value">0.3</span></label>
+    <input type="range" id="backgroundVolume" min="0.1" max="0.8" step="0.05" value="0.3">
+  </div>
   
-  <input type="text" id="ttsText" placeholder="Texte à lire" value="Bonjour, test de synthèse vocale">
-  <button id="speakBtn">🔊 Parler</button>
+  <div class="slider-container">
+    <label>Durée phrase (secondes): <span id="durationValue" class="slider-value">20</span></label>
+    <input type="range" id="phraseDuration" min="5" max="60" step="5" value="20">
+  </div>
+  
+  <button id="testBackground">🔊 Tester le bruit de fond</button>
   
   <h3>🎤 Speech-to-Text (STT)</h3>
-  <button id="startSTT">▶️ Démarrer STT</button>
+  <button id="startSTT">▶️ Démarrer STT avec bruit</button>
   <button id="stopSTT">⏹️ Arrêter STT</button>
   <p id="sttResult">Résultats STT apparaîtront ici...</p>
   
-  <h3>📋 Console de débogage</h3>
+  <h3>📋 Console</h3>
   <div id="log"></div>
 
 <script>
 // =====================================================
-// BASÉ SUR LES VRAIS LOGS DU USER
+// HACK GÉNIAL : TTS comme bruit de fond
 // =====================================================
-// Problème identifié : 
-// 1. onaudioend → bip
-// 2. onend → bip 
-// 3. Redémarrage → nouveau cycle
-// =====================================================
-
 let recognition;
 let isRecording = false;
+let backgroundTTS = null;
 let finalTranscript = '';
-let isCurrentlyRestarting = false;
-let lastSpeechTime = 0;
-let silenceTimeout = null;
+let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// Phrases longues pour le bruit de fond (peuvent être lues lentement)
+const BACKGROUND_PHRASES = [
+    "Le silence est d'or mais la parole est d'argent cependant parfois il est préférable de se taire pour mieux écouter ce que les autres ont à dire dans différentes situations de la vie quotidienne ou professionnelle",
+    "Dans un monde de plus en plus connecté où l'information circule à vitesse grand V il devient essentiel de savoir trier le vrai du faux pour ne pas se perdre dans le flux constant de données qui nous submerge chaque jour",
+    "La patience est une vertu qui se cultive avec le temps et l'expérience elle permet de mieux appréhender les situations complexes sans céder à la précipitation qui souvent mène à des erreurs regrettables par la suite",
+    "L'apprentissage continu est la clé pour s'adapter aux changements permanents de notre société moderne où les technologies évoluent rapidement et demandent une constante mise à jour des connaissances acquises",
+    "L'équilibre entre vie professionnelle et personnelle reste un défi majeur pour beaucoup nécessitant une organisation rigoureuse et une capacité à prioriser les tâches essentielles pour préserver son bien-être"
+];
 
 // =====================================================
-// STRATÉGIE : Réduire les cycles onaudioend/onend
+// Configuration
+// =====================================================
+let backgroundVolume = 0.3;
+let phraseDuration = 20; // secondes
+
+document.getElementById('backgroundVolume').addEventListener('input', function(e) {
+    backgroundVolume = parseFloat(e.target.value);
+    document.getElementById('volumeValue').textContent = backgroundVolume.toFixed(2);
+    log(`🔉 Volume bruit de fond: ${backgroundVolume}`);
+});
+
+document.getElementById('phraseDuration').addEventListener('input', function(e) {
+    phraseDuration = parseInt(e.target.value);
+    document.getElementById('durationValue').textContent = phraseDuration;
+    log(`⏱️ Durée phrase: ${phraseDuration}s`);
+});
+
+// =====================================================
+// Fonctions de logging
 // =====================================================
 function log(msg, type = 'info') {
     console.log('[' + type.toUpperCase() + '] ' + msg);
@@ -2082,68 +2118,89 @@ function updateStatus(msg, statusType) {
 }
 
 // =====================================================
-// TTS Functions (inchangé)
+// HACK PRINCIPAL : Bruit de fond TTS
 // =====================================================
-async function populateVoices() {
-    log('🔍 Chargement des voix TTS...');
-    const voicesSelect = document.getElementById('voices');
-    voicesSelect.innerHTML = '';
+function startBackgroundNoise() {
+    if (!window.speechSynthesis) {
+        log('❌ TTS non disponible pour bruit de fond', 'error');
+        return null;
+    }
     
-    if (window.speechSynthesis) {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) {
-            log('⚠️ Aucune voix trouvée, réessai dans 100ms...');
-            setTimeout(populateVoices, 100);
-            return;
-        }
-        voices.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.textContent = `${v.name} (${v.lang})`;
-            voicesSelect.appendChild(opt);
-        });
-        log('✅ ' + voices.length + ' voix chargées (Web)');
-    } else {
-        log('❌ TTS non disponible', 'error');
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'TTS non disponible';
-        voicesSelect.appendChild(opt);
+    // Choisir une phrase aléatoire
+    const phrase = BACKGROUND_PHRASES[Math.floor(Math.random() * BACKGROUND_PHRASES.length)];
+    
+    // Configurer la lecture lente
+    const utter = new SpeechSynthesisUtterance(phrase);
+    utter.volume = backgroundVolume;
+    utter.rate = 0.7; // Lecture lente
+    utter.pitch = 0.9; // Ton un peu plus grave
+    
+    // Configurer une voix française si disponible
+    const voices = window.speechSynthesis.getVoices();
+    const frenchVoice = voices.find(v => v.lang.startsWith('fr-'));
+    if (frenchVoice) {
+        utter.voice = frenchVoice;
+        log(`🎙️ Voix bruit: ${frenchVoice.name} (${frenchVoice.lang})`);
     }
+    
+    // Gestion des événements
+    utter.onstart = () => {
+        log('🔊 Bruit de fond TTS démarré (volume: ' + backgroundVolume + ')');
+    };
+    
+    utter.onend = () => {
+        log('🔇 Bruit de fond TTS terminé');
+        // Relancer automatiquement si on est toujours en enregistrement
+        if (isRecording) {
+            log('🔄 Relance bruit de fond...');
+            setTimeout(() => {
+                if (isRecording) {
+                    startBackgroundNoise();
+                }
+            }, 500); // Petite pause entre les phrases
+        }
+    };
+    
+    utter.onerror = (e) => {
+        log('⚠️ Erreur bruit TTS: ' + e.error, 'warning');
+        // Réessayer après erreur
+        if (isRecording) {
+            setTimeout(() => {
+                if (isRecording) startBackgroundNoise();
+            }, 1000);
+        }
+    };
+    
+    // Démarrer
+    window.speechSynthesis.speak(utter);
+    
+    // Arrêter automatiquement après la durée configurée (sécurité)
+    setTimeout(() => {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            log('⏹️ Bruit TTS arrêté (timeout sécurité)');
+        }
+    }, phraseDuration * 1000);
+    
+    return utter;
 }
 
-function speakText() {
-    const text = document.getElementById('ttsText').value;
-    const voiceName = document.getElementById('voices').value;
-
-    if (!text) {
-        log('⚠️ Aucun texte à lire', 'warning');
-        return;
-    }
-
-    log('🔊 Lecture TTS : "' + text + '"');
-
-    if (window.speechSynthesis) {
-        const utter = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        if (voiceName) {
-            const selectedVoice = voices.find(v => v.name === voiceName);
-            if (selectedVoice) {
-                utter.voice = selectedVoice;
-                log('🎙️ Voix sélectionnée : ' + selectedVoice.name);
-            }
+// Tester le bruit de fond
+document.getElementById('testBackground').addEventListener('click', () => {
+    log('🔊 Test bruit de fond...');
+    const testTTS = startBackgroundNoise();
+    
+    // Arrêter après 5 secondes pour le test
+    setTimeout(() => {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            log('✅ Test bruit terminé');
         }
-        utter.onend = () => log('✅ TTS terminée');
-        utter.onerror = (e) => log('❌ Erreur TTS: ' + e.error, 'error');
-        window.speechSynthesis.speak(utter);
-    } else {
-        log('❌ TTS non disponible', 'error');
-        updateStatus('❌ TTS non disponible', 'error');
-    }
-}
+    }, 5000);
+});
 
 // =====================================================
-// STT Functions - APPROCHE RADICALEMENT DIFFÉRENTE
+// STT Functions - Version SIMPLE et PROPRE
 // =====================================================
 function initWebSTT() {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
@@ -2151,92 +2208,64 @@ function initWebSTT() {
         recognition = new SpeechRecognitionAPI();
         recognition.lang = 'fr-FR';
         
-        // =====================================================
-        // CONFIGURATION CRITIQUE BASÉE SUR LOGS
-        // =====================================================
-        recognition.continuous = true;  // TEST: true pour éviter les cycles
+        // Configuration mobile (continuous=false)
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
         
-        log('🔧 continuous=true (pour réduire cycles)');
+        log('🎯 STT configurée (simple)');
 
-        // =====================================================
-        // GESTION DES RÉSULTATS AVEC DÉTECTION MANUELLE
-        // =====================================================
+        // Gestion des résultats
         recognition.onresult = (event) => {
-            lastSpeechTime = Date.now();
-            
-            if (silenceTimeout) {
-                clearTimeout(silenceTimeout);
-            }
-            
             let newFinalText = '';
             
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     const transcript = event.results[i][0].transcript.trim();
-                    if (transcript && !finalTranscript.includes(transcript)) {
-                        newFinalText += transcript + ' ';
+                    // Filtrer les doublons SIMPLES
+                    if (transcript && !finalTranscript.endsWith(transcript)) {
+                        newFinalText = transcript; // Prendre seulement le dernier
                     }
                 }
             }
             
             if (newFinalText) {
+                // Ajouter avec un espace si nécessaire
+                if (finalTranscript && !finalTranscript.endsWith(' ')) {
+                    finalTranscript += ' ';
+                }
                 finalTranscript += newFinalText;
                 document.getElementById('sttResult').textContent = finalTranscript;
-                log('✅ Texte: ' + newFinalText.trim());
+                log('✅ Texte: ' + newFinalText);
             }
-            
-            // Détection manuelle du silence (au lieu de compter sur onaudioend)
-            silenceTimeout = setTimeout(() => {
-                if (isRecording && !isCurrentlyRestarting) {
-                    log('🔇 Silence détecté manuellement (pas de bip)');
-                    // Pas de redémarrage immédiat - on laisse continuous=true gérer
-                }
-            }, 1500); // 1.5 secondes de silence
         };
         
         recognition.onstart = () => {
-            log('🎤 STT démarrée (continuous=true)');
-            updateStatus('🎤 STT en cours...', 'ok');
-            isCurrentlyRestarting = false;
-            lastSpeechTime = Date.now();
-        };
-        
-        // =====================================================
-        // HACK : IGNORER COMPLÈTEMENT onaudioend et onend
-        // =====================================================
-        recognition.onaudioend = () => {
-            log('🔕 onaudioend IGNORÉ (pas de traitement)');
-            // ABSOLUMENT RIEN faire ici
-            // Ça évite le redémarrage automatique
+            log('🎤 STT démarrée');
+            updateStatus('🎤 STT en cours (bruit activé)', 'ok');
         };
         
         recognition.onend = () => {
-            log('🔕 onend IGNORÉ (continuous=true devrait éviter ça)');
+            log('🔁 onend (redémarrage avec bruit de fond)');
             
-            // Seulement redémarrer si vraiment nécessaire
-            if (isRecording && !isCurrentlyRestarting) {
-                isCurrentlyRestarting = true;
-                
-                // Attendre PLUS LONGTEMPS avant de redémarrer
+            if (isRecording) {
+                // Redémarrer après un délai MODÉRÉ
                 setTimeout(() => {
-                    if (isRecording) {
+                    if (isRecording && recognition) {
                         try {
                             recognition.start();
-                            log('🔄 Redémarré après long délai (moins de bip)');
+                            log('🔄 Redémarré');
                         } catch(e) {
-                            isCurrentlyRestarting = false;
+                            // Erreur normale
                         }
                     }
-                }, 500); // 500ms au lieu de 50ms
+                }, 300); // Délai raisonnable
             }
         };
         
         recognition.onerror = (event) => {
-            // Ignorer les erreurs "normales"
             if (event.error === 'no-speech' || event.error === 'audio-capture') {
-                log('🔇 Erreur normale: ' + event.error);
+                log('🔇 ' + event.error + ' (normal avec bruit de fond)');
             } else if (event.error === 'not-allowed') {
                 log('🚫 Microphone non autorisé', 'error');
                 isRecording = false;
@@ -2244,89 +2273,77 @@ function initWebSTT() {
             }
         };
         
-        // DÉSACTIVER COMPLÈTEMENT
+        // Désactiver les gestionnaires problématiques
         recognition.onspeechend = null;
-        recognition.onsoundend = null;
+        recognition.onaudioend = null;
         
-        log('✅ STT initialisée (ignore onaudioend/onend)');
+        log('✅ STT initialisée');
         return true;
     }
     return false;
 }
 
 // =====================================================
-// Démarrer STT - Version simple
+// Démarrer STT AVEC bruit de fond
 // =====================================================
 function startSTT() {
-    log('▶️ Démarrage STT (mode continuous=true)...');
+    log('▶️ Démarrage STT AVEC bruit de fond TTS...');
     
     // Réinitialiser
     finalTranscript = '';
     document.getElementById('sttResult').textContent = '';
     isRecording = true;
-    isCurrentlyRestarting = false;
     
-    // Nettoyer les timeouts
-    if (silenceTimeout) {
-        clearTimeout(silenceTimeout);
-        silenceTimeout = null;
-    }
+    // 1. D'abord démarrer le bruit de fond TTS
+    log('🔊 Démarrage bruit de fond TTS...');
+    backgroundTTS = startBackgroundNoise();
     
-    // Démarrer avec un petit délai
+    // 2. Attendre que le TTS démarre avant la STT
     setTimeout(() => {
         if (isRecording && recognition) {
             try {
                 recognition.start();
-                log('🚀 STT démarrée en mode continu');
+                log('🚀 STT démarrée (bruit de fond actif)');
             } catch (e) {
-                log('❌ Erreur démarrage: ' + e.message, 'error');
+                log('❌ Erreur démarrage STT: ' + e.message, 'error');
                 isRecording = false;
             }
         }
-    }, 100);
+    }, 500); // Délai pour que le TTS démarre bien
 }
 
 // =====================================================
-// Arrêt - Version simple
+// Arrêter TOUT
 // =====================================================
 function stopSTT() {
-    log('⏹️ Arrêt STT (nettoyage complet)...');
+    log('⏹️ Arrêt STT ET bruit de fond...');
     
-    // 1. Arrêter les timeouts
-    if (silenceTimeout) {
-        clearTimeout(silenceTimeout);
-        silenceTimeout = null;
-    }
-    
-    // 2. Marquer comme arrêté
+    // 1. Arrêter l'enregistrement
     isRecording = false;
-    isCurrentlyRestarting = false;
+    
+    // 2. Arrêter le bruit de fond TTS
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        log('🔇 Bruit de fond TTS arrêté');
+    }
     
     // 3. Arrêter la reconnaissance
     setTimeout(() => {
         if (recognition) {
             try {
                 recognition.stop();
-                log('✅ STT arrêtée proprement');
+                log('✅ STT arrêtée');
                 updateStatus('⏹️ STT arrêtée', 'warning');
-                
-                // Réinitialiser pour la prochaine fois
-                setTimeout(() => {
-                    initWebSTT();
-                    log('🔄 Instance réinitialisée');
-                }, 200);
-                
             } catch (e) {
-                log('⚠️ Erreur lors de l\'arrêt: ' + e.message);
+                log('⚠️ Erreur arrêt STT: ' + e.message);
             }
         }
-    }, 50);
+    }, 100);
 }
 
 // =====================================================
 // Event Listeners
 // =====================================================
-document.getElementById('speakBtn').addEventListener('click', speakText);
 document.getElementById('startSTT').addEventListener('click', startSTT);
 document.getElementById('stopSTT').addEventListener('click', stopSTT);
 
@@ -2334,16 +2351,12 @@ document.getElementById('stopSTT').addEventListener('click', stopSTT);
 // INITIALISATION
 // =====================================================
 function initApp() {
-    log('🚀 Initialisation solution basée logs...');
+    log('🚀 Initialisation hack TTS bruit de fond...');
+    log('📱 Mobile: ' + isMobile);
+    log('💡 Volume recommandé: 0.2-0.4 (ajustez selon besoin)');
     
     if (initWebSTT()) {
-        updateStatus('✅ STT initialisée (stratégie continue)', 'ok');
-    }
-    
-    if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = populateVoices;
-        setTimeout(populateVoices, 100);
-        log('✅ TTS initialisée');
+        updateStatus('✅ Prêt - Hack TTS bruit de fond activé', 'ok');
     }
 }
 
@@ -2355,18 +2368,17 @@ if (document.readyState === 'loading') {
 }
 
 // =====================================================
-// HACK FINAL : Forcer continuous=true à rester actif
+// HACK SUPPLÉMENTAIRE : Garder l'audio actif
 // =====================================================
-setInterval(() => {
-    if (isRecording && recognition && !isCurrentlyRestarting) {
-        // Vérifier si le système est toujours actif
-        const timeSinceLastSpeech = Date.now() - lastSpeechTime;
-        if (timeSinceLastSpeech > 5000) {
-            // 5 secondes sans activité, vérifier l'état
-            log('🕒 Vérification état système...');
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isRecording) {
+        log('📄 Page cachée - maintien audio...');
+        // Si la page est cachée, relancer le bruit de fond
+        if (window.speechSynthesis && !window.speechSynthesis.speaking) {
+            startBackgroundNoise();
         }
     }
-}, 3000);
+});
 </script>
 </body>
 </html>
