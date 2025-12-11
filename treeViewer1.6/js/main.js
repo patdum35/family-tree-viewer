@@ -2362,7 +2362,7 @@ function secretMode() {
 
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
-    if (state.isMobile && state.isTouchDevice) {
+    // if (state.isMobile && state.isTouchDevice) {
         const inputField = document.getElementById('input-form-firstName');
         if (inputField) {
             // Écouter l'événement directement sur le champ de saisie
@@ -2381,7 +2381,7 @@ function secretMode() {
                 checkSequence(lastKey);
             });
         }
-    }
+    // }
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
     document.addEventListener('keydown', (e) => {
