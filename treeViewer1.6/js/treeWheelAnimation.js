@@ -1701,10 +1701,10 @@ function getFortuneText(textType) {
             "hu": "Részletek mutatása"
         },
         years: {
-            "fr": "ans",
-            "en": "years old",
-            "es": "años", 
-            "hu": "éves"
+            "fr": "ans ,  ,",
+            "en": "years old ,  ,",
+            "es": "años, ", 
+            "hu": "éves, "
         }
 
     };

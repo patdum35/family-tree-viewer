@@ -2384,45 +2384,45 @@ function secretMode() {
     }
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
-    // document.addEventListener('keydown', (e) => {
-    //     // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
-    //     // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
-    //     const keyPressed = e.key.toUpperCase();
+    document.addEventListener('keydown', (e) => {
+        // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
+        // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
+        const keyPressed = e.key.toUpperCase();
         
-    //     // sequenceEnCours.push(keyPressed);
-    //     // sequenceNoFullScreenEnCours.push(keyPressed);
-    //     // sequencePuzzleEnCours.push(keyPressed);
+        // sequenceEnCours.push(keyPressed);
+        // sequenceNoFullScreenEnCours.push(keyPressed);
+        // sequencePuzzleEnCours.push(keyPressed);
 
-    //     checkSequence(keyPressed);
-    // });
+        checkSequence(keyPressed);
+    });
 
 
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
-    document.addEventListener('keydown', (e) => {
+    // document.addEventListener('keydown', (e) => {
         
-        // NOUVEAU BLOCAGE CONDITIONNEL INFALLIBLE
-        // Vérifiez si l'événement provient d'un élément de saisie (input, select, textarea)
-        // ET si la touche 'key' n'est pas définie (ce qui est le cas du conflit de datalist)
-        const targetTagName = e.target.tagName.toLowerCase();
+    //     // NOUVEAU BLOCAGE CONDITIONNEL INFALLIBLE
+    //     // Vérifiez si l'événement provient d'un élément de saisie (input, select, textarea)
+    //     // ET si la touche 'key' n'est pas définie (ce qui est le cas du conflit de datalist)
+    //     const targetTagName = e.target.tagName.toLowerCase();
         
-        if (targetTagName === 'input' || targetTagName === 'select' || targetTagName === 'textarea') {
-            // Bloquer si la propriété 'key' est manquante ou l'événement est incomplet
-            if (typeof e.key === 'undefined' || e.key === null) {
-                e.stopPropagation(); // Bloque la remontée (une dernière tentative)
-                e.preventDefault();  // Empêche toute action par défaut
-                console.warn("[BLOCAGE CRITIQUE] Keydown global bloqué car e.key est manquant (conflit datalist).");
-                return; // Arrête l'exécution de ce gestionnaire
-            }
-        }
-        // ---------------------------------------------
+    //     if (targetTagName === 'input' || targetTagName === 'select' || targetTagName === 'textarea') {
+    //         // Bloquer si la propriété 'key' est manquante ou l'événement est incomplet
+    //         if (typeof e.key === 'undefined' || e.key === null) {
+    //             e.stopPropagation(); // Bloque la remontée (une dernière tentative)
+    //             e.preventDefault();  // Empêche toute action par défaut
+    //             console.warn("[BLOCAGE CRITIQUE] Keydown global bloqué car e.key est manquant (conflit datalist).");
+    //             return; // Arrête l'exécution de ce gestionnaire
+    //         }
+    //     }
+    //     // ---------------------------------------------
 
-        // LIGNE 2390 (main.js) :
-        // Si l'exécution arrive ici, 'e.key' est garanti d'être défini
-        const keyPressed = e.key.toUpperCase();
+    //     // LIGNE 2390 (main.js) :
+    //     // Si l'exécution arrive ici, 'e.key' est garanti d'être défini
+    //     const keyPressed = e.key.toUpperCase();
         
-        checkSequence(keyPressed);
-    });
+    //     checkSequence(keyPressed);
+    // });
 
 
 
