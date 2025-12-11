@@ -2363,25 +2363,61 @@ function secretMode() {
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
     // if (state.isMobile && state.isTouchDevice) {
+    //     const inputField = document.getElementById('input-form-firstName');
+    //     if (inputField) {
+    //         // Écouter l'événement directement sur le champ de saisie
+    //         inputField.addEventListener('input', (e) => {
+    //             const currentValue = inputField.value;
+    //             if (currentValue.length === 0) return; // Rien tapé
+
+    //             // Obtient le DERNIER caractère tapé
+    //             const lastKey = currentValue.slice(-1).toUpperCase(); 
+    //             // --- Logique de séquence ---
+    //             // 1. Ajouter la dernière touche à la séquence en cours
+    //             // sequenceEnCours.push(lastKey);
+    //             // sequenceNoFullScreenEnCours.push(lastKey);
+    //             // sequencePuzzleEnCours.push(lastKey);
+
+    //             checkSequence(lastKey);
+    //         });
+    //     }
+    // }
+
+
+    console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+
+    if (state.isMobile && state.isTouchDevice) {
+        // --- NOUVEAU LOG 1 : Vérification de l'entrée dans le bloc mobile
+        console.log('Mode Mobile/Tactile détecté. Tentative de configuration de l\'écouteur "input".');
+        
         const inputField = document.getElementById('input-form-firstName');
+        
         if (inputField) {
+            // --- NOUVEAU LOG 2 : Vérification que l'input est trouvé
+            console.log('Champ de saisie trouvé. Écouteur "input" configuré.');
+            
             // Écouter l'événement directement sur le champ de saisie
             inputField.addEventListener('input', (e) => {
                 const currentValue = inputField.value;
-                if (currentValue.length === 0) return; // Rien tapé
+                if (currentValue.length === 0) return; 
 
                 // Obtient le DERNIER caractère tapé
                 const lastKey = currentValue.slice(-1).toUpperCase(); 
-                // --- Logique de séquence ---
-                // 1. Ajouter la dernière touche à la séquence en cours
-                // sequenceEnCours.push(lastKey);
-                // sequenceNoFullScreenEnCours.push(lastKey);
-                // sequencePuzzleEnCours.push(lastKey);
-
+                
+                // --- NOUVEAU LOG 3 : Vérification de la touche capturée
+                console.log(`Caractère tapé (Mobile/Input) : ${lastKey}`);
+                
                 checkSequence(lastKey);
             });
+        } else {
+            // --- NOUVEAU LOG 4 : Vérification que l'input n'est pas trouvé
+            console.warn("L'élément 'input-form-firstName' n'a pas été trouvé. Le mode secret clavier ne fonctionnera pas sur mobile.");
         }
-    // }
+    }
+
+
+
+
 
     // ---2.  Activation PC : Écoute de la séquence de touches ---
     document.addEventListener('keydown', (e) => {
