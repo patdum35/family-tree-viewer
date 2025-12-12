@@ -28,7 +28,7 @@ import {
     resetToDefaultSettings,
     displayGenealogicTree,
     state,
-    detectDeviceType
+    detectDeviceType,
 } from './main.js';
 
 import {

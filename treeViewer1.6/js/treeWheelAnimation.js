@@ -1701,10 +1701,10 @@ function getFortuneText(textType) {
             "hu": "Részletek mutatása"
         },
         years: {
-            "fr": "ans ,  ,",
-            "en": "years old ,  ,",
-            "es": "años, ", 
-            "hu": "éves, "
+            "fr": "ans , ,",
+            "en": "years old , ",
+            "es": "años ,", 
+            "hu": "éves ,"
         }
 
     };
@@ -3048,7 +3048,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
     const resultContainer = quizMessage.querySelector('#result-container');
 
     // Démarrer par la solution puis les indices
-    await playAllCluesSequentially();
+    playAllCluesSequentially();
 
     async function playAllCluesSequentially() {
         isReading = true;
@@ -3536,6 +3536,8 @@ export async function readPersonDetails(winner, detectedAction = null) {
     togglePlayPauseBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        console.log('\n\n\n ---------------debug pause togglePlayPauseBtn -------------------');
         
         isPaused = !isPaused;
         

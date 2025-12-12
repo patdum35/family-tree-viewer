@@ -690,6 +690,8 @@ export function checkServiceWorkerVersion() {
  */
 export function activateDebugLogs() {
     state.isDebugLog = true;
+
+    console.log('-------- debug : Activate Debug Logs---------');
     
 
     // Afficher le panneau

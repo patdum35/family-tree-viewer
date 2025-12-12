@@ -1664,24 +1664,33 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
         
             if (animationState.currentIndex === 0) {
                 console.log("🔄 Premier nom - forçage taux initial à 1.2");
-                optimalSpeechRate = 1.0;//1.2;
+                // optimalSpeechRate = 1.0;//1.2;
+                optimalSpeechRate = state.voice_rate;
                 timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 3500 : 2500, timeOutDuration);
             }
             if (animationState.currentIndex === 1) {
                 console.log("🔄 Deuxième nom - ajustement taux");
-                optimalSpeechRate = 1.0; //1.2;
+                // optimalSpeechRate = 1.0; //1.2;
+                optimalSpeechRate = state.voice_rate;
                 timeOutDuration = Math.max(state.isSpeechInGoodHealth ? 2500 : 1600, timeOutDuration);
             }
         } else {
             // Pour le texte complet : timeout plus généreux
             timeOutDuration = Math.max(4000, textToSpeak.length * 120);
-            optimalSpeechRate = 1.0; // Vitesse normale pour le texte
+            // optimalSpeechRate = 1.0; // Vitesse normale pour le texte
+            optimalSpeechRate = state.voice_rate;
+
+
+
+
+
         }
 
 
         if (isFast) {
             timeOutDuration = Math.max(500, textToSpeak.length * 80); // Base de 100ms par lettre, minimum 1200ms
-            optimalSpeechRate = 1.2;
+            // optimalSpeechRate = 1.2;
+            optimalSpeechRate = parseFloat(state.voice_rate) + 0.2;
         }
 
 
@@ -1700,6 +1709,7 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
         const targetDuration = 1500; // 1.5 seconde pour lire le nom
         const maxRate = 2.7; // Vitesse maximale
         const minRate = 0.8; // Vitesse minimale
+        
 
        
         
@@ -1713,9 +1723,12 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
 
 
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                
                 utterance.rate = rate;
                 utterance.lang = 'fr-FR';
-                utterance.volume = 1.0;
+                // utterance.volume = 1.0;
+                utterance.volume = state.voice_volume;               
+                utterance.pitch = state.voice_pitch;     
 
                 const startTime = Date.now();
 
@@ -1774,6 +1787,7 @@ export function speakPersonName(personName, isFullText = false, isFast = false) 
                         window.speechSynthesis.speak(silentUtterance);
                         window.speechSynthesis.cancel();
                     }
+                    // console.log('\n\n\ ------ debug call to measureSpeechDuration with rate= ', optimalSpeechRate)
                     const result = await measureSpeechDuration(optimalSpeechRate);
                 }
                 

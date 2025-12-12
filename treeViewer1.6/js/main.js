@@ -230,6 +230,10 @@ export const state = {
     selectedVoice: null,
     selectedVoiceName: null,
     initialSpeechReconitionIsLaunched: false,
+    voice_volume: 1.0,
+    voice_rate: 1.0,
+    voice_pitch: 1.0,
+
 };
 
 export { geocodeLocation };
@@ -248,13 +252,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-function openGedcomModal() {
-    document.getElementById('advanced-settings-modal').style.display = 'block';
-}
 
-function closeGedcomModal() {
-    document.getElementById('advanced-settings-modal').style.display = 'none';
-}
+// Définir la fonction openGedcomModal globalement avant de charger i18n.js
+function openGedcomModal() {
+    const modal = document.getElementById('advanced-settings-modal');
+    if (modal) { modal.style.display = 'block'; }
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    if (secretTargetArea) {secretTargetArea.style.display = 'none';}
+};
+    
+// Définir également la fonction de fermeture
+function closeGedcomModal () {
+    const modal = document.getElementById('advanced-settings-modal');
+    if (modal) { modal.style.display = 'none';}
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    if (secretTargetArea) {secretTargetArea.style.display = '';}
+};
+
+
 
 // ajoutez des options pour différents types de heatmap
 export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
@@ -946,6 +961,10 @@ function initialize() {
     state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
     state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
     if (state.selectedVoiceName != null) { loadVoices();}
+    state.voice_volume = localStorage.getItem('voice_volume') || 1.0;
+    state.voice_rate = localStorage.getItem('voice_rate') || 1.0;
+    state.voice_pitch = localStorage.getItem('voice_pitch') || 1.0;
+
 
 
     setTimeout(() => {
@@ -1063,17 +1082,17 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
     // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
 
-    if (state.isMobile && state.isTouchDevice ) {
-        if (!state.isPWA && state.isbrowserBarHidden) {
-            // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
-        }
-        else { 
-            if (localStorage.getItem('noFullScreenActif') === 'true') {
-            } else if (window.innerWidth < 500 && window.innerHeight > 600) { // mode portrait
-                toggleFullScreen('fullScreenRequired');
-            }
-        }
-    }
+    // if (state.isMobile && state.isTouchDevice ) {
+    //     if (!state.isPWA && state.isbrowserBarHidden) {
+    //         // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+    //     }
+    //     else { 
+    //         if (localStorage.getItem('noFullScreenActif') === 'true') {
+    //         } else if (window.innerWidth < 500 && window.innerHeight > 600) { // mode portrait
+    //             toggleFullScreen('fullScreenRequired');
+    //         }
+    //     }
+    // }
 
     // for mobile phone
     nameCloudState.mobilePhone = false;
@@ -1209,13 +1228,14 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
             }
             else { 
                 if (localStorage.getItem('noFullScreenActif') === 'true') {
-                } else if (window.innerWidth > 600 && window.innerHeight < 500) { // mode lanscape
+                } else { //if (window.innerWidth > 600 && window.innerHeight < 500) { // mode lanscape
                     setTimeout(() => {
                         toggleFullScreen('fullScreenRequired');
                     }, 300); 
                 }
             }
         }
+
 
         // const originalRootResults = document.getElementById('root-person-results');
         // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
@@ -2188,6 +2208,8 @@ function changePasswordVisibility(hidden = false) {
     }
 }
 
+
+
 function secretMode() {
     // --- Configuration ---
     const CLASSE_CACHE = 'expert-hidden';
@@ -2267,6 +2289,9 @@ function secretMode() {
         sequencePuzzleEnCours.push(keyPressed);
         sequenceLeavesEnCours.push(keyPressed);
 
+
+
+        // console.log('----- debug checkSequence, ', keyPressed, sequenceEnCours, sequenceNoFullScreenEnCours, sequencePuzzleEnCours, sequenceLeavesEnCours)
         // Garde la taille de la séquence
         if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
             sequenceEnCours.shift();
@@ -2384,17 +2409,17 @@ function secretMode() {
     // }
 
 
-    console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+    // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
     if (state.isMobile && state.isTouchDevice) {
         // --- NOUVEAU LOG 1 : Vérification de l'entrée dans le bloc mobile
-        console.log('Mode Mobile/Tactile détecté. Tentative de configuration de l\'écouteur "input".');
+        // console.log('Mode Mobile/Tactile détecté. Tentative de configuration de l\'écouteur "input".');
         
         const inputField = document.getElementById('input-form-firstName');
         
         if (inputField) {
             // --- NOUVEAU LOG 2 : Vérification que l'input est trouvé
-            console.log('Champ de saisie trouvé. Écouteur "input" configuré.');
+            // console.log('Champ de saisie trouvé. Écouteur "input" configuré.');
             
             // Écouter l'événement directement sur le champ de saisie
             inputField.addEventListener('input', (e) => {
@@ -2405,7 +2430,7 @@ function secretMode() {
                 const lastKey = currentValue.slice(-1).toUpperCase(); 
                 
                 // --- NOUVEAU LOG 3 : Vérification de la touche capturée
-                console.log(`Caractère tapé (Mobile/Input) : ${lastKey}`);
+                // console.log(`Caractère tapé (Mobile/Input) : ${lastKey}`);
                 
                 checkSequence(lastKey);
             });
@@ -2417,20 +2442,22 @@ function secretMode() {
 
 
 
+    if (!state.isMobile) {
 
+        // ---2.  Activation PC : Écoute de la séquence de touches ---
+        document.addEventListener('keydown', (e) => {
+            // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
+            // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
+            const keyPressed = e.key.toUpperCase();
+            
+            // sequenceEnCours.push(keyPressed);
+            // sequenceNoFullScreenEnCours.push(keyPressed);
+            // sequencePuzzleEnCours.push(keyPressed);
 
-    // ---2.  Activation PC : Écoute de la séquence de touches ---
-    document.addEventListener('keydown', (e) => {
-        // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
-        // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
-        const keyPressed = e.key.toUpperCase();
-        
-        // sequenceEnCours.push(keyPressed);
-        // sequenceNoFullScreenEnCours.push(keyPressed);
-        // sequencePuzzleEnCours.push(keyPressed);
+            checkSequence(keyPressed);
+        });
 
-        checkSequence(keyPressed);
-    });
+    }
 
 
 
