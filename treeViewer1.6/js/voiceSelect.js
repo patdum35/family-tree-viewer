@@ -1884,10 +1884,10 @@ const SpeechRecognitionUI = (function() {
                 // hideUI();
                 if (!isRecognitionActive) { recognition.start(); }
                 if (state.isMobile) {
-                    // setTimeout(() => {
-                    //     stopSpeechRecognition = false;
-                    //     speakTextfromSliderParams(SUPER_LONG_TEXT);
-                    // }, 2000);
+                    setTimeout(() => {
+                        stopSpeechRecognition = false;
+                        speakTextfromSliderParams(SUPER_LONG_TEXT);
+                    }, 2000);
                 }                    
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
@@ -1895,12 +1895,8 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) {
                             isRecording = false;
                             recognition.stop();
-                            if (state.isMobile ) {
-                                window.speechSynthesis.cancel(); 
-                            }
-                            if (state.isMobile ) {
-                                window.speechSynthesis.cancel(); 
-                            }
+                            window.speechSynthesis.cancel(); 
+                            window.speechSynthesis.cancel(); 
                         }
                     }, PC_MAX_DURATION_MS);
                 }
