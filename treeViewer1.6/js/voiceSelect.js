@@ -9,21 +9,35 @@ import { debugLog } from './debugLogUtils.js';
 
 
 export function selectVoice() {
+
+        console.log('\n\n -----------  debug start  selectVoice  -----\n\n');
+
+
+
     let voice_language = 'fr-FR';
+    let voice_language2 = 'fr_FR';
     let voice_language_short = 'fr-';
+    let voice_language_short2 = 'fr_';
     if (window.CURRENT_LANGUAGE == "fr") {
         voice_language = 'fr-FR';
         voice_language_short = 'fr-';
-
+        voice_language2 = 'fr_FR';
+        voice_language_short2 = 'fr_';
     } else if (window.CURRENT_LANGUAGE == "en") {
         voice_language = 'en-US';
         voice_language_short = 'en-'; 
+        voice_language2 = 'en_US';
+        voice_language_short2 = 'en_'; 
     } else if (window.CURRENT_LANGUAGE == "es") { 
         voice_language = 'es-ES';
         voice_language_short = 'es-';
+        voice_language2 = 'es_ES';
+        voice_language_short2 = 'es_';
     } else if (window.CURRENT_LANGUAGE == "hu") {  
         voice_language = 'hu-HU';
         voice_language_short = 'hu-';
+        voice_language2 = 'hu_HU';
+        voice_language_short2 = 'hu_';
     } 
 
     // if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
@@ -50,12 +64,17 @@ export function selectVoice() {
         //     // voice.lang.startsWith('fr-FR') && 
         //     voice.lang.startsWith(voice_language) && !voice.name.includes('ulti'));
 
+
+
+
+
         let frenchVoices = voices.filter(voice => 
-            voice.lang.startsWith(voice_language) && 
+            (voice.lang.startsWith(voice_language) || voice.lang.startsWith(voice_language2)) && 
             !voice.name.includes('ulti') &&  // Évite Multi/multilingue
             !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
         );
 
+        console.log('\n\n -----------  debug in selectVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', voice_language2, voices, '\n ----- frenchVoices=',frenchVoices);
 
             
         // Chercher la première voix contenant 'compact'
@@ -82,7 +101,7 @@ export function selectVoice() {
         if (frenchVoices.length === 0) {
             frenchVoices = voices.filter(voice => 
                 // voice.lang.startsWith('fr-') || 
-                (voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence')) || 
+                ((voice.lang.startsWith(voice_language_short) || voice.lang.startsWith(voice_language_short2)) && !voice.voiceURI.includes('eloquence')) || 
                 (voice.name.toLowerCase().includes('french') && !voice.voiceURI.includes('eloquence'))
             );
             // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
@@ -105,11 +124,11 @@ export function selectVoice() {
         if (!state.isOnLine) {
             frenchVoices = voices.filter(voice =>
                 // voice.lang.startsWith('fr-') && voice.localService);
-                voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence') && voice.localService);
+                (voice.lang.startsWith(voice_language_short) || voice.lang.startsWith(voice_language_short2)) && !voice.voiceURI.includes('eloquence') && voice.localService);
             console.log("Voix disponibles locales fr-:", frenchVoices);
             if (frenchVoices.length === 0) {
                 frenchVoices = voices.filter(voice =>
-                    voice.lang.startsWith('en-') &&!voice.voiceURI.includes('eloquence') && voice.localService);
+                    (voice.lang.startsWith('en-') || voice.lang.startsWith('en_')) &&!voice.voiceURI.includes('eloquence') && voice.localService);
                 console.log("Voix disponibles locales en-:", frenchVoices);
             }
             if (frenchVoices.length === 0) {
@@ -1921,13 +1940,13 @@ const SpeechRecognitionUI = (function() {
                     displayPersonDetails(personId);
                 }
 
-                await speakTextWithWaitToEnd('essai de parole', 0.0); // ppour débugger le son et éviter la 1iere saccade de son
+                await speakTextWithWaitToEnd('essai', '0.0'); // ppour débugger le son et éviter la 1iere saccade de son
                 if (!detectedAction.includes('search') && !detectedAction.includes('research')  ) { 
                     const quizzMessage = document.getElementById('quizz-message');
                     if (quizzMessage) { quizzMessage.remove(); }
                     await readPersonSheet(personId, detectedAction); 
                 } 
-                else { await speakTextWithWaitToEnd(textToTell, 1.0); }
+                else { await speakTextWithWaitToEnd(textToTell); }
                 // hideUI();
                 if (!isRecognitionActive) { recognition.start(); }
                 if (state.isMobile) {
@@ -2009,14 +2028,14 @@ const SpeechRecognitionUI = (function() {
             stopSpeechRecognition = true;
             window.speechSynthesis.cancel(); 
             
-            await speakTextWithWaitToEnd('essai de parole', 0.0); // ppour débugger le son et éviter la 1iere saccade de son
+            await speakTextWithWaitToEnd('essai', '0.0'); // ppour débugger le son et éviter la 1iere saccade de son
             // await speakTextWithWaitToEnd(' ', 1); // ppour débugger le son et éviter la 1iere saccade de son
             if (detectedAction.includes('whoAreYou')) {
-                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations', 1.0);      
+                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations');      
             } else if (detectedAction.includes('whatIsYourName')) {
-                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations', 1.0);     
+                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations');     
             } else if (detectedAction.includes('whoCreatedYou')) {
-                await speakTextWithWaitToEnd('mon créateur est Patrick Duménil', 1.0);      
+                await speakTextWithWaitToEnd('mon créateur est Patrick Duménil');      
             } else if (detectedAction.includes('whatisTheUse')) {
                 // await speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz', 1.0);      
                 await speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
@@ -3625,7 +3644,7 @@ export function speakTextfromSliderParams(text) {
  * @param {string} text - Le texte à prononcer.
  * @returns {Promise<void>} Une promesse qui se résout lorsque la prononciation est terminée.
  */
-export function speakTextWithWaitToEnd(text, volume = 1.0) {
+export function speakTextWithWaitToEnd(text, volume = null) {
     return new Promise((resolve, reject) => { // La fonction retourne une Promesse
         
         const voiceToUse = VoiceSelectorUI.getSelectedVoice();
@@ -3669,8 +3688,8 @@ export function speakTextWithWaitToEnd(text, volume = 1.0) {
         if (voiceToUse) {
             utterance.voice = voiceToUse;
             utterance.lang = voiceToUse.lang;
-            // utterance.volume = volume;
-            utterance.volume = state.voice_volume;
+            if (volume) { utterance.volume = volume; }
+            else { utterance.volume = state.voice_volume;}
             utterance.rate = state.voice_rate;
             utterance.pitch = state.voice_pitch;
 
