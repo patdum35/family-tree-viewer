@@ -31,6 +31,7 @@ const RESOURCES_TO_CACHE = [
   './css/styles.css',
   './cacheConfig.js',
   './ios-install.html',
+  './background_images/tree-log-lowQuality.jpg',
 
   // Fichiers JS principaux (seulement les plus critiques)
   './js/libraryLoader.js',

@@ -1,11 +1,196 @@
 import { state, loadData } from './main.js';
-import { initSpeechSynthesis } from './treeAnimation.js';
+import { initSpeechSynthesis, testRealConnectivity } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { findPersonsBy } from './searchModalUI.js';
 import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
 import { debounce } from './eventHandlers.js';
+import { debugLog } from './debugLogUtils.js';
 
 
+
+export function selectVoice() {
+    let voice_language = 'fr-FR';
+    let voice_language_short = 'fr-';
+    if (window.CURRENT_LANGUAGE == "fr") {
+        voice_language = 'fr-FR';
+        voice_language_short = 'fr-';
+
+    } else if (window.CURRENT_LANGUAGE == "en") {
+        voice_language = 'en-US';
+        voice_language_short = 'en-'; 
+    } else if (window.CURRENT_LANGUAGE == "es") { 
+        voice_language = 'es-ES';
+        voice_language_short = 'es-';
+    } else if (window.CURRENT_LANGUAGE == "hu") {  
+        voice_language = 'hu-HU';
+        voice_language_short = 'hu-';
+    } 
+
+    // if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    //     return;
+    // } else if (state.selectedVoice === null){ 
+        // Sélectionner une voix française si possible
+        let voices = window.speechSynthesis.getVoices();
+        let localVoice = null;
+        
+        // console.log("Voix disponibles:",voices);
+
+        // debugLog("=== Liste des voix disponibles ===");
+        // voices.forEach(voice => {
+        //     debugLog(`Voix: ${voice.name}
+        //     - Langue: ${voice.lang}
+        //     - Local: ${voice.localService}
+        //     - Par défaut: ${voice.default}
+        //     - URI: ${voice.voiceURI}
+        //     ---------------------`);
+        // });
+
+        // Trouver les voix françaises disponibles
+        // let frenchVoices = voices.filter(voice => 
+        //     // voice.lang.startsWith('fr-FR') && 
+        //     voice.lang.startsWith(voice_language) && !voice.name.includes('ulti'));
+
+        let frenchVoices = voices.filter(voice => 
+            voice.lang.startsWith(voice_language) && 
+            !voice.name.includes('ulti') &&  // Évite Multi/multilingue
+            !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
+        );
+
+
+            
+        // Chercher la première voix contenant 'compact'
+        const compactVoice = frenchVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
+
+        if (compactVoice) {
+            // Si on trouve une voix 'compact', la mettre en première position
+            frenchVoices = [
+                compactVoice,
+                ...frenchVoices.filter(voice => voice !== compactVoice)
+            ];
+        }
+
+
+        let localVoices = voices.filter(voice => voice.localService);
+
+        if (localVoices.length != 0) {
+            console.log("Voix locales disponibles:", localVoices, localVoices.map(v => v.name));
+            localVoice = localVoices[0];
+        } 
+
+        // console.log("Voix françaises France disponibles:", frenchVoices, frenchVoices.map(v => v.name));
+
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice => 
+                // voice.lang.startsWith('fr-') || 
+                (voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence')) || 
+                (voice.name.toLowerCase().includes('french') && !voice.voiceURI.includes('eloquence'))
+            );
+            // console.log("Voix françaises autres disponibles:", frenchVoices.map(v => v.name));
+        } 
+        if (frenchVoices.length === 0) {
+            frenchVoices = voices.filter(voice => 
+                voice.lang.startsWith('en-') && !voice.voiceURI.includes('eloquence') );
+
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.localService);
+                }
+            // console.log("Voix anglaise ou locales disponibles:", frenchVoices.map(v => v.name));
+        }
+
+        
+        console.log("✅ or ⚠️ Connexion Internet ?", state.isOnLine);
+        
+        
+        if (!state.isOnLine) {
+            frenchVoices = voices.filter(voice =>
+                // voice.lang.startsWith('fr-') && voice.localService);
+                voice.lang.startsWith(voice_language_short) && !voice.voiceURI.includes('eloquence') && voice.localService);
+            console.log("Voix disponibles locales fr-:", frenchVoices);
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.lang.startsWith('en-') &&!voice.voiceURI.includes('eloquence') && voice.localService);
+                console.log("Voix disponibles locales en-:", frenchVoices);
+            }
+            if (frenchVoices.length === 0) {
+                frenchVoices = voices.filter(voice =>
+                    voice.localService);
+                console.log("Voix disponibles locales:", frenchVoices);
+            }   
+
+            // console.log("Voix françaises ou autres locales disponibles hors lignes :", frenchVoices.map(v => v.name));
+        }
+
+
+        if (frenchVoices.length != 0) {
+            console.log("Voix  disponibles:", frenchVoices.map(v => v.name));
+        }
+
+
+
+
+
+
+
+        
+        // Choisir la meilleure voix française  
+        // Si en ligne, préférer les voix de haute qualité (généralement Google ou Microsoft)
+        if (state.isOnLine) {
+            // Chercher d'abord les voix Google ou Microsoft qui sont généralement de meilleure qualité
+            state.frenchVoice = frenchVoices.find(voice => 
+                voice.name.includes('Google') || 
+                voice.name.includes('Microsoft')
+            );
+
+
+            // state.frenchVoice = frenchVoices[3];
+            
+            if (state.frenchVoice) {
+                console.log("✅ Utilisation de la voix réseau haute qualité:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            } else if (frenchVoices.length != 0) {
+                // Sélectionner la première voix française disponible
+                state.frenchVoice = frenchVoices[0];
+                console.log("ℹ️ Utilisation de la voix  ?:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            }
+
+        } else {
+            if (frenchVoices.length != 0) {
+                // Sélectionner la première voix française disponible
+                state.frenchVoice = frenchVoices[0];
+                console.log("ℹ️ Utilisation de la voix locale:", state.frenchVoice.name, ', localService=', state.frenchVoice.localService);
+            } else {
+                console.log("⚠️ Aucune voix disponible hors ligne ");
+            }
+        }
+
+
+        if (state.frenchVoice) {
+            console.log("Voix  sélectionnée:", state.frenchVoice);
+            debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
+        }
+
+        
+        // // Si pas de voix réseau ou hors ligne, utiliser une voix locale
+        // if (!frenchVoice) {
+        //     // Sélectionner la première voix française disponible
+        //     frenchVoice = frenchVoices[0];
+            
+        //     if (frenchVoice) {
+        //         console.log("ℹ️ Utilisation de la voix locale:", frenchVoice.name, ', localService=', frenchVoice.localService);
+        //     } else {
+        //         console.log("⚠️ Aucune voix française disponible, utilisation de la voix par défaut");
+        //     }
+        // }
+    
+
+    // }
+
+
+
+
+
+
+}
 
 
 
@@ -252,7 +437,7 @@ const VoiceSelectorUI = (function() {
                 font-size: 0.85em;
                 margin: 0;
                 padding: 0;
-                width: 90px;
+                width: 100px;
                 flex-shrink: 0;
                 text-align: left;
             }
@@ -491,7 +676,7 @@ const VoiceSelectorUI = (function() {
      */
     function getTtsSetting(key, defaultValue) {
         const storedValue = localStorage.getItem(key);
-        console.log('\n\n\n ----------------  debug getTtsSetting ----- key=', key, defaultValue ,'storedValue=', storedValue)
+        // console.log('\n\n\n ----------------  debug getTtsSetting ----- key=', key, defaultValue ,'storedValue=', storedValue)
         // Vérifie si la valeur existe et est valide (non null/undefined/NaN)
         if (storedValue !== null && storedValue !== undefined && !isNaN(parseFloat(storedValue))) {
             return storedValue;
@@ -659,7 +844,7 @@ const VoiceSelectorUI = (function() {
         testButton.disabled = false;
         testButton.textContent = translate('btnTest');
 
-        console.log("Voix sélectionnée:", selectedVoice.name);
+        console.log("Voix sélectionnée dans handleVoiceSelection:", selectedVoice.name);
         state.selectedVoice = selectedVoice;
 
         // Initialiser la synthèse vocale si ce n'est pas déjà fait
@@ -682,7 +867,7 @@ const VoiceSelectorUI = (function() {
 
         if (foundVoice) {
             selectedVoice = foundVoice;
-            console.log(`✅ Voix persistante chargée: ${selectedVoice.name}`);
+            console.log(`✅ Voix persistante chargée pour le nom ${voiceName},  voix trouvée : ${selectedVoice.name}`);
 
             state.selectedVoice = selectedVoice;
 
@@ -722,6 +907,7 @@ const VoiceSelectorUI = (function() {
             const storedVoiceName = localStorage.getItem('selectedVoice');
 
             // 2. Initialiser la voix sélectionnée avec ce nom
+            console.log('\n\n ------------  debug in loadVoices at init with  storedVoiceName localstorage = ', storedVoiceName, '------------\n\n');
             setInitialVoiceByName(storedVoiceName); 
             // ===============================================
 
@@ -729,18 +915,34 @@ const VoiceSelectorUI = (function() {
 
             // NOUVELLE LOGIQUE : Sélectionner une voix par défaut si aucune n'est sélectionnée
             if (!selectedVoice) {
-                const defaultVoice = findDefaultVoice(window.CURRENT_LANGUAGE || 'fr');
-                if (defaultVoice) {
-                    handleVoiceSelection(defaultVoice); // Utiliser handleVoiceSelection pour tout initialiser
-                    console.log(`✅ Voix locale par défaut sélectionnée: ${defaultVoice.name}`);
-                } else {
-                    console.warn(`⚠️ Aucune voix locale par défaut trouvée pour la langue ${window.CURRENT_LANGUAGE}.`);
-                    // Fallback ultime : prendre la première voix disponible
-                    if (appState.voices.length > 0) {
-                        handleVoiceSelection(appState.voices[0]);
-                        console.warn(`⚠️ Aucune voix locale par défaut trouvée. Première voix disponible utilisée: ${appState.voices[0].name}`);
+                // const defaultVoice = findDefaultVoice(window.CURRENT_LANGUAGE || 'fr');
+                // if (defaultVoice) {
+                //     handleVoiceSelection(defaultVoice); // Utiliser handleVoiceSelection pour tout initialiser
+                //     console.log(`✅ Voix locale par défaut sélectionnée: ${defaultVoice.name}`);
+                // } else {
+                //     console.warn(`⚠️ Aucune voix locale par défaut trouvée pour la langue ${window.CURRENT_LANGUAGE}.`);
+                //     // Fallback ultime : prendre la première voix disponible
+                //     if (appState.voices.length > 0) {
+                //         handleVoiceSelection(appState.voices[0]);
+                //         console.warn(`⚠️ Aucune voix locale par défaut trouvée. Première voix disponible utilisée: ${appState.voices[0].name}`);
+                //     }
+                // }
+
+                findDefaultVoice(window.CURRENT_LANGUAGE || 'fr').then(defaultVoice => {
+                    if (defaultVoice) {
+                        handleVoiceSelection(defaultVoice); // Utiliser handleVoiceSelection pour tout initialiser
+                        console.log(`✅ Voix locale par défaut sélectionnée: ${defaultVoice.name}`);
+                    } else {
+                        console.warn(`⚠️ Aucune voix locale par défaut trouvée pour la langue ${window.CURRENT_LANGUAGE}.`);
+                        // Fallback ultime : prendre la première voix disponible
+                        if (appState.voices.length > 0) {
+                            handleVoiceSelection(appState.voices[0]);
+                            console.warn(`⚠️ Aucune voix locale par défaut trouvée. Première voix disponible utilisée: ${appState.voices[0].name}`);
+                        }
                     }
-                }
+                });
+
+
             }
 
 
@@ -755,29 +957,144 @@ const VoiceSelectorUI = (function() {
 
 
 
+    function waitUntilTestRealConnectivityDone() {
+    const start = performance.now();
+
+    return new Promise(resolve => {
+        const i = setInterval(() => {
+        if (state.isEndTestRealConnectivity) {
+            clearInterval(i);
+            const duration = performance.now() - start;
+            resolve(duration); // en millisecondes
+        }
+        }, 50);
+    });
+    }
+
+
 
     /**
      *  Recherche une voix locale correspondant à la langue
      */
-    function findDefaultVoice(lang) {
+    // function findDefaultVoice(lang) {
+    //     const langPrefix = lang.toLowerCase().split('-')[0];
+
+
+    //     // // testRealConnectivity();
+    //     // testRealConnectivity().then(online => {
+
+    //     //     // 1. Chercher une voix LOCALE correspondant exactement à la langue de l'application
+    //     //     let voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService);
+
+            
+    //     //     console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix);
+
+    //     //     if (voice) return voice;
+
+
+
+
+
+    //     //     // 2. Si aucune voix LOCALE n'est trouvée, chercher une voix RÉSEAU (si en ligne) dans la langue
+    //     //     if (state.isOnLine) {
+    //     //         voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+    //     //         if (voice) return voice;
+    //     //     }
+
+    //     //     // 3. Dernière chance : Chercher une voix LOCALE dans n'importe quelle langue
+    //     //     voice = appState.voices.find(v => v.localService);
+    //     //     if (voice) return voice;
+         
+    //     //     return null; // Rien trouvé
+
+    //     // });
+
+    //     waitUntilTestRealConnectivityDone().then(duration => {
+    //         console.log(`\n\n ----- Attente waitUntilTestRealConnectivityDone: ${Math.round(duration)} ms`);
+
+    //     // });            
+
+
+
+    //         // 1. Chercher une voix LOCALE correspondant exactement à la langue de l'application
+    //         let voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService);
+
+            
+    //         console.log('\n\n -----------  debug1 in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix, appState.voices,',\n ---- voice=',voice);
+
+    //         if (voice) return voice;
+
+
+
+
+
+    //         // 2. Si aucune voix LOCALE n'est trouvée, chercher une voix RÉSEAU (si en ligne) dans la langue
+    //         if (state.isOnLine) {
+    //             voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+    //             if (voice) return voice;
+    //         }
+
+    //         // 3. Dernière chance : Chercher une voix LOCALE dans n'importe quelle langue
+    //         voice = appState.voices.find(v => v.localService);
+    //         if (voice) return voice;
+
+            
+
+    //         console.log('\n\n -----------  debug2 in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix, appState.voices,',\n ---- voice=',voice);
+
+
+
+    //         return null; // Rien trouvé
+
+    //     });
+
+
+
+
+
+
+    // }
+
+
+
+
+    async function findDefaultVoice(lang) {
         const langPrefix = lang.toLowerCase().split('-')[0];
 
-        // 1. Chercher une voix LOCALE correspondant exactement à la langue de l'application
-        let voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService);
-        
+        await waitUntilTestRealConnectivityDone();
+
+        // 1. Voix locale dans la langue
+        let voice = null;
+
+        // let voice = appState.voices.find(
+        //     v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService
+        // );
+
+
+        selectVoice();
+        voice = state.frenchVoice;
+
+
+
+
+
+        console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', langPrefix, 'state.frenchVoice=',state.frenchVoice);
+
         if (voice) return voice;
 
-        // 2. Si aucune voix LOCALE n'est trouvée, chercher une voix RÉSEAU (si en ligne) dans la langue
+        // 2. Voix réseau si en ligne
         if (state.isOnLine) {
-             voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-             if (voice) return voice;
+            voice = appState.voices.find(
+                v => v.lang.toLowerCase().startsWith(langPrefix)
+            );
+            if (voice) return voice;
         }
 
-        // 3. Dernière chance : Chercher une voix LOCALE dans n'importe quelle langue
+        // 3. Dernière chance : locale quelconque
         voice = appState.voices.find(v => v.localService);
         if (voice) return voice;
-        
-        return null; // Rien trouvé
+
+        return null;
     }
 
 
@@ -836,6 +1153,7 @@ const VoiceSelectorUI = (function() {
     if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
         if (window.speechSynthesis.getVoices().length > 0) {
+            console.log('\n\n ---- debug : lancement de  à la création de VoiceSelectorUI ---\n\n')
             loadVoices();
         }
     }
@@ -2302,6 +2620,14 @@ const SpeechRecognitionUI = (function() {
         
         const overlay = document.createElement('div');
         overlay.id = overlayId;
+
+
+        // --- NOUVEAU : Récupération des valeurs stockées (ou par défaut) ---
+        const storedVolume = '0.008'; //getTtsSetting('voice_volume', '1.0');
+        const storedRate   = '0.7'; //getTtsSetting('voice_rate', '1.0');
+        const storedPitch  = '1.0'; //getTtsSetting('voice_pitch', '1.0');
+
+
         
         // --- Configuration pour rendre l'overlay NON BLOQUANT ---
         overlay.style.cssText = `
@@ -2445,19 +2771,30 @@ const SpeechRecognitionUI = (function() {
             <div id="modal-content-scroll" style="margin-top: 5px; padding-top: 0px; margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px;">
             
                 <div id="tts-controls-panel" style="margin-top: 10px; padding: 5px; border: 1px solid #3bad77ff; border-radius: 6px; background-color: #e6fff1; display: none;">
+
                     <div class="tts-slider-group">
-                        <label for="tts-volume">Volume (0.0 à 0.03) : <span id="volume-value">0.008</span></label>
-                        <input type="range" id="tts-volume" min="0.0" max="0.03" step="0.001" value="0.008">
+                        <label for="backgroundVoice-volume">vol (0 à 0.03):</label>
+                        <div class="tts-slider-container">
+                            <input type="range" id="backgroundVoice-volume" min="0.0" max="0.03" step="0.001" value="${storedVolume}">
+                        </div>
+                        <span id="backgroundVoice-volume-value" class="tts-slider-value">${storedVolume}</span>
                     </div>
                     <div class="tts-slider-group">
-                        <label for="tts-rate">Débit (Rate: 0.1 à 2.0) : <span id="rate-value">0.7</span></label>
-                        <input type="range" id="tts-rate" min="0.5" max="2.0" step="0.1" value="0.7">
+                        <label for="backgroundVoice-rate">rate (0.5 à 2.0):</label>
+                        <div class="tts-slider-container">
+                            <input type="range" id="backgroundVoice-rate" min="0.5" max="2.0" step="0.1" value="${storedRate}">
+                        </div>
+                        <span id="backgroundVoice-rate-value" class="tts-slider-value">${storedRate}</span>
                     </div>
                     <div class="tts-slider-group">
-                        <label for="tts-pitch">Hauteur (Pitch: 0.0 à 2.0) : <span id="pitch-value">1.0</span></label>
-                        <input type="range" id="tts-pitch" min="0.0" max="2.0" step="0.1" value="1.0">
+                        <label for="backgroundVoice-pitch">pitch (0 à 2):</label>
+                        <div class="tts-slider-container">
+                            <input type="range" id="backgroundVoice-pitch" min="0.0" max="2.0" step="0.1" value="${storedPitch}">
+                        </div>
+                        <span id="backgroundVoice-pitch-value" class="tts-slider-value">${storedPitch}</span>
                     </div>
-                    </div>
+
+                </div>
                 
                 <div id="stt-container" style="margin-top: 5px; padding: 10px; padding-top: 0px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
                     <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px; font-size: 0.9em; font-weight: bold;">Résultat de la Reconnaissance Vocale:</div>
@@ -2525,36 +2862,62 @@ const SpeechRecognitionUI = (function() {
         });
 
 
+
+
+        // 2. Gestion des Sliders (mise à jour des valeurs affichées)
+        function updateTtsValueDisplay(e) {
+            const valueId = `${e.target.id}-value`;
+            const valueSpan = modal.querySelector(`#${valueId}`);
+            if (valueSpan) {
+                valueSpan.textContent = e.target.value;
+            }
+        }
+
+
+
         // Fonction gestionnaire des changements de paramètres TTS
         // Cette fonction arrête/redémarre la STT pour libérer la ressource audio, comme demandé.
         function handleTtsParameterChange(e) {
+
+            // // 1. Annuler la TTS en cours (pour être sûr)
+
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel();
+
+
             // Mise à jour de l'affichage de la valeur (même si elle est déjà faite dans le code précédent)
-            const valueSpan = modal.querySelector(`#${e.target.id.replace('tts-', '')}-value`);
+            const valueId = `${e.target.id}-value`;
+            const valueSpan = modal.querySelector(`#${valueId}`);
             if (valueSpan) {
                 valueSpan.textContent = e.target.value;
             }
 
-            // 1. Annuler la TTS en cours (pour être sûr)
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-            }
+
+
+            speakTextfromSliderParams(SUPER_LONG_TEXT);
+
+
             
-            // 2. Arrêter l'écoute STT
-            arreterEcouteAction(); // Assurez-vous que cette fonction arrête l'écoute
+            // // 2. Arrêter l'écoute STT
+            // arreterEcouteAction(); // Assurez-vous que cette fonction arrête l'écoute
             
-            // 3. Redémarrer l'écoute immédiatement après l'arrêt (pour reprendre la dictée)
-            // Redémarrer en mode 'continue' après un très court délai (pour s'assurer que l'arrêt est effectif)
-            setTimeout(() => {
-                // Tente de relancer la reconnaissance vocale
-                toggleSpeechRecognition('continue'); 
-            }, 50); // 50ms pour relâcher les ressources
+            // // 3. Redémarrer l'écoute immédiatement après l'arrêt (pour reprendre la dictée)
+            // // Redémarrer en mode 'continue' après un très court délai (pour s'assurer que l'arrêt est effectif)
+            // setTimeout(() => {
+            //     // Tente de relancer la reconnaissance vocale
+            //     toggleSpeechRecognition('continue'); 
+            // }, 50); // 50ms pour relâcher les ressources
+
+
+
+            
         }
 
 
         // 2. Gestion des Sliders (Appel de la nouvelle fonction)
-        modal.querySelector('#tts-volume').addEventListener('input', handleTtsParameterChange);
-        modal.querySelector('#tts-rate').addEventListener('input', handleTtsParameterChange);
-        modal.querySelector('#tts-pitch').addEventListener('input', handleTtsParameterChange);
+        modal.querySelector('#backgroundVoice-volume').addEventListener('input', handleTtsParameterChange);
+        modal.querySelector('#backgroundVoice-rate').addEventListener('input', handleTtsParameterChange);
+        modal.querySelector('#backgroundVoice-pitch').addEventListener('input', handleTtsParameterChange);
 
 
 
@@ -2603,9 +2966,9 @@ const SpeechRecognitionUI = (function() {
      */
     function getTtsParameters() {
         // Tente de récupérer les éléments des sliders par leur ID
-        const volumeSlider = document.getElementById('tts-volume');
-        const rateSlider = document.getElementById('tts-rate');
-        const pitchSlider = document.getElementById('tts-pitch');
+        const volumeSlider = document.getElementById('backgroundVoice-volume');
+        const rateSlider = document.getElementById('backgroundVoice-rate');
+        const pitchSlider = document.getElementById('backgroundVoice-pitch');
 
         if (!volumeSlider || !rateSlider || !pitchSlider) {
             console.warn("Les sliders TTS n'ont pas été trouvés dans le DOM.");
@@ -3295,10 +3658,24 @@ export function speakTextWithWaitToEnd(text, volume = 1.0) {
         
         // ------------------------------------------------
         
+
+        const params = SpeechRecognitionUI.getTtsParameters();
+
+
+
+        console.log('\n\n -- voix speakTextWithWaitToEnd , params=', params, state.voice_volume, state.voice_rate, state.voice_pitch)
+
+
         if (voiceToUse) {
             utterance.voice = voiceToUse;
             utterance.lang = voiceToUse.lang;
-            utterance.volume = volume;
+            // utterance.volume = volume;
+            utterance.volume = state.voice_volume;
+            utterance.rate = state.voice_rate;
+            utterance.pitch = state.voice_pitch;
+
+
+
             window.speechSynthesis.speak(utterance);
         } else {
             const warning = "Pas de voix sélectionnée pour speakText. Résolution immédiate.";

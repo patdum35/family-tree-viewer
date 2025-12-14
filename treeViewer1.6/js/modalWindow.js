@@ -7,9 +7,11 @@ import { translateOccupation } from './occupations.js';
 import { cleanProfession} from './nameCloudUtils.js';
 import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
-import { testSpeechSynthesisHealth, selectVoice, addTooltipTransparencyFix } from './treeAnimation.js';
+import { testSpeechSynthesisHealth, addTooltipTransparencyFix } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { debounce, isModalVisible } from './eventHandlers.js';
+import { selectVoice } from './voiceSelect.js';
+
 
 /**
 * Affiche une fenêtre modale détaillée pour une personne

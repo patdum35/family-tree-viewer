@@ -4,10 +4,11 @@
 import { state, displayGenealogicTree, trackPageView } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
-import { testSpeechSynthesisHealth, selectVoice } from './treeAnimation.js';
+import { testSpeechSynthesisHealth } from './treeAnimation.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { extractYear } from './utils.js';
 import { debounce, isModalVisible } from './eventHandlers.js';
+import { selectVoice } from './voiceSelect.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;

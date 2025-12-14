@@ -233,6 +233,7 @@ export const state = {
     voice_volume: 1.0,
     voice_rate: 1.0,
     voice_pitch: 1.0,
+    isEndTestRealConnectivity: false,
 
 };
 
@@ -960,6 +961,10 @@ function initialize() {
     state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
     state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
     state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
+
+    console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
+
+
     if (state.selectedVoiceName != null) { loadVoices();}
     state.voice_volume = localStorage.getItem('voice_volume') || 1.0;
     state.voice_rate = localStorage.getItem('voice_rate') || 1.0;
