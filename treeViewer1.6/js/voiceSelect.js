@@ -1451,7 +1451,7 @@ const SpeechRecognitionUI = (function() {
         }
         
         currentEntity = null; // S'assurer que l'entité est désactivée
-
+        window.speechSynthesis.cancel(); 
 
 
         if (recognition)  {
