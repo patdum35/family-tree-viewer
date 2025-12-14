@@ -986,7 +986,7 @@ export async function readPersonSheet(personId, detectedAction = null) {
             }
         }
         if (state.isSpeechSynthesisAvailable) {
-            selectVoice();
+            // selectVoice();
             state.isVoiceSelected = true;
         } else {
             state.isVoiceSelected = false;

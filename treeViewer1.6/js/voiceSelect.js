@@ -941,88 +941,6 @@ const VoiceSelectorUI = (function() {
     /**
      *  Recherche une voix locale correspondant à la langue
      */
-    // function findDefaultVoice(lang) {
-    //     const langPrefix = lang.toLowerCase().split('-')[0];
-
-
-    //     // // testRealConnectivity();
-    //     // testRealConnectivity().then(online => {
-
-    //     //     // 1. Chercher une voix LOCALE correspondant exactement à la langue de l'application
-    //     //     let voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService);
-
-            
-    //     //     console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix);
-
-    //     //     if (voice) return voice;
-
-
-
-
-
-    //     //     // 2. Si aucune voix LOCALE n'est trouvée, chercher une voix RÉSEAU (si en ligne) dans la langue
-    //     //     if (state.isOnLine) {
-    //     //         voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-    //     //         if (voice) return voice;
-    //     //     }
-
-    //     //     // 3. Dernière chance : Chercher une voix LOCALE dans n'importe quelle langue
-    //     //     voice = appState.voices.find(v => v.localService);
-    //     //     if (voice) return voice;
-         
-    //     //     return null; // Rien trouvé
-
-    //     // });
-
-    //     waitUntilTestRealConnectivityDone().then(duration => {
-    //         console.log(`\n\n ----- Attente waitUntilTestRealConnectivityDone: ${Math.round(duration)} ms`);
-
-    //     // });            
-
-
-
-    //         // 1. Chercher une voix LOCALE correspondant exactement à la langue de l'application
-    //         let voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && v.localService);
-
-            
-    //         console.log('\n\n -----------  debug1 in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix, appState.voices,',\n ---- voice=',voice);
-
-    //         if (voice) return voice;
-
-
-
-
-
-    //         // 2. Si aucune voix LOCALE n'est trouvée, chercher une voix RÉSEAU (si en ligne) dans la langue
-    //         if (state.isOnLine) {
-    //             voice = appState.voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-    //             if (voice) return voice;
-    //         }
-
-    //         // 3. Dernière chance : Chercher une voix LOCALE dans n'importe quelle langue
-    //         voice = appState.voices.find(v => v.localService);
-    //         if (voice) return voice;
-
-            
-
-    //         console.log('\n\n -----------  debug2 in findDefaultVoice state.isOnLine= ', state.isOnLine, ',,langPrefix=', langPrefix, appState.voices,',\n ---- voice=',voice);
-
-
-
-    //         return null; // Rien trouvé
-
-    //     });
-
-
-
-
-
-
-    // }
-
-
-
-
     async function findDefaultVoice(lang) {
         const langPrefix = lang.toLowerCase().split('-')[0];
 
@@ -1859,7 +1777,7 @@ const SpeechRecognitionUI = (function() {
                 arreterEcouteAction();
                 stopSpeechRecognition = true;
                 if (state.isMobile ) {
-                    // window.speechSynthesis.cancel(); 
+                    window.speechSynthesis.cancel(); 
                 }
 
                 let personId = (res.results.length > 0) ? res.results[0].id : res2.results[0].id;

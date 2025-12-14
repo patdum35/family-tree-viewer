@@ -3048,7 +3048,12 @@ export async function readPersonDetails(winner, detectedAction = null) {
     const resultContainer = quizMessage.querySelector('#result-container');
 
     // Démarrer par la solution puis les indices
-    playAllCluesSequentially();
+    if (detectedAction && !detectedAction.includes('readSheet')) {
+        await playAllCluesSequentially();
+    } else {
+        playAllCluesSequentially();
+    }
+
 
     async function playAllCluesSequentially() {
         isReading = true;
@@ -3139,101 +3144,6 @@ export async function readPersonDetails(winner, detectedAction = null) {
         
         isReading = false;
     }
-
-
-
-
-    // async function playAllCluesSequentially() {
-    //     isReading = true;
-        
-    //     // Afficher la solution en premier
-    //     await showSolutionAsync();
-
-    //     //'sex', 'birthDate', 'deathDate', 'occupation_n', 'residences_n', 'children', 'father', 'mother', 'siblings', 'spouse', 'historical','notes'
-    //     let start = 0;
-    //     let end = clues.length;
-    //     let idx = -1;
-    //     console.log('\n\n -----------   debug before detectedAction', detectedAction, cluesLabels)
-    //     if (detectedAction && (detectedAction.includes('readSheet') || detectedAction.includes('research') )) {
-    //         idx = 0;
-    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, start, end)
-    //     } else if (detectedAction && (detectedAction.includes('search') || detectedAction.includes('research') )) {
-    //         start = 0; end = 0;
-    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, start, end);
-    //         idx = 0;
-    //     } else if (detectedAction && (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast') )) {
-    //         idx = cluesLabels.indexOf('age');
-    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
-    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
-    //     } else if (detectedAction && (detectedAction.includes('whenBorn') )) {
-    //         idx = cluesLabels.indexOf('birthDate');
-    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
-    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
-    //     } else if (detectedAction && (detectedAction.includes('whenDead') || detectedAction.includes('whenDeadW')  || detectedAction.includes('whenDied'))) {
-    //         idx = cluesLabels.indexOf('deathDate'); 
-    //         if (idx !== -1) { start = idx; end = idx + 1;} else { start = 0; end = 0; }
-    //         console.log('\n\n -----------   debug after detectedAction', detectedAction, idx, start, end)
-    //     } else
-        
-    //     // Puis afficher les indices un par un
-    //     for (let i = start; i < end; i++) {
-    //         if (isPaused) {
-    //             // Attendre que la lecture reprenne
-    //             await waitForResume();
-    //         }
-            
-    //         const clue = clues[i];
-    //         console.log("🧩 Indice ajouté:", clue, i, clues );
-    //         await showNextClueAsync(start);
-            
-    //         // Petite pause entre chaque indice si pas en pause
-    //         if (!isPaused) {
-    //             await new Promise(resolve => setTimeout(resolve, 500));
-    //         }
-    //     }
-
-    //     setTimeout(() => {
-    //     if (detectedAction && (detectedAction.includes('whatAge') || detectedAction.includes('whatAgePast') ) && idx === -1) {
-
-    //             speakClue('l\'age n\'est pas connu', false);
-    //     } 
-    //     }, 100);
-
-        
-    //     isReading = false;
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3545,7 +3455,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
             togglePlayPauseBtn.innerHTML = `▶ ${getFortuneText('play') || 'Lecture'}`;
             // Arrêter la synthèse vocale si elle est en cours
             if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
+                // window.speechSynthesis.cancel();
             }
         } else {
             togglePlayPauseBtn.innerHTML = `⏸ ${getFortuneText('pause') || 'Pause'}`;
