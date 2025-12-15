@@ -1,7 +1,7 @@
 import { state, loadData } from './main.js';
 import { initSpeechSynthesis, testRealConnectivity } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-import { findPersonsBy } from './searchModalUI.js';
+import { findPersonsBy, openSearchModal } from './searchModalUI.js';
 import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
 import { debounce } from './eventHandlers.js';
 import { debugLog } from './debugLogUtils.js';
@@ -1425,10 +1425,12 @@ const SpeechRecognitionUI = (function() {
         const valueToStore = newValue.trim() || 'not detected'; 
         
         // Mise à jour de l'état
+
+        cumulativeTranscript = cumulativeTranscript.replaceAll(capturedEntities[fieldName], valueToStore);
         capturedEntities[fieldName] = valueToStore;
-        
+
         // Utiliser la variable sécurisée dans le log (résout le TypeError)
-        console.log(`[CLAVIER] ${nameToDisplay} mis à jour manuellement à: "${valueToStore}"`);
+        // console.log(`[CLAVIER] after ${nameToDisplay} mis à jour manuellement à: "${valueToStore}"`, fieldName, capturedEntities[fieldName], cumulativeTranscript);
 
         // Rafraîchir l'interface (essentiel pour résoudre le problème du "double clic")
         updateEntityUI(); 
@@ -1724,6 +1726,37 @@ const SpeechRecognitionUI = (function() {
             } else {
                KeyDetectedTab[key] = false; 
             }
+
+
+
+            // if ( KeyDetectedTab['lastname'] === true) {
+
+            //     if (wordsFirstname[1] === translate('letter') && wordsFirstname[2] === translate('by') && wordsFirstname[3] === translate('letter')) {
+                    
+            //         let fieldToSpell = translate('enter'); 
+                    
+            //         if (currentEntity) {
+            //             fieldToSpell = currentEntity;
+            //             newEntities[translate('lastname')] = []; 
+            //         } else if (i > 0) {
+            //             const previousWord = words[i - 1];
+            //             if (keywordMap[previousWord]) {
+            //                 fieldToSpell = keywordMap[previousWord];
+            //             }
+            //         }
+                    
+            //         console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
+            //         startSpellingCycle(fieldToSpell, config); 
+            //         cumulativeTranscript = newCumulativeTranscript;
+            //         previousNewCumulativeTranscript = newCumulativeTranscript;
+            //         return; 
+            //     }
+            // }   
+
+
+
+
+
         })
 
 
@@ -1794,7 +1827,73 @@ const SpeechRecognitionUI = (function() {
             let res = null;
             let res2 = null;
 
-            res = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], capturedEntities[translate('lastname')], true);
+            res = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], capturedEntities[translate('lastname')], false);
+
+
+
+
+    // if (state.firstName != '' && state.lastName!= '') {
+    //     openSearchModal(state.firstName,  state.lastName );
+
+    //     if (window.currentSearchResults.length == 0) {
+    //         // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
+    //         let othernames = generatePhoneticAlternatives(state.lastName);
+    //         let lastAlternativeNameFound = null;
+    //         // console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
+    //         if (othernames.length > 0) {
+    //             othernames.forEach(name => { 
+    //                 lastAlternativeNameFound = name;
+    //                 openSearchModal(state.firstName,  name );
+    //                 // console.log('\n\n\n ------------   debug : personne trouvée ??? ---------', window.currentSearchResults.length, window.currentSearchResults);
+    //                 if (window.currentSearchResults.length > 0 ) {
+    //                     state.lastName = name;
+    //                     localStorage.setItem('lastName', name );
+    //                     document.getElementById('input-form-lastName').value = name;
+    //                     return;
+    //                 }
+    //             });
+    //         }
+    //     }
+
+
+
+    //     if (window.currentSearchResults.length === 1) {
+    //         personInit = window.currentSearchResults[0];
+    //         if (state.initialSpeechReconitionIsLaunched) {
+    //             speakText(state.firstName + ' ' + state.lastName + translate('hasBeenFound'));
+    //         }
+    //     } else if (window.currentSearchResults.length === 0)  {
+    //         if (state.initialSpeechReconitionIsLaunched) {
+    //             speakText(state.firstName + ' ' + state.lastName  + translate('hasNotBeenFound')) ;        
+    //         }
+    //     } else if (window.currentSearchResults.length > 1)  {
+    //         if (state.initialSpeechReconitionIsLaunched) {
+    //             speakText(translate('severalPersonWithName') + state.firstName + ' ' + state.lastName  + translate('haveBeenFound')) ; 
+    //        }
+    //     }
+    //     state.initialSpeechReconitionIsLaunched = false;
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             console.log('\n\n\n ------------   debug0 : personne trouvée ??? ---------', res, res.results[0]);
             let lastAlternativeNameFound = null;
@@ -1806,7 +1905,7 @@ const SpeechRecognitionUI = (function() {
                 if (othernames.length > 0) {
                     othernames.forEach(name => { 
                         lastAlternativeNameFound = name;
-                        res2 = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], name, true);
+                        res2 = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], name, false);
                         console.log('\n\n\n ------------   debug : personne trouvée ??? ---------', res2, res2.results[0]);
                         if (res2.results.length > 0 ) return;
                     });
@@ -2173,26 +2272,26 @@ const SpeechRecognitionUI = (function() {
         // for (let i = 0; i < words.length; i++) {
         //     const word = words[i];
 
-        //     if (word === translate('letter') && words[i+1] === translate('by') && words[i+2] === translate('letter')) {
+            // if (word === translate('letter') && words[i+1] === translate('by') && words[i+2] === translate('letter')) {
                 
-        //         let fieldToSpell = translate('enter'); 
+            //     let fieldToSpell = translate('enter'); 
                 
-        //         if (currentEntity) {
-        //             fieldToSpell = currentEntity;
-        //             newEntities[currentEntity] = []; 
-        //         } else if (i > 0) {
-        //             const previousWord = words[i - 1];
-        //             if (keywordMap[previousWord]) {
-        //                  fieldToSpell = keywordMap[previousWord];
-        //             }
-        //         }
+            //     if (currentEntity) {
+            //         fieldToSpell = currentEntity;
+            //         newEntities[currentEntity] = []; 
+            //     } else if (i > 0) {
+            //         const previousWord = words[i - 1];
+            //         if (keywordMap[previousWord]) {
+            //              fieldToSpell = keywordMap[previousWord];
+            //         }
+            //     }
                 
-        //         console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
-        //         startSpellingCycle(fieldToSpell, config); 
-        //         cumulativeTranscript = newCumulativeTranscript;
-        //         previousNewCumulativeTranscript = newCumulativeTranscript;
-        //         return; 
-        //     }
+            //     console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
+            //     startSpellingCycle(fieldToSpell, config); 
+            //     cumulativeTranscript = newCumulativeTranscript;
+            //     previousNewCumulativeTranscript = newCumulativeTranscript;
+            //     return; 
+            // }
             
         //     else if (keywordMap[word]) {
         //         const fieldKey = keywordMap[word];
@@ -2449,7 +2548,7 @@ const SpeechRecognitionUI = (function() {
             else if (isRecording && !isSpellingMode) { 
                 
                 if (cumulativeTranscript.trim().length > 0) {
-                    console.log('\n\n ------------------   debug  call to processFullTranscript  from recognition.ONEND, else if (isRecording && !isSpellingMode)', cumulativeTranscript )
+                    console.log('\n\n ------------------  debug call to processFullTranscript from recognition.ONEND, else if (isRecording && !isSpellingMode)', cumulativeTranscript )
                     processFullTranscript(cumulativeTranscript.trim(), config, 'onEnd');
                 }
 
