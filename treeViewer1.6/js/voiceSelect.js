@@ -46,7 +46,7 @@ export function selectVoice() {
         !voice.voiceURI.includes('eloquence')  // Évite les voix pourries sur IOS
     );
 
-    // console.log('\n\n -----------  debug in selectVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', voice_language2, voices, '\n ----- frenchVoices=',frenchVoices);
+    console.log('\n\n -----------  debug in selectVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', voice_language2, voices, '\n ----- frenchVoices=',frenchVoices, ',window.CURRENT_LANGUAGE=',window.CURRENT_LANGUAGE);
 
         
     // Chercher la première voix contenant 'compact'
@@ -872,10 +872,16 @@ const VoiceSelectorUI = (function() {
             const storedVoiceName = localStorage.getItem('selectedVoice');
 
             // 2. Initialiser la voix sélectionnée avec ce nom
-            console.log('\n\n ------------  debug in loadVoices at init with  storedVoiceName localstorage = ', storedVoiceName, '------------\n\n');
             setInitialVoiceByName(storedVoiceName); 
+            // console.log('\n\n ------------  debug in loadVoices at init with  storedVoiceName localstorage = ', storedVoiceName, 'window.CURRENT_LANGUAGE=',window.CURRENT_LANGUAGE,', selectedVoice=' ,selectedVoice, ',restartVoiceSelect=' ,sessionStorage.getItem('restartVoiceSelect'),'------------\n\n');
+
             // ===============================================
 
+            if (sessionStorage.getItem('restartVoiceSelect')) {
+                // console.log('\n\n ------------  debug in loadVoices restartVoiceSelect,  detected = ', sessionStorage.getItem('restartVoiceSelect') );
+                selectedVoice = false;
+                sessionStorage.removeItem('restartVoiceSelect');
+            }
 
 
             // NOUVELLE LOGIQUE : Sélectionner une voix par défaut si aucune n'est sélectionnée
@@ -954,7 +960,7 @@ const VoiceSelectorUI = (function() {
         voice = state.frenchVoice;
 
 
-        // console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', langPrefix, 'state.frenchVoice=',state.frenchVoice);
+        console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', langPrefix, 'state.frenchVoice=',state.frenchVoice);
 
         if (voice) return voice;
 
@@ -1101,6 +1107,7 @@ const SpeechRecognitionUI = (function() {
             questions: 'questions',
             firstname: 'prenom',
             lastname: 'nom',
+            non: 'non',
             place: 'lieu',
             occupation: 'metier',
             occupationBis: 'profession',
@@ -1150,6 +1157,14 @@ const SpeechRecognitionUI = (function() {
             whatIsHistorical: 'what is the historical context of',
             whatIsHistoricalPast: 'what was the historical context of',
             whatAreNotes: 'what are the notes of',
+
+
+            whoAreYou : 'who are you',
+            whatIsYourName : 'what is your name',
+            whoCreatedYou : 'who created you',
+            whatisTheUse : 'what are you used for',
+            whatisTheUseBis : 'what are you used for',
+
             go: 'go',
             enter: 'enter',
             validate: 'validate',
@@ -1158,6 +1173,7 @@ const SpeechRecognitionUI = (function() {
             questions: 'questions',
             firstname: 'first name',
             lastname: 'last name',
+            non: 'non',
             place: 'place',
             occupation: 'occupation',
             occupationBis: 'profession',
@@ -1207,6 +1223,13 @@ const SpeechRecognitionUI = (function() {
             whatIsHistorical: 'cual es el contexto historico de',
             whatIsHistoricalPast: 'cual era el contexto historico de',
             whatAreNotes: 'cuales son las notas de',
+
+            whoAreYou : 'quien eres',
+            whatIsYourName : 'como te llamas',
+            whoCreatedYou : 'quien te creo',
+            whatisTheUse : 'para que sirves',
+            whatisTheUseBis : 'para que sirves',
+
             go: 'ir',
             enter: 'entrar',
             validate: 'validar',
@@ -1215,6 +1238,7 @@ const SpeechRecognitionUI = (function() {
             questions: 'preguntas',
             firstname: 'nombre',
             lastname: 'apellido',
+            non: 'non',
             place: 'lugar',
             occupation: 'profesion',
             occupationBis: 'profesion',
@@ -1263,6 +1287,13 @@ const SpeechRecognitionUI = (function() {
             whatIsHistorical: 'mi a tortenelmi hattere',
             whatIsHistoricalPast: 'mi volt a tortenelmi hattere',
             whatAreNotes: 'mik a jegyzetei',
+
+            whoAreYou : 'ki vagy',
+            whatIsYourName : 'mi a neved',
+            whoCreatedYou : 'ki hozott letre',
+            whatisTheUse : 'mire valo',
+            whatisTheUseBis : 'mire valo',
+
             go: 'mehet',
             enter: 'beír',
             validate: 'jovahagy',
@@ -1271,6 +1302,7 @@ const SpeechRecognitionUI = (function() {
             questions: 'kérdések',
             firstname: 'keresztnev',
             lastname: 'vezeteknev',
+            non: 'non',
             place: 'hely',
             occupation: 'foglalkozas',
             occupationBis: 'foglalkozas',
@@ -1311,6 +1343,8 @@ const SpeechRecognitionUI = (function() {
         acc[field] = 'not detected';
         return acc;
     }, {});
+
+    let capturedEntitiesEnglish = [];
     
     // --- Variables d'État du Mode Hybride ---
     let isSpellingMode = false;
@@ -1340,10 +1374,20 @@ const SpeechRecognitionUI = (function() {
 
     let isNewCommandToBeExecuted = true;
     let isNewCommandToBeExecuted2 = true;
-    const LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés ';
+    // const LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés ';
+    let LONG_PHRASE = null;
+    if (window.CURRENT_LANGUAGE === 'fr') {
+        LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés cette voix de fond sonore sert à garder le micro ouvert pour éviter les arrêts et bip sonores intempestifs vous pouvez la couper en cliquant sur la roue et mettre le volume à zéro ';
+    } else if (window.CURRENT_LANGUAGE === 'en') {
+        LONG_PHRASE = 'speak into the microphone over this voice, your voice is analyzed and keywords are detected this background voice is used to keep the microphone open to avoid unwanted stops and beeping sounds you can turn it off by clicking the gear and setting the volume to zero';
+    } else if (window.CURRENT_LANGUAGE === 'es') {
+        LONG_PHRASE = 'habla en el micrófono sobre esta voz, tu voz es analizada y se detectan palabras clave esta voz de fondo sirve para mantener el micrófono abierto y evitar cortes y pitidos no deseados puedes desactivarla haciendo clic en la rueda y poniendo el volumen a cero';
+    } else if (window.CURRENT_LANGUAGE === 'hu') {
+        LONG_PHRASE = 'beszélj a mikrofonba ezen a hangon keresztül, a hangodat elemzi a rendszer és kulcsszavakat észlel ez a háttérhang arra szolgál, hogy a mikrofon nyitva maradjon és elkerülje a nem kívánt megszakításokat és sípoló hangokat kikapcsolhatod a fogaskerékre kattintva és a hangerőt nullára állítva';
+    }
 
     // Nombre de répétitions souhaitées
-    const REPETITIONS = 2; //20; 
+    const REPETITIONS = 1; //20; 
     let SUPER_LONG_TEXT = LONG_PHRASE;
     for (let i = 0; i < REPETITIONS; i++) {
         SUPER_LONG_TEXT += LONG_PHRASE;
@@ -1406,12 +1450,12 @@ const SpeechRecognitionUI = (function() {
         const capturedData = SpeechRecognitionUI.getCapturedData();
         
         // 3. Stocker les données dans la variable globale de l'application
-        console.log("--- DONNÉES FINALES CAPTURÉES ---");
+        console.log("--- handleValidationAndExit : DONNÉES FINALES CAPTURÉES ---", capturedData);
        
-        
+         
         // Exemple d'utilisation :
-        if (capturedData.prenom) {
-            console.log(`Bonjour ${capturedData.prenom} !`);
+        if (capturedData.firstname) {
+            console.log(`Bonjour ${capturedData.firstname} !`);
         } else {
             console.log("Aucun prénom n'a été capturé.");
         }
@@ -1452,7 +1496,7 @@ const SpeechRecognitionUI = (function() {
         
         currentEntity = null; // S'assurer que l'entité est désactivée
         window.speechSynthesis.cancel(); 
-
+        window.speechSynthesis.cancel(); 
 
         if (recognition)  {
             recognition.stop();
@@ -1475,8 +1519,8 @@ const SpeechRecognitionUI = (function() {
         
         if (isRecording && recognition) {
             recognition.stop(); 
-            if (state.isMobile && window.speechSynthesis.speaking) {
-                // window.speechSynthesis.cancel(); 
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
             }            
             console.log(`[ACTION] Demande de bascule en Mode Épellation pour: ${targetField}`);
         } else {
@@ -1503,82 +1547,14 @@ const SpeechRecognitionUI = (function() {
 
         if (isRecording) {
             recognition.stop(); 
-            if (state.isMobile && window.speechSynthesis.speaking) {
-                // window.speechSynthesis.cancel(); 
+            if (state.isMobile) {
+                window.speechSynthesis.cancel(); 
             }
         }
     }
 
 
 
-    /**
-     * Génère des alternatives orthographiques basées sur des confusions phonétiques courantes.
-     * Retourne une liste vide si aucune alternative n'est trouvée.
-     * @param {string} word - Le mot transcrit (potentiellement erroné).
-     * @returns {Array<string>} Une liste d'alternatives générées (ou une liste vide si aucune).
-     */
-    function generatePhoneticAlternatives(word) {
-        
-        const generatedAlternatives = new Set(); 
-        const wordLower = word.toLowerCase();
-
-
-        // =========================================================================
-        // 0. NOUVELLE RÈGLE : Regrouper les mots (enlever les espaces et les traits d'union)
-        // =========================================================================
-        
-        // Remplace les espaces (\s) et les tirets (-) par une chaîne vide
-        const noSpacesAlternative = wordLower.replace(/[\s-]/g, '');
-
-        if (noSpacesAlternative !== wordLower) {
-            generatedAlternatives.add(noSpacesAlternative);
-            console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
-        }
-
-
-        // =========================================================================
-        // 1. Cas ciblé existant : [C]e[s][C] -> [C]e[C] (le cas de 'dumesnil' -> 'dumenil')
-        // ===
-        // Regex: (.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)
-        const regexES = /(.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)/gi;
-
-        wordLower.replace(regexES, (match, prefix, c1, vowel, c2, suffix) => {
-            
-            // Règle 1: Remplacer 'es' par 'e' (sans accent)
-            if (vowel === 'e') {
-                const alternative = `${prefix}${c1}e${c2}${suffix}`;
-                if (alternative !== wordLower) {
-                    generatedAlternatives.add(alternative);
-
-                    const noSpacesAlternative = alternative.replace(/[\s-]/g, '');
-                    if (noSpacesAlternative !== alternative) {
-                        generatedAlternatives.add(noSpacesAlternative);
-                        console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
-                    }
-
-                }
-            }
-            
-            // Règle 2: Remplacer 'is' par 'i'
-            else if (vowel === 'i') {
-                const alternative = `${prefix}${c1}i${c2}${suffix}`;
-                if (alternative !== wordLower) {
-                    generatedAlternatives.add(alternative);
-
-                    const noSpacesAlternative = alternative.replace(/[\s-]/g, '');
-                    if (noSpacesAlternative !== alternative) {
-                        generatedAlternatives.add(noSpacesAlternative);
-                        console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
-                    }
-
-                }
-            }
-        });
-
-        // --- LOGIQUE DE RETOUR MODIFIÉE ---
-        // Retourne la liste des alternatives (ex: ['dumenil']) ou une liste vide si size = 0.
-        return Array.from(generatedAlternatives);
-    }
 
 
     /**
@@ -1618,29 +1594,30 @@ const SpeechRecognitionUI = (function() {
 
 
         let config = localConfig;
-        let commandActionMap = null;
+        // let commandActionMap = null;
 
-        if (config === 'start') {
-            commandActionMap = {
-                [translate('go')]: handleValidationAndExit,
-                [translate('enter')]: handleValidationAndExit,
-                [translate('end')]: handleValidationAndExit,
-                [translate('stop')]: arreterEcouteAction 
-            };
-        } else if (config === 'full') {
-            commandActionMap = {
-                // [translate('stop')]: arreterEcouteAction 
-            };
-        }
+        // if (config === 'start') {
+        //     commandActionMap = {
+        //         // [translate('go')]: handleValidationAndExit,
+        //         [translate('enter')]: handleValidationAndExit,
+        //         // [translate('end')]: handleValidationAndExit,
+        //         // [translate('validate')]: handleValidationAndExit,
+        //         [translate('stop')]: arreterEcouteAction 
+        //     };
+        // } else if (config === 'full') {
+        //     commandActionMap = {
+        //         // [translate('stop')]: arreterEcouteAction 
+        //     };
+        // }
 
-        const commands = Object.keys(commandActionMap); 
+        // const commands = Object.keys(commandActionMap); 
 
 
-        const detectedCommand = commands.find(cmd => transcript.includes(cmd));
-        if (detectedCommand) {
-            commandActionMap[detectedCommand]();
-            return; 
-        }
+        // const detectedCommand = commands.find(cmd => transcript.includes(cmd));
+        // if (detectedCommand) {
+        //     commandActionMap[detectedCommand]();
+        //     return; 
+        // }
 
         const transcriptCleaned =  transcript.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // enlever les accents !!!
 
@@ -1650,11 +1627,6 @@ const SpeechRecognitionUI = (function() {
         // =========================================================
         // NOUVEAU MODE : Détection de Séquence Spécifique (Action Prénom Nom GO)
         // =========================================================
-        // const actionKeywords = ['chercher', 'quand est ne', 'quand est mort', 'quand est morte', 'quand est decede', 'quel age a', 'quel age avait', 'ou habite', 'ou habitait', 'quelle est la profession de', 'quel est le metier de', 'quelle etait la profession de', 'quel etait le metier de', 'avec qui est marie', 'avec qui était marie'];
-        // const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
-        //     'whatAge', 'whatAgePast', 'whereLive', 'whereLivePast', 'whatProfession', 'whatOccupation', 'whatProfessionPast', 'whatOccupationPast', 
-        //     'whoMarried', 'whoMarriedPast', 'howManyChildren', 'howManyChildrenPast', 'whoIsFather', 'whoIsFatherPast', 
-        //     'whoIsMother','whoIsMotherPast','whoAreSibling','whoAreSiblingPast', 'whatIsHistorical','whatIsHistoricalPast', 'whatAreNotes'];
 
         const actionKeywordsWithoutFirstName = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse']
 
@@ -1668,6 +1640,21 @@ const SpeechRecognitionUI = (function() {
 
         let fullTranscript = transcriptCleaned.trim(); // Version propre du transcript
         fullTranscript = fullTranscript.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // enlever les accents !!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         isNewCommandToBeExecuted = true;
         
@@ -1688,6 +1675,9 @@ const SpeechRecognitionUI = (function() {
         
 
         let detectedAction = null; // Variable pour stocker l'expression d'action qui correspond
+        let detectedFirstName = null;
+        let detectedLastName = null;
+        let detectedQuestion = null;
         let truncatedTranscript = fullTranscript;
         let maxIndex = 0;
         // --- Boucle pour trouver la QUESTION et la validation ---
@@ -1710,6 +1700,59 @@ const SpeechRecognitionUI = (function() {
             }
         }
 
+
+        let isKeyDetected = false;
+        let KeyDetectedTab = [];
+        ['firstname','lastname', 'non','place','occupation','date', 'question'].forEach( key=> {
+            const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
+            let truncatedTranscriptForFirsname = fullTranscript.substring(index);
+            let wordsFirstname = truncatedTranscriptForFirsname.split(/\s+/).filter(w => w.length > 0);
+            let isPauseKeyDetected = truncatedTranscriptForFirsname.lastIndexOf('pause'+ ' ');
+
+            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected firstname word @@@@@@@ key', key, 'truncatedTranscriptForFirsname=',truncatedTranscriptForFirsname, index, wordsFirstname, wordsFirstname.length, validationSignal.includes(wordsFirstname[wordsFirstname.length - 1]), isPauseKeyDetected, '\n\n\n')
+
+            let localKey = key;
+            if(key === 'non') { localKey = 'lastname';}
+            if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsFirstname[wordsFirstname.length - 1]) && !validationSignal.includes(wordsFirstname[wordsFirstname.length - 2]) && wordsFirstname.length < 7 && isPauseKeyDetected === -1 ) {
+                // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected firstname word @@@@@@@', key,localKey,truncatedTranscriptForFirsname, index, '\n\n\n')
+                // capturedEntities[translate(localKey)] = truncatedTranscriptForFirsname.split(/\s+/).slice(1, -1).join(' '); // enlever le 1ier te le dernier mot 
+                capturedEntities[translate(localKey)] = truncatedTranscriptForFirsname.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier te le dernier mot 
+    
+                updateEntityUI();
+                isKeyDetected = true;
+                KeyDetectedTab[localKey] = true;
+            } else {
+               KeyDetectedTab[key] = false; 
+            }
+        })
+
+
+
+        console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  launch load  @@@@@@@ key',KeyDetectedTab['firstname'], KeyDetectedTab['lastname'], 'firstname=',capturedEntities[translate('firstname')], 'lastname=',capturedEntities[translate('lastname')] , words,   transcript, 'cumulativeTranscript=', cumulativeTranscript,'\n\n\n')
+
+
+        if (config === 'start') { 
+            
+            // si double validate
+            if (validationSignal.includes(words[words.length - 1]) && validationSignal.includes(words[words.length - 2]) ) {
+                if (((capturedEntities[translate('lastname')]!= undefined) && capturedEntities[translate('lastname')]!= 'not detected') 
+                || (capturedEntities[translate('firstname')]!= undefined && capturedEntities[translate('firstname')]!= 'not detected')) {
+
+                    capturedEntitiesEnglish['firstname'] = capturedEntities[translate('firstname')];
+                    capturedEntitiesEnglish['lastname'] = capturedEntities[translate('lastname')];       
+                    arreterEcouteAction();
+                    stopSpeechRecognition = true;         
+                    handleValidationAndExit();
+                    return;
+                }
+            }
+        }
+
+
+
+
+
+
         // 1. Enregistrer l'Action
         if (detectedAction) {
             if (detectedAction === 'whatisTheUseBis') {
@@ -1731,7 +1774,6 @@ const SpeechRecognitionUI = (function() {
             if (isOnResult == 'onResult') { previousTruncatedTranscriptOnResult = truncatedTranscript; }
             else { previousTruncatedTranscriptOnEnd = truncatedTranscript; } 
             previousTruncatedTranscript = truncatedTranscript
-
         }
 
 
@@ -1911,26 +1953,21 @@ const SpeechRecognitionUI = (function() {
         // DEBUT DU MODE : question + .... + validationSignal
         // =========================================================
         // VÉRIFICATION GLOBALE : Est-ce qu'une action a été détectée ? Et y a-t-il un signal de validation ?
-        // if (isNewCommandToBeExecuted && isNewCommandToBeExecuted2 && config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
+        
+        // si on a une clé 'Question'  et une clé de validation sur le dernier mot : exemple 'qui es tu go' ou 'quel age a xx yy go'
+        
+        
+        
+        
         if ( config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
 
-            // if (isRecording) {
-            //     if (state.isMobile && window.speechSynthesis.speaking) {
-            //         // window.speechSynthesis.cancel(); 
-            //     }
-            // }
 
             if (state.isMobile ) {
                 window.speechSynthesis.cancel(); 
             }
 
 
-            // window.speechSynthesis.cancel(); 
-
-
-            // // 1. Enregistrer l'Action
-            // capturedEntities[translate('question')] = translate(detectedAction);
-
+            // 1. Enregistrer l'Action
             // Détecte si l'action ne nécessite pas de prénom/nom
             const isActionWithoutFirstName = actionKeywordsWithoutFirstName.includes(detectedAction);
 
@@ -1975,19 +2012,19 @@ const SpeechRecognitionUI = (function() {
 
                 if (entityWords.length >= 2) {
                     // Par convention, le premier mot après l'action est le PRÉNOM
-                    capturedEntities[translate('firstname')] = entityWords[0]; 
+                    if (!KeyDetectedTab['firstname']) { capturedEntities[translate('firstname')] = entityWords[0]; }
                     isEntityKeyAvailable['firstname'] = true;
                     cumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
                     newCumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
                     
                     // Tous les mots restants sont considérés comme le NOM
-                    capturedEntities[translate('lastname')] = entityWords.slice(1,4).join(' ');
+                    if (!KeyDetectedTab['lastname']) {capturedEntities[translate('lastname')] = entityWords.slice(1,4).join(' ');}
                     isEntityKeyAvailable['lastname'] = true;
                     cumulativeTranscript += ' ' + translate('lastname') + ' ' +  capturedEntities[translate('lastname')] + ' pause ';
                     newCumulativeTranscript += ' ' + translate('lastname') + ' ' +  capturedEntities[translate('lastname')] + ' pause ';
                 } else if (entityWords.length === 1) {
                     // S'il n'y a qu'un seul mot (ex: 'chercher Henri GO'), on le met en Nom par défaut ou on gère l'erreur
-                    capturedEntities[translate('firstname')] = entityWords[0]; 
+                    if (!KeyDetectedTab['firstname']) { capturedEntities[translate('firstname')] = entityWords[0]; }
                     isEntityKeyAvailable['firstname'] = true; 
                     cumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
                     newCumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
@@ -2038,9 +2075,9 @@ const SpeechRecognitionUI = (function() {
 
            return; 
         }
-        else if ( validationSignal.includes(words[words.length - 1])) {
 
-
+        // si on a une clé question dans le capturedEntities et une clé de validation sur le dernier mot,  (mais pas de clé 'Question' dans le texte) : exemple texte= ' go' et capturedEntities[translate('question')] ='quel age a '
+        else if ( (capturedEntities[translate('question')] != 'not detected') && (capturedEntities[translate('question')] != undefined) && validationSignal.includes(words[words.length - 1])) {
             // const isActionWithoutFirstName = actionKeywordsWithoutFirstName.includes(detectedAction);
 
             let isDetectedQuestion = false;
@@ -2058,6 +2095,8 @@ const SpeechRecognitionUI = (function() {
                 });
                 if(isDetectedQuestion) { await launchSearchPeopleAction(detectedQuestion);}
             }
+
+
             if (!isDetectedQuestion) {
                 actionKeywordsWithoutFirstName.forEach(key => {
                     // console.log('\n\n\n -------------   debug detected action -------------- = ',key, translate(key), capturedEntities[translate('question')] )
@@ -2080,7 +2119,7 @@ const SpeechRecognitionUI = (function() {
 
             return;
         
-        }
+        } 
 
 
 
@@ -2090,128 +2129,127 @@ const SpeechRecognitionUI = (function() {
      
 
 
-
-        let newEntities = {};
-        let entitiesKeysEnglish = {};
-        words = transcriptCleaned.split(/\s+/).filter(w => w.length > 0);
-        console.log('\n\n------------  debug timer ------', cumulativeTranscript, transcriptCleaned, words)
+        // let newEntities = {};
+        // let entitiesKeysEnglish = {};
+        // words = transcriptCleaned.split(/\s+/).filter(w => w.length > 0);
+        // console.log('\n\n------------  debug timer ------', cumulativeTranscript, transcriptCleaned, words)
 
         
-        let keywordMap;
+        // let keywordMap;
 
-        if (config === 'start') {
-            keywordMap = {
-                'pause' : 'pause', [translate('firstname')]: translate('firstname'), [translate('laststname')]: translate('lastname'), 'non': translate('lastname')
-            };
+        // if (config === 'start') {
+        //     keywordMap = {
+        //         'pause' : 'pause', [translate('firstname')]: translate('firstname'), [translate('laststname')]: translate('lastname'), 'non': translate('lastname')
+        //     };
 
-            entityKeys = [translate('firstname'),translate('lastname'), 'pause'];
-            entitiesKeysEnglish = ['pause', 'firstname','lastname'];
-            capturedEntities = entityKeys.reduce((acc, field) => {
-                acc[field] = 'not detected';
-                cumulativeTranscript = newCumulativeTranscript;
-                previousNewCumulativeTranscript = newCumulativeTranscript;
-                return acc;
-            }, {});
-        } 
-        else if (config === 'full') {
-            keywordMap = {
-                'pause' : 'pause', [ translate('question')] : translate('question'), [translate('questions')] : translate('question'),
-                [translate('firstname')]: translate('firstname'), [translate('lastname')]: translate('lastname'), 'non': translate('lastname'), 
-                [translate('place')]: translate('place'), [translate('occupation')]: translate('occupation'), [translate('occupationBis')]: translate('occupation'), [translate('date')] : translate('date'), [translate('year')]: translate('date'),
-                [translate('go')] : 'pause', [translate('end')] : 'pause', [translate('stop')] :'pause', [translate('stopBis')] :'pause', [translate('enter')] :'pause',  [translate('validate')]:'pause',  [translate('validateBis')]:'pause'
-            };
-            entityKeys = ['pause', translate('firstname'),translate('lastname'), translate('place'), translate('occupation'), translate('date'), translate('question')];
-            entitiesKeysEnglish = ['pause', 'firstname','lastname','place', 'occupation', 'date', 'question'];
+        //     entityKeys = [translate('firstname'),translate('lastname'), 'pause'];
+        //     entitiesKeysEnglish = ['pause', 'firstname','lastname'];
+        //     capturedEntities = entityKeys.reduce((acc, field) => {
+        //         acc[field] = 'not detected';
+        //         cumulativeTranscript = newCumulativeTranscript;
+        //         previousNewCumulativeTranscript = newCumulativeTranscript;
+        //         return acc;
+        //     }, {});
+        // } 
+        // else if (config === 'full') {
+        //     keywordMap = {
+        //         'pause' : 'pause', [ translate('question')] : translate('question'), [translate('questions')] : translate('question'),
+        //         [translate('firstname')]: translate('firstname'), [translate('lastname')]: translate('lastname'), 'non': translate('lastname'), 
+        //         [translate('place')]: translate('place'), [translate('occupation')]: translate('occupation'), [translate('occupationBis')]: translate('occupation'), [translate('date')] : translate('date'), [translate('year')]: translate('date'),
+        //         [translate('go')] : 'pause', [translate('end')] : 'pause', [translate('stop')] :'pause', [translate('stopBis')] :'pause', [translate('enter')] :'pause',  [translate('validate')]:'pause',  [translate('validateBis')]:'pause'
+        //     };
+        //     entityKeys = ['pause', translate('firstname'),translate('lastname'), translate('place'), translate('occupation'), translate('date'), translate('question')];
+        //     entitiesKeysEnglish = ['pause', 'firstname','lastname','place', 'occupation', 'date', 'question'];
 
-        }
+        // }
         
-        currentEntity = null;
-        let entitiesDetectedCount = 0;
-        let entitiesWordCount = 0;
+        // currentEntity = null;
+        // let entitiesDetectedCount = 0;
+        // let entitiesWordCount = 0;
         
-        entityKeys.forEach(key => newEntities[key] = []);
+        // entityKeys.forEach(key => newEntities[key] = []);
 
 
-        for (let i = 0; i < words.length; i++) {
-            const word = words[i];
+        // for (let i = 0; i < words.length; i++) {
+        //     const word = words[i];
 
-            if (word === translate('letter') && words[i+1] === translate('by') && words[i+2] === translate('letter')) {
+        //     if (word === translate('letter') && words[i+1] === translate('by') && words[i+2] === translate('letter')) {
                 
-                let fieldToSpell = translate('enter'); 
+        //         let fieldToSpell = translate('enter'); 
                 
-                if (currentEntity) {
-                    fieldToSpell = currentEntity;
-                    newEntities[currentEntity] = []; 
-                } else if (i > 0) {
-                    const previousWord = words[i - 1];
-                    if (keywordMap[previousWord]) {
-                         fieldToSpell = keywordMap[previousWord];
-                    }
-                }
+        //         if (currentEntity) {
+        //             fieldToSpell = currentEntity;
+        //             newEntities[currentEntity] = []; 
+        //         } else if (i > 0) {
+        //             const previousWord = words[i - 1];
+        //             if (keywordMap[previousWord]) {
+        //                  fieldToSpell = keywordMap[previousWord];
+        //             }
+        //         }
                 
-                console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
-                startSpellingCycle(fieldToSpell, config); 
-                cumulativeTranscript = newCumulativeTranscript;
-                previousNewCumulativeTranscript = newCumulativeTranscript;
-                return; 
-            }
+        //         console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ: ${fieldToSpell}`);
+        //         startSpellingCycle(fieldToSpell, config); 
+        //         cumulativeTranscript = newCumulativeTranscript;
+        //         previousNewCumulativeTranscript = newCumulativeTranscript;
+        //         return; 
+        //     }
             
-            else if (keywordMap[word]) {
-                const fieldKey = keywordMap[word];
+        //     else if (keywordMap[word]) {
+        //         const fieldKey = keywordMap[word];
                 
-                if (fieldKey === 'pause') {
-                    // Si 'pause' est détecté, on désactive l'entité en cours et on ne fait rien d'autre.
-                    console.log("[ANALYSE] Détection du marqueur 'pause'. Arrêt de la capture d'entité.");
-                    currentEntity = null;
-                    // On s'assure de ne pas le traiter comme une entité normale
-                    capturedEntities['pause'] = 'detected'; 
-                } else {
-                    currentEntity = keywordMap[word];
-                    capturedEntities[currentEntity] = 'not detected'; 
-                    newEntities[currentEntity] = []; 
-                    entitiesWordCount = 0;
-                    resetEntityTimeout(); // <<< DÉCLENCHEMENT N°1 : Démarre le minuteur
-                }
+        //         if (fieldKey === 'pause') {
+        //             // Si 'pause' est détecté, on désactive l'entité en cours et on ne fait rien d'autre.
+        //             console.log("[ANALYSE] Détection du marqueur 'pause'. Arrêt de la capture d'entité.");
+        //             currentEntity = null;
+        //             // On s'assure de ne pas le traiter comme une entité normale
+        //             capturedEntities['pause'] = 'detected'; 
+        //         } else {
+        //             currentEntity = keywordMap[word];
+        //             capturedEntities[currentEntity] = 'not detected'; 
+        //             newEntities[currentEntity] = []; 
+        //             entitiesWordCount = 0;
+        //             resetEntityTimeout(); // <<< DÉCLENCHEMENT N°1 : Démarre le minuteur
+        //         }
                 
-            }
-            else if (currentEntity) {
-                newEntities[currentEntity].push(word);
-                entitiesWordCount++;
-                if (entitiesWordCount >= 4) { 
-                    currentEntity = null;
-                }
-                resetEntityTimeout(); // <<< DÉCLENCHEMENT N°2 : Réinitialise le minuteur
-            }
-        }
+        //     }
+        //     else if (currentEntity) {
+        //         newEntities[currentEntity].push(word);
+        //         entitiesWordCount++;
+        //         if (entitiesWordCount >= 4) { 
+        //             currentEntity = null;
+        //         }
+        //         resetEntityTimeout(); // <<< DÉCLENCHEMENT N°2 : Réinitialise le minuteur
+        //     }
+        // }
         
 
 
 
 
-        entitiesKeysEnglish.forEach(key => {
-            if (newEntities[translate(key)].length > 0) {
-                capturedEntities[translate(key)] = newEntities[translate(key)].join(' ');
-                console.log('\n\n ---------------- debug capturedEntities -------- key', key, ',capturedEntities[translate(key)]=',capturedEntities[translate(key)])
-                entitiesDetectedCount++;
-                newCumulativeTranscript += ' ' + translate(key) + ' ' + capturedEntities[translate(key)] + ' pause ';
-            }
-        });
+        // entitiesKeysEnglish.forEach(key => {
+        //     if (newEntities[translate(key)].length > 0) {
+        //         capturedEntities[translate(key)] = newEntities[translate(key)].join(' ');
+        //         console.log('\n\n ---------------- debug capturedEntities -------- key', key, ',capturedEntities[translate(key)]=',capturedEntities[translate(key)])
+        //         entitiesDetectedCount++;
+        //         newCumulativeTranscript += ' ' + translate(key) + ' ' + capturedEntities[translate(key)] + ' pause ';
+        //     }
+        // });
 
-        cumulativeTranscript = newCumulativeTranscript;
-        previousNewCumulativeTranscript = newCumulativeTranscript;
+        // cumulativeTranscript = newCumulativeTranscript;
+        // previousNewCumulativeTranscript = newCumulativeTranscript;
 
-        if (entitiesDetectedCount > 0) {
-            document.getElementById('stt-result-display').textContent = `✅ ${entitiesDetectedCount} champs mis à jour. (Continuez ou faites une pause)`;
-        } else {
-            document.getElementById('stt-result-display').textContent = `🔍 Analyse en cours. Transcript: "${transcript}"`;
-        }
+        // if (entitiesDetectedCount > 0) {
+        //     document.getElementById('stt-result-display').textContent = `✅ ${entitiesDetectedCount} champs mis à jour. (Continuez ou faites une pause)`;
+        // } else {
+        //     document.getElementById('stt-result-display').textContent = `🔍 Analyse en cours. Transcript: "${transcript}"`;
+        // }
         
 
 
-        if (validationSignal.includes(words[words.length - 1]) ) {
+        // if (validationSignal.includes(words[words.length - 1]) ) {
 
-            console.log('\n\n\n\n #######################-----------   debug validationSignal ----------###############' , words[words.length - 1], capturedEntities , capturedEntities[translate('firstname')],capturedEntities[translate('question')], newEntities,'\n\n\n\n')
-        }
+        //     console.log('\n\n\n\n #######################-----------   debug validationSignal ----------###############' , words[words.length - 1], capturedEntities , capturedEntities[translate('firstname')],capturedEntities[translate('question')], newEntities,'\n\n\n\n')
+        // }
 
 
 
@@ -2220,6 +2258,9 @@ const SpeechRecognitionUI = (function() {
 
 
         updateEntityUI();
+
+
+
     }
 
     
@@ -2777,27 +2818,17 @@ const SpeechRecognitionUI = (function() {
             
         }
 
-
         // 2. Gestion des Sliders (Appel de la nouvelle fonction)
         modal.querySelector('#backgroundVoice-volume').addEventListener('input', handleTtsParameterChange);
         modal.querySelector('#backgroundVoice-rate').addEventListener('input', handleTtsParameterChange);
         modal.querySelector('#backgroundVoice-pitch').addEventListener('input', handleTtsParameterChange);
 
 
-
-
-
-
-
-
-
-
-
-
-
         // Événements STT
         modal.querySelector('#record-voice-button').addEventListener('click', () => toggleSpeechRecognition('continue') );
         modal.querySelector('#erase-and-record-voice-button').addEventListener('click', () => toggleSpeechRecognition('erase') );
+
+
         modal.querySelector('#stop-voice-button').addEventListener('click', arreterEcouteAction ); 
         
         // Fermeture
@@ -3169,6 +3200,20 @@ const SpeechRecognitionUI = (function() {
 
         } else {
 
+            if(config && config === 'start') {
+                console.log('\n\n\n ----- debug start showUI --------', document.getElementById('input-form-firstName').value, document.getElementById('input-form-lastName').value )
+                if (document.getElementById('input-form-firstName').value != '') {
+                    capturedEntities[translate('firstname')] = document.getElementById('input-form-firstName').value;
+                    // console.log('\n\n\n ----- debug start showUI --------', document.getElementById('input-form-firstName').value )
+
+                }
+                if (document.getElementById('input-form-lastName').value != '') {
+                    capturedEntities[translate('lastname')] = document.getElementById('input-form-lastName').value;
+                    // console.log('\n\n\n ----- debug start showUI --------',  document.getElementById('input-form-lastName').value )
+                }
+                updateEntityUI();
+            }
+
 
             if (mode === 'erase') {
                 // Efface toutes les entités capturées (utile pour le bouton "Tout effacer & Écouter")
@@ -3280,15 +3325,16 @@ const SpeechRecognitionUI = (function() {
     function getCapturedData() {
         const finalData = {};
         
-        for (const field in capturedEntities) {
-            const value = capturedEntities[field].trim();
+        for (const field in capturedEntitiesEnglish) {
+            const value = capturedEntitiesEnglish[field].trim();
             
             // On ne retourne que les champs qui contiennent une valeur valide
             if (value && value !== 'not detected') {
                 finalData[field] = value;
             }
+        // console.log("--- getCapturedData DONNÉES FINALES CAPTURÉES ---", field, value);
+
         }
-        
         return finalData;
     }
 
@@ -3308,6 +3354,7 @@ const SpeechRecognitionUI = (function() {
         overlay.style.display = 'flex';
 
         updateEntityUI(config);
+        
 
         toggleSpeechRecognition(); 
 
@@ -3315,6 +3362,7 @@ const SpeechRecognitionUI = (function() {
 
     function hideUI() {
         const overlay = document.getElementById('stt-only-overlay');
+
 
         arreterEcouteAction(); 
 
@@ -3482,6 +3530,74 @@ export function speakTextfromSliderParams(text) {
 
 
 
+/**
+ * Génère des alternatives orthographiques basées sur des confusions phonétiques courantes.
+ * Retourne une liste vide si aucune alternative n'est trouvée.
+ * @param {string} word - Le mot transcrit (potentiellement erroné).
+ * @returns {Array<string>} Une liste d'alternatives générées (ou une liste vide si aucune).
+ */
+export function generatePhoneticAlternatives(word) {
+    
+    const generatedAlternatives = new Set(); 
+    const wordLower = word.toLowerCase();
+
+
+    // =========================================================================
+    // 0. NOUVELLE RÈGLE : Regrouper les mots (enlever les espaces et les traits d'union)
+    // =========================================================================
+    
+    // Remplace les espaces (\s) et les tirets (-) par une chaîne vide
+    const noSpacesAlternative = wordLower.replace(/[\s-]/g, '');
+
+    if (noSpacesAlternative !== wordLower) {
+        generatedAlternatives.add(noSpacesAlternative);
+        console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
+    }
+
+
+    // =========================================================================
+    // 1. Cas ciblé existant : [C]e[s][C] -> [C]e[C] (le cas de 'dumesnil' -> 'dumenil')
+    // ===
+    // Regex: (.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)
+    const regexES = /(.*)([bcdfghjklmnpqrstvwxyz])(e|i)s([bcdfghjklmnpqrstvwxyz])(.*)/gi;
+
+    wordLower.replace(regexES, (match, prefix, c1, vowel, c2, suffix) => {
+        
+        // Règle 1: Remplacer 'es' par 'e' (sans accent)
+        if (vowel === 'e') {
+            const alternative = `${prefix}${c1}e${c2}${suffix}`;
+            if (alternative !== wordLower) {
+                generatedAlternatives.add(alternative);
+
+                const noSpacesAlternative = alternative.replace(/[\s-]/g, '');
+                if (noSpacesAlternative !== alternative) {
+                    generatedAlternatives.add(noSpacesAlternative);
+                    console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
+                }
+
+            }
+        }
+        
+        // Règle 2: Remplacer 'is' par 'i'
+        else if (vowel === 'i') {
+            const alternative = `${prefix}${c1}i${c2}${suffix}`;
+            if (alternative !== wordLower) {
+                generatedAlternatives.add(alternative);
+
+                const noSpacesAlternative = alternative.replace(/[\s-]/g, '');
+                if (noSpacesAlternative !== alternative) {
+                    generatedAlternatives.add(noSpacesAlternative);
+                    console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
+                }
+
+            }
+        }
+    });
+
+    // --- LOGIQUE DE RETOUR MODIFIÉE ---
+    // Retourne la liste des alternatives (ex: ['dumenil']) ou une liste vide si size = 0.
+    return Array.from(generatedAlternatives);
+}
 
 
 /**

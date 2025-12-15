@@ -774,7 +774,7 @@ function moveDownSearchModal() {
  */
 export function openSearchModal(firstName = null, lastName = null) {
 
-    console.log('\n\n -----------------   debug openSearchModal ---------------\n')
+    // console.log('\n\n -----------------   debug openSearchModal ---------------\n')
     let isCallFromInit = false;
     if (firstName && lastName && firstName != '' && lastName != '') {
         isCallFromInit = true;

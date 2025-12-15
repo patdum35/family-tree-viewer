@@ -344,10 +344,6 @@ window.i18n = {
         window.applyTextDefinitions();
       }
 
-
-
-
-
       
       // Sauvegarder la préférence
       localStorage.setItem('preferredLanguage', lang);
@@ -355,7 +351,7 @@ window.i18n = {
       // Créer variable globale
       window.CURRENT_LANGUAGE = lang;
 
-
+      sessionStorage.setItem('restartVoiceSelect', '1');
       window.location.reload();
     }
   },

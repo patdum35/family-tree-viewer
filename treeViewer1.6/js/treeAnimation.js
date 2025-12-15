@@ -351,7 +351,7 @@ export async function testRealConnectivity(isEndFlagRequested = false) {
             // selectVoice();
         }
         state.isOnLine = true;
-        console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
+        // console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
         if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
         
         return true;
@@ -368,7 +368,7 @@ export async function testRealConnectivity(isEndFlagRequested = false) {
             // selectVoice();
         }
         state.isOnLine = false;
-        console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
+        // console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
         if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
         return false;
     }

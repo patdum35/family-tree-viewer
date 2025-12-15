@@ -28,7 +28,7 @@ import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 import { enableBackground } from './backgroundManager.js';
-import { loadVoices, speakText } from './voiceSelect.js';
+import { loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
 
 import { 
     displayPersonDetails, 
@@ -238,6 +238,41 @@ export const state = {
 };
 
 export { geocodeLocation };
+
+
+const i18n = {
+    'fr': {
+        hasBeenFound: ' a été trouvé',
+        hasNotBeenFound: ' n\'a pas été trouvé',
+        haveBeenFound: ' ont été trouvés',
+        severalPersonWithName: ' plusieurs personnes du nom de ',
+    },
+    'en': {
+        hasBeenFound: ' has been found',
+        hasNotBeenFound: ' has not been found',
+        haveBeenFound: ' have been found',
+        severalPersonWithName: ' several people with the name ',
+    },
+    'es': {
+        hasBeenFound: ' ha sido encontrado',
+        hasNotBeenFound: ' no ha sido encontrado',
+        haveBeenFound: ' han sido encontrados',
+        severalPersonWithName: ' varias personas con el nombre ',
+    },
+    'hu': {
+        hasBeenFound: ' meg lett találva',
+        hasNotBeenFound: ' nem lett megtalálva',
+        haveBeenFound: ' meg lettek találva',
+        severalPersonWithName: ' több személy ezzel a névvel ',
+    }
+};
+
+// Rendre la fonction de traduction accessible au module STT
+function translate(key) {
+    const lang = window.CURRENT_LANGUAGE || 'fr';
+    return i18n[lang][key] || i18n['fr'][key]; // Fallback au français
+}
+
 
 window.toggleAnimationPause = toggleAnimationPause;
 
@@ -962,7 +997,7 @@ function initialize() {
     state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
     state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
 
-    console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
+    // console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
 
 
     if (state.selectedVoiceName != null) { loadVoices();}
@@ -1068,17 +1103,17 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
     state.lastName = document.getElementById('input-form-lastName').value;
 
         
-    console.log('\n\n --------------- debug speechCapturedData', speechCapturedData); 
+    // console.log('\n\n --------------- debug speechCapturedData', speechCapturedData); 
     if (speechCapturedData && state.initialSpeechReconitionIsLaunched) {
-        if (speechCapturedData.prenom) { 
-            state.firstName = speechCapturedData.prenom ;
-            localStorage.setItem('firstName', speechCapturedData.prenom );
-            document.getElementById('input-form-firstName').value = speechCapturedData.prenom;
+        if (speechCapturedData.firstname) { 
+            state.firstName = speechCapturedData.firstname ;
+            localStorage.setItem('firstName', speechCapturedData.firstname );
+            document.getElementById('input-form-firstName').value = speechCapturedData.firstname;
         }
-        if (speechCapturedData.nom) { 
-            state.lastName = speechCapturedData.nom ;
-            localStorage.setItem('lastName', speechCapturedData.nom );
-            document.getElementById('input-form-lastName').value = speechCapturedData.nom;
+        if (speechCapturedData.lastname) { 
+            state.lastName = speechCapturedData.lastname ;
+            localStorage.setItem('lastName', speechCapturedData.lastname );
+            document.getElementById('input-form-lastName').value = speechCapturedData.lastname;
         }
     }
 
@@ -1839,14 +1874,41 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
     if (state.firstName != '' && state.lastName!= '') {
         openSearchModal(state.firstName,  state.lastName );
+
+        if (window.currentSearchResults.length == 0) {
+            // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
+            let othernames = generatePhoneticAlternatives(state.lastName);
+            let lastAlternativeNameFound = null;
+            // console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
+            if (othernames.length > 0) {
+                othernames.forEach(name => { 
+                    lastAlternativeNameFound = name;
+                    openSearchModal(state.firstName,  name );
+                    // console.log('\n\n\n ------------   debug : personne trouvée ??? ---------', window.currentSearchResults.length, window.currentSearchResults);
+                    if (window.currentSearchResults.length > 0 ) {
+                        state.lastName = name;
+                        localStorage.setItem('lastName', name );
+                        document.getElementById('input-form-lastName').value = name;
+                        return;
+                    }
+                });
+            }
+        }
+
+
+
         if (window.currentSearchResults.length === 1) {
-           personInit = window.currentSearchResults[0];
-           if (state.initialSpeechReconitionIsLaunched) {
-                speakText(state.firstName + ' ' + state.lastName + ' a été trouvée')
-           }
-        } else {
-           if (state.initialSpeechReconitionIsLaunched) {
-                speakText(state.firstName + ' ' + state.lastName + ' n\'a pas été trouvée')            
+            personInit = window.currentSearchResults[0];
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName + translate('hasBeenFound'));
+            }
+        } else if (window.currentSearchResults.length === 0)  {
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName  + translate('hasNotBeenFound')) ;        
+            }
+        } else if (window.currentSearchResults.length > 1)  {
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(translate('severalPersonWithName') + state.firstName + ' ' + state.lastName  + translate('haveBeenFound')) ; 
            }
         }
         state.initialSpeechReconitionIsLaunched = false;
