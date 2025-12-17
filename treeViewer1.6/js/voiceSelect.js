@@ -2284,8 +2284,19 @@ const SpeechRecognitionUI = (function() {
             
             if (!isSpellingMode) {
                 // document.getElementById('stt-interim-display').textContent = interimTranscript;
+
+                if (cumulativeTranscript.length > 10) {
+                    cumulativeTranscript = ' ' + cumulativeTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
+                }
+
                 document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
             }
+            if (isSpellingMode) {
+                if (state.isMobile) {
+                    window.speechSynthesis.cancel(); 
+                }   
+            }
+
         };
 
 
