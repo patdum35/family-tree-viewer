@@ -1415,7 +1415,7 @@ const SpeechRecognitionUI = (function() {
     // const LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés ';
     let LONG_PHRASE = null;
     if (window.CURRENT_LANGUAGE === 'fr') {
-        LONG_PHRASE = 'parler dans le micro par dessus cette voix, votre voix est analysée et des mots clé sont détectés cette voix de fond sonore sert à garder le micro ouvert pour éviter les arrêts et bip sonores intempestifs vous pouvez la couper en cliquant sur la roue et mettre le volume à zéro ';
+        LONG_PHRASE = 'parler dans le micro par dessus cette voix ;  votre voix est analysée et des mots clé sont détectés ;  cette voix de fond sonore sert à garder le micro ouvert,  pour éviter les arrêts et bip sonores intempestifs, vous pouvez la couper en cliquant sur la roue et mettre le volume à zéro ';
     } else if (window.CURRENT_LANGUAGE === 'en') {
         LONG_PHRASE = 'speak into the microphone over this voice, your voice is analyzed and keywords are detected this background voice is used to keep the microphone open to avoid unwanted stops and beeping sounds you can turn it off by clicking the gear and setting the volume to zero';
     } else if (window.CURRENT_LANGUAGE === 'es') {
