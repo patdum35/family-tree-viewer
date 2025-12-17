@@ -2451,7 +2451,7 @@ const SpeechRecognitionUI = (function() {
 
 
         // --- NOUVEAU : Récupération des valeurs stockées (ou par défaut) ---
-        const storedVolume = '0.008'; //getTtsSetting('voice_volume', '1.0');
+        const storedVolume = '0.005'; //getTtsSetting('voice_volume', '1.0');
         const storedRate   = '0.7'; //getTtsSetting('voice_rate', '1.0');
         const storedPitch  = '1.0'; //getTtsSetting('voice_pitch', '1.0');
 
