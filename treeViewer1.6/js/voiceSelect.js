@@ -1374,7 +1374,7 @@ const SpeechRecognitionUI = (function() {
     // Liste des entités canoniques
     // let entityKeys = []; //['commande', 'prenom', 'nom', 'lieux', 'profession'];
 
-    let entityKeys = [ 'firstname','lastname','place','occupation','date'];
+    let entityKeys = [ 'firstname','lastname','place','occupation','date', 'question'];
     let capturedEntities = entityKeys.reduce((acc, field) => {
         acc[translate(field)] = 'not detected';
         return acc;
@@ -1582,8 +1582,9 @@ const SpeechRecognitionUI = (function() {
     
     function stopSpellingCycle() {
         const finalValue = capturedEntities[targetSpellingField];
-        cumulativeTranscript =  cumulativeTranscript + ' ' + targetSpellingField + ' ' + capturedEntities[targetSpellingField] + ' pause ';
-        cumulativeTranscript = cumulativeTranscript.replaceAll(translate('letter'), '');
+        // cumulativeTranscript =  cumulativeTranscript + ' ' + targetSpellingField + ' ' + capturedEntities[targetSpellingField] + ' pause ';
+        // cumulativeTranscript = cumulativeTranscript.replaceAll(translate('letter'), '');
+        cumulativeTranscript = ' ';
 
         
         isSpellingMode = false;
@@ -1625,28 +1626,6 @@ const SpeechRecognitionUI = (function() {
 
 
 
-
-    /**
-     * Réinitialise le minuteur de timeout de l'entité active.
-     * Si le minuteur s'épuise, il désactive l'entité.
-     */
-    function resetEntityTimeout() {
-        // S'assurer que l'entité active est définie avant de démarrer un minuteur
-        if (!currentEntity) return;
-
-        // 1. Annuler tout minuteur existant
-        if (entityTimeoutTimer) {
-            clearTimeout(entityTimeoutTimer);
-        }
-
-        // 2. Démarrer un nouveau minuteur
-        entityTimeoutTimer = setTimeout(() => {
-            console.log(`[TIMEOUT] Entité '${currentEntity}' désactivée après ${ENTITY_TIMEOUT_MS / 1000}s de silence.`);
-            currentEntity = null; // Désactive l'entité en cours
-            entityTimeoutTimer = null;
-            cumulativeTranscript += ' pause ';
-        }, ENTITY_TIMEOUT_MS);
-    }
 
 
     //###################################################
@@ -1726,18 +1705,18 @@ const SpeechRecognitionUI = (function() {
             let localKey = key;
             if(key === 'non') { localKey = 'lastname';}
 
-            if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
-                // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected key word @@@@@@@', key,localKey,truncatedTranscriptForKey, index, '\n\n\n')
-                // capturedEntities[translate(localKey)] = truncatedTranscriptForKey.split(/\s+/).slice(1, -1).join(' '); // enlever le 1ier te le dernier mot 
-                const oldValue = capturedEntities[translate(localKey)];
-                capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier te le dernier mot 
-                if (oldValue!= undefined && oldValue!= 'not detected') { 
+            // let wordsKeyMinLength = 7;
 
-                    truncatedTranscript = truncatedTranscript.replaceAll(oldValue, capturedEntities[translate(localKey)]);
-                }
+            if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
+                capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier te le dernier mot 
+
+                cumulativeTranscript = ' ';
+                previousNewCumulativeTranscript = cumulativeTranscript;
+
                 updateEntityUI();
                 isKeyDetected = true;
                 KeyDetectedTab[localKey] = true;
+
             } else {
                KeyDetectedTab[key] = false; 
             }
@@ -1750,9 +1729,7 @@ const SpeechRecognitionUI = (function() {
             }
             
             
-            // if ( !isSpellDetected &&  (wordsKey[0] === translate(key)   ||  (key === 'lastname' && wordsKey[0] === 'non')  )  && (wordsKey[1] === translate('letter') && wordsKey[2] === translate('by') && wordsKey[3] === translate('letter')) ){                              
-            // if ( !isSpellDetected &&   wordsKey[wordIndex] === translate('letter') && wordsKey[wordIndex+1] === translate('by') && wordsKey[wordIndex+2] === translate('letter') ){                              
-            if ( !isSpellDetected &&   letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
+            if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
 
                 console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
                 capturedEntities[translate(localKey)] = '';
@@ -1762,8 +1739,9 @@ const SpeechRecognitionUI = (function() {
                 isSpellDetected = true;
                 return; 
             }
-
         })
+
+
 
         // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  launch load  @@@@@@@ key',KeyDetectedTab['firstname'], KeyDetectedTab['lastname'], 'firstname=',capturedEntities[translate('firstname')], 'lastname=',capturedEntities[translate('lastname')] , words,   transcript, 'cumulativeTranscript=', cumulativeTranscript,'\n\n\n')
 
@@ -2003,7 +1981,6 @@ const SpeechRecognitionUI = (function() {
                 const index = entityPart.indexOf(keyword);
                 if (index !== -1) {
                     const beforeKeyword = entityPart.substring(0, index).trim();
-                    const afterKeyword = entityPart.substring(index + keyword.length).trim();
                     minSize = Math.min(minSize, beforeKeyword.length);
                     if (minSize === beforeKeyword.length) { beforeKeywordFinal = beforeKeyword; }
                     // console.log('\n ------------  debug  entityPart , keyword=', keyword, beforeKeyword, 'after=', afterKeyword)
@@ -2011,13 +1988,9 @@ const SpeechRecognitionUI = (function() {
             }
             if (beforeKeywordFinal != null && beforeKeywordFinal != ' '  && beforeKeywordFinal != '') { entityWords = beforeKeywordFinal.split(/\s+/)}
 
-            newCumulativeTranscript = translate(detectedAction) + ' ' + beforeKeywordFinal + ' ' + words[words.length - 1]  + ' ';// truncatedTranscript
-
             // console.log('\n ------------  debug  final entityPart =',  entityWords, ',beforeKeywordFinal=',beforeKeywordFinal, ', newCumulativeTranscript=' ,newCumulativeTranscript)
 
 
-            // let isFirstNameAvailable = false; let isLastNameAvailable = false; let isPlaceAvailable = false; let isOccupationAvailable = false; let isDateAvailable = false;
-            // let entityKeys = [ 'firstname','lastname','place','occupation','date'];
             let isEntityKeyAvailable = [];
             entityKeys.forEach(key => { isEntityKeyAvailable[key] = false; });
 
@@ -2030,20 +2003,14 @@ const SpeechRecognitionUI = (function() {
                     // Par convention, le premier mot après l'action est le PRÉNOM
                     if (!KeyDetectedTab['firstname']) { capturedEntities[translate('firstname')] = entityWords[0]; }
                     isEntityKeyAvailable['firstname'] = true;
-                    cumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
-                    newCumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
                     
                     // Tous les mots restants sont considérés comme le NOM
                     if (!KeyDetectedTab['lastname']) {capturedEntities[translate('lastname')] = entityWords.slice(1,4).join(' ');}
                     isEntityKeyAvailable['lastname'] = true;
-                    cumulativeTranscript += ' ' + translate('lastname') + ' ' +  capturedEntities[translate('lastname')] + ' pause ';
-                    newCumulativeTranscript += ' ' + translate('lastname') + ' ' +  capturedEntities[translate('lastname')] + ' pause ';
                 } else if (entityWords.length === 1) {
                     // S'il n'y a qu'un seul mot (ex: 'chercher Henri GO'), on le met en Nom par défaut ou on gère l'erreur
                     if (!KeyDetectedTab['firstname']) { capturedEntities[translate('firstname')] = entityWords[0]; }
                     isEntityKeyAvailable['firstname'] = true; 
-                    cumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
-                    newCumulativeTranscript += ' ' + translate('firstname') + ' ' +  capturedEntities[translate('firstname')] + ' pause ';
                 }
             }
 
@@ -2052,7 +2019,6 @@ const SpeechRecognitionUI = (function() {
             entityKeys.forEach(key => {
                 if (capturedEntities[translate(key)] && capturedEntities[translate(key)] != 'not detected' && capturedEntities[translate(key)] != null) {
                     isEntityKeyAvailable[key] = true ; 
-                    newCumulativeTranscript += ' ' + translate(key) + ' ' + capturedEntities[translate(key)] + ' pause ';
                 }
             });
 
@@ -2067,17 +2033,17 @@ const SpeechRecognitionUI = (function() {
                 await launchSimpleAction(detectedAction);
             }
 
-            cumulativeTranscript = newCumulativeTranscript;
-            previousNewCumulativeTranscript = newCumulativeTranscript;
-
             console.log ('\n\n\n\n\n\n ++++++++++++++++++++     Final texte === ', cumulativeTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+
+            cumulativeTranscript = ' ';
+            previousNewCumulativeTranscript = cumulativeTranscript;
 
            return; 
         }
 
         // si on a une clé question dans le capturedEntities et une clé de validation sur le dernier mot,  (mais pas de clé 'Question' dans le texte) : exemple texte= ' go' et capturedEntities[translate('question')] ='quel age a '
         else if ( (capturedEntities[translate('question')] != 'not detected') && (capturedEntities[translate('question')] != undefined) && validationSignal.includes(words[words.length - 1])) {
-            console.log(`---------[LOG STT] Détection du mode avec question  l'expression: "${translate(detectedAction).toUpperCase()}"`, previousFullTranscript, ',',fullTranscript, 'truncatedTranscript',truncatedTranscript,',isNewCommandToBeExecuted =',isNewCommandToBeExecuted, isNewCommandToBeExecuted2, ',capturedEntities=', capturedEntities, 'isActionWithoutFirstName', isActionWithoutFirstName, 'detectedAction=',detectedAction, 'actionKeywordsWithoutFirstName=' ,actionKeywordsWithoutFirstName);
+            console.log(`---------[LOG STT] Détection du mode avec question  l'expression: "${capturedEntities[translate('question')]}"`);//, previousFullTranscript, ',',fullTranscript, 'truncatedTranscript',truncatedTranscript,',isNewCommandToBeExecuted =',isNewCommandToBeExecuted, isNewCommandToBeExecuted2, ',capturedEntities=', capturedEntities, 'isActionWithoutFirstName', isActionWithoutFirstName, 'detectedAction=',detectedAction, 'actionKeywordsWithoutFirstName=' ,actionKeywordsWithoutFirstName);
 
             let isDetectedQuestion = false;
             let detectedQuestion = null;
@@ -2106,10 +2072,11 @@ const SpeechRecognitionUI = (function() {
                 if(isDetectedQuestion) {await launchSimpleAction(detectedQuestion);}
             }
 
-            cumulativeTranscript = newCumulativeTranscript;
-            previousNewCumulativeTranscript = newCumulativeTranscript;
-
             console.log ('\n\n\n\n\n\n ++++++++++++++++++++     Final texte  with only validate === ', cumulativeTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+
+            cumulativeTranscript = ' ';
+            previousNewCumulativeTranscript = cumulativeTranscript;
+
 
             return;
         } 
@@ -2117,8 +2084,11 @@ const SpeechRecognitionUI = (function() {
         // FIN DU MODE QUESTION
         // =========================================================
 
-        updateEntityUI();
 
+        console.log ('\n\n\n\n\n\n ++++++++++++++++++++      texte  libre === ', cumulativeTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+        if (cumulativeTranscript.length > 10) {
+            cumulativeTranscript = ' ' + cumulativeTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
+        }
     }
 
     
