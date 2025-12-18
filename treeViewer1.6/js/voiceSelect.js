@@ -1577,9 +1577,9 @@ const SpeechRecognitionUI = (function() {
         } else {
             toggleSpeechRecognition(); 
 
-            if (state.isMobile) {
-                window.speechSynthesis.cancel(); 
-            } 
+            // if (state.isMobile) {
+            //     window.speechSynthesis.cancel(); 
+            // } 
         }
 
     }
@@ -1852,7 +1852,7 @@ const SpeechRecognitionUI = (function() {
 
                 // hideUI();
                 if (!isRecognitionActive) { recognition.start(); }
-                if (state.isMobile) {
+                if (state.isMobile && !isSpellingMode) {
                     setTimeout(() => {
                         stopSpeechRecognition = false;
                         speakTextfromSliderParams(SUPER_LONG_TEXT);
@@ -1892,7 +1892,7 @@ const SpeechRecognitionUI = (function() {
                 console.log('\n\n\n ------------   debug words after fail: ',  cumulativeTranscript);
 
                 if (!isRecognitionActive) { recognition.start(); }
-                if (state.isMobile) {
+                if (state.isMobile && !isSpellingMode) {
                     setTimeout(() => {
                         stopSpeechRecognition = false;
                         speakTextfromSliderParams(SUPER_LONG_TEXT);
@@ -1934,8 +1934,7 @@ const SpeechRecognitionUI = (function() {
                 await speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
             }
             if (!isRecognitionActive) { recognition.start(); }
-            if (state.isMobile) {
-
+            if (state.isMobile && !isSpellingMode) {
                 setTimeout(() => {
                     stopSpeechRecognition = false;
                     speakTextfromSliderParams(SUPER_LONG_TEXT);
@@ -2167,9 +2166,9 @@ const SpeechRecognitionUI = (function() {
                 if (isSpellingMode) {
                     
 
-                    if (state.isMobile) {
-                        window.speechSynthesis.cancel(); 
-                    } 
+                    // if (state.isMobile) {
+                    //     window.speechSynthesis.cancel(); 
+                    // } 
 
                     const recognizedSegment = transcriptSegment.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase(); 
                     
@@ -2283,19 +2282,19 @@ const SpeechRecognitionUI = (function() {
             }
             
             if (!isSpellingMode) {
-                // document.getElementById('stt-interim-display').textContent = interimTranscript;
-
+                // document.getElementById('stt-interim-display').textContent = interimTranscript
                 if (cumulativeTranscript.length > 10) {
                     cumulativeTranscript = ' ' + cumulativeTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
                 }
+                if (interimTranscript.length > 10) {
+                    interimTranscript = ' ' + interimTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
+                    cumulativeTranscript = '';
 
+                }
                 document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
             }
-            if (isSpellingMode) {
-                if (state.isMobile) {
-                    window.speechSynthesis.cancel(); 
-                }   
-            }
+            // console.log ('\n\n\n\n\n\n ++++++++++++++++++++     texte in progress === ', cumulativeTranscript + interimTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+
 
         };
 
@@ -2320,7 +2319,7 @@ const SpeechRecognitionUI = (function() {
                     try {
 
                         if (!isRecognitionActive) { recognition.start(); }
-                        if (state.isMobile && !stopSpeechRecognition) {
+                        if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
                             speakTextfromSliderParams(SUPER_LONG_TEXT);
                         }                        
                         console.log("[LOG STT] BASCULE RÉUSSIE: Mode Libre -> Mode Épellation Stricte 🔄");
@@ -2340,7 +2339,7 @@ const SpeechRecognitionUI = (function() {
                 setTimeout(() => {
                     try {
                         if (!isRecognitionActive) { recognition.start(); }
-                        if (state.isMobile && !stopSpeechRecognition) {
+                        if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
                             speakTextfromSliderParams(SUPER_LONG_TEXT);
                         }                        
                         console.log("[LOG STT] RELANCE: Mode Épellation relancé après capture/silence. 🔊");
@@ -2368,7 +2367,7 @@ const SpeechRecognitionUI = (function() {
                         if (isRecording) { 
                             try {
                                 if (!isRecognitionActive) { recognition.start(); }
-                                if (state.isMobile && !stopSpeechRecognition) {
+                                if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
                                     speakTextfromSliderParams(SUPER_LONG_TEXT);
                                 }                                
                             } catch(e) {
@@ -2442,7 +2441,7 @@ const SpeechRecognitionUI = (function() {
 
 
         // --- NOUVEAU : Récupération des valeurs stockées (ou par défaut) ---
-        const storedVolume = '0.003'; //getTtsSetting('voice_volume', '1.0');
+        const storedVolume = '0.002'; //getTtsSetting('voice_volume', '1.0');
         const storedRate   = '0.7'; //getTtsSetting('voice_rate', '1.0');
         const storedPitch  = '1.0'; //getTtsSetting('voice_pitch', '1.0');
 
@@ -2711,9 +2710,9 @@ const SpeechRecognitionUI = (function() {
                 valueSpan.textContent = e.target.value;
             }
 
-
-
-            speakTextfromSliderParams(SUPER_LONG_TEXT);
+            if (state.isMobile && !isSpellingMode) {
+                speakTextfromSliderParams(SUPER_LONG_TEXT);
+            }
 
 
             
@@ -3182,7 +3181,7 @@ const SpeechRecognitionUI = (function() {
                     }, 2000);
 
                 }
-                if (state.isMobile && !stopSpeechRecognition) {
+                if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
                 // if (true) {
                     speakTextfromSliderParams(SUPER_LONG_TEXT);
                     // speakText(SUPER_LONG_TEXT, 0.008, 0.6, 1.3);
@@ -3256,6 +3255,12 @@ const SpeechRecognitionUI = (function() {
 
     function showUI(config = null) {
 
+        
+        ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
+        // state.isMobile = true;
+        ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
+
+
         const overlay = createUIStructure();
         // if (!recognition) 
         cumulativeTranscript = ''
@@ -3271,6 +3276,11 @@ const SpeechRecognitionUI = (function() {
         
 
         toggleSpeechRecognition(); 
+
+
+
+
+
 
     }
 
@@ -3317,37 +3327,6 @@ const SpeechRecognitionUI = (function() {
 
 
 
-// /**
-//  * Initialise le moteur de synthèse vocale pour éliminer le "glitch" ou délai initial.
-//  * À appeler une seule fois au chargement de l'application.
-//  */
-// export function initializeSpeechEngine() {
-//     // 1. Annuler la parole précédente au cas où
-//     window.speechSynthesis.cancel(); 
-
-//     // 2. Créer une Utterance silencieuse
-//     const utterance = new SpeechSynthesisUtterance(' '); // Un seul espace
-
-//     // 3. Tenter de trouver une voix française par défaut pour le warm-up
-//     const voices = window.speechSynthesis.getVoices();
-//     const frenchVoice = voices.find(v => v.lang.startsWith('fr') || v.default);
-    
-//     if (frenchVoice) {
-//         utterance.voice = frenchVoice;
-//         utterance.lang = frenchVoice.lang;
-//     }
-
-//     // 4. Lancer la parole et l'annuler immédiatement
-//     try {
-//         window.speechSynthesis.speak(utterance);
-//         // Annuler immédiatement après le démarrage de la queue. 
-//         // Laisse le temps au moteur de s'initialiser sans prononcer le son.
-//         window.speechSynthesis.cancel();
-//         console.log("Moteur de synthèse vocale initialisé (Warm-up effectué).");
-//     } catch (error) {
-//         console.warn("Échec de l'initialisation du moteur de parole (probablement non supporté ou non autorisé).", error);
-//     }
-// }
 
 
 /**
