@@ -1497,6 +1497,10 @@ const SpeechRecognitionUI = (function() {
         acc[translate(field)] = 'not detected';
         return acc;
     }, {});
+    capturedEntities[translate('firstname')] = '';
+    capturedEntities[translate('lastname')] = '';
+    capturedEntities[translate('question')] = translate('whenBorn');
+
 
 
 
@@ -1820,7 +1824,8 @@ const SpeechRecognitionUI = (function() {
         let isKeyDetected = false;
         let isSpellDetected = false;
         let KeyDetectedTab = [];
-        ['firstname','lastname', 'non','place','occupation','date', 'question'].forEach( key=> {
+        const entityList = ['firstname','lastname', 'non','place','occupation','date', 'question'];
+        entityList.forEach( key=> {
             const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
             const truncatedTranscriptForKey = fullTranscript.substring(index);
             const wordsKey = truncatedTranscriptForKey.split(/\s+/).filter(w => w.length > 0);
@@ -1837,6 +1842,9 @@ const SpeechRecognitionUI = (function() {
                 capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier te le dernier mot 
 
                 cumulativeTranscript = ' ';
+                // if (entityList.includes(wordsKey[wordsKey.length - 1])) {
+                //     cumulativeTranscript = ' ' + wordsKey[wordsKey.length - 1] + ' ';
+                // }
                 previousNewCumulativeTranscript = cumulativeTranscript;
 
                 updateEntityUI();
@@ -1876,8 +1884,8 @@ const SpeechRecognitionUI = (function() {
             
             // si double validate
             if (validationSignal.includes(words[words.length - 1]) && validationSignal.includes(words[words.length - 2]) ) {
-                if (((capturedEntities[translate('lastname')]!= undefined) && capturedEntities[translate('lastname')]!= 'not detected') 
-                || (capturedEntities[translate('firstname')]!= undefined && capturedEntities[translate('firstname')]!= 'not detected')) {
+                if ((capturedEntities[translate('lastname')]!= undefined && capturedEntities[translate('lastname')]!= 'not detected' && capturedEntities[translate('lastname')]!= '') 
+                || (capturedEntities[translate('firstname')]!= undefined && capturedEntities[translate('firstname')]!= 'not detected' && capturedEntities[translate('firstname')]!= '')) {
 
                     capturedEntitiesEnglish['firstname'] = capturedEntities[translate('firstname')];
                     capturedEntitiesEnglish['lastname'] = capturedEntities[translate('lastname')];       
@@ -2148,7 +2156,7 @@ const SpeechRecognitionUI = (function() {
             // console.log('\n ------------  debug newCumulativeTranscript=' ,newCumulativeTranscript)
 
             entityKeys.forEach(key => {
-                if (capturedEntities[translate(key)] && capturedEntities[translate(key)] != 'not detected' && capturedEntities[translate(key)] != null) {
+                if (capturedEntities[translate(key)] && capturedEntities[translate(key)] != 'not detected' && capturedEntities[translate(key)] != null && capturedEntities[translate(key)] != '' ) {
                     isEntityKeyAvailable[key] = true ; 
                 }
             });
@@ -2178,7 +2186,7 @@ const SpeechRecognitionUI = (function() {
 
             let isDetectedQuestion = false;
             let detectedQuestion = null;
-            if (capturedEntities[translate('firstname')] != 'not detected' && capturedEntities[translate('lastname')] != 'not detected') {
+            if (capturedEntities[translate('firstname')] != 'not detected' && capturedEntities[translate('lastname')] != 'not detected' &&capturedEntities[translate('firstname')] != '' && capturedEntities[translate('lastname')] != '') {
 
                 actionKeywordsWithName.forEach(key => {
                     // console.log('\n\n\n -------------   debug detected action -------------- = ',key, translate(key), capturedEntities[translate('question')] )
@@ -3027,6 +3035,8 @@ const SpeechRecognitionUI = (function() {
                 acc[field] = 'not detected';
                 return acc;
             }, {});
+            capturedEntities[translate('firstname')] = '';
+            capturedEntities[translate('lastname')] = '';
         }
 
         listElement.innerHTML = ''; 
@@ -3284,6 +3294,12 @@ const SpeechRecognitionUI = (function() {
                     cumulativeTranscript = '';
                 });
 
+                capturedEntities[translate('firstname')] = '';
+                capturedEntities[translate('lastname')] = '';
+                if (localConfig != 'start') {
+                    capturedEntities[translate('question')] = translate('whenBorn');
+                }
+
                 updateEntityUI(); // Met à jour l'UI pour montrer que les champs sont vides
             }
 
@@ -3429,6 +3445,12 @@ const SpeechRecognitionUI = (function() {
             acc[field] = 'not detected';
             return acc;
         }, {});
+
+        capturedEntities[translate('firstname')] = '';
+        capturedEntities[translate('lastname')] = '';
+        capturedEntities[translate('question')] = translate('whenBorn');
+
+
 
 
         window.speechSynthesis.cancel(); 
