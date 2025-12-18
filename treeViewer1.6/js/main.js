@@ -2651,8 +2651,6 @@ export async function detectDeviceType() {
   state.isMobile = state.deviceInfo.isMobile;
   debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
 
-
-  state.isMobile = state.deviceInfo.isMobile;
   debugLog(`ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen}`, "info")
 
   const deviceType = await checkDevice();
@@ -2662,6 +2660,10 @@ export async function detectDeviceType() {
   const isAndroidTablet = navigator.userAgent.includes("Linux") && state.deviceInfo.hasTouchScreen;
   
   debugLog(`ℹ️  isAndroidTablet : ${isAndroidTablet}`, "info")
+
+  state.isMobile = state.deviceInfo.isMobile || isAndroidTablet;
+
+  debugLog(`ℹ️  isMobile final : ${state.isMobile}`, "info")
 
   state.deviceInfo.isIOS = isIOSDevice();
   state.isIOS = state.deviceInfo.isIOS;
