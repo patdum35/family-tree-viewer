@@ -1091,9 +1091,11 @@ const SpeechRecognitionUI = (function() {
             whoAreSiblingPast: 'qui étaient les freres et sœurs de',           
             whatIsHistorical: 'quel est le contexte historique de',
             whatIsHistoricalPast: 'quel etait le contexte historique de',
-            whatAreNotes : 'quelles sont les notes de',  
+            whatAreNotes : 'quelles sont les notes de', 
+
             whoAreYou : 'qui es-tu',
             whatIsYourName : 'quel est ton nom',
+            whatIsYourNameBis : 'comment t\'appelles-tu',
             whoCreatedYou : "qui t'a cree",            
             whatisTheUse : "a quoi sert tu", 
             whatisTheUseBis : "a quoi sert-tu", 
@@ -1129,6 +1131,33 @@ const SpeechRecognitionUI = (function() {
             cancel: "annuler",
             remove: "supprimer",
             back: "retour",
+            speelingEnded: "Épellation terminée. Valeur enregistrée:",
+            structuredModeDetected: "Mode structuré détecté. Question:",
+            spellingMode : "Mode Épellation (Champ",
+            spellingMode2: "Dites une ou plusieurs lettres, puis attendez la relance. Ou dites 'lettre A lettre B, ... \nDites annuler pour effacer la dernière lettre si erreur.  \nDites 'valider' pour terminer l'épellation.)",
+            spellingStopped: "Épellation interrompue par erreur critique. Redémarrez manuellement",
+            listeningInProgressStart: "Écoute en cours... Dites par exemple: \n- prénom Hugues valider \n- nom Capet valider \n- valider : pour entrer \nPour épeler un mot dites:\n- nom  lettre par lettre  c a p e t   valider",
+            listeningInProgress: "Écoute en cours... Dites par exemple: \n- qui es tu valider , ou \n- quel age a Hugues Capet valider  , ou \n- prénom Hugues valider nom Capet valider question quel age a valider . \n- Pour épeler un mot dites:\nnom  lettre par lettre  c a p e t   valider",
+            removed : "supprimé",
+            nothingToRemove: "Rien à effacer",
+            added: "Ajouté",
+            nextLetter: "Prochaine lettre",
+            recognized: "Reconnu",
+            notRecognized: "Caractère non reconnu/valide. Veuillez réessayer",
+            currentValue: "Valeur actuelle",
+            recognitionError: "Erreur de reconnaissance vocale. Veuillez réessayer",
+            errorStartingRecognition: "Erreur de démarrage de la reconnaissance vocale. Vérifiez les permissions du micro.",
+            thePerson: "la personne",
+            hasBeenFound: " a été trouvée ! Voici sa fiche",
+            hasNotBeenFound : " n'a pas été trouvée ! Ré-essayer",
+            iAmTreeViewer : "je suis 'Explore tes Origines', une appli pour visualiser les arbres généalogiques avec des animations",
+            myCreator: "mon créateur est",
+            iAmUseFor: "je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz",
+
+            speechRecognitionResult: "Résultat de la Reconnaissance Vocale:", 
+            accessByVoice: "accéssible par la voix (éditable)", 
+            speechRecognitionTitle:"Saisie Vocale ",
+
         },
         'en': {
             btnRecord: 'Speak',
@@ -1168,6 +1197,7 @@ const SpeechRecognitionUI = (function() {
 
             whoAreYou : 'who are you',
             whatIsYourName : 'what is your name',
+            whatIsYourNameBis : 'what is your name',
             whoCreatedYou : 'who created you',
             whatisTheUse : 'what are you used for',
             whatisTheUseBis : 'what are you used for',
@@ -1201,6 +1231,36 @@ const SpeechRecognitionUI = (function() {
             cancel: "cancel",
             remove: "remove",
             back: "back",
+
+            speelingEnded: "Spelling finished. Value saved:",
+            structuredModeDetected: "Structured mode detected. Question:",
+            spellingMode: "Spelling Mode (Field",
+            spellingMode2: "Say one or more letters, then wait for the prompt. Or say 'letter A letter B, ...'\nSay 'cancel' to remove the last letter if there is a mistake.\nSay 'validate' to finish spelling.)",
+
+            spellingStopped: "Spelling interrupted due to a critical error. Please restart manually",
+            listeningInProgressStart: "Listening in progress... For example say:\n- first name John validate \n- last name Barre validate \n- validate   : to enter \nTo spell a word say:\nlast name letter by letter b a r r e  validate",
+            listeningInProgress: "Listening in progress... For example say:\n- who are you validate , or\n- how old is John Barre validate  , or \n- first name John validate last name Barre validate question how old is validate .\nTo spell a word say:\nlast name letter by letter b a r r e  validate",
+
+            removed: "removed",
+            nothingToRemove: "Nothing to remove",
+            added: "Added",
+            nextLetter: "Next letter",
+            recognized: "Recognized",
+            notRecognized: "Character not recognized/valid. Please try again",
+            currentValue: "Current value",
+            recognitionError: "Voice recognition error. Please try again",
+            errorStartingRecognition: "Error starting voice recognition. Check microphone permissions.",
+
+            thePerson: "the person",
+            hasBeenFound: " has been found! Here is their record",
+            hasNotBeenFound: " has not been found! Please try again",
+            iAmTreeViewer: "I am 'Explore Your Origins', an app to visualize family trees with animations",
+            myCreator: "my creator is",
+            iAmUseFor: "I am used to visualize GEDCOM family trees in different ways: tree, wheel, or cloud views, with geolocation, animations, text-to-speech and speech recognition, and also quizzes",
+
+            speechRecognitionResult: "Speech Recognition Result:",
+            accessByVoice: "voice-accessible (editable)",
+            speechRecognitionTitle: "Voice Input ",
 
         },
         'es': {
@@ -1242,6 +1302,7 @@ const SpeechRecognitionUI = (function() {
 
             whoAreYou : 'quien eres',
             whatIsYourName : 'como te llamas',
+            whatIsYourNameBis : 'como te llamas',
             whoCreatedYou : 'quien te creo',
             whatisTheUse : 'para que sirves',
             whatisTheUseBis : 'para que sirves',
@@ -1276,6 +1337,33 @@ const SpeechRecognitionUI = (function() {
             cancel: "cancelar",
             remove: "eliminar",
             back: "volver",
+            speelingEnded: "Deletreo finalizado. Valor guardado:",
+            structuredModeDetected: "Modo estructurado detectado. Pregunta:",
+            spellingMode: "Modo Deletreo (Campo",
+            spellingMode2: "Diga una o varias letras y luego espere la reactivación. O diga 'letra A letra B, ...'\nDiga 'cancelar' para borrar la última letra en caso de error.\nDiga 'validar' para finalizar el deletreo.)",
+
+            spellingStopped: "Deletreo interrumpido por un error crítico. Reinicie manualmente",
+            listeningInProgressStart: "Escuchando... Por ejemplo diga:\n- nombre Hugues validar \n- apellido Capet validar \n-  validar : entrar .\nPara deletrear una palabra diga:\napellido letra por letra c a p e t validar",
+            listeningInProgress: "Escuchando... Por ejemplo diga:\n- quien eres validar , O\n- qué edad tiene Hugues Capet validar , O \n- nombre Hugues validar apellido Capet validar pregunta qué edad tiene validar .\nPara deletrear una palabra diga:\napellido letra por letra c a p e t validar",
+            removed: "eliminado",
+            nothingToRemove: "Nada que borrar",
+            added: "Añadido",
+            nextLetter: "Siguiente letra",
+            recognized: "Reconocido",
+            notRecognized: "Carácter no reconocido/válido. Inténtelo de nuevo",
+            currentValue: "Valor actual",
+            recognitionError: "Error de reconocimiento de voz. Inténtelo de nuevo",
+            errorStartingRecognition: "Error al iniciar el reconocimiento de voz. Verifique los permisos del micrófono.",
+            thePerson: "la persona",
+            hasBeenFound: " ha sido encontrada. ¡Aquí está su ficha!",
+            hasNotBeenFound: " no ha sido encontrada. Inténtelo de nuevo",
+            iAmTreeViewer: "Soy 'Explora tus Orígenes', una aplicación para visualizar árboles genealógicos con animaciones",
+            myCreator: "mi creador es",
+            iAmUseFor: "Sirvo para visualizar árboles genealógicos GEDCOM de diferentes maneras: modo árbol, rueda o nube, con geolocalización, animaciones, síntesis de voz, reconocimiento de voz y también cuestionarios",
+
+            speechRecognitionResult: "Resultado del reconocimiento de voz:",
+            accessByVoice: "accesible por voz (editable)",
+            speechRecognitionTitle: "Entrada por voz ",
 
         },
         'hu': {
@@ -1316,6 +1404,7 @@ const SpeechRecognitionUI = (function() {
 
             whoAreYou : 'ki vagy',
             whatIsYourName : 'mi a neved',
+            whatIsYourNameBis : 'mi a neved',
             whoCreatedYou : 'ki hozott letre',
             whatisTheUse : 'mire valo',
             whatisTheUseBis : 'mire valo',
@@ -1349,6 +1438,35 @@ const SpeechRecognitionUI = (function() {
             cancel: "mégse",
             remove: "eltávolítás",
             back: "vissza",
+            speelingEnded: "Betűzés befejezve. Érték mentve:",
+            structuredModeDetected: "Strukturált mód észlelve. Kérdés:",
+            spellingMode: "Betűzési mód (Mező",
+            spellingMode2: "Mondjon egy vagy több betűt, majd várjon az újraindításra. Vagy mondja: 'A betű B betű, ...'\nMondja azt, hogy 'mégse' az utolsó betű törléséhez hiba esetén.\nMondja azt, hogy 'érvényesít' a betűzés befejezéséhez.)",
+
+            spellingStopped: "A betűzés kritikus hiba miatt megszakadt. Indítsa újra manuálisan",
+            listeningInProgressStart: "Figyelés folyamatban... Például mondja:\n- ki vagy érvényesít , vagy\n- hány éves Hugues Capet érvényesít  , Vagy \n- keresztnév Hugues érvényesít vezetéknév Capet érvényesít kérdés hány éves érvényesít .\nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t érvényesít",
+            listeningInProgress: "Figyelés folyamatban... Például mondja:\n- keresztnév Hugues érvényesít \n- vezetéknév Capet érvényesít \n- érvényesít : beír \nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t érvényesít",
+            removed: "eltávolítva",
+            nothingToRemove: "Nincs mit törölni",
+            added: "Hozzáadva",
+            nextLetter: "Következő betű",
+            recognized: "Felismerve",
+            notRecognized: "Nem felismert/érvénytelen karakter. Próbálja újra",
+            currentValue: "Aktuális érték",
+            recognitionError: "Hangalapú felismerési hiba. Próbálja újra",
+            errorStartingRecognition: "Hiba a hangfelismerés indításakor. Ellenőrizze a mikrofon jogosultságait.",
+            thePerson: "a személy",
+            hasBeenFound: " meg lett találva! Íme az adatlapja",
+            hasNotBeenFound: " nem lett megtalálva! Próbálja újra",
+            iAmTreeViewer: "Én vagyok az 'Fedezd fel az eredeteidet', egy alkalmazás családfák animált megjelenítésére",
+            myCreator: "az alkotóm",
+            iAmUseFor: "Arra szolgálok, hogy GEDCOM típusú családfákat jelenítsek meg különböző módokon: fa, kerék vagy felhő nézetben, geolokációval, animációkkal, beszédszintézissel, beszédfelismeréssel és kvízekkel",
+
+            speechRecognitionResult: "Beszédfelismerés eredménye:",
+            accessByVoice: "hanggal elérhető (szerkeszthető)",
+            speechRecognitionTitle: "Hangbevitel ",
+
+
         }
     };
 
@@ -1388,6 +1506,7 @@ const SpeechRecognitionUI = (function() {
     let isSpellingMode = false;
     let pendingSpellingStart = false; 
     let targetSpellingField = null;
+    let targetSpellingFieldEnglish = null;
     let spellingGrammar = null; 
 
     const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -1435,7 +1554,7 @@ const SpeechRecognitionUI = (function() {
 
     let isRecognitionActive = false; 
 
-    const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'whatisTheUseBis', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
+    const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whatIsYourNameBis', 'whoCreatedYou', 'whatisTheUse', 'whatisTheUseBis', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
     'whatAge', 'whatAgePast', 'whereLive', 'whereLivePast', 'whatProfession', 'whatOccupation', 'whatProfessionPast', 'whatOccupationPast', 
     'whoMarried', 'whoMarriedPast', 'howManyChildren', 'howManyChildrenPast', 'whoIsFather', 'whoIsFatherPast', 
     'whoIsMother','whoIsMotherPast','whoAreSibling','whoAreSiblingPast', 'whatIsHistorical','whatIsHistoricalPast', 'whatAreNotes'];
@@ -1448,7 +1567,7 @@ const SpeechRecognitionUI = (function() {
 
 
 
-    const actionKeywordsWithoutFirstName = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse']
+    const actionKeywordsWithoutFirstName = ['whoAreYou', 'whatIsYourName', 'whatIsYourNameBis','whoCreatedYou', 'whatisTheUse']
 
 
     const validationSignal = [translate('go'), translate('end'), translate('stop'), , translate('endBis'), translate('enter'), translate('validateBis'), translate('validate')];
@@ -1563,8 +1682,9 @@ const SpeechRecognitionUI = (function() {
     // Fonctions de Contrôle de la Bascule 
     // =========================================================
 
-    function startSpellingCycle(targetField, config = null) {
+    function startSpellingCycle(targetField, targetFieldEnglish, config = null) {
         targetSpellingField = targetField;
+        targetSpellingFieldEnglish = targetFieldEnglish;
         pendingSpellingStart = true; 
         // cumulativeTranscript = '';       
         if (isRecording && recognition) {
@@ -1594,12 +1714,13 @@ const SpeechRecognitionUI = (function() {
         
         isSpellingMode = false;
         targetSpellingField = null;
+        targetSpellingFieldEnglish = null;
         pendingSpellingStart = false;
 
         recognition.continuous = !state.isMobile;
         recognition.grammars = new SpeechGrammarList(); 
         
-        document.getElementById('stt-result-display').textContent = `✅ Épellation terminée. Valeur enregistrée: "${finalValue}"`;
+        document.getElementById('stt-result-display').textContent = `✅ ${translate('speelingEnded')} "${finalValue}"`;
         document.getElementById('stt-interim-display').textContent = '';
         updateEntityUI(); 
         
@@ -1721,6 +1842,7 @@ const SpeechRecognitionUI = (function() {
                 updateEntityUI();
                 isKeyDetected = true;
                 KeyDetectedTab[localKey] = true;
+              
 
             } else {
                KeyDetectedTab[key] = false; 
@@ -1740,7 +1862,7 @@ const SpeechRecognitionUI = (function() {
                 capturedEntities[translate(localKey)] = '';
                 updateEntityUI();
 
-                startSpellingCycle(translate(localKey), config); 
+                startSpellingCycle(translate(localKey), localKey, config); 
                 isSpellDetected = true;
                 return; 
             }
@@ -1802,6 +1924,12 @@ const SpeechRecognitionUI = (function() {
             let res = null;
             let res2 = null;
 
+            let alternativeName = capturedEntities[translate('lastname')];
+            if (capturedEntities[translate('lastname')] === 'dumesnil' || capturedEntities[translate('lastname')] === 'du mesnil' ) {
+                capturedEntities[translate('lastname')] = 'dumenil';
+            }
+
+
             res = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], capturedEntities[translate('lastname')], false);
 
 
@@ -1810,8 +1938,9 @@ const SpeechRecognitionUI = (function() {
             let othernames = null;
             if (res.results.length === 0) {
                 // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
-                othernames = generatePhoneticAlternatives(capturedEntities[translate('lastname')]);
-                console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
+                othernames = generatePhoneticAlternatives(alternativeName);
+                othernames.push(alternativeName);
+
                 if (othernames.length > 0) {
                     othernames.forEach(name => { 
                         lastAlternativeNameFound = name;
@@ -1824,7 +1953,7 @@ const SpeechRecognitionUI = (function() {
             // si la personne a été trouvé on lance l'action
             if (res.results.length > 0 || (othernames && othernames.length > 0 && res2.results.length > 0 )) {
                 const name = (res.results.length > 0) ? capturedEntities[translate('lastname')] : lastAlternativeNameFound;
-                let textToTell = 'la personne ' + capturedEntities[translate('firstname')] + ' ' + name + ' a été trouvée ! Voici sa fiche';
+                let textToTell = translate('thePerson') + ' ' + capturedEntities[translate('firstname')] + ' ' + name + ' ' + translate('hasBeenFound');
                 arreterEcouteAction();
                 stopSpeechRecognition = true;
                 if (state.isMobile ) {
@@ -1885,7 +2014,7 @@ const SpeechRecognitionUI = (function() {
                     window.speechSynthesis.cancel(); 
                 }                    
 
-                let textToTell = 'la personne ' + capturedEntities[translate('firstname')] + ' ' + capturedEntities[translate('lastname')] + ' n\'a pas été trouvée ! Ré-essayer';
+                let textToTell = translate('thePerson') + ' ' + capturedEntities[translate('firstname')] + ' ' + capturedEntities[translate('lastname')] + ' ' + translate('hasNotBeenFound');
                 console.log('\n\n\n ------------   debug : ', textToTell, cumulativeTranscript);
                 await speakTextWithWaitToEnd(textToTell);
 
@@ -1923,15 +2052,13 @@ const SpeechRecognitionUI = (function() {
             
             await speakTextWithWaitToEnd('essai', '0.0'); // ppour débugger le son et éviter la 1iere saccade de son
             // await speakTextWithWaitToEnd(' ', 1); // ppour débugger le son et éviter la 1iere saccade de son
-            if (detectedAction.includes('whoAreYou')) {
-                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations');      
-            } else if (detectedAction.includes('whatIsYourName')) {
-                await speakTextWithWaitToEnd('je suis treeViewer, une appli pour visualiser les arbres généalogiques avec des animations');     
+            if (detectedAction.includes('whoAreYou') || detectedAction.includes('whatIsYourName') || detectedAction.includes('whatIsYourNameBis')) {
+                await speakTextWithWaitToEnd(translate('iAmTreeViewer'));         
             } else if (detectedAction.includes('whoCreatedYou')) {
-                await speakTextWithWaitToEnd('mon créateur est Patrick Duménil');      
+                await speakTextWithWaitToEnd(translate('myCreator') + ' Patrick Duménil');      
             } else if (detectedAction.includes('whatisTheUse')) {
                 // await speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz', 1.0);      
-                await speakTextWithWaitToEnd('je sers à visualiser les arbres généalogiques de type GEDCOM, de différentes manière, en mode arbre, roue, ou nuage, avec de la géolocalisation, des animation, de la synthèse vocale et reconnaissance vocale, et aussi des quizz');      
+                await speakTextWithWaitToEnd(translate('iAmUseFor'));      
             }
             if (!isRecognitionActive) { recognition.start(); }
             if (state.isMobile && !isSpellingMode) {
@@ -2028,12 +2155,12 @@ const SpeechRecognitionUI = (function() {
 
             // console.log('\n ------------  debug  final entityPart =',  entityWords,', newCumulativeTranscript=' ,newCumulativeTranscript)
 
-            document.getElementById('stt-result-display').textContent = `✅ Mode structuré détecté. Action: ${detectedAction.toUpperCase()}, Prénom: ${capturedEntities[translate('firstname')]}, Nom: ${capturedEntities[translate('lastname')]}.`;
+            document.getElementById('stt-result-display').textContent = `✅ ${translate('structuredModeDetected')} ${detectedAction.toUpperCase()}, ${translate('firstname')}: ${capturedEntities[translate('firstname')]}, ${translate('lastname')}: ${capturedEntities[translate('lastname')]}.`;
             updateEntityUI();
 
             if (!isActionWithoutFirstName && isEntityKeyAvailable['firstname'] && isEntityKeyAvailable['lastname']) { 
                 await launchSearchPeopleAction(detectedAction);
-            } else if ( (detectedAction.includes('whoAreYou') || detectedAction.includes('whatIsYourName') || detectedAction.includes('whoCreatedYou') || detectedAction.includes( 'whatisTheUse') ) ) {
+            } else if ( (detectedAction.includes('whoAreYou') || detectedAction.includes('whatIsYourName') || detectedAction.includes('whatIsYourNameBis') || detectedAction.includes('whoCreatedYou') || detectedAction.includes( 'whatisTheUse') ) ) {
                 await launchSimpleAction(detectedAction);
             }
 
@@ -2135,9 +2262,10 @@ const SpeechRecognitionUI = (function() {
             if (display) display.style.whiteSpace = 'pre-line';
             
             if (isSpellingMode) {
-                display.textContent = `✏️ Mode Épellation (Champ: ${targetSpellingField.toUpperCase()}): Dites une lettre, puis attendez la relance. Dites 'terminer'.`;
+                display.textContent = `✏️ ${translate('spellingMode')} : ${translate(targetSpellingFieldEnglish).toUpperCase()}):  ${translate('spellingMode2')}.`;
             } else {
-                display.textContent = "🎤 Écoute en cours... Dites par exemple: \n prénom henri \nnom rousseau GO\nPour épeler un mot dites:\nprénom     lettre par lettre    h e n r i   terminer";
+                if (localConfig === 'start') { display.textContent = `🎤 ${translate('listeningInProgressStart')}`; }
+                else { display.textContent = `🎤 ${translate('listeningInProgress')}`; }
             }
         };
 
@@ -2195,10 +2323,10 @@ const SpeechRecognitionUI = (function() {
                             capturedEntities[targetSpellingField] = currentValue.slice(0, -1); // On enlève la dernière lettre
                             
                             console.log(`[CORRECTION] "${lastChar.toUpperCase()}" supprimé. Reste: "${capturedEntities[targetSpellingField]}"`);
-                            document.getElementById('stt-result-display').textContent = `🗑️ Supprimé: "${lastChar.toUpperCase()}".`;
+                            document.getElementById('stt-result-display').textContent = `🗑️ ${translate('removed')}: "${lastChar.toUpperCase()}".`;
                             updateEntityUI();
                         } else {
-                            document.getElementById('stt-result-display').textContent = `⚠️ Rien à effacer.`;
+                            document.getElementById('stt-result-display').textContent = `⚠️ ${translate('nothingToRemove')}.`;
                         }
                         return; // On s'arrête là pour ce cycle
                     }
@@ -2228,7 +2356,7 @@ const SpeechRecognitionUI = (function() {
                         capturedEntities[targetSpellingField] = currentValue + processedChar;
                         
                         console.log(`✅ AJOUTÉ: "${processedChar.toUpperCase()}" | Total: ${capturedEntities[targetSpellingField]}`);
-                        document.getElementById('stt-result-display').textContent = `✅ Ajouté: "${processedChar.toUpperCase()}"`;
+                        document.getElementById('stt-result-display').textContent = `✅ ${translate('added')}: "${processedChar.toUpperCase()}"`;
                         updateEntityUI();
                     } else {
                         // mode lettre par lettre sans mot de trigger
@@ -2255,13 +2383,13 @@ const SpeechRecognitionUI = (function() {
                             
                             capturedEntities[targetSpellingField] = currentValue + addedChars; 
                             
-                            document.getElementById('stt-result-display').textContent = `✅ Ajouté: "${addedChars.toUpperCase()}". Prochaine lettre?`;
-                            document.getElementById('stt-interim-display').textContent = `(Reconnu: "${recognizedSegment}"). Valeur actuelle: ${capturedEntities[targetSpellingField]}`;
+                            document.getElementById('stt-result-display').textContent = `✅ ${translate('added')}: "${addedChars.toUpperCase()}". ${translate('nextLetter')}?`;
+                            document.getElementById('stt-interim-display').textContent = `(${translate('recognized')}: "${recognizedSegment}"). ${translate('currentValue')}: ${capturedEntities[targetSpellingField]}`;
                             console.log('\n\n ---- debug spelling mode ------  Reconnu:', recognizedSegment, '. Valeur actuelle:', capturedEntities[targetSpellingField]);
                             updateEntityUI();
                         } else if (errorDetected) {
-                             document.getElementById('stt-result-display').textContent = `❌ Caractère non reconnu/valide. Veuillez réessayer.`;
-                             document.getElementById('stt-interim-display').textContent = `(Reconnu: "${recognizedSegment}")`;
+                             document.getElementById('stt-result-display').textContent = `❌ ${translate('notRecognized')}.`;
+                             document.getElementById('stt-interim-display').textContent = `(${translate('recognized')}: "${recognizedSegment}")`;
                         }
 
                     }
@@ -2292,8 +2420,18 @@ const SpeechRecognitionUI = (function() {
 
                 }
                 document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
+
+
+
+
             }
-            // console.log ('\n\n\n\n\n\n ++++++++++++++++++++     texte in progress === ', cumulativeTranscript + interimTranscript,'+++++++++++++++++++++++++\n\n\n\n')
+            console.log ('\n\n\n\n\n\n ++++++++++++++++++++     texte in progress ===',`'${cumulativeTranscript + interimTranscript}'` ,'config=' , config,'localConfig=' ,localConfig,'+++++++++++++++++++++++++\n\n\n\n')
+
+
+            if (cumulativeTranscript + interimTranscript === '' || cumulativeTranscript + interimTranscript === ' ') {
+                if (localConfig === 'start') { document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgressStart')}`; }
+                else { document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgress')}`; }
+            }
 
 
         };
@@ -2348,7 +2486,7 @@ const SpeechRecognitionUI = (function() {
                         isRecording = false; 
                         isSpellingMode = false; 
                         updateButtonUI(false);
-                        document.getElementById('stt-result-display').textContent = `⚠️ Épellation interrompue par erreur critique. Redémarrez manuellement.`;
+                        document.getElementById('stt-result-display').textContent = `⚠️ ${translate('spellingStopped')}.`;
                     }
                 }, ANTI_NOISE_DELAY_MS); 
                 
@@ -2405,7 +2543,7 @@ const SpeechRecognitionUI = (function() {
 
 
         recognition.onerror = (event) => {
-            document.getElementById('stt-result-display').textContent = `Erreur de reconnaissance: ${event.error}`;
+            document.getElementById('stt-result-display').textContent = `${translate('recognitionError')}: ${event.error}`;
             document.getElementById('stt-result-display').style.color = 'red';
             if (event.error != 'no-speech' ) {
                 isRecording = false;
@@ -2576,7 +2714,7 @@ const SpeechRecognitionUI = (function() {
                 background-color: #cc9eddff; 
                 z-index: 10; 
             ">
-                <span>Saisie Vocale (Langue : ${targetLang})</span>
+                <span>${translate('speechRecognitionTitle')}(Langue : ${targetLang})</span>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div id="toggle-tts-controls-wrapper">
                         <button id="toggle-tts-controls" style="cursor: pointer;">
@@ -2615,7 +2753,7 @@ const SpeechRecognitionUI = (function() {
                 </div>
                 
                 <div id="stt-container" style="margin-top: 5px; padding: 10px; padding-top: 0px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
-                    <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px; font-size: 0.9em; font-weight: bold;">Résultat de la Reconnaissance Vocale:</div>
+                    <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px; font-size: 0.9em; font-weight: bold;">${translate('speechRecognitionResult')}</div>
                     <div id="stt-result-display" style="margin-top: -5px; padding-top: 0px; min-height: 1.2em; color: #333; font-style: italic; white-space: pre-line;">
                         ${translate('statusReady')}
                     </div>
@@ -2625,7 +2763,7 @@ const SpeechRecognitionUI = (function() {
 
                 <div id="stt-entity-panel" style="margin-top: 10px; padding: 10px; border: 1px solid #007bff; border-radius: 6px; background-color: #e6f7ff;">
                     <p style="margin-top: 0; font-weight: bold; color: #007bff;">
-                        ✨ accéssible par la voix (éditable)
+                        ✨ ${translate('accessByVoice')} 
                     </p>
                     <ul id="entity-list" style="list-style: none; padding: 0; margin: 0;">
                         </ul>
@@ -2896,7 +3034,7 @@ const SpeechRecognitionUI = (function() {
 
         listElement.innerHTML = ''; 
         
-        const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whoCreatedYou', 'whatisTheUse', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 
+        const actionKeywords = ['whoAreYou', 'whatIsYourName', 'whatIsYourNameBis', 'whoCreatedYou', 'whatisTheUse', 'search', 'research', 'readSheet', 'whenBorn', 'whenDead', 
             'whatAge', 'whereLive', 'whatProfession', 'whatOccupation', 'whoMarried', 'howManyChildren', 'whoIsFather', 'whoIsMother', 'whoAreSibling','whatIsHistorical', 'whatAreNotes'];
 
         const DATALIST_ID = 'action-datalist'; 
@@ -2999,7 +3137,7 @@ const SpeechRecognitionUI = (function() {
                                 font-size: 0.9em;
                                 color: #333;
                                 transition: background-color 0.1s ease;
-                                min-height: 15px; 
+                                min-height: 28px; 
                                 line-height: 1.5;
                             `;
                             li.addEventListener('mouseenter', () => li.style.backgroundColor = '#f0f0f0');
@@ -3102,6 +3240,7 @@ const SpeechRecognitionUI = (function() {
 
         initializeSpeechRecognition(config);
 
+
         if (isRecording) {
             isRecording = false; 
             isSpellingMode = false;
@@ -3113,7 +3252,7 @@ const SpeechRecognitionUI = (function() {
 
         } else {
 
-            if(config && config === 'start') {
+            if(localConfig && localConfig === 'start') {
                 console.log('\n\n\n ----- debug start showUI --------', document.getElementById('input-form-firstName').value, document.getElementById('input-form-lastName').value )
                 if (document.getElementById('input-form-firstName').value != '') {
                     capturedEntities[translate('firstname')] = document.getElementById('input-form-firstName').value;
@@ -3125,8 +3264,11 @@ const SpeechRecognitionUI = (function() {
                     // console.log('\n\n\n ----- debug start showUI --------',  document.getElementById('input-form-lastName').value )
                 }
                 updateEntityUI();
-            }
+                document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgressStart')}`;
+            } else {
+                document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgress')}`;
 
+            }
 
             if (mode === 'erase') {
                 // Efface toutes les entités capturées (utile pour le bouton "Tout effacer & Écouter")
@@ -3144,8 +3286,6 @@ const SpeechRecognitionUI = (function() {
                     }
                     cumulativeTranscript = '';
                 });
-
-
 
                 updateEntityUI(); // Met à jour l'UI pour montrer que les champs sont vides
             }
@@ -3184,17 +3324,9 @@ const SpeechRecognitionUI = (function() {
                 if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
                 // if (true) {
                     speakTextfromSliderParams(SUPER_LONG_TEXT);
-                    // speakText(SUPER_LONG_TEXT, 0.008, 0.6, 1.3);
                     // chanter();
                     // chanterFluide();
                 }
-                // speakText('phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue  phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue phrase très très très longue ',  0.5)
-                // speakText(BARELY_AUDIBLE_SOUND, 0.9, 0.9);
-
-
-                // speakText(SUPER_LONG_TEXT, 0.008, 0.7); // Juste un espace ou un son très court et discret
-                // startTTSLoop();
-                // speakContinuousLoop('aaaaaaaaaaaaaaa', 0.5, 1.0)
 
 
                 
@@ -3213,7 +3345,7 @@ const SpeechRecognitionUI = (function() {
 
             } catch (e) {
                 console.error("Erreur au démarrage de la reconnaissance:", e);
-                document.getElementById('stt-result-display').textContent = "Erreur au démarrage. Veuillez vérifier les permissions.";
+                document.getElementById('stt-result-display').textContent = `${translate('errorStartingRecognition')}`;
                 document.getElementById('stt-result-display').style.color = 'red';
 
                 initializeSpeechRecognition(config);
@@ -3255,7 +3387,8 @@ const SpeechRecognitionUI = (function() {
 
     function showUI(config = null) {
 
-        
+
+       
         ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
         // state.isMobile = true;
         ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
@@ -3277,20 +3410,12 @@ const SpeechRecognitionUI = (function() {
 
         toggleSpeechRecognition(); 
 
-
-
-
-
-
     }
 
     function hideUI() {
         const overlay = document.getElementById('stt-only-overlay');
 
-
         arreterEcouteAction(); 
-
-
 
         if (overlay) {
             overlay.style.display = 'none';

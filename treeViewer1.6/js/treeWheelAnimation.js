@@ -3067,6 +3067,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
         let end = clues.length;
         let idx = -1;
         console.log('\n\n -----------   debug before detectedAction', detectedAction, cluesLabels)
+        let idxNext = [];
 
         if (detectedAction) {
             if (detectedAction.includes('readSheet')) {
@@ -3081,9 +3082,15 @@ export async function readPersonDetails(winner, detectedAction = null) {
                 idx = cluesLabels.indexOf('deathDate');
 
             } else if (detectedAction.includes('whereLive') || detectedAction.includes('whereLivePast') ) {
-                idx = cluesLabels.indexOf('residences_n');
+                idx = cluesLabels.indexOf('residences_0');
+                for (let i = 1; i < 5; i++) {
+                    idxNext[i] = cluesLabels.indexOf('residences_' + i);
+                }
             } else if (detectedAction.includes('whatProfession') || detectedAction.includes('whatProfessionPast') || detectedAction.includes('whatOccupation') || detectedAction.includes('whatOccupationPast') ) {
-                idx = cluesLabels.indexOf('occupation_n');
+                idx = cluesLabels.indexOf('occupation_0');
+                for (let i = 1; i < 5; i++) {
+                    idxNext[i] = cluesLabels.indexOf('occupation_' + i);
+                }
 
             } else if (detectedAction.includes('whoMarried') || detectedAction.includes('whoMarriedPast')) {
                 idx = cluesLabels.indexOf('spouse');
@@ -3116,6 +3123,11 @@ export async function readPersonDetails(winner, detectedAction = null) {
             const clue = clues[i];
             console.log("🧩 Indice ajouté:", clue, i, clues );
             await showNextClueAsync(start);
+            for (let j = 0; j < idxNext.length; j++) {
+                if (idxNext[j] && idxNext[j] > -1) {
+                    await showNextClueAsync(idxNext[j]);
+                }
+            }
             
             // Petite pause entre chaque indice si pas en pause
             if (!isPaused) {
