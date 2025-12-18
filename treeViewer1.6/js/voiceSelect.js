@@ -2421,9 +2421,6 @@ const SpeechRecognitionUI = (function() {
                 }
                 document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
 
-
-
-
             }
             console.log ('\n\n\n\n\n\n ++++++++++++++++++++     texte in progress ===',`'${cumulativeTranscript + interimTranscript}'` ,'config=' , config,'localConfig=' ,localConfig,'+++++++++++++++++++++++++\n\n\n\n')
 

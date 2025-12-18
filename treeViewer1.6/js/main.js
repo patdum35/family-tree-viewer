@@ -2615,7 +2615,20 @@ export function isIOSDevice() {
     return state.isIOS;
 }
 
-export function detectDeviceType() {
+
+async function checkDevice() {
+  if (navigator.userAgentData) {
+    const uaData = await navigator.userAgentData.getHighEntropyValues(['platform', 'model']);
+    console.log(uaData.platform); // "Android" apparaîtra ici même si le UA dit "Linux"
+    
+    if (uaData.platform === "Android") {
+      return "Mobile/Tablette";
+    }
+  }
+  return "PC (ou navigateur non compatible)";
+}
+
+export async function detectDeviceType() {
   state.deviceInfo = {
     isMobile: false,
     isIOS: false,
@@ -2637,6 +2650,19 @@ export function detectDeviceType() {
   
   state.isMobile = state.deviceInfo.isMobile;
   debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
+
+
+  state.isMobile = state.deviceInfo.isMobile;
+  debugLog(`ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen}`, "info")
+
+  const deviceType = await checkDevice();
+
+  debugLog(`ℹ️  isMobile2 : ${deviceType}`, "info")
+
+  const isAndroidTablet = navigator.userAgent.includes("Linux") && state.deviceInfo.hasTouchScreen;
+  
+  debugLog(`ℹ️  isAndroidTablet : ${isAndroidTablet}`, "info")
+
   state.deviceInfo.isIOS = isIOSDevice();
   state.isIOS = state.deviceInfo.isIOS;
 
