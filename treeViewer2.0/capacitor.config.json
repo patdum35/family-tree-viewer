@@ -1,0 +1,6 @@
+{
+  "appId": "com.patrick.familytree",
+  "appName": "FamilyTreeViewer",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

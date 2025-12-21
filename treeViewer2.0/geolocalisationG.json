@@ -1,0 +1,774 @@
+{
+  "Bruges, Belgique": {
+    "lat": 51.2085526,
+    "lon": 3.226772
+  },
+  "Fécamp, Seine-Maritime, France": {
+    "lat": 49.7577729,
+    "lon": 0.374891
+  },
+  "Tarsus, Turquie": {
+    "lat": 36.9164834,
+    "lon": 34.895149
+  },
+  "Vitry-aux-Loges, Loiret, France": {
+    "lat": 47.9385118,
+    "lon": 2.266736
+  },
+  "Reims, Marne, France": {
+    "lat": 49.2577886,
+    "lon": 4.031926
+  },
+  "Melun, Seine-et-Marne, France": {
+    "lat": 48.539927,
+    "lon": 2.6608169
+  },
+  "Péronne, Somme, France": {
+    "lat": 49.9289578,
+    "lon": 2.9321899
+  },
+  "Hauteville-la-Guichard, Manche, France": {
+    "lat": 49.1261106,
+    "lon": -1.3026354
+  },
+  "Mileto, Italie": {
+    "lat": 38.6092238,
+    "lon": 16.0686322
+  },
+  "Patti, Italie": {
+    "lat": 38.1389007,
+    "lon": 14.9648163
+  },
+  "Palermo, Italie": {
+    "lat": 38.1112268,
+    "lon": 13.3524434
+  },
+  "Echternach, Luxembourg": {
+    "lat": 49.8120961,
+    "lon": 6.4214859
+  },
+  "Istanbul, Turquie": {
+    "lat": 41.006381,
+    "lon": 28.9758715
+  },
+  "Paris": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Béthisy-Saint-Pierre, 60, France": {
+    "lat": 49.3054,
+    "lon": 2.8032
+  },
+  "Palestine": {
+    "lat": 31.462421,
+    "lon": 34.2627215
+  },
+  "Montreuil, Pas-de-Calais, france": {
+    "lat": 50.4638918,
+    "lon": 1.7631125
+  },
+  "Falaise, Calvados, France": {
+    "lat": 48.8964741,
+    "lon": -0.1999129
+  },
+  "Hermeville, Seine-Maritime, France": {
+    "lat": 49.598476,
+    "lon": 0.2625657
+  },
+  "Eu, Normandie, France": {
+    "lat": 50.0491699,
+    "lon": 1.4175744
+  },
+  "Caen, Calvados, France": {
+    "lat": 49.1813403,
+    "lon": -0.3635615
+  },
+  "abbaye de Marcigny": {
+    "lat": 47.391505,
+    "lon": 4.3805108
+  },
+  "Chartres, Eure-et-Loir, France": {
+    "lat": 48.4438601,
+    "lon": 1.4881434
+  },
+  "Selby, Yorkshire, Royaume-Uni": {
+    "lat": 53.785097,
+    "lon": -1.0990407
+  },
+  "Lyons-la-Forêt, Eure, France": {
+    "lat": 49.3989972,
+    "lon": 1.4768236
+  },
+  "Quedlinburg, Allemagne": {
+    "lat": 51.7855428,
+    "lon": 11.1519933
+  },
+  "Vlaardingen, Pays-Bas": {
+    "lat": 51.9227863,
+    "lon": 4.3295634
+  },
+  "Nederhemert, Pays-Bas": {
+    "lat": 51.7645631,
+    "lon": 5.1652605
+  },
+  "Egmond, Pays-Bas": {
+    "lat": 51.6530723,
+    "lon": 5.9400644
+  },
+  "Gand, Belgique": {
+    "lat": 51.0538286,
+    "lon": 3.7250121
+  },
+  "Bruxelles": {
+    "lat": 50.8465573,
+    "lon": 4.351697
+  },
+  "Corvey, Allemagne": {
+    "lat": 51.7788271,
+    "lon": 9.4096857
+  },
+  "Kassel, Deutschland": {
+    "lat": 51.3157833,
+    "lon": 9.4978479
+  },
+  "Lille, Nord, France": {
+    "lat": 50.6365654,
+    "lon": 3.0635282
+  },
+  "Amiens, Somme, France": {
+    "lat": 49.8941708,
+    "lon": 2.2956951
+  },
+  "Messines, Belgique": {
+    "lat": 50.7598269,
+    "lon": 2.8998324
+  },
+  "Homburg, Saarland, Allemagne": {
+    "lat": 49.3181673,
+    "lon": 7.3340336
+  },
+  "Saint-Quentin, Aisne, France": {
+    "lat": 49.8465253,
+    "lon": 3.2876843
+  },
+  "Floreffe": {
+    "lat": 50.4366874,
+    "lon": 4.7600394
+  },
+  "abbaye de Marmoutier": {
+    "lat": 47.4025927,
+    "lon": 0.7172136
+  },
+  "Orléans, Loiret, France": {
+    "lat": 47.9027336,
+    "lon": 1.9086066
+  },
+  "Meulan-en-Yvelines, Yvelines, France": {
+    "lat": 49.0049712,
+    "lon": 1.9100835
+  },
+  "Fleurey-sur-Ouche, Côte-d'Or, France": {
+    "lat": 47.3115572,
+    "lon": 4.8591826
+  },
+  "İznik, Turquie": {
+    "lat": 40.4303445,
+    "lon": 29.7223732
+  },
+  "Paphos, Chypre": {
+    "lat": 34.7743988,
+    "lon": 32.4231586
+  },
+  "Ravensburg, Allemagne": {
+    "lat": 47.7811014,
+    "lon": 9.612468
+  },
+  "Roma": {
+    "lat": 41.8933203,
+    "lon": 12.4829321
+  },
+  "Hébron, Palestine": {
+    "lat": 31.5336282,
+    "lon": 35.0979762
+  },
+  "Lagny-sur-Marne": {
+    "lat": 48.8773018,
+    "lon": 2.7056056
+  },
+  "Hauteville-la-Guichard": {
+    "lat": 49.1261106,
+    "lon": -1.3026354
+  },
+  "Céphalonie, Grèce": {
+    "lat": 38.2660322,
+    "lon": 20.5373903
+  },
+  "Florennes, Belgique": {
+    "lat": 50.2514227,
+    "lon": 4.6030187
+  },
+  "Vienne, Isère, France": {
+    "lat": 45.52524,
+    "lon": 4.87477
+  },
+  "Autun, Saône-et-Loire, France": {
+    "lat": 46.9510313,
+    "lon": 4.2989478
+  },
+  "Arles, Bouches-du-Rhône, France": {
+    "lat": 43.6776223,
+    "lon": 4.6309653
+  },
+  "Auxerre, Yonne, France": {
+    "lat": 47.7961287,
+    "lon": 3.570579
+  },
+  "Angers, Maine-et-Loire, France": {
+    "lat": 47.4739884,
+    "lon": -0.5515588
+  },
+  "Dourdan, Essonne, France": {
+    "lat": 48.5288442,
+    "lon": 2.0153689
+  },
+  "Noyon, Oise, France": {
+    "lat": 49.5805561,
+    "lon": 3.0000288
+  },
+  "Prasville, Eure-et-Loir, France": {
+    "lat": 48.2767097,
+    "lon": 1.7092261
+  },
+  "Marson, Marne, France": {
+    "lat": 48.9119398,
+    "lon": 4.527464
+  },
+  "Metz, Moselle, France": {
+    "lat": 49.1196964,
+    "lon": 6.1763552
+  },
+  "Aachen, Deutschland": {
+    "lat": 50.776351,
+    "lon": 6.083862
+  },
+  "Brescia, Italie": {
+    "lat": 45.7795804,
+    "lon": 10.425873
+  },
+  "Orbe, Suisse": {
+    "lat": 46.724144,
+    "lon": 6.5317943
+  },
+  "Seltz, Bas-Rhin, France": {
+    "lat": 48.8920496,
+    "lon": 8.1067978
+  },
+  "Bamberg, Allemagne": {
+    "lat": 49.8916044,
+    "lon": 10.8868478
+  },
+  "Besançon, Doubs, France": {
+    "lat": 47.2380222,
+    "lon": 6.0243622
+  },
+  "Longwy, Meurthe-et-Moselle, France": {
+    "lat": 49.5145564,
+    "lon": 5.7679082
+  },
+  "Ashkelon, Israël": {
+    "lat": 31.6687545,
+    "lon": 34.5740485
+  },
+  "Nijmegen, Pays-Bas": {
+    "lat": 51.8474946,
+    "lon": 5.8637771
+  },
+  "Messina, Italie": {
+    "lat": 38.1937571,
+    "lon": 15.5542082
+  },
+  "Moûtiers, Savoie, France": {
+    "lat": 45.4849883,
+    "lon": 6.5340061
+  },
+  "Uzès, Gard, France": {
+    "lat": 44.0121279,
+    "lon": 4.4196718
+  },
+  "Sainte-Vertu": {
+    "lat": 47.7496415,
+    "lon": 3.9156372
+  },
+  "Fos, Hérault, France": {
+    "lat": 43.5668,
+    "lon": 3.24696
+  },
+  "Maillezais, Vendée, France": {
+    "lat": 46.3712942,
+    "lon": -0.7391873
+  },
+  "Ingelheim am Rhein, Allemagne": {
+    "lat": 49.9752749,
+    "lon": 8.0547274
+  },
+  "Gençay, Vienne, France": {
+    "lat": 46.3735187,
+    "lon": 0.404331
+  },
+  "Avignon": {
+    "lat": 43.9492493,
+    "lon": 4.8059012
+  },
+  "Nantes, Loire-Atlantique, France": {
+    "lat": 47.2186371,
+    "lon": -1.5541362
+  },
+  "Remiremont, Vosges, France": {
+    "lat": 48.0158951,
+    "lon": 6.5912615
+  },
+  "Jérusalem": {
+    "lat": 31.7788472,
+    "lon": 35.2257856
+  },
+  "Saint-Maixent-l'École, Deux-Sèvres, France": {
+    "lat": 46.409657,
+    "lon": -0.2018603
+  },
+  "Bodfeld, Deutschland": {
+    "lat": 51.7503956,
+    "lon": 10.7831379
+  },
+  "Goslar, Allemagne": {
+    "lat": 51.9059936,
+    "lon": 10.4266284
+  },
+  "Liège, Belgique": {
+    "lat": 50.6450944,
+    "lon": 5.5736112
+  },
+  "Barcelona, Espagne": {
+    "lat": 41.3825802,
+    "lon": 2.177073
+  },
+  "Sant Quirze de Besora, Espagne": {
+    "lat": 42.101426,
+    "lon": 2.2170289
+  },
+  "Tarsus, Tarse, Turquie": {
+    "lat": 36.9123975,
+    "lon": 34.8959891
+  },
+  "Thuin, Belgique": {
+    "lat": 50.321899,
+    "lon": 4.2960837
+  },
+  "Brissarthe, Maine-et-Loire, France": {
+    "lat": 47.7004572,
+    "lon": -0.4495089
+  },
+  "Fontenoy": {
+    "lat": 49.4072,
+    "lon": 3.19997
+  },
+  "Vangadizza, Italie": {
+    "lat": 45.1713446,
+    "lon": 11.3030592
+  },
+  "Napoli, Italie": {
+    "lat": 40.8358846,
+    "lon": 14.2487679
+  },
+  "Clefmont, Haute-Marne, France": {
+    "lat": 48.0959421,
+    "lon": 5.5101687
+  },
+  "Resa, Espagne": {
+    "lat": 38.1356373,
+    "lon": -1.5501056
+  },
+  "Girona, Espagne": {
+    "lat": 41.9793006,
+    "lon": 2.8199439
+  },
+  "La Valldora, Espagne": {
+    "lat": 42.0498721,
+    "lon": 1.6562983
+  },
+  "château de Haguenau, Bas-Rhin, France": {
+    "lat": 48.7932498,
+    "lon": 7.7695911
+  },
+  "Jesi, Italie": {
+    "lat": 43.5219801,
+    "lon": 13.2443764
+  },
+  "Fiorentino, Italie": {
+    "lat": 43.831721,
+    "lon": 11.1992239
+  },
+  "Toulouse, Haute-Garonne, France": {
+    "lat": 43.6044622,
+    "lon": 1.4442469
+  },
+  "Plaisance, Italie": {
+    "lat": 45.0534751,
+    "lon": 9.6947461
+  },
+  "Milano, Italie": {
+    "lat": 45.4641943,
+    "lon": 9.1896346
+  },
+  "Chasseneuil-du-Poitou, Vienne, France": {
+    "lat": 46.6505634,
+    "lon": 0.3748389
+  },
+  "Altdorf, Allemagne": {
+    "lat": 49.2863021,
+    "lon": 8.2164153
+  },
+  "Prüm, Allemagne": {
+    "lat": 50.2069481,
+    "lon": 6.4249003
+  },
+  "Thionville, Moselle, France": {
+    "lat": 49.3579272,
+    "lon": 6.1675872
+  },
+  "Frankfurt am Main, Deutschland": {
+    "lat": 50.1106444,
+    "lon": 8.6820917
+  },
+  "Avrieux, Savoie, France": {
+    "lat": 45.2153331,
+    "lon": 6.7201839
+  },
+  "Quierzy, Aisne, France": {
+    "lat": 49.5713889,
+    "lon": 3.1441667
+  },
+  "Compiègne, Oise, France": {
+    "lat": 49.4179497,
+    "lon": 2.8263171
+  },
+  "Laon, Aisne, France": {
+    "lat": 49.564665,
+    "lon": 3.620686
+  },
+  "Rouen, Seine-Maritime, France": {
+    "lat": 49.4404591,
+    "lon": 1.0939658
+  },
+  "Picquigny, Somme, France": {
+    "lat": 49.9443256,
+    "lon": 2.1418065
+  },
+  "Spoleto, Italie": {
+    "lat": 42.7342971,
+    "lon": 12.7382035
+  },
+  "Craon, Mayenne, France": {
+    "lat": 47.84831,
+    "lon": -0.9518383
+  },
+  "Capua, Italie": {
+    "lat": 41.1079984,
+    "lon": 14.2097176
+  },
+  "Piacenza, Italie": {
+    "lat": 44.8476352,
+    "lon": 9.6665313
+  },
+  "La Préalle, Herstal, Belgique": {
+    "lat": 50.6668629,
+    "lon": 5.611534
+  },
+  "Hasnon": {
+    "lat": 50.4164903,
+    "lon": 3.3866775
+  },
+  "Verberie sur Oise": {
+    "lat": 49.2746027,
+    "lon": 2.6902784
+  },
+  "La Martyre / Ar Merzer": {
+    "lat": 48.3952419,
+    "lon": -4.1321826
+  },
+  "Conquereuil, Loire-Atlantique, France": {
+    "lat": 47.6245975,
+    "lon": -1.7503282
+  },
+  "Marseille, Bouches-du-Rhône, France": {
+    "lat": 43.2961743,
+    "lon": 5.3699525
+  },
+  "Soissons, Aisne, France": {
+    "lat": 49.3837621,
+    "lon": 3.327613
+  },
+  "Nice, Alpes-Maritimes, France": {
+    "lat": 43.7009358,
+    "lon": 7.2683912
+  },
+  "en Palestine": {
+    "lat": 31.8475659,
+    "lon": 35.2302307
+  },
+  "Gemünden, Allemagne": {
+    "lat": 50.5599325,
+    "lon": 8.0176918
+  },
+  "Merton, Royaume-Uni": {
+    "lat": 51.4108698,
+    "lon": -0.1880971
+  },
+  "Wantage, Oxfordshire, UK": {
+    "lat": 51.5878072,
+    "lon": -1.4249258
+  },
+  "Arras, Pas-de-Calais, France": {
+    "lat": 50.291048,
+    "lon": 2.7772211
+  },
+  "Meersen, Belgique": {
+    "lat": 51.2229276,
+    "lon": 4.2673245
+  },
+  "Andernach, Allemagne": {
+    "lat": 50.4391924,
+    "lon": 7.4023145
+  },
+  "Farndon, Royaume-Uni": {
+    "lat": 53.0842541,
+    "lon": -2.8757573
+  },
+  "Magdeburg, Allemagne": {
+    "lat": 52.1314783,
+    "lon": 11.6400789
+  },
+  "Memleben, Allemagne": {
+    "lat": 51.2646037,
+    "lon": 11.4914523
+  },
+  "Enger, Allemagne": {
+    "lat": 52.1394015,
+    "lon": 8.5588818
+  },
+  "Wallhausen, Allemagne": {
+    "lat": 49.8882785,
+    "lon": 7.7684146
+  },
+  "Nordhausen, Thüringen, Allemagne": {
+    "lat": 51.5051574,
+    "lon": 10.7925317
+  },
+  "Giebichenstein, Allemagne": {
+    "lat": 51.5004803,
+    "lon": 11.9577911
+  },
+  "Monza, Italie": {
+    "lat": 45.6395418,
+    "lon": 9.2788304
+  },
+  "Verona, Italie": {
+    "lat": 45.4424977,
+    "lon": 10.9857377
+  },
+  "Mons, Belgique": {
+    "lat": 50.4549568,
+    "lon": 3.951958
+  },
+  "Regensburg, Allemagne": {
+    "lat": 49.0195333,
+    "lon": 12.0974869
+  },
+  "Aschaffenburg, Allemagne": {
+    "lat": 49.9706701,
+    "lon": 9.1384857
+  },
+  "Novara, Italie": {
+    "lat": 45.58425,
+    "lon": 8.545997
+  },
+  "Ivrea, Italie": {
+    "lat": 45.4673791,
+    "lon": 7.874797
+  },
+  "en croisade": {
+    "lat": 48.2651286,
+    "lon": -1.8410477
+  },
+  "Bar-le-Duc, Meuse, France": {
+    "lat": 48.7712673,
+    "lon": 5.1623805
+  },
+  "Klosterneuburg, Autriche": {
+    "lat": 48.30499,
+    "lon": 16.323756
+  },
+  "Mont Cassin, Italie": {
+    "lat": 41.4899454,
+    "lon": 13.8133251
+  },
+  "Torino, Italie": {
+    "lat": 45.0677551,
+    "lon": 7.6824892
+  },
+  "Canischio, Italie": {
+    "lat": 45.373987,
+    "lon": 7.5961265
+  },
+  "Mainz, Deutschland": {
+    "lat": 49.9995205,
+    "lon": 8.2736253
+  },
+  "Lechfeld, Allemagne": {
+    "lat": 48.1643014,
+    "lon": 10.8229467
+  },
+  "Esch-sur-Sûre, Luxembourg": {
+    "lat": 49.9112543,
+    "lon": 5.9351159
+  },
+  "Sezzadio, Italie": {
+    "lat": 44.784849,
+    "lon": 8.572546
+  },
+  "Grazzano Badoglio, Italie": {
+    "lat": 45.0395818,
+    "lon": 8.3135527
+  },
+  "Hermillon, La Tour-en-Maurienne, Savoie, France": {
+    "lat": 45.299115,
+    "lon": 6.3624976
+  },
+  "Marsico, Italie": {
+    "lat": 40.423012,
+    "lon": 15.734868
+  },
+  "Barletta, Italie": {
+    "lat": 41.3214976,
+    "lon": 16.2868696
+  },
+  "abbaye de Lorsch": {
+    "lat": 49.6535505,
+    "lon": 8.5697673
+  },
+  "près de Bratislava": {
+    "lat": 48.2861831,
+    "lon": 17.2716219
+  },
+  "Fritzlar, Deutschland": {
+    "lat": 51.1537071,
+    "lon": 9.2645106
+  },
+  "Augsburg, Deutschland": {
+    "lat": 48.3690341,
+    "lon": 10.8979522
+  },
+  "Saint-Benoît-sur-Loire, Loiret, France": {
+    "lat": 47.8101798,
+    "lon": 2.3069095
+  },
+  "Dourdan, Yvelines, France": {
+    "lat": 48.5458531,
+    "lon": 1.9618187
+  },
+  "Geldern, Allemagne": {
+    "lat": 51.5169736,
+    "lon": 6.3228189
+  },
+  "Utrecht, Pays-Bas": {
+    "lat": 52.0907006,
+    "lon": 5.1215634
+  },
+  "abbaye Saint-Hydulphe de Moyenmoutier, Vosges, France": {
+    "lat": 48.378381,
+    "lon": 6.9125909
+  },
+  "Ertheneburg, Allemagne": {
+    "lat": 53.3785518,
+    "lon": 10.4965737
+  },
+  "Questembert, Bretagne, France": {
+    "lat": 47.6604074,
+    "lon": -2.4527138
+  },
+  "Bulgarie": {
+    "lat": 42.6073975,
+    "lon": 25.4856617
+  },
+  "Espagne": {
+    "lat": 39.3260685,
+    "lon": -4.8379791
+  },
+  "Devín, Slovaquie": {
+    "lat": 48.1731085,
+    "lon": 16.9803676
+  },
+  "Saalfeld, Allemagne": {
+    "lat": 50.6479143,
+    "lon": 11.3610041
+  },
+  "Pont-Audemer, Eure, France": {
+    "lat": 49.356241,
+    "lon": 0.515331
+  },
+  "Salerno": {
+    "lat": 40.4194416,
+    "lon": 15.3106085
+  },
+  "Teano, Italie": {
+    "lat": 41.2510841,
+    "lon": 14.0671513
+  },
+  "Benevento, Italie": {
+    "lat": 41.2476307,
+    "lon": 14.7057054
+  },
+  "Randsfjorden, Norvège": {
+    "lat": 60.5229586,
+    "lon": 10.3119563
+  },
+  "Stiklestad, Norvège": {
+    "lat": 63.7960011,
+    "lon": 11.5587694
+  },
+  "Kiev, Ukraine": {
+    "lat": 50.4500336,
+    "lon": 30.5241361
+  },
+  "Abbaye de Saint-Pierre-sur-Dives": {
+    "lat": 49.0203829,
+    "lon": -0.0339816
+  },
+  "Lauria, Italie": {
+    "lat": 40.0472814,
+    "lon": 15.8354339
+  },
+  "Valencia, Espagne": {
+    "lat": 39.4697065,
+    "lon": -0.3763353
+  },
+  "Lenzen, Allemagne": {
+    "lat": 53.0908005,
+    "lon": 11.4748618
+  },
+  "Allemagne": {
+    "lat": 51.1638175,
+    "lon": 10.4478313
+  },
+  "Paris, France": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Hohenmölsen, Allemagne": {
+    "lat": 51.1573976,
+    "lon": 12.0981844
+  },
+  "Antioche, Turquie": {
+    "lat": 36.2036546,
+    "lon": 36.1637648
+  }
+}
