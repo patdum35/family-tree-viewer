@@ -1156,7 +1156,8 @@ const SpeechRecognitionUI = (function() {
 
             speechRecognitionResult: "Résultat de la Reconnaissance Vocale:", 
             accessByVoice: "accéssible par la voix (éditable)", 
-            speechRecognitionTitle:"Saisie Vocale ",
+            speechRecognitionTitle: "Saisie Vocale ",
+            possibleQuestions:"Liste des questions possibles à prononcer",
 
         },
         'en': {
@@ -1261,6 +1262,7 @@ const SpeechRecognitionUI = (function() {
             speechRecognitionResult: "Speech Recognition Result:",
             accessByVoice: "voice-accessible (editable)",
             speechRecognitionTitle: "Voice Input ",
+            possibleQuestions: "List of possible questions to speak",
 
         },
         'es': {
@@ -1364,7 +1366,7 @@ const SpeechRecognitionUI = (function() {
             speechRecognitionResult: "Resultado del reconocimiento de voz:",
             accessByVoice: "accesible por voz (editable)",
             speechRecognitionTitle: "Entrada por voz ",
-
+            possibleQuestions: "Lista de posibles preguntas para pronunciar",
         },
         'hu': {
             btnRecord: 'Beszeljen',
@@ -1441,11 +1443,11 @@ const SpeechRecognitionUI = (function() {
             speelingEnded: "Betűzés befejezve. Érték mentve:",
             structuredModeDetected: "Strukturált mód észlelve. Kérdés:",
             spellingMode: "Betűzési mód (Mező",
-            spellingMode2: "Mondjon egy vagy több betűt, majd várjon az újraindításra. Vagy mondja: 'A betű B betű, ...'\nMondja azt, hogy 'mégse' az utolsó betű törléséhez hiba esetén.\nMondja azt, hogy 'érvényesít' a betűzés befejezéséhez.)",
+            spellingMode2: "Mondjon egy vagy több betűt, majd várjon az újraindításra. Vagy mondja: 'A betű B betű, ...'\nMondja azt, hogy 'mégse' az utolsó betű törléséhez hiba esetén.\nMondja azt, hogy 'mehet' a betűzés befejezéséhez.)",
 
             spellingStopped: "A betűzés kritikus hiba miatt megszakadt. Indítsa újra manuálisan",
-            listeningInProgressStart: "Figyelés folyamatban... Például mondja:\n- ki vagy érvényesít , vagy\n- hány éves Hugues Capet érvényesít  , Vagy \n- keresztnév Hugues érvényesít vezetéknév Capet érvényesít kérdés hány éves érvényesít .\nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t érvényesít",
-            listeningInProgress: "Figyelés folyamatban... Például mondja:\n- keresztnév Hugues érvényesít \n- vezetéknév Capet érvényesít \n- érvényesít : beír \nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t érvényesít",
+            listeningInProgressStart: "Figyelés folyamatban... Például mondja:\n- ki vagy mehet , vagy\n- hány éves Hugues Capet mehet  , Vagy \n- keresztnév Hugues mehet vezetéknév Capet mehet kérdés hány éves mehet .\nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t mehet",
+            listeningInProgress: "Figyelés folyamatban... Például mondja:\n- keresztnév Hugues mehet \n- vezetéknév Capet mehet \n- mehet : beír \nEgy szó betűzéséhez mondja:\nvezetéknév betűről betűre c a p e t mehet",
             removed: "eltávolítva",
             nothingToRemove: "Nincs mit törölni",
             added: "Hozzáadva",
@@ -1465,7 +1467,7 @@ const SpeechRecognitionUI = (function() {
             speechRecognitionResult: "Beszédfelismerés eredménye:",
             accessByVoice: "hanggal elérhető (szerkeszthető)",
             speechRecognitionTitle: "Hangbevitel ",
-
+            possibleQuestions: "Kiejthető lehetséges kérdések listája",
 
         }
     };
@@ -1798,6 +1800,10 @@ const SpeechRecognitionUI = (function() {
         previousFullTranscript = fullTranscript;
         
 
+        
+        
+        
+        // 1 -  ##########"  Détecter si il y a une question dans le transcript"
         let detectedAction = null; // Variable pour stocker l'expression d'action qui correspond
         let truncatedTranscript = fullTranscript;
         let maxIndex = 0;
@@ -1821,60 +1827,133 @@ const SpeechRecognitionUI = (function() {
             }
         }
 
+
+
+
+        // 1 -  ##########"  Détecter si il y a une ou des keys  dans le transcript"
         let isKeyDetected = false;
         let isSpellDetected = false;
         let KeyDetectedTab = [];
-        const entityList = ['firstname','lastname', 'non','place','occupation','date', 'question'];
-        entityList.forEach( key=> {
-            const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
-            const truncatedTranscriptForKey = fullTranscript.substring(index);
-            const wordsKey = truncatedTranscriptForKey.split(/\s+/).filter(w => w.length > 0);
-            const isPauseKeyDetected = truncatedTranscriptForKey.lastIndexOf('pause'+ ' ');
 
-            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
+        const entityList = ['firstname','lastname', 'non','place','occupation','date','question'];
 
-            let localKey = key;
-            if(key === 'non') { localKey = 'lastname';}
 
-            // let wordsKeyMinLength = 7;
+        
+        // entityList.forEach( key=> {
+        //     const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
+        //     const truncatedTranscriptForKey = fullTranscript.substring(index);
+        //     const wordsKey = truncatedTranscriptForKey.split(/\s+/).filter(w => w.length > 0);
+        //     const isPauseKeyDetected = truncatedTranscriptForKey.lastIndexOf('pause'+ ' ');
 
-            if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
-                capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier te le dernier mot 
+        //     // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
 
-                cumulativeTranscript = ' ';
-                // if (entityList.includes(wordsKey[wordsKey.length - 1])) {
-                //     cumulativeTranscript = ' ' + wordsKey[wordsKey.length - 1] + ' ';
-                // }
-                previousNewCumulativeTranscript = cumulativeTranscript;
+        //     let localKey = key;
+        //     if(key === 'non') { localKey = 'lastname';}
 
-                updateEntityUI();
-                isKeyDetected = true;
-                KeyDetectedTab[localKey] = true;
+        //     // let wordsKeyMinLength = 7;
+
+        //     // si un keyWord est détecté et un validation word à la fin du transcript
+        //     if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
+        //         capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier et le dernier mot 
+
+        //         cumulativeTranscript = ' ';
+        //         // if (entityList.includes(wordsKey[wordsKey.length - 1])) {
+        //         //     cumulativeTranscript = ' ' + wordsKey[wordsKey.length - 1] + ' ';
+        //         // }
+        //         previousNewCumulativeTranscript = cumulativeTranscript;
+
+        //         updateEntityUI();
+        //         isKeyDetected = true;
+        //         KeyDetectedTab[localKey] = true;
               
 
-            } else {
-               KeyDetectedTab[key] = false; 
-            }
+        //     } else {
+        //        KeyDetectedTab[key] = false; 
+        //     }
 
-            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected key=', key, ' @@@@@@@ : ', wordsKey[0], wordsKey[1], wordsKey[2], wordsKey[3], wordsKey[4], window.CURRENT_LANGUAGE,'\n\n\n')
+        //     // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected key=', key, ' @@@@@@@ : ', wordsKey[0], wordsKey[1], wordsKey[2], wordsKey[3], wordsKey[4], window.CURRENT_LANGUAGE,'\n\n\n')
            
-            let wordIndex = 1;
-            if (window.CURRENT_LANGUAGE === 'en' && ( key === 'firstname' || key ==='lastname') ) {
-                wordIndex = 2;
-            }
+        //     let wordIndex = 1;
+        //     if (window.CURRENT_LANGUAGE === 'en' && ( key === 'firstname' || key ==='lastname') ) {
+        //         wordIndex = 2;
+        //     }
             
             
-            if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
+        //     // si un keyWord est détecté et la séquence 'lettre par lettre' est détectée
+        //     if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
 
-                console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
-                capturedEntities[translate(localKey)] = '';
-                updateEntityUI();
+        //         console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
+        //         capturedEntities[translate(localKey)] = '';
+        //         updateEntityUI();
 
-                startSpellingCycle(translate(localKey), localKey, config); 
-                isSpellDetected = true;
-                return; 
+        //         startSpellingCycle(translate(localKey), localKey, config); 
+        //         isSpellDetected = true;
+        //         return; 
+        //     }
+        // })
+
+
+
+
+
+
+        let isOneKeyIsDetected = false;
+        let KeyDetectedArray = [];
+        const entityListAndValidation = ['firstname','lastname', 'non','place','occupation','date', 'question','pause', 'go', 'end','endBis','stop','enter','validateBis','validate'];
+        const ValidationList = ['pause', 'go', 'end','endBis','stop','enter','validateBis','validate'];
+        
+        entityListAndValidation.forEach( key=> {
+            let index = -1;
+            if (ValidationList.includes(key)) { index = fullTranscript.lastIndexOf(translate(key)); } 
+            else { index = fullTranscript.lastIndexOf(translate(key)+ ' '); }
+            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
+            // si un keyWord est détecté et un validation word à la fin du transcript
+            if (index!== -1) {
+                if (key === 'lastname' && KeyDetectedArray.find(item => item.id === 'firstname') && index === KeyDetectedArray.find(item => item.id === 'firstname').index +3){ /*skip*/;}
+                else { KeyDetectedArray.push({ id: key, index: index }); isOneKeyIsDetected = true; }
             }
         })
+
+        console.log('KeyDetectedArray=', KeyDetectedArray);
+
+        // tri de l'index le plus petit au plus grand
+        KeyDetectedArray.sort((a, b) => a.index - b.index);
+
+        entityList.forEach( key=> {
+            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
+            let localKey = key;
+            if(key === 'non') { localKey = 'lastname';}
+            // si un keyWord est détecté et un validation word à la fin du transcript
+
+            let localKeyItem = KeyDetectedArray.find(item => item.id === key);
+            if ( localKeyItem && localKeyItem.index !== -1 ) {
+                let itemFound = false;
+                KeyDetectedArray.forEach( item => {
+                    if (!itemFound && item.index !== -1 && item.index > localKeyItem.index ) {
+                        itemFound = true;
+                        const truncatedTranscriptForKey = fullTranscript.substring(localKeyItem.index, item.index);
+                        cumulativeTranscript = cumulativeTranscript.replace(truncatedTranscriptForKey, '');
+                        capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').trim(); // enlever le 1ier et le dernier mot 
+                        let testValue = truncatedTranscriptForKey.replace(translate(key), '').trim();
+                        testValue = "'" + testValue + "'";
+                        console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  key', localKey, 'key2=',item.id,'testValue=',testValue,'index1=', localKeyItem.index, 'index2=', item.index,'\n\n\n')
+                    }
+                });
+            }
+        })
+
+        if (isOneKeyIsDetected) {
+            updateEntityUI();
+        }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2577,8 +2656,17 @@ const SpeechRecognitionUI = (function() {
     function createUIStructure() {
         const overlayId = 'stt-only-overlay';
         const existingOverlay = document.getElementById(overlayId);
-        if (existingOverlay) return existingOverlay;
-        
+    
+        if (existingOverlay) {
+            // Si l'overlay existe déjà, on récupère la modale à l'intérieur
+            const existingModal = existingOverlay.querySelector('#speechRecognitionModal');
+            if (existingModal && typeof existingModal.resetPositionAndSize === 'function') {
+                // On réinitialise la position et la taille avant de l'afficher
+                existingModal.resetPositionAndSize();
+            }
+            return existingOverlay;
+        }
+
         const overlay = document.createElement('div');
         overlay.id = overlayId;
 
@@ -3235,6 +3323,24 @@ const SpeechRecognitionUI = (function() {
             // Les autres éléments (flèche et liste) sont déjà attachés au listItem
             listElement.appendChild(listItem);
         }
+
+        if (localConfig !== 'start') {
+            // --- AJOUT DU LABEL SOUS LA LISTE ---
+            const footerLabel = document.createElement('div');
+            footerLabel.textContent = translate('possibleQuestions');
+            footerLabel.style.cssText = `
+                margin-top: 0px;
+                margin-left : 40px;
+                font-size: 0.85em;
+                font-style: italic;
+                color: #666;
+                text-align: center;
+                width: 100%;
+            `;
+            listElement.appendChild(footerLabel);
+        }
+
+
     }
 
 
