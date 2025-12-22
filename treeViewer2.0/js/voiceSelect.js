@@ -1025,11 +1025,17 @@ const VoiceSelectorUI = (function() {
 
 
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
+    console.log('\n\n ---- debug0 : lancement de loadVoices à la création de VoiceSelectorUI --- window.speechSynthesis=', window.speechSynthesis,'\n\n')
     if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
+        console.log('\n\n ---- debug1 : lancement de loadVoices à la création de VoiceSelectorUI --- window.speechSynthesis=', window.speechSynthesis, 'window.speechSynthesis.onvoiceschanged=', window.speechSynthesis.onvoiceschanged, 'getVoices()=',window.speechSynthesis.getVoices(),'\n\n');
+
+
         if (window.speechSynthesis.getVoices().length > 0) {
-            console.log('\n\n ---- debug : lancement de  à la création de VoiceSelectorUI ---\n\n')
-            loadVoices();
+            console.log('\n\n ---- debug2 : lancement de loadVoices à la création de VoiceSelectorUI ---\n\n')
+            // loadVoices();
+
+            // console.log('\n\n ---- debug : pas de lancement de loadVoices à la création de VoiceSelectorUI ---\n\n')
         }
     }
 
