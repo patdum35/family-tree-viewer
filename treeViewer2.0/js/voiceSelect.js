@@ -867,6 +867,14 @@ const VoiceSelectorUI = (function() {
         
         if (appState.voices.length > 0) {
             // Mise à jour du statut général après le chargement pour affichage initial
+
+       console.log('\n\n ---- debug4b : in loadVoices --- appState.voices=',state.isOnLine, '\n\n')
+
+      console.log('\n\n ---- debug4c : in loadVoices --- appState.voices=',localStorage.getItem('selectedVoice'), '\n\n')
+
+       console.log('\n\n ---- debug4D : in loadVoices --- appState.voices=', translate('statusOffline'),'\n\n')
+
+
             if (state.isOnLine === false) {
                  appState.status = translate('statusOffline');
             } else {
