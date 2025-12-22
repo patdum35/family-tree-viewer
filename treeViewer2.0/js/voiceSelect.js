@@ -857,7 +857,13 @@ const VoiceSelectorUI = (function() {
             return false;
         }
 
+        console.log('\n\n ---- debug3 : in loadVoices ---\n\n')
+
+
+
         appState.voices = window.speechSynthesis.getVoices();
+        console.log('\n\n ---- debug4 : in loadVoices --- appState.voices=',appState.voices, '\n\n')
+
         
         if (appState.voices.length > 0) {
             // Mise à jour du statut général après le chargement pour affichage initial
@@ -870,6 +876,10 @@ const VoiceSelectorUI = (function() {
             // === ÉTAPE IMPORTANTE : INITIALISATION ===
             // 1. Récupérer le nom de la voix sauvegardée
             const storedVoiceName = localStorage.getItem('selectedVoice');
+
+
+            console.log('\n\n ---- debug5 : in loadVoices --- storedVoiceName=',storedVoiceName, '\n\n')
+
 
             // 2. Initialiser la voix sélectionnée avec ce nom
             setInitialVoiceByName(storedVoiceName); 
@@ -898,6 +908,8 @@ const VoiceSelectorUI = (function() {
                 //         console.warn(`⚠️ Aucune voix locale par défaut trouvée. Première voix disponible utilisée: ${appState.voices[0].name}`);
                 //     }
                 // }
+                 console.log('\n\n ---- debug6 : in loadVoices   call to findDefaultVoice--- storedVoiceName=',storedVoiceName, '\n\n')
+
 
                 findDefaultVoice(window.CURRENT_LANGUAGE || 'fr').then(defaultVoice => {
                     if (defaultVoice) {
@@ -1033,9 +1045,7 @@ const VoiceSelectorUI = (function() {
 
         if (window.speechSynthesis.getVoices().length > 0) {
             console.log('\n\n ---- debug2 : lancement de loadVoices à la création de VoiceSelectorUI ---\n\n')
-            // loadVoices();
-
-            // console.log('\n\n ---- debug : pas de lancement de loadVoices à la création de VoiceSelectorUI ---\n\n')
+            loadVoices();
         }
     }
 
