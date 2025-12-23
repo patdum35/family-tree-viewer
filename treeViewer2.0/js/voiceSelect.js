@@ -2343,10 +2343,10 @@ const SpeechRecognitionUI = (function() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 
-        if (!SpeechRecognition || !SpeechGrammarList) {
-            console.error("Speech Recognition non supporté.");
-            return;
-        }
+        // if (!SpeechRecognition || !SpeechGrammarList) {
+        //     console.error("Speech Recognition non supporté.");
+        //     return;
+        // }
         
 
 
@@ -2354,7 +2354,7 @@ const SpeechRecognitionUI = (function() {
 
         // CHANGEMENT ICI : On ne bloque que si SpeechRecognition manque
         if (!SpeechRecognition) {
-            console.error("Speech Recognition non supporté.");
+            console.error("Speech Recognition non supporté 2.");
             return;
         }
 
