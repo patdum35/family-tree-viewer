@@ -8,6 +8,16 @@ import { debugLog } from './debugLogUtils.js';
 
 
 
+
+
+// Polyfill pour iOS : Si SpeechGrammarList n'existe pas, on crée une classe vide
+if (typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined') {
+    window.SpeechGrammarList = function() {
+        this.addFromString = function() {}; // Ne fait rien, évite le plantage
+    };
+}
+
+
 export function selectVoice() {
 
     let voice_language = 'fr-FR';
