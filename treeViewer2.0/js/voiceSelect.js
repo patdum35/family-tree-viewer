@@ -2340,8 +2340,8 @@ const SpeechRecognitionUI = (function() {
 
     function initializeSpeechRecognition(config = null) {
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+        // const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        // const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 
         // if (!SpeechRecognition || !SpeechGrammarList) {
         //     console.error("Speech Recognition non supporté.");
@@ -2349,47 +2349,65 @@ const SpeechRecognitionUI = (function() {
         // }
         
 
+        // if (recognition) return; 
+
+        // recognition = new SpeechRecognition();
+        
+        // const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
+        // const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+        // const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
+
+        // spellingGrammar = new SpeechGrammarList();
+        // spellingGrammar.addFromString(spellingGrammarString, 1);
+        
+        // recognition.grammars = new SpeechGrammarList(); 
+        
+        // recognition.lang = targetLang; 
+        // recognition.continuous = !state.isMobile; 
+        // recognition.interimResults = true; 
 
 
 
-        // CHANGEMENT ICI : On ne bloque que si SpeechRecognition manque
+
+
+
+        // On garde votre sécurité d'origine
+        if (typeof recognition !== 'undefined' && recognition !== null) {
+            return; 
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+        // --- CORRECTION IOS : On ne bloque que si l'API de base est absente ---
         if (!SpeechRecognition) {
-            console.error("Speech Recognition non supporté 2.");
+            console.error("Speech Recognition non supporté.");
             return;
         }
 
-        const recognition = new SpeechRecognition();
-        
-        // On n'utilise la grammaire que si elle existe
-        if (SpeechGrammarList) {
-            // votre code de grammaire ici...
+        // On crée l'objet (Maintenant cette ligne s'exécute enfin sur iOS !)
+        recognition = new SpeechRecognition();
+
+        // --- CORRECTION IOS : On rend la grammaire optionnelle ---
+        if (SpeechGrammarList && config && config.commands) {
+            const grammar = '#JSGF V1.0; grammar commands; public <command> = ' + config.commands.join(' | ') + ' ;';
+            const speechRecognitionList = new SpeechGrammarList();
+            speechRecognitionList.addFromString(grammar, 1);
+            recognition.grammars = speechRecognitionList;
         }
 
-        console.log("Speech Recognition initialisé avec succès sur iOS !");
-
-
-
-
-
-
-
-
-        if (recognition) return; 
-
-        recognition = new SpeechRecognition();
-        
-        const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
-        const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
-        const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
-
-        spellingGrammar = new SpeechGrammarList();
-        spellingGrammar.addFromString(spellingGrammarString, 1);
-        
-        recognition.grammars = new SpeechGrammarList(); 
-        
+        // ON GARDE TOUT VOTRE CODE D'ORIGINE CI-DESSOUS
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
-        recognition.interimResults = true; 
+        recognition.interimResults = true;
+
+
+
+
+
+
+
+
 
         recognition.onstart = () => {
             isRecognitionActive = true;
