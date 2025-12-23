@@ -2348,6 +2348,32 @@ const SpeechRecognitionUI = (function() {
             return;
         }
         
+
+
+
+
+        // CHANGEMENT ICI : On ne bloque que si SpeechRecognition manque
+        if (!SpeechRecognition) {
+            console.error("Speech Recognition non supporté.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        
+        // On n'utilise la grammaire que si elle existe
+        if (SpeechGrammarList) {
+            // votre code de grammaire ici...
+        }
+
+        console.log("Speech Recognition initialisé avec succès sur iOS !");
+
+
+
+
+
+
+
+
         if (recognition) return; 
 
         recognition = new SpeechRecognition();
