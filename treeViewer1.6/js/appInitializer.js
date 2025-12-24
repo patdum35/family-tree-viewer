@@ -56,7 +56,8 @@ import { documentation } from './documentation.js';
 import { voiceModal, voiceCommand, selectVoice } from './voiceSelect.js';
 
 import { toggleAccelerometer } from './accelerometer.js';
-import { toggleCamera } from './cameraManager.js';
+// import { toggleCamera, cycleCameraFilter, openCameraModal, closeCameraModal } from './cameraManager.js';
+import { toggleCamera, cycleCameraFilter, openCameraModal } from './cameraManager.js';
 
 
 // // ou si tu veux attendre que tout soit chargé
@@ -237,6 +238,9 @@ function initializeAppFunctions() {
     window.selectVoice = selectVoice;
     window.toggleAccelerometer = toggleAccelerometer;
     window.toggleCamera = toggleCamera;
+    window.cycleCameraFilter = cycleCameraFilter;
+    window.openCameraModal = openCameraModal;
+    // window.closeCameraModal = closeCameraModal;
 }
 
 
