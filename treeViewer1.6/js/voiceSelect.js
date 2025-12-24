@@ -1037,17 +1037,22 @@ const VoiceSelectorUI = (function() {
     }
 
 
+
+
+    // --- Créer l'UI dès l'initialisation du module (une seule fois) ---
+    createUIStructure();
+
+
+
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
     if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
         if (window.speechSynthesis.getVoices().length > 0) {
-            console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', state,'\n\n')
-            loadVoices();
+            console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
+            // loadVoices();
         }
     }
 
-    // --- Créer l'UI dès l'initialisation du module (une seule fois) ---
-    createUIStructure();
 
 
     return {
