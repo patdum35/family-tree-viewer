@@ -860,6 +860,11 @@ const VoiceSelectorUI = (function() {
      * 4. FONCTIONS PUBLIQUES (API)
      */
     function loadVoices() {
+
+        console.log('\n\n ---- debug : in loadVoices ---', state,'\n\n');
+        if(!state) { return false;}
+
+
         if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
             appState.status = translate('statusNoSupport');
             return false;
@@ -1036,8 +1041,8 @@ const VoiceSelectorUI = (function() {
     if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
         if (window.speechSynthesis.getVoices().length > 0) {
-            console.log('\n\n ---- debug : lancement de  à la création de VoiceSelectorUI ---\n\n')
-            // loadVoices();
+            console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', state,'\n\n')
+            loadVoices();
         }
     }
 
