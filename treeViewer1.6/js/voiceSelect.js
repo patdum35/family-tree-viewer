@@ -861,8 +861,13 @@ const VoiceSelectorUI = (function() {
      */
     function loadVoices() {
 
-        console.log('\n\n ---- debug : in loadVoices ---', state,'\n\n');
-        if(!state) { return false;}
+        console.log('\n\n ---- debug : in loadVoices ---', '\n\n');
+        if(!state) { 
+            console.log('\n\n ---- debug : in loadVoices return as state not available ---', '\n\n');
+            
+            return false;
+        }
+
 
 
         if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
@@ -1045,13 +1050,24 @@ const VoiceSelectorUI = (function() {
 
 
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
-    if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-        if (window.speechSynthesis.getVoices().length > 0) {
-            console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
-            // loadVoices();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            if (window.speechSynthesis.getVoices().length > 0) {
+                console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
+                setTimeout(() => {
+                    loadVoices();
+                }, 500);
+
+
+            }
         }
-    }
+    });
+
+
+
+
 
 
 
