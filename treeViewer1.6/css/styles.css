@@ -1033,3 +1033,12 @@ input[type=number] {
   background: #1a6dff;         /* bleu plus vif */
   transform: scale(1.1);       /* petit zoom élégant */
 }
+
+
+/* Cache l'élément racine d'Eruda */
+#eruda {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

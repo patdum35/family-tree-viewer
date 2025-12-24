@@ -1,114 +1,8 @@
 // ====================================
 // Configuration et initialisation
 // ====================================
-import { parseGEDCOM } from './gedcomParser.js';
-import { drawTree } from './treeRenderer.js';
-import { findYoungestPerson, findPersonByName } from './utils.js';
-import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
-import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
-    toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
-import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
-import { nameCloudState } from './nameCloud.js';
-import { closeCloudName } from './nameCloudUI.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
-    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
-import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
-    
-    
-import { createEnhancedSettingsModal } from './treeSettingsModal.js';
-import { debounce, hideLoginBackground } from './eventHandlers.js';
-import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
-import { initTilePreloading } from './mapTilesPreloader.js';
-import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
-import { createAudioElement } from './audioPlayer.js';
 
-import { cleanupExportControls } from './exportSettings.js';
 
-import { setMaxGenerationsInit } from './treeWheelRenderer.js';
-import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
-import { debugLog } from './debugLogUtils.js'
-import { enableBackground } from './backgroundManager.js';
-import { loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
-
-import { 
-    displayPersonDetails, 
-    closePersonDetails,
-    setAsRootPerson,
-    closeModal
-} from './modalWindow.js';
-import {
-    initializeEventHandlers,
-    updatePrenoms,
-    updateLettersInNames,
-    updateGenerations,
-    zoomIn,
-    zoomOut,
-    resetView,
-    resetZoom,
-    searchTree,
-    closeAllModals
-} from './eventHandlers.js';
-import { resetPuzzle } from './puzzleSwipe.js';
-
-// Enregistrement du Service Worker pour permettre le mode hors ligne
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(registration => {
-        console.log('✅ Service Worker enregistré avec succès:', registration.scope);
-        
-        // Vérifier si une mise à jour est disponible
-        registration.onupdatefound = () => {
-          const installingWorker = registration.installing;
-          installingWorker.onstatechange = () => {
-            if (installingWorker.state === 'installed') {
-              if (navigator.serviceWorker.controller) {
-                console.log('Nouveau Service Worker installé, sera activé au prochain chargement');
-              } else {
-                console.log('Service Worker installé pour la première fois');
-              }
-            }
-          };
-        };
-      })
-      .catch(error => {
-        console.error('Échec de l\'enregistrement du Service Worker:', error);
-      });
-}
-
-// for tracking with google Analytics
-export function trackPageView(pagePath) {
-    if (window.gtag) {
-        console.log(`📊 Suivi de la vue de page pour google Analytics: ${pagePath}`);
-        gtag('event', 'page_view', {
-            page_location: window.location.href,
-            page_title: pagePath
-        });
-    }
-}
-
-// Sélection des champs
-const passwordInput = document.getElementById('password');
-const firstNameInput = document.getElementById('input-form-firstName');
-const lastNameInput = document.getElementById('input-form-lastName');
-
-// Charger les valeurs stockées au chargement de la page
-window.addEventListener('DOMContentLoaded', () => {
-    const savedPassword  = localStorage.getItem('password');
-    const savedFirstName = localStorage.getItem('firstName');
-    const savedLastName = localStorage.getItem('lastName');
-    if (savedPassword) passwordInput.value = savedPassword;
-    if (savedFirstName) firstNameInput.value = savedFirstName;
-    if (savedLastName) lastNameInput.value = savedLastName;
-});
-
-// Sauvegarder les valeurs dès qu’elles changent
-[passwordInput, firstNameInput, lastNameInput].forEach(input => {
-    input.addEventListener('input', () => {
-        localStorage.setItem('password', passwordInput.value);
-        localStorage.setItem('firstName', firstNameInput.value);
-        localStorage.setItem('lastName', lastNameInput.value);
-    });
-});
 
 export const state = {
     gedcomData: null,
@@ -236,6 +130,136 @@ export const state = {
     isEndTestRealConnectivity: false,
 
 };
+
+
+
+
+import { parseGEDCOM } from './gedcomParser.js';
+import { drawTree } from './treeRenderer.js';
+import { findYoungestPerson, findPersonByName } from './utils.js';
+import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
+import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
+    toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
+import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
+import { nameCloudState } from './nameCloud.js';
+import { closeCloudName } from './nameCloudUI.js';
+import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
+    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
+import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
+    
+    
+import { createEnhancedSettingsModal } from './treeSettingsModal.js';
+import { debounce, hideLoginBackground } from './eventHandlers.js';
+import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
+import { initTilePreloading } from './mapTilesPreloader.js';
+import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
+import { createAudioElement } from './audioPlayer.js';
+
+import { cleanupExportControls } from './exportSettings.js';
+
+import { setMaxGenerationsInit } from './treeWheelRenderer.js';
+import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
+import { debugLog } from './debugLogUtils.js'
+import { enableBackground } from './backgroundManager.js';
+import { loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
+
+import { 
+    displayPersonDetails, 
+    closePersonDetails,
+    setAsRootPerson,
+    closeModal
+} from './modalWindow.js';
+import {
+    initializeEventHandlers,
+    updatePrenoms,
+    updateLettersInNames,
+    updateGenerations,
+    zoomIn,
+    zoomOut,
+    resetView,
+    resetZoom,
+    searchTree,
+    closeAllModals
+} from './eventHandlers.js';
+import { resetPuzzle } from './puzzleSwipe.js';
+
+
+window.addEventListener('load', function() {
+    if (window.eruda) {
+        eruda.hide();
+        console.log("\n\n\nLe bouton Eruda est maintenant masqué, mais la console tourne !");
+    } else {
+        console.log("\n\n\neruda n'est pas défini.");
+    }
+});
+
+
+window.addEventListener('load', initialize);
+
+
+
+
+// Enregistrement du Service Worker pour permettre le mode hors ligne
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('✅ Service Worker enregistré avec succès:', registration.scope);
+        
+        // Vérifier si une mise à jour est disponible
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                console.log('Nouveau Service Worker installé, sera activé au prochain chargement');
+              } else {
+                console.log('Service Worker installé pour la première fois');
+              }
+            }
+          };
+        };
+      })
+      .catch(error => {
+        console.error('Échec de l\'enregistrement du Service Worker:', error);
+      });
+}
+
+// for tracking with google Analytics
+export function trackPageView(pagePath) {
+    if (window.gtag) {
+        console.log(`📊 Suivi de la vue de page pour google Analytics: ${pagePath}`);
+        gtag('event', 'page_view', {
+            page_location: window.location.href,
+            page_title: pagePath
+        });
+    }
+}
+
+// Sélection des champs
+const passwordInput = document.getElementById('password');
+const firstNameInput = document.getElementById('input-form-firstName');
+const lastNameInput = document.getElementById('input-form-lastName');
+
+// Charger les valeurs stockées au chargement de la page
+window.addEventListener('DOMContentLoaded', () => {
+    const savedPassword  = localStorage.getItem('password');
+    const savedFirstName = localStorage.getItem('firstName');
+    const savedLastName = localStorage.getItem('lastName');
+    if (savedPassword) passwordInput.value = savedPassword;
+    if (savedFirstName) firstNameInput.value = savedFirstName;
+    if (savedLastName) lastNameInput.value = savedLastName;
+});
+
+// Sauvegarder les valeurs dès qu’elles changent
+[passwordInput, firstNameInput, lastNameInput].forEach(input => {
+    input.addEventListener('input', () => {
+        localStorage.setItem('password', passwordInput.value);
+        localStorage.setItem('firstName', firstNameInput.value);
+        localStorage.setItem('lastName', lastNameInput.value);
+    });
+});
+
+
 
 export { geocodeLocation };
 
@@ -766,6 +790,12 @@ export function positionFormContainer() {
 }
 
 function initialize() {   
+
+    // --- 1. Persistance : Vérifier l'état au chargement ---
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        activerModeExpert('modeExpertActif');
+    }
+
     // on met à jour l'image de fond en bonne qualité si l'écran est grand
     if (window.innerWidth > 512 || window.innerHeight > 512) {
         setTimeout(() => {
@@ -964,6 +994,8 @@ function initialize() {
         );
     }
 
+
+    
     const device = detectDeviceType();
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
     state.isPWA = isPWA();
@@ -2276,10 +2308,135 @@ function changePasswordVisibility(hidden = false) {
 }
 
 
+const CLASSE_CACHE = 'expert-hidden';
+
+// --- Fonction d'Activation (où la modification a lieu) ---
+const activerModeExpert = (mode) => {
+    // Mémoriser l'état
+    localStorage.setItem(mode, 'true');
+    
+    // Afficher le pop-up sympa !
+    if (mode === 'modeExpertActif') {
+
+        montrerConsole();
+
+        // si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
+        document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
+            el.classList.remove(CLASSE_CACHE);
+        });
+        afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'hidePasswordActif') {
+        changePasswordVisibility(true);
+        afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'noFullScreenActif') {
+        afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'puzzleActif') {
+        afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+            state.isPuzzleSwipeFromSecret = true;
+            const browserBarLabel = document.getElementById('browserBarLabel');
+            browserBarLabel.style.display = '';
+            const browserBarButton = document.getElementById('browserBar-button');
+            browserBarButton.style.display = '';
+            const bodyElement = document.body;
+            // Augmenter min-height à 105vh
+            bodyElement.style.minHeight = '110vh'; //'15vh';
+            // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
+            // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
+            // 'visible' est souvent la valeur par défaut du navigateur.
+            bodyElement.style.overflow = 'visible';
+        }
+    } else if (mode === 'leavesActif') {
+        afficherPopup('Mode leaves Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        state.addLeaves = true;
+    } else {
+        changePasswordVisibility(false);
+    }
+};
+
+
+
+
+
+function montrerConsole() {
+    const el = document.getElementById('eruda');
+    if (el) {
+        // On force l'affichage en modifiant le style directement
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.style.setProperty('opacity', '1', 'important');
+        el.style.setProperty('pointer-events', 'auto', 'important');
+        eruda.show(); // Commande interne d'Eruda
+    }
+}
+
+function cacherConsole() {
+    const el = document.getElementById('eruda');
+    if (el) {
+        el.style.setProperty('display', 'none', 'important');
+        eruda.hide(); // Commande interne d'Eruda
+    }
+}
+
+
+
+// --- Nouvelle fonction pour créer et afficher le pop-up ---
+const afficherPopup = (message, time = null, top = null) => {
+    // 1. Créer l'élément (Toaster)
+    const popup = document.createElement('div');
+    popup.textContent = message;
+    popup.id = 'expert-activation-popup';
+    popup.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4CAF50; /* Vert */
+        color: white;
+        padding: 5px 5px;
+        border-radius: 8px;
+        font-family: sans-serif;
+        font-size: 16px;
+        z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        white-space: pre-line;
+        text-align: center;
+    `;
+
+    if (top) {
+        popup.style.bottom =  '';
+        popup.style.top = top +'px';
+    }
+
+    document.body.appendChild(popup);
+
+    // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
+    setTimeout(() => {
+        popup.style.opacity = '1';
+    }, 10);
+
+    // 3. Le faire disparaître après 3 secondes
+    let duration = 3000;
+    if (time) {
+        console.log('\n\n   debug 2 afficherPopup ', time)
+        duration = time; 
+    }
+
+    setTimeout(() => {
+        popup.style.opacity = '0';
+        // Supprimer l'élément du DOM après la transition de disparition
+        setTimeout(() => {
+            popup.remove();
+        }, 500); // 500ms correspond à la durée de la transition CSS
+    }, duration); // Reste affiché pendant 3 secondes
+};
+
 
 function secretMode() {
     // --- Configuration ---
-    const CLASSE_CACHE = 'expert-hidden';
+    // const CLASSE_CACHE = 'expert-hidden';
 
     // Configuration séquence de touches
     const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
@@ -2296,58 +2453,6 @@ function secretMode() {
     let tapCount = 0;
     let tapTimer = null;
 
-    // --- Nouvelle fonction pour créer et afficher le pop-up ---
-    const afficherPopup = (message, time = null, top = null) => {
-        // 1. Créer l'élément (Toaster)
-        const popup = document.createElement('div');
-        popup.textContent = message;
-        popup.id = 'expert-activation-popup';
-        popup.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4CAF50; /* Vert */
-            color: white;
-            padding: 5px 5px;
-            border-radius: 8px;
-            font-family: sans-serif;
-            font-size: 16px;
-            z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            white-space: pre-line;
-            text-align: center;
-        `;
-
-        if (top) {
-            popup.style.bottom =  '';
-            popup.style.top = top +'px';
-        }
-
-        document.body.appendChild(popup);
-
-        // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
-        setTimeout(() => {
-            popup.style.opacity = '1';
-        }, 10);
-
-        // 3. Le faire disparaître après 3 secondes
-        let duration = 3000;
-        if (time) {
-            console.log('\n\n   debug 2 afficherPopup ', time)
-            duration = time; 
-        }
-
-        setTimeout(() => {
-            popup.style.opacity = '0';
-            // Supprimer l'élément du DOM après la transition de disparition
-            setTimeout(() => {
-                popup.remove();
-            }, 500); // 500ms correspond à la durée de la transition CSS
-        }, duration); // Reste affiché pendant 3 secondes
-    };
 
 
     function checkSequence(keyPressed) {
@@ -2392,47 +2497,6 @@ function secretMode() {
             sequenceLeavesEnCours = []; // Réinitialise
         }
     }
-
-    // --- Fonction d'Activation (où la modification a lieu) ---
-    const activerModeExpert = (mode) => {
-        // Mémoriser l'état
-        localStorage.setItem(mode, 'true');
-        
-        // Afficher le pop-up sympa !
-        if (mode === 'modeExpertActif') {
-            // si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
-            document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
-                el.classList.remove(CLASSE_CACHE);
-            });
-            afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-        } else if (mode === 'hidePasswordActif') {
-            changePasswordVisibility(true);
-            afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-        } else if (mode === 'noFullScreenActif') {
-            afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-        } else if (mode === 'puzzleActif') {
-            afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-            if (state.isMobile && state.isTouchDevice && !state.isPWA) {
-                state.isPuzzleSwipeFromSecret = true;
-                const browserBarLabel = document.getElementById('browserBarLabel');
-                browserBarLabel.style.display = '';
-                const browserBarButton = document.getElementById('browserBar-button');
-                browserBarButton.style.display = '';
-                const bodyElement = document.body;
-                // Augmenter min-height à 105vh
-                bodyElement.style.minHeight = '110vh'; //'15vh';
-                // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
-                // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
-                // 'visible' est souvent la valeur par défaut du navigateur.
-                bodyElement.style.overflow = 'visible';
-            }
-        } else if (mode === 'leavesActif') {
-            afficherPopup('Mode leaves Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
-            state.addLeaves = true;
-        } else {
-            changePasswordVisibility(false);
-        }
-    };
 
 
     // --- 1. Persistance : Vérifier l'état au chargement ---
@@ -2721,7 +2785,7 @@ export {
 };
 
 
-window.addEventListener('load', initialize);
+// window.addEventListener('load', initialize);
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
