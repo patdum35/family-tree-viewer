@@ -1037,7 +1037,7 @@ const VoiceSelectorUI = (function() {
         window.speechSynthesis.onvoiceschanged = loadVoices;
         if (window.speechSynthesis.getVoices().length > 0) {
             console.log('\n\n ---- debug : lancement de  à la création de VoiceSelectorUI ---\n\n')
-            loadVoices();
+            // loadVoices();
         }
     }
 
