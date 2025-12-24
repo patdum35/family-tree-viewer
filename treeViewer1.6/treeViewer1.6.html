@@ -27,7 +27,7 @@
 
     <!-- A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
     <!-- pour débugger sur IOS où le service worker pose problème -->
-    <!-- <script>
+    <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for (let registration of registrations) {
@@ -46,7 +46,7 @@
         }
         // Optionnel : vider aussi le localStorage si besoin
         // localStorage.clear();
-    </script> -->
+    </script>
     <!-- FIN A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
 
 
@@ -216,6 +216,10 @@
 
                 <button id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
 
+                <button id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer l'accéléromètre</button>
+                <button id="activateCameraBtn"  onclick="toggleCamera()" data-text-key="activerCamera" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer la caméra</button>
+
+
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
@@ -294,7 +298,7 @@
     
     <div id="versionFooter" 
         style="position:fixed; bottom:3px; left:50%; transform:translateX(-50%); font-size:10px; color:white; text-align:center; z-index:1; pointer-events:none;">
-        ®isAI4U-PD V2.38
+        ®isAI4U-PD V2.39
     </div>
 
 

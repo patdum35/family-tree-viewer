@@ -55,6 +55,9 @@ import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
 import { documentation } from './documentation.js';
 import { voiceModal, voiceCommand, selectVoice } from './voiceSelect.js';
 
+import { toggleAccelerometer } from './accelerometer.js';
+import { toggleCamera } from './cameraManager.js';
+
 
 // // ou si tu veux attendre que tout soit chargé
 // document.addEventListener('DOMContentLoaded', () => {
@@ -232,6 +235,8 @@ function initializeAppFunctions() {
     window.voiceModal = voiceModal;
     window.voiceCommand = voiceCommand;
     window.selectVoice = selectVoice;
+    window.toggleAccelerometer = toggleAccelerometer;
+    window.toggleCamera = toggleCamera;
 }
 
 
