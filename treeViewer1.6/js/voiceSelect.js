@@ -862,6 +862,8 @@ const VoiceSelectorUI = (function() {
     function loadVoices() {
 
         console.log('\n\n ---- debug : in loadVoices ---', '\n\n');
+
+
         if(!state) { 
             console.log('\n\n ---- debug : in loadVoices return as state not available ---', '\n\n');
             
@@ -1051,19 +1053,17 @@ const VoiceSelectorUI = (function() {
 
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
 
-    document.addEventListener('DOMContentLoaded', () => {
+    // document.addEventListener('DOMContentLoaded', () => {
         if (window.speechSynthesis) {
             window.speechSynthesis.onvoiceschanged = loadVoices;
             if (window.speechSynthesis.getVoices().length > 0) {
                 console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
                 setTimeout(() => {
                     loadVoices();
-                }, 500);
-
-
+                }, 200);
             }
         }
-    });
+    // });
 
 
 
