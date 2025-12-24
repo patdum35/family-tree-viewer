@@ -47,6 +47,7 @@ const MULTILINGUE_DOC_CONTENT = {
                     <li>💡 {aide / documentation / tuto}</li>
                     <li>👆 / 🚫 { 👆 afficher les boutons sur l'écran / 🚫 cacher les boutons}</li>
                     <li>🗣️ / 🔇 {voix activé / désactivée.  Sélection de la voix}</li>
+                    <li>🎙️ {reconnaissance/commande vocale} </li
                     <li>➕ / ➖ {agrandir / réduire}</li>
                     <li>🔌📺 {connection HDMI avec une télé}</li>
                     <li>⚙️ {paramètres}</li>

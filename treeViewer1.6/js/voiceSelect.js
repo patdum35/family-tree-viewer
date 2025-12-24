@@ -7,6 +7,14 @@ import { debounce } from './eventHandlers.js';
 import { debugLog } from './debugLogUtils.js';
 
 
+// Polyfill pour iOS : Si SpeechGrammarList n'existe pas, on crée une classe vide
+if (typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined') {
+    window.SpeechGrammarList = function() {
+        this.addFromString = function() {}; // Ne fait rien, évite le plantage
+    };
+}
+
+
 
 export function selectVoice() {
 
@@ -2316,30 +2324,47 @@ const SpeechRecognitionUI = (function() {
 
     function initializeSpeechRecognition(config = null) {
 
+        // On garde votre sécurité d'origine
+        if (typeof recognition !== 'undefined' && recognition !== null) {
+            return; 
+        }
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 
-        if (!SpeechRecognition || !SpeechGrammarList) {
+        // --- CORRECTION IOS : On ne bloque que si l'API de base est absente ---
+        if (!SpeechRecognition) {
             console.error("Speech Recognition non supporté.");
             return;
         }
-        
-        if (recognition) return; 
 
+        // On crée l'objet (Maintenant cette ligne s'exécute enfin sur iOS !)
         recognition = new SpeechRecognition();
-        
+
         const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
         const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
         const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
 
-        spellingGrammar = new SpeechGrammarList();
-        spellingGrammar.addFromString(spellingGrammarString, 1);
-        
-        recognition.grammars = new SpeechGrammarList(); 
-        
+        // On instancie seulement si la classe existe (PC/Android) mais pas our IOS/apple
+        if (SpeechGrammarList) {
+            spellingGrammar = new SpeechGrammarList();
+            spellingGrammar.addFromString(spellingGrammarString, 1);
+            recognition.grammars = new SpeechGrammarList();
+            // Vous pouvez ajouter ici vos autres manipulations de grammaire si nécessaire
+        }
+
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
-        recognition.interimResults = true; 
+        recognition.interimResults = true;
+
+
+
+
+
+
+
+
+
 
         recognition.onstart = () => {
             isRecognitionActive = true;

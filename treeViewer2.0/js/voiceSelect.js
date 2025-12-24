@@ -2347,39 +2347,7 @@ const SpeechRecognitionUI = (function() {
     // =========================================================
     // CŒUR 2 : Initialisation et Gestion des Sessions (INCHANGÉES)
     // =========================================================
-
     function initializeSpeechRecognition(config = null) {
-
-        // const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        // const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-
-        // if (!SpeechRecognition || !SpeechGrammarList) {
-        //     console.error("Speech Recognition non supporté.");
-        //     return;
-        // }
-        
-
-        // if (recognition) return; 
-
-        // recognition = new SpeechRecognition();
-        
-        // const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
-        // const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
-        // const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
-
-        // spellingGrammar = new SpeechGrammarList();
-        // spellingGrammar.addFromString(spellingGrammarString, 1);
-        
-        // recognition.grammars = new SpeechGrammarList(); 
-        
-        // recognition.lang = targetLang; 
-        // recognition.continuous = !state.isMobile; 
-        // recognition.interimResults = true; 
-
-
-
-
-
 
         // On garde votre sécurité d'origine
         if (typeof recognition !== 'undefined' && recognition !== null) {
@@ -2398,26 +2366,21 @@ const SpeechRecognitionUI = (function() {
         // On crée l'objet (Maintenant cette ligne s'exécute enfin sur iOS !)
         recognition = new SpeechRecognition();
 
-        // --- CORRECTION IOS : On rend la grammaire optionnelle ---
-        if (SpeechGrammarList && config && config.commands) {
-            const grammar = '#JSGF V1.0; grammar commands; public <command> = ' + config.commands.join(' | ') + ' ;';
-            const speechRecognitionList = new SpeechGrammarList();
-            speechRecognitionList.addFromString(grammar, 1);
-            recognition.grammars = speechRecognitionList;
+        const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
+        const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+        const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
+
+        // On instancie seulement si la classe existe (PC/Android) mais pas our IOS/apple
+        if (SpeechGrammarList) {
+            spellingGrammar = new SpeechGrammarList();
+            spellingGrammar.addFromString(spellingGrammarString, 1);
+            recognition.grammars = new SpeechGrammarList();
+            // Vous pouvez ajouter ici vos autres manipulations de grammaire si nécessaire
         }
 
-        // ON GARDE TOUT VOTRE CODE D'ORIGINE CI-DESSOUS
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
         recognition.interimResults = true;
-
-
-
-
-
-
-
-
 
         recognition.onstart = () => {
             isRecognitionActive = true;
@@ -2433,7 +2396,6 @@ const SpeechRecognitionUI = (function() {
                 else { display.textContent = `🎤 ${translate('listeningInProgress')}`; }
             }
         };
-
 
         recognition.onresult = (event) => {
 
