@@ -195,6 +195,29 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(event.request.url);
+
+
+  const allowedHosts = [
+    location.hostname,
+    'cdn.jsdelivr.net', // Pour TensorFlow.js et autres bibliothèques
+    'd3js.org',
+    'cdnjs.cloudflare.com',
+    'unpkg.com',
+    'rawcdn.githack.com'
+  ];
+
+  // Ne pas mettre en cache les requêtes de géolocalisation ou d'autres api
+  
+  ////////////// ATTENTION A cette modif : à vérifier !!!!!!!!!!!!!!!!!!!!!!!!!!
+  // if (url.hostname !== location.hostname || 
+  if (!allowedHosts.includes(url.hostname) ||
+      url.href.includes('nominatim.openstreetmap.org') ||
+      url.href.includes('api.') ||
+      url.href.includes('.api.')) {
+      return; // Laisser passer sans cache
+  }
+
+
   // Ne pas mettre en cache les requêtes de géolocalisation ou d'autres api
   if (url.hostname !== location.hostname || 
       url.href.includes('nominatim.openstreetmap.org') ||

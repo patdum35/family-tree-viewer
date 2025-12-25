@@ -27,7 +27,11 @@ const CameraManager = (function() {
         { name: 'Noir & Blanc', value: 'grayscale(1) contrast(1.2)' },
         { name: 'Négatif', value: 'invert(1)' },
         { name: 'Cyber', value: 'hue-rotate(90deg) contrast(1.5)' },
-        { name: 'Fantôme', value: 'opacity(0.5) blur(2px)' }
+        { name: 'Fantôme', value: 'opacity(0.5) blur(2px)' },
+        { name: 'Contours', value: 'url(#filter-edge)' },
+        { name: 'Crayon', value: 'url(#filter-sketch)' },
+        { name: 'Relief', value: 'url(#filter-emboss) grayscale(1)' },
+        { name: 'Netteté', value: 'url(#filter-sharpen)' }
     ];
 
     // --- NOUVEAU : Détection de mouvement ---
@@ -35,6 +39,83 @@ const CameraManager = (function() {
     let motionCtx = null;
     let lastFrameData = null;
     let motionInterval = null;
+
+    // --- NOUVEAU : Injection des filtres SVG ---
+    function injectSVGFilters() {
+        if (document.getElementById('camera-svg-filters')) return;
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.id = 'camera-svg-filters';
+        svg.style.position = 'absolute';
+        svg.style.width = '0';
+        svg.style.height = '0';
+        svg.style.pointerEvents = 'none';
+
+        // 1. Détection de contours (Edge Detection)
+        const filterEdge = document.createElementNS(svgNS, "filter");
+        filterEdge.id = "filter-edge";
+        const feColorMatrixEdge = document.createElementNS(svgNS, "feColorMatrix");
+        feColorMatrixEdge.setAttribute("type", "matrix");
+        feColorMatrixEdge.setAttribute("values", "0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0");
+        filterEdge.appendChild(feColorMatrixEdge);
+        const feConvolveEdge = document.createElementNS(svgNS, "feConvolveMatrix");
+        feConvolveEdge.setAttribute("order", "3");
+        feConvolveEdge.setAttribute("kernelMatrix", "-1 -1 -1 -1 8 -1 -1 -1 -1");
+        feConvolveEdge.setAttribute("preserveAlpha", "true");
+        filterEdge.appendChild(feConvolveEdge);
+        svg.appendChild(filterEdge);
+
+        // 2. Crayon (Sketch) - Contours inversés
+        const filterSketch = document.createElementNS(svgNS, "filter");
+        filterSketch.id = "filter-sketch";
+        const feColorMatrixSketch = document.createElementNS(svgNS, "feColorMatrix");
+        feColorMatrixSketch.setAttribute("type", "matrix");
+        feColorMatrixSketch.setAttribute("values", "0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 1 0");
+        filterSketch.appendChild(feColorMatrixSketch);
+        const feConvolveSketch = document.createElementNS(svgNS, "feConvolveMatrix");
+        feConvolveSketch.setAttribute("order", "3");
+        feConvolveSketch.setAttribute("kernelMatrix", "-1 -1 -1 -1 8 -1 -1 -1 -1");
+        feConvolveSketch.setAttribute("preserveAlpha", "true");
+        filterSketch.appendChild(feConvolveSketch);
+        const feCompSketch = document.createElementNS(svgNS, "feComponentTransfer");
+        const feFuncRSketch = document.createElementNS(svgNS, "feFuncR");
+        feFuncRSketch.setAttribute("type", "table");
+        feFuncRSketch.setAttribute("tableValues", "1 0");
+        const feFuncGSketch = document.createElementNS(svgNS, "feFuncG");
+        feFuncGSketch.setAttribute("type", "table");
+        feFuncGSketch.setAttribute("tableValues", "1 0");
+        const feFuncBSketch = document.createElementNS(svgNS, "feFuncB");
+        feFuncBSketch.setAttribute("type", "table");
+        feFuncBSketch.setAttribute("tableValues", "1 0");
+        feCompSketch.appendChild(feFuncRSketch);
+        feCompSketch.appendChild(feFuncGSketch);
+        feCompSketch.appendChild(feFuncBSketch);
+        filterSketch.appendChild(feCompSketch);
+        svg.appendChild(filterSketch);
+
+        // 3. Relief (Emboss)
+        const filterEmboss = document.createElementNS(svgNS, "filter");
+        filterEmboss.id = "filter-emboss";
+        const feConvolveEmboss = document.createElementNS(svgNS, "feConvolveMatrix");
+        feConvolveEmboss.setAttribute("order", "3");
+        feConvolveEmboss.setAttribute("kernelMatrix", "-2 -1 0 -1 1 1 0 1 2");
+        feConvolveEmboss.setAttribute("preserveAlpha", "true");
+        filterEmboss.appendChild(feConvolveEmboss);
+        svg.appendChild(filterEmboss);
+
+        // 4. Netteté (Sharpen)
+        const filterSharpen = document.createElementNS(svgNS, "filter");
+        filterSharpen.id = "filter-sharpen";
+        const feConvolveSharpen = document.createElementNS(svgNS, "feConvolveMatrix");
+        feConvolveSharpen.setAttribute("order", "3");
+        feConvolveSharpen.setAttribute("kernelMatrix", "0 -1 0 -1 5 -1 0 -1 0");
+        feConvolveSharpen.setAttribute("preserveAlpha", "true");
+        filterSharpen.appendChild(feConvolveSharpen);
+        svg.appendChild(filterSharpen);
+
+        document.body.appendChild(svg);
+    }
 
     function createVideoElement() {
         const vid = document.createElement('video');
@@ -59,6 +140,8 @@ const CameraManager = (function() {
 
     async function start() {
         if (isRunning) return;
+
+        injectSVGFilters();
 
         try {
             // Contraintes pour demander la caméra arrière (environnement)
@@ -302,7 +385,11 @@ const CameraManager = (function() {
             console.error("Erreur chargement IA:", e);
             isModelLoading = false;
             updateModalUI();
-            alert("Impossible de charger le modèle de détection d'objets. Vérifiez votre connexion.");
+            if (!navigator.onLine) {
+                alert("Le modèle de détection d'objets n'est pas encore en cache. Une connexion Internet est requise pour le premier téléchargement.");
+            } else {
+                alert("Impossible de charger le modèle de détection d'objets. Vérifiez votre connexion Internet.");
+            }
             return false;
         }
     }
