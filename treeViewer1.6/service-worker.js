@@ -196,21 +196,8 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-
-  const allowedHosts = [
-    location.hostname,
-    'cdn.jsdelivr.net', // Pour TensorFlow.js et autres bibliothèques
-    'd3js.org',
-    'cdnjs.cloudflare.com',
-    'unpkg.com',
-    'rawcdn.githack.com'
-  ];
-
   // Ne pas mettre en cache les requêtes de géolocalisation ou d'autres api
-  
-  ////////////// ATTENTION A cette modif : à vérifier !!!!!!!!!!!!!!!!!!!!!!!!!!
-  // if (url.hostname !== location.hostname || 
-  if (!allowedHosts.includes(url.hostname) ||
+  if (url.hostname !== location.hostname || 
       url.href.includes('nominatim.openstreetmap.org') ||
       url.href.includes('api.') ||
       url.href.includes('.api.')) {
@@ -370,6 +357,9 @@ self.addEventListener('activate', (event) => {
         './libs/react.production.min.js',
         './libs/react-dom.production.min.js',
         './libs/d3.layout.cloud.min.js',
+        './libs/tf.min.js',
+        './libs/coco-ssd.min.js',
+
       ];
 
       // Attendre un peu pour ne pas interférer avec l'activation

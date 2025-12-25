@@ -19,6 +19,14 @@ const CameraManager = (function() {
     let detectionAnimationFrame = null;
     let isModelLoading = false;
     
+    // --- NOUVEAU : Enregistrement Vidéo ---
+    let isRecording = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingCanvas = null;
+    let recordingCtx = null;
+    let recordingAnimationFrame = null;
+
     // --- NOUVEAU : Gestion des filtres ---
     let currentFilterIndex = 0;
     const filters = [
@@ -240,8 +248,9 @@ const CameraManager = (function() {
                     videoElement.srcObject = stream;
                     const transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'none';
                     videoElement.style.transform = transform;
-                    if (objectCanvas) {
-                        objectCanvas.style.transform = 'none';
+                    // Correction du bug d'affichage du miroir pour les détections
+                    if (objectCanvas) { 
+                        objectCanvas.style.transform = transform;
                     }
                 }
             } catch (err) {
@@ -367,11 +376,22 @@ const CameraManager = (function() {
 
         try {
             // Chargement dynamique de TensorFlow.js et COCO-SSD
+            // On essaie d'abord en local (pour le mode hors ligne strict), sinon CDN
             if (!window.tf) {
-                await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
+                try {
+                    await loadScript('./libs/tf.min.js');
+                } catch (e) {
+                    console.warn("tf.min.js local non trouvé, utilisation du CDN");
+                    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
+                }
             }
             if (!window.cocoSsd) {
-                await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd');
+                try {
+                    await loadScript('./libs/coco-ssd.min.js');
+                } catch (e) {
+                    console.warn("coco-ssd.min.js local non trouvé, utilisation du CDN");
+                    await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd');
+                }
             }
             
             console.log("Chargement du modèle COCO-SSD...");
@@ -546,6 +566,149 @@ const CameraManager = (function() {
         updateModalUI();
     }
 
+    // --- NOUVEAU : Fonctions d'enregistrement vidéo ---
+
+    function startRecording() {
+        if (!isRunning || isRecording) return;
+
+        console.log("[REC] 🎬 Démarrage de l'enregistrement...");
+        recordedChunks = [];
+
+        // --- CORRECTION : Obtenir les dimensions fiables depuis la piste vidéo ---
+        const videoTrack = stream.getVideoTracks()[0];
+        if (!videoTrack) {
+            console.error("[REC] Aucune piste vidéo trouvée dans le stream.");
+            alert("Erreur: Impossible de trouver la piste vidéo pour l'enregistrement.");
+            return;
+        }
+        const trackSettings = videoTrack.getSettings();
+        const videoWidth = trackSettings.width;
+        const videoHeight = trackSettings.height;
+        console.log(`[REC] Dimensions de la piste vidéo: ${videoWidth}x${videoHeight}`);
+
+        if (!videoWidth || !videoHeight) {
+            console.error("[REC] Dimensions de la vidéo non valides:", videoWidth, videoHeight);
+            alert("Erreur: Impossible d'obtenir les dimensions de la vidéo pour l'enregistrement.");
+            return;
+        }
+
+        // Créer un canvas pour l'enregistrement qui combine vidéo et overlays
+        recordingCanvas = document.createElement('canvas');
+        recordingCanvas.width = videoWidth;
+        recordingCanvas.height = videoHeight;
+        recordingCtx = recordingCanvas.getContext('2d');
+
+        // --- DEBUG: Utiliser setInterval pour un timing plus fiable que requestAnimationFrame ---
+        recordingAnimationFrame = setInterval(drawRecordingFrame, 1000 / 30); // 30 fps
+
+        const streamCanvas = recordingCanvas.captureStream(30);
+        console.log(`[REC] Stream du canvas créé. Pistes vidéo: ${streamCanvas.getVideoTracks().length}`);
+
+        // Récupérer la qualité depuis le slider
+        const qualitySlider = document.getElementById('video-quality-slider');
+        const qualityValue = parseInt(qualitySlider.value) * 1000; // en bps
+
+        const options = {
+            mimeType: 'video/webm;codecs=vp9',
+            // mimeType: 'video/webm;codecs=vp8', // Alternative pour tester si vp9 échoue
+            videoBitsPerSecond: qualityValue
+        };
+        console.log("[REC] Options MediaRecorder:", options);
+
+        try {
+            mediaRecorder = new MediaRecorder(streamCanvas, options);
+        } catch (e) {
+            console.error("[REC] Erreur MediaRecorder:", e);
+            alert(`Impossible de créer MediaRecorder. Le format/codec n'est peut-être pas supporté. Essayez avec une qualité différente. Erreur: ${e.message}`);
+            return;
+        }
+
+        mediaRecorder.ondataavailable = (event) => {
+            console.log(`[REC] ondataavailable - taille du chunk: ${event.data.size}`);
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstart = () => {
+            console.log('[REC] mediaRecorder.onstart - Enregistrement officiellement démarré.');
+        };
+
+        mediaRecorder.onstop = () => {
+            console.log(`[REC] mediaRecorder.onstop - Chunks collectés: ${recordedChunks.length}`);
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            console.log(`[REC] Blob final créé. Taille: ${blob.size} bytes.`);
+            if (blob.size === 0) {
+                console.error("[REC] Le fichier final est vide. Aucun chunk de données n'a été enregistré.");
+                alert("L'enregistrement a échoué (fichier vide). Veuillez réessayer.");
+                return;
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `enregistrement-camera-${new Date().toISOString()}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            console.log("[REC] 💾 Enregistrement sauvegardé.");
+        };
+
+        // --- CORRECTION : Démarrer avec un intervalle pour forcer la génération de données ---
+        mediaRecorder.start(100); // Enregistre des chunks toutes les 100ms
+        isRecording = true;
+        updateModalUI();
+    }
+
+    function stopRecording() {
+        if (!isRecording || !mediaRecorder) return;
+
+        // --- DEBUG: Utiliser clearInterval ---
+        if (recordingAnimationFrame) {
+            clearInterval(recordingAnimationFrame);
+            recordingAnimationFrame = null;
+        }
+
+        mediaRecorder.stop();
+        isRecording = false;
+        console.log("[REC] 🛑 Enregistrement arrêté.");
+        updateModalUI();
+    }
+
+    function drawRecordingFrame() {
+        if (!isRecording || !recordingCtx || !videoElement) return;
+
+        // console.log(`[REC] drawRecordingFrame - time: ${performance.now().toFixed(0)}`);
+
+        // --- CORRECTION : Utiliser save/restore pour gérer le miroir proprement ---
+        recordingCtx.save();
+
+        // Inverser le canvas si la caméra avant est utilisée
+        if (currentFacingMode === 'user') {
+            recordingCtx.translate(recordingCanvas.width, 0);
+            recordingCtx.scale(-1, 1);
+        }
+
+        // Appliquer le filtre CSS au contexte du canvas
+        recordingCtx.filter = videoElement.style.filter;
+
+        // Dessiner la vidéo (sera inversée si le contexte l'est)
+        recordingCtx.drawImage(videoElement, 0, 0, recordingCanvas.width, recordingCanvas.height);
+
+        // Réinitialiser le filtre pour ne pas affecter les overlays
+        recordingCtx.filter = 'none';
+
+        // Dessiner le canvas de détection d'objets par-dessus (sera aussi inversé)
+        if (isObjectDetectionEnabled && objectCanvas) {
+            recordingCtx.drawImage(objectCanvas, 0, 0, recordingCanvas.width, recordingCanvas.height);
+        }
+
+        // Restaurer le contexte à son état original (non-inversé)
+        recordingCtx.restore();
+
+    }
+
     // --- GESTION DE LA MODAL ---
     function createModal() {
         if (document.getElementById('camera-modal')) return;
@@ -596,6 +759,21 @@ const CameraManager = (function() {
                         </button>
                     </div>
 
+                    <!-- NOUVEAU : Section Enregistrement -->
+                    <div style="margin-bottom: 15px; background: #FFF3E0; padding: 10px; border-radius: 10px; border: 1px solid #FFB74D;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="font-weight: bold; color: #E65100; font-size: 13px;">Enregistrement Vidéo</label>
+                            <div id="recording-indicator" style="width: 12px; height: 12px; background-color: #ccc; border-radius: 50%; transition: all 0.3s;"></div>
+                        </div>
+                        <button id="camera-record-btn" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; background-color: #E65100; color: white; margin-bottom: 10px;">
+                            ⏺️ Enregistrer
+                        </button>
+                        <div style="font-size: 11px; color: #666;">
+                            <label for="video-quality-slider">Qualité (kbps): <span id="quality-value">1000</span></label>
+                            <input type="range" id="video-quality-slider" min="500" max="8000" step="100" value="1000" style="width: 100%;">
+                        </div>
+                    </div>
+
                     <!-- Sélection Filtre -->
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 13px;">Filtre Visuel</label>
@@ -635,11 +813,16 @@ const CameraManager = (function() {
                         <div id="object-status" style="font-size: 10px; color: #999; margin-top: 5px; text-align: right;">Désactivé</div>
                     </div>
                 </div>
+            </div>
             <style>
+                #motion-toggle-cb:checked ~ .slider-knob { transform: translateX(18px); }
                 #motion-toggle-cb:checked + .slider { background-color: #2196F3; }
                 #motion-toggle-cb:checked ~ .slider-knob { transform: translateX(18px); }
+                #object-toggle-cb:checked ~ .slider-knob { transform: translateX(18px); }
                 #object-toggle-cb:checked + .slider { background-color: #9C27B0; }
                 #object-toggle-cb:checked ~ .slider-knob { transform: translateX(18px); }
+                @keyframes blink { 50% { opacity: 0; } }
+                .recording { animation: blink 1s linear infinite; }
             </style>
         `;
         
@@ -664,14 +847,24 @@ const CameraManager = (function() {
             toggleObjectDetection(e.target.checked);
         };
 
+        // NOUVEAU : Listeners pour l'enregistrement
+        document.getElementById('camera-record-btn').onclick = () => isRecording ? stopRecording() : startRecording();
+        const qualitySlider = document.getElementById('video-quality-slider');
+        const qualityValue = document.getElementById('quality-value');
+        qualitySlider.oninput = () => {
+            qualityValue.textContent = qualitySlider.value;
+        };
+
         // Rendre la fenêtre déplaçable et redimensionnable
-        const header = document.getElementById('camera-modal-header');
+        const header = modalDiv.querySelector('#camera-modal-header');
         makeModalDraggableAndResizable(modalDiv, header, false);
         makeModalInteractive(modalDiv);
     }
 
     function updateModalUI() {
         const btn = document.getElementById('camera-toggle-btn');
+        const recordBtn = document.getElementById('camera-record-btn');
+        const indicator = document.getElementById('recording-indicator');
         const select = document.getElementById('camera-filter-select');
         const motionCb = document.getElementById('motion-toggle-cb');
         const objectCb = document.getElementById('object-toggle-cb');
@@ -683,10 +876,25 @@ const CameraManager = (function() {
             btn.textContent = "Arrêter la Caméra";
             btn.style.backgroundColor = "#ff4444";
             btn.style.color = "white";
+            if (recordBtn) recordBtn.disabled = false;
         } else {
             btn.textContent = "Démarrer la Caméra";
             btn.style.backgroundColor = "#4CAF50";
             btn.style.color = "white";
+            if (recordBtn) recordBtn.disabled = true;
+        }
+
+        // NOUVEAU : UI pour l'enregistrement
+        if (isRecording) {
+            recordBtn.textContent = "⏹️ Arrêter l'enregistrement";
+            recordBtn.style.backgroundColor = "#D32F2F";
+            indicator.style.backgroundColor = "#D32F2F";
+            indicator.classList.add('recording');
+        } else {
+            recordBtn.textContent = "⏺️ Enregistrer";
+            recordBtn.style.backgroundColor = "#E65100";
+            indicator.style.backgroundColor = "#ccc";
+            indicator.classList.remove('recording');
         }
 
         select.value = currentFilterIndex;
