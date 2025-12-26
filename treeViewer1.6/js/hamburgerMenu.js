@@ -4,7 +4,7 @@ import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
 import { showToastNew } from './debugLogUtils.js';
 import { documentation } from './documentation.js';
-import { startAncestorAnimation, resetAnimationState } from './treeAnimation.js';
+import { toggleAnimationPause, resetAnimationState } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { openSearchModal } from './searchModalUI.js';
 import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
@@ -1868,7 +1868,9 @@ function createDemoSelector() {
                  }
 
                  console.log("🚀 Lancement de l'animation dans 500ms...");
-                 setTimeout(() => { startAncestorAnimation(); }, 500);
+                 setTimeout(() => { 
+                    toggleAnimationPause();
+                  }, 500);
                  toggleMenu(false);
                  return;
              } else {
@@ -3318,7 +3320,7 @@ export function openCustomAnimationModal() {
         let customDemos = JSON.parse(localStorage.getItem('customDemos') || '[]');
         
         if (!name) {
-            name = `Demo ${customDemos.length + 1}`;
+            name = `myDemo ${customDemos.length + 1}`;
         }
         
         const newDemo = {
@@ -3336,7 +3338,7 @@ export function openCustomAnimationModal() {
 
         state.targetAncestorId = selectedAncestor.id;
         state.targetCousinId = cousinToggle.checked && selectedCousin ? selectedCousin.id : null;
-        startAncestorAnimation();
+        toggleAnimationPause();
         closeModal();
     });
 

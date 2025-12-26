@@ -149,6 +149,7 @@ const CameraManager = (function() {
             object-fit: cover;
             z-index: -100; /* Derrière tout le reste */
             transition: filter 0.5s ease; /* Transition douce pour les filtres */
+            transform: translateZ(0); /* Force l'accélération matérielle pour les filtres */
         `;
         return vid;
     }
@@ -256,7 +257,7 @@ const CameraManager = (function() {
                 
                 if (videoElement) {
                     videoElement.srcObject = stream;
-                    const transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'none';
+                    const transform = currentFacingMode === 'user' ? 'scaleX(-1) translateZ(0)' : 'translateZ(0)';
                     videoElement.style.transform = transform;
                     // Correction du bug d'affichage du miroir pour les détections
                     if (objectCanvas) { 
@@ -297,6 +298,7 @@ const CameraManager = (function() {
         currentFilterIndex = (currentFilterIndex + 1) % filters.length;
         const filter = filters[currentFilterIndex];
         videoElement.style.filter = filter.value;
+        videoElement.style.webkitFilter = filter.value; // Support WebKit
         
         if (window.showToast) {
             window.showToast(`Filtre caméra : ${filter.name}`);
