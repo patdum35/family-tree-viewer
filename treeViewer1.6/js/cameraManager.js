@@ -26,6 +26,13 @@ const CameraManager = (function() {
     let recordingCanvas = null;
     let recordingCtx = null;
     let recordingAnimationFrame = null;
+    
+    // --- NOUVEAU : Options d'enregistrement ---
+    let selectedCodec = 'video/webm;codecs=vp9';
+    let selectedResolution = 'default';
+    let recordingMode = 'camera-only'; // 'camera-only' ou 'camera-overlay'
+    let lastSvgImg = null;
+    let isSvgRendering = false;
 
     // --- NOUVEAU : Gestion des filtres ---
     let currentFilterIndex = 0;
@@ -172,6 +179,9 @@ const CameraManager = (function() {
             
             // Insérer au tout début du body
             document.body.insertBefore(videoElement, document.body.firstChild);
+
+            // Appliquer la résolution par défaut ou sélectionnée
+            applyResolution(selectedResolution);
             
             // --- Gestion de la transparence ---
             // Masquer les fonds d'écran existants pour voir la caméra
@@ -259,6 +269,26 @@ const CameraManager = (function() {
             }
         }
         updateModalUI();
+    }
+
+    // --- NOUVEAU : Gestion de la résolution ---
+    async function applyResolution(res) {
+        if (!stream) return;
+        const track = stream.getVideoTracks()[0];
+        if (!track) return;
+
+        let constraints = {};
+        if (res === 'hd') constraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
+        else if (res === 'fhd') constraints = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+        else if (res === '4k') constraints = { width: { ideal: 3840 }, height: { ideal: 2160 } };
+        else constraints = { width: { ideal: 640 }, height: { ideal: 480 } }; // Default/VGA
+
+        try {
+            await track.applyConstraints(constraints);
+            console.log(`[Camera] Résolution demandée: ${res}`);
+        } catch (e) {
+            console.error("[Camera] Erreur changement résolution:", e);
+        }
     }
 
     // --- Fonctions de Filtres ---
@@ -607,10 +637,11 @@ const CameraManager = (function() {
         // Récupérer la qualité depuis le slider
         const qualitySlider = document.getElementById('video-quality-slider');
         const qualityValue = parseInt(qualitySlider.value) * 1000; // en bps
+        
+        console.log(`[REC] Codec sélectionné: ${selectedCodec}, Mode: ${recordingMode}`);
 
         const options = {
-            mimeType: 'video/webm;codecs=vp9',
-            // mimeType: 'video/webm;codecs=vp8', // Alternative pour tester si vp9 échoue
+            mimeType: selectedCodec,
             videoBitsPerSecond: qualityValue
         };
         console.log("[REC] Options MediaRecorder:", options);
@@ -647,7 +678,9 @@ const CameraManager = (function() {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `enregistrement-camera-${new Date().toISOString()}.webm`;
+            // Extension selon le codec
+            const ext = selectedCodec.includes('mp4') ? 'mp4' : 'webm';
+            a.download = `enregistrement-camera-${new Date().toISOString()}.${ext}`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -674,6 +707,31 @@ const CameraManager = (function() {
         isRecording = false;
         console.log("[REC] 🛑 Enregistrement arrêté.");
         updateModalUI();
+    }
+
+    // Fonction pour capturer le SVG de l'arbre en image (asynchrone)
+    function updateSvgImage() {
+        if (isSvgRendering) return;
+        
+        const svgElement = document.getElementById('tree-svg');
+        if (!svgElement) return;
+
+        isSvgRendering = true;
+        const svgString = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(svgBlob);
+        
+        const img = new Image();
+        img.onload = function() {
+            lastSvgImg = img;
+            URL.revokeObjectURL(url);
+            isSvgRendering = false;
+        };
+        img.onerror = function() {
+            URL.revokeObjectURL(url);
+            isSvgRendering = false;
+        };
+        img.src = url;
     }
 
     function drawRecordingFrame() {
@@ -707,6 +765,17 @@ const CameraManager = (function() {
         // Restaurer le contexte à son état original (non-inversé)
         recordingCtx.restore();
 
+        // --- NOUVEAU : Dessiner l'arbre D3 par-dessus (non inversé, comme l'interface) ---
+        if (recordingMode === 'camera-overlay') {
+            // Lancer la mise à jour de l'image SVG (non bloquant)
+            updateSvgImage();
+            
+            if (lastSvgImg) {
+                // Dessiner la dernière image SVG disponible
+                // On dessine sur toute la taille du canvas (qui correspond à la résolution vidéo)
+                recordingCtx.drawImage(lastSvgImg, 0, 0, recordingCanvas.width, recordingCanvas.height);
+            }
+        }
     }
 
     // --- GESTION DE LA MODAL ---
@@ -768,6 +837,36 @@ const CameraManager = (function() {
                         <button id="camera-record-btn" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; background-color: #E65100; color: white; margin-bottom: 10px;">
                             ⏺️ Enregistrer
                         </button>
+                        
+                        <!-- Options d'enregistrement -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div>
+                                <label style="font-size: 11px; color: #E65100; display: block; margin-bottom: 2px;">Codec</label>
+                                <select id="video-codec-select" style="width: 100%; font-size: 11px; padding: 4px;">
+                                    <option value="video/webm;codecs=vp9">WebM (VP9)</option>
+                                    <option value="video/webm;codecs=vp8">WebM (VP8)</option>
+                                    <option value="video/mp4">MP4 (H.264)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #E65100; display: block; margin-bottom: 2px;">Résolution</label>
+                                <select id="video-resolution-select" style="width: 100%; font-size: 11px; padding: 4px;">
+                                    <option value="default">Défaut</option>
+                                    <option value="hd">HD (720p)</option>
+                                    <option value="fhd">Full HD</option>
+                                    <option value="4k">4K</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 8px;">
+                            <label style="font-size: 11px; color: #E65100; display: block; margin-bottom: 2px;">Mode</label>
+                            <select id="recording-mode-select" style="width: 100%; font-size: 11px; padding: 4px;">
+                                <option value="camera-only">Caméra seule</option>
+                                <option value="camera-overlay">Caméra + Arbre (D3.js)</option>
+                            </select>
+                        </div>
+
                         <div style="font-size: 11px; color: #666;">
                             <label for="video-quality-slider">Qualité (kbps): <span id="quality-value">1000</span></label>
                             <input type="range" id="video-quality-slider" min="500" max="8000" step="100" value="1000" style="width: 100%;">
@@ -854,6 +953,27 @@ const CameraManager = (function() {
         qualitySlider.oninput = () => {
             qualityValue.textContent = qualitySlider.value;
         };
+        
+        // Listeners pour les options
+        const codecSelect = modalDiv.querySelector('#video-codec-select');
+        codecSelect.onchange = (e) => {
+            selectedCodec = e.target.value;
+            // Vérifier le support
+            if (!MediaRecorder.isTypeSupported(selectedCodec)) {
+                alert(`Attention: Le codec ${selectedCodec} ne semble pas supporté par ce navigateur.`);
+            }
+        };
+        
+        const resSelect = modalDiv.querySelector('#video-resolution-select');
+        resSelect.onchange = (e) => {
+            selectedResolution = e.target.value;
+            if (isRunning) applyResolution(selectedResolution);
+        };
+        
+        const modeSelect = modalDiv.querySelector('#recording-mode-select');
+        modeSelect.onchange = (e) => {
+            recordingMode = e.target.value;
+        };
 
         // Rendre la fenêtre déplaçable et redimensionnable
         const header = modalDiv.querySelector('#camera-modal-header');
@@ -866,6 +986,9 @@ const CameraManager = (function() {
         const recordBtn = document.getElementById('camera-record-btn');
         const indicator = document.getElementById('recording-indicator');
         const select = document.getElementById('camera-filter-select');
+        const codecSelect = document.getElementById('video-codec-select');
+        const resSelect = document.getElementById('video-resolution-select');
+        const modeSelect = document.getElementById('recording-mode-select');
         const motionCb = document.getElementById('motion-toggle-cb');
         const objectCb = document.getElementById('object-toggle-cb');
         const objectStatus = document.getElementById('object-status');
@@ -898,6 +1021,10 @@ const CameraManager = (function() {
         }
 
         select.value = currentFilterIndex;
+        if (codecSelect) codecSelect.value = selectedCodec;
+        if (resSelect) resSelect.value = selectedResolution;
+        if (modeSelect) modeSelect.value = recordingMode;
+        
         motionCb.checked = isMotionDetectionEnabled;
         objectCb.checked = isObjectDetectionEnabled;
 

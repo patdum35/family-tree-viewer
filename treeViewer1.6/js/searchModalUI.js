@@ -14,6 +14,7 @@ import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWhee
 const searchModalTranslations = {
     fr: {
         title: "Recherche de la pers. racine",
+        selectPersonTitle: "Sélection d'une personne",
         nameOption: "par Prénom/Nom",
         placeOption: "par Lieux", 
         occupationOption: "par Profession",
@@ -53,6 +54,7 @@ const searchModalTranslations = {
     },
     en: {
         title: "Search for root person",
+        selectPersonTitle: "Select a person",
         nameOption: "per First name/Name",
         placeOption: "per Places",
         occupationOption: "per Profession",
@@ -89,6 +91,7 @@ const searchModalTranslations = {
     },
     es: {
         title: "Búsqueda de la persona raíz",
+        selectPersonTitle: "Selección de una persona",
         nameOption: "por Nombre/Apellido",
         placeOption: "por Lugares",
         occupationOption: "por Profesión",
@@ -125,6 +128,7 @@ const searchModalTranslations = {
     },
     hu: {
         title: "Gyökérszemély keresése",
+        selectPersonTitle: "Személy kiválasztása",
         nameOption: "Keresztnév/Név szerint",
         placeOption: "Helyek szerint",
         occupationOption: "Foglalkozás szerint",
@@ -769,10 +773,16 @@ function moveDownSearchModal() {
     }
 }
 
+let currentSearchPurpose = 'root';
+let currentSearchCallback = null;
+
 /**
  * Crée et affiche la modale de recherche
  */
-export function openSearchModal(firstName = null, lastName = null) {
+export function openSearchModal(firstName = null, lastName = null, purpose = 'root', onSelectCallback = null) {
+
+    currentSearchPurpose = purpose;
+    currentSearchCallback = onSelectCallback;
 
     // console.log('\n\n -----------------   debug openSearchModal ---------------\n')
     let isCallFromInit = false;
@@ -790,8 +800,16 @@ export function openSearchModal(firstName = null, lastName = null) {
 
     // console.log('- open setupSearchFieldModal openSearchModal', existingModal);
 
+    const titleKey = purpose === 'root' ? 'title' : 'selectPersonTitle';
+    const titleText = searchModalTranslations[window.CURRENT_LANGUAGE][titleKey];
+
     if (existingModal) {
         existingModal.style.display = 'flex';
+        
+        // Mettre à jour le titre
+        const headerTitle = existingModal.querySelector('.searchModal-header h3');
+        if (headerTitle) headerTitle.textContent = titleText;
+
         // Vider les champs à la réouverture
         document.getElementById('searchModal-search-input').value = '';
         if (!state.deviceInfo.hasTouchScreen ||  !(state.deviceInfo.inputType === 'tactile')) {
@@ -827,7 +845,7 @@ export function openSearchModal(firstName = null, lastName = null) {
     modal.innerHTML = `
         <div class="searchModal-content">
             <div class="searchModal-header">
-                <h3>${searchModalTranslations[window.CURRENT_LANGUAGE].title}</h3>
+                <h3>${titleText}</h3>
                 <button class="searchModal-close" onclick="closeSearchModal()">&times;</button>
             </div>
             
@@ -1758,7 +1776,14 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
             `;
         }
 
-        leftZone.addEventListener('click', () => selectPersonFromModal(person.id));
+        leftZone.addEventListener('click', () => {
+            if (currentSearchPurpose === 'root') {
+                selectPersonFromModal(person.id);
+            } else {
+                if (currentSearchCallback) currentSearchCallback(person);
+                window.closeSearchModal();
+            }
+        });
         leftZone.addEventListener('mouseenter', () => leftZone.style.backgroundColor = 'rgba(0,123,255,0.1)');
         leftZone.addEventListener('mouseleave', () => leftZone.style.backgroundColor = 'transparent');
 

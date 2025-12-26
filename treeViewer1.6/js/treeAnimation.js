@@ -1454,6 +1454,8 @@ export async function startAncestorAnimation() {
     disableFortuneModeClean();
     disableFortuneModeWithLever();
 
+    console.log(`🎬 startAncestorAnimation: Path length=${animationState.path.length}, Root=${state.rootPersonId}, Target=${state.targetAncestorId}`);
+
     origineGenNb = state.nombre_generation;
     console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex);
 

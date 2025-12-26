@@ -4,6 +4,10 @@ import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
 import { showToastNew } from './debugLogUtils.js';
 import { documentation } from './documentation.js';
+import { startAncestorAnimation, resetAnimationState } from './treeAnimation.js';
+import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
+import { openSearchModal } from './searchModalUI.js';
+import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
 
 // Variables pour garder une référence aux éléments
 let hamburgerMenu, sideMenu, menuOverlay;
@@ -35,6 +39,17 @@ export function getMenuTranslation(key) {
       'section_settings': 'Fonds d\'écran & Paramètres',
       'section_search': 'Recherche dans l\'arbre',
       'zoomIn': 'Zoom avant',
+      'createYourDemo': 'Créer Démo',
+      'createYourOwnDemo': 'Créer votre propre démo',
+      'customAnimationTitle': 'Animation Personnalisée',
+      'ancestorMode': 'Mode Ancêtre',
+      'cousinMode': 'Mode Cousin',
+      'commonAncestor': 'Ancêtre Commun',
+      'ancestor': 'Ancêtre',
+      'cousin': 'Cousin',
+      'startAnimation': "Lancer l'Animation",
+      'noResults': 'Aucun résultat',
+      'selectPerson': 'Sélectionnez une personne',
       'zoomOut': 'Zoom arrière',
       'resetView': 'Réinitialiser la vue',
       'fullscreen': 'Plein écran',
@@ -56,6 +71,8 @@ export function getMenuTranslation(key) {
       'noButtonOnDisplay': 'Ne pas afficher les boutons sur l\'écran',
       'tutoDocumention': 'Tutoriel / Documentation',
       'keepSilentAudio': 'audio constant sur HDMI',
+      'animationNameLabel': 'Nom de l\'animation',
+      'animationNamePlaceholder': 'Ma super démo',
 
     },
     'en': {
@@ -82,6 +99,17 @@ export function getMenuTranslation(key) {
       'section_settings': 'Backgrounds & Settings',
       'section_search': 'Tree search',
       'zoomIn': 'Zoom in',
+      'createYourDemo': 'Create Demo',
+      'createYourOwnDemo': 'Create your own demo',
+      'customAnimationTitle': 'Custom Animation',
+      'ancestorMode': 'Ancestor Mode',
+      'cousinMode': 'Cousin Mode',
+      'commonAncestor': 'Common Ancestor',
+      'ancestor': 'Ancestor',
+      'cousin': 'Cousin',
+      'startAnimation': 'Start Animation',
+      'noResults': 'No results',
+      'selectPerson': 'Select a person',
       'zoomOut': 'Zoom out',
       'resetView': 'Reset view',
       'fullscreen': 'Fullscreen',
@@ -103,6 +131,8 @@ export function getMenuTranslation(key) {
       'noButtonOnDisplay': 'Do not show buttons on screen',
       'tutoDocumention': 'Tutorial / Documentation',     
       'keepSilentAudio': 'constant audio on HDMI',
+      'animationNameLabel': 'Animation name',
+      'animationNamePlaceholder': 'My awesome demo',
     },
     'es': {
       'menuTitle': 'Menú del árbol',
@@ -128,6 +158,17 @@ export function getMenuTranslation(key) {
       'section_settings': 'Fondos de pantalla y configuración',
       'section_search': 'Búsqueda en el árbol',
       'zoomIn': 'Acercar',
+      'createYourDemo': 'Crear Demo',
+      'createYourOwnDemo': 'Crear tu propia demo',
+      'customAnimationTitle': 'Animación Personalizada',
+      'ancestorMode': 'Modo Ancestro',
+      'cousinMode': 'Modo Primo',
+      'commonAncestor': 'Ancestro Común',
+      'ancestor': 'Ancestro',
+      'cousin': 'Primo',
+      'startAnimation': 'Iniciar Animación',
+      'noResults': 'No hay resultados',
+      'selectPerson': 'Seleccione una persona',
       'zoomOut': 'Alejar',
       'resetView': 'Restablecer vista',
       'fullscreen': 'Pantalla completa',
@@ -149,6 +190,8 @@ export function getMenuTranslation(key) {
       'noButtonOnDisplay': 'Desactivar botones en pantalla',
       'tutoDocumention': 'Tutorial / Documentación',
       'keepSilentAudio': 'audio constante en HDMI',   
+      'animationNameLabel': 'Nombre de la animación',
+      'animationNamePlaceholder': 'Mi súper demo',
     },
     'hu': {
       'menuTitle': 'Fa menü',
@@ -174,6 +217,17 @@ export function getMenuTranslation(key) {
       'section_settings': 'Hátterek és beállítások',
       'section_search': 'Fa keresés',
       'zoomIn': 'Nagyítás',
+      'createYourDemo': 'Demó Létrehozása',
+      'createYourOwnDemo': 'Saját demó létrehozása',
+      'customAnimationTitle': 'Egyéni Animáció',
+      'ancestorMode': 'Ős Mód',
+      'cousinMode': 'Unokatestvér Mód',
+      'commonAncestor': 'Közös Ős',
+      'ancestor': 'Ős',
+      'cousin': 'Unokatestvér',
+      'startAnimation': 'Animáció Indítása',
+      'noResults': 'Nincs találat',
+      'selectPerson': 'Válasszon személyt',
       'zoomOut': 'Kicsinyítés',
       'resetView': 'Nézet visszaállítása',
       'fullscreen': 'Teljes képernyő',
@@ -195,6 +249,8 @@ export function getMenuTranslation(key) {
       'noButtonOnDisplay': 'Gombok elrejtése a képernyőn',
       'tutoDocumention': 'Bemutató / Dokumentáció',
       'keepSilentAudio': 'állandó hang HDMI-n',
+      'animationNameLabel': 'Animáció neve',
+      'animationNamePlaceholder': 'Az én szuper demóm',
     }
   };
 
@@ -1575,68 +1631,102 @@ export function toggleTreeRadarFromHamburger() {
 function createDemoSelector() {
   const height = window.innerHeight;
 
-  // Vérifier si le sélecteur existe déjà
-  if (document.getElementById('menu-demo-selector')) {
-    console.log("Le sélecteur de démo existe déjà");
-    // return; // Ne pas recréer s'il existe déjà
+  // Trouver le sélecteur existant ou le placeholder
+  let existingSelector = document.getElementById('menu-demo-selector');
+  let demoPlaceholder = document.getElementById('menu-demo-selector-placeholder');
+  
+  let parentNode;
+  let referenceNode;
+
+  if (existingSelector) {
+      parentNode = existingSelector.parentNode;
+      referenceNode = existingSelector;
+  } else if (demoPlaceholder) {
+      parentNode = demoPlaceholder.parentNode;
+      referenceNode = demoPlaceholder;
+  } else {
+      // console.error("Placeholder pour le sélecteur de démo non trouvé");
+      return;
   }
 
-  // Vérifier si le placeholder existe
-  let demoPlaceholder = document.getElementById('menu-demo-selector-placeholder');
-  if (!demoPlaceholder) {
-    console.error("Placeholder pour le sélecteur de démo non trouvé");
-    return;
-  }
   
   // Définir les options en fonction de l'état
-  let typeOptions = ['démo1', 'démo2'];
+  let typeOptions = [];
   let typeOptionsExpanded = [];
-  let typeValues = ['demo1', 'demo2'];
+  let typeValues = [];
+
+  // 1. Ajouter l'option pour créer une démo personnalisée EN PREMIER
+  typeOptions.push(getMenuTranslation('createYourDemo'));
+  typeOptionsExpanded.push(getMenuTranslation('createYourOwnDemo'));
+  typeValues.push('createYourDemo');
+
+  // 2. Ajouter les démos personnalisées du localStorage
+  try {
+      const customDemos = JSON.parse(localStorage.getItem('customDemos') || '[]');
+      customDemos.forEach(demo => {
+          // On utilise le nom pour l'affichage court et long
+          typeOptions.push(demo.name.length > 10 ? demo.name.substring(0, 10) + '...' : demo.name);
+          typeOptionsExpanded.push(demo.name);
+          typeValues.push(demo.id);
+      });
+  } catch (e) {
+      console.error("Erreur lecture customDemos", e);
+  }
+
+  // 3. Ajouter les démos standard
+  let stdTypeOptions = ['démo1', 'démo2'];
+  let stdTypeOptionsExpanded = [];
+  let stdTypeValues = ['demo1', 'demo2'];
   
   // Adapter les textes en fonction de l'état
   if (state.treeOwner === 2) {
-    typeOptionsExpanded = ['Clou du spectacle', 'Spain'];
+    stdTypeOptionsExpanded = ['Clou du spectacle', 'Spain'];
   } else if (state.treeOwner === 3) {
-    typeOptionsExpanded = ['Capet', 'Capet'];
+    stdTypeOptionsExpanded = ['Capet', 'Capet'];
   } else if (state.treeOwner === 4) {
-      typeOptions = ['démo1', 'démo2', 'démo3'];
-      typeValues = ['demo1', 'demo2', 'demo3'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        typeOptionsExpanded = ["l'affaire", "le plus ancien", "la plus ancienne"];
+        stdTypeOptionsExpanded = ["l'affaire", "le plus ancien", "la plus ancienne"];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        typeOptionsExpanded = ["the case", "the oldest", "the oldest"];
+        stdTypeOptionsExpanded = ["the case", "the oldest", "the oldest"];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        typeOptionsExpanded = ["el caso", "el más antiguo", "la más antigua"];
+        stdTypeOptionsExpanded = ["el caso", "el más antiguo", "la más antigua"];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        typeOptionsExpanded = ["az ügy", "a legrégebbi", "a legidősebb"];
+        stdTypeOptionsExpanded = ["az ügy", "a legrégebbi", "a legidősebb"];
       }
   } else if (state.treeOwner === 5) {
-    typeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
+    stdTypeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
   } else if (state.treeOwner === 6) {
-      typeOptions = ['démo1', 'démo2', 'démo3'];
-      typeValues = ['demo1', 'demo2', 'demo3'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        typeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        typeOptionsExpanded = ['Our ancestor to all', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Our ancestor to all', 'Franks', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        typeOptionsExpanded = ['Nuestro antepasado de todos', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['Nuestro antepasado de todos', 'Francs', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        typeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet'];
       }
   } else {
-      typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
-      typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        typeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        typeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        typeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet'];
       }
   }
+
+  // Fusionner les listes
+  typeOptions = typeOptions.concat(stdTypeOptions);
+  typeOptionsExpanded = typeOptionsExpanded.concat(stdTypeOptionsExpanded);
+  typeValues = typeValues.concat(stdTypeValues);
   
   try {
     // Créer la liste d'options
@@ -1731,6 +1821,61 @@ function createDemoSelector() {
       },
       onChange: (value) => {
         // Créer un événement pour simuler le clic sur l'option de menu correspondante
+        if (value === 'createYourDemo') {
+          openCustomAnimationModal();
+          toggleMenu(false);
+          return;
+        }
+
+        // Gérer les démos personnalisées
+        if (value.startsWith('custom_demo_')) {
+             console.log("🔍 Tentative de chargement démo:", value);
+             const customDemos = JSON.parse(localStorage.getItem('customDemos') || '[]');
+             const demo = customDemos.find(d => d.id === value);
+             
+             console.log("🔍 Démo trouvée:", demo);
+
+             if (demo) {
+                 // 1. Réinitialiser l'état d'animation (CRUCIAL pour recalculer le chemin)
+                 resetAnimationState();
+
+                 // 2. Gérer les modes conflictuels (Radar/Nuage)
+                 if (state.isRadarEnabled) {
+                    console.log("🔄 Désactivation Radar pour démo");
+                    disableFortuneModeClean();
+                    disableFortuneModeWithLever();
+                    toggleTreeRadar();
+                 }
+        
+                 if (state.isWordCloudEnabled) { 
+                    console.log("🔄 Fermeture Nuage pour démo");
+                    closeCloudName(); 
+                 }
+
+                 state.targetAncestorId = demo.ancestorId;
+                 state.targetCousinId = demo.cousinId;
+                 
+                 // Configuration pour l'animation
+                 state.isAnimationLaunched = true;
+                 state.nombre_generation = 2;
+                 
+                 const genSelect = document.getElementById('generations');
+                 if (genSelect) genSelect.value = '2';
+                 
+                 const animationPauseBtn = document.getElementById('animationPauseBtn');
+                 if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+                    animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+                 }
+
+                 console.log("🚀 Lancement de l'animation dans 500ms...");
+                 setTimeout(() => { startAncestorAnimation(); }, 500);
+                 toggleMenu(false);
+                 return;
+             } else {
+                 console.error("❌ Démo introuvable dans le stockage!");
+             }
+        }
+
         const fakeEvent = {
           target: { value: value }
         };
@@ -1792,7 +1937,7 @@ function createDemoSelector() {
     customSelector.setAttribute('title', getMenuTranslation('selectDemo')); //'Sélectionner une démo');
     
     // Remplacer le placeholder par le sélecteur personnalisé
-    demoPlaceholder.parentNode.replaceChild(customSelector, demoPlaceholder);
+    parentNode.replaceChild(customSelector, referenceNode);
     console.log("Sélecteur de démo créé avec succès");
   } catch (error) {
     console.error("Erreur lors de la création du sélecteur de démo:", error);
@@ -1823,7 +1968,7 @@ function createDemoSelector() {
     });
     
     // Remplacer le placeholder par le sélecteur de secours
-    demoPlaceholder.parentNode.replaceChild(fallbackSelector, demoPlaceholder);
+    parentNode.replaceChild(fallbackSelector, referenceNode);
     console.log("Sélecteur de démo de secours créé");
   }
 }
@@ -2976,37 +3121,271 @@ export function showHamburgerButtonForcefully() {
 
 // Initialiser le menu au chargement
 export function initializeHamburgerOnce() {
-if (!state.isHamburgerMenuInitialized) {
-  console.log("Initialisation HamburgerMenu.js");
-  createMenuElements();
-  state.isHamburgerMenuInitialized = true;
-  
-  // Attacher un écouteur d'événements pour détecter quand l'arbre est chargé
-  document.addEventListener('gedcomLoaded', function() {
-  console.log("Event gedcomLoaded détecté, préparation du menu hamburger");
-  updateHeightClass(); // Mettre à jour les classes de hauteur
-  setTimeout(syncCustomSelectors, 1000); // Synchroniser après un délai pour s'assurer que tout est prêt
-  });
+  if (!state.isHamburgerMenuInitialized) {
+    console.log("Initialisation HamburgerMenu.js");
+    createMenuElements();
+    state.isHamburgerMenuInitialized = true;
+    
+    // Attacher un écouteur d'événements pour détecter quand l'arbre est chargé
+    document.addEventListener('gedcomLoaded', function() {
+    console.log("Event gedcomLoaded détecté, préparation du menu hamburger");
+    updateHeightClass(); // Mettre à jour les classes de hauteur
+    setTimeout(syncCustomSelectors, 1000); // Synchroniser après un délai pour s'assurer que tout est prêt
+    });
 
-  // Ajouter un écouteur pour les changements de taille de fenêtre
-  window.addEventListener('resize', debounce(function() {
-    // Ajuster les sélecteurs si le menu est ouvert
-    if (sideMenu && sideMenu.classList.contains('open')) {
-      console.log('\n\n*** debug resize in initializeHamburgerOnce in hammburger.js for updateHeightClass \n\n')
-      updateHeightClass();
-      setTimeout(syncCustomSelectors, 300);
-    }
+    // Ajouter un écouteur pour les changements de taille de fenêtre
+    window.addEventListener('resize', debounce(function() {
+      // Ajuster les sélecteurs si le menu est ouvert
+      if (sideMenu && sideMenu.classList.contains('open')) {
+        console.log('\n\n*** debug resize in initializeHamburgerOnce in hammburger.js for updateHeightClass \n\n')
+        updateHeightClass();
+        setTimeout(syncCustomSelectors, 300);
+      }
 
-  }, 150));
+    }, 150));
 
-  document.addEventListener('change', function(event) {
-    // Vérifier si l'événement provient du sélecteur de personne racine
-    if (event.target && event.target.id === 'root-person-results') {
-        // Petit délai pour s'assurer que l'interface s'est mise à jour
-        setTimeout(updateRootPersonNameInMenu, 100);
-    }
-  });
+    document.addEventListener('change', function(event) {
+      // Vérifier si l'événement provient du sélecteur de personne racine
+      if (event.target && event.target.id === 'root-person-results') {
+          // Petit délai pour s'assurer que l'interface s'est mise à jour
+          setTimeout(updateRootPersonNameInMenu, 100);
+      }
+    });
+  }
 }
+
+export function openCustomAnimationModal() {
+    let modal = document.getElementById('custom-animation-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        return;
+    }
+
+    modal = document.createElement('div');
+    modal.id = 'custom-animation-modal';
+    
+    // Style wrapper to be non-blocking for background but centering content
+    Object.assign(modal.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        zIndex: '9000',
+        pointerEvents: 'none', // Let clicks pass through outside
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        paddingTop: '80px'
+    });
+
+    let selectedAncestor = null;
+    let selectedCousin = null;
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'custom-animation-content';
+    // Apply styles similar to searchModal-content
+    Object.assign(modalContent.style, {
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        width: '90%',
+        maxWidth: '400px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        pointerEvents: 'all', // Re-enable clicks
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        maxHeight: '80vh',
+        border: '1px solid #ccc'
+    });
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'custom-animation-header';
+    Object.assign(header.style, {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '10px 15px',
+        backgroundColor: '#4387fc', // Blue like the menu item
+        color: 'white',
+        cursor: 'move',
+        borderBottom: '1px solid #eee'
+    });
+
+    const title = document.createElement('h3');
+    title.textContent = getMenuTranslation('customAnimationTitle');
+    title.style.margin = '0';
+    title.style.fontSize = '16px';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '&times;';
+    Object.assign(closeBtn.style, {
+        background: 'none',
+        border: 'none',
+        color: 'white',
+        fontSize: '24px',
+        cursor: 'pointer',
+        padding: '0',
+        width: '30px',
+        height: '30px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    });
+    
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+    
+    closeBtn.onclick = closeModal;
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'custom-animation-body';
+    Object.assign(body.style, {
+        padding: '15px',
+        overflowY: 'auto'
+    });
+
+    body.innerHTML = `
+        <div class="animation-name-container" style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:14px;">${getMenuTranslation('animationNameLabel')}:</label>
+            <input type="text" id="animation-name" placeholder="${getMenuTranslation('animationNamePlaceholder')}" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+        </div>
+        <div class="animation-mode-toggle" style="margin-bottom: 15px;">
+            <label>
+                <input type="checkbox" id="cousin-mode-toggle">
+                ${getMenuTranslation('cousinMode')}
+            </label>
+        </div>
+        <div id="ancestor-search-container"></div>
+        <div id="cousin-search-container" style="display: none;"></div>
+        <div class="modal-buttons" style="margin-top: 20px; text-align: right;">
+            <button id="start-custom-animation" class="modal-btn confirm" style="
+                background-color: #4CAF50; 
+                color: white; 
+                border: none; 
+                padding: 8px 16px; 
+                border-radius: 4px; 
+                cursor: pointer; 
+                font-weight: bold;">
+                ${getMenuTranslation('startAnimation')}
+            </button>
+        </div>
+    `;
+
+    modalContent.appendChild(header);
+    modalContent.appendChild(body);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    const ancestorContainer = body.querySelector('#ancestor-search-container');
+    const cousinContainer = body.querySelector('#cousin-search-container');
+    const cousinToggle = body.querySelector('#cousin-mode-toggle');
+    const startButton = body.querySelector('#start-custom-animation');
+
+    const ancestorSearch = createSearchInput('ancestor', (person) => {
+        selectedAncestor = person;
+    });
+    ancestorContainer.appendChild(ancestorSearch.container);
+
+    const cousinSearch = createSearchInput('cousin', (person) => {
+        selectedCousin = person;
+    });
+    cousinContainer.appendChild(cousinSearch.container);
+
+    cousinToggle.addEventListener('change', () => {
+        const isCousinMode = cousinToggle.checked;
+        cousinContainer.style.display = isCousinMode ? 'block' : 'none';
+        ancestorSearch.label.textContent = isCousinMode ? getMenuTranslation('commonAncestor') + ':' : getMenuTranslation('ancestor') + ':';
+    });
+
+    startButton.addEventListener('click', () => {
+        if (!selectedAncestor) {
+            alert(getMenuTranslation('selectPerson'));
+            return;
+        }
+
+        // Sauvegarder la démo personnalisée
+        const nameInput = document.getElementById('animation-name');
+        let name = nameInput.value.trim();
+        
+        // Charger les démos existantes
+        let customDemos = JSON.parse(localStorage.getItem('customDemos') || '[]');
+        
+        if (!name) {
+            name = `Demo ${customDemos.length + 1}`;
+        }
+        
+        const newDemo = {
+            id: `custom_demo_${Date.now()}`,
+            name: name,
+            ancestorId: selectedAncestor.id,
+            cousinId: cousinToggle.checked && selectedCousin ? selectedCousin.id : null
+        };
+        
+        customDemos.push(newDemo);
+        localStorage.setItem('customDemos', JSON.stringify(customDemos));
+
+        // Mettre à jour le sélecteur
+        createDemoSelector();
+
+        state.targetAncestorId = selectedAncestor.id;
+        state.targetCousinId = cousinToggle.checked && selectedCousin ? selectedCousin.id : null;
+        startAncestorAnimation();
+        closeModal();
+    });
+
+    // Make draggable/resizable
+    makeModalDraggableAndResizable(modalContent, header);
+    makeModalInteractive(modal);
+
+ 
+    function createSearchInput(type, onSelect) {
+        const container = document.createElement('div');
+        container.className = 'search-input-container';
+        container.style.marginBottom = '15px';
+        container.style.position = 'relative';
+
+        const label = document.createElement('label');
+        label.textContent = getMenuTranslation(type) + ':';
+        label.style.display = 'block';
+        label.style.marginBottom = '5px';
+        label.style.fontWeight = 'bold';
+        label.style.fontSize = '14px';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = getMenuTranslation('searchPlaceholder');
+        Object.assign(input.style, {
+            width: '100%',
+            padding: '8px',
+            boxSizing: 'border-box',
+            border: '1px solid #ccc',
+            borderRadius: '4px'
+        });
+
+        const handleOpenModal = (e) => {
+            e.preventDefault();
+            input.blur();
+            openSearchModal(null, null, 'select', (person) => {
+                input.value = person.name.replace(/\//g, '');
+                onSelect(person);
+            });
+        };
+
+        input.addEventListener('click', handleOpenModal);
+        input.addEventListener('focus', handleOpenModal);
+
+        container.appendChild(label);
+        container.appendChild(input);
+
+        return { container, label };
+    }
 }
 
 export function updateRootPersonNameInMenu() {
