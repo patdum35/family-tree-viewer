@@ -1,3 +1,85 @@
+// ===== NOUVEAU : Logique de mise à jour PWA =====
+
+/**
+ * Affiche un popup pour informer l'utilisateur qu'une nouvelle version est disponible.
+ * @param {ServiceWorkerRegistration} registration - L'objet d'enregistrement du Service Worker.
+ */
+function showUpdatePopup(registration) {
+    if (document.getElementById('sw-update-popup')) return; // Éviter les doublons
+    // Créer le conteneur du popup
+    const popup = document.createElement('div');
+    popup.id = 'sw-update-popup';
+    // Styles pour la visibilité et le positionnement
+    Object.assign(popup.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: '#2c3e50', // Bleu nuit
+        color: 'white',
+        padding: '15px 20px',
+        borderRadius: '8px',
+        boxShadow: '0 5px 15px rgba(0,0,0,0.4)',
+        zIndex: '10001', // Au-dessus de tout
+        display: 'flex',
+        alignItems: 'center',
+        gap: '15px',
+        fontFamily: 'sans-serif',
+        opacity: '0',
+        transition: 'opacity 0.5s ease'
+    });
+
+    // Contenu HTML du popup avec traductions
+    popup.innerHTML = `
+        <span style="font-size: 15px;">${window.i18n.getMultilingueText('newVersionAvailable')}</span>
+        <button id="sw-update-accept" style="background-color: #27ae60; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold;">${window.i18n.getMultilingueText('updateNow')}</button>
+        <button id="sw-update-decline" style="background: none; border: none; color: #bdc3c7; cursor: pointer; font-size: 24px; line-height: 1;">&times;</button>
+    `;
+
+    document.body.appendChild(popup);
+
+    // Afficher avec une transition
+    setTimeout(() => popup.style.opacity = '1', 100);
+
+    // Gérer le clic sur "Mettre à jour"
+    document.getElementById('sw-update-accept').addEventListener('click', () => {
+        console.log('Mise à jour acceptée par l\'utilisateur.');
+        const waitingWorker = registration.waiting;
+        if (waitingWorker) {
+            // 1. Changer le texte du bouton pour feedback
+            const btn = document.getElementById('sw-update-accept');
+            btn.textContent = "Téléchargement...";
+            btn.disabled = true;
+
+            // 2. Écouter la fin du téléchargement
+            const onDownloadComplete = (event) => {
+                if (event.data && event.data.type === 'DOWNLOAD_COMPLETE') {
+                    console.log("✅ Téléchargement terminé, demande d'activation...");
+                    navigator.serviceWorker.removeEventListener('message', onDownloadComplete);
+                    
+                    // 3. Activer le nouveau SW
+                    if (registration.waiting) {
+                        registration.waiting.postMessage({ action: 'skipWaiting' });
+                    }
+                    // Le reload se fera via l'événement 'controllerchange' plus bas
+                }
+            };
+            navigator.serviceWorker.addEventListener('message', onDownloadComplete);
+
+            // 4. Lancer le téléchargement
+            waitingWorker.postMessage({ action: 'downloadResources' });
+        }
+    });
+
+    // Gérer le clic sur "Fermer"
+    document.getElementById('sw-update-decline').addEventListener('click', () => {
+        console.log('Mise à jour refusée par l\'utilisateur.');
+        popup.remove();
+    });
+}
+
+// ===== FIN : Logique de mise à jour PWA =====
+
 // 6 cas d'utilisation pour le service worker:
 // 1- mode de test/developpement sur PC windows avec VS code et test avec Live Server
 // 2- mode opérationnel sur PC avec le lien gitHub
@@ -26,6 +108,26 @@ if ('serviceWorker' in navigator) {
                 scope: './' // Spécifier explicitement le scope
             }).then(function(registration) {
                 console.log('ServiceWorker enregistré avec succès sur scope: ', registration.scope);
+
+                // Vérifier si un Service Worker est déjà en attente (cas où on a ignoré le popup et rechargé la page)
+                if (registration.waiting) {
+                    console.log('Service Worker en attente détecté au démarrage.');
+                    showUpdatePopup(registration);
+                }
+
+                // --- NOUVELLE LOGIQUE DE MISE À JOUR ---
+                registration.addEventListener('updatefound', () => {
+                    console.log('Nouvelle version du Service Worker trouvée, installation en cours...');
+                    const newWorker = registration.installing;
+
+                    newWorker.addEventListener('statechange', () => {
+                        // Si le nouveau worker est installé, il est maintenant en attente (waiting)
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('Nouveau Service Worker installé et en attente.');
+                            showUpdatePopup(registration);
+                        }
+                    });
+                });
                 
                 // Vérifier si le service worker contrôle déjà la page
                 if (!navigator.serviceWorker.controller) {
@@ -87,6 +189,15 @@ if ('serviceWorker' in navigator) {
             console.log('Rechargement demandé par le ServiceWorker');
             window.location.reload();
         }
+    });
+
+    // --- NOUVEAU : Écouteur pour le rechargement automatique ---
+    let refreshing;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        console.log('Nouveau Service Worker activé, rechargement de la page...');
+        window.location.reload();
+        refreshing = true;
     });
 }
 

@@ -229,7 +229,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
             // --- FIN ÉTAPE A ---
 
             // Constantes de contrôle
-            const SEPARATION_ENTRE_BRANCHES = 190;
+            const SEPARATION_ENTRE_BRANCHES = 150;
             const RAPPROCHEMENT_FRERES = 60; 
 
             let yReference = null;
@@ -257,6 +257,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
                     } else {
                         // 2. Nœuds SIBLING (Frères et Sœurs de A ou B) : Ils prennent les positions suivantes (index 3, 4, ...)
                         const baseIndex = 2; // Position de départ juste après le couple (index 1 et 2)
+                        // 2. Nœuds SIBLING (Frères et Sœurs de A ou B)
                         
                         siblingCounters[depth] = (siblingCounters[depth] || 0) + 1;
                         const siblingIndex = siblingCounters[depth];
@@ -264,6 +265,14 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
                         // Position = Référence + Décalage de la Branche 2 + (Index du sibling * RAPPROCHEMENT_FRERES)
                         // Cela aligne les siblings verticalement avec la Branche 2.
                         node.x = yReference + SEPARATION_ENTRE_BRANCHES + (siblingIndex * RAPPROCHEMENT_FRERES);
+                        // Calcul dynamique pour éviter le chevauchement avec les ancêtres
+                        const ancestorsCount = nodes.filter(n => n.depth === depth && n.data.mainBranch === 1 && !n.data.isSibling).length;
+                        const lastAncestorY = yReference + (ancestorsCount * RAPPROCHEMENT_FRERES);
+                        
+                        // On part soit de la séparation standard, soit après le dernier ancêtre si celui-ci descend trop bas
+                        const startY = Math.max(yReference + SEPARATION_ENTRE_BRANCHES, lastAncestorY);
+
+                        node.x = startY + (siblingIndex * RAPPROCHEMENT_FRERES);
                     }
 
                 } else if (branch === 2) {

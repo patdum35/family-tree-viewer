@@ -1460,6 +1460,7 @@ export async function startAncestorAnimation() {
     console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex);
 
     if (animationState.currentIndex === 0) {
+        state.treeShapeStyle= state.treeShapeStyleBackup;
         state.nombre_generation = 2;
         displayGenealogicTree(null, true, false);        
     }
@@ -1615,6 +1616,12 @@ export async function startAncestorAnimation() {
                 state.treeModeReal = 'directAncestors';
                 console.log("Chemin cousin trouvé:", animationState.cousinPath);
                 console.log("Chemin cousin trouvé descendant:", animationState.cousinDescendantPath);
+
+                // si mode cousin utiliser l'affichage en ligne droite
+                if (state.treeShapeStyle !== 'straight') {
+                    state.treeShapeStyleBackup = state.treeShapeStyle;
+                    state.treeShapeStyle = 'straight'; // ['normal', 'straight']; 
+                }
             }
             
             if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
@@ -1658,8 +1665,9 @@ export async function startAncestorAnimation() {
               
                 animationState.currentIndex = i;
 
-                // pour le mode 'cousin', 4 avant la fin on passe en mode Ancestors pour laisser apparaitre les siclings qui vont permettre la descente
-                if ((animationState.currentIndex > animationState.path.length - 4 ) && (state.targetCousinId != null) )
+                // pour le mode 'cousin', 4 avant la fin on passe en mode Ancestors pour laisser apparaitre les siblings qui vont permettre la descente
+                // if ((animationState.currentIndex > animationState.path.length - 4 ) && (state.targetCousinId != null) )
+                if ((animationState.currentIndex > animationState.path.length - 3 ) && (state.targetCousinId != null) )
                 { 
                     state.treeModeReal = 'ancestors';
                     console.log("\n\n debug -- passage en mode state.treeModeReal = 'Ancestors'")
@@ -2657,7 +2665,7 @@ export function generateLocalMaps() {
 window.generateLocalMaps = generateLocalMaps;
 
 
-export function toggleAnimationPause() {
+export function toggleAnimationPause(animationStateisPaused = null) {
 
     if (state.isRadarEnabled) {
         disableFortuneModeClean();
@@ -2671,7 +2679,13 @@ export function toggleAnimationPause() {
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     
     // Basculer l'état de pause
-    animationState.isPaused = !animationState.isPaused;
+    // animationState.isPaused = !animationState.isPaused;
+    if (animationStateisPaused !== null) {
+        animationState.isPaused = animationStateisPaused;
+    } else {
+        animationState.isPaused = !animationState.isPaused;
+    }
+
     
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';

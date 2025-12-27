@@ -4,7 +4,7 @@ import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
 import { showToastNew } from './debugLogUtils.js';
 import { documentation } from './documentation.js';
-import { toggleAnimationPause, resetAnimationState } from './treeAnimation.js';
+import { toggleAnimationPause, resetAnimationState, startAncestorAnimation  } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { openSearchModal } from './searchModalUI.js';
 import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
@@ -1867,12 +1867,21 @@ function createDemoSelector() {
                     animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
                  }
 
-                 console.log("🚀 Lancement de l'animation dans 500ms...");
-                 setTimeout(() => { 
-                    toggleAnimationPause();
-                  }, 500);
-                 toggleMenu(false);
-                 return;
+                 const treeModeReal = state.treeModeReal;
+                 if (state.targetCousinId && state.targetCousinId !== '') {
+                    state.treeMode = 'directAncestors';
+                 }
+
+                displayGenealogicTree(null, true, false, true);
+
+                state.treeModeReal = treeModeReal;               
+
+                console.log("🚀 Lancement de l'animation dans 500ms...");
+                setTimeout(() => { 
+                  startAncestorAnimation();
+                }, 500);
+                toggleMenu(false);
+                return;
              } else {
                  console.error("❌ Démo introuvable dans le stockage!");
              }
@@ -3338,7 +3347,32 @@ export function openCustomAnimationModal() {
 
         state.targetAncestorId = selectedAncestor.id;
         state.targetCousinId = cousinToggle.checked && selectedCousin ? selectedCousin.id : null;
-        toggleAnimationPause();
+        // Configuration pour l'animation
+        state.isAnimationLaunched = true;
+        state.nombre_generation = 2;
+        
+        const genSelect = document.getElementById('generations');
+        if (genSelect) genSelect.value = '2';
+        
+        const animationPauseBtn = document.getElementById('animationPauseBtn');
+        if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+          animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+        }
+
+          const treeModeReal = state.treeModeReal;
+          if (state.targetCousinId && state.targetCousinId !== '') {
+            state.treeMode = 'directAncestors';
+          }
+
+        displayGenealogicTree(null, true, false, true);
+
+        state.treeModeReal = treeModeReal; 
+
+        
+        setTimeout(() => { 
+          startAncestorAnimation();
+        }, 500);
+
         closeModal();
     });
 

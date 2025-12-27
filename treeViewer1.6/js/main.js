@@ -97,6 +97,7 @@ export const state = {
 
     linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
     treeShapeStyle: 'normal',  //'straight'
+    treeShapeStyleBackup: 'normal',  //'straight'
     addLeaves: false,
     frequencyStatsModalCounter: 0,
     showPersonListModalCounter: 0,
@@ -1849,8 +1850,15 @@ export function handleRootPersonChange(event) {
         // Redessiner l'arbre d'abord
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
 
+        const treeModeReal = state.treeModeReal;
+        if (state.targetCousinId && state.targetCousinId !== '') {
+            state.treeMode = 'directAncestors';
+        }
+
         displayGenealogicTree(null, true, false, true);
-        
+
+        state.treeModeReal = treeModeReal; 
+
         // Nettoyer tous les conteneurs de fond d'écran existants
         const loginBackground = document.querySelector('.login-background');
         if (loginBackground) {

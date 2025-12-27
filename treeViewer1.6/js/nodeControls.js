@@ -284,7 +284,8 @@ async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
     if (!isAnimation) {
         [mapX, mapY, mapW, mapH] = getAnimationMapPosition('namecloud-heatmap-wrapper');
     } else {
-        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');       
+        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');   
+        mapH = mapH + 100; // ajustement pour animation    
     }
 
 

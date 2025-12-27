@@ -1,4 +1,7 @@
-// Importer la configuration de cache
+// =================================================================
+// SERVICE WORKER
+// Version: 1.0.19 - Correction communication update
+// =================================================================
 importScripts('./cacheConfig.js');
 
 // Console pour le logging
@@ -6,7 +9,7 @@ const swConsole = {
   log: function(message) {
     console.log(`[SW] ${message}`);
     try {
-      self.clients.matchAll().then(clients => {
+      self.clients.matchAll({includeUncontrolled: true}).then(clients => {
         clients.forEach(client => client.postMessage({type: 'SW_LOG', message}));
       });
     } catch (e) {}
@@ -14,7 +17,7 @@ const swConsole = {
   error: function(message) {
     console.error(`[SW] ${message}`);
     try {
-      self.clients.matchAll().then(clients => {
+      self.clients.matchAll({includeUncontrolled: true}).then(clients => {
         clients.forEach(client => client.postMessage({type: 'SW_ERROR', message}));
       });
     } catch (e) {}
@@ -54,74 +57,52 @@ const RESOURCES_TO_CACHE = [
   './manifest.webmanifest'
 ];
 
-// Installation du Service Worker - adaptation de la technique de mapTilesPreloader.js
-self.addEventListener('install', (event) => {
-  swConsole.log('🚀 Service Worker: Installation démarrée');
-  
-  // Forcer l'activation immédiate
-  self.skipWaiting();
-  
-  event.waitUntil((async () => {
-    try {
-      // Ouvrir le cache
-      const cache = await caches.open(CACHE_NAME);
-      swConsole.log(`📦 Cache '${CACHE_NAME}' ouvert avec succès`);
-      
-      // Compter les ressources déjà en cache
-      let existingCount = 0;
-      let successCount = 0;
-      let failedCount = 0;
-      
-      // Utiliser la technique de processInChunks qui fonctionne sur mobile
-      await processInChunks(RESOURCES_TO_CACHE, async (url) => {
-        try {
-          // Vérifier d'abord si la ressource est déjà en cache
-          const cachedResponse = await cache.match(url);
-          
-          if (cachedResponse) {
-            // Déjà en cache
-            existingCount++;
-            return;
-          }
-          
-          // Charger la ressource avec une approche similaire à fetchTileWithCache
-          const response = await fetch(url, {
-            method: 'GET',
-            cache: 'no-cache',
-            mode: 'no-cors'
-          });
-          
-          if (response.ok || response.type === 'opaque') {
-            await cache.put(url, response.clone());
-            successCount++;
-            swConsole.log(`✅ Mise en cache: ${url}`);
-          } else {
-            failedCount++;
-            swConsole.error(`❌ Échec pour ${url}: ${response.status}`);
-          }
-        } catch (err) {
-          failedCount++;
-          swConsole.error(`❌ Erreur pour ${url}: ${err.message}`);
-        }
-      }, 3, 50); // 3 ressources à la fois, 50ms entre les lots
-      
-      // Rapport final
-      swConsole.log(`📊 Bilan de mise en cache: ${successCount} ajoutés, ${existingCount} existants, ${failedCount} échecs`);
-      
-      // Vérification spécifique pour arbre.enc et arbreX.enc
-      const verifyFiles = ['arbre.enc', 'arbreX.enc', 'arbreB.enc', 'arbreC.enc', 'arbreG.enc', 'arbreLE.enc'];
-      for (const file of verifyFiles) {
-        const response = await cache.match(file);
-        if (response) {
-          swConsole.log(`✅ Fichier critique trouvé en cache: ${file}`);
+// Fonction de mise en cache déplacée (appelée manuellement)
+async function performCaching() {
+  try {
+    // Ouvrir le cache
+    const cache = await caches.open(CACHE_NAME);
+    swConsole.log(`📦 Cache '${CACHE_NAME}' ouvert pour téléchargement manuel`);
+    
+    let successCount = 0;
+    let failedCount = 0;
+    
+    // Utiliser la technique de processInChunks
+    await processInChunks(RESOURCES_TO_CACHE, async (url) => {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          cache: 'no-cache',
+          mode: 'no-cors'
+        });
+        
+        if (response.ok || response.type === 'opaque') {
+          await cache.put(url, response.clone());
+          successCount++;
+          // swConsole.log(`✅ Téléchargé: ${url}`);
         } else {
-          swConsole.error(`❌ ÉCHEC: ${file} n'est PAS en cache!`);
+          failedCount++;
+          swConsole.error(`❌ Échec: ${url} (${response.status})`);
         }
+      } catch (err) {
+        failedCount++;
+        swConsole.error(`❌ Erreur: ${url} (${err.message})`);
       }
-    } catch (error) {
-      swConsole.error(`🔥 Erreur critique: ${error.message}`);
-    }
-  })());
+    }, 3, 50);
+    
+    swConsole.log(`📊 Téléchargement terminé: ${successCount} OK, ${failedCount} Erreurs`);
+    return true;
+  } catch (error) {
+    swConsole.error(`🔥 Erreur critique cache: ${error.message}`);
+    return false;
+  }
+}
+
+// Installation : NE FAIT RIEN (pas de téléchargement)
+self.addEventListener('install', (event) => {
+  swConsole.log('🚀 Service Worker: Installation détectée (Attente validation utilisateur)');
+  // On passe immédiatement à l'état "installed" sans rien télécharger
+  event.waitUntil(Promise.resolve());
 });
 
 // Traitement par lots, comme dans votre code qui fonctionne
@@ -255,6 +236,23 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (!event.data || !event.data.action) return;
   
+  if (event.data.action === 'skipWaiting') {
+    swConsole.log('🏃‍♂️ Action "skipWaiting" reçue, activation du nouveau SW...');
+    self.skipWaiting();
+  }
+  
+  // NOUVEAU : Action pour déclencher le téléchargement
+  if (event.data.action === 'downloadResources') {
+    swConsole.log('📥 Ordre de téléchargement reçu de l\'utilisateur');
+    performCaching().then(() => {
+        // Prévenir le client que c'est fini
+        // IMPORTANT : includeUncontrolled: true est vital car ce SW ne contrôle pas encore la page
+        self.clients.matchAll({includeUncontrolled: true}).then(clients => {
+            clients.forEach(client => client.postMessage({type: 'DOWNLOAD_COMPLETE'}));
+        });
+    });
+  }
+
   switch (event.data.action) {
     case 'clearCache':
       swConsole.log('🗑️ Demande de vidage du cache reçue');
