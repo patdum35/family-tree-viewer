@@ -1,6 +1,6 @@
 // =================================================================
 // SERVICE WORKER
-// Version: 1.0.19 - Correction communication update
+// Version: 1.0.20 - Correction communication update
 // =================================================================
 importScripts('./cacheConfig.js');
 
