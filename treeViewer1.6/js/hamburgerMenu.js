@@ -1713,13 +1713,13 @@ function createDemoSelector() {
       stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11', 'démo12', 'démo13', 'démo14', 'démo15', 'démo16'];
       stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11', 'demo12', 'demo13', 'demo14', 'demo15', 'demo16'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        stdTypeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet', 'pti gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'le grand blond'];
+        stdTypeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet', 'ptit gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'le grand blond'];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        stdTypeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet', 'pti gars du wav', 'yellow jersey', 'Valerie', 'Victor', 'the tall blond'];
+        stdTypeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet', 'ptit gars du wav', 'yellow jersey', 'Valerie', 'Victor', 'the tall blond'];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        stdTypeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet', 'pti gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'el rubio alto'];
+        stdTypeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet', 'ptit gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'el rubio alto'];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        stdTypeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet', 'pti gars du wav', 'sárga mez', 'Valerie', 'Victor', 'a magas szőke'];
+        stdTypeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet', 'ptit gars du wav', 'sárga mez', 'Valerie', 'Victor', 'a magas szőke'];
       }
   }
 
