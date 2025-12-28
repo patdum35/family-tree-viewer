@@ -582,24 +582,24 @@ const MULTILINGUE_DOC_CONTENT = {
 
         voiceCommandList: `
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Liste des questions possible:</strong></ul>
-        <ul style="margin-left: 20px; line-height: 0.7;">
-            <li><strong>chercher, rechercher</strong></li>
-            <li><strong>quand est né</strong></li>
-            <li><strong>quand est mort, quand est morte, quand est décédé</strong></li>
-            <li><strong>quel âge a, quel âge avait</strong></li>
-            <li><strong>ou habite, ou habitait</strong></li>
-            <li><strong>quelle est la profession de, quelle était la profession de</strong></li>
-            <li><strong>quel est le métier de, quel etait le métier de</strong></li>
-            <li><strong>avec qui est marié, avec qui etait marié</strong></li>
-            <li><strong>combien d'enfants a, combien d'enfant a eu</strong></li>
-            <li><strong>qui est le père de, qui etait le père de</strong></li>
-            <li><strong>qui est la mère de, qui etait la mère de</strong></li>
-            <li><strong>qui sont les frères et sœurs de, qui étaient les frères et sœurs de</strong></li>
-            <li><strong>quel est le contexte historique de, quel était le contexte historique de</strong></li>
-            <li><strong>quelles sont les notes de</strong></li>
-            <li><strong>qui es-tu, quel est ton nom, comment t'appelles-tu</strong></li>
-            <li><strong>qui t'a créé</strong></li>
-            <li><strong>à quoi sert tu</strong></li>
+        <ul style="margin-left: 20px; line-height: 1.0;">
+            <li>chercher, rechercher</strong></li>
+            <li>quand est né</strong></li>
+            <li>quand est mort, quand est morte, quand est décédé</strong></li>
+            <li>quel âge a, quel âge avait</strong></li>
+            <li>ou habite, ou habitait</strong></li>
+            <li>quelle est la profession de, quelle était la profession de</strong></li>
+            <li>quel est le métier de, quel etait le métier de</strong></li>
+            <li>avec qui est marié, avec qui etait marié</strong></li>
+            <li>combien d'enfants a, combien d'enfant a eu</strong></li>
+            <li>qui est le père de, qui etait le père de</strong></li>
+            <li>qui est la mère de, qui etait la mère de</strong></li>
+            <li>qui sont les frères et sœurs de, qui étaient les frères et sœurs de</strong></li>
+            <li>quel est le contexte historique de, quel était le contexte historique de</strong></li>
+            <li>quelles sont les notes de</strong></li>
+            <li>qui es-tu, quel est ton nom, comment t'appelles-tu</strong></li>
+            <li>qui t'a créé</strong></li>
+            <li>à quoi sert tu</strong></li>
         </ul>
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Mode épeller lettre par lettre:</strong></ul>
          
@@ -866,24 +866,24 @@ const MULTILINGUE_DOC_CONTENT = {
 
         voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>List of possible questions:</strong></ul>
-        <ul style="margin-left: 20px; line-height: 0.7;">
-            <li><strong>search, research</strong></li>
-            <li><strong>when was born</strong></li>
-            <li><strong>when died, when passed away</strong></li>
-            <li><strong>how old is, how old was</strong></li>
-            <li><strong>where lives, where lived</strong></li>
-            <li><strong>what is the profession of, what was the profession of</strong></li>
-            <li><strong>what is the job of, what was the job of</strong></li>
-            <li><strong>who is married to, who was married to</strong></li>
-            <li><strong>how many children does have, how many children did have</strong></li>
-            <li><strong>who is the father of, who was the father of</strong></li>
-            <li><strong>who is the mother of, who was the mother of</strong></li>
-            <li><strong>who are the siblings of, who were the siblings of</strong></li>
-            <li><strong>what is the historical context of, what was the historical context of</strong></li>
-            <li><strong>what are the notes of</strong></li>
-            <li><strong>who are you, what is your name</strong></li>
-            <li><strong>who created you</strong></li>
-            <li><strong>what are you for</strong></li>
+        <ul style="margin-left: 20px; line-height: 1.0;">
+            <li>search, research</strong></li>
+            <li>when was born</strong></li>
+            <li>when died, when passed away</strong></li>
+            <li>how old is, how old was</strong></li>
+            <li>where lives, where lived</strong></li>
+            <li>what is the profession of, what was the profession of</strong></li>
+            <li>what is the job of, what was the job of</strong></li>
+            <li>who is married to, who was married to</strong></li>
+            <li>how many children does have, how many children did have</strong></li>
+            <li>who is the father of, who was the father of</strong></li>
+            <li>who is the mother of, who was the mother of</strong></li>
+            <li>who are the siblings of, who were the siblings of</strong></li>
+            <li>what is the historical context of, what was the historical context of</strong></li>
+            <li>what are the notes of</strong></li>
+            <li>who are you, what is your name</strong></li>
+            <li>who created you</strong></li>
+            <li>what are you for</strong></li>
         </ul>,
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Spell letter by letter mode:</strong></ul>
          
@@ -1154,24 +1154,24 @@ const MULTILINGUE_DOC_CONTENT = {
 
         voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Lista de preguntas posibles:</strong></ul>
-        <ul style="margin-left: 20px; line-height: 0.7;">
-            <li><strong>buscar</strong></li>
-            <li><strong>cuándo nació</strong></li>
-            <li><strong>cuándo murió, cuándo falleció</strong></li>
-            <li><strong>qué edad tiene, qué edad tenía</strong></li>
-            <li><strong>dónde vive, dónde vivía</strong></li>
-            <li><strong>cuál es la profesión de, cuál era la profesión de</strong></li>
-            <li><strong>cuál es el oficio de, cuál era el oficio de</strong></li>
-            <li><strong>con quién está casado, con quién estaba casado</strong></li>
-            <li><strong>cuántos hijos tiene, cuántos hijos tuvo</strong></li>
-            <li><strong>quién es el padre de, quién era el padre de</strong></li>
-            <li><strong>quién es la madre de, quién era la madre de</strong></li>
-            <li><strong>quiénes son los hermanos de, quiénes eran los hermanos de</strong></li>
-            <li><strong>cuál es el contexto histórico de, cuál era el contexto histórico de</strong></li>
-            <li><strong>cuáles son las notas de</strong></li>
-            <li><strong>quién eres, cómo te llamas</strong></li>
-            <li><strong>quién te creó</strong></li>
-            <li><strong>para qué sirves</strong></li>
+        <ul style="margin-left: 20px; line-height: 1.0;">
+            <li>buscar</strong></li>
+            <li>cuándo nació</strong></li>
+            <li>cuándo murió, cuándo falleció</strong></li>
+            <li>qué edad tiene, qué edad tenía</strong></li>
+            <li>dónde vive, dónde vivía</strong></li>
+            <li>cuál es la profesión de, cuál era la profesión de</strong></li>
+            <li>cuál es el oficio de, cuál era el oficio de</strong></li>
+            <li>con quién está casado, con quién estaba casado</strong></li>
+            <li>cuántos hijos tiene, cuántos hijos tuvo</strong></li>
+            <li>quién es el padre de, quién era el padre de</strong></li>
+            <li>quién es la madre de, quién era la madre de</strong></li>
+            <li>quiénes son los hermanos de, quiénes eran los hermanos de</strong></li>
+            <li>cuál es el contexto histórico de, cuál era el contexto histórico de</strong></li>
+            <li>cuáles son las notas de</strong></li>
+            <li>quién eres, cómo te llamas</strong></li>
+            <li>quién te creó</strong></li>
+            <li>para qué sirves</strong></li>
         </ul>
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Modo deletrear letra por letra:</strong></ul>
          
@@ -1433,24 +1433,24 @@ const MULTILINGUE_DOC_CONTENT = {
 
         voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Lehetséges kérdések listája:</strong></ul>
-        <ul style="margin-left: 20px; line-height: 0.7;">
-            <li><strong>keresés</strong></li>
-            <li><strong>mikor született</strong></li>
-            <li><strong>mikor halt meg, mikor hunyt el</strong></li>
-            <li><strong>hány éves, hány éves volt</strong></li>
-            <li><strong>hol lakik, hol lakott</strong></li>
-            <li><strong>mi a foglalkozása, mi volt a foglalkozása</strong></li>
-            <li><strong>mi a munkája, mi volt a munkája</strong></li>
-            <li><strong>kivel házas, kivel volt házas</strong></li>
-            <li><strong>hány gyermeke van, hány gyermeke volt</strong></li>
-            <li><strong>ki az apja, ki volt az apja</strong></li>
-            <li><strong>ki az anyja, ki volt az anyja</strong></li>
-            <li><strong>kik a testvérei, kik voltak a testvérei</strong></li>
-            <li><strong>mi a történelmi háttere, mi volt a történelmi háttere</strong></li>
-            <li><strong>mik a jegyzetek</strong></li>
-            <li><strong>ki vagy te, mi a neved</strong></li>
-            <li><strong>ki alkotott téged</strong></li>
-            <li><strong>mire vagy jó</strong></li>
+        <ul style="margin-left: 20px; line-height: 1.0;">
+            <li>keresés</strong></li>
+            <li>mikor született</strong></li>
+            <li>mikor halt meg, mikor hunyt el</strong></li>
+            <li>hány éves, hány éves volt</strong></li>
+            <li>hol lakik, hol lakott</strong></li>
+            <li>mi a foglalkozása, mi volt a foglalkozása</strong></li>
+            <li>mi a munkája, mi volt a munkája</strong></li>
+            <li>kivel házas, kivel volt házas</strong></li>
+            <li>hány gyermeke van, hány gyermeke volt</strong></li>
+            <li>ki az apja, ki volt az apja</strong></li>
+            <li>ki az anyja, ki volt az anyja</strong></li>
+            <li>kik a testvérei, kik voltak a testvérei</strong></li>
+            <li>mi a történelmi háttere, mi volt a történelmi háttere</strong></li>
+            <li>mik a jegyzetek</strong></li>
+            <li>ki vagy te, mi a neved</strong></li>
+            <li>ki alkotott téged</strong></li>
+            <li>mire vagy jó</strong></li>
         </ul>
         <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Betűről betűre mód:</strong></ul>
          
