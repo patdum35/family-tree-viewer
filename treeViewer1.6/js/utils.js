@@ -89,30 +89,82 @@ export function findYoungestPerson() {
  * @param {string} nameToFind - La chaîne de caractères à rechercher dans les noms
  * @returns {Array} - Tableau des personnes trouvées ou tableau vide si aucune personne ne correspond
  */
-export function findPersonsByName(nameToFind) {
+// export function findPersonsByName(nameToFind, date = null) {
+//     if (!state.gedcomData || !state.gedcomData.individuals) {
+//         return [];
+//     }
+    
+//     // Convertir en minuscules pour une recherche insensible à la casse
+//     const searchStr = nameToFind.toLowerCase();
+
+//     console.log("\n\n\n in findPersonsByName: Recherche de personnes avec le nom contenant :", searchStr, '\n\n\n');
+    
+//     // Rechercher parmi tous les individus
+//     let count = 0
+//     return Object.values(state.gedcomData.individuals)
+//         .filter(person => {
+//             count += 1;
+//             const fullName = person.name.toLowerCase().replace(/\//g, '');
+//             if (count >6344 && count < 6370) {console.log("Vérification de la personne :", person.name, 'fullName' , fullName, 'searchStr=', searchStr, 'count', count, person);}
+
+//             return fullName.includes(searchStr);
+//         });
+// }
+
+
+/**
+ * Trouve toutes les personnes dont le nom contient une chaîne spécifique
+ * @param {string} nameToFind - La chaîne de caractères à rechercher dans les noms
+ * @returns {Array} - Tableau des personnes trouvées ou tableau vide si aucune personne ne correspond
+ */
+export function findPersonsByName(nameToFind, date = null) {
     if (!state.gedcomData || !state.gedcomData.individuals) {
         return [];
     }
-    
-    // Convertir en minuscules pour une recherche insensible à la casse
+
     const searchStr = nameToFind.toLowerCase();
-    
-    // Rechercher parmi tous les individus
+    // On prépare la date en string pour la comparaison si elle existe
+    const dateStr = date ? date.toString() : null;
+    // let count = 0
     return Object.values(state.gedcomData.individuals)
         .filter(person => {
+
+            // count += 1;
+            // 1. Vérification du nom (toujours requise)
             const fullName = person.name.toLowerCase().replace(/\//g, '');
-            return fullName.includes(searchStr);
+            const nameMatches = fullName.includes(searchStr);
+
+            // Si le nom ne matche pas, on s'arrête là
+            if (!nameMatches) return false;
+
+            // 2. Vérification de la date (seulement si 'date' est fournie)
+            if (dateStr) {
+                const birthDate = person.birthDate ? person.birthDate.toString() : "";
+                const deathDate = person.deathDate ? person.deathDate.toString() : "";
+                // if (count >6344 && count < 6370) {console.log("Vérification de la personne :", person.name, 'fullName' , fullName, 'searchStr=', searchStr, 'count', count, person);}                
+                // On garde la personne seulement si la date est incluse dans l'un des deux champs
+                return birthDate.includes(dateStr) || deathDate.includes(dateStr);
+            }
+
+            // Si aucune date n'est fournie, le match sur le nom suffit
+            return true;
         });
 }
+
+
+
+
+
+
 
 /**
  * Trouve une personne dont le nom contient une chaîne spécifique
  * @param {string} nameToFind - La chaîne de caractères à rechercher dans les noms
  * @returns {Object|null} - La première personne trouvée ou null si aucune personne ne correspond
  */
-export function findPersonByName(nameToFind) {
+export function findPersonByName(nameToFind, date = null) {
     // Utiliser findPersonsByName et retourner le premier résultat ou null
-    const results = findPersonsByName(nameToFind);
+    const results = findPersonsByName(nameToFind, date);
     return results.length > 0 ? results[0] : null;
 }
 

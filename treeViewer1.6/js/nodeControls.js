@@ -284,8 +284,10 @@ async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
     if (!isAnimation) {
         [mapX, mapY, mapW, mapH] = getAnimationMapPosition('namecloud-heatmap-wrapper');
     } else {
-        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');   
-        mapH = mapH + 100; // ajustement pour animation    
+        [mapX, mapY, mapW, mapH] = getAnimationMapPosition('animation-map-container');
+        if (state.treeShapeStyle === 'straight') { 
+            mapH = mapH + 100; // ajustement pour animation  
+        }  
     }
 
 
@@ -3637,7 +3639,7 @@ function handleNormalAncestors(node) {
  * @param {Event} event - L'événement de clic
  * @param {Object} d - Les données du nœud cliqué
  */
-export function handleAncestorsClick(event, d) {
+export function handleAncestorsClick(event, d, isFromAnimation = false) {
     event.stopPropagation();
     // console.log("Clicked node data:", d.data);
     let newAncestorsAdded = false;
@@ -3654,7 +3656,7 @@ export function handleAncestorsClick(event, d) {
         // console.log("After handling normal ancestors:", d.data.children);
     }
 
-    drawTree();
+    drawTree(false, isFromAnimation);
 
     if (newAncestorsAdded) {
         handleTreeShift();

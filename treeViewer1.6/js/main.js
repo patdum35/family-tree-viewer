@@ -18,6 +18,7 @@ export const state = {
     treeMode: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
     treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'   
+    // treeModeBackup: 'ancestors', // ou 'descendants' ou 'both'   
     treeModeReal_whenReturnToTree: 'ancestors', // ou 'descendants' ou 'both'   
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
@@ -129,6 +130,8 @@ export const state = {
     voice_rate: 1.0,
     voice_pitch: 1.0,
     isEndTestRealConnectivity: false,
+    iSAnimationWithStraightLines: false,
+    iSAnimationWithDirectAncestors: false,
 
 };
 
@@ -1783,6 +1786,24 @@ export function handleRootPersonChange(event) {
             } else if (selectedValue === 'demo11'){ // 'Capet'
                 ancestor = searchRootPersonId('hugues capet'); 
                 cousin = null;           
+            } else if (selectedValue === 'demo12'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('jacques delabarre');
+                cousin = searchRootPersonId('laurent ruq');             
+            // } else if (selectedValue === 'demo13'){ // 'un pti gars du wav'
+            //         ancestor = searchRootPersonId('marie guilemard');
+            //         cousin = searchRootPersonId('robert charpentier');             
+            } else if (selectedValue === 'demo13'){ // 'un pti gars du wav'
+                    ancestor = searchRootPersonId('julien vilboux');
+                    cousin = searchRootPersonId('louis pierre marie bobet', true, '1925');     
+            } else if (selectedValue === 'demo14'){ // 'un pti gars du wav'
+                    ancestor = searchRootPersonId('Léger lecerf');
+                    cousin = searchRootPersonId('Valérie le');             
+            } else if (selectedValue === 'demo15'){ // 'un pti gars du wav'
+                    ancestor = searchRootPersonId('jean baptiste hebert');
+                    cousin = searchRootPersonId('victor lan');             
+            } else if (selectedValue === 'demo16'){ // 'un pti gars du wav'
+                    ancestor = searchRootPersonId('guillaume olivier');
+                    cousin = searchRootPersonId('pierre richard maurice');                        
             } else {
                 ancestor = searchRootPersonId('charlemagne');
                 cousin = null;
@@ -1792,8 +1813,7 @@ export function handleRootPersonChange(event) {
             state.targetAncestorId = ancestor.id;
             if (cousin != null) {
                 state.targetCousinId = cousin.id;
-            } else {
-                state.targetCousinId = null;
+            } else {                state.targetCousinId = null;
             }   
 
 
@@ -1851,8 +1871,11 @@ export function handleRootPersonChange(event) {
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
 
         const treeModeReal = state.treeModeReal;
+        // state.treeModeBackup = state.treeMode;
+        let isCousin = false;
         if (state.targetCousinId && state.targetCousinId !== '') {
             state.treeMode = 'directAncestors';
+            isCousin = true;
         }
 
         displayGenealogicTree(null, true, false, true);
@@ -1871,7 +1894,7 @@ export function handleRootPersonChange(event) {
 
         // Démarrer l'animation après un court délai
         setTimeout(() => {
-            startAncestorAnimation();
+            startAncestorAnimation(isCousin);
         }, 500);
         
         // Mettre à jour la valeur du sélecteur si possible
@@ -2797,7 +2820,7 @@ export {
 
 
 //  fonction searchRootPerson pour utiliser findPersonsByName :
-export function searchRootPersonId(searchStr, isAlert = true) {
+export function searchRootPersonId(searchStr, isAlert = true, date = null) {
 
     // searchStr = searchStr.value.toLowerCase();
 
@@ -2806,7 +2829,7 @@ export function searchRootPersonId(searchStr, isAlert = true) {
     // Utiliser la nouvelle fonction findPersonsByName
 
     
-    const matchedPerson = findPersonByName(searchStr);
+    const matchedPerson = findPersonByName(searchStr, date);
 
 
 

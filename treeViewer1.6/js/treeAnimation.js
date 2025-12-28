@@ -1450,20 +1450,29 @@ function delay(ms) {
 }
 
 //#####################################################
-export async function startAncestorAnimation() {
+export async function startAncestorAnimation(isCousin = false) {
     disableFortuneModeClean();
     disableFortuneModeWithLever();
 
     console.log(`🎬 startAncestorAnimation: Path length=${animationState.path.length}, Root=${state.rootPersonId}, Target=${state.targetAncestorId}`);
 
     origineGenNb = state.nombre_generation;
-    console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex);
+    console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex,  'state.targetCousinId=', state.targetCousinId);
 
     if (animationState.currentIndex === 0) {
-        state.treeShapeStyle= state.treeShapeStyleBackup;
+        state.treeShapeStyle = state.treeShapeStyleBackup;
+        state.iSAnimationWithStraightLines = false;
+        state.iSAnimationWithDirectAncestors = false;
         state.nombre_generation = 2;
+
+        // if (isCousin) { state.treeMode = 'directAncestors'; } 
+        // // else { state.treeMode = 'ancestors';} // state.treeModeBackup; }
+        // else { state.treeMode =  state.treeModeBackup; }
+
+
         displayGenealogicTree(null, true, false);        
     }
+    
 
     state.isFullResetAnimationRequested = false; 
 
@@ -1613,14 +1622,21 @@ export async function startAncestorAnimation() {
             // console.log("Chemin trouvé descendant:", animationState.descendpath);
             if (state.targetCousinId != null) {
                 [animationState.cousinPath, animationState.cousinDescendantPath] = findAncestorPath(state.targetCousinId, state.targetAncestorId);
+
+                if (animationState.currentIndex === 0) {
+                    state.iSAnimationWithDirectAncestors = true;
+                }
                 state.treeModeReal = 'directAncestors';
+
+
                 console.log("Chemin cousin trouvé:", animationState.cousinPath);
                 console.log("Chemin cousin trouvé descendant:", animationState.cousinDescendantPath);
 
                 // si mode cousin utiliser l'affichage en ligne droite
-                if (state.treeShapeStyle !== 'straight') {
+                if (state.treeShapeStyle !== 'straight' && animationState.currentIndex === 0)  {
                     state.treeShapeStyleBackup = state.treeShapeStyle;
                     state.treeShapeStyle = 'straight'; // ['normal', 'straight']; 
+                    state.iSAnimationWithStraightLines = true;
                 }
             }
             
@@ -1666,8 +1682,8 @@ export async function startAncestorAnimation() {
                 animationState.currentIndex = i;
 
                 // pour le mode 'cousin', 4 avant la fin on passe en mode Ancestors pour laisser apparaitre les siblings qui vont permettre la descente
-                // if ((animationState.currentIndex > animationState.path.length - 4 ) && (state.targetCousinId != null) )
-                if ((animationState.currentIndex > animationState.path.length - 3 ) && (state.targetCousinId != null) )
+                if ((animationState.currentIndex > animationState.path.length - 4 ) && (state.targetCousinId != null) )
+                // if ((animationState.currentIndex > animationState.path.length - 3 ) && (state.targetCousinId != null) )
                 { 
                     state.treeModeReal = 'ancestors';
                     console.log("\n\n debug -- passage en mode state.treeModeReal = 'Ancestors'")
@@ -1835,7 +1851,7 @@ export async function startAncestorAnimation() {
                         // Attendre la lecture ou le délai
                         await voicePromise;
 
-                        handleAncestorsClick(event, node);
+                        handleAncestorsClick(event, node, true);
                         // drawTree();
                     }
                     

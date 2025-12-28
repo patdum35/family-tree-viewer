@@ -8,6 +8,7 @@ import { resetView } from './eventHandlers.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
+import { animationState } from './treeAnimation.js';
 
 // let zoom;
 // let lastTransform = null;
@@ -50,6 +51,15 @@ export function calculateLayout() {
  */
 export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalculatedLayout = false) {
     if (!state.currentTree) return;
+
+    if (state.iSAnimationWithStraightLines && !isAnimation) {
+        state.treeShapeStyle = state.treeShapeStyleBackup;
+        state.iSAnimationWithStraightLines = false;
+    }
+
+    if (state.iSAnimationWithDirectAncestors && !isAnimation) {
+        state.iSAnimationWithDirectAncestors = false;
+    }
 
     // console.log("⭐ Structure finale:", JSON.stringify(state.currentTree, null, 2));
     // console.log("Arbre restructuré :", state.currentTree);

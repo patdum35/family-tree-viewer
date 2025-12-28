@@ -1,4 +1,4 @@
-import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive } from './main.js';
+import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive, searchRootPersonId } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
@@ -1710,16 +1710,16 @@ function createDemoSelector() {
         stdTypeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet'];
       }
   } else {
-      stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
-      stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11', 'démo12', 'démo13', 'démo14', 'démo15', 'démo16'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11', 'demo12', 'demo13', 'demo14', 'demo15', 'demo16'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        stdTypeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'les bronzés', 'avant JC', 'Francs', 'Capet', 'pti gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'le grand blond'];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        stdTypeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Lalatte castle', 'Our ancestor to all', 'Like a hurricane', 'Space', 'The Arab of the future', 'Wolf of Canada', "it's normal", 'les bronzed', 'before JC', 'Franks', 'Capet', 'pti gars du wav', 'yellow jersey', 'Valerie', 'Victor', 'the tall blond'];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        stdTypeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['El castillo de Lalatte', 'Nuestro antepasado de todos', 'Como un huracán', 'Espacio', 'El árabe del futuro', 'Lobo de Canadá', 'es normal', 'los bronceados', 'antes de JC', 'Francs', 'Capet', 'pti gars du wav', 'maillot jaune', 'Valerie', 'Victor', 'el rubio alto'];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        stdTypeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Lalatte kastély', 'Mindenki ősünk', 'Mint egy hurrikán', 'Űr', 'A jövő arabja', 'Kanada farkasa', 'ez normális', 'a lebarnultakat', 'JC előtt', 'Franks', 'Capet', 'pti gars du wav', 'sárga mez', 'Valerie', 'Victor', 'a magas szőke'];
       }
   }
 
@@ -1727,8 +1727,7 @@ function createDemoSelector() {
   typeOptions = typeOptions.concat(stdTypeOptions);
   typeOptionsExpanded = typeOptionsExpanded.concat(stdTypeOptionsExpanded);
   typeValues = typeValues.concat(stdTypeValues);
-  
-  try {
+    try {
     // Créer la liste d'options
     const options = [];
     for (let i = 0; i < typeOptions.length; i++) {
@@ -1852,9 +1851,22 @@ function createDemoSelector() {
                     closeCloudName(); 
                  }
 
-                 state.targetAncestorId = demo.ancestorId;
-                 state.targetCousinId = demo.cousinId;
-                 
+                //  state.targetAncestorId = demo.ancestorId;
+                //  state.targetCousinId = demo.cousinId;
+
+
+                state.targetAncestorId  = null;
+                state.targetCousinId  = null;
+
+                if (demo.ancestorName && demo.ancestorName !== '') {
+                  state.targetAncestorId = searchRootPersonId(demo.ancestorName.replace(/\//g, '')).id;
+                }
+
+                if (demo.cousinName && demo.cousinName !== '') {
+                  state.targetCousinId = searchRootPersonId(demo.cousinName.replace(/\//g, '')).id;
+                }
+
+
                  // Configuration pour l'animation
                  state.isAnimationLaunched = true;
                  state.nombre_generation = 2;
@@ -1868,8 +1880,12 @@ function createDemoSelector() {
                  }
 
                  const treeModeReal = state.treeModeReal;
+                //  state.treeModeBackup = state.treeMode;
+                 let isCousin = false;
+
                  if (state.targetCousinId && state.targetCousinId !== '') {
                     state.treeMode = 'directAncestors';
+                    isCousin = true;
                  }
 
                 displayGenealogicTree(null, true, false, true);
@@ -1878,7 +1894,7 @@ function createDemoSelector() {
 
                 console.log("🚀 Lancement de l'animation dans 500ms...");
                 setTimeout(() => { 
-                  startAncestorAnimation();
+                  startAncestorAnimation(isCousin);
                 }, 500);
                 toggleMenu(false);
                 return;
@@ -3336,7 +3352,9 @@ export function openCustomAnimationModal() {
             id: `custom_demo_${Date.now()}`,
             name: name,
             ancestorId: selectedAncestor.id,
-            cousinId: cousinToggle.checked && selectedCousin ? selectedCousin.id : null
+            cousinId: cousinToggle.checked && selectedCousin ? selectedCousin.id : null,
+            ancestorName: selectedAncestor.name,
+            cousinName: cousinToggle.checked && selectedCousin ? selectedCousin.name : null
         };
         
         customDemos.push(newDemo);
@@ -3360,8 +3378,11 @@ export function openCustomAnimationModal() {
         }
 
           const treeModeReal = state.treeModeReal;
+          // state.treeModeBackup = state.treeMode;
+          let isCousin = false;
           if (state.targetCousinId && state.targetCousinId !== '') {
             state.treeMode = 'directAncestors';
+            isCousin = true;
           }
 
         displayGenealogicTree(null, true, false, true);
@@ -3370,7 +3391,7 @@ export function openCustomAnimationModal() {
 
         
         setTimeout(() => { 
-          startAncestorAnimation();
+          startAncestorAnimation(isCousin);
         }, 500);
 
         closeModal();

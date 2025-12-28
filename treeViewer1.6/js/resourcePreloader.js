@@ -44,7 +44,11 @@ const RESOURCES_TO_CACHE = [
   './background_images/pharabert.jpx',
   './background_images/dominique.jpx',
   './background_images/riad.jpx',
-  
+  './background_images/laurent.jpx',
+  './background_images/victor.jpx',
+  './background_images/valerie.jpx',
+  './background_images/louison.jpx',
+  './background_images/richard.jpx',  
   // Sons
   './sounds/lalatte.mpx'
 ];
