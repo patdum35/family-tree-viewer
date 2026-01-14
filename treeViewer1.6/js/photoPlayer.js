@@ -555,6 +555,15 @@ export async function showEndAnimationPhoto(nodeName) {
         'valerie': '/background_images/valerie.jpx',
         'louis': '/background_images/louison.jpx',
         'richard': '/background_images/richard.jpx',
+        'christophe': '/background_images/christophe_m.jpx',
+        'yoann': '/background_images/yoann_g.jpx',
+        'rene': '/background_images/rene_b.jpx',
+        'xavier': '/background_images/xavier_g.jpx',
+        'michel': '/background_images/michel_e.jpx',
+        'louis': '/background_images/louis_l.jpx',
+        'didier': '/background_images/didier_s.jpx',
+        'benoit': '/background_images/benoit_h.jpx',
+
     };
     
     // Trouver la correspondance dans le mapping

@@ -1698,16 +1698,17 @@ function createDemoSelector() {
   } else if (state.treeOwner === 5) {
     stdTypeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
   } else if (state.treeOwner === 6) {
-      stdTypeOptions = ['démo1', 'démo2', 'démo3'];
-      stdTypeValues = ['demo1', 'demo2', 'demo3'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        stdTypeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet'];
+        // stdTypeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet', 'miossec', 'gourcuff', 'grall', 'bargavel', 'leclerc', 'leduff', 'squiban', 'hamon' ];
+        stdTypeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet', 'chanteur breton', 'footballeur', 'écrivain', 'journaliste','super marché', 'brioche', 'compositeur', 'politicien' ];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        stdTypeOptionsExpanded = ['Our ancestor to all', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Our ancestor to all', 'Franks', 'Capet', 'breton singer', 'footballer', 'writer', 'journalist','supermarket', 'brioche', 'composer', 'politician' ];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        stdTypeOptionsExpanded = ['Nuestro antepasado de todos', 'Francs', 'Capet'];
+        stdTypeOptionsExpanded = ['Nuestro antepasado de todos', 'Francs', 'Capet', 'cantante bretón', 'futbolista', 'escritor', 'periodista','supermercado', 'brioche', 'compositor', 'político' ];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        stdTypeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet'];
+        stdTypeOptionsExpanded = ['Mindenki ősünk', 'Franks', 'Capet', 'breton énekes', 'labdarúgó', 'író', 'irodalom','szupermarket', 'briós', 'zeneszerző', 'politikus' ];
       }
   } else {
       stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11', 'démo12', 'démo13', 'démo14', 'démo15', 'démo16'];

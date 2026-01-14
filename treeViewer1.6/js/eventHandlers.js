@@ -386,7 +386,9 @@ export function resetView() {
             transform = transform.translate(window.innerWidth - state.boxWidth * 2, height / 2);
         } else {
             // Pour les ascendants, commencer du côté gauche
-            transform = transform.translate(state.boxWidth, height / 2);
+            // transform = transform.translate(state.boxWidth, height / 2);
+            transform = transform.translate(state.boxWidth/2, height / 2);
+
         }
         transform = transform.scale(0.8);
 

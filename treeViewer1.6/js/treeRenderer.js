@@ -532,7 +532,8 @@ function drawBothModeTree(isZoomRefresh = false) {
     ancestorsResult.descendants().forEach(node => {
         if (state.nombre_prenoms === 1)
         {
-            node.y -= 120*2.8 // Ajuster la valeur 2.8 selon le rapprochement souhaité
+            // node.y -= 120*2.8 // Ajuster la valeur 2.8 selon le rapprochement souhaité
+            node.y -= 120*3.1
         }        
         else if (state.nombre_prenoms === 2)
         {

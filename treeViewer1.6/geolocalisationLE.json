@@ -71,7 +71,7 @@
     "lat": 50.1106444,
     "lon": 8.6820917
   },
-  "Avrieux, 73500, Savoie, ": {
+  "Avrieux, 73500, Savoie,": {
     "lat": 45.2153331,
     "lon": 6.7201839
   },
@@ -434,6 +434,10 @@
   "Kerhalvez, Plougastel-Daoulas, 29189, Finistère, Bretagne, France": {
     "lat": 48.3629621,
     "lon": -4.3720468
+  },
+  "Plougastel-Daoulas, 29, Finistère, Bretagne, France": {
+    "lat": 48.3742317,
+    "lon": -4.369679
   },
   "Saint-Sauveur, 29262, Finistère, Bretagne, France": {
     "lat": 48.4471795,
@@ -1387,7 +1391,7 @@
     "lat": 46.6505634,
     "lon": 0.3748389
   },
-  "Ingelheim am Rhein, ALLEMAGNE ": {
+  "Ingelheim am Rhein, ALLEMAGNE": {
     "lat": 49.9752749,
     "lon": 8.0547274
   },
@@ -1771,6 +1775,10 @@
     "lat": 48.4532343,
     "lon": -4.1418753
   },
+  "Ploudiry, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
   "Bodilis, 29010, Finistère, Bretagne, FRANCE": {
     "lat": 48.53056,
     "lon": -4.1167121
@@ -1954,5 +1962,217 @@
   "Locmelar, , Finistère, Bretagne,": {
     "lat": 48.4528938,
     "lon": -4.0654009
+  },
+  "Plabennec": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Kersaint Plabennec": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Keraiber Ploudaniel": {
+    "lat": 48.50183,
+    "lon": -4.3240109
+  },
+  "Kersaint-Plabennec, 29095, Finistère, Bretagne, France": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Kervily Kersaint-Plabennec, 29095, Finistère, Bretagne, France": {
+    "lat": 48.4970483,
+    "lon": -4.3628076
+  },
+  "Kersaint-Plabennec, 29860, Finistère, Bretagne, France": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Saint Thonan, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4792138,
+    "lon": -4.3362597
+  },
+  "29800 Saint Thonan, Finistère, Bretagne, France": {
+    "lat": 48.4876994,
+    "lon": -4.2719144
+  },
+  "Ploudaniel, 29260, Finistère, Bretagne, France": {
+    "lat": 48.5369719,
+    "lon": -4.3106173
+  },
+  "Benghazi, Libye": {
+    "lat": 32.1200168,
+    "lon": 20.0812174
+  },
+  "Salles-sous-Bois, Drôme, , France": {
+    "lat": 44.4511,
+    "lon": 4.93441
+  },
+  "Paris, île de France, France": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "roudouhir - Hanvec,29460,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3406822,
+    "lon": -4.1375224
+  },
+  "Rosnoën,29580,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën,29580,Finistère,Bretagne,France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën, 29590, Finistère, Bretagne, France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën, 29580, Finistère, Bretagne, France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Hanvec, 29460, Finistère, Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "L'Hopital Camfrout, 29460, Finistère  Bretagne, France": {
+    "lat": 48.3214264,
+    "lon": -4.2366629
+  },
+  "Douarnenez, 29100, Finistère, Bretagne, France": {
+    "lat": 48.0944459,
+    "lon": -4.3311243
+  },
+  "Hanvec, 29460, Finistère Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Ploemeur, 56270, Morbihan, Bretagne, France": {
+    "lat": 47.7354591,
+    "lon": -3.4270534
+  },
+  "Lestraouen Plougastel Daoulas": {
+    "lat": 48.3408724,
+    "lon": -4.3704104
+  },
+  "Plougastel Daoulas Finistère Bretagne": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Kersaint-Plabennec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Beuzit-Conogan, 29103, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4417599,
+    "lon": -4.2793636
+  },
+  "Saint-Thonan, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4792138,
+    "lon": -4.3362597
+  },
+  "Plouzévédé, 29440, Finistère, Bretagne, France": {
+    "lat": 48.595965,
+    "lon": -4.112168
+  },
+  "Plougar, 29440, Finistère, Bretagne, France": {
+    "lat": 48.562264,
+    "lon": -4.141439
+  },
+  "Kervingant - Plouzévédé, 29440, Finistère, Bretagne, France": {
+    "lat": 48.593557,
+    "lon": -4.10231
+  },
+  "Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.6612675,
+    "lon": -4.1039679
+  },
+  "Kersaudy - Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.63104,
+    "lon": -4.1404059
+  },
+  "Kerleunoc - Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.670037,
+    "lon": -4.1543287
+  },
+  "Boulevard de la Boutière - Saint-Grégoire, 35760, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1433544,
+    "lon": -1.6881925
+  },
+  "Ploudaniel,29179,Finistère,Bretagne,France": {
+    "lat": 48.5369719,
+    "lon": -4.3106173
+  },
+  "Lanneuffret,29 ,Finistère,Bretagne,France": {
+    "lat": 48.4978925,
+    "lon": -4.2035575
+  },
+  "Landerneau,29103,Finistère,Bretagne,France": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "La Forest-Landerneau,29106,Finistère,Bretagne,France": {
+    "lat": 48.4279152,
+    "lon": -4.3177287
+  },
+  "Guipavas,29075,Finistère,Bretagne,France": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Dirinon,29045,Finistère,Bretagne,France": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "Ploudalmézeau,29178,Bretagne,France": {
+    "lat": 48.5410278,
+    "lon": -4.6576826
+  },
+  "Loperhet,29140,Finistère,Bretagne,France": {
+    "lat": 48.3754847,
+    "lon": -4.3065629
+  },
+  "Ploudiry, Finistère": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Le Tréhou, Finistère": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Tréflévénez, Finistère": {
+    "lat": 48.4158504,
+    "lon": -4.1707425
+  },
+  "Tréflévénez, Finistère (Tromelin)": {
+    "lat": 48.4046489,
+    "lon": -4.1591346
+  },
+  "La Martyre, Finistère": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Ploudiry, Finistère (Salou Coativy)": {
+    "lat": 48.4413157,
+    "lon": -4.1052168
+  },
+  "Landivisiau, Finistère, Bretagne, France": {
+    "lat": 48.5127551,
+    "lon": -4.0699356
+  },
+  "Landivisiau, Finistère": {
+    "lat": 48.5127551,
+    "lon": -4.0699356
+  },
+  "Landivisiau, Finistère (Saint-Guénal)": {
+    "lat": 48.507173,
+    "lon": -4.0708849
+  },
+  "Landivisiau, Finistère (Rue Saint-Guénal)": {
+    "lat": 48.507173,
+    "lon": -4.0708849
+  },
+  "Landivisiau, Finistère (19 Rue du Manoir)": {
+    "lat": 48.5110349,
+    "lon": -4.0737499
   }
 }

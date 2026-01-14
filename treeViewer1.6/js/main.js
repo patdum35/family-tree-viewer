@@ -15,11 +15,11 @@ export const state = {
     nombre_generation: 4,
     boxWidth: 150,
     boxHeight: 50,
-    treeMode: 'ancestors', // ou 'descendants' ou 'both'
-    treeModeReal: 'ancestors', // ou 'descendants' ou 'both'
-    treeModeReal_backup: 'ancestors', // ou 'descendants' ou 'both'   
+    treeMode: 'directAncestors', // ou 'descendants' ou 'both'
+    treeModeReal: 'directAncestors', // ou 'descendants' ou 'both'
+    treeModeReal_backup: 'directAncestors', // ou 'descendants' ou 'both'   
     // treeModeBackup: 'ancestors', // ou 'descendants' ou 'both'   
-    treeModeReal_whenReturnToTree: 'ancestors', // ou 'descendants' ou 'both'   
+    treeModeReal_whenReturnToTree: 'directAncestors', // ou 'descendants' ou 'both'   
     lastHorizontalPosition: 0,
     lastVerticalPosition: 0,
     isSpeechEnabled: true,
@@ -800,6 +800,14 @@ function initialize() {
         activerModeExpert('modeExpertActif');
     }
 
+    if ((window.innerWidth < 400 || window.innerHeight < 400) && !localStorage.getItem('nombre_prenoms')) {
+        state.nombre_prenoms = 1;
+        localStorage.setItem('nombre_prenoms', 1);
+    }
+
+
+
+
     // on met à jour l'image de fond en bonne qualité si l'écran est grand
     if (window.innerWidth > 512 || window.innerHeight > 512) {
         setTimeout(() => {
@@ -1083,8 +1091,8 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
     audio.preload = 'auto';
     audio.volume = 1;
 
-    state.treeMode = 'ancestors';
-    state.treeModeReal = 'ancestors';
+    state.treeMode = 'directAncestors';
+    state.treeModeReal = 'directAncestors';
 
 
     // 💡 Débloque l'audio à ce moment-là pour IOS
@@ -1697,7 +1705,7 @@ export function handleRootPersonChange(event) {
     if (selectedValue.includes('demo')) {
         let ancestor;
         let cousin;
-        if (state.treeOwner ===2 ) {
+        if (state.treeOwner === 2 ) {
             if (selectedValue === 'demo1'){ 
                 // state.targetAncestorId = "@I1152@";
                 ancestor = searchRootPersonId('guillaume du');
@@ -1707,7 +1715,7 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('alonso de ');
             }
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===3 ) {
+        } else if (state.treeOwner === 3 ) {
             if (selectedValue === 'demo1'){ 
                 // state.targetAncestorId = "@I1152@";
                 ancestor = searchRootPersonId('hugues c');
@@ -1717,7 +1725,7 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('hugues c ');
             }
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===4 ) {
+        } else if (state.treeOwner === 4 ) {
             if (selectedValue === 'demo1'){ 
                 // state.targetAncestorId = "@I1152@";
                 ancestor = searchRootPersonId('guillaume sez');
@@ -1735,7 +1743,7 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('hugues c ');
             }
             state.targetAncestorId = ancestor.id;
-        } else if (state.treeOwner ===5 || state.treeOwner ===6 ) {
+        } else if (state.treeOwner === 5 ) {
             if (selectedValue === 'demo1'){ 
                 // state.targetAncestorId = "@I1152@";
                 ancestor = searchRootPersonId('charlemagne');
@@ -1745,6 +1753,53 @@ export function handleRootPersonChange(event) {
                 ancestor = searchRootPersonId('charlemagne');
             }
             state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 6 ) {
+            if (selectedValue === 'demo1'){ 
+                ancestor = searchRootPersonId('charlemagne');
+            } else if (selectedValue === 'demo2'){ // 'Francs'
+                ancestor = searchRootPersonId('pharabert des francs'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo3'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues capet'); 
+                cousin = null;           
+            } else if (selectedValue === 'demo4'){ // 'chanteur breton'
+                ancestor = searchRootPersonId('guillaume le g');
+                cousin = searchRootPersonId('christophe m');
+            } else if (selectedValue === 'demo5'){ // 'footballeur'
+                ancestor = searchRootPersonId('marie cro');
+                cousin = searchRootPersonId('yoann mi');
+            } else if (selectedValue === 'demo6'){ // 'ecrivain'
+                ancestor = searchRootPersonId('jean louis fré');
+                cousin = searchRootPersonId('rené gustave henri');
+            } else if (selectedValue === 'demo7'){ // 'journaliste'
+                ancestor = searchRootPersonId('sébastien le r');
+                cousin = searchRootPersonId('xavier (marie) g');
+            } else if (selectedValue === 'demo8'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('goulven le roux', true, '1610');
+                cousin = searchRootPersonId('michel leclerc');
+            } else if (selectedValue === 'demo9'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('yves le roux', true, '1615');
+                cousin = searchRootPersonId('louis le duff');
+            } else if (selectedValue === 'demo10'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('françois roux', true, '1605');
+                cousin = searchRootPersonId('didier sq');
+            } else if (selectedValue === 'demo11'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('françois le bot', true, '1744');
+                cousin = searchRootPersonId('benoit ha');
+            }
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('charlemagne');
+            }
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            }   
+
+
         } else {
             if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
                 // state.targetAncestorId = "@I739@" 
@@ -1813,11 +1868,9 @@ export function handleRootPersonChange(event) {
             state.targetAncestorId = ancestor.id;
             if (cousin != null) {
                 state.targetCousinId = cousin.id;
-            } else {                state.targetCousinId = null;
+            } else {  
+                 state.targetCousinId = null;
             }   
-
-
-
 
         }
 

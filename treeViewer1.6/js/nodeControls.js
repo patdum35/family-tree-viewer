@@ -30,10 +30,14 @@ import { getNodeScreenPosition, getAnimationMapPosition } from './treeAnimation.
 
 export function addRootChangeButton(nodeGroups) {
     
+    let offset_x = 13;
+    if (state.nombre_prenoms === 1) {
+        offset_x = 10;
+    }
     
     // Ajouter une zone de clic invisible plus grande
     nodeGroups.append("circle")
-        .attr("cx", state.boxWidth/2 + 13)
+        .attr("cx", state.boxWidth/2 + offset_x)
         .attr("cy", -state.boxHeight/2 + 39)
         .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
         .style("fill", "transparent")
@@ -41,8 +45,10 @@ export function addRootChangeButton(nodeGroups) {
         .on("click", handleRootChange);
     
     // Ajouter le texte visible par-dessus
+
+
     nodeGroups.append("text")
-        .attr("x", state.boxWidth/2 + 13)
+        .attr("x", state.boxWidth/2 + offset_x)
         .attr("y", -state.boxHeight/2 + 39)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central")  // Centrage vertical parfait
@@ -3343,10 +3349,16 @@ export function addAncestorsControls(nodeGroups) {
             return d.ShowAncestorsButton;
         })
         .attr("class", "ancestors-button-group");
-    
+
+        
+    let offset_x = 13;
+    if (state.nombre_prenoms === 1) {
+        offset_x = 10;
+    }
+
     // Ajouter une zone de clic invisible plus grande
     buttonGroups.append("circle")
-        .attr("cx", state.boxWidth/2 + 13)
+        .attr("cx", state.boxWidth/2 + offset_x)
         .attr("cy", -state.boxHeight/2 + 10)
         .attr("r", 20)  // Rayon de 20px pour une zone de clic généreuse
         .style("fill", "transparent")
@@ -3355,7 +3367,7 @@ export function addAncestorsControls(nodeGroups) {
     
     // Ajouter le texte visible par-dessus
     buttonGroups.append("text")
-        .attr("x", state.boxWidth/2 + 13)
+        .attr("x", state.boxWidth/2 + offset_x)
         .attr("y", -state.boxHeight/2 + 10)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central")  // Centrage vertical parfait
