@@ -1726,33 +1726,62 @@ export function handleRootPersonChange(event) {
             }
             state.targetAncestorId = ancestor.id;
         } else if (state.treeOwner === 4 ) {
-            if (selectedValue === 'demo1'){ 
-                // state.targetAncestorId = "@I1152@";
-                ancestor = searchRootPersonId('guillaume sez');
-                cousin = null;
-            } else if (selectedValue === 'demo2'){  //'On descend tous de lui'
+            if (selectedValue === 'demo1'){  //'chanteur breton'
+                ancestor = searchRootPersonId('jean gourmelen', true, '1710');
+                cousin = searchRootPersonId('daniel le bras');                      
+            } else if (selectedValue === 'demo2'){  //'bagnard'
+                ancestor = searchRootPersonId('louis trellu');
+                cousin = searchRootPersonId('joseph marie dit');  
+            } else if (selectedValue === 'demo3'){  //'Espace'
+                ancestor = searchRootPersonId('charles vézier');
+                cousin = searchRootPersonId('thomas pesquet');          
+            } else if (selectedValue === 'demo4'){ // 'Victor'
+                ancestor = searchRootPersonId('pierre augustin duchemin');
+                cousin = searchRootPersonId('victor robert');             
+            } else if (selectedValue === 'demo5'){ // 'le grand blond'
+                ancestor = searchRootPersonId('suzanne martin', true, '1655');
+                cousin = searchRootPersonId('pierre richard maurice');                        
+            } else if (selectedValue === 'demo6'){  //'On descend tous de lui'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('richard por');
                 cousin = null; 
-            } else if (selectedValue === 'demo3'){  //'On descend tous de lui'
+            } else if (selectedValue === 'demo7'){  //'On descend tous de lui'
                 // state.targetAncestorId = "@I1322@"
                 ancestor = searchRootPersonId('catherine tymen (le)');
                 cousin = null; 
-            } else { 
-                // state.targetAncestorId = "@I2179@";
-                ancestor = searchRootPersonId('hugues c ');
+            } else {
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
             }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
             state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            } 
+
         } else if (state.treeOwner === 5 ) {
             if (selectedValue === 'demo1'){ 
-                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('charlemagne');  
+                cousin = null;                                                   
+            } else if (selectedValue === 'demo2'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues de france'); 
+                cousin = null;           
+            } else {
                 ancestor = searchRootPersonId('charlemagne');
-            } //"@I74@" } // "@I739@" } //"@I6@" } //
-            else { 
-                // state.targetAncestorId = "@I2179@";
-                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
             }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
             state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            } 
+
         } else if (state.treeOwner === 6 ) {
             if (selectedValue === 'demo1'){ 
                 ancestor = searchRootPersonId('charlemagne');
@@ -1848,17 +1877,17 @@ export function handleRootPersonChange(event) {
             //         ancestor = searchRootPersonId('marie guilemard');
             //         cousin = searchRootPersonId('robert charpentier');             
             } else if (selectedValue === 'demo13'){ // 'un pti gars du wav'
-                    ancestor = searchRootPersonId('julien vilboux');
-                    cousin = searchRootPersonId('louis pierre marie bobet', true, '1925');     
+                ancestor = searchRootPersonId('julien vilboux');
+                cousin = searchRootPersonId('louis pierre marie bobet', true, '1925');     
             } else if (selectedValue === 'demo14'){ // 'un pti gars du wav'
-                    ancestor = searchRootPersonId('Léger lecerf');
-                    cousin = searchRootPersonId('Valérie le');             
+                ancestor = searchRootPersonId('Léger lecerf');
+                cousin = searchRootPersonId('Valérie le');             
             } else if (selectedValue === 'demo15'){ // 'un pti gars du wav'
-                    ancestor = searchRootPersonId('jean baptiste hebert');
-                    cousin = searchRootPersonId('victor lan');             
+                ancestor = searchRootPersonId('jean baptiste hebert');
+                cousin = searchRootPersonId('victor lan');             
             } else if (selectedValue === 'demo16'){ // 'un pti gars du wav'
-                    ancestor = searchRootPersonId('guillaume olivier');
-                    cousin = searchRootPersonId('pierre richard maurice');                        
+                ancestor = searchRootPersonId('guillaume olivier');
+                cousin = searchRootPersonId('pierre richard maurice');                        
             } else {
                 ancestor = searchRootPersonId('charlemagne');
                 cousin = null;

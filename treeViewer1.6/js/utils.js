@@ -124,6 +124,7 @@ export function findPersonsByName(nameToFind, date = null) {
 
     const searchStr = nameToFind.toLowerCase();
     // On prépare la date en string pour la comparaison si elle existe
+
     const dateStr = date ? date.toString() : null;
     // let count = 0
     return Object.values(state.gedcomData.individuals)
@@ -140,10 +141,14 @@ export function findPersonsByName(nameToFind, date = null) {
             // 2. Vérification de la date (seulement si 'date' est fournie)
             if (dateStr) {
                 const birthDate = person.birthDate ? person.birthDate.toString() : "";
+                // const birthYear = extractYear(person.birthDate);
                 const deathDate = person.deathDate ? person.deathDate.toString() : "";
+                // const deathYear = extractYear(person.deathDate);
+
                 // if (count >6344 && count < 6370) {console.log("Vérification de la personne :", person.name, 'fullName' , fullName, 'searchStr=', searchStr, 'count', count, person);}                
                 // On garde la personne seulement si la date est incluse dans l'un des deux champs
-                return birthDate.includes(dateStr) || deathDate.includes(dateStr);
+
+                return birthDate.includes(dateStr) || deathDate.includes(dateStr) ;
             }
 
             // Si aucune date n'est fournie, le match sur le nom suffit

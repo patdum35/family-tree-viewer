@@ -1,20 +1,4 @@
 {
-  "Azay-le-Rideau, 37014, Indre-et-Loire, Centre-Val de Loire, France": {
-    "lat": 47.2614793,
-    "lon": 0.4667128
-  },
-  "37000 TOURS, Indre-Et-Loire": {
-    "lat": 47.3867351,
-    "lon": 0.6883243
-  },  
-  "Huismes, 37118, Indre-et-Loire, Centre-Val de Loire, France": {
-    "lat": 47.2312241,
-    "lon": 0.2519958
-  },
-  "Manthelan, 37143, Indre-et-Loire, Centre-Val de Loire, France": {
-    "lat": 47.136387,
-    "lon": 0.7938916
-  },
   "Landivisiau,29105,Finistère,Bretagne,FRANCE": {
     "lat": 48.5127551,
     "lon": -4.0699356
@@ -707,6 +691,14 @@
     "lat": 47.8411013,
     "lon": -4.2835502
   },
+  "37000 TOURS, Indre-Et-Loire": {
+    "lat": 47.3867351,
+    "lon": 0.6883243
+  },
+  "Azay-le-Rideau, 37014, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2614793,
+    "lon": 0.4667128
+  },
   "Lothey,29142,Finistère,Bretagne,FRANCE": {
     "lat": 48.1816811,
     "lon": -4.0281159
@@ -1119,6 +1111,18 @@
     "lat": 36.3208994,
     "lon": 5.7367902
   },
+  "Harfleur,76341,Normandie,FRANCE": {
+    "lat": 49.5075158,
+    "lon": 0.200141
+  },
+  "Huismes, 37118, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2312241,
+    "lon": 0.2519958
+  },
+  "Manthelan, 37143, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.136387,
+    "lon": 0.7938916
+  },
   "Saint-Martin-aux-Buneaux,76613,Normandie,FRANCE": {
     "lat": 49.8243383,
     "lon": 0.552795
@@ -1258,6 +1262,10 @@
   "Guilers,29069,Finistère,Bretagne,FRANCE": {
     "lat": 48.4244717,
     "lon": -4.5583284
+  },
+  "Pouldergat, 29224, Finistère, Bretagne, France": {
+    "lat": 48.043461,
+    "lon": -4.3275721
   },
   "Vernon,27681,Eure,Normandie,FRANCE": {
     "lat": 49.0932008,
@@ -1499,10 +1507,6 @@
     "lat": 50.8276429,
     "lon": 3.2659884
   },
-  "Harfleur,76341,Normandie,FRANCE": {
-    "lat": 49.5075158,
-    "lon": 0.200141
-  },
   "Sainneville,76430,Normandie,FRANCE": {
     "lat": 49.5566905,
     "lon": 0.286551
@@ -1618,10 +1622,6 @@
   "Plouaret,22207,Côtes d'Armor,Bretagne,FRANCE": {
     "lat": 48.6118151,
     "lon": -3.4731376
-  },
-  "?,Paroisse saint aubin": {
-    "lat": 46.9940432,
-    "lon": 5.3062059
   },
   "Saint Denis le Hericourt,76355,Normandie,FRANCE": {
     "lat": 49.7002086,
@@ -1823,6 +1823,10 @@
     "lat": 47.6206507,
     "lon": -0.5100566
   },
+  "Landrévarzec, 29510, Finistère, Bretagne, FRANCE": {
+    "lat": 48.0912721,
+    "lon": -4.0581968
+  },
   "Lannion,22300,Côtes d'Armor,Bretagne,FRANCE": {
     "lat": 48.7322183,
     "lon": -3.4587994
@@ -1862,5 +1866,137 @@
   "Hautot-Saint-Sulpice,76190,Normandie,FRANCE": {
     "lat": 49.6805831,
     "lon": 0.740849
+  },
+  "Rue de l'hospice - Quimper, 29232, Finistère, Bretagne, France": {
+    "lat": 47.8729073,
+    "lon": -3.9129062
+  },
+  "Douarnenez, 29046, Finistère, Bretagne, France": {
+    "lat": 48.0944459,
+    "lon": -4.3311243
+  },
+  "Rue Duguay Trouin - Douarnenez, 29046, Finistère, Bretagne, France": {
+    "lat": 48.0918507,
+    "lon": -4.3313462
+  },
+  "Quimper, 29232, Finistère, Bretagne, France": {
+    "lat": 47.9960325,
+    "lon": -4.1024782
+  },
+  "Plogonnec, 29180, Finistère, Bretagne, FRANCE": {
+    "lat": 48.0776491,
+    "lon": -4.1915768
+  },
+  "Plomodiern, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1815192,
+    "lon": -4.2328062
+  },
+  "Quéménéven, 29180, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1149391,
+    "lon": -4.1205993
+  },
+  "Ploéven, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1571549,
+    "lon": -4.2333681
+  },
+  "Kerniol - Plomodiern, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1776995,
+    "lon": -4.2752869
+  },
+  "Paris, 75013, Paris, Ile-de-France, France": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Grainville-la-Teinturière, 76450, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7480281,
+    "lon": 0.6403272
+  },
+  "Autretot, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6557481,
+    "lon": 0.7248077
+  },
+  "Veauville-lès-Baons, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6560034,
+    "lon": 0.7577053
+  },
+  "Yvetot, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6179384,
+    "lon": 0.7538866
+  },
+  "Veules-les-Roses, 76980, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.8722029,
+    "lon": 0.7990652
+  },
+  "Paris, 75000, Paris, Île-de-France, FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Roye, 80700, Somme, Hauts-de-France, FRANCE": {
+    "lat": 49.6986186,
+    "lon": 2.7930755
+  },
+  "Incheville, 76117, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 50.0156564,
+    "lon": 1.4979002
+  },
+  "Droue-sur-Drouette, 28135, Eure-et-Loir, Centre-Val de Loire, France": {
+    "lat": 48.6007588,
+    "lon": 1.7022661
+  },
+  "Saint-Saulve, 59880, Nord, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 50.3710165,
+    "lon": 3.5547336
+  },
+  "Clasville, 76, Normandie, France": {
+    "lat": 49.7907636,
+    "lon": 0.6186733
+  },
+  "Canouville, 76, Normandie, France": {
+    "lat": 49.8066238,
+    "lon": 0.6036945
+  },
+  "Thiouville, 76, Normandie, France": {
+    "lat": 49.692902,
+    "lon": 0.6189306
+  },
+  "Butot-en-Caux, 76, Normandie, France": {
+    "lat": 49.6257734,
+    "lon": 0.9926733
+  },
+  "Saint-Pierre-Lavis, 76, Normandie, France": {
+    "lat": 49.665587,
+    "lon": 0.6215956
+  },
+  "Bosville, 76, Normandie, France": {
+    "lat": 49.7595553,
+    "lon": 0.6830967
+  },
+  "Ermenouville, 76, Normandie, France": {
+    "lat": 49.7985524,
+    "lon": 0.7880973
+  },
+  "Hermeville, 76, Normandie, France": {
+    "lat": 49.598476,
+    "lon": 0.2625657
+  },
+  "Criquetot-l'Esneval, 76, Normandie, France": {
+    "lat": 49.6449576,
+    "lon": 0.2661419
+  },
+  "Le Havre, 76, Normandie, France": {
+    "lat": 49.5394242,
+    "lon": 0.316573
+  },
+  "Brunoy, 91, Île-de-France, France": {
+    "lat": 48.6979312,
+    "lon": 2.5044613
+  },
+  "Paris, 75, Île-de-France, France": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Boulogne Billancourt, 94, Île-de-France, France": {
+    "lat": 48.8356649,
+    "lon": 2.240206
   }
 }

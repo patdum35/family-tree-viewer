@@ -1684,19 +1684,30 @@ function createDemoSelector() {
   } else if (state.treeOwner === 3) {
     stdTypeOptionsExpanded = ['Capet', 'Capet'];
   } else if (state.treeOwner === 4) {
-      stdTypeOptions = ['démo1', 'démo2', 'démo3'];
-      stdTypeValues = ['demo1', 'demo2', 'demo3'];
+      stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7'];
+      stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7'];
       if (window.CURRENT_LANGUAGE === 'fr') {
-        stdTypeOptionsExpanded = ["l'affaire", "le plus ancien", "la plus ancienne"];
+        // stdTypeOptionsExpanded = ['On descend tous de lui', 'Francs', 'Capet', 'miossec', 'gourcuff', 'grall', 'bargavel', 'leclerc', 'leduff', 'squiban', 'hamon' ];
+        stdTypeOptionsExpanded = ['chanteur breton', "l'affaire", 'Espace', 'Victor', 'le grand blond', "le plus ancien", "la plus ancienne"];
       } else if (window.CURRENT_LANGUAGE === 'en') {
-        stdTypeOptionsExpanded = ["the case", "the oldest", "the oldest"];
+        stdTypeOptionsExpanded = ['breton singer', "the case", 'Space', 'Victor', 'the tall blond', "the oldest", "she's old"];
       } else if (window.CURRENT_LANGUAGE === 'es') {
-        stdTypeOptionsExpanded = ["el caso", "el más antiguo", "la más antigua"];
+        stdTypeOptionsExpanded = ['cantante bretón', "el caso", 'Espacio', 'Victor', 'el rubio alto', "el más antiguo", "la más antigua"];
       } else if (window.CURRENT_LANGUAGE === 'hu') {
-        stdTypeOptionsExpanded = ["az ügy", "a legrégebbi", "a legidősebb"];
+        stdTypeOptionsExpanded = ['breton énekes', "az ügy" ,'Űr', 'Victor', 'a magas szőke', "a legrégebbi", "a legidősebb"];
       }
   } else if (state.treeOwner === 5) {
-    stdTypeOptionsExpanded = ['On descend tous de lui', 'On descend tous de lui'];
+      stdTypeOptions = ['démo1', 'démo2'];
+      stdTypeValues = ['demo1', 'demo2'];
+      if (window.CURRENT_LANGUAGE === 'fr') {
+        stdTypeOptionsExpanded = ['On descend tous de lui', 'Capet'];
+      } else if (window.CURRENT_LANGUAGE === 'en') {
+        stdTypeOptionsExpanded = ['Our ancestor to all', 'Capet'];
+      } else if (window.CURRENT_LANGUAGE === 'es') {
+        stdTypeOptionsExpanded = ['Nuestro antepasado de todos', 'Capet' ];
+      } else if (window.CURRENT_LANGUAGE === 'hu') {
+        stdTypeOptionsExpanded = ['Mindenki ősünk', 'Capet'];
+      }
   } else if (state.treeOwner === 6) {
       stdTypeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10', 'démo11'];
       stdTypeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10', 'demo11'];

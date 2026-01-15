@@ -563,7 +563,8 @@ export async function showEndAnimationPhoto(nodeName) {
         'louis': '/background_images/louis_l.jpx',
         'didier': '/background_images/didier_s.jpx',
         'benoit': '/background_images/benoit_h.jpx',
-
+        'daniel': '/background_images/daniel.jpx',
+        'joseph': '/background_images/joseph.jpx',
     };
     
     // Trouver la correspondance dans le mapping
