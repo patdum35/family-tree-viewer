@@ -781,6 +781,9 @@ let currentSearchCallback = null;
  */
 export function openSearchModal(firstName = null, lastName = null, purpose = 'root', onSelectCallback = null) {
 
+    // console.log(`[DEBUG] openSearchModal: But='${purpose}', Callback fourni?`, !!onSelectCallback); // <-- AJOUTER
+
+
     currentSearchPurpose = purpose;
     currentSearchCallback = onSelectCallback;
 
@@ -1776,14 +1779,39 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
             `;
         }
 
+        // leftZone.addEventListener('click', () => {
+        //     if (currentSearchPurpose === 'root') {
+        //         selectPersonFromModal(person.id);
+        //     } else {
+        //         if (currentSearchCallback) currentSearchCallback(person);
+        //         window.closeSearchModal();
+        //     }
+        // });
+
+
+
+        // Dans searchModalUI.js, à l'intérieur de la fonction qui affiche les résultats
         leftZone.addEventListener('click', () => {
+            // console.log(`[DEBUG] Clic sur la personne:`, person); // <-- AJOUTER
+            // console.log(`[DEBUG] But actuel: '${currentSearchPurpose}'`); // <-- AJOUTER
+            // console.log(`[DEBUG] Callback existe?`, !!currentSearchCallback); // <-- AJOUTER
+
             if (currentSearchPurpose === 'root') {
                 selectPersonFromModal(person.id);
             } else {
-                if (currentSearchCallback) currentSearchCallback(person);
+                if (currentSearchCallback) {
+                    // console.log("[DEBUG] Appel du callback..."); // <-- AJOUTER
+                    currentSearchCallback(person);
+                }
                 window.closeSearchModal();
             }
         });
+
+
+
+
+
+
         leftZone.addEventListener('mouseenter', () => leftZone.style.backgroundColor = 'rgba(0,123,255,0.1)');
         leftZone.addEventListener('mouseleave', () => leftZone.style.backgroundColor = 'transparent');
 
@@ -1934,12 +1962,14 @@ export function setupSearchFieldModal(isFromStatsModal = false) {
         searchField.addEventListener('focus', function(event) {
             event.preventDefault();
             this.blur(); // Enlever le focus
+            console.log('- launch openSearchModal in setupSearchFieldModal focus');
             openSearchModal();
         });
         
         // Empêcher la saisie directe
         searchField.addEventListener('keydown', function(event) {
             event.preventDefault();
+            console.log('- launch openSearchModal in setupSearchFieldModal keydown');
             openSearchModal();
         });
 

@@ -5,7 +5,7 @@ import { state, searchRootPersonId, trackPageView, toggleTreeRadar } from './mai
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
 import { cleanIdForSelector } from './nodeRenderer.js';
 import { getZoom, getLastTransform, setLastTransform, drawTree, hardResetZoom } from './treeRenderer.js';
-import { buildDescendantTree, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
+import { buildDescendantTree, buildDescendantTreeWithDuplicates, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
 // import { geocodeLocation } from './modalWindow.js';
 import { geocodeLocation } from './geoLocalisation.js';
 import { initBackgroundContainer, updateBackgroundImage } from './backgroundManager.js';
@@ -985,11 +985,84 @@ async function updateAnimationMapLocations(locations, locationSymbols) {
     });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Trouve tous les chemins possibles entre une personne et son ancêtre
+ * @param {string} startId - ID de la personne de départ
+ * @param {string} targetAncestorId - ID de l'ancêtre cible
+ * @returns {Array} - Liste des chemins (chaque chemin est un objet {ancestorPath, descendantPath})
+ */
+export function findAllAncestorPaths(startId, targetAncestorId) {
+    // Sauvegarder et modifier temporairement nombre_generation
+    const savedGen = state.nombre_generation;
+    state.nombre_generation = 100;  // Valeur temporaire élevée pour s'assurer de trouver le chemin
+    
+    // Construire l'arbre des descendants depuis l'ancêtre cible en autorisant les doublons
+    // Cela permet de construire toutes les branches possibles menant à la personne de départ
+    const descendantTree = buildDescendantTreeWithDuplicates(targetAncestorId, true);
+    
+    // Restaurer nombre_generation
+    state.nombre_generation = savedGen;
+    
+    const allPaths = [];
+
+    // Fonction pour parcourir l'arbre et trouver tous les chemins
+    function traverse(node, currentPath) {
+        if (!node) return;
+        
+        // Ajouter le nœud courant au chemin
+        const newPath = [...currentPath, node.id];
+        
+        // Si on a atteint la personne de départ
+        if (node.id === startId) {
+            allPaths.push(newPath);
+        }
+        
+        // Continuer la recherche dans les enfants
+        if (node.children) {
+            for (const child of node.children) {
+                // Ignorer les nœuds "spouse" pour la traversée principale
+                if (child.isSpouse) continue;
+                
+                traverse(child, newPath);
+            }
+        }
+    }
+
+    traverse(descendantTree, []);
+    
+    // Les chemins trouvés vont de l'ancêtre vers la personne (descendants)
+    // On retourne les chemins inversés (de la personne vers l'ancêtre) et les chemins descendants
+    return allPaths.map(path => ({
+        ancestorPath: [...path].reverse(),
+        descendantPath: path
+    }));
+}
+
+
+
+
+
+
+
+
+
+
 /**
  * Trouve le chemin entre une personne et son ancêtre
  * @private
  */
-function findAncestorPath(startId, targetAncestorId) {
+export function findAncestorPath(startId, targetAncestorId) {
     // console.log("Recherche du chemin de", startId, "vers", targetAncestorId);
     
     // Sauvegarder et modifier temporairement nombre_generation
@@ -998,34 +1071,15 @@ function findAncestorPath(startId, targetAncestorId) {
     
     // Construire l'arbre des descendants depuis l'ancêtre cible
     const descendantTree = buildDescendantTree(targetAncestorId);
+    // const descendantTree = buildDescendantTreeWithDuplicates(targetAncestorId, true);
+
+    
     // console.log("Arbre des descendants depuis l'ancêtre:", descendantTree);
 
     // Restaurer nombre_generation
     state.nombre_generation = savedGen;
     
     // Fonction pour trouver un nœud et son chemin dans l'arbre
-    // function findNodeAndPath(node, targetId, currentPath = []) {
-        
-    //     if (node.id === targetId) {
-    //         const finalPath = [...currentPath, node.id];
-    //         return finalPath;
-    //     }
-        
-    //     if (node.children) {
-    //         for (const child of node.children) {
-    //             // Si le noeud est un spouse, on vérifie si on a déjà trouvé un chemin par l'autre branche
-    //             if (child.isSpouse) {
-    //                 continue;
-    //             }
-    //             const path = findNodeAndPath(child, targetId, [...currentPath, node.id]);
-    //             if (path) {
-    //                 return path;
-    //             }
-    //         }
-    //     }
-    //     return null;
-    // }
-
     function findNodeAndPath(node, targetId, currentPath = []) {
         // Vérification explicite que le nœud existe
         if (!node) {
@@ -1457,7 +1511,7 @@ export async function startAncestorAnimation(isCousin = false) {
     console.log(`🎬 startAncestorAnimation: Path length=${animationState.path.length}, Root=${state.rootPersonId}, Target=${state.targetAncestorId}`);
 
     origineGenNb = state.nombre_generation;
-    console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex,  'state.targetCousinId=', state.targetCousinId);
+    console.log("\n\n🔄 Démarrage de l'animation vers l'ancêtre avec nombre_generation =", state.nombre_generation,', animationState.currentIndex=', animationState.currentIndex,  'state.targetCousinId=', state.targetCousinId, ', ancestor path index=', state.ancestorPathIndex);
 
     if (animationState.currentIndex === 0) {
         state.treeShapeStyle = state.treeShapeStyleBackup;
@@ -1538,7 +1592,21 @@ export async function startAncestorAnimation(isCousin = false) {
    
     // Réinitialiser ou initialiser l'état si ce n'est pas déjà fait
     if (animationState.path.length === 0) {
-        [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
+
+        if (state.ancestorPathIndex) {
+            const allPaths = findAllAncestorPaths(state.rootPersonId, state.targetAncestorId);
+        
+            if (allPaths.length > 0) {
+                // Retourner le premier chemin trouvé (comportement par défaut)
+                // On pourrait ici choisir le chemin le plus court avec : allPaths.sort((a,b) => a.ancestorPath.length - b.ancestorPath.length)[0]
+                console.log(`\n\n\n ***** DEBUG ALL PATHS ***** Trouvé ${allPaths.length} chemin(s) possible(s). Utilisation du premier.`, allPaths[0].ancestorPath);
+                animationState.path = allPaths[state.ancestorPathIndex].ancestorPath;
+                animationState.descendpath = allPaths[state.ancestorPathIndex].descendantPath;
+            }
+
+        } else {
+            [animationState.path, animationState.descendpath] = findAncestorPath(state.rootPersonId, state.targetAncestorId);
+        }
        
         console.log("\n\n\n DEBUG animationState.path avec", state.rootPersonId, "et ", state.targetAncestorId, animationState.path)
         

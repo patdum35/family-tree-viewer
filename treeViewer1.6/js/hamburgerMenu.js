@@ -4,7 +4,7 @@ import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
 import { showToastNew } from './debugLogUtils.js';
 import { documentation } from './documentation.js';
-import { toggleAnimationPause, resetAnimationState, startAncestorAnimation  } from './treeAnimation.js';
+import { toggleAnimationPause, resetAnimationState, startAncestorAnimation, findAncestorPath, findAllAncestorPaths  } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { openSearchModal } from './searchModalUI.js';
 import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
@@ -1827,6 +1827,8 @@ function createDemoSelector() {
           return;
         }
 
+        state.ancestorPathIndex = null;
+
         // Gérer les démos personnalisées
         if (value.startsWith('custom_demo_')) {
              console.log("🔍 Tentative de chargement démo:", value);
@@ -1865,6 +1867,12 @@ function createDemoSelector() {
 
                 if (demo.cousinName && demo.cousinName !== '') {
                   state.targetCousinId = searchRootPersonId(demo.cousinName.replace(/\//g, '')).id;
+                }
+
+                if (demo.ancestorPathIndex && demo.ancestorPathIndex !== '') {
+                  state.ancestorPathIndex = demo.ancestorPathIndex;
+                } else {
+                  state.ancestorPathIndex = null;
                 }
 
 
@@ -3182,6 +3190,10 @@ export function initializeHamburgerOnce() {
   }
 }
 
+
+
+
+
 export function openCustomAnimationModal() {
     let modal = document.getElementById('custom-animation-modal');
     if (modal) {
@@ -3332,7 +3344,7 @@ export function openCustomAnimationModal() {
         ancestorSearch.label.textContent = isCousinMode ? getMenuTranslation('commonAncestor') + ':' : getMenuTranslation('ancestor') + ':';
     });
 
-    startButton.addEventListener('click', () => {
+    startButton.addEventListener('click', async () => {
         if (!selectedAncestor) {
             alert(getMenuTranslation('selectPerson'));
             return;
@@ -3349,13 +3361,50 @@ export function openCustomAnimationModal() {
             name = `myDemo ${customDemos.length + 1}`;
         }
         
+        const allPaths = findAllAncestorPaths(state.rootPersonId, selectedAncestor.id);
+        let selectedPathIndex;
+        if (allPaths.length > 0) {
+
+          let cousinPath = null;
+          let cousinDescendantPath = null;
+
+          if (cousinToggle.checked && selectedCousin && selectedCousin.id !== '') {
+            [cousinPath, cousinDescendantPath] = findAncestorPath(selectedCousin.id, selectedAncestor.id);
+            
+            if (cousinPath && cousinPath.length > 0) {  
+              console.log("\n\n Chemin cousin trouvé:", cousinPath);
+              // console.log("\n\n Chemin cousin trouvé descendant:", cousinDescendantPath);
+            } else {
+              console.log("\n\n Chemin cousin NON TROUVE");
+              // Message à l'utilisateur
+              alert("Aucun lien de parenté n'a été trouvé entre ce cousin et cet ancêtre. Veuillez saisir un nouveau nom de cousin ou d'ancêtre.");
+              return; // On arrête l'exécution ici pour permettre à l'utilisateur de modifier ses choix
+            }
+          }
+
+
+          const result = await showPathSelectionModal(allPaths, cousinPath);
+          if (result) {
+              const { path, index } = result; // On extrait les deux valeurs
+              console.log(`Utilisateur a choisi le chemin n°${index + 1}`);
+              // console.log("Données du chemin :", path);
+              selectedPathIndex = index; 
+          } else {
+              console.log("Sélection annulée");
+              return;
+          }
+
+        } 
+ 
+ 
         const newDemo = {
             id: `custom_demo_${Date.now()}`,
             name: name,
             ancestorId: selectedAncestor.id,
             cousinId: cousinToggle.checked && selectedCousin ? selectedCousin.id : null,
             ancestorName: selectedAncestor.name,
-            cousinName: cousinToggle.checked && selectedCousin ? selectedCousin.name : null
+            cousinName: cousinToggle.checked && selectedCousin ? selectedCousin.name : null,
+            ancestorPathIndex: selectedPathIndex
         };
         
         customDemos.push(newDemo);
@@ -3366,6 +3415,8 @@ export function openCustomAnimationModal() {
 
         state.targetAncestorId = selectedAncestor.id;
         state.targetCousinId = cousinToggle.checked && selectedCousin ? selectedCousin.id : null;
+        state.ancestorPathIndex = selectedPathIndex;
+
         // Configuration pour l'animation
         state.isAnimationLaunched = true;
         state.nombre_generation = 2;
@@ -3378,13 +3429,13 @@ export function openCustomAnimationModal() {
           animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
         }
 
-          const treeModeReal = state.treeModeReal;
-          // state.treeModeBackup = state.treeMode;
-          let isCousin = false;
-          if (state.targetCousinId && state.targetCousinId !== '') {
-            state.treeMode = 'directAncestors';
-            isCousin = true;
-          }
+        const treeModeReal = state.treeModeReal;
+        // state.treeModeBackup = state.treeMode;
+        let isCousin = false;
+        if (state.targetCousinId && state.targetCousinId !== '') {
+          state.treeMode = 'directAncestors';
+          isCousin = true;
+        }
 
         displayGenealogicTree(null, true, false, true);
 
@@ -3430,10 +3481,23 @@ export function openCustomAnimationModal() {
         const handleOpenModal = (e) => {
             e.preventDefault();
             input.blur();
+
+            console.log(`\n\n--------[DEBUG] handleOpenModal: Ouverture pour le type '${type}'\n\n`);
+     
+
             openSearchModal(null, null, 'select', (person) => {
-                input.value = person.name.replace(/\//g, '');
-                onSelect(person);
-            });
+                // input.value = person.name.replace(/\//g, '');
+                // onSelect(person);
+                console.log(`[DEBUG] handleOpenModal: Callback reçu pour '${type}' avec la personne:`, person);
+                if (person && person.name) {
+                    input.value = person.name.replace(/\//g, '');
+                    onSelect(person);
+                } else {
+                    console.error(`\n\n ----[DEBUG] handleOpenModal: L'objet 'person' reçu est invalide.\n\n`);
+                }
+
+
+              });
         };
 
         input.addEventListener('click', handleOpenModal);
@@ -3445,6 +3509,147 @@ export function openCustomAnimationModal() {
         return { container, label };
     }
 }
+
+
+
+/**
+ * Affiche une modale avec sélection de chemin.
+ * Nom extrait entre slashes et coloration différentielle alternée (Bleu/Vert).
+ * Inclut un chemin cousin optionnel non sélectionnable à la fin.
+ */
+async function showPathSelectionModal(paths, cousinPath = null) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.id = 'path-selection-overlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            font-family: sans-serif;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: white; padding: 20px; border-radius: 8px;
+            max-width: 95%; width: 800px; max-height: 85vh;
+            display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        `;
+
+        const title = document.createElement('h3');
+        title.textContent = `Choisir un chemin (${paths.length} trouvés)`;
+        title.style.margin = '0 0 15px 0';
+
+        const pathList = document.createElement('div');
+        pathList.style.overflowY = 'auto';
+        pathList.style.flexGrow = '1';
+
+        // Fonction utilitaire pour générer le contenu d'un chemin (noms + flèches)
+        const renderPathContent = (ancestorIds, prevPathIds, diffColor, container) => {
+            ancestorIds.forEach((id, stepIdx) => {
+                const individual = state.gedcomData.individuals[id];
+                const fullName = individual.name || "";
+                
+                // Formatage : Prénom + NOM entre slashes
+                const firstName = fullName.replace(/\//g, '').split(' ')[0];
+                const match = fullName.match(/\/([^/]+)\//);
+                const lastName = match ? match[1].trim() : "";
+                const nameToDisplay = (firstName + ' ' + lastName).trim();
+
+                const span = document.createElement('span');
+                span.textContent = nameToDisplay;
+
+                // Coloration différentielle si id différent du chemin précédent
+                if (prevPathIds && id !== prevPathIds[stepIdx]) {
+                    span.style.color = diffColor;
+                } else {
+                    span.style.color = '#333';
+                }
+
+                container.appendChild(span);
+
+                if (stepIdx < ancestorIds.length - 1) {
+                    const arrow = document.createElement('span');
+                    arrow.textContent = ' → ';
+                    arrow.style.color = '#ccc';
+                    container.appendChild(arrow);
+                }
+            });
+        };
+
+        // --- Affichage des chemins sélectionnables ---
+        paths.forEach((path, pathIdx) => {
+            const pathItem = document.createElement('div');
+            pathItem.style.cssText = `
+                padding: 10px; border: 1px solid #eee; border-radius: 5px;
+                margin-bottom: 8px; cursor: pointer; background: #fff;
+            `;
+
+            let diffColor = 'black';
+            if (pathIdx > 0) {
+                diffColor = (pathIdx % 2 === 1) ? '#0055ff' : '#28a745'; 
+            }
+
+            const container = document.createElement('div');
+            container.style.fontSize = '11px';
+
+            const prevPathIds = pathIdx > 0 ? paths[pathIdx - 1].ancestorPath : null;
+            renderPathContent(path.ancestorPath, prevPathIds, diffColor, container);
+
+            pathItem.innerHTML = `<div style="font-size: 11px; color: #999; margin-bottom: 3px;">Chemin ${pathIdx + 1}</div>`;
+            pathItem.appendChild(container);
+
+            pathItem.onmouseover = () => pathItem.style.backgroundColor = '#f8f9fa';
+            pathItem.onmouseout = () => pathItem.style.backgroundColor = '#fff';
+            pathItem.onclick = () => {
+                document.body.removeChild(overlay);
+                resolve({ path: path, index: pathIdx });
+            };
+
+            pathList.appendChild(pathItem);
+        });
+
+        // --- Affichage du chemin COUSIN (si présent, non sélectionnable) ---
+        if (cousinPath) {
+            const cousinItem = document.createElement('div');
+            cousinItem.style.cssText = `
+                padding: 10px; border: 1px dashed #ccc; border-radius: 5px;
+                margin-top: 15px; background: #fdfdfd; cursor: default;
+                opacity: 0.8;
+            `;
+
+            const container = document.createElement('div');
+            container.style.fontSize = '11px';
+
+            // On le compare éventuellement au dernier chemin de la liste pour la couleur
+            const lastPathIds = paths.length > 0 ? paths[paths.length - 1].ancestorPath : null;
+            renderPathContent(cousinPath, lastPathIds, '#666', container);
+
+            cousinItem.innerHTML = `<div style="font-size: 11px; color: #bc8f8f; font-weight: bold; margin-bottom: 3px;">Chemin Cousin (Info)</div>`;
+            cousinItem.appendChild(container);
+            pathList.appendChild(cousinItem);
+        }
+
+        modal.appendChild(title);
+        modal.appendChild(pathList);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+                resolve(null);
+            }
+        };
+    });
+}
+
+
+
+
+
+
+
+
 
 export function updateRootPersonNameInMenu() {
     const rootPersonLink = document.querySelector('#menu-root-person-results-container div');

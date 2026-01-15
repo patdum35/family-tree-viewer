@@ -132,7 +132,7 @@ export const state = {
     isEndTestRealConnectivity: false,
     iSAnimationWithStraightLines: false,
     iSAnimationWithDirectAncestors: false,
-
+    ancestorPathIndex: null,
 };
 
 
@@ -141,7 +141,7 @@ export const state = {
 import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
-import { buildAncestorTree, buildDescendantTree, buildCombinedTree } from './treeOperations.js';
+import { buildAncestorTree, buildDescendantTree, buildDescendantTreeWithDuplicates, buildCombinedTree } from './treeOperations.js';
 import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
     toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
 import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
@@ -1988,7 +1988,9 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
 
     let personInit = null; 
     // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
-    if (state.firstName != '' && state.lastName!= '') {
+    // if (state.firstName != '' && state.lastName!= '') {
+    if (isInit && state.firstName != '' && state.lastName!= '') {
+
         openSearchModal(state.firstName,  state.lastName );
 
         if (window.currentSearchResults.length == 0) {
@@ -2084,6 +2086,8 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
         state.currentTree =  buildDescendantTree(tempPerson.id);
+        // state.currentTree =  buildDescendantTreeWithDuplicates(tempPerson.id, true);
+
     }
     else {
         if (['WheelAncestors', 'WheelDescendants'].includes(mode)) {
@@ -2110,6 +2114,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
             // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
             state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
                 ? buildDescendantTree(person.id)
+                // ? buildDescendantTreeWithDuplicates(person.id, true)
                 : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
                 ? buildAncestorTree(person.id)
                 : (state.treeMode === 'both')

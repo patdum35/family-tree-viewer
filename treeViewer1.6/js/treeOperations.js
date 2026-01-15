@@ -242,8 +242,140 @@ export function buildDescendantTree(personId, processed = new Set(), generation 
     return node;
 }
 
-//Fonction utilitaire pour trouver les mariages entre branches
 
+
+
+
+export function buildDescendantTreeWithDuplicates(personId, allowDuplicates = false, processed = new Set(), generation = 0, duplicatesInfo = null) {
+    // Au premier appel, initialiser duplicatesInfo
+    if (!duplicatesInfo) {
+        duplicatesInfo = findInterBranchMarriages(personId);
+    }
+
+    if (!allowDuplicates && processed.has(personId) && !duplicatesInfo.has(personId)) {
+        return null;
+    }
+
+    if (generation >= state.nombre_generation) {
+        return null;
+    }
+
+    const person = state.gedcomData.individuals[personId];
+    if (!person) return null;
+
+    // Créer le nœud pour la personne courante
+    const node = {
+        id: personId,
+        name: person.name,
+        generation: generation,
+        children: [],
+        birthDate: person.birthDate,
+        deathDate: person.deathDate,
+        sex: person.sex,
+        duplicate: processed.has(personId), // Marquer comme duplicate si déjà traité
+        mainBranch: 1,
+    };
+
+    processed.add(personId);
+
+    // Traiter les conjoints de la racine de manière spéciale
+    if (generation === 0 && person.spouseFamilies) {
+        node.spouses = [];
+        person.spouseFamilies.forEach(famId => {
+            const family = state.gedcomData.families[famId];
+            if (family) {
+                const spouseId = family.husband === personId ? family.wife : family.husband;
+                if (spouseId) {
+                    const spouse = state.gedcomData.individuals[spouseId];
+                    if (spouse) {
+                        node.spouses.push({
+                            id: spouseId,
+                            name: spouse.name,
+                            birthDate: spouse.birthDate,
+                            deathDate: spouse.deathDate,
+                            sex: spouse.sex,
+                            mainBranch: 120,
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    // Collecter les enfants et leurs conjoints
+    if (person.spouseFamilies) {
+        const childrenWithSpouses = [];
+
+        person.spouseFamilies.forEach(famId => {
+            const family = state.gedcomData.families[famId];
+            if (family && family.children) {
+                family.children.forEach(childId => {
+                    const childNode = buildDescendantTreeWithDuplicates(childId, allowDuplicates, processed, generation + 1, duplicatesInfo);
+                    
+                    if (childNode) {
+                        const childPerson = state.gedcomData.individuals[childId];
+                        let spouseNode = null;
+
+                        if (state.treeModeReal === 'descendants') {
+                            if (childPerson.spouseFamilies) {
+                                const spouseFam = state.gedcomData.families[childPerson.spouseFamilies[0]];
+                                if (spouseFam) {
+                                    const spouseId = spouseFam.husband === childId ? spouseFam.wife : spouseFam.husband;
+                                    if (spouseId) {
+                                        const spouse = state.gedcomData.individuals[spouseId];
+                                        if (spouse) {
+                                            spouseNode = {
+                                                id: spouseId,
+                                                name: spouse.name,
+                                                generation: generation + 1,
+                                                isSpouse: true,
+                                                spouseOf: childId,
+                                                children: [],
+                                                birthDate: spouse.birthDate,
+                                                deathDate: spouse.deathDate,
+                                                sex: spouse.sex,
+                                                duplicate: processed.has(spouseId),
+                                                mainBranch: 70,
+                                            };
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        childrenWithSpouses.push({
+                            child: childNode,
+                            spouse: spouseNode
+                        });
+                    }
+                });
+            }
+        });
+
+        // Entrelacer les enfants et leurs conjoints
+        childrenWithSpouses.forEach(pair => {
+            node.children.push(pair.child);
+            if (pair.spouse) {
+                node.children.push(pair.spouse);
+            }
+        });
+    }
+
+    return node;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//Fonction utilitaire pour trouver les mariages entre branches
 function findInterBranchMarriages(rootId) {
     const duplicatesSet = new Set();
     const allDescendants = new Map(); // Map<personId, branchId>
