@@ -317,6 +317,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+
+function detectBrowserScale() {
+  const probe = document.createElement("span");
+  probe.textContent = "M";
+  probe.style.cssText = `
+    position: fixed;
+    visibility: hidden;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+  `;
+  document.body.appendChild(probe);
+
+  const computedPx = parseFloat(getComputedStyle(probe).fontSize);
+  document.body.removeChild(probe);
+
+  const scale = computedPx / 16;
+  console.log(
+    "[detectBrowserScale]",
+    "computed font-size =", computedPx + "px",
+    "=> scale =", scale
+  );
+
+  return scale;
+}
+
+// test immédiat
+window.addEventListener("DOMContentLoaded", detectBrowserScale);
+
+
+
+
+
+
 // Définir la fonction openGedcomModal globalement avant de charger i18n.js
 function openGedcomModal() {
     const modal = document.getElementById('advanced-settings-modal');
