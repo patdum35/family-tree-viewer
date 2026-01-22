@@ -8,37 +8,6 @@ import { debugLog } from './debugLogUtils.js';
 
 
 
-
-
-
-// const ua = navigator.userAgent.toLowerCase();
-// let browserName = '';
-// if (ua.includes('samsungbrowser')) browserName = 'Samsung Internet';
-// else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) browserName = 'MIUI Browser';
-// else if (ua.includes('oppo')) browserName = 'Oppo Browser';
-// else if (ua.includes('vivo')) browserName = 'Vivo Browser';
-// else if (ua.includes('huawei')) browserName = 'Huawei Browser';
-// else if (ua.includes('ucbrowser')) browserName = 'UC Browser';
-// else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) browserName = 'Navigateur système';
-// else if (ua.includes('edg')) browserName = 'Edge';
-// else if (ua.includes('chrome')) browserName = 'Chrome';
-// else browserName = 'navigateur inconnu';
-
-// Polyfill pour iOS ou Samsunf browser: Si SpeechGrammarList n'existe pas, on crée une classe vide
-// if (typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined')  {
-// if ((typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined') || (browserName != 'Chrome' && browserName != 'Edge' )) {
-//     window.SpeechGrammarList = function() {
-//         this.addFromString = function() {}; // Ne fait rien, évite le plantage
-//     };
-// }
-
-// window.SpeechGrammarList = function() {
-//     this.addFromString = function() {}; // Ne fait rien, évite le plantage
-// };
-
-
-
-
 export function selectVoice() {
 
     let voice_language = 'fr-FR';
@@ -1781,7 +1750,6 @@ const SpeechRecognitionUI = (function() {
         pendingSpellingStart = false;
 
         recognition.continuous = !state.isMobile;
-        // recognition.grammars = new SpeechGrammarList(); 
         
         document.getElementById('stt-result-display').textContent = `✅ ${translate('speelingEnded')} "${finalValue}"`;
         document.getElementById('stt-interim-display').textContent = '';
@@ -2385,9 +2353,6 @@ const SpeechRecognitionUI = (function() {
         }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        // const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-
-        // const SpeechGrammarList = false; // on supprime car problème sur Samsung Browser //window.SpeechGrammarList || window.webkitSpeechGrammarList;
 
 
         // --- CORRECTION IOS : On ne bloque que si l'API de base est absente ---
@@ -2399,28 +2364,9 @@ const SpeechRecognitionUI = (function() {
         // On crée l'objet (Maintenant cette ligne s'exécute enfin sur iOS !)
         recognition = new SpeechRecognition();
 
-        // const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
-        // const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
-        // const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
-
-        // On instancie seulement si la classe existe (PC/Android) mais pas our IOS/apple
-        // if (SpeechGrammarList) {
-        //     spellingGrammar = new SpeechGrammarList();
-        //     spellingGrammar.addFromString(spellingGrammarString, 1);
-        //     recognition.grammars = new SpeechGrammarList();
-        //     // Vous pouvez ajouter ici vos autres manipulations de grammaire si nécessaire
-        // }
-
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
         recognition.interimResults = true;
-
-
-
-
-
-
-
 
 
 
@@ -2617,7 +2563,6 @@ const SpeechRecognitionUI = (function() {
                 pendingSpellingStart = false; 
                 isSpellingMode = true; 
                 recognition.continuous = false; 
-                // recognition.grammars = spellingGrammar; 
                 
                 // 🚨 MODIFICATION : Application du délai anti-bruit (150ms)
                 setTimeout(() => {
@@ -3499,7 +3444,6 @@ const SpeechRecognitionUI = (function() {
             // cumulativeTranscript = '';
             
             recognition.continuous = !state.isMobile; 
-            // recognition.grammars = new SpeechGrammarList(); 
             
             document.getElementById('stt-result-display').textContent = '';
             // Définissez cette constante quelque part au début de votre fichier JS

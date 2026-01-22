@@ -5,9 +5,21 @@
 
 /* Empêche les navigateurs de forcer le mode sombre */
 html {
-  color-scheme: light !important;
-  forced-color-adjust: none !important;
+    color-scheme: light !important;
+    forced-color-adjust: none !important;
+
+    /* Désactive l'ajustement automatique sur iOS et Android */
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
 }
+
+* {
+    /* Ce hack est documenté et sûr : il empêche Chrome Android 
+       de déclencher l'inflation du texte sur n'importe quel élément. */
+    max-height: 1000000px;
+}
+
+
 
 *[translate="no"] {
   unicode-bidi: isolate;
