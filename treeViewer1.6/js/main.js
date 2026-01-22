@@ -374,12 +374,26 @@ function detectChromeFontBoost() {
 }
 
 
+
+
 // test immédiat
 window.addEventListener("DOMContentLoaded", detectBrowserScale);
 window.addEventListener("DOMContentLoaded", detectChromeFontBoost);
 
 
-
+// // window.addEventListener("DOMContentLoaded", () => {
+// window.addEventListener("load", () => {
+//   const button = document.querySelector("#voiceCommandBtn");
+//   if (!button) {
+//       console.log("\n\n[Button Size Detection] Bouton voiceCommandBtn non trouvé");
+//     return;
+//   }
+  
+//   const rect = button.getBoundingClientRect();
+//   console.log(
+//     `\n\nTaille du bouton "${button.textContent.trim()}": width=${rect.width.toFixed(2)}px, height=${rect.height.toFixed(2)}px`
+//   );
+// });
 
 
 // Définir la fonction openGedcomModal globalement avant de charger i18n.js
