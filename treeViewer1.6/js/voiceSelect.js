@@ -7,12 +7,35 @@ import { debounce } from './eventHandlers.js';
 import { debugLog } from './debugLogUtils.js';
 
 
-// Polyfill pour iOS : Si SpeechGrammarList n'existe pas, on crée une classe vide
-if (typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined') {
-    window.SpeechGrammarList = function() {
-        this.addFromString = function() {}; // Ne fait rien, évite le plantage
-    };
-}
+
+
+
+
+// const ua = navigator.userAgent.toLowerCase();
+// let browserName = '';
+// if (ua.includes('samsungbrowser')) browserName = 'Samsung Internet';
+// else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) browserName = 'MIUI Browser';
+// else if (ua.includes('oppo')) browserName = 'Oppo Browser';
+// else if (ua.includes('vivo')) browserName = 'Vivo Browser';
+// else if (ua.includes('huawei')) browserName = 'Huawei Browser';
+// else if (ua.includes('ucbrowser')) browserName = 'UC Browser';
+// else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) browserName = 'Navigateur système';
+// else if (ua.includes('edg')) browserName = 'Edge';
+// else if (ua.includes('chrome')) browserName = 'Chrome';
+// else browserName = 'navigateur inconnu';
+
+// Polyfill pour iOS ou Samsunf browser: Si SpeechGrammarList n'existe pas, on crée une classe vide
+// if (typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined')  {
+// if ((typeof window.webkitSpeechGrammarList === 'undefined' && typeof window.SpeechGrammarList === 'undefined') || (browserName != 'Chrome' && browserName != 'Edge' )) {
+//     window.SpeechGrammarList = function() {
+//         this.addFromString = function() {}; // Ne fait rien, évite le plantage
+//     };
+// }
+
+// window.SpeechGrammarList = function() {
+//     this.addFromString = function() {}; // Ne fait rien, évite le plantage
+// };
+
 
 
 
@@ -1547,7 +1570,7 @@ const SpeechRecognitionUI = (function() {
     let pendingSpellingStart = false; 
     let targetSpellingField = null;
     let targetSpellingFieldEnglish = null;
-    let spellingGrammar = null; 
+    // let spellingGrammar = null; 
 
     const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -1758,7 +1781,7 @@ const SpeechRecognitionUI = (function() {
         pendingSpellingStart = false;
 
         recognition.continuous = !state.isMobile;
-        recognition.grammars = new SpeechGrammarList(); 
+        // recognition.grammars = new SpeechGrammarList(); 
         
         document.getElementById('stt-result-display').textContent = `✅ ${translate('speelingEnded')} "${finalValue}"`;
         document.getElementById('stt-interim-display').textContent = '';
@@ -1873,58 +1896,64 @@ const SpeechRecognitionUI = (function() {
 
 
         
-        // entityList.forEach( key=> {
-        //     const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
-        //     const truncatedTranscriptForKey = fullTranscript.substring(index);
-        //     const wordsKey = truncatedTranscriptForKey.split(/\s+/).filter(w => w.length > 0);
-        //     const isPauseKeyDetected = truncatedTranscriptForKey.lastIndexOf('pause'+ ' ');
+        
+        
+        /////////////////////////
+        // pour activer le mode épeler, sinon on peut supprimer ce code
+        entityList.forEach( key=> {
+            const index = fullTranscript.lastIndexOf(translate(key)+ ' ');
+            const truncatedTranscriptForKey = fullTranscript.substring(index);
+            const wordsKey = truncatedTranscriptForKey.split(/\s+/).filter(w => w.length > 0);
+            const isPauseKeyDetected = truncatedTranscriptForKey.lastIndexOf('pause'+ ' ');
 
-        //     // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
+            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected word @@@@@@@ key', key, 'truncatedTranscriptForKey=',truncatedTranscriptForKey, index, wordsKey, wordsKey.length, validationSignal.includes(wordsKey[wordsKey.length - 1]), isPauseKeyDetected, '\n\n\n')
 
-        //     let localKey = key;
-        //     if(key === 'non') { localKey = 'lastname';}
+            let localKey = key;
+            if(key === 'non') { localKey = 'lastname';}
 
-        //     // let wordsKeyMinLength = 7;
+            // let wordsKeyMinLength = 7;
 
-        //     // si un keyWord est détecté et un validation word à la fin du transcript
-        //     if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
-        //         capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier et le dernier mot 
+            // si un keyWord est détecté et un validation word à la fin du transcript
+            if (!isKeyDetected && index !== -1  && validationSignal.includes(wordsKey[wordsKey.length - 1]) && !validationSignal.includes(wordsKey[wordsKey.length - 2]) && wordsKey.length < 7 && isPauseKeyDetected === -1 ) {
+                capturedEntities[translate(localKey)] = truncatedTranscriptForKey.replace(translate(key), '').split(/\s+/).slice(1, -1).join(' ');; // enlever le 1ier et le dernier mot 
 
-        //         cumulativeTranscript = ' ';
-        //         // if (entityList.includes(wordsKey[wordsKey.length - 1])) {
-        //         //     cumulativeTranscript = ' ' + wordsKey[wordsKey.length - 1] + ' ';
-        //         // }
-        //         previousNewCumulativeTranscript = cumulativeTranscript;
+                cumulativeTranscript = ' ';
+                // if (entityList.includes(wordsKey[wordsKey.length - 1])) {
+                //     cumulativeTranscript = ' ' + wordsKey[wordsKey.length - 1] + ' ';
+                // }
+                previousNewCumulativeTranscript = cumulativeTranscript;
 
-        //         updateEntityUI();
-        //         isKeyDetected = true;
-        //         KeyDetectedTab[localKey] = true;
+                updateEntityUI();
+                isKeyDetected = true;
+                KeyDetectedTab[localKey] = true;
               
 
-        //     } else {
-        //        KeyDetectedTab[key] = false; 
-        //     }
+            } else {
+               KeyDetectedTab[key] = false; 
+            }
 
-        //     // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected key=', key, ' @@@@@@@ : ', wordsKey[0], wordsKey[1], wordsKey[2], wordsKey[3], wordsKey[4], window.CURRENT_LANGUAGE,'\n\n\n')
+            // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  detected key=', key, ' @@@@@@@ : ', wordsKey[0], wordsKey[1], wordsKey[2], wordsKey[3], wordsKey[4], window.CURRENT_LANGUAGE,'\n\n\n')
            
-        //     let wordIndex = 1;
-        //     if (window.CURRENT_LANGUAGE === 'en' && ( key === 'firstname' || key ==='lastname') ) {
-        //         wordIndex = 2;
-        //     }
+            let wordIndex = 1;
+            if (window.CURRENT_LANGUAGE === 'en' && ( key === 'firstname' || key ==='lastname') ) {
+                wordIndex = 2;
+            }
             
             
-        //     // si un keyWord est détecté et la séquence 'lettre par lettre' est détectée
-        //     if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
+            // si un keyWord est détecté et la séquence 'lettre par lettre' est détectée
+            if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
 
-        //         console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
-        //         capturedEntities[translate(localKey)] = '';
-        //         updateEntityUI();
+                console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
+                capturedEntities[translate(localKey)] = '';
+                updateEntityUI();
 
-        //         startSpellingCycle(translate(localKey), localKey, config); 
-        //         isSpellDetected = true;
-        //         return; 
-        //     }
-        // })
+                startSpellingCycle(translate(localKey), localKey, config); 
+                isSpellDetected = true;
+                return; 
+            }
+        })
+
+        //////////////////
 
 
 
@@ -2356,7 +2385,10 @@ const SpeechRecognitionUI = (function() {
         }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+        // const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+        // const SpeechGrammarList = false; // on supprime car problème sur Samsung Browser //window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
 
         // --- CORRECTION IOS : On ne bloque que si l'API de base est absente ---
         if (!SpeechRecognition) {
@@ -2367,17 +2399,17 @@ const SpeechRecognitionUI = (function() {
         // On crée l'objet (Maintenant cette ligne s'exécute enfin sur iOS !)
         recognition = new SpeechRecognition();
 
-        const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
-        const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
-        const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
+        // const exitSpellingCommand = ['terminer', 'fin', 'fini']; 
+        // const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+        // const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`; 
 
         // On instancie seulement si la classe existe (PC/Android) mais pas our IOS/apple
-        if (SpeechGrammarList) {
-            spellingGrammar = new SpeechGrammarList();
-            spellingGrammar.addFromString(spellingGrammarString, 1);
-            recognition.grammars = new SpeechGrammarList();
-            // Vous pouvez ajouter ici vos autres manipulations de grammaire si nécessaire
-        }
+        // if (SpeechGrammarList) {
+        //     spellingGrammar = new SpeechGrammarList();
+        //     spellingGrammar.addFromString(spellingGrammarString, 1);
+        //     recognition.grammars = new SpeechGrammarList();
+        //     // Vous pouvez ajouter ici vos autres manipulations de grammaire si nécessaire
+        // }
 
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
@@ -2585,7 +2617,7 @@ const SpeechRecognitionUI = (function() {
                 pendingSpellingStart = false; 
                 isSpellingMode = true; 
                 recognition.continuous = false; 
-                recognition.grammars = spellingGrammar; 
+                // recognition.grammars = spellingGrammar; 
                 
                 // 🚨 MODIFICATION : Application du délai anti-bruit (150ms)
                 setTimeout(() => {
@@ -3467,7 +3499,7 @@ const SpeechRecognitionUI = (function() {
             // cumulativeTranscript = '';
             
             recognition.continuous = !state.isMobile; 
-            recognition.grammars = new SpeechGrammarList(); 
+            // recognition.grammars = new SpeechGrammarList(); 
             
             document.getElementById('stt-result-display').textContent = '';
             // Définissez cette constante quelque part au début de votre fichier JS
