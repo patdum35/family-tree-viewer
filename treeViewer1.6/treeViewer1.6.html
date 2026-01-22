@@ -98,47 +98,48 @@
 
     <script src="js/pwaInstaller_ProgressiveWebApps.js"></script>
 
-    <script>
-        (function() {
-            function counteractSystemFontSize() {
-                // On crée un élément de test de 16px théoriques
-                const test = document.createElement('div');
-                test.style.cssText = "width:16px;height:16px;position:absolute;left:-9999px;font-size:16px !important;";
-                test.innerHTML = "M";
-                document.documentElement.appendChild(test);
-                
-                // On mesure la taille réelle que le navigateur lui donne
-                // Si l'utilisateur a réglé sa police à 150%, au lieu de 16px, on mesurera 24px.
-                const actualSize = test.getBoundingClientRect().width;
-                document.documentElement.removeChild(test);
-
-                if (actualSize !== 16 && actualSize > 0) {
-                    // On calcule le ratio d'agrandissement (ex: 1.5)
-                    const multiplier = actualSize / 16;
-                    // On force la taille du document à l'inverse du ratio (ex: 100% / 1.5 = 66.6%)
-                    // Cela annule l'effet de zoom du paramètre browser pour tout le site
-                    document.documentElement.style.fontSize = (100 / multiplier) + "%";
-                }
-            }
-
-            // Exécution immédiate
-            counteractSystemFontSize();
-            
-            // Sécurité pour certains navigateurs qui chargent les réglages après le DOM
-            window.addEventListener('DOMContentLoaded', counteractSystemFontSize);
-            window.addEventListener('load', counteractSystemFontSize);
-        })();
-    </script>
-
-
-
-
 
 </head>
 
 
 
 <body>
+
+
+<body>
+    <script>
+        (function() {
+            function fixGui() {
+                // 1. Créer un élément de mesure dans le body
+                const tester = document.createElement('div');
+                tester.style.cssText = "position:absolute; width:100px; font-size:100px; left:-9999px; visibility:hidden;";
+                tester.innerHTML = "M"; // Un caractère pour forcer le moteur de texte
+                document.body.appendChild(tester);
+                
+                // 2. Mesurer la largeur réelle
+                // Si le paramètre browser est à 150%, offsetWidth sera 150 au lieu de 100
+                const actualWidth = tester.offsetWidth;
+                
+                if (actualWidth > 0 && actualWidth !== 100) {
+                    const ratio = 100 / actualWidth;
+                    // 3. Appliquer la correction inverse sur la racine
+                    // Cela "écrase" le réglage du browser pour toute la page
+                    document.documentElement.style.fontSize = (ratio * 100) + "%";
+                }
+                
+                document.body.removeChild(tester);
+            }
+
+            // On l'exécute immédiatement
+            fixGui();
+            // Et on le relance au chargement complet au cas où
+            window.onload = fixGui;
+        })();
+    </script>
+
+
+
+
     <div class="login-background">
         <!-- <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran"> -->
         <!-- <img src="background_images/bois.jpg" class="login-background-image" alt="Fond d'écran">         -->
@@ -332,7 +333,7 @@
     
     <div id="versionFooter" 
         style="position:fixed; bottom:3px; left:50%; transform:translateX(-50%); font-size:10px; color:white; text-align:center; z-index:1; pointer-events:none;">
-        ®isAI4U-PD V2.55
+        ®isAI4U-PD V2.56
     </div>
 
 
