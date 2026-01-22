@@ -344,9 +344,39 @@ function detectBrowserScale() {
   return scale;
 }
 
+
+
+function detectChromeFontBoost() {
+  const probe = document.createElement("div");
+  probe.textContent = "MMMMMMMMMM"; // 10 M
+  probe.style.cssText = `
+    position:absolute;
+    visibility:hidden;
+    font-size:16px;
+    line-height:1;
+    white-space:nowrap;
+  `;
+  document.body.appendChild(probe);
+
+  const width = probe.getBoundingClientRect().width;
+  document.body.removeChild(probe);
+
+  const expected = 10 * 16 * 0.6; // largeur approx d’un M
+  const scale = width / expected;
+
+  console.log(
+    "[Chrome Font Boost Detection]",
+    "rendered width =", width.toFixed(2),
+    "scale ≈", scale.toFixed(2)
+  );
+
+  return scale;
+}
+
+
 // test immédiat
 window.addEventListener("DOMContentLoaded", detectBrowserScale);
-
+window.addEventListener("DOMContentLoaded", detectChromeFontBoost);
 
 
 
