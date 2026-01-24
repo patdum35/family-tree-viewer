@@ -186,6 +186,7 @@ import {
     closeAllModals
 } from './eventHandlers.js';
 import { resetPuzzle } from './puzzleSwipe.js';
+import { APP_CACHE_NAME } from './resourcePreloader.js';
 
 
 window.addEventListener('load', function() {
@@ -1035,6 +1036,23 @@ export function positionFormContainer() {
     }
 }
 
+
+
+export async function getCachedImageURL(imagePath) {
+    try {
+        const cache = await caches.open(APP_CACHE_NAME);
+        const response = await cache.match(imagePath);
+        if (response) {
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        }
+    } catch (e) {
+        console.error("Erreur accès cache:", e);
+    }
+    return imagePath; // Retourne le chemin original si échec
+}
+
+
 function initialize() {   
 
     // --- 1. Persistance : Vérifier l'état au chargement ---
@@ -1063,6 +1081,23 @@ function initialize() {
     //         }
     //     }, 100); // Petit délai pour s'assurer que tout est prêt   
     // }
+
+    // On met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
+        setTimeout(async () => {
+            const loginBackground = document.getElementById('login-background-image');
+            if (loginBackground) {
+                let imagePath = '';
+                if (window.innerWidth > 800 || window.innerHeight > 800) {
+                    imagePath = 'background_images/tree-log.jpg';
+                } else {
+                    imagePath = 'background_images/tree-log-mediumQuality.jpg';
+                }
+                // Récupération forcée depuis le cache pour le mode offline
+                loginBackground.src = await getCachedImageURL(imagePath);
+            }
+        }, 100); 
+    }
 
 
 

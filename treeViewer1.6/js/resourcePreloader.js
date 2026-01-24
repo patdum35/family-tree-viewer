@@ -7,7 +7,7 @@
 import { debugLog } from './debugLogUtils.js';
 
 // Nom du cache pour les ressources importantes
-const APP_CACHE_NAME = 'app-resources-cache-v2';
+export const APP_CACHE_NAME = 'app-resources-cache-v2';
 
 // Liste des ressources importantes à précharger
 const RESOURCES_TO_CACHE = [

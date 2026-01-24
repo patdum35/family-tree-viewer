@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen } from './main.js';
+import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen, getCachedImageURL } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
@@ -731,32 +731,23 @@ export async function returnToLogin() {
         const newLoginBackground = document.createElement('div');
         newLoginBackground.className = 'login-background';
         const backgroundImage = document.createElement('img');
-        // backgroundImage.src = 'background_images/fort_lalatte.jpg';
         backgroundImage.className = 'login-background-image';
         backgroundImage.alt = 'Fond d\'écran';
         newLoginBackground.appendChild(backgroundImage);
         document.body.insertBefore(newLoginBackground, document.body.firstChild);
 
-
-        // Utiliser getCachedResourceUrl pour obtenir l'URL de l'image (si disponible)
-        try {
-            // const imagePath = 'background_images/fort_lalatte.jpx';
-            // const imagePath = 'background_images/lichen-red.jpg';
-            // const imagePath = 'background_images/bois.jpg';
-            // backgroundImage.src = 'background_images/tree-log.jpg';
-            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
-            // backgroundImage.src = await getCachedResourceUrl(imagePath);
-        } catch (error) {
-            console.error("Erreur lors du chargement de l'image de fond:", error);
-            // Fallback en cas d'erreur
-            // backgroundImage.src = 'background_images/fort_lalatte.jpg';
-            // backgroundImage.src = 'background_images/lichen-red.jpg';
-            // backgroundImage.src = 'background_images/bois.jpg';
-            // backgroundImage.src = 'background_images/tree-log.jpg';
-            backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
-        }
+        // Utilisation du cache pour l'image Low Quality initiale
+        (async () => {
+            try {
+                const lowResPath = 'background_images/tree-log-lowQuality.jpg';
+                backgroundImage.src = await getCachedImageURL(lowResPath);
+            } catch (error) {
+                console.error("Erreur lors du chargement de l'image de fond:", error);
+                backgroundImage.src = 'background_images/tree-log-lowQuality.jpg';
+            }
+        })();
     }
-    
+
     // Quitter le mode plein écran si actif
     toggleFullScreen('exitfullScreenRequired');
 
@@ -768,19 +759,19 @@ export async function returnToLogin() {
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = '';
 
-    // // on met à jour l'image de fond en bonne qualité si l'écran est grand
-    // if (window.innerWidth > 512 || window.innerHeight > 512) {
-    //     setTimeout(() => {
-    //         const loginBackground = document.querySelector('.login-background-image');
-    //         if (loginBackground) {
-    //             if (window.innerWidth > 800 || window.innerHeight > 800)  {
-    //                 loginBackground.src = 'background_images/tree-log.jpg';  
-    //             } else {
-    //                 loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
-    //             }
-    //         }
-    //     }, 50); // Petit délai pour s'assurer que tout est prêt   
-    // }
+    // Mise à jour de l'image créée dynamiquement vers la HD
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
+        setTimeout(async () => {
+            const imgElement = document.querySelector('.login-background-image');
+            if (imgElement) {
+                let targetPath = (window.innerWidth > 800 || window.innerHeight > 800) 
+                    ? 'background_images/tree-log.jpg' 
+                    : 'background_images/tree-log-mediumQuality.jpg';
+                
+                imgElement.src = await getCachedImageURL(targetPath);
+            }
+        }, 50);
+    }
 
 }
 
