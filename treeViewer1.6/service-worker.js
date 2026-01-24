@@ -154,6 +154,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+
 // Stratégie de cache simplifiée - inspirée de votre fetchTileWithCache
 self.addEventListener('fetch', (event) => {
   // Ignorer certaines requêtes
