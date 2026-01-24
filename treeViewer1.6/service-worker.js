@@ -29,6 +29,7 @@ swConsole.log(`Service Worker démarré - Cache: ${CACHE_NAME}`);
 // Liste des ressources à mettre en cache immédiatement
 const RESOURCES_TO_CACHE = [
   './',
+  './index.html',
   './treeViewer1.6.html',
   './offline.html',
   './css/styles.css',

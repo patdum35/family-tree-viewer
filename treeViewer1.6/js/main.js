@@ -379,6 +379,7 @@ function isSamsungBrowser() {
 
 // Calculer le facteur de redimensionnement
 function calculerFacteurRedimensionnement() {
+
     if (isSamsungBrowser()) {
         // // Samsung: utilise le multiplicateur de font-size
         const facteur = detectBrowserScale();
