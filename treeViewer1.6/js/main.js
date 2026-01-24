@@ -1050,19 +1050,22 @@ function initialize() {
 
 
 
-    // on met à jour l'image de fond en bonne qualité si l'écran est grand
-    if (window.innerWidth > 512 || window.innerHeight > 512) {
-        setTimeout(() => {
-            const loginBackground = document.getElementById('login-background-image');
-            if (loginBackground) {
-                if (window.innerWidth > 800 ||  window.innerHeight > 800)  {
-                    loginBackground.src = 'background_images/tree-log.jpg';  
-                } else {
-                    loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
-                }
-            }
-        }, 100); // Petit délai pour s'assurer que tout est prêt   
-    }
+    // // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    // if (window.innerWidth > 512 || window.innerHeight > 512) {
+    //     setTimeout(() => {
+    //         const loginBackground = document.getElementById('login-background-image');
+    //         if (loginBackground) {
+    //             if (window.innerWidth > 800 ||  window.innerHeight > 800)  {
+    //                 loginBackground.src = 'background_images/tree-log.jpg';  
+    //             } else {
+    //                 loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+    //             }
+    //         }
+    //     }, 100); // Petit délai pour s'assurer que tout est prêt   
+    // }
+
+
+
      // Initialiser le sélecteur de générations standard d'abord
     // (nécessaire pour sa création avant de le remplacer)
     initializeGenerationSelect();

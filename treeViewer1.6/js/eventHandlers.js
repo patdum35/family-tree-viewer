@@ -768,19 +768,19 @@ export async function returnToLogin() {
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = '';
 
-    // on met à jour l'image de fond en bonne qualité si l'écran est grand
-    if (window.innerWidth > 512 || window.innerHeight > 512) {
-        setTimeout(() => {
-            const loginBackground = document.querySelector('.login-background-image');
-            if (loginBackground) {
-                if (window.innerWidth > 800 || window.innerHeight > 800)  {
-                    loginBackground.src = 'background_images/tree-log.jpg';  
-                } else {
-                    loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
-                }
-            }
-        }, 50); // Petit délai pour s'assurer que tout est prêt   
-    }
+    // // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    // if (window.innerWidth > 512 || window.innerHeight > 512) {
+    //     setTimeout(() => {
+    //         const loginBackground = document.querySelector('.login-background-image');
+    //         if (loginBackground) {
+    //             if (window.innerWidth > 800 || window.innerHeight > 800)  {
+    //                 loginBackground.src = 'background_images/tree-log.jpg';  
+    //             } else {
+    //                 loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+    //             }
+    //         }
+    //     }, 50); // Petit délai pour s'assurer que tout est prêt   
+    // }
 
 }
 
