@@ -114,8 +114,8 @@
         browserName = 'Chrome';
       }
       
-    //   if (isProblematic) {
-      if (true) {
+      if (isProblematic) {
+      // if (true) {
         const DEFAULT_LANG = 'fr';
         const saved = localStorage.getItem('redir_lang');
         let LANG = saved || (navigator.language ? navigator.language.slice(0,2) : DEFAULT_LANG);
