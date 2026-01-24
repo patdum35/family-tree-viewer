@@ -318,6 +318,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+
+
+/////////////////////////////////////////////////////
 function detectBrowserScale() {
   const probe = document.createElement("span");
   probe.textContent = "M";
@@ -345,55 +348,214 @@ function detectBrowserScale() {
 }
 
 
+// Configuration de base (référence au chargement)
+const CONFIG_BASE = {
+    devicePixelRatio: null,
+    innerWidth: null,
+    fontSize: null
+};
 
-function detectChromeFontBoost() {
-  const probe = document.createElement("div");
-  probe.textContent = "MMMMMMMMMM"; // 10 M
-  probe.style.cssText = `
-    position:absolute;
-    visibility:hidden;
-    font-size:16px;
-    line-height:1;
-    white-space:nowrap;
-  `;
-  document.body.appendChild(probe);
-
-  const width = probe.getBoundingClientRect().width;
-  document.body.removeChild(probe);
-
-  const expected = 10 * 16 * 0.6; // largeur approx d’un M
-  const scale = width / expected;
-
-  console.log(
-    "[Chrome Font Boost Detection]",
-    "rendered width =", width.toFixed(2),
-    "scale ≈", scale.toFixed(2)
-  );
-
-  return scale;
+// Capturer les valeurs de référence au chargement
+function capturerReference() {
+    const testElement = document.createElement('div');
+    testElement.style.fontSize = '16px';
+    testElement.style.position = 'absolute';
+    testElement.style.visibility = 'hidden';
+    document.body.appendChild(testElement);
+    
+    CONFIG_BASE.devicePixelRatio = window.devicePixelRatio;
+    CONFIG_BASE.innerWidth = window.innerWidth;
+    CONFIG_BASE.fontSize = parseFloat(window.getComputedStyle(testElement).fontSize);
+    
+    document.body.removeChild(testElement);
+    
+    console.log('\n\nRéférence capturée:', CONFIG_BASE);
 }
 
+// Détecter si c'est Samsung Internet
+function isSamsungBrowser() {
+    return navigator.userAgent.includes('SamsungBrowser');
+}
+
+// Calculer le facteur de redimensionnement
+function calculerFacteurRedimensionnement() {
+    if (isSamsungBrowser()) {
+        // // Samsung: utilise le multiplicateur de font-size
+        const facteur = detectBrowserScale();
+        return facteur;
+        
+    } else {
+        // Chrome: utilise devicePixelRatio ET innerWidth
+        const facteurWidth =  window.innerWidth / window.screen.width; 
+        const facteur = facteurWidth;
+        return facteur;
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+function redimensionnerButtonSizeInDOM() {
+    const facteur = calculerFacteurRedimensionnement();
+    
+    console.log('Facteur de redimensionnement:', facteur);
+    
+    // Si le facteur est proche de 1, pas besoin de redimensionner
+    if (Math.abs(facteur - 1) < 0.01) {
+        return;
+    }
+    
+    // Sélectionner TOUS les éléments
+    // const elements = document.querySelectorAll('*');
+    const elements = document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
+    
+    // elements.forEach(element => {
+
+    //     // console.log('Redimensionnement de l\'élément:', element);
+
+    //     const styles = window.getComputedStyle(element);
+        
+    //     // Redimensionner font-size
+    //     if (styles.fontSize) { //} && element.id === 'load-gedcom-button') { //} && element.id === 'startTitle') {
+    //         const fontSizeOriginal = parseFloat(styles.fontSize);
+    //         // console.log('Redimensionnement du fontsize de l\'élément:', element, fontSizeOriginal, (fontSizeOriginal * facteur));
+
+    //         if (element.id) {
+    //             console.log('Redimensionnement du fontsize de l\'élément:', element.id, fontSizeOriginal, (fontSizeOriginal * facteur));
+    //         }
+
+    //         if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+    //             element.style.fontSize = (fontSizeOriginal * facteur) + 'px';
+    //         }
+    //     }
+        
+    //     // // Redimensionner width (si définie et pas auto)
+    //     // if (styles.width && styles.width !== 'auto') {
+    //     //     const widthOriginal = parseFloat(styles.width);
+    //     //     if (!isNaN(widthOriginal) && widthOriginal > 0) {
+    //     //         element.style.width = (widthOriginal * facteur) + 'px';
+    //     //     }
+    //     // }
+        
+    //     // // Redimensionner height (si définie et pas auto)
+    //     // if (styles.height && styles.height !== 'auto') {
+    //     //     const heightOriginal = parseFloat(styles.height);
+    //     //     if (!isNaN(heightOriginal) && heightOriginal > 0) {
+    //     //         element.style.height = (heightOriginal * facteur) + 'px';
+    //     //     }
+    //     // }
+        
+    //     // // Redimensionner line-height (si définie en px)
+    //     // if (styles.lineHeight && styles.lineHeight.includes('px')) {
+    //     //     const lineHeightOriginal = parseFloat(styles.lineHeight);
+    //     //     if (!isNaN(lineHeightOriginal) && lineHeightOriginal > 0) {
+    //     //         element.style.lineHeight = (lineHeightOriginal * facteur) + 'px';
+    //     //     }
+    //     // }
+        
+    //     // // Redimensionner padding
+    //     // ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].forEach(prop => {
+    //     //     const value = parseFloat(styles[prop]);
+    //     //     if (!isNaN(value) && value > 0) {
+    //     //         element.style[prop] = (value * facteur) + 'px';
+    //     //     }
+    //     // });
+        
+    //     // // Redimensionner margin
+    //     // ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(prop => {
+    //     //     const value = parseFloat(styles[prop]);
+    //     //     if (!isNaN(value) && value > 0) {
+    //     //         element.style[prop] = (value * facteur) + 'px';
+    //     //     }
+    //     // });
+        
+    //     // // Redimensionner border-width
+    //     // if (styles.borderWidth) {
+    //     //     const borderOriginal = parseFloat(styles.borderWidth);
+    //     //     if (!isNaN(borderOriginal) && borderOriginal > 0) {
+    //     //         element.style.borderWidth = (borderOriginal * facteur) + 'px';
+    //     //     }
+    //     // }
+    // });
+}
+
+// Observer les changements pour Samsung (polling)
+let derniereFontSize = null;
+function surveillerChangementsFontSize() {
+    const testElement = document.createElement('div');
+    testElement.style.fontSize = '16px';
+    testElement.style.position = 'absolute';
+    testElement.style.visibility = 'hidden';
+    document.body.appendChild(testElement);
+    
+    const fontSizeActuelle = parseFloat(window.getComputedStyle(testElement).fontSize);
+    document.body.removeChild(testElement);
+    
+    if (derniereFontSize !== null && derniereFontSize !== fontSizeActuelle) {
+        console.log('Changement de font-size détecté:', derniereFontSize, '→', fontSizeActuelle);
+        redimensionnerDOM();
+    }
+    
+    derniereFontSize = fontSizeActuelle;
+}
+
+// Initialisation au chargement
+function initialiserButtonSize() {
+    console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM...\n\n');
+    capturerReference();
+
+    redimensionnerButtonSizeInDOM();
+    
+    // Surveillance resize (pour Chrome)
+    // window.addEventListener('resize', () => {
+    //     console.log('/n/n-Resize détecté, redimensionnement button size...');
+    //     redimensionnerButtonSizeInDOM();
+    // });
+    
+    // Surveillance font-size (pour Samsung)
+    setInterval(surveillerChangementsFontSize, 500);
+}
+
+// Auto-initialisation quand le DOM est prêt
+// if (document.readyState === 'loading') {
+//     console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM ON LOADING...\n\n');
+//     document.addEventListener('DOMContentLoaded', initialiserButtonSize);
+// } else {
+//     console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT START...\n\n');
+//     initialiserButtonSize();
+// }
+
+// Export des fonctions pour usage externe si nécessaire
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        redimensionnerDOM,
+        calculerFacteurRedimensionnement,
+        capturerReference
+    };
+}
+/////////////////////////////////////////////////////////////////
 
 
 
-// test immédiat
-window.addEventListener("DOMContentLoaded", detectBrowserScale);
-window.addEventListener("DOMContentLoaded", detectChromeFontBoost);
 
 
-// // window.addEventListener("DOMContentLoaded", () => {
-// window.addEventListener("load", () => {
-//   const button = document.querySelector("#voiceCommandBtn");
-//   if (!button) {
-//       console.log("\n\n[Button Size Detection] Bouton voiceCommandBtn non trouvé");
-//     return;
-//   }
-  
-//   const rect = button.getBoundingClientRect();
-//   console.log(
-//     `\n\nTaille du bouton "${button.textContent.trim()}": width=${rect.width.toFixed(2)}px, height=${rect.height.toFixed(2)}px`
-//   );
-// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Définir la fonction openGedcomModal globalement avant de charger i18n.js
@@ -1133,6 +1295,10 @@ function initialize() {
     setTimeout(() => {
         positionFormContainer();
     }, 200); // Petit délai pour s'assurer que tout est prêt    
+
+
+    console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT END OF INITIALIZE...\n\n');
+    initialiserButtonSize();
 
 
 }
