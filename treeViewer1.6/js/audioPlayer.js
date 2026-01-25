@@ -764,9 +764,9 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.style.color = 'white';
     toggleButton.style.border = 'none';
     toggleButton.style.borderRadius = '50%';
-    toggleButton.style.width = '40px';
-    toggleButton.style.height = '40px';
     toggleButton.style.fontSize = '20px';
+    toggleButton.style.width = '2em'; //'40px';
+    toggleButton.style.height = '2em'; //'40px';
     toggleButton.style.cursor = 'pointer';
     toggleButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
     toggleButton.style.zIndex = '1499';

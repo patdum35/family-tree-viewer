@@ -395,7 +395,7 @@ function calculerFacteurRedimensionnement() {
 }
 
 // Redimensionner tous les éléments de la DOM
-function redimensionnerButtonSizeInDOM() {
+export function redimensionnerButtonSizeInDOM() {
     const facteur = calculerFacteurRedimensionnement();
     
     console.log('Facteur de redimensionnement:', facteur);
@@ -407,96 +407,134 @@ function redimensionnerButtonSizeInDOM() {
     
     // Sélectionner TOUS les éléments
     // const elements = document.querySelectorAll('*');
-    const elements = document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
-    
-    // elements.forEach(element => {
+    // const elements = document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
+    // On ajoute [role="button"] pour attraper les div/span qui se comportent comme des boutons
+    const elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"]');
 
-    //     // console.log('Redimensionnement de l\'élément:', element);
+    elements.forEach(element => {
 
-    //     const styles = window.getComputedStyle(element);
-        
-    //     // Redimensionner font-size
-    //     if (styles.fontSize) { //} && element.id === 'load-gedcom-button') { //} && element.id === 'startTitle') {
-    //         const fontSizeOriginal = parseFloat(styles.fontSize);
-    //         // console.log('Redimensionnement du fontsize de l\'élément:', element, fontSizeOriginal, (fontSizeOriginal * facteur));
+        // console.log('Redimensionnement de l\'élément:', element);
 
-    //         if (element.id) {
-    //             console.log('Redimensionnement du fontsize de l\'élément:', element.id, fontSizeOriginal, (fontSizeOriginal * facteur));
-    //         }
+        // const styles = window.getComputedStyle(element);
+        
+        // // Redimensionner font-size
+        // if (styles.fontSize) { //} && element.id === 'load-gedcom-button') { //} && element.id === 'startTitle') {
+        //     const fontSizeOriginal = parseFloat(styles.fontSize);
+        //     // console.log('Redimensionnement du fontsize de l\'élément:', element, fontSizeOriginal, (fontSizeOriginal * facteur));
 
-    //         if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
-    //             element.style.fontSize = (fontSizeOriginal * facteur) + 'px';
-    //         }
-    //     }
+        //     if (element.id) {
+        //         console.log('Redimensionnement du fontsize de l\'élément:', element.id, fontSizeOriginal, (fontSizeOriginal * facteur));
+        //     }
+
+        //     if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+        //         element.style.fontSize = (fontSizeOriginal * facteur) + 'px';
+        //     }
+        // }
         
-    //     // // Redimensionner width (si définie et pas auto)
-    //     // if (styles.width && styles.width !== 'auto') {
-    //     //     const widthOriginal = parseFloat(styles.width);
-    //     //     if (!isNaN(widthOriginal) && widthOriginal > 0) {
-    //     //         element.style.width = (widthOriginal * facteur) + 'px';
-    //     //     }
-    //     // }
+
+
+
+
+
+
+        let fontSizeOriginal;
+
+        // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+        if (!element.dataset.originalFontSize) {
+            // C'est la première fois qu'on touche à ce bouton
+            const styles = window.getComputedStyle(element);
+            fontSizeOriginal = parseFloat(styles.fontSize);
+
+            // On sauvegarde la valeur numérique pure dans le dataset
+            if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                element.dataset.originalFontSize = fontSizeOriginal;
+            }
+        } else {
+            // On récupère la valeur sauvegardée précédemment
+            fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+        }
+
+        // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+        if (fontSizeOriginal) {
+            const nouvelleTaille = fontSizeOriginal * facteur;
+            element.style.fontSize = nouvelleTaille + 'px';
+            
+            if (element.id) {
+                console.log(`Redimensionnement du fontsize de l\'élément: ID: ${element.id} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+            } else {
+                console.log(`Redimensionnement du fontsize de l\'élément: Tag: ${element.tagName} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+            }
+        }
+
+
+
+
+
+
+
+
+
+        // // Redimensionner width (si définie et pas auto)
+        // if (styles.width && styles.width !== 'auto') {
+        //     const widthOriginal = parseFloat(styles.width);
+        //     if (!isNaN(widthOriginal) && widthOriginal > 0) {
+        //         element.style.width = (widthOriginal * facteur) + 'px';
+        //     }
+        // }
         
-    //     // // Redimensionner height (si définie et pas auto)
-    //     // if (styles.height && styles.height !== 'auto') {
-    //     //     const heightOriginal = parseFloat(styles.height);
-    //     //     if (!isNaN(heightOriginal) && heightOriginal > 0) {
-    //     //         element.style.height = (heightOriginal * facteur) + 'px';
-    //     //     }
-    //     // }
+        // // Redimensionner height (si définie et pas auto)
+        // if (styles.height && styles.height !== 'auto') {
+        //     const heightOriginal = parseFloat(styles.height);
+        //     if (!isNaN(heightOriginal) && heightOriginal > 0) {
+        //         element.style.height = (heightOriginal * facteur) + 'px';
+        //     }
+        // }
         
-    //     // // Redimensionner line-height (si définie en px)
-    //     // if (styles.lineHeight && styles.lineHeight.includes('px')) {
-    //     //     const lineHeightOriginal = parseFloat(styles.lineHeight);
-    //     //     if (!isNaN(lineHeightOriginal) && lineHeightOriginal > 0) {
-    //     //         element.style.lineHeight = (lineHeightOriginal * facteur) + 'px';
-    //     //     }
-    //     // }
+        // // Redimensionner line-height (si définie en px)
+        // if (styles.lineHeight && styles.lineHeight.includes('px')) {
+        //     const lineHeightOriginal = parseFloat(styles.lineHeight);
+        //     if (!isNaN(lineHeightOriginal) && lineHeightOriginal > 0) {
+        //         element.style.lineHeight = (lineHeightOriginal * facteur) + 'px';
+        //     }
+        // }
         
-    //     // // Redimensionner padding
-    //     // ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].forEach(prop => {
-    //     //     const value = parseFloat(styles[prop]);
-    //     //     if (!isNaN(value) && value > 0) {
-    //     //         element.style[prop] = (value * facteur) + 'px';
-    //     //     }
-    //     // });
+        // // Redimensionner padding
+        // ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].forEach(prop => {
+        //     const value = parseFloat(styles[prop]);
+        //     if (!isNaN(value) && value > 0) {
+        //         element.style[prop] = (value * facteur) + 'px';
+        //     }
+        // });
         
-    //     // // Redimensionner margin
-    //     // ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(prop => {
-    //     //     const value = parseFloat(styles[prop]);
-    //     //     if (!isNaN(value) && value > 0) {
-    //     //         element.style[prop] = (value * facteur) + 'px';
-    //     //     }
-    //     // });
+        // // Redimensionner margin
+        // ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(prop => {
+        //     const value = parseFloat(styles[prop]);
+        //     if (!isNaN(value) && value > 0) {
+        //         element.style[prop] = (value * facteur) + 'px';
+        //     }
+        // });
         
-    //     // // Redimensionner border-width
-    //     // if (styles.borderWidth) {
-    //     //     const borderOriginal = parseFloat(styles.borderWidth);
-    //     //     if (!isNaN(borderOriginal) && borderOriginal > 0) {
-    //     //         element.style.borderWidth = (borderOriginal * facteur) + 'px';
-    //     //     }
-    //     // }
-    // });
+        // // Redimensionner border-width
+        // if (styles.borderWidth) {
+        //     const borderOriginal = parseFloat(styles.borderWidth);
+        //     if (!isNaN(borderOriginal) && borderOriginal > 0) {
+        //         element.style.borderWidth = (borderOriginal * facteur) + 'px';
+        //     }
+        // }
+    });
 }
 
 // Observer les changements pour Samsung (polling)
-let derniereFontSize = null;
+let dernierFacteur = null;
 function surveillerChangementsFontSize() {
-    const testElement = document.createElement('div');
-    testElement.style.fontSize = '16px';
-    testElement.style.position = 'absolute';
-    testElement.style.visibility = 'hidden';
-    document.body.appendChild(testElement);
-    
-    const fontSizeActuelle = parseFloat(window.getComputedStyle(testElement).fontSize);
-    document.body.removeChild(testElement);
-    
-    if (derniereFontSize !== null && derniereFontSize !== fontSizeActuelle) {
-        console.log('Changement de font-size détecté:', derniereFontSize, '→', fontSizeActuelle);
-        redimensionnerDOM();
+
+    const facteurActuel = calculerFacteurRedimensionnement();
+    if (dernierFacteur !== null && dernierFacteur !== facteurActuel) {
+        console.log('Changement de scale détecté:', dernierFacteur, '→', facteurActuel);
+        redimensionnerButtonSizeInDOM();
     }
-    
-    derniereFontSize = fontSizeActuelle;
+
+    dernierFacteur = facteurActuel;
 }
 
 // Initialisation au chargement
@@ -504,16 +542,22 @@ function initialiserButtonSize() {
     console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM...\n\n');
     capturerReference();
 
-    redimensionnerButtonSizeInDOM();
-    
-    // Surveillance resize (pour Chrome)
-    // window.addEventListener('resize', () => {
-    //     console.log('/n/n-Resize détecté, redimensionnement button size...');
-    //     redimensionnerButtonSizeInDOM();
-    // });
-    
-    // Surveillance font-size (pour Samsung)
-    setInterval(surveillerChangementsFontSize, 500);
+
+    // if (isSamsungBrowser()) {
+    if (true) {
+
+        redimensionnerButtonSizeInDOM();
+        
+        // Surveillance resize (pour Chrome)
+        // window.addEventListener('resize', () => {
+        //     console.log('/n/n-Resize détecté, redimensionnement button size...');
+        //     redimensionnerButtonSizeInDOM();
+        // });
+        
+        // Surveillance font-size (pour Samsung)
+        setInterval(surveillerChangementsFontSize, 500);
+
+    }
 }
 
 // Auto-initialisation quand le DOM est prêt
@@ -525,14 +569,14 @@ function initialiserButtonSize() {
 //     initialiserButtonSize();
 // }
 
-// Export des fonctions pour usage externe si nécessaire
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        redimensionnerDOM,
-        calculerFacteurRedimensionnement,
-        capturerReference
-    };
-}
+// // Export des fonctions pour usage externe si nécessaire
+// if (typeof module !== 'undefined' && module.exports) {
+//     module.exports = {
+//         redimensionnerDOM,
+//         calculerFacteurRedimensionnement,
+//         capturerReference
+//     };
+// }
 /////////////////////////////////////////////////////////////////
 
 
@@ -561,6 +605,17 @@ if (typeof module !== 'undefined' && module.exports) {
 
 
 // Définir la fonction openGedcomModal globalement avant de charger i18n.js
+
+
+
+
+
+
+
+
+
+
+
 function openGedcomModal() {
     const modal = document.getElementById('advanced-settings-modal');
     if (modal) { modal.style.display = 'block'; }
@@ -1608,6 +1663,10 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
         // const originalRootResults = document.getElementById('root-person-results');
         // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
         
+
+    redimensionnerButtonSizeInDOM();
+
+
     } catch (error) {
         console.error('Erreur complète:', error);
         alert(error.message);
