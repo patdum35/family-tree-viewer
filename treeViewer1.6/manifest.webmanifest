@@ -1,7 +1,7 @@
 {
-  "name": "Genealogic Tree Viewer",
+  "name": "explore your origins",
   "short_name": "origin",
-  "description": "Genealogic Tree Viewer",
+  "description": "explore your origins",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
