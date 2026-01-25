@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Samsung Force Dark Detection - Lab</title>
+    <style>
+        body { background: white; color: black; font-family: sans-serif; padding: 20px; }
+        #log { background: #eee; padding: 10px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+        .warning { display: none; background: red; color: white; padding: 20px; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Test de Détection Samsung</h1>
+    <p>Appuyez sur le bouton pour lancer l'analyse du moteur de rendu.</p>
+    
+    <button onclick="runDiagnostic()" style="padding: 15px; font-size: 16px;">Lancer le Diagnostic</button>
+
+    <div id="log">En attente de test...</div>
+    <div id="warning" class="warning">ATTENTION : Inversion forcée détectée !</div>
+
+    <script>
+        function log(msg) { document.getElementById('log').innerText += "\n" + msg; }
+
+        async function runDiagnostic() {
+            const logElement = document.getElementById('log');
+            logElement.innerText = "Analyse en cours...";
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 3; // On teste 3 couleurs
+            canvas.height = 1;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            // 1. On dessine 3 témoins : BLANC, NOIR, GRIS
+            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, 1, 1);
+            ctx.fillStyle = "#000000"; ctx.fillRect(1, 0, 1, 1);
+            ctx.fillStyle = "#808080"; ctx.fillRect(2, 0, 1, 1);
+
+            // On attend un micro-délai pour laisser le moteur de rendu respirer
+            await new Promise(r => setTimeout(r, 100));
+
+            const data = ctx.getImageData(0, 0, 3, 1).data;
+            
+            const colors = {
+                whiteSource: { r: data[0], g: data[1], b: data[2] },
+                blackSource: { r: data[4], g: data[5], b: data[6] },
+                greySource:  { r: data[8], g: data[9], b: data[10] }
+            };
+
+            log(`Témoin BLANC : rgb(${colors.whiteSource.r}, ${colors.whiteSource.g}, ${colors.whiteSource.b})`);
+            log(`Témoin NOIR  : rgb(${colors.blackSource.r}, ${colors.blackSource.g}, ${colors.blackSource.b})`);
+            log(`Témoin GRIS  : rgb(${colors.greySource.r}, ${colors.greySource.g}, ${colors.greySource.b})`);
+
+            // LOGIQUE DE DÉCISION
+            // Si le blanc est devenu sombre ET le noir est devenu clair -> Inversion confirmée
+            const isInverted = (colors.whiteSource.r < 100 && colors.blackSource.r > 150);
+            
+            // Si le blanc ET le noir sont sombres -> Problème de rendu (Canvas non supporté ou caché)
+            const isBroken = (colors.whiteSource.r < 100 && colors.blackSource.r < 100);
+
+            if (isInverted) {
+                log(">>> RÉSULTAT : INVERSION DÉTECTÉE (Samsung Dark Mode actif)");
+                document.getElementById('warning').style.display = 'block';
+            } else if (isBroken) {
+                log(">>> RÉSULTAT : LE CANVAS RENVOIE DU NOIR PARTOUT (Mode sombre total ou protection browser)");
+            } else {
+                log(">>> RÉSULTAT : MODE CLAIR NORMAL");
+                document.getElementById('warning').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
