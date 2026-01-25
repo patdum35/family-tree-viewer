@@ -409,8 +409,12 @@ export function redimensionnerButtonSizeInDOM() {
     // const elements = document.querySelectorAll('*');
     // const elements = document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
     // On ajoute [role="button"] pour attraper les div/span qui se comportent comme des boutons
-    const elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"]');
-
+    let elements; 
+    if (isSamsungBrowser()) {
+        elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"]');
+    } else {
+        elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"], [role="fontSizeChangeChrome"]');
+    }
     elements.forEach(element => {
 
         // console.log('Redimensionnement de l\'élément:', element);
