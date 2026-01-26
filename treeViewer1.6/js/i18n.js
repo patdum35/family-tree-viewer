@@ -13,7 +13,7 @@ window.i18n = {
       'startTitle': 'explore tes origines...',
       'inputFormFirstName': 'prénom',
       'inputFormLastName': 'nom',
-      'inputFormLastNameComment': 'nom (fem.: de jeune fille)',
+      'inputFormLastNameComment': 'nom (de jeune fille)',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menu utilisateur avancé',
@@ -94,7 +94,7 @@ window.i18n = {
       'startTitle': 'explore your origins...',
       'inputFormFirstName': 'first name',
       'inputFormLastName': 'last name',
-      'inputFormLastNameComment': 'last name (wom.: maiden)',      
+      'inputFormLastNameComment': 'last name (maiden)',      
       // Modal GEDCOM
       'AdvancedUserMenu': 'Advanced user menu',
       'afficherArbre': 'Show tree',
@@ -171,7 +171,7 @@ window.i18n = {
       'startTitle': 'explora tus orígenes...',
       'inputFormFirstName': 'nombre',
       'inputFormLastName': 'apellido',
-      'inputFormLastNameComment': 'apellido (muj.: de soltera)',
+      'inputFormLastNameComment': 'apellido (de soltera)',
 
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menú de usuario avanzado',
@@ -249,7 +249,7 @@ window.i18n = {
       'startTitle': 'fedezd fel az eredeted...',
       'inputFormFirstName': 'keresztnév',
       'inputFormLastName': 'vezetéknév',
-      'inputFormLastNameComment': 'vezetéknév (nők.: leánykori)',  
+      'inputFormLastNameComment': 'vezetéknév (leánykori)',  
 
       // Modal GEDCOM
       'AdvancedUserMenu': 'Haladó felhasználói menü',
