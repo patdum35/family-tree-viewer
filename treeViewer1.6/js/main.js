@@ -625,6 +625,11 @@ function openGedcomModal() {
     if (modal) { modal.style.display = 'block'; }
     const secretTargetArea = document.getElementById('secret-trigger-area');
     if (secretTargetArea) {secretTargetArea.style.display = 'none';}
+    setTimeout(() => {
+        redimensionnerButtonSizeInDOM();
+    }, 300);
+
+    
 };
     
 // Définir également la fonction de fermeture
