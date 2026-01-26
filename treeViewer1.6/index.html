@@ -400,7 +400,7 @@
     <div id="advanced-settings-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
     
 
-        <div role="fontSizeChangeChrome" style="background-color: white; font-size: 10px; width: 35em; max-width: 90%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+        <div role="fontSizeChangeChrome" style="background-color: white; font-size: 10px; width: 34em; max-width: 90%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
             <!-- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; "> -->
             <div style="display: flex; justify-content: space-between; align-items: center;  /* STYLES DU BANDEAU */ background-color: #E0F7FA;  padding: 3px 20px; margin-bottom: 0;  border-radius: 10px 10px 0 0;  border-bottom: 1px solid #B2EBF2;">
                 <h2 role="fontSizeChange" id="advancedSettingsTitle" style="margin: 0; font-size: 16px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
@@ -410,13 +410,6 @@
                 <!-- <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;"> -->
                 <!-- Cacher l'input file original -->
                 <input type="file" id="gedFile" accept=".ged" style="display: none;">
-
-                <!-- <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; border-radius: 0.4em;  margin-top: -1.5em; margin-bottom: 1em;">
-                    <button id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="font-size: 16px; width: 100%; height: 100%; font-weight: bold; background-color: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0">
-                        Mise à jour du logiciel
-                    </button>
-                </div> -->
-
 
                 <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4CAF50; border-radius: 3px;  margin-top: -1.5em; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
                     <button id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
@@ -445,15 +438,7 @@
                 </label>
 
 
-                <div style="display: flex; margin-bottom: 0px; width: 100%; align-items: stretch; height: auto;">
-
-                    <!-- <div role="fontSizeChangeChrome"  style="font-size: 10px;  flex-shrink: 0; width: 8em; height: auto; border: none; border-radius: 0.4em; ">
-                        <button id="gedFileBtn" onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
-                                style="font-size: 14px; width: 100%; line-height: 1.2; height: auto; background-color: #4361ee; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 5px;">
-                            Choisir un fichier
-                        </button>
-                    </div> -->
-
+                <div style="font-size: 10px; width: 100%; max-width: 30em; display: flex; margin-bottom: 0px; align-items: stretch; height: auto;">
                     <div role="fontSizeChangeChrome"  style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4361ee; border-radius: 3px; padding: 0.6em; box-sizing: border-box;">
                         <button id="gedFileBtn" onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
                                 style="font-size: 14px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0;">
@@ -461,15 +446,17 @@
                         </button>
                     </div>
 
-                    <span role="fontSizeChangeChrome" id="fileNameDisplay" style="font-size: 14px; flex-grow: 1; padding: 0px; border: 1px solid #ccc; border-left: none; border-right: none; 
+                    <span role="fontSizeChangeChrome" id="fileNameDisplay" style="font-size: 10px; flex-grow: 1; padding: 1em; border: 1px solid #ccc; border-left: none; border-right: none; 
+                                                    box-sizing: border-box; /* IMPORTANT : pour inclure le padding dans les 300px */
+                                                    display: block;        /* IMPORTANT : pour que le box-sizing s'applique correctement */
                                                     border-radius: 0; background-color: #f9f9f9; text-align: left; 
                                                     overflow: hidden; /* Permet le saut de ligne */
                                                     text-overflow: ellipsis; 
                                                     align-self: stretch;
                                                     line-height: 1.2; /* Permet le saut de ligne */
-                                                    max-height: 40px; /* Limite la hauteur à environ 2 lignes de texte */
+                                                    max-height: 6em; /*40px;  Limite la hauteur à environ 2 lignes de texte */
                                                     white-space: normal;"> 
-                                                    <span role="fontSizeChange" class="label-text" style="font-size: 14px;">Aucun fichier choisi</span>
+                                                    <span role="fontSizeChange" class="label-text" style="font-size: 14px;  margin: 0; padding: 0;">Aucun fichier choisi</span>
                     </span>
 
                     <div role="fontSizeChangeChrome" id="showTreeBtnDiv" style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4CAF50; border-radius: 3px; padding: 0.6em; box-sizing: border-box; display: none;">
@@ -479,7 +466,6 @@
                         </button>
                     </div>
                 </div>
-    
 
                 <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
                 <script>
@@ -515,13 +501,13 @@
                     </button>
                 </div>   
 
-                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d55266; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
                     <button id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🧭 Activer l'accéléromètre
                     </button>
                 </div> 
 
-                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f74; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
                     <button id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🎥 Caméra & Réalité Augmentée
                     </button>

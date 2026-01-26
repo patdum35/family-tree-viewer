@@ -83,9 +83,14 @@ class PWAInstaller {
         container.style.cssText = `
             font-size: 10px;
             width: 100%; 
-            max-width: 30em; 
+            max-width: 30em;
+            height: 4em; 
             border-radius: 0.4em; 
             margin-bottom: 1em;
+            background-color: #ff8c42;
+            border-radius: 3px;
+            padding: 1em; 
+            box-sizing: border-box;
         `;
 
         // 2. CONTENU : Le Bouton (gère le texte, la couleur, le centrage du texte)
@@ -97,16 +102,15 @@ class PWAInstaller {
             width: 100%; 
             height: 100%; 
             font-weight: bold; 
-            background-color: #ff8c42; 
+            background-color: transparent; 
             color: white; 
-            border: none; 
-            border-radius: 3px; 
+            border: none;  
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0; 
-            padding: 10px;
+            padding: 0;
         `;
         
         // On met le bouton DANS le container
