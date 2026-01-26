@@ -63,41 +63,56 @@ class PWAInstaller {
         });
     }
 
-
-
     createInstallButton() {
-        // Vérifier si le bouton existe déjà
         if (this.installButton) return;
 
-        // Trouver le conteneur dans la modal gedcom
-        const modalContent = document.querySelector('#advanced-settings-modal div[style*="padding: 20px"]');
+        // Ciblage par ID unique 
+        const modalContent = document.getElementById('insertionPointForInstallButton');
+
         if (!modalContent) {
             console.warn('[PWA Installer] Conteneur de modal non trouvé, tentative différée...');
             // Réessayer plus tard
-            setTimeout(() => this.createInstallButton(), 1000);
+            etTimeout(() => this.createInstallButton(), 1000);
             return;
         }
 
-        // Créer le bouton d'installation
+        // 1. STRUCTURE : Le Conteneur (gère l'emplacement et la largeur)
+        const container = document.createElement('div');
+        container.id = 'install-btn-container';
+        container.role = 'fontSizeChangeChrome';
+        container.style.cssText = `
+            font-size: 10px;
+            width: 100%; 
+            max-width: 30em; 
+            border-radius: 0.4em; 
+            margin-bottom: 1em;
+        `;
+
+        // 2. CONTENU : Le Bouton (gère le texte, la couleur, le centrage du texte)
         this.installButton = document.createElement('button');
         this.installButton.id = 'install-app-btn';
         this.updateButtonContent();
         this.installButton.style.cssText = `
+            font-size: 16px;
+            width: 100%; 
+            height: 100%; 
+            font-weight: bold; 
             background-color: #ff8c42; 
             color: white; 
             border: none; 
-            padding: 10px; 
-            width: 100%; 
-            max-width: 300px; 
-            border-radius: 4px; 
+            border-radius: 3px; 
             cursor: pointer; 
-            font-weight: bold; 
-            margin: 0 auto 10px auto;
-            display: none;
-            box-sizing: border-box;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0; 
+            padding: 10px;
         `;
         
-        // Ajouter l'événement click
+        // On met le bouton DANS le container
+        container.appendChild(this.installButton);
+
+        // Ajouter l'événement click (reste sur le bouton)
         this.installButton.addEventListener('click', () => {
             if (this.isAppInstalled()) {
                 this.uninstallApp();
@@ -106,17 +121,19 @@ class PWAInstaller {
             }
         });
         
-        // Insérer le bouton avant le bouton "Activer les logs"
+        // 3. INSERTION : On insère le CONTAINER (qui contient le bouton)
         const labelGedFile = document.getElementById('labelGedFile');
         if (labelGedFile) {
-            labelGedFile.parentNode.insertBefore(this.installButton, labelGedFile);
+            labelGedFile.parentNode.insertBefore(container, labelGedFile);
         } else {
-            // Fallback : ajouter à la fin du conteneur
-            modalContent.appendChild(this.installButton);
+            modalContent.appendChild(container);
         }
-        
-        console.log('[PWA Installer] Bouton d\'installation/désinstallation créé');
+
+        // Note : Pour afficher le bouton plus tard, il faudra faire : 
+        // container.style.display = 'block'; (et non plus sur this.installButton seul)
+        this.installButtonContainer = container; // On garde une référence si besoin
     }
+
 
     updateButtonContent() {
         if (!this.installButton) return;

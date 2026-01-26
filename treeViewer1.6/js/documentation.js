@@ -421,7 +421,7 @@ const MULTILINGUE_DOC_CONTENT = {
         secondOption: "Une autre solution est d'ouvrir un fichier gedcom non crypté (pas de mot de passe) en cliquant sur ⚙️ puis 'Choisir un fichier'",
         logVideoDemo : '🎬 Démonstration Rapide',
 
-        rootPersonTitle : 'Changement et recherche d\'un personne racine',
+        rootPersonTitle : 'Changement et recherche d\'une personne racine',
         rootPersonIntro : `Cette fonction ouvre une fenêtre de recherche avancée pour trouver et définir une nouvelle personne racine pour l'arbre.
 <ul>
 <li><strong>Trois modes de recherche :</strong>

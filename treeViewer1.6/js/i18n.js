@@ -19,8 +19,8 @@ window.i18n = {
       'AdvancedUserMenu': 'Menu utilisateur avancé',
       'afficherArbre': 'Afficher l\'arbre',
       // 'viderCache': 'Vider le cache',
-      'SWUpdate': 'Mise à jour du logiciel',
-      'activerLogs': 'Activer les logs de debug',
+      'SWUpdate': '🆕📦 Mise à jour du logiciel',
+      'activerLogs': '🐞 Activer les logs de debug',
       
       // Contrôles de l'arbre
       'rootPersonSearch': '🔍racine',
@@ -48,7 +48,7 @@ window.i18n = {
       'resetSuccess': 'Paramètres remis par défaut avec succès !',
       'pageWillReload': 'La page va se recharger',
       'resetError': 'Erreur lors de la réinitialisation des paramètres.',
-      'SWUpdate': 'Mise à jour du logiciel',
+      'SWUpdate': '🆕📦 Mise à jour du logiciel',
       'parametresDefaut': '🔄 Paramètres par défaut',
       // 'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur n\'a été détecté. La mise à jour du logiciel est impossible.\n\nCette opération nécessite VS Code avec Live Server ou tablette Apple.',
       'noServerDetected': '⚠️ ATTENTION ⚠️\n\nAucun serveur local n\'a été détecté. La mise à jour du logiciel est impossible.\n\nPour le développement, veuillez utiliser VS Code avec Live Server.',
@@ -99,8 +99,8 @@ window.i18n = {
       'AdvancedUserMenu': 'Advanced user menu',
       'afficherArbre': 'Show tree',
       // 'viderCache': 'Clear cache',
-      'SWUpdate': 'SW update',
-      'activerLogs': 'Enable debug logs',
+      'SWUpdate': '🆕📦 SW update',
+      'activerLogs': '🐞 Enable debug logs',
       
       // Contrôles de l'arbre
       'rootPersonSearch': '🔍root',
@@ -128,7 +128,7 @@ window.i18n = {
       'resetSuccess': 'Settings reset successfully!',
       'pageWillReload': 'The page will reload',
       'resetError': 'Error while resetting settings.',
-      'SWUpdate': 'Software Update',
+      'SWUpdate': '🆕📦 Software Update',
       'parametresDefaut': '🔄 Default Settings',
       'noServerDetected': '⚠️ WARNING ⚠️\n\nNo server detected. Software update is not possible.\n\nFor development purpose, this operation requires VS Code with Live Server.',
       'noServerDetected2': '⚠️ WARNING ⚠️\n\nNo Internet connection detected.\n\nThe update requires a connection to download new resources from GitHub.',
@@ -178,7 +178,7 @@ window.i18n = {
       'afficherArbre': 'Mostrar árbol',
       // 'viderCache': 'Limpiar caché',
       'SWUpdate': 'Mantenimiento de software',
-      'activerLogs': 'Activar logs de depuración',
+      'activerLogs': '🐞 Activar logs de depuración',
       
       // Contrôles de l'arbre
       'rootPersonSearch': '🔍raíz',
@@ -256,7 +256,7 @@ window.i18n = {
       'afficherArbre': 'Fa megjelenítése',
       // 'viderCache': 'Gyorsítótár törlése',
       'SWUpdate': 'Szoftverfrissítés',
-      'activerLogs': 'Hibakeresési naplók engedélyezése',
+      'activerLogs': '🐞 Hibakeresési naplók engedélyezése',
       'choisirFichier': 'Fájl kiválasztása',
       'fichierGedcom': 'opcionális: GEDCOM fájl',
       'aucunFichier': 'Nincs kiválasztott fájl',
