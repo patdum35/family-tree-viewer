@@ -390,7 +390,7 @@
     <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
     <button id="help-button" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
 
-    <div class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
+    <div role="fontSizeChange"class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
     <button id="fullScreen-button" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="position: fixed; z-index: 1499; bottom: 3px; left: 5px; font-size: 34px; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
 
     <div class="browserBarLabel" id="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
@@ -513,43 +513,43 @@
         </div>
         
 
-        <div class="form-container" style="display: none; position: fixed; width: 280px; max-width: 280px; padding: 20px; padding-top: 10px; padding-bottom: 5px; text-align: center; box-sizing: border-box;  overflow-y: auto;">
-            <div class="name-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 4px; max-width: 240px;  height: 40px; width: 100%; margin-left: auto; margin-right: auto;">
-                <button id="voiceCommandBtn" onclick="voiceCommand('start')" style="background-color: transparent; font-size: 18px; color: white; border: none; padding: 0px; margin-left: -22px;  margin-right: -15px; margin-top: 11px;  cursor: pointer;">🎙️</button>
+        <div role="fontSizeChange" class="form-container" style="display: none; position: fixed; font-size: 10px; width: 28em; max-width: 28em; padding: 2em; padding-top: 1em; padding-bottom: 0.5em; text-align: center; box-sizing: border-box;  overflow-y: auto;">
+            <div  role="fontSizeChange" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em;  height: 4em; width: 100%; margin-left: auto; margin-right: auto;">
+                <button id="voiceCommandBtn" onclick="voiceCommand('start')" style="background-color: transparent; font-size: 18px; color: white; border: none; padding: 0px; margin-left: -1.22em;  margin-right: -0.83em; margin-top: 0.61em;  cursor: pointer;">🎙️</button>
 
-                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
-                    <small data-text-key="inputFormFirstName" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                <div role="fontSizeChange"  style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange" data-text-key="inputFormFirstName" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         prénom
                     </small>
-                    <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName"
-                        style="box-sizing: border-box; width: 115px; text-align: center; height: 40px;" autocomplete="off">
+                    <input role="fontSizeChange" type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName"
+                        style="box-sizing: border-box; font-size: 10px; width: 11.5em; text-align: center; height: 4em;" autocomplete="off">
                 </div>
 
-                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
-                    <small data-text-key="inputFormLastNameComment" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                <div role="fontSizeChange" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange" data-text-key="inputFormLastNameComment" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         nom (fem.: de jeune fille)
                     </small>
-                    <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName"
-                        style="box-sizing: border-box; width: 115px; text-align: center;height: 40px;" autocomplete="off">
+                    <input role="fontSizeChange" type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName"
+                        style="box-sizing: border-box; font-size: 10px; width: 11.5em; text-align: center;height: 4em;" autocomplete="off">
                 </div>
             </div>
 
 
-            <div class="password-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 20px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
-                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
-                    <small data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+            <div role="fontSizeChange" class="password-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 2em; max-width: 24em;  height: 3em; width: 100%; margin-left: auto; margin-right: auto;">
+                <div role="fontSizeChange" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange"data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         mot de passe
                     </small>
-                    <input type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"
-                        style="box-sizing: border-box; width: 115px; text-align: center; height: 40px; ">
+                    <input role="fontSizeChange" type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"
+                        style="box-sizing: border-box; font-size: 10px; width: 11.5em; text-align: center; height: 4em; ">
                 </div>
 
-                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
-                    <small style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                <div role="fontSizeChange" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         .
                     </small>
                     <button id="loadDataButton" data-text-key="visualiserArbre"
-                        style="flex: 1 1 0; width: 115px; box-sizing: border-box; min-height: 28px;  padding-top: 1px; padding-bottom: 1px;  background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        style="flex: 1 1 0; font-size: 16px; width: 7.19em; box-sizing: border-box; min-height: 1.75em;  padding-top: 0.0625em; padding-bottom: 0.0625em;  background-color: #4CAF50; color: white; border: none; border-radius: 0.25em; cursor: pointer;">
                         Continuer
                     </button>
                 </div>
@@ -557,7 +557,7 @@
         </div>
 
         <div id="startTitle" style="display: none; position: fixed; top: '80%';  z-index: 1; ">
-            <h2 style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
+            <h2 role="fontSizeChange" style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
             data-text-key="startTitle">explore tes origines...</h2>
         </div>  
         
