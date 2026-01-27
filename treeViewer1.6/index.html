@@ -142,7 +142,7 @@
       }
       
       if (isProblematic) {
-      // if (true) {
+    //   if (true) {
         const DEFAULT_LANG = 'fr';
         const saved = localStorage.getItem('redir_lang');
         let LANG = saved || (navigator.language ? navigator.language.slice(0,2) : DEFAULT_LANG);
@@ -165,6 +165,7 @@
         document.addEventListener('DOMContentLoaded', function() {
           const overlay = document.createElement('div');
           overlay.id = 'browser-warning-overlay';
+          overlay.role = "fontSizeChangeChrome";
           overlay.style.cssText = `
             position: fixed;
             top: 0;
@@ -181,7 +182,7 @@
             box-sizing: border-box;
           `;
           const container = document.createElement('div');
-          container.style.cssText = 'background:white;border-radius:20px;padding:20px;padding-top:25px;width:100%;max-width:500px;margin:0 auto;box-sizing:border-box;max-height:95vh;overflow-y:auto;box-shadow:0 20px 30px rgba(0,0,0,0.3);';
+          container.style.cssText = 'font-size:10px;background:white;border-radius:2em;padding:2em;padding-top:2.5em;width:100%;max-width:32em;margin:0 auto;box-sizing:border-box;max-height:95vh;overflow-y:auto;box-shadow:0 2em 3em rgba(0,0,0,0.3);';
 
           const t = T[LANG];
           const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -194,20 +195,20 @@
                 <div class="l-flag f-es ${LANG==='es'?'active':''}" onclick="setModalLang('es')"></div>
                 <div class="l-flag f-hu ${LANG==='hu'?'active':''}" onclick="setModalLang('hu')"></div>
             </div>
-            <h1 style="white-space:nowrap;margin-top:0px;margin-bottom:5px;padding:0;font-size:20px;color:#333;text-align:center;">${t.title}</h1>
-            <p style="color:#666;line-height:1.6;margin-bottom:20px;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:5px 10px;border-radius:5px;display:inline-block;">${browserName}</span></p>
-            <p style="color:#666;line-height:1.6;margin-bottom:20px;text-align:center;margin-top:-10px;">${warningMsg}</p>
-            
-            <button onclick="tryChrome()" style="display:block;width:100%;padding:15px;background:#2196F3;color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin:10px 0;">${t.chromeBtn}</button>          
-            <button onclick="continueToApp()" style="display:block;width:100%;padding:15px;background:#ff9800;color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin:10px 0;">${t.continueBtn}</button>
-            <button onclick="copyUrl()" style="display:block;width:100%;padding:15px;background:#4CAF50;color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin:10px 0;">${t.copyBtn}</button>
+            <h1 role="fontSizeChange" style="font-size:20px; white-space:nowrap;margin-top:0px;margin-bottom:0.25em;padding:0;color:#333;text-align:center;">${t.title}</h1>
+            <p role="fontSizeChange" style="font-size:20px; color:#666;line-height:1.6;margin-bottom:2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
+            <p role="fontSizeChange" style="font-size:20px; color:#666;line-height:1.6;margin-bottom:2em;text-align:center;margin-top:-0.5em;">${warningMsg}</p>
 
-            <div style="background:#f8f9fa;border-radius:10px;padding:15px;margin:20px 0;">
-              <strong style="display:block;margin-bottom:5px;">${t.solutionsStrong}</strong>
-              <ol style="padding-left:20px;color:#444;margin:0;">
-                <li style="margin:5px 0;">${t.s1}</li>
-                <li style="margin:5px 0;">${t.s2}</li>
-                <li style="margin:5px 0;">${t.s3}</li>
+            <button onclick="tryChrome()" style="font-size:16px;display:block;width:100%;padding:1em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.chromeBtn}</button>          
+            <button onclick="continueToApp()" style="font-size:16px;display:block;width:100%;padding:1em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.continueBtn}</button>
+            <button onclick="copyUrl()" style="font-size:16px;display:block;width:100%;padding:1em;background:#4CAF50;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.copyBtn}</button>
+
+            <div role="fontSizeChangeChrome" style="font-size:10px;background:#f8f9fa;border-radius:1em;padding:1.5em;margin:2em 0;">
+              <strong role="fontSizeChange" style="font-size:16px;display:block;margin-bottom:0.6em;">${t.solutionsStrong}</strong>
+              <ol role="fontSizeChangeChrome" style="font-size:10px; padding-left:2em;color:#444;margin:0;">
+                <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s1}</li>
+                <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s2}</li>
+                <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s3}</li>
               </ol>
             </div>
           `;
@@ -216,8 +217,8 @@
           document.body.appendChild(overlay);
         });
       }
-
     })();
+
 
     function continueToApp() {
       const overlay = document.getElementById('browser-warning-overlay');
@@ -390,7 +391,7 @@
     <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
     <button id="help-button" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
 
-    <div role="fontSizeChange"class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
+    <div role="fontSizeChange" class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
     <button id="fullScreen-button" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="position: fixed; z-index: 1499; bottom: 3px; left: 5px; font-size: 34px; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
 
     <div class="browserBarLabel" id="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
