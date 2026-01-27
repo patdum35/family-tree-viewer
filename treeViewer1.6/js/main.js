@@ -392,6 +392,7 @@ function calculerFacteurRedimensionnement() {
     } else {
         // Chrome: utilise devicePixelRatio ET innerWidth
         const facteurWidth =  window.innerWidth / window.screen.width; 
+        if (state.isMobile) { };
         const facteur = facteurWidth;
         return facteur;
     }
@@ -419,6 +420,9 @@ export function redimensionnerButtonSizeInDOM() {
         elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"], [role="fontSizeChangeChrome"]');
     }
     elements.forEach(element => {
+
+               console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} `);
+ 
 
         // console.log('Redimensionnement de l\'élément:', element);
 
@@ -467,9 +471,9 @@ export function redimensionnerButtonSizeInDOM() {
             element.style.fontSize = nouvelleTaille + 'px';
             
             if (element.id) {
-                console.log(`Redimensionnement du fontsize de l\'élément: ID: ${element.id} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                // console.log(`Redimensionnement du fontsize de l\'élément: ID: ${element.id} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
             } else {
-                console.log(`Redimensionnement du fontsize de l\'élément: Tag: ${element.tagName} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                // console.log(`Redimensionnement du fontsize de l\'élément: Tag: ${element.tagName} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
             }
         }
 
