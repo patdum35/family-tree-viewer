@@ -40,8 +40,8 @@
         risk: "⚠️: Ce navigateur risque d'inverser les couleurs de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span>. Sélectionnez \"Sites Lumineux\" ",
         colorRisk: "⚠️: Ce navigateur va inverser les couleurs de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span>. Sélectionnez \"Sites Lumineux\"",
         solutionsStrong: "Solutions :",
-        s1: "Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong>",
-        s2: "Plan B : Continuer quand même, et activer le mode sites lumineux",
+        s1: "Continuer quand même, et activer le mode sites lumineux",
+        s2: "Plan B : Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong>",
         s3: "Plan C : Copiez l'URL et coller dans un autre browser",
         chromeBtn: "🚀 Ouvrir dans Chrome",
         continueBtn: "⚠️ Continuer quand même",
@@ -55,8 +55,8 @@
         risk: "⚠️: This browser may invert the colors of the app. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>. Select \"Light Sites\" ",
         colorRisk: "⚠️: This browser will invert the colors of the app. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>. Select \"Light Sites\"",
         solutionsStrong: "Solutions:",
-        s1: "Open in <strong>Chrome</strong> or <strong>Firefox</strong>",
-        s2: "Plan B: Continue anyway and enable light site mode",
+        s1: "Continue anyway and enable light site mode",
+        s2: "Plan B: Open in <strong>Chrome</strong> or <strong>Firefox</strong>",
         s3: "Plan C: Copy the URL and paste in another browser",
         chromeBtn: "🚀 Open in Chrome",
         continueBtn: "⚠️ Continue anyway",
@@ -70,8 +70,8 @@
         risk: "⚠️: Este navegador puede invertir los colores de la aplicación <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>. Selecciona \"Sitios claros\" ",
         colorRisk: "⚠️: Este navegador invertirá los colores de la aplicación <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>. Selecciona \"Sitios claros\" ",
         solutionsStrong: "Soluciones :",
-        s1: "Abre en <strong>Chrome</strong> o <strong>Firefox</strong>",
-        s2: "Plan B : Continuar de todos modos y activar el modo claro",
+        s1: "Continuar de todos modos y activar el modo claro",
+        s2: "Plan B : Abre en <strong>Chrome</strong> o <strong>Firefox</strong>",
         s3: "Plan C : Copia la URL y ábrela en otro navegador",
         chromeBtn: "🚀 Abrir en Chrome",
         continueBtn: "⚠️ Continuar de todos modos",
@@ -86,8 +86,8 @@
         risk: "⚠️: Ez a böngésző megfordíthatja az alkalmazás színeit <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeted\"</span>. Válassza a \"Világos webhelyek\" lehetőséget ",
         colorRisk: "⚠️: Ez a böngésző meg fogja fordítani az app színeit <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeted\"</span>. Válassza a \"Világos webhelyek\" lehetőséget",
         solutionsStrong: "Megoldások :",
-        s1: "Nyissa meg <strong>Chrome</strong> vagy <strong>Firefox</strong> böngészőben",
-        s2: "B terv : Folytassa így is, és kapcsolja be a világos módot",
+        s1: "Folytassa így is, és kapcsolja be a világos módot",
+        s2: "B terv : Nyissa meg <strong>Chrome</strong> vagy <strong>Firefox</strong> böngészőben",
         s3: "C terv : Másolja a címet, és nyissa meg másik böngészőben",
         chromeBtn: "🚀 Megnyitás Chrome-ban",
         continueBtn: "⚠️ Folytatás mégis",
@@ -141,8 +141,8 @@
         browserName = 'Chrome';
       }
       
-      if (isProblematic) {
-    //   if (true) {
+    //   if (isProblematic) {
+      if (true) {
         const DEFAULT_LANG = 'fr';
         const saved = localStorage.getItem('redir_lang');
         let LANG = saved || (navigator.language ? navigator.language.slice(0,2) : DEFAULT_LANG);
@@ -199,8 +199,8 @@
             <p role="fontSizeChange" style="font-size:16px; color:#666;line-height:1.4;margin-bottom:1.2em;margin-top:-0.2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
             <p role="fontSizeChange" style="font-size:16px; color:#666;line-height:1.4;margin-bottom:0.8em;text-align:center;margin-top:-0.7em;">${warningMsg}</p>
 
-            <button onclick="tryChrome()" style="font-size:16px;display:block;width:100%;padding:1em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.chromeBtn}</button>          
-            <button onclick="continueToApp()" style="font-size:16px;display:block;width:100%;padding:1em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.continueBtn}</button>
+            <button onclick="continueToApp()" style="font-size:16px;display:block;width:100%;padding:1em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.continueBtn}</button>
+            <button onclick="tryChrome()" style="font-size:16px;display:block;width:100%;padding:1em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.chromeBtn}</button>          
             <button onclick="copyUrl()" style="font-size:16px;display:block;width:100%;padding:1em;background:#4CAF50;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.copyBtn}</button>
 
             <div role="fontSizeChangeChrome" style="font-size:10px;background:#f8f9fa;border-radius:1em;padding:1.5em; padding-top:0.5em; padding-bottom:0.2em;margin:0; margin-top:-0.5em">
@@ -536,7 +536,7 @@
 
         <div role="fontSizeChangeChrome" id="formContainer" class="form-container" style="display: none; position: fixed; font-size: 10px; width: 28em; max-width: 28em; padding: 2em; padding-top: 1em; padding-bottom: 0.5em; text-align: center; box-sizing: border-box;  overflow-y: auto;">
             <!-- <div  role="fontSizeChangeChrome" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em;  height: 4em; width: 100%; margin-left: auto; margin-right: auto;"> -->
-            <div  role="fontSizeChangeChrome" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em;  width: 100%; margin-left: auto; margin-right: auto;">
+            <!-- <div  role="fontSizeChangeChrome" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em;  width: 100%; margin-left: auto; margin-right: auto;">
 
 
                 <div role="fontSizeChangeChrome"  style="flex: 1 1 0; font-size: 18px; padding: 0px; margin-left: -1.22em;  margin-right: -0.83em; margin-top: 0.81em; margin-bottom: 0">
@@ -558,6 +558,7 @@
                 </div>
 
 
+                
 
                 <div role="fontSizeChangeChrome" id="lastNameContainer" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
                     <small role="fontSizeChangeChrome" id="lastNameContainerDetail"  style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; margin-left: -1em; padding-top:0; padding-bottom:0; text-align: center; max-height: 1em; min-height: 1em">
@@ -570,7 +571,54 @@
                             style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
                     </div>    
                 </div>
+            </div> -->
+
+
+
+
+
+
+
+            <div role="fontSizeChangeChrome" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em; width: 100%; margin-left: auto; margin-right: auto;">
+
+                <div role="fontSizeChangeChrome" style="flex: 1 1 0; font-size: 18px; padding: 0px; margin-left: -1.22em; margin-right: -0.83em; margin-top: 0.81em; margin-bottom: 0">
+                    <button id="voiceCommandBtn" onclick="voiceCommand('start')" style="font-size: 18px; width: 100%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0;">
+                        🎙️
+                    </button>
+                </div>
+
+                <div role="fontSizeChangeChrome" id="firstNameContainer" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small role="fontSizeChangeChrome" id="firstNameContainerDetail" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span role="fontSizeChange" id="prenomLabel" data-text-key="inputFormFirstName" class="label-text" style="font-size: 9px;">prénom</span>
+                    </small>
+
+                    <div role="fontSizeChangeChrome" id="firstNameInputContainer" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input role="fontSizeChange" type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
+                    </div>
+                </div>
+
+                <div role="fontSizeChangeChrome" id="lastNameContainer" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small role="fontSizeChangeChrome" id="lastNameContainerDetail" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; margin-left: -1em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span role="fontSizeChange" id="nomLabel" data-text-key="inputFormLastNameComment" class="label-text" style="font-size: 9px;">nom (jeune fille)</span>
+                    </small>
+
+                    <div role="fontSizeChangeChrome" id="lastNameInputContainer" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input role="fontSizeChange" type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
+                    </div>    
+                </div>
             </div>
+
+
+
+
+
+
+
+
+
+
 
 
             <div role="fontSizeChangeChrome" class="password-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 2em; max-width: 24em;  height: 3em; width: 100%; margin-left: auto; margin-right: auto;">
