@@ -153,7 +153,7 @@
         const style = document.createElement('style');
         style.textContent = `
           .lang-switch-modal { display: flex; justify-content: center; gap: 6px; margin-bottom: 15px; margin-top: -10px; }
-          .l-flag { width: 28px; height: 20px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background-size: cover; opacity: 0.6; transition: 0.2s; }
+          .l-flag { width: 24px; height: 16px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background-size: cover; opacity: 0.6; transition: 0.2s; }
           .l-flag.active { opacity: 1; outline: 2px solid #2196F3; outline-offset: 2px; }
           .f-fr { background: linear-gradient(to right, #0055A4 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #EF4135 66.66%); }
           .f-en { background: #012169 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cpath fill='%23012169' d='M0 0v30h60V0z'/%3E%3Cpath stroke='%23fff' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath stroke='%23C8102E' stroke-width='6' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='10' d='M30 0v30M0 15h60'/%3E%3Cpath fill='none' stroke='%23C8102E' stroke-width='6' d='M30 0v30M0 15h60'/%3E%3C/svg%3E") center/cover; }
@@ -170,8 +170,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
             background: url('background_images/tree-log-lowQuality.jpg') no-repeat center center;
             background-size: cover;
             z-index: 999999;
@@ -182,7 +182,7 @@
             box-sizing: border-box;
           `;
           const container = document.createElement('div');
-          container.style.cssText = 'font-size:10px;background:white;border-radius:2em;padding:2em;padding-top:2.5em;width:100%;max-width:32em;margin:0 auto;box-sizing:border-box;max-height:95vh;overflow-y:auto;box-shadow:0 2em 3em rgba(0,0,0,0.3);';
+          container.style.cssText = 'font-size:10px;background:white;border-radius:2em;padding:2em;padding-top:2.5em;width:100%;max-width:32em;margin:0 auto;box-sizing:border-box;max-height:90vh;overflow-y:auto;box-shadow:0 2em 3em rgba(0,0,0,0.3);';
 
           const t = T[LANG];
           const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -195,20 +195,20 @@
                 <div class="l-flag f-es ${LANG==='es'?'active':''}" onclick="setModalLang('es')"></div>
                 <div class="l-flag f-hu ${LANG==='hu'?'active':''}" onclick="setModalLang('hu')"></div>
             </div>
-            <h1 role="fontSizeChange" style="font-size:20px; white-space:nowrap;margin-top:0px;margin-bottom:0.25em;padding:0;color:#333;text-align:center;">${t.title}</h1>
-            <p role="fontSizeChange" style="font-size:20px; color:#666;line-height:1.6;margin-bottom:2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
-            <p role="fontSizeChange" style="font-size:20px; color:#666;line-height:1.6;margin-bottom:2em;text-align:center;margin-top:-0.5em;">${warningMsg}</p>
+            <h1 role="fontSizeChange" style="font-size:18px; white-space:nowrap;margin-top:0px;margin-bottom:0.2em;margin-top:-0.2em;padding:0;color:#333;text-align:center;">${t.title}</h1>
+            <p role="fontSizeChange" style="font-size:16px; color:#666;line-height:1.4;margin-bottom:1.2em;margin-top:-0.2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
+            <p role="fontSizeChange" style="font-size:16px; color:#666;line-height:1.4;margin-bottom:0.8em;text-align:center;margin-top:-0.7em;">${warningMsg}</p>
 
             <button onclick="tryChrome()" style="font-size:16px;display:block;width:100%;padding:1em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.chromeBtn}</button>          
             <button onclick="continueToApp()" style="font-size:16px;display:block;width:100%;padding:1em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.continueBtn}</button>
             <button onclick="copyUrl()" style="font-size:16px;display:block;width:100%;padding:1em;background:#4CAF50;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.625em 0;">${t.copyBtn}</button>
 
-            <div role="fontSizeChangeChrome" style="font-size:10px;background:#f8f9fa;border-radius:1em;padding:1.5em;margin:2em 0;">
-              <strong role="fontSizeChange" style="font-size:16px;display:block;margin-bottom:0.6em;">${t.solutionsStrong}</strong>
+            <div role="fontSizeChangeChrome" style="font-size:10px;background:#f8f9fa;border-radius:1em;padding:1.5em; padding-top:0.5em; padding-bottom:0.2em;margin:0; margin-top:-0.5em">
+              <strong role="fontSizeChange" style="font-size:16px;display:block;margin-bottom:0;">${t.solutionsStrong}</strong>
               <ol role="fontSizeChangeChrome" style="font-size:10px; padding-left:2em;color:#444;margin:0;">
                 <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s1}</li>
                 <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s2}</li>
-                <li role="fontSizeChange" style="font-size:16px; margin:0.3em 0;">${t.s3}</li>
+                <li role="fontSizeChange" style="font-size:16px; margin:0.3em; margin-bottom:0">${t.s3}</li>
               </ol>
             </div>
           `;
