@@ -376,7 +376,9 @@ async function isServerAvailable() {
 // Fonction principale pour vider le cache
 window.SWUpdate = async function() {
     console.log('🔍 Vérification de l\'environnement...');
-    
+
+    localStorage.removeItem('hide_browser_warning');
+
     // Détecter l'environnement d'exécution
     const environment = detectEnvironment();
     console.log(`Environnement détecté: ${environment.type} - ${environment.description}`);
