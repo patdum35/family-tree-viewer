@@ -385,8 +385,8 @@ function calculerFacteurRedimensionnement() {
         // // Samsung: utilise le multiplicateur de font-size
         let facteur = 1/detectBrowserScale();
         if (facteur < 0.85) { facteur = facteur * 0.7; } // Limite minimale
-        if (facteur < 0.7) { facteur = facteur * 0.6; } // Limite minimale
-        if (facteur < 0.56) { facteur = facteur * 0.5; } // Limite minimale
+        else if (facteur < 0.7) { facteur = facteur * 0.6; } // Limite minimale
+        else if (facteur < 0.56) { facteur = facteur * 0.5; } // Limite minimale
         return facteur;
         
     } else {
