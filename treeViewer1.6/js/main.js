@@ -421,33 +421,6 @@ export function redimensionnerButtonSizeInDOM() {
     }
     elements.forEach(element => {
 
-               console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} `);
- 
-
-        // console.log('Redimensionnement de l\'élément:', element);
-
-        // const styles = window.getComputedStyle(element);
-        
-        // // Redimensionner font-size
-        // if (styles.fontSize) { //} && element.id === 'load-gedcom-button') { //} && element.id === 'startTitle') {
-        //     const fontSizeOriginal = parseFloat(styles.fontSize);
-        //     // console.log('Redimensionnement du fontsize de l\'élément:', element, fontSizeOriginal, (fontSizeOriginal * facteur));
-
-        //     if (element.id) {
-        //         console.log('Redimensionnement du fontsize de l\'élément:', element.id, fontSizeOriginal, (fontSizeOriginal * facteur));
-        //     }
-
-        //     if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
-        //         element.style.fontSize = (fontSizeOriginal * facteur) + 'px';
-        //     }
-        // }
-        
-
-
-
-
-
-
         let fontSizeOriginal;
 
         // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
@@ -469,12 +442,7 @@ export function redimensionnerButtonSizeInDOM() {
         if (fontSizeOriginal) {
             const nouvelleTaille = fontSizeOriginal * facteur;
             element.style.fontSize = nouvelleTaille + 'px';
-            
-            if (element.id) {
-                // console.log(`Redimensionnement du fontsize de l\'élément: ID: ${element.id} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
-            } else {
-                // console.log(`Redimensionnement du fontsize de l\'élément: Tag: ${element.tagName} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
-            }
+            console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
         }
 
 
