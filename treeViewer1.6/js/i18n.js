@@ -13,7 +13,7 @@ window.i18n = {
       'startTitle': 'explore tes origines...',
       'inputFormFirstName': 'prénom',
       'inputFormLastName': 'nom',
-      'inputFormLastNameComment': 'nom (de jeune fille)',
+      'inputFormLastNameComment': 'nom (jeune fille)',
       
       // Modal GEDCOM
       'AdvancedUserMenu': 'Menu utilisateur avancé',
