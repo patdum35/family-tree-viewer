@@ -1,6 +1,6 @@
 
 import { getCachedResourceUrl } from './photoPlayer.js';
-import { calcFontSize } from './main.js'
+import { state, calcFontSize } from './main.js'
 
 /**
  * @file documentation.js
@@ -18,7 +18,7 @@ export function documentation() {
             summary: `
                 <div class="help-section">
                     <h3>{overviewTitle}</h3>
-                    <p style="margin-left: 20px;">{discover}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;>{discover}</p>
                     <div class="image-example">
                         <div class="media-injection-point tree-image-container"></div>
                         <p class="caption">{classicalTreeView}</p>
@@ -30,13 +30,13 @@ export function documentation() {
                 </div>
                 <div class="help-section">
                     <h3>{interact}</h3>
-                    <ol style="margin-left: 20px;">
+                    <ol style="margin-left: ${20*state.scaleChrome}px; ">
                         <li>{clickOnPeople}</li>
                         <li>{useMolette}</li>
                         <li>{videoDemo}</li>
                     </ol>
                     <h3>{usedSymbols}</h3>
-                    <ul class="symbol-list" style="margin-left: 20px; list-style: none; line-height: 1.6;">
+                    <ul class="symbol-list" style="margin-left: ${20*state.scaleChrome}px; list-style: none; line-height: 1.6; ">
                         <li>💾 / 📱 : {legend_install}</li>
                         <li>🔒 : {legend_password}</li>
                         <li>🎙️ : {legend_voice}</li>
@@ -82,53 +82,54 @@ export function documentation() {
             install: `
                 <div class="help-section">
                     <h3>{installTitle}</h3>
-                    
-                    <h4>{whatIsPWA_title}</h4>
-                    <p>{whatIsPWA_p1}</p>
-                    
-                    <h4>{whyInstall_title}</h4>
-                    <ul>
-                        <li><strong>{whyInstall_li1_strong}</strong>: {whyInstall_li1_p}</li>
-                        <li><strong>{whyInstall_li2_strong}</strong>: {whyInstall_li2_p}</li>
-                        <li><strong>{whyInstall_li3_strong}</strong>: {whyInstall_li3_p}</li>
-                    </ul>
+                    <div style="margin-left: 20px;">
+                        <h4>{whatIsPWA_title}</h4>
+                        <p>{whatIsPWA_p1}</p>
+                        
+                        <h4>{whyInstall_title}</h4>
+                        <ul>
+                            <li><strong>{whyInstall_li1_strong}</strong>: {whyInstall_li1_p}</li>
+                            <li><strong>{whyInstall_li2_strong}</strong>: {whyInstall_li2_p}</li>
+                            <li><strong>{whyInstall_li3_strong}</strong>: {whyInstall_li3_p}</li>
+                        </ul>
 
-                    <h4>{howInstall_title_desktop}</h4>
-                    <p>{howInstall_p_desktop}</p>
-                    <ol>
-                        <li>{howInstall_desktop_li1}</li>
-                        <li>{howInstall_desktop_li2}</li>
-                    </ol>
+                        <h4>{howInstall_title_desktop}</h4>
+                        <p>{howInstall_p_desktop}</p>
+                        <ol>
+                            <li>{howInstall_desktop_li1}</li>
+                            <li>{howInstall_desktop_li2}</li>
+                        </ol>
 
-                    <h4>{howInstall_title_mobile}</h4>
-                    <p><strong>Android (Chrome):</strong></p>
-                    <ol>
-                        <li>{howInstall_android_li1}</li>
-                        <li>{howInstall_android_li2}</li>
-                    </ol>
-                    <p><strong>iOS (Safari):</strong></p>
-                    <ol>
-                        <li>{howInstall_ios_li1}</li>
-                        <li>{howInstall_ios_li2}</li>
-                        <li>{howInstall_ios_li3}</li>
-                    </ol>
+                        <h4>{howInstall_title_mobile}</h4>
+                        <p><strong>Android (Chrome):</strong></p>
+                        <ol>
+                            <li>{howInstall_android_li1}</li>
+                            <li>{howInstall_android_li2}</li>
+                        </ol>
+                        <p><strong>iOS (Safari):</strong></p>
+                        <ol>
+                            <li>{howInstall_ios_li1}</li>
+                            <li>{howInstall_ios_li2}</li>
+                            <li>{howInstall_ios_li3}</li>
+                        </ol>
 
-                    <h4>{updates_title}</h4>
-                    <p>{updates_p}</p>
+                        <h4>{updates_title}</h4>
+                        <p>{updates_p}</p>
+                    </div>
                 </div>
             `,
             login: `
-                <div class="help-section">
+                <div class="help-section" >
                     <h3>{howToLogTitle}</h3>
-                    <p>{loginIntro}</p>
-                    <ol style="margin-left: 20px;">
+                    <p style="margin-left: ${10*state.scaleChrome}px;">{loginIntro}</p>
+                    <ol style="margin-left: ${20*state.scaleChrome}px;">
                         <li>{loginStep0}</li>
                         <li>{loginStep1}</li>
                         <li>{loginStep2}</li>
                         <li>{loginStep3}</li>
                     </ol>
-                    <p>{secondOption}</p>
-                    <div style="margin-top: 15px; background-color: #f0f8ff; padding: 10px; border-radius: 5px; border-left: 4px solid #4e54c8;">
+                    <p style="margin-left: ${10*state.scaleChrome}px;">{secondOption}</p>
+                    <div style="margin-top: ${15*state.scaleChrome}px; background-color: #f0f8ff; padding: ${10*state.scaleChrome}px; border-radius: ${5*state.scaleChrome}px; border-left: ${4*state.scaleChrome}px solid #4e54c8;">
                         <p><strong>🎙️ {voiceLoginTitle} :</strong> {voiceLoginDesc}</p>
                     </div>
                     <div class="video-example">
@@ -140,7 +141,7 @@ export function documentation() {
             root: `
                 <div class="help-section">
                     <h3>{rootPersonTitle}</h3>
-                    <p style="margin-left: 20px;">{rootPersonIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{rootPersonIntro}</p>
                     </div>
                 <div class="warning-box"> {gedcomSize_warning} </div>
             `,
@@ -151,7 +152,7 @@ export function documentation() {
                         <div class="media-injection-point tree-image-container"></div>
                         <p class="caption">{classicalTreeView}</p>
                     </div>
-                    <p style="margin-left: 20px;">{treeViewIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{treeViewIntro}</p>
                     <div class="image-example">
                         <div class="media-injection-point treeDetails-image-container"></div>
                         <p class="caption">{detailPersonView}</p>
@@ -167,7 +168,7 @@ export function documentation() {
                     <div class="image-example">
                         <div class="media-injection-point radar-image-container"></div>
                     </div>
-                    <p style="margin-left: 20px;">{radarViewIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{radarViewIntro}</p>
                 </div>
                 <div class="warning-box"> {gedcomSize_warning} </div>
             `,
@@ -177,7 +178,7 @@ export function documentation() {
                     <div class="image-example">
                         <div class="media-injection-point cloudFirstNames-image-container"></div>
                     </div>
-                    <p style="margin-left: 20px;">{cloudViewIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{cloudViewIntro}</p>
                     <div class="image-example">
                         <div class="media-injection-point cloudNames-image-container"></div>
                         <p class="caption">{cloudViewName}</p>
@@ -198,7 +199,7 @@ export function documentation() {
             stats: `
                 <div class="help-section">
                     <h3>{statsTitle}</h3>
-                    <p style="margin-left: 20px;">{statsIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{statsIntro}</p>
                     <div class="media-injection-point stats-image-container"></div>
                 </div>
                 <div class="warning-box"> {gedcomSize_warning} </div>
@@ -206,17 +207,18 @@ export function documentation() {
             geoloc: `
                 <div class="help-section">
                     <h3>{geoLocTitle}</h3>
-                    <p style="margin-left: 20px;">{geoLocIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{geoLocIntro}</p>
                 </div>
                 <div class="warning-box"> {gedcomSize_warning} </div>
             `,
             voice: `
                 <div class="help-section">
                     <h3>{voiceTitle}</h3>
-                    <p style="margin-left: 20px;">{voiceIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px;">{voiceIntro}</p>
                     
-                    <h4>{voiceCommandsTitle}</h4>
-                    <ul style="margin-left: 20px; line-height: 1.6;">
+                    <div style="margin-left: ${20*state.scaleChrome}px; margin-top: ${6*state.scaleChrome}px; margin-bottom: ${8*state.scaleChrome}px; font-weight: bold;">{voiceCommandsTitle}</div>
+
+                    <ul style="margin-left: ${20*state.scaleChrome}px; line-height: 1.6;">
                         <li><strong>{voiceCmdSearch}</strong> : {voiceCmdSearchDesc}</li>
                         <li><strong>{voiceCmdInfo}</strong> : {voiceCmdInfoDesc}</li>
                         <li><strong>{voiceCmdAge}</strong> : {voiceCmdAgeDesc}</li>
@@ -225,12 +227,14 @@ export function documentation() {
                         <li><strong>{voiceCmdLastName}</strong> : {voiceCmdLastNameDesc}</li>
                         <li><strong>{voiceCmdQuestion}</strong> : {voiceCmdQuestionDesc}</li>
                     </ul>
-                    {voiceCommandList}
-                    <ul style="margin-left: 20px; line-height: 1.6;">
+
+                    <div>{voiceCommandList}</div>
+
+                    <ul style="margin-left: ${20*state.scaleChrome}px; line-height: 1.6;">
                         <li><strong>{voiceCmdFirstNameSpell}</strong> : {voiceCmdFirstNameSpellDesc}</li>
                     </ul>
                     
-                    <div class="warning-box" style="margin-top: 20px;">
+                    <div class="warning-box" style="margin-top: ${20*state.scaleChrome}px;">
                         <p><em>{voiceNote}</em></p>
                     </div>
                 </div>
@@ -248,8 +252,8 @@ export function documentation() {
                 <div class="faq-item"><h4>{faq_q8_title}</h4><p>{faq_q8_p}</p></div>
             </div>
             <style>
-                .faq-item { margin-bottom: 20px; padding-left: 15px; border-left: 3px solid #e0e0e0; }
-                .faq-item h4 { font-size: ${calcFontSize(18)}px; color: #333; margin-bottom: 8px; }
+                .faq-item { margin-bottom: ${20*state.scaleChrome}px; padding-left: ${15*state.scaleChrome}px; border-left: ${3*state.scaleChrome}px solid #e0e0e0; }
+                .faq-item h4 { font-size: ${calcFontSize(18)}px; color: #333; margin-bottom: ${8*state.scaleChrome}px; }
                 .faq-item p { line-height: 1.6; color: #555; }
                 .faq-item strong { color: #4e54c8; }
             </style>
@@ -257,7 +261,7 @@ export function documentation() {
             contact: `
                 <div class="help-section">
                     <h3>{contactTitle}</h3>
-                    <p style="margin-left: 20px;">{contactIntro}</p>
+                    <p style="margin-left: ${20*state.scaleChrome}px; margin-bottom: ${20*state.scaleChrome}px">{contactIntro}</p>
                 </div>
             `,
         },
@@ -267,19 +271,19 @@ export function documentation() {
                 targetClass: 'tree-image-container', 
                 type: 'image',
                 path: 'doc/images/tree.jpx',
-                styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+                styles: `width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);`
             },
             { 
                 targetClass: 'treeDetails-image-container', 
                 type: 'image',
                 path: 'doc/images/detail.jpx',
-                styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+                styles: `width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);`
             },
             { 
                 targetClass: 'treeGeoloc-image-container', 
                 type: 'image',
                 path: 'doc/images/geoloc.jpx',
-                styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+                styles: `width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);`
             },
             // ... (autres métadonnées existantes)
         ],
@@ -431,7 +435,7 @@ export function documentation() {
     <li><strong>Trois modes de recherche :</strong>
     <ul><li><strong>Par Prénom/Nom :</strong> Saisissez un prénom et/ou un nom. La recherche est flexible et tolère les accents.</li><li><strong>Par Lieux :</strong> Retrouvez toutes les personnes associées à un lieu spécifique (naissance, décès, résidence, mariage).</li><li><strong>Par Profession :</strong> Listez les individus exerçant un métier ou un titre particulier.</li></ul>
     </li>
-    <li><strong>Filtrage par dates :</strong> Cliquez sur l'icône ⚙️ pour affiner votre recherche en spécifiant une période (année de début et/ou de fin). Ce filtre s'applique aux dates de naissance, de mariage et de décès.</li>
+    <li style="margin-top: -${-40*state.scaleChrome}px;"><strong>Filtrage par dates :</strong> Cliquez sur l'icône ⚙️ pour affiner votre recherche en spécifiant une période (année de début et/ou de fin). Ce filtre s'applique aux dates de naissance, de mariage et de décès.</li>
     <li><strong>Résultats :</strong> La liste des résultats s'affiche dynamiquement. Cliquez sur une personne pour la définir comme nouvelle racine de l'arbre.</li>
     <li><strong>Carte de chaleur :</strong> Cliquez sur l'icône 🌍 en haut de la liste de résultats pour visualiser la répartition géographique des personnes trouvées.</li>
     </ul>`,
@@ -556,7 +560,7 @@ export function documentation() {
                 <li>Les zones rouges indiquent une forte concentration d'ancêtres.</li>
             </ul>
         </li>
-        <li><strong>Contrôles :</strong> Zoomez, déplacez-vous et cliquez sur les marqueurs pour plus de détails.</li>
+        <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Contrôles :</strong> Zoomez, déplacez-vous et cliquez sur les marqueurs pour plus de détails.</li>
     </ul>`,
 
             // --- Section Vocale ---
@@ -582,31 +586,29 @@ export function documentation() {
             voiceCmdFirstNameSpell: "«Prénom lettre par lettre H E N R I valider»",
             voiceCmdFirstNameSpellDesc: "entrer le prénom de la personne lettre par lettre»",
 
-
-
-            voiceCommandList: `
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Liste des questions possible:</strong></ul>
-            <ul style="margin-left: 20px; line-height: 1.0;">
-                <li>chercher, rechercher</strong></li>
-                <li>quand est né</strong></li>
-                <li>quand est mort, quand est morte, quand est décédé</strong></li>
-                <li>quel âge a, quel âge avait</strong></li>
-                <li>ou habite, ou habitait</strong></li>
-                <li>quelle est la profession de, quelle était la profession de</strong></li>
-                <li>quel est le métier de, quel etait le métier de</strong></li>
-                <li>avec qui est marié, avec qui etait marié</strong></li>
-                <li>combien d'enfants a, combien d'enfant a eu</strong></li>
-                <li>qui est le père de, qui etait le père de</strong></li>
-                <li>qui est la mère de, qui etait la mère de</strong></li>
-                <li>qui sont les frères et sœurs de, qui étaient les frères et sœurs de</strong></li>
-                <li>quel est le contexte historique de, quel était le contexte historique de</strong></li>
-                <li>quelles sont les notes de</strong></li>
-                <li>qui es-tu, quel est ton nom, comment t'appelles-tu</strong></li>
-                <li>qui t'a créé</strong></li>
-                <li>à quoi sert tu</strong></li>
-            </ul>
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Mode épeller lettre par lettre:</strong></ul>
-            
+            voiceCommandList: 
+            `
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-bottom:0; font-weight: bold;">Liste des questions possible:</div>
+                <ul style="margin-left: ${20*state.scaleChrome}px; margin-top: ${-20*state.scaleChrome}px; line-height: 0.8;">
+                    <li>chercher, rechercher</strong></li>
+                    <li>quand est né</strong></li>
+                    <li>quand est mort, quand est morte, quand est décédé</strong></li>
+                    <li>quel âge a, quel âge avait</strong></li>
+                    <li>ou habite, ou habitait</strong></li>
+                    <li>quelle est la profession de, quelle était la profession de</strong></li>
+                    <li>quel est le métier de, quel etait le métier de</strong></li>
+                    <li>avec qui est marié, avec qui etait marié</strong></li>
+                    <li>combien d'enfants a, combien d'enfant a eu</strong></li>
+                    <li>qui est le père de, qui etait le père de</strong></li>
+                    <li>qui est la mère de, qui etait la mère de</strong></li>
+                    <li>qui sont les frères et sœurs de, qui étaient les frères et sœurs de</strong></li>
+                    <li>quel est le contexte historique de, quel était le contexte historique de</strong></li>
+                    <li>quelles sont les notes de</strong></li>
+                    <li>qui es-tu, quel est ton nom, comment t'appelles-tu</strong></li>
+                    <li>qui t'a créé</strong></li>
+                    <li>à quoi sers tu</strong></li>
+                </ul>
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-top:${-10*state.scaleChrome}px; font-weight: bold;">Mode épeller lettre par lettre:</ul>        
             `,
             voiceNote: "Note : La reconnaissance vocale fonctionne mieux sur Google Chrome.",
 
@@ -729,7 +731,7 @@ export function documentation() {
     <li><strong>Three search modes:</strong>
     <ul><li><strong>By First Name/Name:</strong> Enter a first name and/or a last name. The search is flexible and handles accents.</li><li><strong>By Places:</strong> Find all people associated with a specific place (birth, death, residence, marriage).</li><li><strong>By Profession:</strong> List individuals with a particular job or title.</li></ul>
     </li>
-    <li><strong>Date Filtering:</strong> Click the ⚙️ icon to refine your search by specifying a period (start and/or end year). This filter applies to birth, marriage, and death dates.</li>
+    <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Date Filtering:</strong> Click the ⚙️ icon to refine your search by specifying a period (start and/or end year). This filter applies to birth, marriage, and death dates.</li>
     <li><strong>Results:</strong> The results list is displayed dynamically. Click on a person to set them as the new root of the tree.</li>
     <li><strong>Heatmap:</strong> Click the 🌍 icon at the top of the results list to visualize the geographical distribution of the found people.</li>
     </ul>`,
@@ -843,7 +845,7 @@ export function documentation() {
                 <li>Red areas indicate a high concentration of ancestors.</li>
             </ul>
         </li>
-        <li><strong>Controls:</strong> Zoom, pan, and click on markers for more details.</li>
+        <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Controls:</strong> Zoom, pan, and click on markers for more details.</li>
     </ul>`,
             
             voiceTitle: "Voice Command 🎙️",
@@ -868,30 +870,31 @@ export function documentation() {
             voiceCmdFirstNameSpell: "«First Name letter by letter H E N R I validate»",
             voiceCmdFirstNameSpellDesc: "enter the person's first name letter by letter»",
 
-            voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>List of possible questions:</strong></ul>
-            <ul style="margin-left: 20px; line-height: 1.0;">
-                <li>search, research</strong></li>
-                <li>when was born</strong></li>
-                <li>when died, when passed away</strong></li>
-                <li>how old is, how old was</strong></li>
-                <li>where lives, where lived</strong></li>
-                <li>what is the profession of, what was the profession of</strong></li>
-                <li>what is the job of, what was the job of</strong></li>
-                <li>who is married to, who was married to</strong></li>
-                <li>how many children does have, how many children did have</strong></li>
-                <li>who is the father of, who was the father of</strong></li>
-                <li>who is the mother of, who was the mother of</strong></li>
-                <li>who are the siblings of, who were the siblings of</strong></li>
-                <li>what is the historical context of, what was the historical context of</strong></li>
-                <li>what are the notes of</strong></li>
-                <li>who are you, what is your name</strong></li>
-                <li>who created you</strong></li>
-                <li>what are you for</strong></li>
-            </ul>,
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Spell letter by letter mode:</strong></ul>
-            
+            voiceCommandList: 
+            `
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-bottom:0; font-weight: bold;">List of possible questions:</div>
+                <ul style="margin-left: ${20*state.scaleChrome}px; margin-top: ${-20*state.scaleChrome}px; line-height: 0.8;">
+                    <li>search, research</strong></li>
+                    <li>when was born</strong></li>
+                    <li>when died, when passed away</strong></li>
+                    <li>how old is, how old was</strong></li>
+                    <li>where lives, where lived</strong></li>
+                    <li>what is the profession of, what was the profession of</strong></li>
+                    <li>what is the job of, what was the job of</strong></li>
+                    <li>who is married to, who was married to</strong></li>
+                    <li>how many children does have, how many children did have</strong></li>
+                    <li>who is the father of, who was the father of</strong></li>
+                    <li>who is the mother of, who was the mother of</strong></li>
+                    <li>who are the siblings of, who were the siblings of</strong></li>
+                    <li>what is the historical context of, what was the historical context of</strong></li>
+                    <li>what are the notes of</strong></li>
+                    <li>who are you, what is your name</strong></li>
+                    <li>who created you</strong></li>
+                    <li>what are you for</strong></li>
+                </ul>,
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-top:${-10*state.scaleChrome}px; font-weight: bold;">Spell letter by letter mode</ul>   
             `,
+
             voiceNote: "Note: Voice recognition works best on Google Chrome.",
 
             faqTitle: "Frequently Asked Questions (FAQ)",
@@ -1017,7 +1020,7 @@ export function documentation() {
     <li><strong>Tres modos de búsqueda:</strong>
     <ul><li><strong>Por Nombre/Apellido:</strong> Ingrese un nombre y/o un apellido. La búsqueda es flexible y maneja acentos.</li><li><strong>Por Lugares:</strong> Encuentre a todas las personas asociadas con un lugar específico (nacimiento, muerte, residencia, matrimonio).</li><li><strong>Por Profesión:</strong> Liste a los individuos con un trabajo o título en particular.</li></ul>
     </li>
-    <li><strong>Filtrado por fecha:</strong> Haga clic en el icono ⚙️ para refinar su búsqueda especificando un período (año de inicio y/o fin). Este filtro se aplica a las fechas de nacimiento, matrimonio y muerte.</li>
+    <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Filtrado por fecha:</strong> Haga clic en el icono ⚙️ para refinar su búsqueda especificando un período (año de inicio y/o fin). Este filtro se aplica a las fechas de nacimiento, matrimonio y muerte.</li>
     <li><strong>Resultados:</strong> La lista de resultados se muestra dinámicamente. Haga clic en una persona para establecerla como la nueva raíz del árbol.</li>
     <li><strong>Mapa de calor:</strong> Haga clic en el icono 🌍 en la parte superior de la lista de resultados para visualizar la distribución geográfica de las personas encontradas.</li>
     </ul>`,
@@ -1131,7 +1134,7 @@ export function documentation() {
                 <li>Las zonas rojas indican una alta concentración de antepasados.</li>
             </ul>
         </li>
-        <li><strong>Controles:</strong> Acerque, desplácese y haga clic en los marcadores para obtener más detalles.</li>
+        <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Controles:</strong> Acerque, desplácese y haga clic en los marcadores para obtener más detalles.</li>
     </ul>`,
             
             voiceTitle: "Comando de Voz 🎙️",
@@ -1156,29 +1159,29 @@ export function documentation() {
             voiceCmdFirstNameSpell: "«Nombre letra por letra H E N R I validar»",
             voiceCmdFirstNameSpellDesc: "introducir el nombre de la persona letra por letra»",
 
-            voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Lista de preguntas posibles:</strong></ul>
-            <ul style="margin-left: 20px; line-height: 1.0;">
-                <li>buscar</strong></li>
-                <li>cuándo nació</strong></li>
-                <li>cuándo murió, cuándo falleció</strong></li>
-                <li>qué edad tiene, qué edad tenía</strong></li>
-                <li>dónde vive, dónde vivía</strong></li>
-                <li>cuál es la profesión de, cuál era la profesión de</strong></li>
-                <li>cuál es el oficio de, cuál era el oficio de</strong></li>
-                <li>con quién está casado, con quién estaba casado</strong></li>
-                <li>cuántos hijos tiene, cuántos hijos tuvo</strong></li>
-                <li>quién es el padre de, quién era el padre de</strong></li>
-                <li>quién es la madre de, quién era la madre de</strong></li>
-                <li>quiénes son los hermanos de, quiénes eran los hermanos de</strong></li>
-                <li>cuál es el contexto histórico de, cuál era el contexto histórico de</strong></li>
-                <li>cuáles son las notas de</strong></li>
-                <li>quién eres, cómo te llamas</strong></li>
-                <li>quién te creó</strong></li>
-                <li>para qué sirves</strong></li>
-            </ul>
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Modo deletrear letra por letra:</strong></ul>
-            
+            voiceCommandList: 
+            `
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-bottom:0; font-weight: bold;">Lista de preguntas posibles:</div>
+                <ul style="margin-left: ${20*state.scaleChrome}px; margin-top: ${-20*state.scaleChrome}px; line-height: 0.8;">
+                    <li>buscar</strong></li>
+                    <li>cuándo nació</strong></li>
+                    <li>cuándo murió, cuándo falleció</strong></li>
+                    <li>qué edad tiene, qué edad tenía</strong></li>
+                    <li>dónde vive, dónde vivía</strong></li>
+                    <li>cuál es la profesión de, cuál era la profesión de</strong></li>
+                    <li>cuál es el oficio de, cuál era el oficio de</strong></li>
+                    <li>con quién está casado, con quién estaba casado</strong></li>
+                    <li>cuántos hijos tiene, cuántos hijos tuvo</strong></li>
+                    <li>quién es el padre de, quién era el padre de</strong></li>
+                    <li>quién es la madre de, quién era la madre de</strong></li>
+                    <li>quiénes son los hermanos de, quiénes eran los hermanos de</strong></li>
+                    <li>cuál es el contexto histórico de, cuál era el contexto histórico de</strong></li>
+                    <li>cuáles son las notas de</strong></li>
+                    <li>quién eres, cómo te llamas</strong></li>
+                    <li>quién te creó</strong></li>
+                    <li>para qué sirves</strong></li>
+                </ul>
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-top:${-10*state.scaleChrome}px; font-weight: bold;">Modo deletrear letra por letra:</ul>
             `,
             voiceNote: "Nota: El reconocimiento de voz funciona mejor en Google Chrome.",
 
@@ -1305,7 +1308,7 @@ export function documentation() {
     <li><strong>Három keresési mód:</strong>
     <ul><li><strong>Keresztnév/Név szerint:</strong> Adjon meg egy keresztnevet és/vagy egy vezetéknevet. A keresés rugalmas és kezeli az ékezeteket.</li><li><strong>Helyek szerint:</strong> Találja meg az összes személyt, aki egy adott helyhez kapcsolódik (születés, halál, lakóhely, házasság).</li><li><strong>Foglalkozás szerint:</strong> Listázza azokat a személyeket, akik egy adott munkakörrel vagy címmel rendelkeznek.</li></ul>
     </li>
-    <li><strong>Dátumszűrés:</strong> Kattintson a ⚙️ ikonra a keresés finomításához egy időszak (kezdő és/vagy befejező év) megadásával. Ez a szűrő a születési, házassági és halálozási dátumokra vonatkozik.</li>
+    <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Dátumszűrés:</strong> Kattintson a ⚙️ ikonra a keresés finomításához egy időszak (kezdő és/vagy befejező év) megadásával. Ez a szűrő a születési, házassági és halálozási dátumokra vonatkozik.</li>
     <li><strong>Eredmények:</strong> Az eredmények listája dinamikusan jelenik meg. Kattintson egy személyre, hogy őt állítsa be a fa új gyökérszemélyének.</li>
     <li><strong>Hőtérkép:</strong> Kattintson az 🌍 ikonra az eredmények listájának tetején, hogy megjelenítse a talált személyek földrajzi eloszlását.</li>
     </ul>`,
@@ -1410,7 +1413,7 @@ export function documentation() {
                 <li>A vörös területek az ősök magas koncentrációját jelzik.</li>
             </ul>
         </li>
-        <li><strong>Vezérlők:</strong> Nagyítson, pásztázzon és kattintson a jelölőkre további részletekért.</li>
+        <li style="margin-top: ${-40*state.scaleChrome}px;"><strong>Vezérlők:</strong> Nagyítson, pásztázzon és kattintson a jelölőkre további részletekért.</li>
     </ul>`,
             
             voiceTitle: "Hangvezérlés 🎙️",
@@ -1435,29 +1438,29 @@ export function documentation() {
             voiceCmdFirstNameSpell: "«Keresztnév betűről betűre H E N R I mehet»",
             voiceCmdFirstNameSpellDesc: "adja meg a személy keresztnevét betűről betűre»",
 
-            voiceCommandList: `<ul style="margin-left: 20px; line-height: 1.6;">
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Lehetséges kérdések listája:</strong></ul>
-            <ul style="margin-left: 20px; line-height: 1.0;">
-                <li>keresés</strong></li>
-                <li>mikor született</strong></li>
-                <li>mikor halt meg, mikor hunyt el</strong></li>
-                <li>hány éves, hány éves volt</strong></li>
-                <li>hol lakik, hol lakott</strong></li>
-                <li>mi a foglalkozása, mi volt a foglalkozása</strong></li>
-                <li>mi a munkája, mi volt a munkája</strong></li>
-                <li>kivel házas, kivel volt házas</strong></li>
-                <li>hány gyermeke van, hány gyermeke volt</strong></li>
-                <li>ki az apja, ki volt az apja</strong></li>
-                <li>ki az anyja, ki volt az anyja</strong></li>
-                <li>kik a testvérei, kik voltak a testvérei</strong></li>
-                <li>mi a történelmi háttere, mi volt a történelmi háttere</strong></li>
-                <li>mik a jegyzetek</strong></li>
-                <li>ki vagy te, mi a neved</strong></li>
-                <li>ki alkotott téged</strong></li>
-                <li>mire vagy jó</strong></li>
-            </ul>
-            <ul style="margin-left: -30px; margin-bottom: -20px; line-height: 0.8; "><strong>Betűről betűre mód:</strong></ul>
-            
+            voiceCommandList: 
+            `
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-bottom:0; font-weight: bold;">Lehetséges kérdések listája:</div>
+                <ul style="margin-left: ${20*state.scaleChrome}px; margin-top: ${-20*state.scaleChrome}px; line-height: 0.8;">
+                    <li>keresés</strong></li>
+                    <li>mikor született</strong></li>
+                    <li>mikor halt meg, mikor hunyt el</strong></li>
+                    <li>hány éves, hány éves volt</strong></li>
+                    <li>hol lakik, hol lakott</strong></li>
+                    <li>mi a foglalkozása, mi volt a foglalkozása</strong></li>
+                    <li>mi a munkája, mi volt a munkája</strong></li>
+                    <li>kivel házas, kivel volt házas</strong></li>
+                    <li>hány gyermeke van, hány gyermeke volt</strong></li>
+                    <li>ki az apja, ki volt az apja</strong></li>
+                    <li>ki az anyja, ki volt az anyja</strong></li>
+                    <li>kik a testvérei, kik voltak a testvérei</strong></li>
+                    <li>mi a történelmi háttere, mi volt a történelmi háttere</strong></li>
+                    <li>mik a jegyzetek</strong></li>
+                    <li>ki vagy te, mi a neved</strong></li>
+                    <li>ki alkotott téged</strong></li>
+                    <li>mire vagy jó</strong></li>
+                </ul>
+                <div style="margin-left: ${20*state.scaleChrome}px; margin-top:${-10*state.scaleChrome}px; font-weight: bold;"><strong>Betűről betűre mód:</ul>
             `,
             voiceNote: "Megjegyzés: A hangfelismerés a Google Chrome-ban működik a legjobban.",
 
@@ -1500,73 +1503,73 @@ export function documentation() {
             targetClass: 'tree-image-container', 
             type: 'image', // Type de média pour savoir quelle balise créer
             path: 'doc/images/tree.jpx', // Image cryptée
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'treeDetails-image-container', 
             type: 'image', // Type de média pour savoir quelle balise créer
             path: 'doc/images/detail.jpx', // Image cryptée
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'treeGeoloc-image-container', 
             type: 'image', // Type de média pour savoir quelle balise créer
             path: 'doc/images/geoloc.jpx', // Image cryptée
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'radar-image-container', 
             type: 'image', 
             path: 'doc/images/radar.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'cloudFirstNames-image-container', 
             type: 'image', 
             path: 'doc/images/nuage_prenoms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'cloudNames-image-container', 
             type: 'image', 
             path: 'doc/images/nuage_noms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'cloudNamesHeatmap-image-container', 
             type: 'image', 
             path: 'doc/images/heatmap_noms.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },    
         { 
             targetClass: 'cloudProfessions-image-container', 
             type: 'image', 
             path: 'doc/images/nuage_metiers.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'cloudPlaces-image-container', 
             type: 'image', 
             path: 'doc/images/nuage_lieux.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },
         { 
             targetClass: 'cloudLifeSpan-image-container', 
             type: 'image', 
             path: 'doc/images/nuage_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },     
         { 
             targetClass: 'cloudLifeSpanGraph-image-container', 
             type: 'image', 
             path: 'doc/images/graph_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },    
         { 
             targetClass: 'cloudLifeSpanCenturyGraph-image-container', 
             type: 'image', 
             path: 'doc/images/centuryGraph_dureeVie.jpx', // Image JPG normale ou 'doc/radar.jpx'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
         },      
         { 
             targetClass: 'video-demo-container', 
@@ -1574,7 +1577,7 @@ export function documentation() {
             // path: 'doc/videos/loginTree.mp4', // Vidéo cryptée (ou .mp4 si non cryptée)
             path: 'doc/videos/loginTree.mvx', // Vidéo cryptée (ou .mp4 si non cryptée)
             // styles: 'width: 100%; max-width: 500px; border-radius: 8px;'
-            styles: 'width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);'
+            styles: 'width: 100%; border-radius: ${8*state.scaleChrome}px; box-shadow: 0 ${4*state.scaleChrome}px ${10*state.scaleChrome}px rgba(0, 0, 0, 0.1);'
 
         },
 
@@ -1867,27 +1870,34 @@ export function documentation() {
             
             /* CORRECTION MAJEURE: Centrage Vertical/Horizontal et positionnement */
             .docModal-overlay {
-                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                /*  background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); */
-                background: rgba(150, 150, 150, 0.3); backdrop-filter: none; 
+                display: none; position: fixed; top: 0;  
+                max-width: ${Math.min((state.innerWidth-40)*state.scaleChrome,900*state.scaleChrome)}px; 
+                max-height: ${(state.innerHeight)*state.scaleChrome}px; 
+                /*height: 100%;*/
+                left: 50%; transform: translateX(-50%);
+                /*  background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(${5*state.scaleChrome}px); */
+                /* background: rgba(150, 150, 150, 0.3); backdrop-filter: none; */
                 /* Gris léger (150, 150, 150) et très transparent (0.2) */
                 z-index: 2000; animation: none
-                animation: fadeIn 0.3s ease; 
+                animation: fadeIn 0.3s ease;
+                overflow: hidden; 
+                border-radius: ${6*state.scaleChrome}px;
+
             }
             .docModal-overlay.active {
                 display: flex; 
                 justify-content: center; /* Centre horizontalement */
                 align-items: flex-start; /* Commence en haut pour ne pas cacher le haut sur mobile */
-                padding: 5vh 5px; /* Ajoute de l'espace en haut et sur les côtés */
+                padding: 5vh ${5*state.scaleChrome}px; /* Ajoute de l'espace en haut et sur les côtés */
                 overflow-y: auto; /* Permet le défilement si le contenu est trop grand pour l'écran */
             }
 
             .help-modal {
                 font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-                background: #ffffff; border-radius: 20px; max-width: 900px; width: 100%; /* Important: utiliser 100% dans la limite de max-width */
-                max-height: 90vh; /* Augmenté légèrement pour mieux s'adapter */
+                background: #ffffff; border-radius: ${20*state.scaleChrome}px; max-width: ${900*state.scaleChrome}px; width: 100%; /* Important: utiliser 100% dans la limite de max-width */
+                max-height: 100vh; /* Augmenté légèrement pour mieux s'adapter */
                 overflow: hidden; 
-                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 ${25*state.scaleChrome}px ${50*state.scaleChrome}px rgba(0, 0, 0, 0.5);
                 animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
                 margin: 0; /* Supprime l'ancienne marge */
                 /* Ajout pour la correction de l'ascenseur vertical */
@@ -1898,22 +1908,22 @@ export function documentation() {
             /* En-tête */
             .docModal-header {
                 background: var(--color-header-bg);
-                color: white; padding: 5px 30px; display: flex;
+                color: white; padding: ${5*state.scaleChrome}px ${30*state.scaleChrome}px; display: flex;
                 justify-content: space-between; align-items: center; flex-shrink: 0;
 
-                // border-bottom: 1px solid #e0e0e0;
-                margin-bottom: 15px;
+                // border-bottom: ${1*state.scaleChrome}px solid #e0e0e0;
+                margin-bottom: ${15*state.scaleChrome}px;
 
 
             }
-            .docModal-header h2 { font-size: ${calcFontSize(26)}px; font-weight: 700; letter-spacing: 0.5px; margin: 0; margin-left: 40px; line-height: 1.1;}
+            .docModal-header h2 { font-size: ${calcFontSize(26)}px; font-weight: 700; letter-spacing: ${0.5*state.scaleChrome}px; margin: 0; margin-left: ${40*state.scaleChrome}px; line-height: 1.1;}
 
 
 
             /* Bouton de Fermeture */
             .close-button {
-                background: #c82333; border: 2px solid white; color: white; font-size: ${calcFontSize(20)}px;
-                cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center;
+                background: #c82333; border: ${2*state.scaleChrome}px solid white; color: white; font-size: ${calcFontSize(20)}px;
+                cursor: pointer; width: ${35*state.scaleChrome}px; height: ${35*state.scaleChrome}px; display: flex; align-items: center;
                 justify-content: center; border-radius: 50%; transition: all 0.3s; line-height: 1; 
             }
             .close-button:hover { background: #a82e38; transform: scale(1.1) rotate(90deg); }
@@ -1926,10 +1936,10 @@ export function documentation() {
             }
             .docModal-content-container, .docModal-tabs, .docModal-overlay.active { 
                 /* Scrollbar pour Webkit (Chrome, Safari, Edge) */
-                &::-webkit-scrollbar { width: 5px; height: 5px; }
+                &::-webkit-scrollbar { width: ${5*state.scaleChrome}px; height: ${5*state.scaleChrome}px; }
                 &::-webkit-scrollbar-track { background: transparent; }
                 &::-webkit-scrollbar-thumb { 
-                    background-color: #c4c4c4; border-radius: 10px; border: 1px solid transparent; 
+                    background-color: #c4c4c4; border-radius: ${10*state.scaleChrome}px; border: ${1*state.scaleChrome}px solid transparent; 
                 }
                 &::-webkit-scrollbar-thumb:hover { background-color: #8f94fb; }
             }
@@ -1939,14 +1949,14 @@ export function documentation() {
             .docModal-tabs {
                 display: flex; 
                 background: #e9ecef; 
-                border-bottom: 2px solid #e0e0e0; 
+                border-bottom: ${2*state.scaleChrome}px solid #e0e0e0; 
                 overflow-x: auto;
                 margin-top: -10px; 
                 /* ❌ SUPPRIMER/IGNORER : gap: 1px; */
                 flex-shrink: 0;
                 
                 /* 💥 NOUVEAU : Ajouter un padding à droite pour que le dernier onglet soit visible */
-                padding-right: 20px;
+                padding-right: ${20*state.scaleChrome}px;
             }
 
             /* --- Bloc 2 : .docTab-button --- */
@@ -1956,9 +1966,9 @@ export function documentation() {
                 flex-grow: 0;
                 flex-shrink: 0;
                 /* min-width: 75px; */
-                padding-top: 10px; 
-                padding-bottom: 10px;
-                padding-left: 4px;
+                padding-top: ${10*state.scaleChrome}px; 
+                padding-bottom: ${10*state.scaleChrome}px;
+                padding-left: ${4*state.scaleChrome}px;
                 padding-right: 0;
                 border: none; 
                 cursor: pointer; 
@@ -1974,8 +1984,8 @@ export function documentation() {
                 margin-left: 0px; 
                 
                 /* 💥 NOUVEAU : Ajoute une bordure pour simuler l'épaisseur de la feuille */
-                border-right: 1px solid #d0d0d0 !important; 
-                border-radius: 8px 8px 0 0; /* Arrondi seulement en haut */
+                border-right: ${1*state.scaleChrome}px solid #d0d0d0 !important; 
+                border-radius: ${8*state.scaleChrome}px ${8*state.scaleChrome}px 0 0; /* Arrondi seulement en haut */
             }
 
 
@@ -2008,8 +2018,8 @@ export function documentation() {
             .docTab-button.active {
                 color: var(--color-text-dark) !important; 
                 font-weight: 700;
-                box-shadow: 0 -3px 5px rgba(0, 0, 0, 0.1); 
-                border-bottom: 4px solid #fff; 
+                box-shadow: 0 ${-3*state.scaleChrome}px ${5*state.scaleChrome}px rgba(0, 0, 0, 0.1); 
+                border-bottom: ${4*state.scaleChrome}px solid #fff; 
                 filter: none;
                 
                 /* 💥 NOUVEAU : Annuler le chevauchement */
@@ -2039,39 +2049,40 @@ export function documentation() {
             /* Contenu */
             /* Correction de l'ascenseur vertical */
             .docModal-content-container { 
-                max-height: calc(90vh - 130px); 
+                /* max-height: calc(90vh - 130px); */ 
+                max-height:${(state.innerHeight - 150/state.scaleChrome)*state.scaleChrome}px; 
                 overflow-y: auto; 
                 padding: 0px;  
                 flex-grow: 1; 
             }
-            .docTab-content { display: none; }
+            .docTab-content { display: none; font-size: ${calcFontSize(16)}px;}
             .docTab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
 
             /* Autres styles de contenu */
             .help-section  {
-                padding: 10px; 
+                padding: ${10*state.scaleChrome}px; 
             }
             
             .help-section ul, .help-section ol {
-                padding-left: 30px; /* Décalage des puces vers la droite */
-                margin-left: 5px;
-                margin-bottom: 10px;
+                padding-left: ${30*state.scaleChrome}px; /* Décalage des puces vers la droite */
+                margin-left: ${5*state.scaleChrome}px;
+                margin-bottom: ${10*state.scaleChrome}px;
             }
 
             .help-section h3 { 
                 color: #4e54c8; 
                 font-size: ${calcFontSize(22)}px; 
                 font-weight: 600; 
-                margin-bottom: 15px; 
-                padding-bottom: 5px; 
-                border-bottom: 1px solid #f0f0f0;
+                margin-bottom: ${15*state.scaleChrome}px; 
+                padding-bottom: ${5*state.scaleChrome}px; 
+                border-bottom: ${1*state.scaleChrome}px solid #f0f0f0;
                 
                 /* 💥 NOUVEAU : Positionnement relatif pour l'icône absolue */
                 position: relative; 
                 
                 /* 💥 NOUVEAU : Espace à gauche pour l'icône (20px icône + 10px marge) */
-                padding-left: 30px; 
+                padding-left: ${30*state.scaleChrome}px; 
             }
 
             .help-section h3::before { 
@@ -2087,14 +2098,14 @@ export function documentation() {
                 transform: translateY(-50%); /* Ajustement précis du centrage vertical */
                 
                 /* Vous pouvez ajouter une largeur pour garantir l'alignement, si besoin */
-                width: 20px; 
+                width: ${20*state.scaleChrome}px; 
             }
 
             .image-example, .video-example { 
-                margin: 25px 0; padding: 0px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef; text-align: center; 
+                margin: ${25*state.scaleChrome}px 0; padding: 0px; background: #f8f9fa; border-radius: ${10*state.scaleChrome}px; border: ${1*state.scaleChrome}px solid #e9ecef; text-align: center; 
             }
             .image-example .caption, .video-example .caption { 
-                font-style: italic; color: #6c757d; margin-top: 10px; font-size: ${calcFontSize(14)}px; 
+                font-style: italic; color: #6c757d; margin-top: ${10*state.scaleChrome}px; font-size: ${calcFontSize(14)}px; 
             }
             .caption {
                 text-align: center; 
@@ -2105,9 +2116,10 @@ export function documentation() {
                 display: block; 
                 margin-left: auto;
                 margin-right: auto;
+                max-Width: ${860*state.scaleChrome}px;
             }
 
-            .warning-box { background: #fff3cd; border-left: 4px solid var(--color-warning-border); padding: 15px; border-radius: 4px; margin: 15px 0; }
+            .warning-box { background: #fff3cd; border-left: ${4*state.scaleChrome}px solid var(--color-warning-border); padding: ${15*state.scaleChrome}px; border-radius: ${4*state.scaleChrome}px; margin: ${15*state.scaleChrome}px 0; font-size:${calcFontSize(18)}px }
             .warning-box::before { content: '⚠️ Attention : '; font-weight: 600; color: #856404; }
 
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -2117,18 +2129,18 @@ export function documentation() {
         /* ------------------------------------------- */
         /* NOUVEAU: Optimisation Mobile (Max 400px) */
         /* ------------------------------------------- */
-        @media (max-width: 400px) {
+        @media (max-width: ${400*state.scaleChrome}px) {
             .docTab-button {
-                flex-basis: 77px;
+                flex-basis: ${77*state.scaleChrome}px;
                 flex-grow: 0;
                 flex-shrink: 0;
-                min-width: 75px; 
-                padding-top: 10px; 
-                padding-bottom: 10px;
-                padding-left: 2px;
+                min-width: ${75*state.scaleChrome}px; 
+                padding-top: ${10*state.scaleChrome}px; 
+                padding-bottom: ${10*state.scaleChrome}px;
+                padding-left: ${2*state.scaleChrome}px;
                 padding-right: 0;
                 font-size: ${calcFontSize(14)}px;
-                margin-left: -50px; 
+                margin-left: ${-50*state.scaleChrome}px; 
             }
 
             /* Cacher le texte long et afficher le texte court/icône */
@@ -2141,16 +2153,16 @@ export function documentation() {
 
         }
 
-        @media (max-height: 400px) {
+        @media (max-height: ${400*state.scaleChrome}px) {
             .docTab-button {
                 font-size: ${calcFontSize(14)}px;
             }
         }
 
-        @media (max-width: 400px), (max-height: 400px) {
+        @media (max-width: ${400*state.scaleChrome}px), (max-height: ${400*state.scaleChrome}px) {
             /* 1. OCCUPER TOUT L'ESPACE & REDUIRE LES ARRONDIS */
             .docModal-overlay.active {
-                padding: 1px; /* Supprime l'espace autour du modal */
+                padding: ${1*state.scaleChrome}px; /* Supprime l'espace autour du modal */
                 align-items: stretch; /* Étend le modal pour remplir la hauteur */
                 justify-content: stretch; /* Étend le modal pour remplir la largeur */
             }
@@ -2158,34 +2170,35 @@ export function documentation() {
                 max-width: 100%; /* Occupe toute la largeur */
                 width: 100%;
                 max-height: 100vh; /* Occupe toute la hauteur de la vue */
-                border-radius: 4px; /* Supprime les coins arrondis */
-                margin: 2px; /* S'assure qu'il n'y a pas de marge */
+                border-radius: ${4*state.scaleChrome}px; /* Supprime les coins arrondis */
+                margin: ${2*state.scaleChrome}px; /* S'assure qu'il n'y a pas de marge */
                 height: 100%; /* Important pour certains navigateurs */
             }
 
             /* 2. RÉDUIRE TOUS LES PADDINGS */
             .docModal-header {
-                padding: 7px 15px; /* Réduit le padding de l'en-tête (de 20px 30px à 15px) */
+                padding: ${7*state.scaleChrome}px ${15*state.scaleChrome}px; /* Réduit le padding de l'en-tête (de 20px 30px à 15px) */
             }
 
             .docModal-header h2 {
-                font-size: ${calcFontSize(18)}px; margin: 0; margin-left: 40px; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
+                font-size: ${calcFontSize(18)}px; margin: 0; margin-left: ${40*state.scaleChrome}px; line-height: 1.1;/* Optionnel: Réduire la taille du titre */
             }
 
-        .close-button {
-                width: 30px; /* Optionnel: Réduire la taille du bouton de fermeture */
-                height: 30px;
+            .close-button {
+                width: ${30*state.scaleChrome}px; /* Optionnel: Réduire la taille du bouton de fermeture */
+                height: ${30*state.scaleChrome}px;
                 font-size: ${calcFontSize(20)}px;
             }
 
             .docModal-content-container { 
                 /*padding: 15px;  Réduit le padding du contenu principal (de 30px à 15px) */
                 /* Recalcul de la hauteur maximale pour remplir tout l'espace */
-                max-height: calc(100vh - 100px); 
+                /*max-height: calc(100vh - 100px);*/
+                max-height:${(state.innerHeight - 150/state.scaleChrome)*state.scaleChrome}px; 
             }
 
             .help-section  {
-                padding: 2px; 
+                padding: ${2*state.scaleChrome}px; 
             }
 
             .help-section h3 {

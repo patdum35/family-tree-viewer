@@ -1,7 +1,7 @@
 // ====================================
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
-import { state, updateRadarButtonText, trackPageView } from './main.js';
+import { state, calcFontSize, updateRadarButtonText, trackPageView } from './main.js';
 import { needsReset, resetWheelView, getGenerationColor, calculateOptimalZoom } from './treeWheelRenderer.js';
 // import { historicalFigures } from './historicalData.js';
 import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow.js';
@@ -1784,7 +1784,7 @@ function createRealisticSlotHandle() {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: ${18*state.scaleTextFontSize}px;
+        font-size: ${calcFontSize(18)}px;
         user-select: none;
         touch-action: manipulation;
     `;
@@ -1801,7 +1801,7 @@ function createRealisticSlotHandle() {
         left: ${85*state.scaleChrome}px;
         color: #fff;
         font-weight: bold;
-        font-size: ${12*state.scaleTextFontSize}px;
+        font-size: ${calcFontSize(12)}px;
         text-align: center;
         text-shadow: 0 ${2*state.scaleChrome}px ${4*state.scaleChrome}px rgba(0,0,0,0.7);
         background: rgba(0,0,0,0.7);
@@ -1828,7 +1828,7 @@ function createRealisticSlotHandle() {
         background: crimson;
         color: white;
         font-weight: bold;
-        font-size: ${13*state.scaleTextFontSize}px;
+        font-size: ${calcFontSize(13)}px;
         text-align: center;
         padding: ${7*state.scaleChrome}px ${11*state.scaleChrome}px;
         border: none;
@@ -2101,7 +2101,7 @@ function showWinnerMessage(winner) {
         color: white;
         padding: 20px;
         border-radius: 15px;
-        font-size: 20px;
+        font-size: ${calcFontSize(20)}px;
         font-weight: bold;
         text-align: center;
         box-shadow: 0 15px 30px rgba(0,0,0,0.3);
@@ -2113,24 +2113,24 @@ function showWinnerMessage(winner) {
         overflow-y: auto;
         width: auto;
         @media (max-width: 600px) {
-            font-size: 16px !important;
+            font-size: ${calcFontSize(16)}px !important;
             padding: 15px !important;
             min-width: 280px !important;
         }
         @media (max-width: 400px) {
-            font-size: 14px !important;
+            font-size: ${calcFontSize(14)}px !important;
             padding: 12px !important;
             min-width: 250px !important;
         }
         @media (max-height: 500px) {
             padding: 10px !important;
-            font-size: 14px !important;
+            font-size: ${calcFontSize(14)}px !important;
             border-radius: 10px !important;
         }
     `;
     
     message.innerHTML = `
-        <div style="font-size: 30px; margin-bottom: 8px;">🎉</div>
+        <div style="font-size: ${calcFontSize(30)}px; margin-bottom: 8px;">🎉</div>
         <div style="margin-bottom: 12px; font-size: 0.9em;">${getFortuneText('winnerTitle')}</div>
         
         <!-- Zone pour afficher le nom du gagnant (cachée au début) -->
@@ -2151,7 +2151,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 8px 14px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2167,7 +2167,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 8px 14px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2184,7 +2184,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 8px 14px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2201,7 +2201,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 8px 14px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2218,7 +2218,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 10px 18px;
                 border-radius: 10px;
-                font-size: 15px;
+                font-size: ${calcFontSize(15)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2234,7 +2234,7 @@ function showWinnerMessage(winner) {
                 color: white;
                 padding: 8px 14px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 font-weight: bold;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -2389,7 +2389,7 @@ export function showQuizMessage(winner) {
         color: white;
         padding: 15px;
         border-radius: 20px;
-        font-size: 18px;
+        font-size: ${calcFontSize(18)}px;
         font-weight: bold;
         text-align: center;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
@@ -2400,12 +2400,12 @@ export function showQuizMessage(winner) {
         max-height: 85vh;
         overflow-y: auto;
         @media (max-width: 600px) {
-            font-size: 16px !important;
+            font-size: ${calcFontSize(16)}px !important;
             padding: 20px !important;
             min-width: 280px !important;
         }
         @media (max-width: 400px) {
-            font-size: 14px !important;
+            font-size: ${calcFontSize(14)}px !important;
             padding: 15px !important;
             min-width: 250px !important;
         }
@@ -2416,8 +2416,8 @@ export function showQuizMessage(winner) {
     console.log("Indices préparés pour", winner.name, ":", clues);
     
     quizMessage.innerHTML = `
-        <div style="font-size: 32px; margin: 5px 0;">🧠</div>
-        <div style="margin-bottom: 15px; font-size: 18px;">${getFortuneText('quizTitle')} ${getFortuneText('quizSubtitle')}</div>
+        <div style="font-size: ${calcFontSize(32)}px; margin: 5px 0;">🧠</div>
+        <div style="margin-bottom: 15px; font-size: ${calcFontSize(18)}px;">${getFortuneText('quizTitle')} ${getFortuneText('quizSubtitle')}</div>
 
         <!-- Boutons de contrôle en haut -->
         <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 15px;">
@@ -2427,7 +2427,7 @@ export function showQuizMessage(winner) {
                 color: white;
                 padding: 8px 6px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 white-space: nowrap;
@@ -2441,7 +2441,7 @@ export function showQuizMessage(winner) {
                 color: white;
                 padding: 8px 6px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(16)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 white-space: nowrap;
@@ -2455,7 +2455,7 @@ export function showQuizMessage(winner) {
                 color: white;
                 padding: 0;
                 border-radius: 8px;
-                font-size: 16px;
+                font-size: ${calcFontSize(16)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 width: 40px;
@@ -2480,7 +2480,7 @@ export function showQuizMessage(winner) {
             max-height: 250px;
             overflow-y: auto;
         ">
-            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 14px;">
+            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: ${calcFontSize(14)}px;">
                 ${getFortuneText('clickNextClue')}
             </div>
         </div>
@@ -2494,7 +2494,7 @@ export function showQuizMessage(winner) {
                 padding: 8px;
                 border: none;
                 border-radius: 5px;
-                font-size: 14px;
+                font-size: ${calcFontSize(14)}px;
                 text-align: center;
             ">
             <button id="check-answer-btn" style="
@@ -2503,7 +2503,7 @@ export function showQuizMessage(winner) {
                 color: white;
                 padding: 8px 6px;
                 border-radius: 6px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 cursor: pointer;
                 white-space: nowrap;
             ">${getFortuneText('checkAnswer')}</button>
@@ -2653,27 +2653,27 @@ export function showQuizMessage(winner) {
         switch(type) {
             case true:
                 resultHTML = `
-                    <div style="font-size: 24px;">🎉</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">🎉</div>
                     <div>${getFortuneText('correctGuess')}</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(0, 255, 0, 0.2)';
                 break;
             case false:
                 resultHTML = `
-                    <div style="font-size: 24px;">😔</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">😔</div>
                     <div>${getFortuneText('wrongGuess')}</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 0, 0, 0.2)';
                 break;
             case 'solution':
                 resultHTML = `
-                    <div style="font-size: 24px;">💡</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">💡</div>
                     <div>${getFortuneText('solutionRevealed')}</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 165, 0, 0.2)';
@@ -2714,7 +2714,7 @@ export function showQuizMessage(winner) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -2737,7 +2737,7 @@ export function showQuizMessage(winner) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -2760,7 +2760,7 @@ export function showQuizMessage(winner) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -2936,7 +2936,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
         color: white;
         padding: 15px;
         border-radius: 20px;
-        font-size: 18px;
+        font-size: ${calcFontSize(18)}px;
         font-weight: bold;
         text-align: center;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
@@ -2947,12 +2947,12 @@ export async function readPersonDetails(winner, detectedAction = null) {
         max-height: 85vh;
         overflow-y: auto;
         @media (max-width: 600px) {
-            font-size: 16px !important;
+            font-size: ${calcFontSize(16)}px !important;
             padding: 20px !important;
             min-width: 280px !important;
         }
         @media (max-width: 400px) {
-            font-size: 14px !important;
+            font-size: ${calcFontSize(14)}px !important;
             padding: 15px !important;
             min-width: 250px !important;
         }
@@ -2963,7 +2963,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
     console.log("Indices préparés pour", winner.name, ":", clues, cluesLabels, detectedAction);
     
     quizMessage.innerHTML = `
-        <div style="font-size: 32px; margin: 5px 0;">🧠</div>
+        <div style="font-size: ${calcFontSize(32)}px; margin: 5px 0;">🧠</div>
   
         <!-- Boutons de contrôle en haut -->
         <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 15px;">
@@ -2973,7 +2973,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                 color: white;
                 padding: 8px 6px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 white-space: nowrap;
@@ -2987,7 +2987,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                 color: white;
                 padding: 8px 6px;
                 border-radius: 8px;
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 white-space: nowrap;
@@ -3001,7 +3001,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                 color: white;
                 padding: 0;
                 border-radius: 8px;
-                font-size: 16px;
+                font-size: ${calcFontSize(16)}px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 width: 40px;
@@ -3026,7 +3026,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
             max-height: 250px;
             overflow-y: auto;
         ">
-            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 14px;">
+            <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: ${calcFontSize(14)}px;">
                 ${getFortuneText('readingInProgress') || 'Lecture en cours...'}
             </div>
         </div>
@@ -3247,26 +3247,26 @@ export async function readPersonDetails(winner, detectedAction = null) {
         switch(type) {
             case true:
                 resultHTML = `
-                    <div style="font-size: 24px;">🎉</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">🎉</div>
                     <div>${getFortuneText('correctGuess')}</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(0, 255, 0, 0.2)';
                 break;
             case false:
                 resultHTML = `
-                    <div style="font-size: 24px;">😔</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">😔</div>
                     <div>${getFortuneText('wrongGuess')}</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 0, 0, 0.2)';
                 break;
             case 'solution':
                 resultHTML = `
-                    <div style="font-size: 24px;">💡</div>
-                    <div style="font-size: 20px; margin: 10px 0; color: #fff700;">${correctName}</div>
+                    <div style="font-size: ${calcFontSize(24)}px;">💡</div>
+                    <div style="font-size: ${calcFontSize(20)}px; margin: 10px 0; color: #fff700;">${correctName}</div>
                     ${createActionButtons()}
                 `;
                 bgColor = 'rgba(255, 165, 0, 0.2)';
@@ -3302,7 +3302,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -3325,7 +3325,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -3348,7 +3348,7 @@ export async function readPersonDetails(winner, detectedAction = null) {
                     color: white;
                     padding: 6px 2px;
                     border-radius: 6px;
-                    font-size: 12px;
+                    font-size: ${calcFontSize(12)}px;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -4362,7 +4362,7 @@ function showFortuneInstructions() {
         color: white;
         padding: ${15*state.scaleChrome}px ${25*state.scaleChrome}px;
         border-radius: ${25*state.scaleChrome}px;
-        font-size: ${16*state.scaleTextFontSize}px;
+        font-size: ${calcFontSize(16)}px;
         z-index: 1000;
         animation: fadeInOut 5s ease;
     `;

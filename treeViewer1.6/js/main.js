@@ -1822,10 +1822,10 @@ function initialize() {
     loadGedcomButton.style.background = 'transparent';  
     loadGedcomButton.style.padding = '0px';
     loadGedcomButton.style.border = 'none';
-    loadGedcomButton.style.borderRadius = '6px';
+    loadGedcomButton.style.borderRadius = 6*state.scaleChrome+'px';
     loadGedcomButton.style.position = 'fixed';
-    loadGedcomButton.style.top = '5px';
-    loadGedcomButton.style.left = '10px';
+    loadGedcomButton.style.top = 5*state.scaleChrome+'px';
+    loadGedcomButton.style.left = 10*state.scaleChrome+'px';
     loadGedcomButton.style.zIndex = '1000';
      
 
@@ -1864,10 +1864,10 @@ function initialize() {
     helpButton.style.background = 'transparent';  
     helpButton.style.padding = '0px';
     helpButton.style.border = 'none';
-    helpButton.style.borderRadius = '6px';
+    helpButton.style.borderRadius = 6*state.scaleChrome+'px';
     helpButton.style.position = 'fixed';
-    helpButton.style.top = '5px';
-    helpButton.style.right = '10px';
+    helpButton.style.top = 5*state.scaleChrome+'px';
+    helpButton.style.right = 10*state.scaleChrome+'px';
     helpButton.style.zIndex = '1000';
      
 
@@ -1922,11 +1922,11 @@ function initialize() {
     style.textContent += `
     @keyframes lightbulb-glow {
         0%, 100% {
-        text-shadow: 0 0 2px rgba(255, 255, 150, 0.2);
+        text-shadow: 0 0 ${2*state.scaleChrome}px rgba(255, 255, 150, 0.2);
         filter: brightness(1);
         }
         50% {
-        text-shadow: 0 0 15px rgba(255, 255, 120, 0.8);
+        text-shadow: 0 0 ${15*state.scaleChrome}px rgba(255, 255, 120, 0.8);
         filter: brightness(1.6);
         }
     }
@@ -3577,7 +3577,7 @@ const afficherPopup = (message, time = null, top = null) => {
     popup.textContent = message;
     popup.id = 'expert-activation-popup';
     popup.style.cssText = `
-        font-size: 16px;
+        font-size: ${16*state.scaleTextFontSize}px;
         position: fixed;
         bottom: 1.25em;
         left: 50%;
@@ -4107,14 +4107,14 @@ function showErrorMessage(message) {
     // Ajouter des styles d'erreur
     errorDiv.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: ${20*state.scaleChrome}px;
+        right: ${20*state.scaleChrome}px;
         background: #dc3545;
         color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
+        padding: ${15*state.scaleChrome}px ${20*state.scaleChrome}px;
+        border-radius: ${5*state.scaleChrome}px;
         z-index: 10000;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 ${4*state.scaleChrome}px ${6*state.scaleChrome}px rgba(0,0,0,0.1);
     `;
     
     document.body.appendChild(errorDiv);

@@ -345,13 +345,16 @@ export function displayPersonDetails(personId) {
     modal.style.position = 'fixed';
 
     modal.style.backgroundColor = 'white';
-    modal.style.padding = '0px 4px';    
-    modal.style.borderRadius = '8px';
-    modal.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
+    modal.style.padding = '0px '+4*state.scaleChrome+'px';    
+    modal.style.borderRadius = 8*state.scaleChrome+'px';
+    modal.style.boxShadow = '0 '+4*state.scaleChrome+'px ' +20*state.scaleChrome+'px rgba(0, 0, 0, 0.2)';
     modal.style.zIndex = state.topZindex;
 
-    modal.style.minWidth = state.minModalWidth + 'px';
-    modal.style.minHeight = state.minModalHeight + 'px';
+    modal.style.minWidth = state.minModalWidth*state.scaleChrome + 'px';
+    modal.style.maxWidth = (state.innerWidth-30)*state.scaleChrome + 'px';
+
+
+    modal.style.minHeight = state.minModalHeight*state.scaleChrome + 'px';
     modal.style.overflow = 'auto';
 
     modal.style.display = "flex";           // Pour que l'ascenseur s'adapte automatiquement à la hauteur de la modal quand on resize
@@ -364,37 +367,37 @@ export function displayPersonDetails(personId) {
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
-    header.style.borderBottom = '1px solid #eee';
+    header.style.borderBottom = 1*state.scaleChrome+'px solid #eee';
     // Nouvelles propriétés pour rendre l'en-tête sticky
     header.style.position = 'sticky';
     header.style.top = '0';
     header.style.backgroundColor = '#EBF8FF'; //'white';
     header.style.zIndex = '1101';
-    header.style.paddingTop = '3px';
+    header.style.paddingTop = 3*state.scaleChrome+'px';
     header.style.paddingBottom = '0px';
     header.style.width = '100%';
 
     // Ajuster la marge pour éviter le déplacement du contenu
     header.style.marginBottom = '0px';
-    header.style.marginLeft = '-20px';  // Compenser le padding du modal
-    header.style.marginRight = '-20px'; // Compenser le padding du modal
-    header.style.paddingLeft = '20px';  // Restaurer le padding pour l'alignement
-    header.style.paddingRight = '20px'; // Restaurer le padding pour l'alignement
+    header.style.marginLeft = -20*state.scaleChrome+'px';  // Compenser le padding du modal
+    header.style.marginRight = -20*state.scaleChrome+'px'; // Compenser le padding du modal
+    header.style.paddingLeft = 20*state.scaleChrome+'px';  // Restaurer le padding pour l'alignement
+    header.style.paddingRight = 20*state.scaleChrome +'px'; // Restaurer le padding pour l'alignement
 
     // Container pour titre
     const titleContainer = document.createElement('div');
 
     titleContainer.style.display = 'flex';
     titleContainer.style.alignItems = 'center';
-    titleContainer.style.gap = '5px 0px';
-    titleContainer.style.marginLeft = '5px';
+    titleContainer.style.gap = 5*state.scaleChrome+'px 0px';
+    titleContainer.style.marginLeft = 5*state.scaleChrome +'px';
 
     const title = document.createElement('h2');
     title.id = 'person-fullDetails-modal-title';
     // Set the name in the modal header (with reduced size)
     title.textContent = person.name.replace(/\//g, '');
     title.style.margin = '0';
-    title.style.fontSize = nameCloudState.mobilePhone ? calcFontSize(13)+'px' : calcFontSize(16)+'px';
+    title.style.fontSize = nameCloudState.mobilePhone ? calcFontSize(13)+'px' : calcFontSize(18)+'px';
 
     titleContainer.appendChild(title);
 
@@ -404,8 +407,8 @@ export function displayPersonDetails(personId) {
     closeButton.style.border = 'none';
     closeButton.style.fontSize = calcFontSize(28)+'px';
     closeButton.style.cursor = 'pointer';
-    closeButton.style.padding = '2px 10px';
-    closeButton.style.marginRight = '10px';
+    closeButton.style.padding = 2*state.scaleChrome+'px '+10*state.scaleChrome+'px';
+    closeButton.style.marginRight = 10*state.scaleChrome+'px';
 
     // style hover via JS
     closeButton.addEventListener('mouseenter', () => {
@@ -435,18 +438,18 @@ export function displayPersonDetails(personId) {
     <style>
     /* Style unifié pour le modal */
         .details-section {
-            margin-bottom: 6px;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: ${nameCloudState && nameCloudState.mobilePhone ? '${calcFontSize(11)}px' : '${calcFontSize(13)}px'};
+            margin-bottom: ${6*state.scaleChrome}px;
+            padding: ${6*state.scaleChrome}px;
+            border-radius: ${6*state.scaleChrome}px;
+            font-size: ${nameCloudState && nameCloudState.mobilePhone ? `${calcFontSize(11)}px` : `${calcFontSize(13)}px`};
             background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(${3*state.scaleChrome}px);
         }
         .details-icon {
             font-size: ${nameCloudState && nameCloudState.mobilePhone ? '1.2em' : '1.6em'};
             /*vertical-align: middle;*/
-            margin-right: 4px;
-            margin-top: -8px;
+            margin-right: ${4*state.scaleChrome}px;
+            margin-top: ${-8*state.scaleChrome}px;
             padding-top: 0px;
         }
         .details-value {
@@ -454,55 +457,55 @@ export function displayPersonDetails(personId) {
         }
 
         .details-section.gedcomID { background-color: #E8F5E9; 
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */
-            margin-top: -5px !important;
-            margin-bottom: 4px !important;
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */
+            margin-top: ${-5*state.scaleChrome}px !important;
+            margin-bottom: ${4*state.scaleChrome}px !important;
         }
         .details-section.occupation { background-color:  #F8BBD0;
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */
 
         }
         .details-section.birth { background-color: #E3F2FD;
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 1px !important;            /* réduit les marges */        
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${1*state.scaleChrome}px !important;            /* réduit les marges */        
         }
         .details-section.death { background-color: #EFEBE9; 
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */        
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */        
         }
         .details-section.marriage { background-color: #F8BBD0; 
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */        
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */        
         }
         .details-section.residence { background-color: #E8F5E9; 
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */
         }
         .details-section.notes { background-color: #FFF8E1;
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */        
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */        
         }
         .details-section.sources { background-color: #F3E5F5; 
-            padding: 1px 6px !important;     /* Padding réduit */
+            padding: 1px ${6*state.scaleChrome}px !important;     /* Padding réduit */
             margin: 3px !important;            /* réduit les marges */
-            font-size: 85%; 
+            font-size: ${calcFontSize(13)}px; 
         }
         .details-section.context { background-color: #E0F2F1; 
-            padding: 1px 6px !important;     /* Padding réduit */
-            margin: 3px !important;            /* réduit les marges */
+            padding: ${1*state.scaleChrome}px ${6*state.scaleChrome}px !important;     /* Padding réduit */
+            margin: ${3*state.scaleChrome}px !important;            /* réduit les marges */
         }
         .details-section.actions { background-color: #ECEFF1; text-align: center; }
 
         .action-btn {
             color: white;
             border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: ${4*state.scaleChrome}px ${8*state.scaleChrome}px;
+            border-radius: ${4*state.scaleChrome}px;
             cursor: pointer;
-            font-size: ${calcFontSize(10)}px;
-            margin: 2px 2px 0 0;
+            font-size: ${calcFontSize(11)}px;
+            margin: ${2*state.scaleChrome}px ${2*state.scaleChrome}px 0 0;
             flex: 1;
             min-width: 0;
             white-space: nowrap;
@@ -516,10 +519,10 @@ export function displayPersonDetails(personId) {
         .details-section.actions {
             min-height: 0 !important;
             height: auto !important;
-            padding: 2px !important;
-            margin-bottom: 2px !important;
+            padding: ${2*state.scaleChrome}px !important;
+            margin-bottom: ${2*state.scaleChrome}px !important;
             margin-top: 0px !important;
-            gap: 2px !important;
+            gap: ${2*state.scaleChrome}px !important;
             display: flex;
             align-items: center; /* centre verticalement */
         }
@@ -538,11 +541,9 @@ export function displayPersonDetails(personId) {
         /* Ajustements spécifiques pour les petits écrans */
         @media (max-height: 400px) {
             #multi-location-map {
-                height: 200px !important; /* Réduire la hauteur de la carte */
+                height: ${200*state.scaleChrome}px !important; /* Réduire la hauteur de la carte */
             }
         }
-        
-
     </style>
     `;
 
@@ -644,7 +645,7 @@ export function displayPersonDetails(personId) {
             residences.forEach((residence, index) => {
                 if (residence.date || residence.place) {
                     detailsHTML += `
-                        ${index > 0 ? '<hr style="border-top: 1px dashed #aaa; margin: 2px 0;">' : ''}
+                        ${index > 0 ? `<hr style="border-top: ${1*state.scaleChrome}px dashed #aaa; margin: ${2*state.scaleChrome}px 0;">` : ''}
                         ${residence.date ? `<span class="details-value">${formatGedcomDate(residence.date)}</span>` : ''}
                         ${residence.date && residence.place ? '<br>' : ''}
                         ${residence.place ? `<span class="details-value">${cleanupPlace(residence.place)}</span>` : ''}
@@ -779,17 +780,17 @@ export function displayPersonDetails(personId) {
     const style = document.createElement('style');
     style.textContent = `
         .person-fullDetails-modal div::-webkit-scrollbar {
-            width: 20px !important;
+            width: ${20*state.scaleChrome}px !important;
         }
         .person-fullDetails-modal div::-webkit-scrollbar-track {
             background: #80f0f044; /* Couleur de fond du track  */
-            border-radius: 6px;
+            border-radius: ${6*state.scaleChrome}px;
         }
         .person-fullDetails-modal div::-webkit-scrollbar-thumb {
             background: #3182ce; /* Couleur du curseur  */
-            border-radius: 6px;
-            border: 2px solid #f0f0f0; /* Bordure du curseur */
-            min-height: 50px;  /* Hauteur minimum du curseur  */
+            border-radius: ${6*state.scaleChrome}px;
+            border: ${2*state.scaleChrome}px solid #f0f0f0; /* Bordure du curseur */
+            min-height: ${50*state.scaleChrome}px;  /* Hauteur minimum du curseur  */
         }
         .person-fullDetails-modal div::-webkit-scrollbar-thumb:hover {
             background: #2c5aa0; /* Couleur au survol */
@@ -798,23 +799,23 @@ export function displayPersonDetails(personId) {
         /* Bouton du haut */
         .person-fullDetails-modal div::-webkit-scrollbar-button:single-button:vertical:decrement {
             background: #3182ce;
-            height: 20px;
+            height: ${20*state.scaleChrome}px;
             display: block;
             background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,10 5,0 10,10'/></svg>");
             background-repeat: no-repeat;
             background-position: center;
-            border-radius: 6px 6px 0 0;
+            border-radius: ${6*state.scaleChrome}px ${6*state.scaleChrome}px 0 0;
         }
 
         /* Bouton du bas */
         .person-fullDetails-modal div::-webkit-scrollbar-button:single-button:vertical:increment {
             background: #3182ce;
-            height: 20px;
+            height: ${20*state.scaleChrome}px;
             display: block;
             background-image: url("data:image/svg+xml;utf8,<svg fill='white' xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,0 5,10 10,0'/></svg>");
             background-repeat: no-repeat;
             background-position: center;
-            border-radius: 0 0 6px 6px;
+            border-radius: 0 0 ${6*state.scaleChrome}px ${6*state.scaleChrome}px;
         }
     `;
     document.head.appendChild(style);
@@ -877,30 +878,40 @@ export function displayPersonDetails(personId) {
 
     let innerContentHeight = innerContent.offsetHeight + 60;
     if (collectPersonLocations(person, state.gedcomData.families).length > 0) {
-        innerContentHeight = innerContentHeight + ((window.innerHeight < 400) ? 180 : 200) ;
+        innerContentHeight = innerContentHeight + ((state.innerHeight < 400) ? 180 : 200) ;
     }
     console.log('\n\n -debug innerContent.offsetHeight ', innerContentHeight);
 
 
-    if (prevTop === 0 && prevLeft ===0) {
-        modal.style.top = topLocal + 'px'; 
+    let scaleChrome = state.scaleChrome;
+    if (state.scaleChrome < 0.95) {scaleChrome = scaleChrome * 1.3;}
+
+    if (prevTop === 0 && prevLeft === 0) {
+        modal.style.top = topLocal*state.scaleChrome + 'px'; 
         modal.style.left = '50%';
         modal.style.transform = 'translateX(-50%)';
-        modal.style.maxWidth = '440px';
-        modal.style.maxHeight = innerContentHeight + 35 +'px';
-        modal.style.width = Math.min(440, window.innerWidth - 35) + 'px';
+        // modal.style.maxWidth = '440px';
+        modal.style.maxWidth = 440*state.scaleChrome +'px'; 
+        modal.style.maxHeight = (innerContentHeight + 35)*scaleChrome +'px';
+        // modal.style.width = Math.min(440, window.innerWidth - 35) + 'px';
+        modal.style.width = Math.min(440*state.scaleChrome , (state.innerWidth - 35)*state.scaleChrome) + 'px';
 
-        innerContent.style.maxWidth = 450 - 10 +'px';
-        innerContent.style.maxHeight = window.innerHeight - 80 +'px'; // ratioHeight +'vh';
+        // innerContent.style.maxWidth = 440  +'px';
+        innerContent.style.maxWidth = 440*state.scaleChrome  +'px';
+        
+        innerContent.style.maxHeight = (state.innerHeight - 80)*scaleChrome +'px'; // ratioHeight +'vh';
     } else {
-        modal.style.top = prevTop +'px';
-        modal.style.left = prevLeft +'px';
-        modal.style.maxWidth = '440px';
-        modal.style.maxHeight = innerContentHeight + 35 + 'px';        
-        modal.style.width = Math.min(440, window.innerWidth - prevLeft - 17) + 'px';
+        modal.style.top = prevTop*state.scaleChrome +'px';
+        modal.style.left = prevLeft*state.scaleChrome +'px';
+        // modal.style.maxWidth = '440px';
+        modal.style.maxWidth = 440*state.scaleChrome +'px'; 
+        modal.style.maxHeight = (innerContentHeight + 35)*scaleChrome +'px';        
+        // modal.style.width = Math.min(440, window.innerWidth - prevLeft - 17) + 'px';
+        modal.style.width = Math.min(440*state.scaleChrome , (state.innerWidth - 17)*state.scaleChrome) + 'px';
 
-        innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft) +'px';
-        innerContent.style.maxHeight = Math.min(window.innerHeight -80 , window.innerHeight - 40 - prevTop) +'px'; // ratioHeight +'vh';
+        // innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft) +'px';
+        innerContent.style.maxWidth = Math.min(440*state.scaleChrome , (state.innerWidth - prevLeft)*state.scaleChrome) +'px';
+        innerContent.style.maxHeight = Math.min((state.innerHeight - 80)*scaleChrome , (state.innerHeight - 40 - prevTop)*scaleChrome) +'px'; // ratioHeight +'vh';
     } 
 
     // Rendre la modale déplaçable et redimensionnable
@@ -916,17 +927,33 @@ function adjustModalOnResize(modal, innerContent) {
         prevTop = parseInt(styleNew.top, 10);
         prevLeft = parseInt(styleNew.left, 10);
 
-        console.log("\n\n\n - adjustModalOnResize HxW, Top x Left=", window.innerHeight, window.innerWidth, prevTop, prevLeft)
-        prevTop = Math.min(window.innerHeight - 150, prevTop );
-        prevLeft = Math.min(window.innerWidth - 150, prevLeft );
-        if (window.innerWidth < 400) { prevLeft = 10;} // forcer à gauche si trop petit
+        console.log("\n\n\n - adjustModalOnResize HxW, Top x Left=", window.innerHeight, window.innerWidth, prevTop, prevLeft, state.innerHeight, state.innerWidth)
+        // prevTop = Math.min(window.innerHeight - 150, prevTop );
+        // prevLeft = Math.min(window.innerWidth - 150, prevLeft );
+        // if (state.innerWidth < 400) { prevLeft = 10;} // forcer à gauche si trop petit
 
-        modal.style.top = prevTop +'px';
-        modal.style.left = prevLeft +'px';
-        modal.style.width = Math.min(440, window.innerWidth - prevLeft -17) + 'px';
+        prevTop = Math.min((state.innerHeight - 150), prevTop );
+        prevLeft = Math.min((state.innerWidth - 150), prevLeft );
+        if (state.innerWidth < 400) { prevLeft = 10;} // forcer à gauche si trop petit
 
-        innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft -10 ) +'px';
-        innerContent.style.maxHeight = Math.min(window.innerHeight -80 , window.innerHeight - 40 - prevTop) +'px'; // ratioHeight +'vh';
+
+        modal.style.top = prevTop*scaleChrome +'px';
+        modal.style.left = prevLeft*scaleChrome +'px';
+        // modal.style.width = Math.min(440, window.innerWidth - prevLeft -17) + 'px';
+
+        // innerContent.style.maxWidth = Math.min(440, window.innerWidth - prevLeft -10 ) +'px';
+        // innerContent.style.maxHeight = Math.min(window.innerHeight -80 , window.innerHeight - 40 - prevTop) +'px'; // ratioHeight +'vh';
+
+
+
+        modal.style.width = Math.min(440*state.scaleChrome , (state.innerWidth - 17)*state.scaleChrome) + 'px';
+
+        innerContent.style.maxWidth = Math.min(440*state.scaleChrome , (state.innerWidth - prevLeft - 10)*state.scaleChrome) +'px';
+        innerContent.style.maxHeight = Math.min((state.innerHeight - 80)*scaleChrome , (state.innerHeight - 40 - prevTop)*scaleChrome) +'px'; // ratioHeight +'vh';
+
+        console.log("\n\n\n - adjustModalOnResize HxW after , Top x Left=", window.innerHeight, window.innerWidth, prevTop, prevLeft, state.innerHeight, state.innerWidth)
+
+
 
     }, 200); // Augmenter le délai à 300ms pour plus de sécurité
 }
@@ -1152,17 +1179,17 @@ function createEnhancedLocationMap(locations) {
     
     // Ajuster la hauteur selon la taille d'écran
     // const mapHeight = window.innerHeight < 400 ? '200px' : '260px';
-    const mapHeight = window.innerHeight < 400 ? '180px' : '200px';
+    const mapHeight = state.innerHeight < 400 ? 180*state.scaleChrome +'px' : 200*state.scaleChrome +'px';
     mapContainer.style.height = mapHeight;
     
     mapContainer.style.width = '100%';
-    mapContainer.style.borderRadius = '6px';
+    mapContainer.style.borderRadius = 6*state.scaleChrome+'px';
     mapContainer.style.overflow = 'hidden';
-    mapContainer.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)';
-    mapContainer.style.marginBottom = '8px';
+    mapContainer.style.boxShadow = '0 '+1*state.scaleChrome+'px '+3*state.scaleChrome+'px rgba(0,0,0,0.12)';
+    mapContainer.style.marginBottom = 8*state.scaleChrome+'px';
     
     // Ajouter une classe pour identifier les cartes sur petits écrans
-    if (window.innerHeight < 400) {
+    if (state.innerHeight < 400) {
         mapContainer.classList.add('small-screen-map');
     }
 

@@ -1,6 +1,6 @@
 import { geocodeLocation } from './geoLocalisation.js';
 import { fetchTileWithCache } from './mapTilesPreloader.js';
-import { calcFontSize } from './main.js';
+import { state, calcFontSize } from './main.js';
 /**
  * Symboles pour chaque type de lieu
  */
@@ -86,13 +86,13 @@ export function createEnhancedMarkerIcon(type) {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 40px;
-            height: 40px;
+            width: ${40*state.scaleChrome}px;
+            height: ${40*state.scaleChrome}px;
             background-color: ${symbolInfo.bgColor};
-            border: 3px solid ${symbolInfo.color};
+            border: ${3*state.scaleChrome}px solid ${symbolInfo.color};
             border-radius: 50%;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            text-shadow: 0 0 2px white;
+            box-shadow: 0 ${3*state.scaleChrome}px ${6*state.scaleChrome}px rgba(0,0,0,0.3);
+            text-shadow: 0 0 ${2*state.scaleChrome}px white;
         ">${symbolInfo.emoji}</div>`,
         iconSize: [40, 40],
         iconAnchor: [20, 20]
@@ -452,13 +452,13 @@ export function showTemporaryLabel(marker, text, duration = 1000, options = {}) 
             text-align: center;
             font-size: ${calcFontSize(12)}px;
             background-color: rgba(255, 255, 255, 0.6) !important; 
-            padding: 3px 6px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            border: 1px solid rgba(200, 200, 200, 0.4);
+            padding: ${3*state.scaleChrome}px ${6*state.scaleChrome}px;
+            border-radius: ${4*state.scaleChrome}px;
+            box-shadow: 0 ${1*state.scaleChrome}px ${3*state.scaleChrome}px rgba(0,0,0,0.2);
+            border: ${1*state.scaleChrome}px solid rgba(200, 200, 200, 0.4);
             white-space: nowrap;
             color: rgba(0, 0, 0, 0.9);
-            max-width: 150px;
+            max-width: ${150*state.scaleChrome}px;
             overflow: hidden;
             text-overflow: ellipsis;
             z-index: ${1000 + labelIndex}; /* Plus haut index pour apparaître au-dessus */
@@ -692,13 +692,13 @@ export function createMediumMarkerIcon(type) {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 30px;
-            height: 30px;
+            width: ${30*state.scaleChrome}px;
+            height: ${30*state.scaleChrome}px;
             background-color: ${symbolInfo.bgColor};
-            border: 2px solid ${symbolInfo.color};
+            border: ${2*state.scaleChrome}px solid ${symbolInfo.color};
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            text-shadow: 0 0 1px white;
+            box-shadow: 0 ${2*state.scaleChrome}px ${4*state.scaleChrome}px rgba(0,0,0,0.2);
+            text-shadow: 0 0 ${1*state.scaleChrome}px white;
         ">${symbolInfo.emoji}</div>`,
         iconSize: [30, 30],
         iconAnchor: [15, 15]
@@ -735,20 +735,20 @@ export function addMapTitle(container, title) {
     const titleElement = document.createElement('div');
     titleElement.className = 'individual-map-title';
     titleElement.style.position = 'absolute';
-    titleElement.style.top = '10px';
+    titleElement.style.top = 10*state.scaleChrome+'px';
     titleElement.style.left = '50%';
     titleElement.style.transform = 'translateX(-50%)';
     titleElement.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-    titleElement.style.padding = '5px 10px';
-    titleElement.style.borderRadius = '4px';
+    titleElement.style.padding = 10*state.scaleChrome+'px '+10*state.scaleChrome+'px';
+    titleElement.style.borderRadius = 4*state.scaleChrome+'px';
     titleElement.style.zIndex = '9100';
-    if (window.innerHeight < 500 || window.innerWidth < 800) {
+    if (state.innerHeight < 500 || state.innerWidth < 800) {
         titleElement.style.fontSize = calcFontSize(12) +'px';
     } else {
         titleElement.style.fontSize = calcFontSize(14) +'px';  
     }
     titleElement.style.fontWeight = 'bold';
-    titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    titleElement.style.boxShadow = '0 '+1*state.scaleChrome+'px '+3*state.scaleChrome+'px rgba(0,0,0,0.3)';
     titleElement.textContent = title;
     
     container.appendChild(titleElement);
@@ -769,17 +769,17 @@ export function addMapButton(container, text, onClick) {
     const button = document.createElement('button');
     button.className = 'reset-heatmap-button';
     button.style.position = 'absolute';
-    button.style.bottom = '10px';
-    button.style.right = '10px';
+    button.style.bottom = 10*state.scaleChrome+'px';
+    button.style.right = 10*state.scaleChrome+'px';
     button.style.backgroundColor = '#4361ee';
     button.style.color = 'white';
     button.style.border = 'none';
-    button.style.borderRadius = '4px';
-    button.style.padding = '5px 10px';
+    button.style.borderRadius = 4*state.scaleChrome+'px';
+    button.style.padding = 5*state.scaleChrome+'px '+10*state.scaleChrome+'px';
     button.style.cursor = 'pointer';
     button.style.zIndex = '9100';
     button.style.fontSize = calcFontSize(14) +'px';
-    button.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    button.style.boxShadow = '0 '+1*state.scaleChrome+'px '+ 3*state.scaleChrome+'px rgba(0,0,0,0.3)';
     button.textContent = text;
     
     button.addEventListener('click', onClick);
@@ -810,7 +810,7 @@ export function addLoadingOverlay(container, message = 'Chargement...') {
     loadingOverlay.style.justifyContent = 'center';
     loadingOverlay.style.alignItems = 'center';
     loadingOverlay.style.zIndex = '9500';
-    loadingOverlay.innerHTML = `<div style="text-align: center;"><p>${message}</p><progress style="width: 200px;"></progress></div>`;
+    loadingOverlay.innerHTML = `<div style="text-align: center;"><p>${message}</p><progress style="width: ${200*state.scaleChrome}px;"></progress></div>`;
     
     container.appendChild(loadingOverlay);
     return loadingOverlay;
@@ -835,11 +835,11 @@ export function setupCustomPopupStyle() {
         style.textContent = `
             .custom-popup .leaflet-popup-content-wrapper {
                 background-color: rgba(255, 255, 255, 0.95);
-                border-radius: 8px;
-                box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+                border-radius: ${8*state.scaleChrome}px;
+                box-shadow: 0 ${3*state.scaleChrome}px ${14*state.scaleChrome}px rgba(0,0,0,0.4);
             }
             .custom-popup .leaflet-popup-content {
-                margin: 13px 19px;
+                margin: ${13*state.scaleChrome}px ${19*state.scaleChrome}px;
                 font-size: ${calcFontSize(14)}px;
                 line-height: 1.4;
             }

@@ -92,8 +92,8 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
             style.id = 'custom-modal-scrollbar-style'; // ID pour éviter les doublons
             style.textContent = `
                 .custom-modal::-webkit-scrollbar {
-                    width: 10px;
-                    height: 10px;
+                    width: ${10*state.scaleChrome}px;
+                    height: ${10*state.scaleChrome}px;
                 }
 
                 .custom-modal::-webkit-scrollbar-button {
@@ -104,14 +104,14 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
 
                 .custom-modal::-webkit-scrollbar-thumb {
                     background-color: #888;
-                    border-radius: 6px; 
-                    border: 3px solid transparent;
+                    border-radius: ${6*state.scaleChrome}px; 
+                    border: ${3*state.scaleChrome}px solid transparent;
                 }
 
                 .custom-modal::-webkit-scrollbar-track {
                     background-color: #f1f1f1;
-                    border-radius: 4px;
-                    margin: 30px;
+                    border-radius: ${4*state.scaleChrome}px;
+                    margin: ${30*state.scaleChrome}px;
                 }
             `;
             document.head.appendChild(style);
@@ -282,13 +282,13 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
             // Configurer l'apparence de chaque poignée selon sa position
             switch(pos) {
                 case 'e':  // Est (droite)
-                    handle.style.width = '10px';
-                    handle.style.height = '100px';
+                    handle.style.width = 10*state.scaleChrome+'px';
+                    handle.style.height = 100*state.scaleChrome+'px';
                     handle.style.cursor = 'ew-resize';
                     break;
                 case 'se': // Sud-Est (bas droite)
-                    handle.style.width = '25px';
-                    handle.style.height = '25px';
+                    handle.style.width = 25*state.scaleChrome+'px';
+                    handle.style.height = 25*state.scaleChrome+'px';
                     handle.style.cursor = 'nwse-resize';
                     // Montrer un indicateur visuel uniquement au survol
                     handle.addEventListener('mouseover', () => {
@@ -299,13 +299,13 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                     });
                     break;
                 case 's':  // Sud (bas)
-                    handle.style.width = '100px';
-                    handle.style.height = '10px';
+                    handle.style.width = 100*state.scaleChrome+'px';
+                    handle.style.height = 10*state.scaleChrome+'px';
                     handle.style.cursor = 'ns-resize';
                     break;
                 case 'sw': // Sud-Ouest (bas gauche)
-                    handle.style.width = '25px';
-                    handle.style.height = '25px';
+                    handle.style.width = 25*state.scaleChrome+'px';
+                    handle.style.height = 25*state.scaleChrome+'px';
                     handle.style.cursor = 'nesw-resize';
                     // Montrer un indicateur visuel uniquement au survol
                     handle.addEventListener('mouseover', () => {
@@ -316,13 +316,13 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                     });
                     break;
                 case 'w':  // Ouest (gauche)
-                    handle.style.width = '10px';
-                    handle.style.height = '100px';
+                    handle.style.width = 10*state.scaleChrome+'px';
+                    handle.style.height = 100*state.scaleChrome+'px';
                     handle.style.cursor = 'ew-resize';
                     break;
                 case 'nw': // Nord-Ouest (haut gauche)
-                    handle.style.width = '25px';
-                    handle.style.height = '25px';
+                    handle.style.width = 25*state.scaleChrome+'px';
+                    handle.style.height = 25*state.scaleChrome+'px';
                     handle.style.cursor = 'nwse-resize';
                     // Montrer un indicateur visuel uniquement au survol
                     handle.addEventListener('mouseover', () => {
@@ -333,13 +333,13 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                     });
                     break;
                 case 'n':  // Nord (haut)
-                    handle.style.width = '100px';
-                    handle.style.height = '10px';
+                    handle.style.width = 100*state.scaleChrome+'px';
+                    handle.style.height = 10*state.scaleChrome+'px';
                     handle.style.cursor = 'ns-resize';
                     break;
                 case 'ne': // Nord-Est (haut droite)
-                    handle.style.width = '25px';
-                    handle.style.height = '25px';
+                    handle.style.width = 25*state.scaleChrome+'px';
+                    handle.style.height = 25*state.scaleChrome+'px';
                     handle.style.cursor = 'nesw-resize';
                     // Montrer un indicateur visuel uniquement au survol
                     handle.addEventListener('mouseover', () => {
@@ -367,14 +367,14 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                 switch(pos) {
                     case 'e':
                         handle.style.top = (rect.top + rect.height/2 - handle.offsetHeight/2) + 'px';
-                        handle.style.left = (rect.right - 5) + 'px';
+                        handle.style.left = (rect.right - 5*state.scaleChrome) + 'px';
                         break;
                     case 'se':
                         handle.style.top = (rect.bottom - handle.offsetHeight) + 'px';
                         handle.style.left = (rect.right - handle.offsetWidth) + 'px';
                         break;
                     case 's':
-                        handle.style.top = (rect.bottom - 5) + 'px';
+                        handle.style.top = (rect.bottom - 5*state.scaleChrome) + 'px';
                         handle.style.left = (rect.left + rect.width/2 - handle.offsetWidth/2) + 'px';
                         break;
                     case 'sw':
@@ -383,14 +383,14 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
                         break;
                     case 'w':
                         handle.style.top = (rect.top + rect.height/2 - handle.offsetHeight/2) + 'px';
-                        handle.style.left = (rect.left - 5) + 'px';
+                        handle.style.left = (rect.left - 5*state.scaleChrome) + 'px';
                         break;
                     case 'nw':
                         handle.style.top = rect.top + 'px';
                         handle.style.left = rect.left + 'px';
                         break;
                     case 'n':
-                        handle.style.top = (rect.top - 5) + 'px';
+                        handle.style.top = (rect.top - 5*state.scaleChrome) + 'px';
                         handle.style.left = (rect.left + rect.width/2 - handle.offsetWidth/2) + 'px';
                         break;
                     case 'ne':
@@ -504,8 +504,8 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
             const cursorIndicator = document.createElement('div');
             cursorIndicator.className = 'touch-cursor-indicator';
             cursorIndicator.style.position = 'absolute';
-            cursorIndicator.style.width = '24px';
-            cursorIndicator.style.height = '24px';
+            cursorIndicator.style.width = 24*state.scaleChrome+'px';
+            cursorIndicator.style.height = 24*state.scaleChrome+'px';
             cursorIndicator.style.pointerEvents = 'none';
             cursorIndicator.style.zIndex = '10002';
             

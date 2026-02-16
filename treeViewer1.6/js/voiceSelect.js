@@ -9,12 +9,6 @@ import { debugLog } from './debugLogUtils.js';
 let voiceUI = null;
 let speechUI = null;
 
-// const calcFontSize = (baseSize) => { 
-//     // On récupère la valeur de l'import seulement ICI, à l'exécution.
-//     const factor = state?.browserScaleFactor || 1;
-//     return Math.round(baseSize / factor); 
-// };
-
 export function selectVoice() {
 
     let voice_language = 'fr-FR';
@@ -163,7 +157,6 @@ export function selectVoice() {
     }
 
 }
-
 
 /**
  * Module de gestion de l'interface utilisateur (UI) pour la sélection de voix
