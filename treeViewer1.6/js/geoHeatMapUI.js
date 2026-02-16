@@ -1,4 +1,4 @@
-import { state } from './main.js';
+import { state, calcFontSize } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
 import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
@@ -784,11 +784,11 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
         <div class="title-text">${heatmapTitle || ''}</div>
         <div style="display: flex; gap: 10px;">
             <button id="heatmap-refresh" title="Rafraîchir la heatmap" 
-                    style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: ${calcFontSize(16)}px;">
                 🔄
             </button>
             <button id="heatmap-close" title="Fermer la heatmap" 
-                    style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: ${calcFontSize(16)}px;">
                 ✖
             </button>
         </div>
@@ -823,7 +823,7 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
     dragHandle.style.borderRadius = '5px';
     dragHandle.style.backgroundColor = 'rgba(67, 97, 238, 0.7)';
     dragHandle.style.color = 'white';
-    dragHandle.style.fontSize = '18px';
+    dragHandle.style.fontSize = calcFontSize(18)+'px';
     dragHandle.style.display = 'flex';
     dragHandle.style.justifyContent = 'center';
     dragHandle.style.alignItems = 'center';
@@ -854,7 +854,7 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
     resizeHandle.className = 'heatmap-resize-handle';
     resizeHandle.innerHTML = '⤡';
     resizeHandle.style.fontFamily = 'Arial, sans-serif'; // Police simple et moderne
-    resizeHandle.style.fontSize = '23px'; // Taille légèrement augmentée
+    resizeHandle.style.fontSize = calcFontSize(23)+'px'; // Taille légèrement augmentée
     resizeHandle.style.fontWeight = 'bold'; // Rendre la flèche plus visible
     resizeHandle.style.lineHeight = '1'; // Empêcher les problèmes de hauteur de ligne
     resizeHandle.style.paddingBottom = '4px';
@@ -1331,7 +1331,7 @@ function configureMarkerInteractions(marker, detailsContainer, location) {
         let details = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="margin: 0;">${getUITranslation('pointDetails')}</h3>
-                <button id="close-details" style="background: none; border: none; font-size: 16px; cursor: pointer;">✖</button>
+                <button id="close-details" style="background: none; border: none; font-size: ${calcFontSize(16)}px; cursor: pointer;">✖</button>
             </div>
             <p><strong>${getUITranslation('place')} :</strong> ${location.placeName || getUITranslation('placeNotSpecified')}</p>
             <p><strong>${getUITranslation('totalOccurrences')} :</strong> ${location.count}</p>
@@ -1480,7 +1480,7 @@ function createMapTitle(mapContainer, heatmapTitle = 'Heatmap') {
         mapTitle.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
         mapTitle.style.padding = '3px 6px';
         mapTitle.style.borderRadius = '4px';
-        mapTitle.style.fontSize = '12px';
+        mapTitle.style.fontSize = calcFontSize(12)+'px';
         mapTitle.style.fontWeight = 'bold';
         mapTitle.style.maxWidth = '70%';
         mapContainer.appendChild(mapTitle);
@@ -1518,7 +1518,7 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
     refreshBtn.style.borderRadius = '3px';
     refreshBtn.style.backgroundColor = 'white';
     refreshBtn.style.cursor = 'pointer';
-    refreshBtn.style.fontSize = '12px';
+    refreshBtn.style.fontSize = calcFontSize(12)+'px';
     refreshBtn.style.display = 'flex';
     refreshBtn.style.justifyContent = 'center';
     refreshBtn.style.alignItems = 'center';
@@ -1536,7 +1536,7 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
     borderRadius: '50%',         // bouton rond, plus élégant
     backgroundColor: '#f5f5f5',
     color: '#333',
-    fontSize: '18px',            // icône plus visible
+    fontSize: calcFontSize(18) +'px',            // icône plus visible
     fontWeight: 'bold',
     cursor: 'pointer',
     display: 'flex',
@@ -1618,7 +1618,7 @@ function configureLeafletZoomControls() {
             btn.style.width = '28px';
             btn.style.height = '28px';
             btn.style.lineHeight = '28px';
-            btn.style.fontSize = '16px';
+            btn.style.fontSize = calcFontSize(16)+'px';
         });
     }
 }

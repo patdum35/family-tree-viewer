@@ -1,5 +1,5 @@
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree } from './main.js';
+import { state, calcFontSize } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
 import { selectFoundPerson, debounce, isModalVisible } from './eventHandlers.js';
 import { extractYear, findDateForPerson } from './nameCloudUtils.js';
@@ -9,7 +9,7 @@ import { makeModalDraggableAndResizable, makeModalInteractive, bringToFrontOfHam
 import { adjustSplitScreenLayout } from './nameCloudInteractions.js';
 import { resizeModal } from './nameCloudStatModal.js';
 import { fullResetAnimationState } from './treeAnimation.js';
-import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { disableFortuneModeClean } from './treeWheelAnimation.js';
 
 const searchModalTranslations = {
     fr: {
@@ -797,7 +797,6 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
         fullResetAnimationState();
         disableFortuneModeClean();
     }
-    // disableFortuneModeWithLever();    
     // Vérifier si la modale existe déjà
     let existingModal = document.getElementById('search-modal');
 
@@ -935,14 +934,14 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
         
         .searchModal-header h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: ${calcFontSize(16)}px;
         }
         
         .searchModal-close {
             background: none;
             border: none;
             color: white;
-            font-size: 30px;
+            font-size: ${calcFontSize(30)}px;
             cursor: pointer;
             /* padding: 0; */
             padding = '2px 2px';
@@ -984,7 +983,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }      
         #searchModal-searchSurname-input {
@@ -992,7 +991,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }
         #searchModal-searchName-input {
@@ -1000,7 +999,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }
 
@@ -1024,14 +1023,14 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
         }
         
         #date-start, #date-end {
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }
 
@@ -1047,6 +1046,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
         }
         
         #searchModal-search-button {
+            font-size: ${calcFontSize(14)}px;
             padding: 4px 4px;
             background: #faad38ff;
             color: white;
@@ -1066,7 +1066,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             padding: 8px;
             border-radius: 4px;
             margin-bottom: 4px;
-            font-size: 11px;
+            font-size: ${calcFontSize(11)}px;
             color: #666;
         }
 
@@ -1096,11 +1096,11 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             font-weight: normal;
             color: #333;
             margin-bottom: 3px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
         }
         
         .search-result-info {
-            font-size: 11px;
+            font-size: ${calcFontSize(11)}px;
             color: #666;
             /* color: darkblue;*/
         }
@@ -1114,7 +1114,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             padding: 2px 6px;
             border-radius: 3px;
             margin-right: 8px;
-            font-size: 11px;
+            font-size: ${calcFontSize(11)}px;
         }
 
 
@@ -1140,11 +1140,11 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
         @media screen and (max-width: 400px) , screen and (max-height: 500px)  {
 
             .result-name {
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
             }
            
             .searchModal-header h3 {
-                font-size: 16px !important; /* Réduire la taille du titre */
+                font-size: ${calcFontSize(16)}px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
             }
             
@@ -1162,12 +1162,12 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             .search-help {
                 padding: 4px !important; /* Réduire de 8px à 5px */
                 margin-bottom: 4px !important; /* Réduire de 15px à 8px */
-                font-size: 12px !important;
+                font-size: ${calcFontSize(12)}px !important;
             }
 
             .date-filter-section label {
                 /* font-weight: bold; */
-                font-size: 13px;
+                font-size: ${calcFontSize(13)}px;
             }
         }
         </style>
@@ -1233,7 +1233,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: ${calcFontSize(20)}px;
             padding: 0px 0px;
         }
         #searchModal-settings-button:hover {
@@ -1650,7 +1650,7 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
         instructionDiv.style.padding = '0px 5px';  
         instructionDiv.style.color = '#ff6600ff';
         instructionDiv.style.fontWeight = 'bold';
-        instructionDiv.style.fontSize = '13px';
+        instructionDiv.style.fontSize = calcFontSize(13)+'px';
         instructionDiv.style.marginBottom = '5px';
         // instructionDiv.style.padding = '2px';
         instructionDiv.style.background = '#f9f9f9';
@@ -1663,7 +1663,7 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
         // 👉 bloc d'instruction
         const span = document.createElement('span');
         span.textContent = searchModalTranslations[window.CURRENT_LANGUAGE].clickMessage;
-        span.style.fontSize = '11px';
+        span.style.fontSize = calcFontSize(11)+'px';
         span.style.padding = '0px';
         span.style.marginTop = '0px';
         span.style.marginBottom = '0px';        
@@ -1693,7 +1693,7 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
             color: inherit;
             border: none;
             cursor: pointer;
-            fontSize: 18px;
+            font-size: ${calcFontSize(18)}px;
             padding: 6px;
         `;
 
@@ -1819,7 +1819,7 @@ function performModalSearch(firstName = null, lastName = null, isFromSearchModal
         nameDiv.className = 'result-name';
         if (matchInfo) {
             nameDiv.style.fontWeight = 'normal'; //= 'bold';
-            nameDiv.style.fontSize = nameCloudState.mobilePhone ? '12px' : '14px';
+            nameDiv.style.fontSize = nameCloudState.mobilePhone ? calcFontSize(12)+'px' : calcFontSize(14)+'px';
             nameDiv.innerHTML =   `<b>${person.name.replace(/\//g, '').trim()}</b> ${dateInfo || ''}`;
         } else {
             nameDiv.style.fontWeight = 'normal'; 

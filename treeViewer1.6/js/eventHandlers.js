@@ -2,7 +2,7 @@
 // Gestionnaires d'événements
 // ====================================
 import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen, getCachedImageURL } from './main.js';
+import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen, getCachedImageURL, redimensionnerPlayButtonSizeInDOM } from './main.js';
 import { setupElegantBackground } from './backgroundManager.js';
 import { findPersonsByName } from './utils.js';
 import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
@@ -72,18 +72,21 @@ export function handleWindowResize() {
 
 
     const closeButton = document.getElementById('close-tree-button');
+    if (!state.isSamsungBrowser) { state.innerWidth = window.innerWidth*state.browserScaleFactor; }
+    else { state.innerWidth = window.innerWidth;}
 
     if (state.isButtonOnDisplay) {
-        if (window.innerWidth < 400) {
-            closeButton.style.setProperty('top', '48px', 'important');
-            closeButton.style.setProperty('right', '6px', 'important');
+        if (state.innerWidth < 400) {
+            if (state.isMobile) { closeButton.style.setProperty('top', '4.2em', 'important');}
+            else { closeButton.style.setProperty('top', '4.8em', 'important');}
+            closeButton.style.setProperty('right', '1em', 'important');
         } else {
-            closeButton.style.setProperty('top', '6px', 'important');
-            closeButton.style.setProperty('right', '6px', 'important'); 
+            closeButton.style.setProperty('top', '1em', 'important');
+            closeButton.style.setProperty('right', '1em', 'important'); 
         }
     } else {
-        closeButton.style.setProperty('top', '6px', 'important');
-        closeButton.style.setProperty('right', '6px', 'important');        
+        closeButton.style.setProperty('top', '1em', 'important');
+        closeButton.style.setProperty('right', '1em', 'important');        
     }
 
 
@@ -181,7 +184,7 @@ export function selectRootPerson() {
             resultsSelect.setBlinking(false);
         } else {
             resultsSelect.style.animation = 'none';
-            resultsSelect.style.backgroundColor = 'orange';
+            // resultsSelect.style.backgroundColor = 'orange';
         }
 
         state.rootPersonId = selectedPersonId;
@@ -251,7 +254,7 @@ export function selectFoundPerson(personId) {
             resultsSelect.setBlinking(false);
         } else {
             resultsSelect.style.animation = 'none';
-            resultsSelect.style.backgroundColor = 'orange';
+            // resultsSelect.style.backgroundColor = 'orange';
         }
     }
     
@@ -702,6 +705,7 @@ export async function returnToLogin() {
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = '▶️';
     animationPauseBtn.querySelector('span').textContent = '▶';
+    redimensionnerPlayButtonSizeInDOM();
 
     // Masquer la carte
     hideMap();
@@ -753,7 +757,8 @@ export async function returnToLogin() {
 
 
     state.isTreeEnabled = false;
-
+    state.isWordCloudEnabled = false;
+    
     positionFormContainer();
 
     const secretTargetArea = document.getElementById('secret-trigger-area');

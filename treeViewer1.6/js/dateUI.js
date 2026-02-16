@@ -657,19 +657,31 @@ export function createMobileDateInput(label, defaultValue, onChange) {
     const labelElement = document.createElement('div');
     labelElement.innerHTML = label;
     labelElement.style.fontSize = '12px';
-    labelElement.style.marginBottom = '3px';
+    labelElement.style.marginBottom = '0.25em';
+    labelElement.role = 'fontSizeChangeCloudName';
+    labelElement.id = 'dateButtonLabel-'+label;
     
     const dateButton = document.createElement('button');
-    dateButton.textContent = defaultValue;
-    dateButton.style.width = '36px';
-    dateButton.style.padding = '3px 0px';
-    dateButton.style.fontSize = '13px';
-    dateButton.style.border = '1px solid #3f51b5';
-    dateButton.style.borderRadius = '3px';
+    // dateButton.textContent = defaultValue;
+    dateButton.style.width = '3.6em';
+    dateButton.style.padding = '0.3em 0px';
+    dateButton.style.fontSize = '10px';
+    dateButton.style.border = '0.1em solid #3f51b5';
+    dateButton.style.borderRadius = '0.3em';
     dateButton.style.backgroundColor = '#e8eaf6';
     dateButton.style.color = '#3f51b5';
     dateButton.style.cursor = 'pointer';
     dateButton.style.fontWeight = 'bold';
+    dateButton.role = 'fontSizeChangeChromeCloudName';
+    dateButton.id = 'dateButton-'+label;
+
+    const dateButtonSpan = document.createElement('span');
+    dateButtonSpan.textContent = defaultValue;
+    dateButtonSpan.role = 'fontSizeChangeCloudName';
+    dateButtonSpan.style.fontSize = '13px';
+    dateButtonSpan.id = 'dateButtonSpan-'+label;
+    dateButton.appendChild(dateButtonSpan);
+    
     
     // Input caché pour stocker la valeur
     const hiddenInput = document.createElement('input');
@@ -680,7 +692,7 @@ export function createMobileDateInput(label, defaultValue, onChange) {
     dateButton.addEventListener('click', () => {
         const datePicker = new HistoricDatePicker(hiddenInput.value, (selectedYear) => {
             hiddenInput.value = selectedYear;
-            dateButton.textContent = selectedYear;
+            dateButton.querySelector('span').textContent = selectedYear;
             
             // Déclencher un événement de changement
             const event = new Event('change');

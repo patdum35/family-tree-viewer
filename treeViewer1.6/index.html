@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html style="color-scheme: light !important;" translate="no">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,8 +26,9 @@
     <title>Explore tes origines</title>
 
 
-
-
+    <!-- Pour afficher un bouton de debug pour afficher la console de debug eruda -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 
 
     <!-- SCRIPT DE DÉTECTION DE NAVIGATEUR - DOIT ÊTRE EN PREMIER -->
@@ -35,12 +37,16 @@
     const T = {
       fr: {
         title: "⚠️ Navigateur compatible ?",
+        title2: "⚠️ zoom du Navigateur ?",
         using: "Vous utilisez",
-        // risk: '⚠️: Ce navigateur risque d\'inverser les couleurs de l\'app. "Explore tes origines"',
         risk: "⚠️: Ce navigateur risque d'inverser les couleurs de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span>. Sélectionnez \"Sites Lumineux\" ",
         colorRisk: "⚠️: Ce navigateur va inverser les couleurs de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span>. Sélectionnez \"Sites Lumineux\"",
+        zoomRiskChrome: "⚠️: Ce navigateur applique un zoom de {zoom} de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span>.<br>Sélectionnez \" ⋮ / Paramètres / Accessibilité / 100%\" ",
+        zoomRiskOther: "⚠️: Ce navigateur applique un zoom de {zoom} de l'app. <span style='font-weight:bold; color:#002395;'>\"explore tes origines\"</span> et risque d'inverser les couleurs. <br>Sélectionnez \"Sites Lumineux\" et \" ☰ / Taille du texte / 100%\"",
         solutionsStrong: "Solutions :",
         s1: "Continuer quand même, et activer le mode sites lumineux",
+        s1bis: "Continuer quand même, et remettre le zoom à 100%",
+        s1ter: "Continuer quand même, et activer le mode sites lumineux et zoom 100%",
         s2: "Plan B : Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong>",
         s3: "Plan C : Copiez l'URL et coller dans un autre browser",
         chromeBtn: "🚀 Ouvrir dans Chrome",
@@ -52,11 +58,16 @@
       },
       en: {
         title: "⚠️ Compatible browser?",
+        title2: "⚠️ Browser zoom?",
         using: "You are using",
         risk: "⚠️: This browser may invert the colors of the app. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>. Select \"Light Sites\" ",
         colorRisk: "⚠️: This browser will invert the colors of the app. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>. Select \"Light Sites\"",
+        zoomRiskChrome: "⚠️: This browser is applying a {zoom} zoom to the app. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>.<br>Select \" ⋮ / Settings / Accessibility / 100%\" ",
+        zoomRiskOther: "⚠️: This browser is applying a {zoom} zoom and might invert app colors. <span style='font-weight:bold; color:#002395;'>\"explore your origins\"</span>.<br>Select \"Light Sites\" and \" ☰ / Text size / 100%\"",
         solutionsStrong: "Solutions:",
         s1: "Continue anyway and enable light site mode",
+        s1bis: "Continue anyway, and reset zoom to 100%",
+        s1ter: "Continue anyway, enable light sites mode and 100% zoom",
         s2: "Plan B: Open in <strong>Chrome</strong> or <strong>Firefox</strong>",
         s3: "Plan C: Copy the URL and paste in another browser",
         chromeBtn: "🚀 Open in Chrome",
@@ -68,11 +79,16 @@
       },
       es: {
         title: "⚠️ ¿Navegador compatible?",
+        title2: "¿⚠️ Zoom del navegador?",
         using: "Estás usando",
         risk: "⚠️: Este navegador puede invertir los colores de la aplicación <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>. Selecciona \"Sitios claros\" ",
         colorRisk: "⚠️: Este navegador invertirá los colores de la aplicación <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>. Selecciona \"Sitios claros\" ",
+        zoomRiskChrome: "⚠️: Este navegador aplica un zoom de {zoom} a la aplicación. <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>.<br>Seleccione \" ⋮ / Configuración / Accesibilidad / 100%\" ",
+        zoomRiskOther: "⚠️: Este navegador aplica un zoom de {zoom} y corre el riesgo de invertir los colores. <span style='font-weight:bold; color:#002395;'>\"explora tus orígenes\"</span>.<br>Seleccione \"Sitios claros\" y \" ☰ / Tamaño del texto / 100%\"",
         solutionsStrong: "Soluciones :",
         s1: "Continuar de todos modos y activar el modo claro",
+        s1bis: "Continuar de todos modos y restablecer el zoom al 100%",
+        s1ter: "Continuar de todos modos, activar sitios claros y zoom al 100%",        
         s2: "Plan B : Abre en <strong>Chrome</strong> o <strong>Firefox</strong>",
         s3: "Plan C : Copia la URL y ábrela en otro navegador",
         chromeBtn: "🚀 Abrir en Chrome",
@@ -85,11 +101,16 @@
       },
       hu: {
         title: "⚠️ Kompatibilis böngésző?",
+        title2: "⚠️ Böngésző nagyítása?",
         using: "Ön ezt használja:",
         risk: "⚠️: Ez a böngésző megfordíthatja az alkalmazás színeit <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeted\"</span>. Válassza a \"Világos webhelyek\" lehetőséget ",
         colorRisk: "⚠️: Ez a böngésző meg fogja fordítani az app színeit <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeted\"</span>. Válassza a \"Világos webhelyek\" lehetőséget",
+        zoomRiskChrome: "⚠️: Ez a böngésző {zoom} nagyítást alkalmaz az alkalmazásban. <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeteded\"</span>.<br>Válaszd a \" ⋮ / Beállítások / Kisegítő lehetőségek / 100%\" opciót",
+        zoomRiskOther: "⚠️: Ez a böngésző {zoom} nagyítást alkalmaz és felcserélheti a színeket. <span style='font-weight:bold; color:#002395;'>\"fedezd fel az eredeteded\"</span>.<br>Válaszd a \"Világos webhelyek\" módot és a \" ☰ / Szövegméret / 100%\" opciót",
         solutionsStrong: "Megoldások :",
         s1: "Folytassa így is, és kapcsolja be a világos módot",
+        s1bis: "Folytatás mindenképpen, és a nagyítás visszaállítása 100%-ra",
+        s1ter: "Folytatás mindenképpen, világos mód és 100%-os nagyítás bekapcsolása",        
         s2: "B terv : Nyissa meg <strong>Chrome</strong> vagy <strong>Firefox</strong> böngészőben",
         s3: "C terv : Másolja a címet, és nyissa meg másik böngészőben",
         chromeBtn: "🚀 Megnyitás Chrome-ban",
@@ -105,12 +126,31 @@
 
     window.redirectLang = 'fr';
     
-    // Détection IMMÉDIATE
-    (function() {
-      const ua = navigator.userAgent.toLowerCase();
-      let isProblematic = false;
-      let browserName = '';
-      
+    let isProblematic = false;
+    let browserName = '';
+    let isSamsungBrowser = false;
+    let isSamsungLikeBrowser = false;
+    let innerWidth = 1920;
+    let browserScaleFactor = 1;
+    let browserScaleFactor_ChromeMethod = 1;
+    let browserScaleFactor_SamsungMethod = 1;
+    let isMobile = false;
+    const MAX_FONT_PIXELS = 100;
+
+    const calcChrome = (baseSize) => { 
+        if (isSamsungBrowser || isSamsungLikeBrowser) { return baseSize; }
+        else { return Math.min(MAX_FONT_PIXELS, Math.round(baseSize/browserScaleFactor));  }        
+    };
+
+    const calcSamsung = (baseSize) => {  
+        return Math.round(baseSize/browserScaleFactor); 
+        return Math.min(MAX_FONT_PIXELS, Math.round(baseSize/browserScaleFactor));
+    };
+
+    function detectBrowserType() { 
+      const ua = navigator.userAgent.toLowerCase();   
+      isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+  
       if (/iphone|ipad|ipod/.test(ua)) {
         isProblematic = false;
         if (ua.includes('crios')) browserName = 'Chrome (iOS)';
@@ -119,6 +159,7 @@
       } else if (ua.includes('samsungbrowser')) {
         isProblematic = true;
         browserName = 'Samsung Internet';
+        isSamsungBrowser = true;
       } else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) {
         isProblematic = true;
         browserName = 'MIUI Browser';
@@ -144,18 +185,128 @@
         isProblematic = false;
         browserName = 'Chrome';
       }
-      
+      console.log(' - browserName:', browserName);
+    }
+
+    function detectBrowserScaleSamsung() {
+        const probe = document.createElement("span");
+        probe.textContent = "M";
+        probe.style.cssText = `
+            position: fixed;
+            visibility: hidden;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+        `;
+
+        const container = document.documentElement;
+        container.appendChild(probe);
+        const computedPx = parseFloat(getComputedStyle(probe).fontSize);
+        container.removeChild(probe);
+        const scale = computedPx / 16;
+        console.log(
+            "[detectBrowserScaleSamsung]",
+            "computed font-size =", computedPx + "px",
+            "=> scale =", scale
+        );
+        return scale;
+    }
+
+    function detectBrowserScale() {
+        console.log('\n=== at start in html : ANALYSE SCREEN SIZE / BROWSER WINDOW SIZE / BROWSER ZOOM  ===');
+        console.log(' - browser internal size:', window.innerWidth+'x'+window.innerHeight);
+        if (isMobile) {
+            console.log(' - browser GLOBAL SCALE FACTOR:', window.screen.width / window.innerWidth);
+            browserScaleFactor_ChromeMethod = window.screen.width / window.innerWidth; 
+        } else {
+            console.log(' - screen size:', window.screen.width+'x'+window.screen.height);
+            console.log(' - screen orientation:', screen.orientation ? screen.orientation.type : 'not available');
+            console.log(' - browser external size:', window.outerWidth+'x'+window.outerHeight);
+            console.log(' - browser internal size:', window.innerWidth+'x'+window.innerHeight);
+            console.log(' - devicePixelRatio:', window.devicePixelRatio);
+            console.log(' - screen available Size:', window.screen.availWidth+'x'+window.screen.availHeight);
+            // console.log(' - F12 DevTools open ?', state.isF12Detected);
+            console.log(' - screen physical real width;', (window.innerWidth * window.devicePixelRatio));
+            console.log(' - browser window position left:', window.screenX, 'top:', window.screenY, 'right:', window.screenX + window.outerWidth, 'bottom:', window.screenY + window.outerHeight);
+            console.log(' - browser text scale factor W :', window.outerWidth / window.innerWidth);
+            console.log(' - browser text scale factor H :', window.outerHeight / window.innerHeight );
+            console.log(' - browser text scale factor H , corrected:', window.outerHeight*0.875 / window.innerHeight );
+
+
+            console.log(' - browser GLOBAL SCALE FACTOR:', window.outerWidth / window.innerWidth);
+            browserScaleFactor_ChromeMethod = window.outerWidth/ window.innerWidth; 
+            // let browserScaleFactor2 = window.outerHeight*0.875 / window.innerHeight; 
+            // browserScaleFactor_ChromeMethod = Math.min(browserScaleFactor_ChromeMethod, browserScaleFactor2 )
+        }
+
+        if (!isSamsungBrowser) { innerWidth = window.innerWidth*browserScaleFactor_ChromeMethod; }
+        else { innerWidth = window.innerWidth;}
+
+        console.log(' -', browserScaleFactor_ChromeMethod,'= browser browserScaleFactor chrome method');
+        console.log(' - final browser internal width:', innerWidth);
+
+        //Samsung: utilise le multiplicateur de font-size
+        browserScaleFactor_SamsungMethod = detectBrowserScaleSamsung();
+        console.log(' - ', browserScaleFactor_SamsungMethod,'= browser browserScaleFactor samsung method');
+
+        if (Math.abs(browserScaleFactor_SamsungMethod - 1) < 0.05) {
+            browserScaleFactor = browserScaleFactor_ChromeMethod;
+        } else {
+            browserScaleFactor = browserScaleFactor_SamsungMethod;
+            isSamsungLikeBrowser = true;
+        }
+        browserScaleFactor = Math.max(Math.min(browserScaleFactor, 6) , 0.20);
+        console.log(' -', browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
+    }
+
+
+    // function montrerConsole() {
+    //     const el = document.getElementById('eruda');
+    //     if (el) {
+    //         // On force l'affichage en modifiant le style directement
+    //         el.style.setProperty('display', 'block', 'important');
+    //         el.style.setProperty('visibility', 'visible', 'important');
+    //         el.style.setProperty('opacity', '1', 'important');
+    //         el.style.setProperty('pointer-events', 'auto', 'important');
+    //         eruda.show(); // Commande interne d'Eruda
+    //     }
+    // }
 
 
 
-      // Vérification immédiate : si l'utilisateur a choisi de ne plus voir la modale
+    //Détection IMMÉDIATE
+    (function() {
+    //   montrerConsole();
+      detectBrowserType();
+      detectBrowserScale();
+        // Vérification immédiate : si l'utilisateur a choisi de ne plus voir la modale
       if (localStorage.getItem('hide_browser_warning') === 'true') {
             return; // On arrête l'exécution ici, la modale ne s'affichera pas
       }
+      const isZoomed = (Math.abs(browserScaleFactor-1) > 0.05);
+    //   const zoomPercentVal = Math.round(browserScaleFactor * 100);
+    //   const zoomPercentVal = Math.round((browserScaleFactor * 100) / 5) * 5;
+      const zoomPercentValTrunc = Math.floor((browserScaleFactor * 100) / 5) * 5;
+      const zoomPercentValRound = Math.round((browserScaleFactor * 100) / 5) * 5;
+      const deltaTrunc = Math.abs(zoomPercentValTrunc - browserScaleFactor);
+      const deltaRound = Math.abs(zoomPercentValTrunc - browserScaleFactor);
+      let zoomPercentVal;
+      if (deltaTrunc < deltaRound) zoomPercentVal = zoomPercentValTrunc;
+      else zoomPercentVal = zoomPercentValRound;
+
+      if (zoomPercentVal >= 200) zoomPercentVal = Math.floor((browserScaleFactor * 100) / 10) * 10;
+      if (zoomPercentVal == 130) zoomPercentVal = 125;
+      if (zoomPercentVal == 155) zoomPercentVal = 150;
+      if (zoomPercentVal == 180) zoomPercentVal = 175;
+      if (zoomPercentVal == 510) zoomPercentVal = 500;
 
 
+      const zoomHtml = `<strong>${zoomPercentVal}%</strong>`;
+      console.log('\n\n\n\n=== START === is browser Problematic ?', isProblematic, ' is browser zoomed ?', isZoomed, zoomPercentVal,'%\n\n');
 
-      if (isProblematic) {
+
+      if (isProblematic || isZoomed) {
     //   if (true) {
         const DEFAULT_LANG = 'fr';
         const saved = localStorage.getItem('redir_lang');
@@ -163,12 +314,43 @@
         if (!T[LANG]) LANG = DEFAULT_LANG;
         window.redirectLang = LANG;
 
+
+        const t = T[LANG];
+        const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let warningMsg = '';
+        let solution1Text = '';
+        let showAlternateBrowsers = true; // Par défaut on montre les boutons Chrome/Copier
+        let modalTitle = t.title;
+
+        if (isProblematic && isZoomed) {
+            // CAS 3 : Problematic ET Zoom
+            // On remplace le marqueur {zoom} par le HTML généré
+            warningMsg = t.zoomRiskOther.replace('{zoom}', zoomHtml);
+            solution1Text = t.s1ter;
+            showAlternateBrowsers = true; 
+        } 
+        else if (isProblematic && !isZoomed) {
+            // CAS 1 : Problematic seulement (Comportement original)
+            warningMsg = dark ? t.colorRisk : t.risk;
+            solution1Text = t.s1;
+            showAlternateBrowsers = true;
+        } 
+        else if (!isProblematic && isZoomed) {
+            // CAS 2 : Zoom seulement (Browser OK)
+            warningMsg = t.zoomRiskChrome.replace('{zoom}', zoomHtml);
+            solution1Text = t.s1bis;
+            modalTitle = t.title2;
+            showAlternateBrowsers = false; // On cache les alternatives car le browser est OK
+        }
+
+
+
         // On injecte tes styles de index.html
         const style = document.createElement('style');
         style.textContent = `
-          .lang-switch-modal { display: flex; justify-content: center; gap: 6px; margin-bottom: 15px; margin-top: -10px; }
-          .l-flag { width: 24px; height: 16px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background-size: cover; opacity: 0.6; transition: 0.2s; }
-          .l-flag.active { opacity: 1; outline: 2px solid #2196F3; outline-offset: 2px; }
+          .lang-switch-modal { font-size: ${calcChrome(20)}px; display: flex; justify-content: center; gap: 0.3em; margin-bottom: 0.75em; margin-top: -0.5em; }
+          .l-flag { font-size: ${calcSamsung(20)}px; width: 2.2em; height: 1.6em; border-radius: 0.2em; cursor: pointer; border: 0.05em solid #ccc; background-size: cover; opacity: 0.6; transition: 0.2s; }
+          .l-flag.active { opacity: 1; outline: 0.1em solid #2196F3; outline-offset: 0.1em; }
           .f-fr { background: linear-gradient(to right, #0055A4 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #EF4135 66.66%); }
           .f-en { background: #012169 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cpath fill='%23012169' d='M0 0v30h60V0z'/%3E%3Cpath stroke='%23fff' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath stroke='%23C8102E' stroke-width='6' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='10' d='M30 0v30M0 15h60'/%3E%3Cpath fill='none' stroke='%23C8102E' stroke-width='6' d='M30 0v30M0 15h60'/%3E%3C/svg%3E") center/cover; }
           .f-es { background: linear-gradient(to bottom, #C60B1E 25%, #FFC400 25%, #FFC400 75%, #C60B1E 75%); }
@@ -179,9 +361,10 @@
         document.addEventListener('DOMContentLoaded', function() {
           const overlay = document.createElement('div');
           overlay.id = 'browser-warning-overlay';
-          overlay.role = "fontSizeChangeChrome";
+          overlay.role = "fontSizeChangeChrome0";
           overlay.style.cssText = `
             position: fixed;
+            font-size: ${calcChrome(10)}px;
             top: 0;
             left: 0;
             width: 100%;
@@ -192,44 +375,62 @@
             display: flex;
             align-items: center;      /* Centrage vertical */
             justify-content: center;   /* Centrage horizontal */
-            padding: 10px;
+            padding: 1em;
             box-sizing: border-box;
+            border-radius: 0.6em;
           `;
           const container = document.createElement('div');
-          container.style.cssText = 'font-size:10px;background:white;border-radius:2em;padding:2em;padding-top:2.5em;width:100%;max-width:32em;margin:0 auto;box-sizing:border-box;max-height:90vh;overflow-y:auto;box-shadow:0 2em 3em rgba(0,0,0,0.3);';
+          container.style.cssText = 'font-size:${calcChrome(10)}px;background:white;border-radius:1.2em;padding:2.0em;padding-top:2.5em;width:100%;max-width:32em;margin:0 auto;box-sizing:border-box;max-height:90vh;overflow-y:auto;box-shadow:0 2em 3em rgba(0,0,0,0.3);';
+          container.role = "fontSizeChangeChrome0";
 
-          const t = T[LANG];
-          const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          let warningMsg = dark ? t.colorRisk : t.risk;
+
+
+          // Préparation du HTML pour les boutons additionnels (Chrome / Copy)
+          const extraButtonsHTML = showAlternateBrowsers ? `
+            <button role="fontSizeChangeChrome0" onclick="tryChrome()" style="font-size:${calcChrome(15)}px; border-radius: 0.3em; display:block;width:100%;padding:0.5em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0; margin-bottom:0.5em;">
+                <span role="fontSizeChange0" style="font-size:${calcSamsung(15)}px;">${t.chromeBtn}</span>
+            </button>          
+            <button role="fontSizeChangeChrome0" onclick="copyUrl()" style="font-size:${calcChrome(15)}px; border-radius: 0.3em; display:block;width:100%;padding:0.5em;background:#4CAF50;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0;">
+                <span role="fontSizeChange0" style="font-size:${calcSamsung(15)}px;">${t.copyBtn}</span>
+            </button>
+          ` : '';
+
+          // Préparation du HTML pour la liste des solutions (Plan B et C)
+          const extraSolutionsHTML = showAlternateBrowsers ? `
+            <li role="fontSizeChange0" style="font-size:${calcSamsung(15)}px; margin:0.3em 0;">${t.s2}</li>
+            <li role="fontSizeChange0" style="font-size:${calcSamsung(15)}px; margin:0.3em; margin-bottom:0">${t.s3}</li>
+          ` : '';
 
           container.innerHTML = `
-            <div class="lang-switch-modal">
-                <div class="l-flag f-fr ${LANG==='fr'?'active':''}" onclick="setModalLang('fr')"></div>
-                <div class="l-flag f-en ${LANG==='en'?'active':''}" onclick="setModalLang('en')"></div>
-                <div class="l-flag f-es ${LANG==='es'?'active':''}" onclick="setModalLang('es')"></div>
-                <div class="l-flag f-hu ${LANG==='hu'?'active':''}" onclick="setModalLang('hu')"></div>
+            <div class="lang-switch-modal" role= "fontSizeChangeChrome0" >
+                <div class="l-flag f-fr ${LANG==='fr'?'active':''}" role= "fontSizeChangeChrome0" onclick="setModalLang('fr')"></div>
+                <div class="l-flag f-en ${LANG==='en'?'active':''}" role= "fontSizeChangeChrome0" onclick="setModalLang('en')"></div>
+                <div class="l-flag f-es ${LANG==='es'?'active':''}" role= "fontSizeChangeChrome0" onclick="setModalLang('es')"></div>
+                <div class="l-flag f-hu ${LANG==='hu'?'active':''}" role= "fontSizeChangeChrome0" onclick="setModalLang('hu')"></div>
             </div>
-            <h1 role="fontSizeChange" style="font-size:17px; white-space:nowrap;margin-top:0px;margin-bottom:0.2em;margin-top:-0.2em;padding:0;color:#333;text-align:center;">${t.title}</h1>
-            <p role="fontSizeChange" style="font-size:15px; color:#666;line-height:1.4;margin-bottom:1.2em;margin-top:-0.2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
-            <p role="fontSizeChange" style="font-size:15px; color:#666;line-height:1.4;margin-bottom:0.8em;text-align:center;margin-top:-0.7em;">${warningMsg}</p>
+            <h1 role="fontSizeChange0" style="font-size:${calcSamsung(17)}px; white-space:nowrap;margin-top:0px;margin-bottom:0.2em;margin-top:-0.2em;padding:0;color:#333;text-align:center;">${modalTitle}</h1>
+            <p role="fontSizeChange0" style="font-size:${calcSamsung(15)}px; color:#666;line-height:1.4;margin-bottom:1.2em;margin-top:-0.2em;text-align:center;">${t.using} <span style="color:#667eea;font-weight:bold;background:#f0f0f0;padding:0.25em 10px;border-radius:0.25em;display:inline-block;">${browserName}</span></p>
+            <p role="fontSizeChange0" style="font-size:${calcSamsung(15)}px; color:#666;line-height:1.4;margin-bottom:0.8em;text-align:center;margin-top:-0.7em;">${warningMsg}</p>
 
-            <button onclick="continueToApp()" style="font-size:15px;display:block;width:100%;padding:0.5em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0;margin-top:-0.5em;">${t.continueBtn}</button>
-            <button onclick="tryChrome()" style="font-size:15px;display:block;width:100%;padding:0.5em;background:#ff9800;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0;">${t.chromeBtn}</button>          
-            <button onclick="copyUrl()" style="font-size:15px;display:block;width:100%;padding:0.5em;background:#4CAF50;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0;">${t.copyBtn}</button>
+            <button role="fontSizeChangeChrome0" onclick="continueToApp()" style="font-size:${calcChrome(15)}px; border-radius: 0.3em; display:block;width:100%;padding:0.5em;background:#2196F3;color:white;border:none;border-radius:0.625em;font-weight:bold;cursor:pointer;margin:0.325em 0;margin-top:-0.5em; margin-bottom:0.5em;">
+                 <span role="fontSizeChange0" style="font-size:${calcSamsung(15)}px;">${t.continueBtn}</span>
+            </button>
 
-            <div role="fontSizeChangeChrome" style="font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 0.5em; margin: 0.4em; margin-top: -0.5em ; cursor: pointer;">
-                <input role="fontSizeChangeChrome" type="checkbox" id="dont-show-again" style="font-size: 10px; width: 1.8em; height: 1.8em; cursor: pointer;">
-                <label role="fontSizeChange"  for="dont-show-again" style="font-size: 14px; color: #666; cursor: pointer; user-select: none;">
+            ${extraButtonsHTML}
+
+            <div role="fontSizeChangeChrome0" style="font-size: ${calcSamsung(14)}px; display: flex; align-items: center; justify-content: center; gap: 0.5em; margin: 0.4em; margin-top: -0.1em ; cursor: pointer;">
+                <input role="fontSizeChangeChrome0" type="checkbox" id="dont-show-again" style="font-size: ${calcChrome(10)}px; width: 1.8em; height: 1.8em; cursor: pointer; box-sizing: border-box; border-radius: 0.4em; border:0.2em solid #afaeae; "
+                <label role="fontSizeChange0"  for="dont-show-again" style="font-size: ${calcChrome(10)}px; color: #666; cursor: pointer; user-select: none;">
                     ${t.dontShowAgain}
                 </label>
             </div>
 
-            <div role="fontSizeChangeChrome" style="font-size:10px;background:#f8f9fa;border-radius:1em;padding:.5em; padding-top:0.5em; padding-bottom:0.2em;margin:0; margin-top:-0.5em">
-              <strong role="fontSizeChange" style="font-size:15px;display:block;margin-bottom:0;">${t.solutionsStrong}</strong>
-              <ol role="fontSizeChangeChrome" style="font-size:10px; padding-left:2em;color:#444;margin:0;">
-                <li role="fontSizeChange" style="font-size:15px; margin:0.3em 0;">${t.s1}</li>
-                <li role="fontSizeChange" style="font-size:15px; margin:0.3em 0;">${t.s2}</li>
-                <li role="fontSizeChange" style="font-size:15px; margin:0.3em; margin-bottom:0">${t.s3}</li>
+
+            <div role="fontSizeChangeChrome0" style="font-size:${calcChrome(10)}px; border-radius: 0.3em; background:#f8f9fa;border-radius:1em;padding:.5em; padding-top:0.5em; padding-bottom:0.2em;margin:0; margin-top:-0.5em">
+              <strong role="fontSizeChange0" style="font-size:${calcSamsung(15)}px;display:block;margin-bottom:0;">${t.solutionsStrong}</strong>
+              <ol role="fontSizeChangeChrome0" style="font-size:${calcChrome(10)}px; padding-left:2em;color:#444;margin:0;">
+                <li role="fontSizeChange0" style="font-size:${calcSamsung(15)}px; margin:0.3em 0;">${solution1Text}</li>
+                ${extraSolutionsHTML}
               </ol>
             </div>
           `;
@@ -239,7 +440,6 @@
         });
       }
     })();
-
 
     function continueToApp() {
         savePreferenceAndClose();
@@ -331,9 +531,7 @@
     <title>Arbre généalogique</title>
 
     
-    <!-- Pour afficher un bouton de debug pour afficher la console de debug eruda -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
+
 
 
 
@@ -425,66 +623,76 @@
 
 
     <!-- Bouton pour ouvrir la modal de chargement de fichier -->
-    <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
-    <button id="help-button" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
+    <button id="load-gedcom-button" role="button1" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
+    <button id="help-button" role="button1" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
 
-    <div role="fontSizeChange" class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
-    <button id="fullScreen-button" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="position: fixed; z-index: 1499; bottom: 3px; left: 5px; font-size: 34px; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
+    <!-- <div id="fullScreenLabel" role="fontSizeChange1" class="fullScreenLabel" data-text-key="fullScreenLabel" style="font-size: 11px; position: fixed; z-index: 2; bottom: 3.75em; left: 0.42em;  color: white; margin-top: 0px; margin-bottom: 0.17em; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div> -->
 
-    <div class="browserBarLabel" id="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
-    <button id="browserBar-button" class="browserBar-Button"   onclick="browserBarPuzzle()" data-text-key="browserBar" style="display: none; position: fixed; z-index: 2; bottom: 3px;  font-size: 28px; background: transparent; border: none; cursor: pointer;"><span>💻</span></button>
+    <div id="fullScreenLabel" role="fontSizeChangeChrome1" class="fullScreenLabel"  style="font-size: 11px; position: fixed; z-index: 2; bottom: 3.1em; left: 0.42em;  color: white; margin-top: 0px; margin-bottom: 0.17em; padding-top:0; padding-bottom:0; text-align: center;">
+        <span data-text-key="fullScreenLabel" role="fontSizeChange1" style="font-size: 10px;">fullScreen</span>
+    </div>
+
+
+    <button id="fullScreen-button" role="fontSizeChangeChrome1" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="font-size: 10px; position: fixed; z-index: 1499; bottom: 0.4em; left: 0.7em; padding: 0; margin:0; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
+<!-- bottom: 0.09em; -->
+    <div id="browserBarLabel" class="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
+    <button id="browserBar-button" role="button1" class="browserBar-Button"   onclick="browserBarPuzzle()" data-text-key="browserBar" style="display: none; position: fixed; z-index: 2; bottom: 3px;  font-size: 28px; background: transparent; border: none; cursor: pointer;"><span>💻</span></button>
 
 
     <div id="advanced-settings-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
     
 
-        <div role="fontSizeChangeChrome" style="background-color: white; font-size: 10px; width: 34em; max-width: 90%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+        <div role="fontSizeChangeChromeAdvanced" style="background-color: white; font-size: 10px; width: 34em; max-width: 90%; border-radius: 1em; box-shadow: 0 0.4em 0.6em rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
             <!-- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; "> -->
-            <div style="display: flex; justify-content: space-between; align-items: center;  /* STYLES DU BANDEAU */ background-color: #E0F7FA;  padding: 3px 20px; margin-bottom: 0;  border-radius: 10px 10px 0 0;  border-bottom: 1px solid #B2EBF2;">
-                <h2 role="fontSizeChange" id="advancedSettingsTitle" style="margin: 0; font-size: 16px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
-                <span role="button" onclick="closeGedcomModal()" id="advancedSettingsClose-btn" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
+            <div role="fontSizeChangeChromeAdvanced"  style="font-size: 10px; display: flex; justify-content: space-between; align-items: center;  /* STYLES DU BANDEAU */ background-color: #E0F7FA;  padding: 0.3em 2em; margin-bottom: 0;  border-radius: 1em 1em 0 0;  border-bottom: 0.1em solid #B2EBF2;">
+                <h2 role="fontSizeChangeAdvanced" id="advancedSettingsTitle" style="margin: 0; font-size: 16px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
+                <span role="button1" onclick="closeGedcomModal()" id="advancedSettingsClose-btn" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
             </div>
-            <div id="insertionPointForInstallButton" style="font-size: 10px; padding: 2em; padding-left: 2.5em;" role="fontSizeChangeChrome">
+            <div id="insertionPointForInstallButton" style="font-size: 10px; padding: 2em; padding-left: 2.5em;" role="fontSizeChangeChrome1">
                 <!-- <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;"> -->
                 <!-- Cacher l'input file original -->
                 <input type="file" id="gedFile" accept=".ged" style="display: none;">
 
-                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4CAF50; border-radius: 3px;  margin-top: -1.5em; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4CAF50; border-radius: 3px;  margin-top: -1.5em; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced" id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         Mise à jour du logiciel
                     </button>
                 </div>
 
 
-                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #9c27b0; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="defaultSettingsBtn" onclick="resetToDefaultSettings()" data-text-key="parametresDefaut" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #9c27b0; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced"id="defaultSettingsBtn" onclick="resetToDefaultSettings()" data-text-key="parametresDefaut" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🔄 Paramètres par défaut
                     </button>
                 </div>
 
                 
-                <div role="fontSizeChangeChrome"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4c93af; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="voiceBtn" onclick="voiceModal()" data-text-key="voiceModal"style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4c93af; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced" id="voiceBtn" onclick="voiceModal()" data-text-key="voiceModal"style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🗣️ sélection de la voix
                     </button>
                 </div>                
 
 
                 <!-- Label pour le fichier GEDCOM -->
-                <label role="fontSizeChangeChrome" id="labelGedFile" for="gedFile" style="display: block; font-size: 10px; color: #333; margin-top: 2em; margin-bottom: 0.3em; font-weight: 500;" data-text-key="fichierGedcom">
-                    <span role="fontSizeChange" class="label-text" style="font-size: 14px;">GEDCOM file</span>
+                <!-- <label id="labelGedFile"  role="fontSizeChangeChrome1" for="gedFile" style="display: block; font-size: 10px; color: #333; margin-top: 2em; margin-bottom: 0.3em; font-weight: 500;" data-text-key="fichierGedcom">
+                    <span id="labelGedFileSpan" role="fontSizeChange1"  class="label-text" style="font-size: 14px;">GEDCOM file</span>
+                </label> -->
+
+                <label id="labelGedFile"  role="fontSizeChangeAdvanced" class="label-text" for="gedFile" style="display: block; font-size: 13px; color: #333; margin-top: 1.4em; margin-bottom: 0.2em; font-weight: 500;" data-text-key="fichierGedcom">
+                    GEDCOM file
                 </label>
 
 
                 <div style="font-size: 10px; width: 100%; max-width: 30em; display: flex; margin-bottom: 0px; align-items: stretch; height: auto;">
-                    <div role="fontSizeChangeChrome"  style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4361ee; border-radius: 3px; padding: 0.6em; box-sizing: border-box;">
-                        <button id="gedFileBtn" onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
-                                style="font-size: 14px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0;">
+                    <div role="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4361ee; border-radius: 3px; padding: 0.6em; box-sizing: border-box;">
+                        <button role="buttonAdvanced" id="gedFileBtn" onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
+                                style="font-size: 13px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0;">
                             Choisir un fichier
                         </button>
                     </div>
 
-                    <span role="fontSizeChangeChrome" id="fileNameDisplay" style="font-size: 10px; flex-grow: 1; padding: 1em; border: 1px solid #ccc; border-left: none; border-right: none; 
+                    <span role="fontSizeChangeChromeAdvanced" id="fileNameDisplay" style="font-size: 10px; flex-grow: 1; padding: 1em; border: 1px solid #ccc; border-left: none; border-right: none; 
                                                     box-sizing: border-box; /* IMPORTANT : pour inclure le padding dans les 300px */
                                                     display: block;        /* IMPORTANT : pour que le box-sizing s'applique correctement */
                                                     border-radius: 0; background-color: #f9f9f9; text-align: left; 
@@ -494,11 +702,11 @@
                                                     line-height: 1.2; /* Permet le saut de ligne */
                                                     max-height: 6em; /*40px;  Limite la hauteur à environ 2 lignes de texte */
                                                     white-space: normal;"> 
-                                                    <span role="fontSizeChange" class="label-text" style="font-size: 14px;  margin: 0; padding: 0;">Aucun fichier choisi</span>
+                                                    <span role="fontSizeChangeAdvanced" class="label-text" style="font-size: 14px;  margin: 0; padding: 0;">Aucun fichier choisi</span>
                     </span>
 
-                    <div role="fontSizeChangeChrome" id="showTreeBtnDiv" style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4CAF50; border-radius: 3px; padding: 0.6em; box-sizing: border-box; display: none;">
-                        <button id="showTreeBtn" onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" 
+                    <div role="fontSizeChangeChromeAdvanced" id="showTreeBtnDiv" style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4CAF50; border-radius: 3px; padding: 0.6em; box-sizing: border-box; display: none;">
+                        <button role="buttonAdvanced" id="showTreeBtn" onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" 
                                 style="font-size: 14px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0; display: none;">
                             Afficher l'arbre
                         </button>
@@ -533,24 +741,30 @@
                     });
                 </script>
 
-                <div role="fontSizeChangeChrome"  class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced"  class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced" id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🐞 Activer les logs de debug
                     </button>
                 </div>   
 
-                <div role="fontSizeChangeChrome" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d55266; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d55266; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced" id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🧭 Activer l'accéléromètre
                     </button>
                 </div> 
 
-                <div role="fontSizeChangeChrome" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f74; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f74; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button role="buttonAdvanced"id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🎥 Caméra & Réalité Augmentée
                     </button>
                 </div> 
-
+                
+                <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 0.5em; margin: 0.4em; cursor: pointer; ">
+                    <input role="fontSizeChangeAdvanced" type="checkbox" id="dont-apply-button-rescale" style="font-size: 10px; width: 1.8em; height: 1.8em; cursor: pointer; box-sizing: border-box; border-radius: 0.2em; border:0.2em solid #afaeae; ">  
+                    <label role="fontSizeChangeAdvanced" id="dont-apply-button-rescale-label" for="dont-apply-button-rescale" style="font-size: 14px; color: #666; cursor: pointer; user-select: none;">
+                        do not apply button rescale
+                    </label>
+                </div>
             </div>
             <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
@@ -561,67 +775,72 @@
     <!-- Formulaire de mot de passe -->
     <div id="password-form" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">    
 
-        <div id="language-selector-container" style="display: none; position: fixed; top: 0px; margin-top: -10px;   z-index: 1; pointer-events: none;">
-            <div class="language-selector" style=" background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
-                <div role="fontSizeChangeChrome" id="french" class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr'); "></div>
-                <div role="fontSizeChangeChrome" id="english" class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en'); "></div>
-                <div role="fontSizeChangeChrome" id="spanish" class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es'); "></div>
-                <div role="fontSizeChangeChrome" id="hungarian" class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu'); "></div>
+        <div id="language-selector-container" role="fontSizeChangeChrome1" style="font-size: 10px; display: none; position: fixed; top: 0; margin-top: -1em; z-index: 1; pointer-events: none;">
+            <div id="language-selector" role="fontSizeChangeChrome1" class="language-selector" style="font-size: 10px; display: flex; justify-content: center; background-color: rgba(255, 255, 255, 0.8); padding: 0.5em; border-radius: 0.8em; box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.2); pointer-events: auto; margin-top: 1.5em; gap: 1em;">
+                <div id="french" role="fontSizeChangeChrome1" class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr'); "></div>
+                <div id="english" role="fontSizeChangeChrome1" class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en'); "></div>
+                <div id="spanish" role="fontSizeChangeChrome1" class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es'); "></div>
+                <div id="hungarian" role="fontSizeChangeChrome1" class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu'); "></div>
             </div>
         </div>
         
 
-        <div role="fontSizeChangeChrome" id="formContainer" class="form-container" style="display: none; position: fixed; font-size: 10px; width: 28em; max-width: 28em; padding: 2em; padding-top: 1em; padding-bottom: 0.5em; text-align: center; box-sizing: border-box;  overflow-y: auto;">
-            <div role="fontSizeChangeChrome" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em; width: 100%; margin-left: auto; margin-right: auto;">
+        <div  id="formContainer"  role="fontSizeChangeChrome1" class="form-container" 
+            style="display: none; position: fixed; font-size: 10px; width: 28em; max-width: 28em; top: 8em; padding: 2em; padding-top: 1em; padding-bottom: 0.5em; text-align: center; box-sizing: border-box;  overflow-y: auto; border-radius: 0.85em; border:0.1em solid #afaeae; box-shadow: 0 0.4em 0.6em  rgba(0,0,0,0.1); background-color: rgba(255, 255, 255, 0.9);">
 
-                <div role="fontSizeChangeChrome" style="display: flex; flex-direction: column; justify-content: flex-end; flex: 1 1 0; font-size: 18px; padding: 0px; margin-left: -1.22em; margin-right: -0.83em; height: auto; ">
-                    <button id="voiceCommandBtn" onclick="voiceCommand('start')" style="font-size: 18px; width: 100%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; background: transparent;">
+            <div id="nameRow" role="fontSizeChangeChrome1" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em; width: 100%; margin-left: auto; margin-right: auto;">
+
+                <div role="fontSizeChangeChrome1" style="display: flex; flex-direction: column; justify-content: flex-end; flex: 1 1 0; font-size: 18px; padding: 0px; margin-left: -1.22em; margin-right: -0.83em; height: auto; ">
+                    <button id="voiceCommandBtn" role="button1"  onclick="voiceCommand('start')" style="font-size: 18px; width: 100%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; background: transparent;">
                         🎙️
                     </button>
                 </div>
 
-                <div role="fontSizeChangeChrome" id="firstNameContainer" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
-                    <small role="fontSizeChangeChrome" id="firstNameContainerDetail" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; padding-top:0; padding-bottom:0; text-align: center;">
-                        <span role="fontSizeChange" id="prenomLabel" data-text-key="inputFormFirstName" class="label-text" style="font-size: 9px;">prénom</span>
+                <div id="firstNameContainer" role="fontSizeChangeChrome1"  style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small id="firstNameContainerDetail" role="fontSizeChangeChrome1"  style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span id="prenomLabel" role="fontSizeChange1"  data-text-key="inputFormFirstName" class="label-text" style="font-size: 9px;">prénom</span>
                     </small>
 
-                    <div role="fontSizeChangeChrome" id="firstNameInputContainer" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
-                        <input role="fontSizeChange" type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName" autocomplete="off" 
-                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
+                    <div id="firstNameInputContainer" role="fontSizeChangeChrome1"  style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input id="input-form-firstName" role="fontSizeChange1" type="text"  placeholder="prénom" data-text-key="inputFormFirstName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
                     </div>
                 </div>
 
-                <div role="fontSizeChangeChrome" id="lastNameContainer" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
-                    <small role="fontSizeChangeChrome" id="lastNameContainerDetail" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; margin-left: -1em; padding-top:0; padding-bottom:0; text-align: center;">
-                        <span role="fontSizeChange" id="nomLabel" data-text-key="inputFormLastNameComment" class="label-text" style="font-size: 9px;">nom (jeune fille)</span>
+                <div id="lastNameContainer" role="fontSizeChangeChrome1"  style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small id="lastNameContainerDetail" role="fontSizeChangeChrome1"  style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; margin-left: -1em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span id="nomLabel" role="fontSizeChange1"  data-text-key="inputFormLastNameComment" class="label-text" style="font-size: 9px;">nom (jeune fille)</span>
                     </small>
 
-                    <div role="fontSizeChangeChrome" id="lastNameInputContainer" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
-                        <input role="fontSizeChange" type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName" autocomplete="off" 
-                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
+                    <div id="lastNameInputContainer"  role="fontSizeChangeChrome1" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input id="input-form-lastName" role="fontSizeChange1" type="text"  placeholder="nom" data-text-key="inputFormLastName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
                     </div>    
                 </div>
             </div>
 
-            <div role="fontSizeChangeChrome" class="password-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 2em; max-width: 24em;  height: 3em; width: 100%; margin-left: auto; margin-right: auto;">
-                <div role="fontSizeChangeChrome" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
-                    <small role="fontSizeChange"data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
+            <div role="fontSizeChangeChrome1" class="password-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 2em; max-width: 24em;  height: 3em; width: 100%; margin-left: auto; margin-right: auto;">
+                <div role="fontSizeChangeChrome1" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange1"data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         mot de passe
                     </small>
 
-                    <div role="fontSizeChangeChrome" style="font-size: 10px; width: 11.5em; height: 4em; box-sizing: border-box; display: inline-block; vertical-align: middle;">
-                        <input role="fontSizeChange" type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" 
-                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 1px solid #767676; margin: 0; padding: 0; border-radius: 3px;">
-                    </div>    
+                    <div role="fontSizeChangeChrome1" style="font-size: 10px; width: 11.5em; height: 4em; box-sizing: border-box; display: inline-block; vertical-align: middle;">
+                        <input id="password" role="fontSizeChange1" type="text"  placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border:0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
+                        </div>    
                 </div>
 
-                <div role="fontSizeChangeChrome" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
-                    <small role="fontSizeChange" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
+                <div role="fontSizeChangeChrome1" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small role="fontSizeChange1" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
                         .
                     </small>
 
-                    <div role="fontSizeChangeChrome"  style="flex: 1 1 0; font-size: 16px; width: 7.19em; min-height: 1.75em; padding-top: 0.0625em; padding-bottom: 0.0625em; box-sizing: border-box;">
-                        <button id="loadDataButton" data-text-key="visualiserArbre" style="font-size: 16px; width: 100%; height: 100%; background-color: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0;">
+                    <div role="fontSizeChangeChrome1"  style="flex: 1 1 0; font-size: 16px; width: 7.19em; min-height: 1.75em; padding-top: 0.0625em; padding-bottom: 0.0625em; box-sizing: border-box;">
+                        <button id="loadDataButton"role="button1"  data-text-key="visualiserArbre" style="font-size: 16px; width: 100%; height: 100%; background-color: #4CAF50; color: white; border: none; border-radius: 0.25em; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0;">
                             Continuer
                         </button>
                     </div>
@@ -630,57 +849,81 @@
         </div>
 
         <div id="startTitle" style="display: none; position: fixed; top: '80%';  z-index: 1; ">
-            <h2 role="fontSizeChange" style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
+            <h2 role="fontSizeChange1" style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
             data-text-key="startTitle">explore tes origines...</h2>
         </div>  
         
     </div>
 
-    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 9999; cursor: default;" ></div>
+    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 1; cursor: default;" ></div>
     
-    <div id="versionFooter" 
-        style="position:fixed; bottom:3px; left:50%; transform:translateX(-50%); font-size:10px; color:white; text-align:center; z-index:1; pointer-events:none;">
+    <div id="versionFooter" role="fontSizeChange1"
+        style="font-size:10px; position:fixed; bottom:0.3em; left:50%; transform:translateX(-50%);  color:white; text-align:center; z-index:1; pointer-events:none;">
         ®isAI4U-PD V2.59
     </div>
 
 
-
     <!-- Conteneur de l'arbre -->
     <div id="tree-container" style="display: none;">
-        <button id="voiceCommand2Btn" onclick="voiceCommand('full')" style="display: block; position: fixed;  background-color: transparent; font-size: 40px; color: white; border: none; padding: 0px; bottom: 3px; left:50%; transform:translateX(-50%); cursor: pointer; z-index: 10001; ">🎙️</button>
+        <button role="button2" id="voiceCommand2Btn" onclick="voiceCommand('full')" style="display: block; position: fixed;  background-color: transparent; font-size: 40px; color: white; border: none; padding: 0px; bottom: 3px; left:50%; transform:translateX(-50%); cursor: pointer; z-index: 10001; ">🎙️</button>
 
         <div class="controls">
-            <button id="close-tree-button" onclick="returnToLogin()" style="position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times;
+            <!-- <button role="button2" id="close-tree-button" onclick="returnToLogin()" style="font-size: 32px!important; position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times; -->
+            <button role="fontSizeChangeChrome2" id="close-tree-button" onclick="returnToLogin()" style="font-size: 10px!important; position: fixed; top: 1em; right: 1em; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 3.2em; height: 3.2em; min-width: 3.2em; min-height: 3.2em; max-width: 3.2em; max-height: 3.2em; padding: 0; font-weight: bold; cursor: pointer; box-shadow: 0 0.2em 0.5em rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">
+                <span role="button2" class="wide-span"style="font-size: 32px!important;">&times;</span>
             </button>
-            <div class="controls-row-1" style="position: fixed; top: 5px; left: 40px; width: fit-content;" >
-                <button id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔊</span></button>
-                <!-- <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>▶️</span></button> -->
-                <button class="play-btn" onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span class="icon">▶</span></button>
 
-                <button onclick="openSettingsModal()" id="settingsBtn" class="large-button" data-text-key="openSettingsModal" style="font-size: 34px; background: transparent; border: none"><span>⚙️</span></button>
-                <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
-                    <span class="wide-span">💖</span>
+            <div role="fontSizeChangeChrome2"  class="controls-row-1" data-original-gap="1.8"  style="font-size: 10px; position: fixed; top: 0.3em; left: 4em; margin-bottom: 0; width: fit-content; padding-left: calc(var(--current-paddindLeft, 1.5) * 1em);  gap: calc(var(--current-gap, 1.8) * 1em);" >
+                <!-- gap: 1.8em !important; -->
+                <button id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" >
+                    <span role="button2" class="wide-span" style="font-size: 32px !important;">🔊</span></button>
+                <!-- <button class="play-btn" role="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause" 
+                    style="font-size: 10px; border-radius: 0.4em; width: 3em!important; min-width: 3em!important;  max-width: 3em!important; min-height: 3em; max-height: 3em; 
+                    box-shadow: inset 0 0.2em 0.3em rgba(255,255,255,0.5),  inset 0 -0.2em 0.3em rgba(0,0,80,0.4),  0 0.1em 0.2em rgba(255,255,255,0.4), 0 0.2em 0.4em rgba(0,0,0,0.35);" >
+                    <span role="button2" id="animationPauseBtnSpan" style="font-size: 20px !important; display: inline-block; ">▶</span>
+                </button> -->
+
+
+                <button class="play-btn" role="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn" 
+                        style="font-size: 10px; border-radius: 0.4em; width: 3em!important; min-width: 3em!important;  max-width: 3em!important; height: 3em!important; min-height: 3em!important; max-height: 3em!important; 
+                            display: inline-flex; align-items: center; justify-content: center;  padding: 0; line-height: 1; 
+                            box-shadow: inset 0 0.2em 0.3em rgba(255,255,255,0.5), inset 0 -0.2em 0.3em rgba(0,0,80,0.4), 0 0.1em 0.2em rgba(255,255,255,0.4), 0 0.2em 0.4em rgba(0,0,0,0.35);">
+                    
+                    <!-- <span id="animationPauseBtnSpan" role="button2" style="font-size: 20px !important; display: inline-block; line-height: 1;">▶</span> -->
+                    <span id="animationPauseBtnSpan" role="button2" style="font-size: 20px;  display: inline-flex; align-items: center; justify-content: center; line-height: 1;">▶</span>
+                </button>
+
+
+                <button onclick="openSettingsModal()" id="settingsBtn" class="large-button" data-text-key="openSettingsModal" style="background: transparent; border: none">
+                    <span role="button2" style="font-size: 32px!important;">⚙️</span></button>
+                <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" role="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" > 
+                    <span role="button2" class="wide-span" style="font-size: 32px !important;">💖</span>
                 </button>            
-                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" >
-                <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults"  >
+                <!-- <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" style=" width: 65px !important;  height: 27px !important; margin-left: -4px !important; " > -->
+
+
+                <div role="fontSizeChangeChrome2" id="root-person-search-div" style="font-size: 10px; width: 6.5em!important; min-width: 6.5em!important; max-width: 6.5em!important;  height: 2.7em; min-height: 2.7em!important; margin-left: -0.4em; ">
+                    <input role="fontSizeChange2" type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" style="font-size: 15px; width: 100%; height: 100%; box-sizing: border-box; display: block; border: 0.1em solid #ccc; border-radius: 0.4em;">
+                </div> 
+
+                <select id="root-person-results" data-text-key="rootPersonResults"  >
                     <option value="">Select</option>
                 </select>
-                <button id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" > 
-                    <span class="wide-span">🌍</span>
+                <button role="fontSizeChangeChrome2"  id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" > 
+                    <span role="button2" class="wide-span" style="font-size: 32px !important;">🌍</span>
                 </button> 
                 <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
-                    <span class="wide-span">🎯</span>
+                    <span role="button2" class="wide-span" style="font-size: 32px !important;">🎯</span>
                 </button> 
-
                 <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" > 
-                    <span class="wide-span">📊</span>
+                    <span role="button2" class="wide-span" style="font-size: 32px !important;">📊</span>
                 </button> 
             </div>
             
-            <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px; width: fit-content;">                  
-                <label id="generationsLabel" for="generations" data-text-key="nbreGene">nbre<br>géné</label>
+            <div role="fontSizeChangeChrome2" class="controls-row-2" style="font: size 10px !important; position: fixed; top: 3.1em; left: 0.7em; gap: 0.3em!important; width: fit-content;">                  
+                <label role="fontSizeChange2" id="generationsLabel" for="generations" data-text-key="nbreGene" style="font-size: 12px !important;">nbre<br>géné</label>
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
-                <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
+                <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations";">
                 </select>
                     <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
                     <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode"  style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">

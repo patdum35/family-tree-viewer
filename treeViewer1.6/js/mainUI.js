@@ -1,7 +1,7 @@
 
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { state, displayGenealogicTree, showToast, positionRadarButton, positionHeatMapButton } from './main.js';
+import { state, displayGenealogicTree, showToast, positionRadarButton, positionHeatMapButton, redimensionnerButtonSizeInDOM, redimensionnerSelectorSizeInDOM } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { generateNameCloudExport } from './nameCloudUI.js';
 import { selectFoundPerson } from './eventHandlers.js';
@@ -35,7 +35,6 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     const heatMapBtnOverlay = document.getElementById('heatMapBtn-overlay');
     const closeButton = document.getElementById('close-tree-button');
 
-
     if (isButtonsOnDisplay) {
         controlsRow1.style.display = '';
         controlsRow2.style.display = ''; 
@@ -60,12 +59,17 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         // speechToggleBtn.style.display = 'flex';
 
 
-        if (window.innerWidth < 400) {
-            closeButton.style.setProperty('top', '48px', 'important');
-            closeButton.style.setProperty('right', '6px', 'important');
+        if (!state.isSamsungBrowser) { state.innerWidth = window.innerWidth*state.browserScaleFactor; }
+        else { state.innerWidth = window.innerWidth;}
+
+
+        if (state.innerWidth < 400) {
+            if (state.isMobile) { closeButton.style.setProperty('top', '4.2em', 'important');}
+            else { closeButton.style.setProperty('top', '4.8em', 'important');}
+            closeButton.style.setProperty('right', '1em', 'important');
         } else {
-            closeButton.style.setProperty('top', '6px', 'important');
-            closeButton.style.setProperty('right', '6px', 'important'); 
+            closeButton.style.setProperty('top', '1em', 'important');
+            closeButton.style.setProperty('right', '1em', 'important'); 
         }
 
         positionRadarButton();
@@ -93,7 +97,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         closeButton.style.setProperty('top', '6px', 'important');
         closeButton.style.setProperty('right', '6px', 'important');
         // controlsRow1.style.display = 'none';
-        controlsRow2.style.display = 'none';        
+        controlsRow2.style.display = 'none';  
     }
     
     speechToggleBtn.style.background = 'transparent';
@@ -102,11 +106,12 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
     cloudBtn.style.background = 'transparent';
     heatMapBtn.style.background = 'transparent';
     radarBtn.style.background = 'transparent';
+    statsBtn.style.background = 'transparent';
 
     const settingsBtnSpan = settingsBtn.querySelector('span');
     settingsBtnSpan.style.display = 'inline-block';
     settingsBtn.style.setProperty('font-size', '32px', 'important');
-    settingsBtnSpan.style.setProperty('font-size', '32px', 'important');
+    // settingsBtnSpan.style.setProperty('font-size', '32px', 'important');
     
     settingsBtnSpan.style.animation = 'gear-spin 6s linear infinite'; // 6 secondes pour un tour complet
 
@@ -153,7 +158,7 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
 
     const heatMapBtnSpan = heatMapBtn.querySelector('span');
     heatMapBtnSpan.style.display = 'inline-block';
-    heatMapBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // heatMapBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
 
     // Tableau des globes
     const globes = ['🌍',  '🌏', '🌎'];
@@ -207,13 +212,13 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
 
     const radarBtnSpan = radarBtn.querySelector('span');
     radarBtnSpan.style.display = 'inline-block';
-    radarBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // radarBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
     // Applique l’animation target 
     radarBtnSpan.style.animation = 'target-animation 5s ease-in-out infinite';
 
     const speechToggleBtnSpan = speechToggleBtn.querySelector('span');
     speechToggleBtnSpan.style.display = 'inline-block';
-    speechToggleBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
+    // speechToggleBtnSpan.style.fontSize = '24px'; // optionnel, pour bien voir
     // Applique l’animation target 
     // speechToggleBtnSpan.style.animation = 'sound-swing  5s ease-in-out infinite';
     speechToggleBtnSpan.style.animation = 'sound-animate  5s ease-in-out infinite';
@@ -254,14 +259,22 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
         }
     `;
 
+
+    let browserInverseScalefactor = 1;
+    if (state.isSamsungBrowser) {
+        browserInverseScalefactor = 1/state.browserScaleFactor;
+    }
+
+
+
     // Animation radar combinée pulse + oscillation + glow 
     style.textContent += `
         @keyframes target-animation {
-            0%   { transform: scale(1) rotate(-10deg); text-shadow: 0 0 2px #000; }
-            25%  { transform: scale(1.1) rotate(5deg); text-shadow: 0 0 4px red; }
-            50%  { transform: scale(1.2) rotate(10deg); text-shadow: 0 0 8px red; }
-            75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px red; }
-            100% { transform: scale(1) rotate(-10deg); text-shadow: 0 0 2px #000; }
+            0%   { transform: scale(1) rotate(-10deg); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
+            25%  { transform: scale(1.1) rotate(5deg); text-shadow: 0 0 ${4*browserInverseScalefactor}px red; }
+            50%  { transform: scale(1.2) rotate(10deg); text-shadow: 0 0 ${8*browserInverseScalefactor}px red; }
+            75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 ${4*browserInverseScalefactor}px red; }
+            100% { transform: scale(1) rotate(-10deg); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
         }
     `;
 
@@ -277,30 +290,70 @@ export function buttonsOnDisplay(isButtonsOnDisplay = false) {
 
 
 
+
+
     // Animation petit haut-parleur qui vibre Pulse + swing + glow subtil :
     style.textContent += `
         @keyframes sound-animate {
-        0%   { transform: scale(1) rotate(0deg); text-shadow: 0 0 2px #000; }
-        25%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px yellow; }
-        50%  { transform: scale(1.2) rotate(5deg); text-shadow: 0 0 6px yellow; }
-        75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 4px yellow; }
-        100% { transform: scale(1) rotate(0deg); text-shadow: 0 0 2px #000; }
+        0%   { transform: scale(1) rotate(0deg); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
+        25%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 ${4*browserInverseScalefactor}px yellow; }
+        50%  { transform: scale(1.2) rotate(5deg); text-shadow: 0 0 ${6*browserInverseScalefactor}px yellow; }
+        75%  { transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 ${4*browserInverseScalefactor}px yellow; }
+        100% { transform: scale(1) rotate(0deg); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
+        }
+            #speechToggleBtn span {
+            will-change: transform; /* Bloque le recalcul de la boîte englobante */
         }
     `;
+
+
+
+    // style.textContent += `
+    //     @keyframes sound-animate {
+    //         0%   { transform: scale(1) rotate(0deg); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
+    //         25%  { transform: scale(1.1) rotate(-5deg); }
+    //         50%  { transform: scale(1.2) rotate(5deg); text-shadow: 0 0 ${6*browserInverseScalefactor}px yellow; }
+    //         100% { transform: scale(1) rotate(0deg); }
+    //     }
+    //     #speechToggleBtn span {
+    //         will-change: transform; /* Bloque le recalcul de la boîte englobante */
+    //     }
+    // `;
+
+
+
 
 
     // Animation bouton Play : Pulse + léger déplacement + glow : :
+    // style.textContent += `
+    //     @keyframes play-animate {
+    //     0%   { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
+    //     25%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
+    //     50%  { transform: scale(1.2) translateX(2px); text-shadow: 0 0 6px green; }
+    //     75%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
+    //     100% { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
+    //     }
+    // `;
+
+
     style.textContent += `
         @keyframes play-animate {
-        0%   { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
-        25%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
-        50%  { transform: scale(1.2) translateX(2px); text-shadow: 0 0 6px green; }
-        75%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 4px green; }
-        100% { transform: scale(1) translateX(0); text-shadow: 0 0 2px #000; }
+        0%   { transform: scale(1) translateX(0); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
+        25%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 ${4*browserInverseScalefactor}px green; }
+        50%  { transform: scale(1.2) translateX(2px); text-shadow: 0 0 ${6*browserInverseScalefactor}px green; }
+        75%  { transform: scale(1.1) translateX(1px); text-shadow: 0 0 ${4*browserInverseScalefactor}px green; }
+        100% { transform: scale(1) translateX(0); text-shadow: 0 0 ${2*browserInverseScalefactor}px #000; }
         }
     `;
 
+
     document.head.appendChild(style);
+
+
+    // redimensionnerSelectorSizeInDOM();
+
+
+    
 }
 
 export function initializeCustomSelectors() {
@@ -351,7 +404,7 @@ function replaceGenerationSelector() {
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
-            display: { x: 8, y: 1 },    // Padding minimal pour le sélecteur
+            display: { x: 4, y: 1 },    // Padding minimal pour le sélecteur
             options: { x: 1, y: 2}     // Padding pour les options
         },   
         arrow: {
@@ -514,11 +567,11 @@ function replaceTreeModeSelector() {
         dimensions: {
             width: '45px',
             height: '25px',
-            dropdownWidth: '180px'
+            dropdownWidth: '220px'
         },
         // Padding très réduit pour maximiser la compacité
         padding: {
-            display: { x: 4, y: 1 },    // Padding minimal pour le sélecteur
+            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
             options: { x: 8, y: 10 }     // Padding pour les options
         },   
         arrow: {
@@ -572,6 +625,24 @@ function replaceTreeModeSelector() {
     
     // IMPORTANT: Conserver l'ID original
     customSelector.id = 'treeMode';
+
+
+
+
+    // On ajoute une propriété de style par défaut
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    // Récupérer la taille de la police 
+    const span = heatMapBtn.querySelector('span');
+    const style = window.getComputedStyle(span);
+    const fontSize = parseFloat(style.fontSize); // Convertit "16px" en 16 par exemple 
+    const marginDefaut = -parseInt(fontSize*0/32)
+
+    // Initialisation des variables avec tes calculs de base
+    customSelector.style.setProperty('--custom-marginleft', `${marginDefaut}px`);
+    // // On applique les styles qui utilisent ces variables
+    customSelector.style.marginLeft = `var(--custom-marginleft)`;
+
+
 
     // Transférer les attributs pour le toast
     customSelector.setAttribute('data-text-key', dataTextKey || 'treeMode');
@@ -765,18 +836,18 @@ export function replaceRootPersonSelector(customOptions = null) {
         dropdownAlign: 'right',  // Alignement à droite
         isMobile: nameCloudState.mobilePhone,
         dimensions: {
-            width: '80px',
-            height: '25px',
+            width: '70px',
+            height: '27px',            
             dropdownWidth: '250px' // Largeur plus importante pour le dropdown
         },
         padding: {
-            display: { x: 4, y: 1 },    // Padding minimal pour le sélecteur
+            display: { x: 1, y: 1 },    // Padding minimal pour le sélecteur
             options: { x: 8, y: 10 }     // Padding pour les options
         },
         arrow: {
             position: 'top-right',
             size: 5.5,
-            offset: { x: -5, y: 1} // Décale 5px vers la gauche et 1px vers le bas
+            offset: { x: -5, y: 0.5} // Décale 5px vers la gauche et 1px vers le bas
         },
         customizeOptionElement: (optionElement, option) => {
             // Style particulier pour les options spéciales
@@ -893,13 +964,17 @@ export function replaceRootPersonSelector(customOptions = null) {
                 }
             }
             
+
+
             // Supprimer toute bordure du conteneur
             Object.assign(selector.style, {
                 border: 'none',
                 backgroundColor: 'transparent',
                 boxShadow: 'none',
                 outline: 'none',
-                display: 'block' // Conserver le display:block de l'original
+                display: 'block', // Conserver le display:block de l'original
+                // marginLeft: '-15px', 
+                // position: 'relative' // Optionnel, pour sécuriser le rendu
             });
             
             // Force un repaint
@@ -1211,9 +1286,54 @@ export function replaceRootPersonSelector(customOptions = null) {
         }
     });
     
+
+
+    // On s'assure que l'ID est sur le conteneur extérieur
+    customSelector.id = 'root-person-results';
+
+
+    // On remplace dans le DOM
     // Remplacer le sélecteur original par le sélecteur personnalisé
     const parentElement = originalSelect.parentElement;
     parentElement.replaceChild(customSelector, originalSelect);
+
+
+
+
+
+    // On ajoute une propriété de style par défaut
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    // Récupérer la taille de la police 
+    const span = heatMapBtn.querySelector('span');
+    const style = window.getComputedStyle(span);
+    const fontSize = parseFloat(style.fontSize); // Convertit "16px" en 16 par exemple 
+    const marginDefaut = -parseInt(fontSize*14/32)
+    // calculs de base
+    const baseWidth = Math.round(fontSize * 70/32); // Exemple : 70px pour font 28
+    const baseHeight = Math.round(fontSize *27/32); // Exemple : 25px pour font 28
+    const dropdownWidth = Math.round(fontSize * 250/32); // Largeur de la liste
+    const baseDropdownPadding = Math.round(fontSize * 8 / 32);
+
+    // Initialisation des variables avec tes calculs de base
+    customSelector.style.setProperty('--custom-marginleft', `${marginDefaut}px`);
+    customSelector.style.setProperty('--custom-width', `${baseWidth}px`);
+    customSelector.style.setProperty('--custom-height', `${baseHeight}px`);
+    customSelector.style.setProperty('--custom-dropdown-width', `${dropdownWidth}px`);
+    customSelector.style.setProperty('--custom-dropdown-padding', `${baseDropdownPadding}px`);
+    // customSelector.style.setProperty('--custom-dropdown-line-height', '1.2');
+    customSelector.style.setProperty('--custom-arrow-size', '5.5px');
+    customSelector.style.setProperty('--custom-arrow-right', '2px');
+
+    // // On applique les styles qui utilisent ces variables
+    customSelector.style.marginLeft = `var(--custom-marginleft)`;
+    customSelector.style.width = `var(--custom-width)`;
+    customSelector.style.height = `var(--custom-height)`;
+    customSelector.style.setProperty('--custom-font-size-display', '14px');
+    customSelector.style.setProperty('--custom-font-size-options', '15px');
+
+
+
+
     
     // Ajuster la couleur si nécessaire
     if (originalSelect.style.backgroundColor === 'yellow') {
@@ -1260,6 +1380,7 @@ export function replaceRootPersonSelector(customOptions = null) {
     document.dispatchEvent(event);
 
     if (customSelector && !state.isButtonOnDisplay) {customSelector.style.visibility = 'hidden';}
+
 
     return customSelector;
 }

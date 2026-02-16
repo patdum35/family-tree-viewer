@@ -79,7 +79,7 @@ class PWAInstaller {
         // 1. STRUCTURE : Le Conteneur (gère l'emplacement et la largeur)
         const container = document.createElement('div');
         container.id = 'install-btn-container';
-        container.role = 'fontSizeChangeChrome';
+        container.role = 'fontSizeChangeChromeAdvanced';
         container.style.cssText = `
             font-size: 10px;
             width: 100%; 
@@ -96,6 +96,7 @@ class PWAInstaller {
         // 2. CONTENU : Le Bouton (gère le texte, la couleur, le centrage du texte)
         this.installButton = document.createElement('button');
         this.installButton.id = 'install-app-btn';
+        this.installButton.role = 'buttonAdvanced';
         this.updateButtonContent();
         this.installButton.style.cssText = `
             font-size: 16px;

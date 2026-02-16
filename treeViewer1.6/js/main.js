@@ -1,9 +1,6 @@
 // ====================================
 // Configuration et initialisation
 // ====================================
-
-
-
 export const state = {
     gedcomData: null,
     rootPersonId: null,
@@ -133,10 +130,25 @@ export const state = {
     iSAnimationWithStraightLines: false,
     iSAnimationWithDirectAncestors: false,
     ancestorPathIndex: null,
+    isF12Detected: false,
+    browserScaleFactor: 1,
+    browserScaleFactorInverse: 1,
+    browserScaleFactor2: 1,
+    isSamsungBrowser: false,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    initialHamburgerFontSize : 14,
+    browserScaleCorrection: 1,
+    dontApplyButtonRescale: false,
+    scaleTextFontSize: 1,
+    scaleChrome: 1,
 };
 
-
-
+export const calcFontSize = (baseSize) => { 
+    // On récupère la valeur de l'import seulement ICI, à l'exécution.
+    const factor = state?.browserScaleFactor || 1;
+    return Math.round(baseSize / factor); 
+};
 
 import { parseGEDCOM } from './gedcomParser.js';
 import { drawTree } from './treeRenderer.js';
@@ -150,23 +162,18 @@ import { closeCloudName } from './nameCloudUI.js';
 import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
 import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
-    
-    
 import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { debounce, hideLoginBackground } from './eventHandlers.js';
 import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
 import { initTilePreloading } from './mapTilesPreloader.js';
 import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
 import { createAudioElement } from './audioPlayer.js';
-
 import { cleanupExportControls } from './exportSettings.js';
-
 import { setMaxGenerationsInit } from './treeWheelRenderer.js';
 import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
 import { debugLog } from './debugLogUtils.js'
 import { enableBackground } from './backgroundManager.js';
 import { loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
-
 import { 
     displayPersonDetails, 
     closePersonDetails,
@@ -200,9 +207,6 @@ window.addEventListener('load', function() {
 
 
 window.addEventListener('load', initialize);
-
-
-
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -265,9 +269,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
 export { geocodeLocation };
-
 
 const i18n = {
     'fr': {
@@ -305,11 +307,6 @@ function translate(key) {
 
 window.toggleAnimationPause = toggleAnimationPause;
 
-// document.addEventListener('DOMContentLoaded', async () => {
-//     // Lancer le préchargement des tuiles en tâche de fond
-//     initResourcePreloading();
-//     initTilePreloading();
-// });
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initResourcePreloading();
@@ -317,12 +314,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-
-
-
-
 /////////////////////////////////////////////////////
-function detectBrowserScale() {
+// Observer les changements pour Samsung (polling)
+// Initialisation au chargement
+function initialiserButtonSize() {
+    console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM... with browserScaleFactor=' , state.browserScaleFactor,'\n\n');
+
+    // if (isSamsungBrowser()) {
+    if (!state.dontApplyButtonRescale) {
+    // if (true) {
+        // lancer redimensionnement initial
+        state.initialHamburgerFontSize =  parseInt(14/state.browserScaleFactor);
+        calculerFacteurRedimensionnement();
+        redimensionnerButtonSizeInDOM();
+        //Surveillance resize (pour Chrome)
+        window.addEventListener('resize', debounce(() => {
+            console.log('\n\n\n\n @@@@@@@@@@@@@@@@@@@@    Resize détecté, redimensionnement button size...@@@@@@@@@@@@@@@@@@@@@  \n\n\n\n');
+            surveillerChangementsFontSize();
+        }, 250)); // Attend 150ms après le dernier resize
+    }
+}
+
+let dernierFacteur = null;
+function surveillerChangementsFontSize() {
+    console.log('\n\n 🔍 Surveillance des changements de font-size...@@@@@@@@@@@@@\n\n');
+    if (!state.dontApplyButtonRescale) {
+        if (!state.isMobile) { detectF12Once(); }
+        //On lance ce code UNE FOIS au démarrage
+        // detectBrowserScaleChrome();
+        const facteurActuel = calculerFacteurRedimensionnement();
+        if (dernierFacteur !== null && dernierFacteur !== facteurActuel) {
+            console.log('\n\n\n***********  Debug: Changement de scale détecté:', dernierFacteur, '→', facteurActuel);
+            redimensionnerButtonSizeInDOM();
+            redimensionnerSelectorSizeInDOM();
+            const selector = document.getElementById('nameCloudTypeSelect');
+            if (selector) { 
+                redimensionnerSelectorSizeInDOMnameCloud();
+                redimensionnerItemsInCloudName();               
+            }
+        }
+        dernierFacteur = facteurActuel;
+    }
+}
+
+function detectBrowserScaleSamsung() {
   const probe = document.createElement("span");
   probe.textContent = "M";
   probe.style.cssText = `
@@ -334,273 +369,897 @@ function detectBrowserScale() {
     margin: 0;
   `;
   document.body.appendChild(probe);
-
   const computedPx = parseFloat(getComputedStyle(probe).fontSize);
   document.body.removeChild(probe);
-
   const scale = computedPx / 16;
   console.log(
-    "[detectBrowserScale]",
+    "[detectBrowserScaleSamsung]",
     "computed font-size =", computedPx + "px",
     "=> scale =", scale
   );
-
   return scale;
 }
 
+function detectBrowserScaleChrome() {
+    let browserScaleFactor_ChromeMethod = 1;
+    let browserScaleFactor_SamsungMethod = 1;
+    let isSamsungLikeBrowser = false;
 
-// Configuration de base (référence au chargement)
-const CONFIG_BASE = {
-    devicePixelRatio: null,
-    innerWidth: null,
-    fontSize: null
-};
+    console.log('\n=== ANALYSE SCREEN SIZE / BROWSER WINDOW SIZE / BROWSER ZOOM / isF12 active ===');
+    console.log(' - screen size:', window.screen.width+'x'+window.screen.height);
+    console.log(' - screen orientation:', screen.orientation ? screen.orientation.type : 'not available');
+    console.log(' - browser external size:', window.outerWidth+'x'+window.outerHeight);
+    console.log(' - browser internal size:', window.innerWidth+'x'+window.innerHeight);
+    console.log(' - devicePixelRatio:', window.devicePixelRatio);
+    console.log(' - screen available Size:', window.screen.availWidth+'x'+window.screen.availHeight);
+    console.log(' - F12 DevTools open ?', state.isF12Detected);
+    console.log(' - screen physical real width;', (window.innerWidth * window.devicePixelRatio));
+    console.log(' - browser window position left:', window.screenX, 'top:', window.screenY, 'right:', window.screenX + window.outerWidth, 'bottom:', window.screenY + window.outerHeight);
+    console.log(' - browser text scale factor W :', window.outerWidth / window.innerWidth);
+    console.log(' - browser text scale factor H :', window.outerHeight / window.innerHeight );
+    console.log(' - browser text scale factor H , corrected:', window.outerHeight*0.875 / window.innerHeight );
+    console.log(' - browser GLOBAL SCALE FACTOR:', window.outerWidth / window.innerWidth);
+    // if (!state.isF12Detected) { state.browserScaleFactor = Math.max(window.outerWidth, window.innerWidth) / window.innerWidth; }
+    // else { state.browserScaleFactor = Math.max(window.outerHeight, window.innerHeight) * 0.875 / window.innerHeight; }
 
-// Capturer les valeurs de référence au chargement
-function capturerReference() {
-    const testElement = document.createElement('div');
-    testElement.style.fontSize = '16px';
-    testElement.style.position = 'absolute';
-    testElement.style.visibility = 'hidden';
-    document.body.appendChild(testElement);
-    
-    CONFIG_BASE.devicePixelRatio = window.devicePixelRatio;
-    CONFIG_BASE.innerWidth = window.innerWidth;
-    CONFIG_BASE.fontSize = parseFloat(window.getComputedStyle(testElement).fontSize);
-    
-    document.body.removeChild(testElement);
-    
-    console.log('\n\nRéférence capturée:', CONFIG_BASE);
+    if (!state.isF12Detected) { state.browserScaleFactor = window.outerWidth / window.innerWidth; }
+    else { state.browserScaleFactor = window.outerHeight * 0.875 / window.innerHeight; }
+
+
+
+    state.browserScaleCorrection = state.browserScaleFactor
+
+    browserScaleFactor_ChromeMethod = state.browserScaleFactor;
+    //Samsung: utilise le multiplicateur de font-size
+    browserScaleFactor_SamsungMethod = detectBrowserScaleSamsung();
+    console.log(' - ', browserScaleFactor_SamsungMethod,'= browser browserScaleFactor samsung method');
+
+    if (Math.abs(browserScaleFactor_SamsungMethod - 1) < 0.05) {
+        state.browserScaleFactor = browserScaleFactor_ChromeMethod;
+    } else {
+        state.browserScaleFactor = browserScaleFactor_SamsungMethod;
+        isSamsungLikeBrowser = true;
+    }
+    console.log(' -', browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
+
+    if (navigator.userAgent.includes('SamsungBrowser') || isSamsungLikeBrowser) { 
+        // // Samsung: utilise le multiplicateur de font-size
+        state.isSamsungBrowser = true; 
+        state.browserScaleCorrection = 1;
+        console.log(' - Samsung browser detected : state.browserScaleFactor:', state.browserScaleFactor);
+        console.log(' - Samsung browser detected : state.browserScaleCorrection:', state.browserScaleCorrection);
+        state.scaleChrome = 1;
+    } else { 
+        state.isSamsungBrowser = false; 
+        state.scaleChrome = 1 / state.browserScaleFactor;
+    }
+
+
+    if (!state.isSamsungBrowser) { 
+        state.innerWidth = window.innerWidth*state.browserScaleFactor; 
+        state.innerHeight = window.innerHeight*state.browserScaleFactor;         
+    }
+    else { 
+        state.innerWidth = window.innerWidth;
+        state.innerHeight = window.innerHeight;
+    }
+    state.scaleTextFontSize = 1 / state.browserScaleFactor;
+
+    console.log(' - final browser state.browserScaleFactor:', state.browserScaleFactor);
+    console.log(' - final browser internal width:', state.innerWidth);
+    console.log(' - browser state.browserScaleCorrection:', state.browserScaleCorrection);
+
+    return state.browserScaleFactor;
 }
+
+// Calculer le facteur de redimensionnement
+function calculerFacteurRedimensionnement() {
+    let facteur = 1.0;
+    let facteur2 = 1.0;
+    detectBrowserScaleChrome();
+
+    facteur = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+
+    if (state.isSamsungBrowser) {
+        // // Samsung: utilise le multiplicateur de font-size
+        if (facteur < 0.56) { facteur = facteur * 0.7; } // Limite minimale
+        else if (facteur < 0.7) { facteur = facteur * 0.8; } 
+        else if (facteur < 0.85) { facteur = facteur * 0.9; }
+        facteur2 = facteur;       
+    } else {
+        // Chrome: 
+        facteur2 = facteur;
+        if (!state.isMobile) {
+            if(state.innerWidth > 1000) {
+                facteur = facteur * 1.5;
+            }
+        } 
+    }
+    state.browserScaleFactorInverse = facteur;
+    state.browserScaleFactor2 = facteur2;
+
+    return { facteur, facteur2};
+}
+
+function detectF12Once() {
+    const start = performance.now();
+    // Le code va s'arrêter ICI. 
+    // Appuie sur F8 UNE SEULE FOIS.
+    debugger; 
+    
+    const end = performance.now();
+    state.isF12Detected = (end - start > 100);
+
+    if (state.isF12Detected) {
+        console.warn("DÉTECTÉ ! Maintenant le script va te laisser tranquille.");
+        // On ne relance plus le debugger pour ne pas boucler à l'infini
+    }
+}
+// On lance ce code pour la detection du F12 UNE FOIS au démarrage
+if (!state.isMobile) { detectF12Once(); }
 
 // Détecter si c'est Samsung Internet
 function isSamsungBrowser() {
     return navigator.userAgent.includes('SamsungBrowser');
 }
 
-// Calculer le facteur de redimensionnement
-function calculerFacteurRedimensionnement() {
-
-    if (isSamsungBrowser()) {
-        // // Samsung: utilise le multiplicateur de font-size
-        let facteur = 1/detectBrowserScale();
-        if (facteur < 0.85) { facteur = facteur * 0.7; } // Limite minimale
-        else if (facteur < 0.7) { facteur = facteur * 0.6; } // Limite minimale
-        else if (facteur < 0.56) { facteur = facteur * 0.5; } // Limite minimale
-        return facteur;
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerButtonSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n @@@@@@@@@@@ start redimensionnerButtonSizeInDOM -Facteur de redimensionnement ?');
+        const facteur = state.browserScaleFactorInverse;
+        const facteur2 = state.browserScaleFactor2;
+                
+        // Si le facteur est proche de 1, pas besoin de redimensionner
+        // if (Math.abs(facteur2 - 1) < 0.01) {
+        //     return;
+        // }
         
-    } else {
-        // Chrome: utilise devicePixelRatio ET innerWidth
-        const facteurWidth =  window.innerWidth / window.screen.width; 
-        if (state.isMobile) { };
-        const facteur = facteurWidth;
-        return facteur;
+        // Sélectionner TOUS les éléments
+        let elements; 
+
+        // for start page for samsung browser with button0, fontSizeChange0, fontSizeChangeChrome0, with facteur2"
+        // if (Math.abs(facteur2 - 1) > 0.01) {
+        //     let facteurStartPageSamsung = facteur2;
+        //     if (isSamsungBrowser()) {
+        //         elements = document.querySelectorAll(' [role="button0"], [role="fontSizeChange0"]');
+        //         const initialSamsungFactor = 1/state.browserScaleFactor
+        //         if (facteurStartPageSamsung < 0.56) { facteurStartPageSamsung = facteurStartPageSamsung * 0.8; } // Limite minimale
+        //         else if (facteurStartPageSamsung < 0.7) { facteurStartPageSamsung = facteurStartPageSamsung * 0.9; } // Limite minimale
+        //         else if (facteurStartPageSamsung < 0.85) { facteurStartPageSamsung = facteurStartPageSamsung * 1; } // Limite minimale
+
+        //     } else {
+        //         elements = document.querySelectorAll(' [role="button0"], [role="fontSizeChange0"], [role="fontSizeChangeChrome0"]');
+        //     }
+        //     console.log(`-éléments for for start page for samsung browser  with [role="button0"], [role="fontSizeChange0"], [role="fontSizeChangeChrome0"]: facteur: ${facteurStartPageSamsung}`);
+
+        //     elements.forEach(element => {
+        //         // console.log(`-élément Advanced: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role}`);
+        //         let fontSizeOriginal;
+
+        //         // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+        //         if (!element.dataset.originalFontSize) {
+        //             // C'est la première fois qu'on touche à ce bouton
+        //             const styles = window.getComputedStyle(element);
+        //             fontSizeOriginal = parseFloat(styles.fontSize);
+
+        //             // On sauvegarde la valeur numérique pure dans le dataset
+        //             if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+        //                 element.dataset.originalFontSize = fontSizeOriginal;
+        //             }
+        //         } else {
+        //             // On récupère la valeur sauvegardée précédemment
+        //             fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+        //         }
+
+        //         // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+        //         if (fontSizeOriginal) {
+        //             const nouvelleTaille = fontSizeOriginal * facteurStartPageSamsung;
+        //             // element.style.fontSize = nouvelleTaille + 'px';
+        //             element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+        //             // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+        //         }
+        //     });
+        // }
+
+        // for advanced setting Menu with buttonAdvanced, fontSizeChangeAdvanced, fontSizeChangeChromeAdvanced"
+        if (Math.abs(facteur - 1) > 0.01) {
+            let facteurAdvanced = facteur * 0.9;
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll('[role="buttonAdvanced"], [role="fontSizeChangeAdvanced"]');
+            } else {
+                elements = document.querySelectorAll('[role="buttonAdvanced"], [role="fontSizeChangeAdvanced"], [role="fontSizeChangeChromeAdvanced"]');
+            }
+            console.log(`-éléments for advanced setting Menu with [role="buttonAdvanced"], [role="fontSizeChangeAdvanced"], [role="fontSizeChangeChromeAdvanced"]: facteur: ${facteurAdvanced}`);
+
+            elements.forEach(element => {
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // C'est la première fois qu'on touche à ce bouton
+                    const styles = window.getComputedStyle(element);
+                    fontSizeOriginal = parseFloat(styles.fontSize);
+
+                    // On sauvegarde la valeur numérique pure dans le dataset
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteurAdvanced;
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+            });
+        }
+        
+        // for 1rst page with form container and password  with button1, fontSizeChange1, fontSizeChangeChrome1, with facteur"
+        if (Math.abs(facteur - 1) > 0.01) {
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll('[role="button1"], [role="fontSizeChange1"]');
+            } else {
+                elements = document.querySelectorAll('[role="button1"], [role="fontSizeChange1"], [role="fontSizeChangeChrome1"]');
+            }
+            console.log(`-éléments for 1rst page with form container and password with [role="button1"], [role="fontSizeChange1"], [role="fontSizeChangeChrome1"]: facteur: ${facteur}`);
+
+            elements.forEach(element => {
+                // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role}`);
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // C'est la première fois qu'on touche à ce bouton
+                    const styles = window.getComputedStyle(element);
+                    fontSizeOriginal = parseFloat(styles.fontSize);
+
+                    // On sauvegarde la valeur numérique pure dans le dataset
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteur;
+                    // element.style.fontSize = nouvelleTaille + 'px';
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+            });
+        }
+
+        // For display tree page with button2, fontSizeChange2, fontSizeChangeChrome2"
+        if (Math.abs(facteur2 - 1) > 0.01) {
+            let newfacteur = facteur2
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll(' [role="button2"], [role="fontSizeChange2"]');
+
+                newfacteur = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                if (newfacteur < 0.56) { newfacteur = newfacteur * 0.9; } // Limite minimale
+                else if (newfacteur < 0.7) { newfacteur = newfacteur * 0.9; } 
+                else if (newfacteur < 0.85) { newfacteur = newfacteur * 0.9; }
+
+            } else {
+                elements = document.querySelectorAll(' [role="button2"], [role="fontSizeChange2"], [role="fontSizeChangeChrome2"]');
+            }
+            // console.log(`-éléments for display tree page with [role="button2"], [role="fontSizeChange2"], [role="fontSizeChangeChrome2"]: facteur: ${facteur2}`);
+
+            elements.forEach(element => {
+
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                if(element.id ==='menu-root-person-search-clone'  || element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    fontSizeOriginal = 14;
+                    // console.log('\n\n\n ----- DEBUG menu-root-person-search-clone -----',element.id, element.style.fontSize, fontSizeOriginal, facteur2, fontSizeOriginal * facteur2,  ' \n\n')
+                }
+
+
+                if (state.isSamsungBrowser && element.id ==='animationPauseBtnSpan' && state.browserScaleFactor >=1.5) {
+                    if (element.textContent === '▶') {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 35;}
+                        else {fontSizeOriginal = 30;}
+                    } else {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 40;}
+                        else {fontSizeOriginal = 35;}
+                    }
+                    // console.log('\n\n\n ----- DEBUG animationPauseBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, newfacteur, fontSizeOriginal * newfacteur, element.textContent, ' \n\n')
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * newfacteur;
+                    // element.style.fontSize = nouvelleTaille + 'px'
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+
+
+                if( !state.isSamsungBrowser) {
+                    //  Détection du tag "gap"
+                    // if (element.dataset.originalGap && (facteur < 0.83)) {
+                    if (element.dataset.originalGap ) {
+                        // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                        // On injecte la valeur dans la variable CSS
+                        if (facteur2 > 0.5) {
+                            element.style.setProperty('--current-gap', 1.8*newfacteur*1.2);
+                            element.style.setProperty('--current-paddindLeft', 1.5*newfacteur*1.2);
+                        } else {
+                            element.style.setProperty('--current-gap', 1.8*newfacteur*1.2*0.5);
+                            element.style.setProperty('--current-paddindLeft', 1.5*newfacteur*1.2*0.5);
+                        }
+                    }
+                }
+            });
+        }
+
+        setTimeout(() => {
+            redimensionnerItemsInHamburgerMenu();
+        }, 600);
+
+        // if (state.browserScaleFactor != 1 )  {  redimensionnerSelectorSizeInDOM();}
+        positionHeatMapButton();
+        positionRadarButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
     }
 }
 
 // Redimensionner tous les éléments de la DOM
-export function redimensionnerButtonSizeInDOM() {
-    const facteur = calculerFacteurRedimensionnement();
-    
-    console.log('Facteur de redimensionnement:', facteur);
-    
-    // Si le facteur est proche de 1, pas besoin de redimensionner
-    if (Math.abs(facteur - 1) < 0.01) {
-        return;
-    }
-    
-    // Sélectionner TOUS les éléments
-    // const elements = document.querySelectorAll('*');
-    // const elements = document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]');
-    // On ajoute [role="button"] pour attraper les div/span qui se comportent comme des boutons
-    let elements; 
-    if (isSamsungBrowser()) {
-        elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"]');
-    } else {
-        elements = document.querySelectorAll('button, input[type="button"], [role="button"], [role="fontSizeChange"], [role="fontSizeChangeChrome"]');
-    }
-    elements.forEach(element => {
+export function redimensionnerPlayButtonSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        if (state.isSamsungBrowser) {
+            let scalingFactor = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+            if (scalingFactor < 0.56) { scalingFactor = scalingFactor * 0.7; } // Limite minimale
+            else if (scalingFactor < 0.7) { scalingFactor = scalingFactor * 0.8; } 
+            else if (scalingFactor < 0.85) { scalingFactor = scalingFactor * 0.9; }
+            
+            console.log('\n\n -Facteur de redimensionnement Play Button:', scalingFactor);
+                        
+            // For display tree page with button2, fontSizeChange2, fontSizeChangeChrome2"
+            if (Math.abs(scalingFactor - 1) > 0.01 ) {
+                const element = document.getElementById('animationPauseBtnSpan');
+                let fontSizeOriginal;
 
-        let fontSizeOriginal;
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
 
-        // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
-        if (!element.dataset.originalFontSize) {
-            // C'est la première fois qu'on touche à ce bouton
-            const styles = window.getComputedStyle(element);
-            fontSizeOriginal = parseFloat(styles.fontSize);
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
 
-            // On sauvegarde la valeur numérique pure dans le dataset
-            if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
-                element.dataset.originalFontSize = fontSizeOriginal;
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                if (state.isSamsungBrowser && element.id ==='animationPauseBtnSpan' && state.browserScaleFactor >=1.5) {
+                    if (element.textContent === '▶') {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 35;}
+                        else {fontSizeOriginal = 30;}
+                    } else {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 55;}
+                        else {fontSizeOriginal = 35;}
+                    }
+                    console.log('\n\n\n ----- DEBUG animationPauseBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, scalingFactor, fontSizeOriginal * scalingFactor, element.textContent, ' \n\n')
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * scalingFactor;
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
             }
+        }
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerItemsInHamburgerMenu() {
+    const facteur2 = state.browserScaleFactor2;
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n -Facteur de redimensionnement Hamburger  menu:', facteur2);
+        // Si le facteur est proche de 1, pas besoin de redimensionner
+        // if (Math.abs(facteur2 - 1) < 0.01) {
+        //     return;
+        // }
+        let elements; 
+        
+        // For display tree page with buttonHamburger, fontSizeChangeHamburger, fontSizeChangeChromeHamburger"
+        if (Math.abs(facteur2 - 1) > 0.01) {
+            let facteurHamburger = facteur2;
+            if (isSamsungBrowser()) {
+                facteurHamburger = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                if (facteurHamburger < 0.56) { facteurHamburger = facteurHamburger * 0.9; } // Limite minimale
+                else if (facteurHamburger < 0.7) { facteurHamburger = facteurHamburger * 0.9; } 
+                else if (facteurHamburger < 0.85) { facteurHamburger = facteurHamburger * 0.9; }
+
+                elements = document.querySelectorAll(' [role="buttonHamburger"], [role="fontSizeChangeHamburger"]');
+                if (facteurHamburger < 0.56) { facteurHamburger = facteurHamburger * 1.3; }
+            } else {
+                elements = document.querySelectorAll(' [role="buttonHamburger"], [role="fontSizeChangeHamburger"], [role="fontSizeChangeChromeHamburger"]');
+            }
+            console.log(`-éléments for display tree page with [role="buttonHamburger"], [role="fontSizeChangeHamburger"], [role="fontSizeChangeChromeHamburger"]: facteur: ${facteur2}`);
+
+            elements.forEach(element => {
+                // console.log('\n\n\n ----- DEBUG menu hamburger elements -----', element.id, element.style.fontSize, ' \n\n')
+
+
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
+
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+
+                if(element.id ==='menu-root-person-search-clone'|| element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    fontSizeOriginal = 14;
+                    // if (element.id === 'menu-root-search-span') {fontSizeOriginal = 12;}
+                    console.log('\n\n\n ----- DEBUG menu hamburger elements -----',element.id, element.style.fontSize, fontSizeOriginal, facteurHamburger, fontSizeOriginal * facteurHamburger,  ' \n\n')
+                }
+
+                if( element.id === 'menu-speechToggleBtnSpan' && state.isSamsungBrowser) {
+                    fontSizeOriginal = 30;
+                    console.log('\n\n\n ----- DEBUG menu hamburger menu-speechToggleBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, facteurHamburger, fontSizeOriginal * facteurHamburger,  ' \n\n')
+                }
+
+
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteurHamburger;
+                    // element.style.fontSize = nouvelleTaille + 'px'
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+
+
+                if( !state.isSamsungBrowser) {
+                    //  Détection du tag "gap"
+                    // if (element.dataset.originalGap && (facteur < 0.83)) {
+                    if (element.dataset.originalGap ) {
+                        // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                        // On injecte la valeur dans la variable CSS
+                        if (facteur2 > 0.5) {
+                            element.style.setProperty('--current-gap', 1.8*facteurHamburger*1.2);
+                            element.style.setProperty('--current-paddindLeft', 1.5*facteurHamburger*1.2);
+                        } else {
+                            element.style.setProperty('--current-gap', 1.8*facteurHamburger*1.2*0.5);
+                            element.style.setProperty('--current-paddindLeft', 1.5*facteurHamburger*1.2*0.5);
+                        }
+                    }
+                }
+        
+
+                // --- LE CORRECTIF GLOBAL (H3 et Labels) ---
+                let fixStyle = document.getElementById('global-fix-style');
+                if (!fixStyle) {
+                    fixStyle = document.createElement('style');
+                    fixStyle.id = 'global-fix-style';
+                    document.head.appendChild(fixStyle);
+                }
+                
+                // On calcule les tailles pour les deux types d'éléments
+                const h3Taille = 14 * facteurHamburger;
+                const labelTaille = 12 * facteurHamburger; // Base 12px pour tes labels
+                
+                fixStyle.textContent = `
+                    /* Pour les titres du menu */
+                    .menu-section h3[role="fontSizeChangeHamburger"] {
+                        font-size: ${h3Taille}px !important;
+                    }
+                    /* Pour les labels du menu */
+                    label[role="fontSizeChangeHamburger"] {
+                        font-size: ${labelTaille}px !important;
+                        display: inline-block; /* Sécurité pour le rendu */
+                    }
+                `;
+                
+                // console.log(`Sécurité appliquée: H3=${h3Taille}px, Label=${labelTaille}px`);
+            });
+        }
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerItemsInCloudName() {
+    const facteur2 = state.browserScaleFactor2;
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n -Facteur de redimensionnement CloudName  menu:', facteur2, ', if width >1000 and chrome:');
+        let elements; 
+        
+        setTimeout(() => {
+            // For display tree page with buttonCloudName, fontSizeChangeCloudName, fontSizeChangeChromeCloudName"
+            if (Math.abs(facteur2 - 1) > 0.01) {
+                let facteurCloudName = facteur2;
+                if (isSamsungBrowser()) {
+                    facteurCloudName = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                    if (facteurCloudName < 0.56) { facteurCloudName = facteurCloudName * 0.9; } // Limite minimale
+                    else if (facteurCloudName < 0.7) { facteurCloudName = facteurCloudName * 0.9; } 
+                    else if (facteurCloudName < 0.85) { facteurCloudName = facteurCloudName * 0.9; }
+
+                    elements = document.querySelectorAll(' [role="buttonCloudName"], [role="fontSizeChangeCloudName"]');
+                    if (facteurCloudName < 0.56) { facteurCloudName = facteurCloudName * 1.3; }
+                } else {
+                    elements = document.querySelectorAll(' [role="buttonCloudName"], [role="fontSizeChangeCloudName"], [role="fontSizeChangeChromeCloudName"]');
+                }
+                console.log(`-éléments for display tree page with [role="buttonCloudName"], [role="fontSizeChangeCloudName"], [role="fontSizeChangeChromeCloudName"]: facteur: ${facteur2}`);
+
+                elements.forEach(element => {
+                    // console.log('\n\n\n ----- DEBUG menu CloudName elements -----', element.id, element.style.fontSize, ' \n\n')
+
+                    let fontSizeOriginal;
+
+                    // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                    if (!element.dataset.originalFontSize) {
+                        // // C'est la première fois qu'on touche à ce bouton
+                        // 1. On regarde d'abord le style direct (le plus fiable)
+                        const styleDirect = element.style.fontSize;
+                        
+                        if (styleDirect && styleDirect.includes('px')) {
+                            fontSizeOriginal = parseFloat(styleDirect);
+                        } else {
+                            // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                            fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                        }
+
+                        if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                            element.dataset.originalFontSize = fontSizeOriginal;
+                        }
+
+                    } else {
+                        // On récupère la valeur sauvegardée précédemment
+                        fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                    }
+
+
+                    // if(element.id ==='menu-root-person-search-clone'|| element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    //     fontSizeOriginal = 14;
+                    //     // if (element.id === 'menu-root-search-span') {fontSizeOriginal = 12;}
+                    //     console.log('\n\n\n ----- DEBUG menu CloudName elements -----',element.id, element.style.fontSize, fontSizeOriginal, facteurCloudName, fontSizeOriginal * facteurCloudName,  ' \n\n')
+                    // }
+
+                    // if( element.id === 'menu-speechToggleBtnSpan' && state.isSamsungBrowser) {
+                    //     fontSizeOriginal = 30;
+                    //     console.log('\n\n\n ----- DEBUG menu CloudName menu-speechToggleBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, facteurCloudName, fontSizeOriginal * facteurCloudName,  ' \n\n')
+                    // }
+
+
+
+                    // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                    if (fontSizeOriginal) {
+                        const nouvelleTaille = fontSizeOriginal * facteurCloudName;
+                        // element.style.fontSize = nouvelleTaille + 'px'
+                        element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                        // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                    }
+
+
+                    if( !state.isSamsungBrowser) {
+                        //  Détection du tag "gap"
+                        // if (element.dataset.originalGap && (facteur < 0.83)) {
+                        if (element.dataset.originalGap ) {
+                            // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                            // On injecte la valeur dans la variable CSS
+                            if (facteur2 > 0.5) {
+                                element.style.setProperty('--current-gap', 1.8*facteurCloudName*1.2);
+                                element.style.setProperty('--current-paddindLeft', 1.5*facteurCloudName*1.2);
+                            } else {
+                                element.style.setProperty('--current-gap', 1.8*facteurCloudName*1.2*0.5);
+                                element.style.setProperty('--current-paddindLeft', 1.5*facteurCloudName*1.2*0.5);
+                            }
+                        }
+                    }
+            
+
+                    // --- LE CORRECTIF GLOBAL (H3 et Labels) ---
+                    let fixStyle = document.getElementById('global-fix-style');
+                    if (!fixStyle) {
+                        fixStyle = document.createElement('style');
+                        fixStyle.id = 'global-fix-style';
+                        document.head.appendChild(fixStyle);
+                    }
+                    
+                    // On calcule les tailles pour les deux types d'éléments
+                    const h3Taille = 14 * facteurCloudName;
+                    const labelTaille = 12 * facteurCloudName; // Base 12px pour tes labels
+                    
+                    fixStyle.textContent = `
+                        /* Pour les titres du menu */
+                        .menu-section h3[role="fontSizeChangeCloudName"] {
+                            font-size: ${h3Taille}px !important;
+                        }
+                        /* Pour les labels du menu */
+                        label[role="fontSizeChangeCloudName"] {
+                            font-size: ${labelTaille}px !important;
+                            display: inline-block; /* Sécurité pour le rendu */
+                        }
+                    `;
+                    
+                    // console.log(`Sécurité appliquée: H3=${h3Taille}px, Label=${labelTaille}px`);
+                });
+            }
+            setTimeout(() => {
+                redimensionnerItemsInHamburgerMenu();
+
+                setTimeout(() => {
+                    redimensionnerRootSelectorSizeInDOM();
+                }, 500);
+            }, 100);
+        }, 100);
+    }
+}
+
+let facteur, borderWidth, borderRadius, borderStyle, arrowSize, arrowRight, fontSizeDisplay, fontSizeOptions;
+
+function rescaleCustomSelector(id, marginLeft, width, height, dropdownWidth, dropdownPadding) {
+    if (!state.dontApplyButtonRescale) {
+        const selector = document.getElementById(id);
+        let offsetMargin = 0;
+        let offsetWidth = 0;
+        if ((id === 'root-person-results') && (facteur < 0.67) ) { offsetMargin = 10; }
+        if ((id === 'root-person-results') && (facteur < 0.49) ) {  offsetWidth = 10;}
+        if ((id === 'treeMode') && (facteur < 0.51) && (facteur > 0.48) ) {  offsetWidth = -10;}
+
+        if (!state.isSamsungBrowser) {
+            selector.style.setProperty('--custom-marginleft', `${marginLeft + offsetMargin*facteur}px`);
+            selector.style.setProperty('--custom-width', `${width + offsetWidth*facteur}px`);
+            selector.style.setProperty('--custom-height', `${height}px`);
+            selector.style.setProperty('--custom-dropdown-width', `${dropdownWidth}px`);
+            selector.style.setProperty('--custom-dropdown-padding', `${dropdownPadding}px`);
+            selector.style.setProperty('--custom-border', borderStyle);
+            selector.style.setProperty('--custom-border-radius', borderRadius);
+            selector.style.setProperty('--custom-arrow-size', arrowSize);
+            selector.style.setProperty('--custom-arrow-right', arrowRight);
+        }
+        selector.style.setProperty('--custom-font-size-display', fontSizeDisplay);
+        selector.style.setProperty('--custom-font-size-options', fontSizeOptions);
+
+        // Si le menu est ouvert, il est dans le body, on le cherche par sa classe
+        if (selector.optionsElement && document.body.contains(selector.optionsElement)) {
+            selector.optionsElement.style.width =dropdownWidth + 'px';
+            const options = selector.optionsElement.querySelectorAll('div');
+            selector.optionsElement.style.setProperty('--custom-font-size-options', fontSizeOptions);
+            options.forEach(opt => {
+                if (!state.isSamsungBrowser) {
+                    opt.style.padding = `${dropdownPadding} ${Math.round(facteur*10)}px`;
+                }
+                opt.style.fontSize = fontSizeOptions;
+            });
+            if (!state.isSamsungBrowser) {
+                selector.optionsElement.style.border = borderStyle;
+                selector.optionsElement.style.borderRadius = borderRadius;
+            }
+        }
+    }
+}
+
+export function redimensionnerSelectorSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n --- DEBUG redimensionner Selectors SizeInDOM ----: generations, treeMode, root-person-results, menu-demo-selector, prenoms, @@@@@@@@@@@@@\n\n\n')
+        facteur = 1/state.browserScaleFactor;
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+
+        let selector = null;
+        setTimeout(() => {
+            selector = document.getElementById('generations');
+            if (selector) {
+                rescaleCustomSelector('generations', -parseInt(facteur*14), Math.round(facteur*35), Math.round(facteur*25), Math.round(facteur*55), Math.round(facteur*2));
+                console.log("Élément generations trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'generations' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('treeMode');
+            if (selector) {
+                rescaleCustomSelector('treeMode', parseInt(facteur*0), Math.round(facteur*45), Math.round(facteur*25), Math.round(facteur*220), Math.round(facteur*1.5));
+                console.log("Élément treeMode trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }
+            if (!state.isSamsungBrowser) {
+                setTimeout(() => {
+                    const selector = document.getElementById('generations');
+                    selector.style.setProperty('margin-right', 1/state.browserScaleFactor +'px', 'important');
+                }, 150);
+            }
+            selector = document.getElementById('searchModal-search-type'); 
+            if (selector) {
+                rescaleCustomSelector('searchModal-search-type', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément searchModal-search-type' trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'searchModal-search-type'' est INTROUVABLE dans le DOM.");
+            }
+
+
+            selector = document.getElementById('statsModal-search-type'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-search-type', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-search-type trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-search-type' est INTROUVABLE dans le DOM.");
+            }            
+            selector = document.getElementById('statsModal-search-scope'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-search-scope', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-search-scope trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-search-scope' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('statsModal-StatsType'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-StatsType', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-StatsType trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-StatsType' est INTROUVABLE dans le DOM.");
+            }
+
+        }, 300);
+
+        setTimeout(() => {
+            selector = document.getElementById('menu-demo-selector');
+            if (selector) {
+                rescaleCustomSelector('menu-demo-selector', parseInt(facteur*0), Math.round(facteur*70), Math.round(facteur*30), Math.round(facteur*190), Math.round(facteur*1.5));
+                console.log("Élément menu-demo-selector trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'menu-demo-selector' est INTROUVABLE dans le DOM.");
+            }
+        // }, 300);
+
+        // setTimeout(() => {
+            fontSizeDisplay = Math.round(facteur*12) + 'px';
+            fontSizeOptions = Math.round(facteur*13) + 'px';
+            selector = document.getElementById('menu-prenoms-selector');
+            if (selector) {
+                rescaleCustomSelector('menu-prenoms-selector', parseInt(facteur*0), Math.round(facteur*30), Math.round(facteur*25), Math.round(facteur*45), Math.round(facteur*1.5));
+                console.log("Élément menu-prenoms-selector trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'menu-prenoms-selector' est INTROUVABLE dans le DOM.");
+            }
+        // }, 300);
+
+        // setTimeout(() => {
+            selector = document.getElementById('root-person-results');
+            if (selector) {
+                rescaleCustomSelector('root-person-results', -parseInt(facteur*14), Math.round(facteur*70), Math.round(facteur*27), Math.round(facteur*250), Math.round(facteur*10) );
+                console.log("*********** Élément root-person-results trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'root-person-results' est INTROUVABLE dans le DOM.");
+            }
+        }, 1200);
+    }
+}
+
+export function redimensionnerRootSelectorSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        facteur = 1/state.browserScaleFactor;
+        console.log('\n\n\n --- DEBUG redimensionner Root SelectorSizeInDOM avec facteur= ',facteur,'---- @@@@@@@@@@@@@\n\n', )
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+        let selector = null;
+        selector = document.getElementById('root-person-results');
+        if (selector) {
+            rescaleCustomSelector('root-person-results', -parseInt(facteur*14), Math.round(facteur*70), Math.round(facteur*27), Math.round(facteur*250), Math.round(facteur*10) );
+            console.log("*********** Élément root-person-results trouvé ! Classe :", selector.className, ',resize avec :', facteur);
         } else {
-            // On récupère la valeur sauvegardée précédemment
-            fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+            console.error("L'ID 'root-person-results' est INTROUVABLE dans le DOM.");
         }
-
-        // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
-        if (fontSizeOriginal) {
-            const nouvelleTaille = fontSizeOriginal * facteur;
-            element.style.fontSize = nouvelleTaille + 'px';
-            console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
-        }
-
-
-
-
-
-
-
-
-
-        // // Redimensionner width (si définie et pas auto)
-        // if (styles.width && styles.width !== 'auto') {
-        //     const widthOriginal = parseFloat(styles.width);
-        //     if (!isNaN(widthOriginal) && widthOriginal > 0) {
-        //         element.style.width = (widthOriginal * facteur) + 'px';
-        //     }
-        // }
-        
-        // // Redimensionner height (si définie et pas auto)
-        // if (styles.height && styles.height !== 'auto') {
-        //     const heightOriginal = parseFloat(styles.height);
-        //     if (!isNaN(heightOriginal) && heightOriginal > 0) {
-        //         element.style.height = (heightOriginal * facteur) + 'px';
-        //     }
-        // }
-        
-        // // Redimensionner line-height (si définie en px)
-        // if (styles.lineHeight && styles.lineHeight.includes('px')) {
-        //     const lineHeightOriginal = parseFloat(styles.lineHeight);
-        //     if (!isNaN(lineHeightOriginal) && lineHeightOriginal > 0) {
-        //         element.style.lineHeight = (lineHeightOriginal * facteur) + 'px';
-        //     }
-        // }
-        
-        // // Redimensionner padding
-        // ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].forEach(prop => {
-        //     const value = parseFloat(styles[prop]);
-        //     if (!isNaN(value) && value > 0) {
-        //         element.style[prop] = (value * facteur) + 'px';
-        //     }
-        // });
-        
-        // // Redimensionner margin
-        // ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(prop => {
-        //     const value = parseFloat(styles[prop]);
-        //     if (!isNaN(value) && value > 0) {
-        //         element.style[prop] = (value * facteur) + 'px';
-        //     }
-        // });
-        
-        // // Redimensionner border-width
-        // if (styles.borderWidth) {
-        //     const borderOriginal = parseFloat(styles.borderWidth);
-        //     if (!isNaN(borderOriginal) && borderOriginal > 0) {
-        //         element.style.borderWidth = (borderOriginal * facteur) + 'px';
-        //     }
-        // }
-    });
-}
-
-// Observer les changements pour Samsung (polling)
-let dernierFacteur = null;
-function surveillerChangementsFontSize() {
-
-    const facteurActuel = calculerFacteurRedimensionnement();
-    if (dernierFacteur !== null && dernierFacteur !== facteurActuel) {
-        console.log('Changement de scale détecté:', dernierFacteur, '→', facteurActuel);
-        redimensionnerButtonSizeInDOM();
-    }
-
-    dernierFacteur = facteurActuel;
-}
-
-// Initialisation au chargement
-function initialiserButtonSize() {
-    console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM...\n\n');
-    capturerReference();
-
-
-    // if (isSamsungBrowser()) {
-    if (true) {
-
-        redimensionnerButtonSizeInDOM();
-        
-        // Surveillance resize (pour Chrome)
-        // window.addEventListener('resize', () => {
-        //     console.log('/n/n-Resize détecté, redimensionnement button size...');
-        //     redimensionnerButtonSizeInDOM();
-        // });
-        
-        // Surveillance font-size (pour Samsung)
-        setInterval(surveillerChangementsFontSize, 500);
-
     }
 }
 
-// Auto-initialisation quand le DOM est prêt
-// if (document.readyState === 'loading') {
-//     console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM ON LOADING...\n\n');
-//     document.addEventListener('DOMContentLoaded', initialiserButtonSize);
-// } else {
-//     console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT START...\n\n');
-//     initialiserButtonSize();
-// }
-
-// // Export des fonctions pour usage externe si nécessaire
-// if (typeof module !== 'undefined' && module.exports) {
-//     module.exports = {
-//         redimensionnerDOM,
-//         calculerFacteurRedimensionnement,
-//         capturerReference
-//     };
-// }
+export function redimensionnerSelectorSizeInDOMnameCloud() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n\n --- DEBUG redimensionnerSelectorSizeInDOM nameCloud ----\n\n\n\n')
+        facteur = 1/state.browserScaleFactor;
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+        setTimeout(() => {
+            let selector = document.getElementById('nameCloudTypeSelect');
+            if (selector) {
+                rescaleCustomSelector('nameCloudTypeSelect', parseInt(facteur*0), Math.round(facteur*60), Math.round(facteur*25), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('nameCloudScopeSelect');
+            if (selector) {
+                rescaleCustomSelector('nameCloudScopeSelect', parseInt(facteur*0), Math.round(facteur*60), Math.round(facteur*25), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }            
+        }, 600);
+        if (!state.isSamsungBrowser) {
+            setTimeout(() => {
+                const selector = document.getElementById('generations');
+                selector.style.setProperty('margin-right', 1/state.browserScaleFactor +'px', 'important');
+            }, 150);
+        }
+    }
+}
 /////////////////////////////////////////////////////////////////
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Définir la fonction openGedcomModal globalement avant de charger i18n.js
-
-
-
-
-
-
-
-
-
-
-
 function openGedcomModal() {
     const modal = document.getElementById('advanced-settings-modal');
     if (modal) { modal.style.display = 'block'; }
     const secretTargetArea = document.getElementById('secret-trigger-area');
     if (secretTargetArea) {secretTargetArea.style.display = 'none';}
     setTimeout(() => {
+        calculerFacteurRedimensionnement();
         redimensionnerButtonSizeInDOM();
     }, 300);
 
@@ -829,9 +1488,9 @@ export function toggleFullScreen(requestedstate = null) {
             }
         }
         // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
-        fullScreenLabel.textContent = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
-        fullScreenLabel.dataset.textKey = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
-        window.i18n.updateUI();
+        // fullScreenLabel.textContent = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        // fullScreenLabel.dataset.textKey = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        // window.i18n.updateUI();
     }
 
     const browserBarButton = document.getElementById('browserBar-button');
@@ -1277,24 +1936,8 @@ function initialize() {
 
 
     // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
-    const fullScreenButton = document.getElementById('fullScreen-button');
-    if (fullScreenButton) {
-        const span = fullScreenButton.querySelector('span');
-        if (span) {
-            // span.textContent = '🖥️';
-            span.innerHTML = "";
-            // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+    createFullScreenButton();
 
-            // Créer les SVG une seule fois
-            state.svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
-            state.svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
-
-            state.svgExit.style.display = 'none'; // caché par défaut
-
-            span.appendChild(state.svgFull);
-            span.appendChild(state.svgExit);
-        }
-    }
  
     // Ajouter l'événement pour soumettre le formulaire avec Enter
     const passwordInput = document.getElementById('password');
@@ -1328,13 +1971,21 @@ function initialize() {
 
     
     const device = detectDeviceType();
+
+
+
+
+
+
+
+    console.log("\n\n\n   --- DEBUG device", device);
+
+
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
     state.isPWA = isPWA();
     
 
-
     secretMode();
-
 
 
     if (state.isPuzzleSwipeFromSecret) {
@@ -1378,8 +2029,38 @@ function initialize() {
     console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT END OF INITIALIZE...\n\n');
     initialiserButtonSize();
 
-
 }
+
+
+
+function createFullScreenButton() {
+
+    // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = '🖥️';
+            span.innerHTML = "";
+            // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+
+            // Créer les SVG une seule fois
+            if (state.isSamsungBrowser) {
+                state.svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
+                state.svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
+            } else {
+                const f=1/state.browserScaleFactor;
+                state.svgFull = createExitFullscreenSVG(35.0*f, 28.0*f, 0.1*f, 0.35*f, 2.0*f, 3.0*f, 5.0*f, 2.0*f, "#3498db", "yellow", "outward");
+                state.svgExit = createExitFullscreenSVG(35.0*f, 28.0*f, 0.1*f, 0.35*f, 2.0*f, 3.0*f, 5.0*f, 2.0*f, "#3498db", "yellow", "inward");
+            }
+            state.svgExit.style.display = 'none'; // caché par défaut
+
+            span.appendChild(state.svgFull);
+            span.appendChild(state.svgExit);
+        }
+    }
+}
+
 
 /**
  * Initialise le sélecteur de générations
@@ -1647,7 +2328,8 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
         // const originalRootResults = document.getElementById('root-person-results');
         // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
         
-
+    console.log('\n\n\n @@@@@@@@@@@  DEBUG : launch redimensionnerButtonSizeInDOM  at loadData after displayGenealogicTree @@@@@@@@@@@\n\n')
+    calculerFacteurRedimensionnement();
     redimensionnerButtonSizeInDOM();
 
 
@@ -2266,15 +2948,26 @@ export function handleRootPersonChange(event) {
         }
         
         // Mettre à jour l'état de pause
-        const animationPauseBtn = document.getElementById('animationPauseBtn');
-        if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
-            // animationPauseBtn.querySelector('span').textContent = '⏸️';
-            // animationPauseBtn.querySelector('span').textContent = '⏸';
-            animationPauseBtn.querySelector('span').innerHTML =
-            '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+        // const animationPauseBtn = document.getElementById('animationPauseBtn');
+        // if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+        //     // animationPauseBtn.querySelector('span').textContent = '⏸️';
+        //     // animationPauseBtn.querySelector('span').textContent = '⏸';
+        //     animationPauseBtn.querySelector('span').innerHTML =
+        //     '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
 
+        // }
+
+        const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
+        if (animationPauseBtnSpan ) {
+            // animationPauseBtn.querySelector('span').textContent = '⏸';
+            if(state.isSamsungBrowser && state.browserScaleFactor > 1.4) {
+                animationPauseBtnSpan.style.fontSize = baseSizeSVG; // On applique la taille SVG
+            }
+            animationPauseBtnSpan.innerHTML =
+            '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
         }
-               
+        redimensionnerPlayButtonSizeInDOM();
+              
         
         // Redessiner l'arbre d'abord
         console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
@@ -2418,7 +3111,7 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
         rootPersonResults.innerHTML = '';
         addToRootHistory(person);
         rootPersonResults.style.display = 'block';
-        rootPersonResults.style.backgroundColor = 'orange';
+        // rootPersonResults.style.backgroundColor = 'orange';
     } else {
         // Sinon, ajouter la nouvelle racine à l'historique
         if (!state.isAnimationLaunched || (!state.treeModeReal==='descendants'&& !state.treeModeReal==='directDescendants'))  {
@@ -2491,6 +3184,12 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // Ne pas faire resetView() en mode both
     if (state.treeModeReal !== 'both') {
         resetView();    
+    }
+    if (state.browserScaleFactor != 1) { 
+        console.log('\n\n - DEBUG : call to redimensionnerSelectorSizeInDOM in displayGenealogicTree tree=', state.isTreeEnabled,'cloud=', state.isWordCloudEnabled, 'radar=',state.isRadarEnabled, 'previousMode=',state.previousMode)
+        redimensionnerSelectorSizeInDOM(); 
+
+        // redimensionnerRootSelectorSizeInDOM() ;
     }
 
 }
@@ -2657,6 +3356,52 @@ const max_count = 3;
 
 // Ajouter les messages toast aux boutons et sélecteurs
 document.addEventListener('DOMContentLoaded', function() {
+
+    const dontApplyButtonRescaleCheckbox = document.getElementById('dont-apply-button-rescale');
+
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+    if (!isMobile) { 
+        dontApplyButtonRescaleCheckbox.checked = true;
+    }
+
+
+    // 1. RÉCUPÉRATION au démarrage
+    // On récupère la valeur stockée (qui est une chaîne de caractères "true" ou "false")
+    const savedRescalePreference = localStorage.getItem('dontApplyButtonRescale');
+    // Si une valeur existe en mémoire, on l'applique au state et à la checkbox
+    if (savedRescalePreference !== null) {
+        state.dontApplyButtonRescale = (savedRescalePreference === 'true');
+        dontApplyButtonRescaleCheckbox.checked = state.dontApplyButtonRescale;
+    } else {
+        // Valeur par défaut si rien n'est stocké
+        state.dontApplyButtonRescale = dontApplyButtonRescaleCheckbox.checked;
+    }
+
+    // 2. SAUVEGARDE lors du changement
+    dontApplyButtonRescaleCheckbox.addEventListener('change', (e) => {
+        state.dontApplyButtonRescale = e.target.checked;
+        // On enregistre la nouvelle valeur dans le localStorage
+        localStorage.setItem('dontApplyButtonRescale', e.target.checked);
+        if(state.dontApplyButtonRescale) {
+            state.browserScaleFactor = 1;
+            state.browserScaleCorrection = 1;
+        } 
+        window.location.reload();
+    });
+
+
+    //On lance ce code UNE FOIS au démarrage
+    if (!state.dontApplyButtonRescale) { detectBrowserScaleChrome();}
+
+
+    const buttonSpan = document.getElementById('animationPauseBtnSpan');
+    if (buttonSpan && navigator.userAgent.includes('SamsungBrowser')) {
+    // if (buttonSpan ) {
+        buttonSpan.style.fontSize = '25px';
+        console.log("/n/n -------  DEBUG ---------Font-size initial de animationPauseBtnSpan fixé à 25px " );
+    }
+
+
     document.querySelectorAll('.controls-row-1 button, .controls-row-2 button, select, .controls-row-1 input, .controls-row-2 input').forEach(element => {
         element.addEventListener('change', function() {
             const message = this.getAttribute('data-action');
@@ -2832,20 +3577,20 @@ const afficherPopup = (message, time = null, top = null) => {
     popup.textContent = message;
     popup.id = 'expert-activation-popup';
     popup.style.cssText = `
+        font-size: 16px;
         position: fixed;
-        bottom: 20px;
+        bottom: 1.25em;
         left: 50%;
         transform: translateX(-50%);
         background-color: #4CAF50; /* Vert */
         color: white;
-        padding: 5px 5px;
-        border-radius: 8px;
+        padding: 0.31em 0.31em;
+        border-radius: 0.5em;
         font-family: sans-serif;
-        font-size: 16px;
         z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
         opacity: 0;
         transition: opacity 0.5s ease-in-out;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0.25em 0.375em rgba(0, 0, 0, 0.1);
         white-space: pre-line;
         text-align: center;
     `;
@@ -2854,6 +3599,8 @@ const afficherPopup = (message, time = null, top = null) => {
         popup.style.bottom =  '';
         popup.style.top = top +'px';
     }
+
+    popup.style.setProperty('font-size', (16 / state.browserScaleFactor) + 'px', 'important');
 
     document.body.appendChild(popup);
 
@@ -2927,18 +3674,22 @@ function secretMode() {
         // Vérification de la correspondance
         if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
             activerModeExpert('hidePasswordActif');
+            console.log('\n\n ---- mode hidePasswordActif activé ----')
             sequenceEnCours = []; // Réinitialise
         }
         if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
             activerModeExpert('noFullScreenActif');
+            console.log('\n\n ---- mode noFullScreenActif activé ----')            
             sequenceNoFullScreenEnCours = []; // Réinitialise
         }
         if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
             activerModeExpert('puzzleActif');
+            console.log('\n\n ---- mode puzzleActif activé ----')
             sequencePuzzleEnCours = []; // Réinitialise
         }
         if (sequenceLeavesEnCours.join(',') === SEQUENCE_LEAVES.join(',')) {
             activerModeExpert('leavesActif');
+            console.log('\n\n ---- mode leavesActif activé ----')
             sequenceLeavesEnCours = []; // Réinitialise
         }
     }
@@ -2961,7 +3712,7 @@ function secretMode() {
         activerModeExpert('leavesActif');
     }
 
-    // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+    console.log( '\n\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
     // if (state.isMobile && state.isTouchDevice) {
     //     const inputField = document.getElementById('input-form-firstName');
@@ -2987,7 +3738,8 @@ function secretMode() {
 
     // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
 
-    if (state.isMobile && state.isTouchDevice) {
+    // if (state.isMobile && state.isTouchDevice) {
+    if (true) {
         // --- NOUVEAU LOG 1 : Vérification de l'entrée dans le bloc mobile
         // console.log('Mode Mobile/Tactile détecté. Tentative de configuration de l\'écouteur "input".');
         
@@ -3037,7 +3789,8 @@ function secretMode() {
     // }
 
 
-    if (!state.isMobile) {
+    if(false) {
+    // if (!state.isMobile) {
         // ---2.  Activation PC : Écoute de la séquence de touches ---
         document.addEventListener('keydown', (e) => {
             
@@ -3091,7 +3844,6 @@ function secretMode() {
     } else {
         console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
     }
-
 }
 
 
@@ -3125,19 +3877,41 @@ export function isIOSDevice() {
 }
 
 
-async function checkDevice() {
-  if (navigator.userAgentData) {
-    const uaData = await navigator.userAgentData.getHighEntropyValues(['platform', 'model']);
-    console.log(uaData.platform); // "Android" apparaîtra ici même si le UA dit "Linux"
+// async function checkDevice() {
+//   if (navigator.userAgentData) {
+//     const uaData = await navigator.userAgentData.getHighEntropyValues(['platform', 'model']);
+//     console.log(uaData.platform); // "Android" apparaîtra ici même si le UA dit "Linux"
     
-    if (uaData.platform === "Android") {
+//     if (uaData.platform === "Android") {
+//       return "Mobile/Tablette";
+//     }
+//   }
+//   return "PC (ou navigateur non compatible)";
+// }
+
+
+function checkDevice() {
+  // On ne peut PAS utiliser getHighEntropyValues ici car il impose 'await'
+  
+  // On se rabat sur l'API synchrone (moins précise mais immédiate)
+  if (navigator.userAgentData) {
+    if (navigator.userAgentData.mobile) {
       return "Mobile/Tablette";
     }
   }
+  
+  // Détection classique par User Agent (Synchrone)
+  if (/Android/i.test(navigator.userAgent)) {
+    return "Mobile/Tablette";
+  }
+
   return "PC (ou navigateur non compatible)";
 }
 
-export async function detectDeviceType() {
+
+
+
+export function detectDeviceType() {
   state.deviceInfo = {
     isMobile: false,
     isIOS: false,
@@ -3162,7 +3936,8 @@ export async function detectDeviceType() {
 
   debugLog(`ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen}`, "info")
 
-  const deviceType = await checkDevice();
+//   const deviceType = await checkDevice();
+  const deviceType = checkDevice();
 
   debugLog(`ℹ️  isMobile2 : ${deviceType}`, "info")
 
@@ -3376,160 +4151,217 @@ export function positionRadarButton() {
     let offsetY2 = 5;
     // if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
     offsetY = 5; offsetY2 = 0;
+    let factor = 1; 
+    let radarX = 0, statsX = 47;
+    let radarY = 0, statsY = 0, cloudY = 0;
 
-    if (cloudButton && radarButton && statsButton) {
-        const cloudRect = cloudButton.getBoundingClientRect();
-        radarButton.style.position = 'fixed';
-        radarButton.style.left = cloudRect.left + 'px';
-        radarButton.style.top = (cloudRect.bottom + 3 + offsetY) + 'px';
-        radarButton.style.zIndex = '1001';
-
-
-        statsButton.style.position = 'fixed';
-        // statsButton.style.left = cloudRect.left + 37 + 'px';
-        // statsButton.style.top = (cloudRect.bottom + 11 - offsetY2) + 'px';
-
-        statsButton.style.left = cloudRect.left + 47 + 'px';
-        statsButton.style.top = (cloudRect.bottom + 8 - offsetY2) + 'px';
-
-        statsButton.style.zIndex = '1001';
+    if (!state.isSamsungBrowser) { 
+        factor= 1/state.browserScaleFactor; 
+        radarX = factor*3;
+        statsX = factor*47.0;    
+        radarX = 2;
+        // if (factor < 0.5) {radarX = 1;}
     }
+
+    if (state.isMobile) { 
+        radarY = factor*3; statsY = factor*3; cloudY = 0;
+        if (state.isSamsungBrowser && state.browserScaleFactor >= 1.1){
+            radarY = 8; statsY = 8; cloudY = 0;
+        }
+    }
+    else { radarY = -5*factor; statsY = -5*factor; cloudY = -15*factor;}
+  
+
+    setTimeout(() => {
+        if (cloudButton && radarButton && statsButton) {
+            const cloudRect = cloudButton.getBoundingClientRect();
+            radarButton.style.position = 'fixed';
+            // radarButton.style.left = cloudRect.left + 'px';
+            // radarButton.style.top = (cloudRect.bottom + 3 + offsetY) + 'px';
+
+
+            radarButton.style.left = parseInt(cloudRect.left + (radarX)) + 'px';
+            radarButton.style.top = parseInt(cloudRect.bottom + (radarY)) + 'px';
+            radarButton.style.zIndex = '1001';
+
+            statsButton.style.position = 'fixed';
+            // statsButton.style.top = (cloudRect.bottom + 8 - offsetY2) + 'px';
+            // statsButton.style.left = cloudRect.left + (fontSize*47/32)+ 'px';
+            statsButton.style.left = parseInt(cloudRect.left + statsX) + 'px';
+            statsButton.style.top = parseInt(cloudRect.bottom + (statsY)) + 'px';
+
+            // cloudButton.style.marginTop = parseInt(-15) + 'px';
+
+            statsButton.style.zIndex = '1001';
+        }
+
+    }, 100);
 
 
 }
 
 // Nouvelle fonction pour l'overlay
 function createAndPositionRadarOverlay() {
-    // Trouver les boutons
-    const cloudButton = document.getElementById('cloudBtn');
-    const radarButton = document.getElementById('radarBtn');
-    const statsButton = document.getElementById('statsBtn');
+    setTimeout(() => {
+        // Trouver les boutons
+        const cloudButton = document.getElementById('cloudBtn');
+        const radarButton = document.getElementById('radarBtn');
+        const statsButton = document.getElementById('statsBtn');
 
-    // Forcer padding/marges/tailles (avec !important)
-    // statsButton.style.setProperty('padding-top', '0px', 'important');
-    // statsButton.style.setProperty('padding-bottom', '0px', 'important');
-    // statsButton.style.setProperty('padding-left', '0px', 'important');
-    // statsButton.style.setProperty('padding-right', '0px', 'important');
-
-    // statsButton.style.setProperty('border-radius', '4px', 'important');
-
-    // statsButton.style.setProperty('min-width', '67px', 'important');
-    // statsButton.style.setProperty('height', '27px', 'important');
-
-
-    // Vérifier que les boutons existent
-    if (!cloudButton || !radarButton || !statsButton) return;
-    
-    // Récupérer les dimensions du bouton cloud
-    const cloudRect = cloudButton.getBoundingClientRect();
-    
-    // Créer l'overlay s'il n'existe pas déjà
-    let overlay = document.getElementById('radarBtn-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'radarBtn-overlay';
-        overlay.style.position = 'fixed';
-        overlay.style.backgroundColor = 'transparent';
-        overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
-        overlay.style.cursor = 'pointer';
+        // Vérifier que les boutons existent
+        if (!cloudButton || !radarButton || !statsButton) return;
         
-        // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
-        overlay.addEventListener('click', () => {
-            radarButton.click();
-        });
+        // Récupérer les dimensions du bouton cloud
+        const cloudRect = cloudButton.getBoundingClientRect();
         
-        // Ajouter l'overlay au body
-        document.body.appendChild(overlay);
-    }
-    
-    // Positionner l'overlay
-    overlay.style.top = `${cloudRect.bottom + 5}px`;
-    overlay.style.left = `${cloudRect.left}px`;
-    overlay.style.width = `${radarButton.offsetWidth}px`;
-    overlay.style.height = `${radarButton.offsetHeight}px`;
+        // Créer l'overlay s'il n'existe pas déjà
+        let overlay = document.getElementById('radarBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'radarBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+            overlay.style.cursor = 'pointer';
+            
+            // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+            overlay.addEventListener('click', () => {
+                radarButton.click();
+            });
+            
+            // Ajouter l'overlay au body
+            document.body.appendChild(overlay);
+        }
 
-
-
-
-
-    // Créer l'overlay s'il n'existe pas déjà
-    overlay = document.getElementById('statsBtn-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'statsBtn-overlay';
-        overlay.style.position = 'fixed';
-        overlay.style.backgroundColor = 'transparent';
-        overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
-        overlay.style.cursor = 'pointer';
+        let factor = 1;
+        if (!state.isSamsungBrowser) { factor= 1/state.browserScaleFactor; }
         
-        // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
-        overlay.addEventListener('click', () => {
-            statsButton.click();
-        });
+        // Positionner l'overlay
+        overlay.style.top = `${cloudRect.bottom + 5*factor}px`;
+        overlay.style.left = `${cloudRect.left}px`;
+        overlay.style.width = `${radarButton.offsetWidth}px`;
+        overlay.style.height = `${radarButton.offsetHeight}px`;
+
+        // Créer l'overlay s'il n'existe pas déjà
+        overlay = document.getElementById('statsBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'statsBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+            overlay.style.cursor = 'pointer';
+            
+            // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+            overlay.addEventListener('click', () => {
+                statsButton.click();
+            });
+            
+            // Ajouter l'overlay au body
+            document.body.appendChild(overlay);
+        }
         
-        // Ajouter l'overlay au body
-        document.body.appendChild(overlay);
-    }
-    
-    // Positionner l'overlay
-    // overlay.style.top = `${cloudRect.bottom + 10}px`;
-    // overlay.style.left = `${cloudRect.left + 40}px`;
-    overlay.style.top = `${cloudRect.bottom + 15}px`;
-    overlay.style.left = `${cloudRect.left + 45}px`;
+        // Positionner l'overlay
+        overlay.style.top = `${cloudRect.bottom + 15*factor}px`;
+        overlay.style.left = `${cloudRect.left + 45*factor}px`;
 
-    overlay.style.width = `${statsButton.offsetWidth}px`;
-    overlay.style.height = `${statsButton.offsetHeight}px`;
-
-
-
-
-
-
-
+        overlay.style.width = `${statsButton.offsetWidth}px`;
+        overlay.style.height = `${statsButton.offsetHeight}px`;
+    }, 100);
 }
 
 function createAndPositionHeatMapOverlay() {
-    const heatMapBtn = document.getElementById('heatMapBtn');
-    if (!heatMapBtn) return;
+    setTimeout(() => {
 
-    let overlay = document.getElementById('heatMapBtn-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'heatMapBtn-overlay';
-        overlay.style.position = 'fixed';
-        overlay.style.backgroundColor = 'transparent';
-        overlay.style.zIndex = '1002';
-        overlay.style.cursor = 'pointer';
-        overlay.addEventListener('click', () => {
-            heatMapBtn.click();
-        });
-        document.body.appendChild(overlay);
-    }
+        const heatMapBtn = document.getElementById('heatMapBtn');
+        if (!heatMapBtn) return;
 
+        let overlay = document.getElementById('heatMapBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'heatMapBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002';
+            overlay.style.cursor = 'pointer';
+            overlay.addEventListener('click', () => {
+                heatMapBtn.click();
+            });
+            document.body.appendChild(overlay);
+        }
+        let factor = 1;
+        if (!state.isSamsungBrowser) { factor= 1/state.browserScaleFactor; }
 
-
-    const rect = heatMapBtn.getBoundingClientRect();
-    overlay.style.top = `${rect.top - 10 }px`;
-    overlay.style.left = `${rect.left - 10}px`;
-    overlay.style.width = `${rect.width + 20}px`;
-    overlay.style.height = `${rect.height + 20}px`;
+        const rect = heatMapBtn.getBoundingClientRect();
+        overlay.style.top = `${rect.top - 10*factor }px`;
+        overlay.style.left = `${rect.left - 10*factor}px`;
+        overlay.style.width = `${rect.width + 20*factor}px`;
+        overlay.style.height = `${rect.height + 20*factor}px`;
+    }, 100);
 }
 
 export function positionHeatMapButton() {
     const settingsBtn = document.getElementById('settingsBtn');
     const heatMapBtn = document.getElementById('heatMapBtn');
+    setTimeout(() => {
 
-    let offsetY = 0;
-    // if (window.innerWidth < 768) {offsetY = 5;}
-    offsetY = 5;
+        // let factor = 1;
+        // let heatmapX = 0; //1;
+        // let heatmapY = 0; //1;
 
-    if (settingsBtn && heatMapBtn) {
-        const settingRect = settingsBtn.getBoundingClientRect();
-        heatMapBtn.style.position = 'fixed';
-        heatMapBtn.style.left = (settingRect.left - 1)+ 'px';
-        heatMapBtn.style.top = (settingRect.bottom + 3 + offsetY) + 'px';
-        heatMapBtn.style.zIndex = '1001';
-    }
+        // if (!state.isSamsungBrowser) { 
+        //     factor = 1/state.browserScaleFactor; 
+        //     heatmapX = 0.0;
+        //     if (factor < 0.5) {heatmapX = -1.5;}
+        // }
+
+        // if (state.isMobile) { heatmapY = 2;}
+        // else { heatmapY = -5;}
+
+        // // if (state.browserScaleFactor >=1.74) { radarY = 2*factor;  }
+
+
+
+
+
+        let factor = 1; 
+        let heatmapX = 0, heatmapY = 0;
+
+        if (!state.isSamsungBrowser) { 
+            factor= 1/state.browserScaleFactor;
+            heatmapX = -1*factor;
+            if (factor < 0.5) {heatmapX = -2*factor;}            
+
+            // if (factor < 0.5) {radarX = 1;}
+        }
+
+        if (state.isMobile) { 
+            heatmapY = 2*factor;
+            if (state.isSamsungBrowser && state.browserScaleFactor >= 1.1){
+                heatmapY =7;
+            }
+        }
+        else { heatmapY = -5*factor;}
+
+
+
+
+
+        if (settingsBtn && heatMapBtn) {
+            const settingRect = settingsBtn.getBoundingClientRect();
+
+            heatMapBtn.style.position = 'fixed';
+            if (factor < 0.5) {heatmapX = 1;}
+            heatMapBtn.style.left = parseInt(settingRect.left + heatmapX)+ 'px';
+            // heatMapBtn.style.top = parseInt(settingRect.bottom - factor*5) + 'px';
+            heatMapBtn.style.top = parseInt(settingRect.bottom + heatmapY) + 'px';
+
+            heatMapBtn.style.zIndex = '1001';
+        }
+
+    }, 100);
+
+
 }
 
 export function hideAndCleanupTreeButtons() {

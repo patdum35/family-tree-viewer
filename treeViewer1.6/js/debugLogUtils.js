@@ -1143,6 +1143,7 @@ function getScreenInfo() {
         Écran: ${window.screen.width}x${window.screen.height}
         Fenêtre: ${window.innerWidth}x${window.innerHeight}
         Ratio pixel: ${window.devicePixelRatio}
+        Ratio browser: ${window.screen.devicePixelRatio}
         Orientation: ${screen.orientation ? screen.orientation.type : 'Non disponible'}
     `.trim();
 }

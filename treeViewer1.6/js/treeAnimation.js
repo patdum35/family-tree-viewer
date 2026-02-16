@@ -1,7 +1,7 @@
 // ====================================
 // Animation de l'arbre
 // ====================================
-import { state, searchRootPersonId, trackPageView, toggleTreeRadar } from './main.js';
+import { state, searchRootPersonId, trackPageView, toggleTreeRadar, redimensionnerPlayButtonSizeInDOM } from './main.js';
 import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
 import { cleanIdForSelector } from './nodeRenderer.js';
 import { getZoom, getLastTransform, setLastTransform, drawTree, hardResetZoom } from './treeRenderer.js';
@@ -418,33 +418,41 @@ function showNetworkStatus(message) {
     if (!notification) {
         notification = document.createElement('div');
         notification.id = 'network-status';
+
+        notification.style.fontSize = 15 / state.browserScaleFactor +'px';
+
         notification.style.position = 'fixed';
-        if (window.innerHeight < 400) {
-            notification.style.top = '10px';
+        if (state.innerHeight < 400) {
+            notification.style.top = '0.67em';
             notification.style.left = '';
-            notification.style.right = '50px';
+            notification.style.right = '3.33em';
         } else {
-            notification.style.top = '50px';
-            notification.style.left = window.innerWidth/2 - 100  +'px';
+            if (window.outerWidth > 1000) { notification.style.top = '3.33em';}
+            else { notification.style.top = '3.33em';}
+
+            notification.style.left = (state.innerWidth/2 - 100)*state.scaleChrome  +'px';
             notification.style.right = '';
             // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
             // notification.style.transform = 'translateX(-50%)';
         }
 
-
-        notification.style.padding = '5px';
-        notification.style.borderRadius = '5px';
+        notification.style.padding = '0.33em';
+        notification.style.borderRadius = '0.33em';
         notification.style.zIndex = '9999';
         document.body.appendChild(notification);
     }
     
+    console.log("\n\n\n 🌐 DEBUG : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, state.innerHeight, notification.style.left) ;
+
+    notification.style.setProperty('font-size', (15 / state.browserScaleFactor) + 'px', 'important');
     notification.textContent = message;
     notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
     notification.style.color = 'white';
 
-    if (window.innerHeight >= 400) {
+    if (state.innerHeight >= 400) {
         setTimeout(() => {    
-            notification.style.left = window.innerWidth/2 - (notification.offsetWidth)/2  +'px';
+            notification.style.left = (state.innerWidth/2)*state.scaleChrome - (notification.offsetWidth)/2  +'px';
+            console.log("\n\n\n 🌐 DEBUG 2 : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, notification.style.left, notification.offsetWidth) ;
         }, 50);
     }
 
@@ -468,14 +476,14 @@ export function initializeAnimationMapPosition()
 
 
 
-    if ((window.innerWidth < 400) && (window.innerHeight < 800)) {
+    if ((state.innerWidth < 400) && (state.innerHeight < 800)) {
     // format smartphone portrait
         animationMapPosition.width = window.innerWidth - 20;
         animationMapPosition.left = 10;
         animationMapPosition.height = window.innerHeight/3;
         animationMapPosition.top = window.innerHeight - animationMapPosition.height - 15;
     }
-    else if ((window.innerWidth < 800) && (window.innerHeight < 400)) { 
+    else if ((state.innerWidth < 800) && (state.innerHeight < 400)) { 
     // format smartphone landscape
         animationMapPosition.width = window.innerWidth/2 ;
         animationMapPosition.left = 10;
@@ -498,7 +506,7 @@ export function initializeAnimationMapPosition()
 
     // animationMapPosition.top = window.innerHeight - animationMapPosition.height - 20;
 
-    console.log("\n \n Position de la carte d'animation initialisée:", window.innerWidth, window.innerHeight, animationMapPosition, "\n\n");
+    console.log("\n \n Position de la carte d'animation initialisée:", window.innerWidth, state.innerHeight, animationMapPosition, "\n\n");
 
     state.isAnimationMapInitialized = true;
 }
@@ -1722,7 +1730,7 @@ export async function startAncestorAnimation(isCousin = false) {
 
     // Initialiser la carte au début de l'animation
     let deltaXRatio = 2; // Ratio de décalage horizontal
-    if (window.innerWidth < 400) { deltaXRatio = 2; } // Pour les petits écrans, on
+    if (state.innerWidth < 400) { deltaXRatio = 2; } // Pour les petits écrans, on
 
 
     if (state.isSpeechEnabled2 && state.isSpeechSynthesisAvailable ) {
@@ -1827,9 +1835,9 @@ export async function startAncestorAnimation(isCousin = false) {
                     
                         offsetY = 0;
                         if (animationState.currentIndex === 0) {
-                            if (window.innerHeight > 1000) {
+                            if (state.innerHeight > 1000) {
                                 offsetY = -450;
-                            } else if (window.innerHeight > 800) {
+                            } else if (state.innerHeight > 800) {
                                 offsetY = -300;
                             } else {
                                 offsetY = -100;
@@ -2760,7 +2768,9 @@ export function toggleAnimationPause(animationStateisPaused = null) {
 
     closeAllModals(false);
 
-    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    // const animationPauseBtn = document.getElementById('animationPauseBtn');
+    const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
+
     
     // Basculer l'état de pause
     // animationState.isPaused = !animationState.isPaused;
@@ -2775,11 +2785,16 @@ export function toggleAnimationPause(animationStateisPaused = null) {
     // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶️' : '⏸️';
     // animationPauseBtn.querySelector('span').textContent = animationState.isPaused ? '▶' : '⏸';
     if (animationState.isPaused) {
-            animationPauseBtn.querySelector('span').textContent = '▶';
+            // animationPauseBtn.querySelector('span').textContent = '▶';
+            animationPauseBtnSpan.textContent = '▶';
     } else {
-        animationPauseBtn.querySelector('span').innerHTML =
+        // animationPauseBtn.querySelector('span').innerHTML =
+        // '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+        animationPauseBtnSpan.innerHTML =
         '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
     }
+
+    redimensionnerPlayButtonSizeInDOM();
 
 
     if (animationState.isPaused) {
@@ -2794,8 +2809,11 @@ export function toggleAnimationPause(animationStateisPaused = null) {
 
 
 export function displayPauseButton() {
-    const animationPauseBtn = document.getElementById('animationPauseBtn');
-    animationPauseBtn.querySelector('span').textContent = '▶';
+    // const animationPauseBtn = document.getElementById('animationPauseBtn');
+    const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
+    // animationPauseBtn.querySelector('span').textContent = '▶';
+    animationPauseBtnSpan.textContent = '▶';
+    redimensionnerPlayButtonSizeInDOM();
 }
 
 
@@ -2847,7 +2865,8 @@ export function resetAnimationState() {
 export function fullResetAnimationState() {
     console.log("\n\n🔄 Full Reset Animation State");
 
-    const animationPauseBtn = document.getElementById('animationPauseBtn');
+    // const animationPauseBtn = document.getElementById('animationPauseBtn');
+    const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
     
     // Basculer l'état de pause
     animationState.isPaused = true;
@@ -2855,7 +2874,9 @@ export function fullResetAnimationState() {
     
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = '▶️';
-    animationPauseBtn.querySelector('span').textContent = '▶';
+    // animationPauseBtn.querySelector('span').textContent = '▶';
+    animationPauseBtnSpan.textContent = '▶';
+    redimensionnerPlayButtonSizeInDOM();
 
     state.isFullResetAnimationRequested = true;
 

@@ -1,4 +1,4 @@
-import { state, showAndRestoreTreeButtons, displayGenealogicTree, updateRadarButtonText } from './main.js';
+import { state, showAndRestoreTreeButtons, displayGenealogicTree, updateRadarButtonText, redimensionnerRootSelectorSizeInDOM } from './main.js';
 import { NameCloud } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
 import { createSettingsModal } from './nameCloudSettings.js';
@@ -331,7 +331,10 @@ function createMainContainer() {
     container.style.width = '100%';
     container.style.height = '100%';
     container.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-    container.style.borderRadius = '10px';
+    let scale;
+    if(state.isSamsungBrowser) { scale = 1;}
+    else { scale = 1/state.browserScaleFactor;}
+    container.style.borderRadius = 10*scale+'px';
     container.style.padding = '0';
     container.style.position = 'relative';
     container.style.display = 'flex';
@@ -385,24 +388,31 @@ function createMainContainer() {
 
 function createCloseButton() {
     const closeButton = document.createElement('button');
-    closeButton.innerHTML = '×';
+    // closeButton.innerHTML = '×';
     closeButton.style.position = 'absolute';
-    closeButton.style.top = '6px';
-    closeButton.style.right = '6px';
+    closeButton.style.top = '0.6em';
+    closeButton.style.right = '0.6em';
     closeButton.style.background =  '#f44336'; //'rgba(255, 255, 255, 0.7)';    
     closeButton.style.color = 'white'; //'rgba(255, 255, 255, 0.7)';
     closeButton.style.border = 'none'; //'1px solid #ccc';
     closeButton.style.borderRadius = '50%';
-    closeButton.style.width = '32px';
-    closeButton.style.height = '32px';
-    closeButton.style.fontSize = '24px';
+    closeButton.style.width = '3.2em';
+    closeButton.style.height = '3.2em';
+    closeButton.style.fontSize = '10px';
     closeButton.style.fontWeight= 'bold';
     closeButton.style.cursor = 'pointer';
     closeButton.style.display = 'flex';
     closeButton.style.justifyContent = 'center';
     closeButton.style.alignItems = 'center';
     closeButton.style.zIndex = '1001';
-    closeButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'; //'0 2px 4px rgba(0,0,0,0.2)';
+    closeButton.style.boxShadow = '0 0.2em 0.5em rgba(0,0,0,0.3)'; //'0 2px 4px rgba(0,0,0,0.2)';
+    closeButton.role = 'fontSizeChangeChromeCloudName';
+    
+    const closeButtonSpan = document.createElement('span');
+    closeButtonSpan.innerHTML = '×';
+    closeButtonSpan.role = 'fontSizeChangeCloudName';
+    closeButtonSpan.style.fontSize = '24px';
+    closeButton.appendChild(closeButtonSpan);
     
     return closeButton;
 }
@@ -415,7 +425,8 @@ function createNameCloudContainer() {
     nameCloudContainer.style.margin = '0';
     nameCloudContainer.style.padding = '0';
     nameCloudContainer.style.position = 'relative';
-    nameCloudContainer.style.marginTop = '-20px';
+    if (state.isSamsungBrowser) { nameCloudContainer.style.marginTop = '-20px'; }
+    else { nameCloudContainer.style.marginTop = -20/state.browserScaleFactor+'px';}
     nameCloudContainer.id = 'name-Cloud-Container';
     return nameCloudContainer;
 }
@@ -714,21 +725,30 @@ export function createStatsTypeSelect(type, isForStatsModal = false, width = 60,
 
 function createSettingsButton() {
     const settingsButton = document.createElement('button');
-    settingsButton.innerHTML = '⚙️';
+    // settingsButton.innerHTML = '⚙️';
     
     // Style de base
     settingsButton.style.backgroundColor = 'transparent';
     settingsButton.style.border = 'none';
     settingsButton.style.padding = '0';
-    settingsButton.style.width = '28px';
-    settingsButton.style.height = '28px';
-    settingsButton.style.fontSize = '20px';
+    settingsButton.style.width = '2.8em';
+    settingsButton.style.height = '2.8em';
+    settingsButton.style.fontSize = '10px';
     settingsButton.style.cursor = 'pointer';
     settingsButton.style.display = 'flex';
     settingsButton.style.justifyContent = 'center';
     settingsButton.style.alignItems = 'center';
     // settingsButton.title = 'Paramètres';
     settingsButton.title = getTranslation('titleSettings');
+    settingsButton.role = 'fontSizeChangeChromeCloudName';
+
+
+    const settingsButtonSpan = document.createElement('span');
+    settingsButtonSpan.innerHTML = '⚙️';
+    settingsButtonSpan.style.fontSize = '20px';
+    settingsButtonSpan.role = 'fontSizeChangeCloudName';
+    settingsButton.appendChild(settingsButtonSpan);
+
     
     // Animation subtile au survol
     settingsButton.addEventListener('mouseover', () => {
@@ -858,21 +878,29 @@ export function updateTitleText(element, cfg) {
         titleText = `${nameCloudState.totalWords} ${getTranslation('titleNombreEnfants')}`;
     }
 
-    if (!nameCloudState.mobilePhone || window.innerWidth > 800) 
+    if (!nameCloudState.mobilePhone || state.innerWidth > 800) 
         titleText = titleText + ` ${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}`;
     else
         titleText = ` <span style="font-size: 0.7em">` + titleText + `</span> <span style="font-size: 0.6em">${getTranslation('entre')} ${cfg.startDate} ${getTranslation('et')} ${cfg.endDate}</span>`;
 
     if (nameCloudState.placedWords < nameCloudState.totalWords) {
-        if (!nameCloudState.mobilePhone || window.innerWidth > 800)
+        if (!nameCloudState.mobilePhone || state.innerWidth > 800)
             titleText = titleText + ` <span style="font-size: 0.6em; color: red">(${nameCloudState.placedWords} ${getTranslation('motPlaces')})</span>`;
         else
             titleText = titleText + ` <span style="font-size: 0.5em; color: red">(${nameCloudState.placedWords} ${getTranslation('motPlaces')})</span>`;
     } 
 
-    if ((window.innerWidth > 700)) {
-        element.style.marginTop = '-30px';
-        element.style.marginLeft = '375px';
+    
+    if ((state.innerWidth > 700)) {
+        if (state.isSamsungBrowser) {
+            element.style.marginTop = '-30px';
+            element.style.marginLeft = '375px';
+        } else {
+            element.style.marginTop = -30/state.browserScaleFactor +'px';
+            element.style.marginLeft = 375/state.browserScaleFactor +'px';
+        }
+
+
         element.style.textAlign = 'left';
     } else {
         element.style.marginTop = '0px';
@@ -919,34 +947,64 @@ export function generateNameCloudExport() {
         }, 0);               
 }
 
-
-
 // Ajuste la direction selon la largeur de l’écran
 export function updateOverlayLayout() {
     if (!state.isWordCloudEnabled) return;
+
+
+    console.log('\n\n\n\n -------------   DEBUG updateOverlayLayout -------- \n\n\n\n')
+
+
     let searchRootOverlay = document.getElementById('resultsTreeOverlay');
-    if(window.innerWidth > 420) {
-        searchRootOverlay.style.top = '20px';
+    let scale;
+    if(state.isSamsungBrowser) { scale = 1;}
+    else { scale = 1/state.browserScaleFactor;}
+
+    if(state.innerWidth > 420) {
+        searchRootOverlay.style.top = 20*scale +'px';
         searchRootOverlay.style.flexDirection = 'row';
-        searchRootOverlay.style.gap = '10px';
-        nameCloudState.searchInputTree.style.maxHeight = '26px';
+        searchRootOverlay.style.gap = 10*scale +'px';
+        nameCloudState.searchInputTree.style.maxHeight = 26*scale +'px';
         // ordre sans déplacer les éléments
         nameCloudState.searchInputTree.style.order = 0; // search à gauche
         nameCloudState.resultsSelectTree.style.order = 1; // results à droite
     } else {
-        searchRootOverlay.style.top = '-3px';
+        searchRootOverlay.style.top = -3*scale +'px';
         searchRootOverlay.style.flexDirection = 'column';
         searchRootOverlay.style.gap = '0px';
-        nameCloudState.searchInputTree.style.maxHeight = '20px';
-        nameCloudState.searchInputTree.style.marginLeft = '-7px';
-        nameCloudState.searchInputTree.style.marginTop = '1px';
-        nameCloudState.searchInputTree.style.minWidth = '68px';
+        nameCloudState.searchInputTree.style.maxHeight = 20*scale +'px';
+        nameCloudState.searchInputTree.style.marginLeft = -7*scale +'px';
+        nameCloudState.searchInputTree.style.marginTop = 1*scale +'px';
+        nameCloudState.searchInputTree.style.minWidth = 68*scale +'px';
         // ordre sans déplacer les éléments
         nameCloudState.resultsSelectTree.style.order = 0; // results en haut
         nameCloudState.searchInputTree.style.order = 1; // search en bas
     }
-}
 
+    if (!state.isSamsungBrowser) {
+        setTimeout(() => {
+            nameCloudState.searchInputTree.style.setProperty('margin-right', 7*scale +'px', 'important');
+        }, 150);    
+    }
+
+
+
+    
+    // setTimeout(() => {
+    //     // redimensionnerSelectorSizeInDOMnameCloud();
+
+    //     const selector = document.getElementById('root-person-results');
+    //     // nameCloudState.resultsSelectTree
+    //     selector.style.setProperty('--custom-font-size-display', 2);
+    //     selector.style.setProperty('--custom-font-size-options', 2);
+
+    //     // nameCloudState.resultsSelectTree.style.setProperty('--custom-font-size-display', 2);
+    //     // nameCloudState.resultsSelectTree.style.setProperty('--custom-font-size-options', 2);
+
+    // }, 1000);    
+
+
+}
 
 function showNameCloud(nameData, config) {
     config.scope ='ancestors';
@@ -955,12 +1013,15 @@ function showNameCloud(nameData, config) {
     const container = createMainContainer();
     const closeButton = createCloseButton();
     const nameCloudContainer = createNameCloudContainer();
+    let scale;
+    if(state.isSamsungBrowser) { scale = 1;}
+    else { scale = 1/state.browserScaleFactor;}
 
     const optionsContainer = document.createElement('div');
     optionsContainer.style.display = 'flex';
     optionsContainer.style.flexDirection = 'column';
     optionsContainer.style.alignItems = 'center';
-    optionsContainer.style.padding = '2px';
+    optionsContainer.style.padding = 2*scale +'px';
     optionsContainer.style.backgroundColor = 'transparent';
     optionsContainer.style.position = 'absolute';
     optionsContainer.style.top = '0';
@@ -969,9 +1030,15 @@ function showNameCloud(nameData, config) {
     optionsContainer.style.zIndex = '10';
 
     const typeSelect = createTypeSelect(config.type);
-    typeSelect.style.marginTop = '20px';
+    typeSelect.id = 'nameCloudTypeSelect';
+    // typeSelect.role = 'fontSizeChangeChromeCloudName';
+    // typeSelect.style.fontSize = '10px' 
+    typeSelect.style.marginTop = 20*scale +'px'; //'2em';
     const scopeSelect = createScopeSelect(config.scope);
-    scopeSelect.style.marginTop = '20px';
+    scopeSelect.id = 'nameCloudScopeSelect';
+    // scopeSelect.role = 'fontSizeChangeChromeCloudName';
+    // scopeSelect.style.fontSize = '10px' 
+    scopeSelect.style.marginTop = 20*scale +'px'; //'2em';
 
     const { container: startDateContainer, input: startDateInput } = createDateInput(getTranslation('début'), config.startDate || 1500, (value) => {
         // Support de callback en option pour réagir directement aux changements
@@ -982,29 +1049,36 @@ function showNameCloud(nameData, config) {
         console.log('End date changed to:', value);
     });
 
-
     const showButton = document.createElement('button');
-    showButton.innerHTML = '✓';
+    // showButton.innerHTML = '✓';
     showButton.style.padding = '0';
     showButton.style.backgroundColor = '#4CAF50';
     showButton.style.color = 'white';
     showButton.style.border = 'none';
     showButton.style.borderRadius = '50%';
-    showButton.style.width = '23px';
-    showButton.style.height = '23px';
+    showButton.style.width = '2.3em';
+    showButton.style.height = '2.3em';
     showButton.style.position = 'relative';
     showButton.style.marginLeft = '0px';
     showButton.style.transform = 'translateY(-2px)';
-    showButton.style.fontSize = '16px';
+    showButton.style.fontSize = '10px';
     showButton.style.cursor = 'pointer';
     showButton.style.display = 'flex';
     showButton.style.justifyContent = 'center';
     showButton.style.alignItems = 'center';
-    showButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    showButton.style.boxShadow = '0 0.2em 0.4em rgba(0,0,0,0.2)';
     showButton.title = getTranslation('buttonValidate');
+    showButton.role = 'fontSizeChangeChromeCloudName';
+
+    const showButtonSpan = document.createElement('span');
+    showButtonSpan.innerHTML = '✓';
+    showButtonSpan.style.fontSize = '16px';
+    showButtonSpan.role = 'fontSizeChangeCloudName';
+    showButton.appendChild(showButtonSpan);
 
 
-    nameCloudState.searchInputTree = document.getElementById('root-person-search');
+    // nameCloudState.searchInputTree = document.getElementById('root-person-search');
+    nameCloudState.searchInputTree = document.getElementById('root-person-search-div');
     // Sauvegarder la position d'origine
     nameCloudState.originalParentSearch = nameCloudState.searchInputTree.parentNode;
     nameCloudState.originalNextSiblingSearch = nameCloudState.searchInputTree.nextSibling;
@@ -1031,11 +1105,14 @@ function showNameCloud(nameData, config) {
         searchRootOverlay = document.createElement('div');
         searchRootOverlay.id = 'resultsTreeOverlay';
         searchRootOverlay.style.position = 'fixed';
-        searchRootOverlay.style.left = '235px';
+        searchRootOverlay.style.fontSize = '10px';
+        searchRootOverlay.style.left = '23.5em';
         searchRootOverlay.style.zIndex = '1100';
         searchRootOverlay.style.pointerEvents = 'auto'; // <-- cliquable
         searchRootOverlay.style.display = 'flex ';
         searchRootOverlay.style.alignItems = 'center '; // petit espace entre les éléments
+        searchRootOverlay.style.gap = '2em!important';
+        searchRootOverlay.role = 'fontSizeChangeChromeCloudName';
         document.body.appendChild(searchRootOverlay);
         // Mets les sélecteurs dans l'overlay
         searchRootOverlay.appendChild(nameCloudState.searchInputTree);
@@ -1094,39 +1171,31 @@ function showNameCloud(nameData, config) {
     titleElement.style.fontWeight = 'bold';
     titleElement.id = 'name-cloud-title';
     titleElement.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
-    titleElement.style.padding = '2px 10px';
-    titleElement.style.borderRadius = '4px';
-    titleElement.style.marginTop = '2px'; //'5px';
+    titleElement.style.padding = '0.2em 1em';
+    titleElement.style.borderRadius = '0.4em';
+    titleElement.style.marginTop = '0.2em'; //'5px';
     titleElement.style.textAlign = 'center';
     titleElement.style.position = 'relative';
-    titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    titleElement.style.boxShadow = '0 0.1em 0.3em rgba(0,0,0,0.1)';
     titleElement.style.zIndex = '15'; // Z-index plus élevé pour superposer sur le sélecteur
-    if ((window.innerWidth > 700)) {
-            titleElement.style.marginTop = '-30px';
-            titleElement.style.marginLeft = '375px';
+    if ((state.innerWidth > 700)) {
+            titleElement.style.marginTop = '-3em';
+            titleElement.style.marginLeft = '37.5em';
             titleElement.style.textAlign = 'left';
     }
-
+    titleElement.role = 'fontSizeChangeCloudName';
 
     // Définir le texte du titre
     nameCloudState.totalWords = nameData.length;
 
     updateTitleText(titleElement, config);
     
-
-
-
-
-
-
     // function generateNameCloud() {
     //     // console.log('\n\n **** debug generateNameCloud', typeSelect.value, nameCloudState.scopeSelect.value )
     //     console.log('\n\n **** debug generateNameCloud', typeSelect.value, scopeSelect.value ,' root=' , state.rootPersonId)
 
         
     // }
-
-
 
 
 
@@ -1194,6 +1263,9 @@ function showNameCloud(nameData, config) {
                 updateStatsButtons(container, nameCloudState.currentNameData, newConfig.type, newConfig);
             }
         }, 0); 
+
+
+        // redimensionnerRootSelectorSizeInDOM();
         
     }
 
@@ -1227,7 +1299,7 @@ function showNameCloud(nameData, config) {
     // Assemblage du conteneur
     const leftContainer = document.createElement('div');
     leftContainer.style.display = 'flex';
-    leftContainer.style.gap = '2px';
+    leftContainer.style.gap = 2*scale +'px';
     leftContainer.appendChild(typeSelect);
     leftContainer.appendChild(scopeSelect);
 
@@ -1236,10 +1308,10 @@ function showNameCloud(nameData, config) {
     // Notez que settingsButton sera positionné en tant qu'élément indépendant
     settingsButton.style.position = 'absolute';
     if (nameCloudState.mobilePhone) 
-        settingsButton.style.top = '-4px'; // Ajustez selon la hauteur de votre typeSelect
+        settingsButton.style.top = -4*scale +'px'; // Ajustez selon la hauteur de votre typeSelect
     else
-        settingsButton.style.top = '-3px'; // Ajustez selon la hauteur de votre typeSelect
-    settingsButton.style.left = '16px'; // Ajustez selon le positionnement souhaité
+        settingsButton.style.top = -3*scale +'px'; // Ajustez selon la hauteur de votre typeSelect
+    settingsButton.style.left = 16*scale +'px'; // Ajustez selon le positionnement souhaité
 
     // Ajoutez le bouton à optionsContainer
     optionsContainer.appendChild(settingsButton);
@@ -1273,9 +1345,9 @@ function showNameCloud(nameData, config) {
         loadingIndicator.style.left = '50%';
         loadingIndicator.style.transform = 'translate(-50%, -50%)';
         loadingIndicator.style.backgroundColor = 'white';
-        loadingIndicator.style.padding = '20px';
-        loadingIndicator.style.borderRadius = '8px';
-        loadingIndicator.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        loadingIndicator.style.padding = 20*scale +'px'
+        loadingIndicator.style.borderRadius = 8*scale +'px'
+        loadingIndicator.style.boxShadow = '0 '+2*scale +'px '+10*scale +'px rgba(0,0,0,0.2)';
         loadingIndicator.style.zIndex = '9999';
         // loadingIndicator.innerHTML = '<p>Génération de la heatmap...</p><progress style="width: 100%;"></progress>';
         loadingIndicator.innerHTML = `<p>${getTranslation('mapGeneration')}</p><progress style="width: 100%;"></progress>`;
@@ -1294,7 +1366,7 @@ function showNameCloud(nameData, config) {
             if (heatmapData && heatmapData.length > 0) {
                 // Créer un titre pour la heatmap basé sur la configuration
                 let heatmapTitle;
-                if (window.innerWidth < 300) { 
+                if (state.innerWidth < 300) { 
                     heatmapTitle = `${currentConfig.scope === 'all' ? getTranslation('heatmapTitleTous') : 
                         (currentConfig.scope === 'ancestors' || currentConfig.scope === 'directAncestors') ? getTranslation('heatmapTitleAscend') : getTranslation('heatmapTitleDescend')} 
                         (${currentConfig.startDate}-${currentConfig.endDate})`;
@@ -1366,10 +1438,10 @@ function showNameCloud(nameData, config) {
     // Positionnement du bouton carte
     mapButton.style.position = 'absolute';
     if (nameCloudState.mobilePhone) 
-        mapButton.style.top = '-5px';
+        mapButton.style.top = -5*scale +'px';
     else
-        mapButton.style.top = '-4px';
-    mapButton.style.left = '78px'; // Positionner à droite du bouton de paramètres
+        mapButton.style.top = -4*scale +'px';
+    mapButton.style.left = 78*scale +'px'; // Positionner à droite du bouton de paramètres
 
     // Ajout du bouton à optionsContainer
     optionsContainer.appendChild(mapButton);
@@ -1377,13 +1449,13 @@ function showNameCloud(nameData, config) {
 
     const dateContainer = document.createElement('div');
     dateContainer.style.display = 'flex';
-    dateContainer.style.gap = '3px';
+    dateContainer.style.gap = 3*scale +'px';
     dateContainer.appendChild(startDateContainer);
     dateContainer.appendChild(endDateContainer);
 
     const mainOptionsContainer = document.createElement('div');
     mainOptionsContainer.style.display = 'flex';
-    mainOptionsContainer.style.gap = '3px';
+    mainOptionsContainer.style.gap = 3*scale +'px';
     mainOptionsContainer.style.alignItems = 'flex-end';
 
     mainOptionsContainer.appendChild(leftContainer);
@@ -1395,7 +1467,7 @@ function showNameCloud(nameData, config) {
     bottomContainer.style.justifyContent = 'flex-start'; // Changé de 'space-between' à 'flex-start'
     bottomContainer.style.alignItems = 'center';
     bottomContainer.style.width = '100%';
-    bottomContainer.style.gap = '10px'; 
+    bottomContainer.style.gap = 10*scale +'px'; 
 
     bottomContainer.appendChild(mainOptionsContainer);
 
@@ -1444,22 +1516,29 @@ export const createNameCloudUI = {
 
 function createMapButton() {
     const mapButton = document.createElement('button');
-    mapButton.innerHTML = '🌍'; //'🗺️';
+    // mapButton.innerHTML = '🌍'; //'🗺️';
     
     // Style de base similaire au bouton de paramètres existant
     mapButton.style.backgroundColor = 'transparent';
     mapButton.style.border = 'none';
     mapButton.style.padding = '0';
-    mapButton.style.width = '28px';
-    mapButton.style.height = '28px';
-    mapButton.style.fontSize = '20px';
+    mapButton.style.width = '2.8em';
+    mapButton.style.height = '2.8em';
+    mapButton.style.fontSize = '10px';
     mapButton.style.cursor = 'pointer';
     mapButton.style.display = 'flex';
     mapButton.style.justifyContent = 'center';
     mapButton.style.alignItems = 'center';
     // mapButton.title = 'Afficher la heatmap';
     mapButton.title = getTranslation('titleMap');
-    mapButton.style.marginTop = '2px';
+    mapButton.style.marginTop = '0.2em';
+    mapButton.role = 'fontSizeChangeChromeCloudName';
+    const mapButtonSpan = document.createElement('span');
+    mapButtonSpan.innerHTML = '🌍';
+    mapButtonSpan.style.fontSize = '20px';
+    mapButtonSpan.role = 'fontSizeChangeCloudName';
+    mapButton.appendChild(mapButtonSpan);
+
     
     // Effet de survol avec légère animation
     mapButton.addEventListener('mouseover', () => {

@@ -6,6 +6,9 @@ import { fitTreeToScreen, exportWithPagePrintingParams,
     calculateFullTreeDimensions, calculatePagePrintingParams, 
     generatePrintingPreview, exportProgress } from './exportManager.js';
 import { resetViewZoomBeforeExport, resetViewZoomAfterExport } from './eventHandlers.js'
+import { state } from './main.js';
+
+
 
 // Traductions pour les éléments de l'interface
 const ExportControlsTranslations = {
@@ -237,6 +240,14 @@ function translateExportControls(key) {
  * Affiche la boîte de dialogue des options d'export unifiée
  */
 function showExportOptionsDialog() {
+
+
+    const calcFontSize = (baseSize) => { 
+        // On récupère la valeur de l'import seulement ICI, à l'exécution.
+        const factor = state?.browserScaleFactor || 1;
+        return Math.round(baseSize / factor); 
+    };
+
     // Créer la modal
     const modal = document.createElement('div');
     modal.id = 'export-options-modal';
@@ -397,7 +408,7 @@ function showExportOptionsDialog() {
         .export-option-group.horizontal label {
             flex: 0 0 110px;
             margin-bottom: 0;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
             line-height: 1.1;
             font-weight: bold;
             color: #555;
@@ -407,7 +418,7 @@ function showExportOptionsDialog() {
 
         .export-option-group.horizontal label.multiline {
             flex: 0 0 110px;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
             text-align: left;
         }
 
@@ -417,7 +428,7 @@ function showExportOptionsDialog() {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             height: 36px;
             box-sizing: border-box;
             min-width: 0; /* Permet la flexibilité */
@@ -437,7 +448,7 @@ function showExportOptionsDialog() {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
         }
 
         .export-option-group input[type="checkbox"] {
@@ -447,7 +458,7 @@ function showExportOptionsDialog() {
         .export-option-group small {
             display: block;
             color: #6c757d;
-            font-size: 12px;
+            font-size: ${calcFontSize(12)}px;
             margin-top: 5px;
         }
 
@@ -456,7 +467,7 @@ function showExportOptionsDialog() {
             border: 1px solid #dee2e6;
             border-radius: 5px;
             padding: 10px;
-            font-size: 13px;
+            font-size: ${calcFontSize(13)}px;
         }
 
         #preview-info {
@@ -527,7 +538,7 @@ function showExportOptionsDialog() {
             color: white;
             padding: 2px 8px;
             border-radius: 10px;
-            font-size: 12px;
+            font-size: ${calcFontSize(12)}px;
             font-weight: bold;
             text-align: center;
         }

@@ -1721,89 +1721,95 @@ function getFortuneText(textType) {
 
 // Fonction createRealisticSlotHandle 
 function createRealisticSlotHandle() {
+
     const leverContainer = document.createElement("div");
     leverContainer.id = "lever-container";
     leverContainer.style.cssText = `
         position: fixed;
-        right: 30px;
-        top: 80px;
-        width: 100px;
-        height: 200px;
+        right: ${30*state.scaleChrome}px;
+        top: ${80*state.scaleChrome}px;
+        width: ${100*state.scaleChrome}px;
+        height: ${200*state.scaleChrome}px;
         z-index: 1000;
     `;
+    leverContainer.role = 'fontSizeChangeChromeWheel';
     
     const leverPivot = document.createElement("div");
     leverPivot.style.cssText = `
         position: absolute;
-        bottom: 40px;
+        bottom: ${40*state.scaleChrome}px;
         left: 50%;
         transform: translateX(-50%);
-        width: 25px;
-        height: 25px;
+        width: ${25*state.scaleChrome}px;
+        height: ${25*state.scaleChrome}px;
         background: radial-gradient(circle, #888, #555);
         border-radius: 50%;
-        border: 2px solid #333;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        border: ${2*state.scaleChrome}px solid #333;
+        box-shadow: 0 ${3*state.scaleChrome}px ${6*state.scaleChrome}px rgba(0,0,0,0.3);
     `;
+    leverPivot.role = 'fontSizeChangeChromeWheel';
     
     const leverArm = document.createElement("div");
     leverArm.id = "lever-arm";
     leverArm.style.cssText = `
         position: absolute;
-        bottom: 52px;
+        bottom: ${52*state.scaleChrome}px;
         left: 50%;
         transform-origin: center bottom;
         transform: translateX(-50%) rotate(-15deg);
-        width: 10px;
-        height: 120px;
+        width: ${10*state.scaleChrome}px;
+        height: ${120*state.scaleChrome}px;
         background: linear-gradient(90deg, #888, #aaa, #888);
-        border-radius: 5px;
+        border-radius: ${5*state.scaleChrome}px;
         transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+        box-shadow: ${2*state.scaleChrome}px 0 ${6*state.scaleChrome}px rgba(0,0,0,0.3);
     `;
+    leverArm.role = 'fontSizeChangeChromeWheel';
     
     const leverHandle = document.createElement("div");
     leverHandle.id = "lever-handle";
     leverHandle.style.cssText = `
         position: absolute;
-        top: -15px;
+        top: ${-15*state.scaleChrome}px;
         left: 50%;
         transform: translateX(-50%);
-        width: 50px;
-        height: 70px;
+        width: ${50*state.scaleChrome}px;
+        height: ${70*state.scaleChrome}px;
         background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffb3b3 100%);
-        border-radius: 15px;
+        border-radius: ${15*state.scaleChrome}px;
         box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-        border: 2px solid #fff;
+        border: ${2*state.scaleChrome}px solid #fff;
         cursor: pointer;
         transition: all 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: ${18*state.scaleTextFontSize}px;
         user-select: none;
         touch-action: manipulation;
     `;
+    leverHandle.role = 'fontSizeChangeChromeWheel';
     
     leverHandle.innerHTML = "🎰";
     
     const leverText = document.createElement("div");
     leverText.style.cssText = `
         position: absolute;
-        top: 100px; /*-30px;*/
+        top: ${100*state.scaleChrome}px; /*-30px;*/
         left: 50%;
         transform: translateX(-50%);
-        left: 85px;
+        left: ${85*state.scaleChrome}px;
         color: #fff;
         font-weight: bold;
-        font-size: 12px;
+        font-size: ${12*state.scaleTextFontSize}px;
         text-align: center;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+        text-shadow: 0 ${2*state.scaleChrome}px ${4*state.scaleChrome}px rgba(0,0,0,0.7);
         background: rgba(0,0,0,0.7);
-        padding: 6px 10px;
-        border-radius: 12px;
+        padding: ${6*state.scaleChrome}px ${10*state.scaleChrome}px;
+        border-radius: ${12*state.scaleChrome}px;
         white-space: nowrap;
     `;
+    leverText.role = 'fontSizeChangeChromeWheel';
     
     // UTILISER LA TRADUCTION
     leverText.textContent = getFortuneText('leverText');
@@ -1814,23 +1820,25 @@ function createRealisticSlotHandle() {
     stopBtn.textContent = "STOP";
     stopBtn.style.cssText = `
         position: absolute;
-        top: 100px; /*-30px;*/
+        top: ${100*state.scaleChrome}px; /*-30px;*/
         left: 50%;
         transform: translateX(-50%);
-        left: 85px;
+        left: ${85*state.scaleChrome}px;
         z-index: 2; /* au-dessus du texte */
         background: crimson;
         color: white;
         font-weight: bold;
-        font-size: 13px;
+        font-size: ${13*state.scaleTextFontSize}px;
         text-align: center;
-        padding: 7px 11px;
+        padding: ${7*state.scaleChrome}px ${11*state.scaleChrome}px;
         border: none;
-        border-radius: 12px;
+        border-radius: ${12*state.scaleChrome}px;
         white-space: nowrap;
         cursor: pointer;
         display: none; /* caché par défaut au démarrage*/
     `;
+    stopBtn.role = 'fontSizeChangeChromeWheel';
+
     stopBtn.onclick = () => {
         console.log("🛑 STOP demandé !");
         disableFortuneModeClean(); 
@@ -4343,6 +4351,7 @@ function prepareDetailsForReading(person) {
 // Fonction Instructions pour l'utilisateur  
 function showFortuneInstructions() {
     const instructions = document.createElement("div");
+
     instructions.style.cssText = `
         position: fixed;
         /* top: 80px; */
@@ -4351,12 +4360,13 @@ function showFortuneInstructions() {
         transform: translateX(-50%);
         background: rgba(0,0,0,0.8);
         color: white;
-        padding: 15px 25px;
-        border-radius: 25px;
-        font-size: 16px;
+        padding: ${15*state.scaleChrome}px ${25*state.scaleChrome}px;
+        border-radius: ${25*state.scaleChrome}px;
+        font-size: ${16*state.scaleTextFontSize}px;
         z-index: 1000;
-        animation: fadeInOut 4s ease;
+        animation: fadeInOut 5s ease;
     `;
+    instructions.role = 'fontSizeChangeChromeWheel'
     
     instructions.innerHTML = getFortuneText('fortuneInstructions');
     
@@ -4387,7 +4397,7 @@ function removeWinnerRedArrowIndicator() {
 
 // Fonction pour calculer les dimensions responsives
 function getResponsiveDimensions() {
-    const screenWidth = window.innerWidth;
+    const screenWidth = state.innerWidth;
     const screenHeight = window.innerHeight;
     const screenSize = Math.min(screenWidth, screenHeight);
     
@@ -4403,15 +4413,15 @@ function getResponsiveDimensions() {
     const arrowStrokeWidth = Math.max(2, Math.round(3 * arrowScale));
     
     // Position de la flèche (plus bas dans l'écran)
-    const arrowTopOffset = Math.max(80, Math.round(120 * scale));
+    const arrowTopOffset = Math.max(80*state.scaleChrome, Math.round(120*state.scaleChrome * scale));
     
     // Taille du texte (avec limites min/max)
-    const baseFontSize = 16;
-    const fontSize = Math.max(12, Math.min(24, Math.round(baseFontSize * scale)));
-    const textStrokeWidth = Math.max(2, Math.round(3 * scale));
+    const baseFontSize = 16*state.scaleTextFontSize;
+    const fontSize = Math.max(12*state.scaleTextFontSize, Math.min(24*state.scaleTextFontSize, Math.round(baseFontSize * scale)));
+    const textStrokeWidth = Math.max(2*state.scaleChrome, Math.round(3*state.scaleChrome * scale));
     
     // Position du texte par rapport à la flèche
-    const textOffsetY = Math.round(5 * scale);
+    const textOffsetY = Math.round(5*state.scaleChrome * scale);
     
     console.log(`📱 Écran: ${screenWidth}x${screenHeight}, Échelle: ${scale.toFixed(2)}`);
     console.log(`🎯 Flèche: ${arrowWidth}x${arrowHeight}px, Police: ${fontSize}px`);

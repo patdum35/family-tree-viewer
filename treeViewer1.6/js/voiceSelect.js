@@ -1,4 +1,4 @@
-import { state, loadData } from './main.js';
+import { state, loadData, calcFontSize } from './main.js';
 import { initSpeechSynthesis, testRealConnectivity } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { findPersonsBy, openSearchModal } from './searchModalUI.js';
@@ -6,7 +6,14 @@ import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
 import { debounce } from './eventHandlers.js';
 import { debugLog } from './debugLogUtils.js';
 
+let voiceUI = null;
+let speechUI = null;
 
+// const calcFontSize = (baseSize) => { 
+//     // On récupère la valeur de l'import seulement ICI, à l'exécution.
+//     const factor = state?.browserScaleFactor || 1;
+//     return Math.round(baseSize / factor); 
+// };
 
 export function selectVoice() {
 
@@ -158,13 +165,11 @@ export function selectVoice() {
 }
 
 
-
 /**
  * Module de gestion de l'interface utilisateur (UI) pour la sélection de voix
  * avec gestion de la connexion, priorisation linguistique et multilinguisme.
  */
 const VoiceSelectorUI = (function() {
-
     let selectedVoice = null;
     const testPhrase = "Ceci est un test de la voix sélectionnée.";
     const appState = {
@@ -242,7 +247,6 @@ const VoiceSelectorUI = (function() {
         const lang = window.CURRENT_LANGUAGE || 'fr';
         return i18n[lang][key] || i18n['fr'][key]; // Fallback au français
     }
-
     
     /**
      * 2. FILTRAGE ET TRI DES VOIX
@@ -287,19 +291,13 @@ const VoiceSelectorUI = (function() {
 
         return { local, network };
     }
-
-
-
-
-
  
     /**
      * 3. GESTION DE L'INTERFACE UTILISATEUR (UI)
      */
     // Crée la structure HTML de l'overlay et de la fenêtre de sélection
     function createUIStructure() {
-
-        
+       
         /**
          * Calcule une hauteur max sécurisée pour la liste des voix.
          */
@@ -311,8 +309,6 @@ const VoiceSelectorUI = (function() {
             if (isSliders && isSliders === 'withSliders') { finalHeight = calculatedHeight - 100;}
             return `${finalHeight}px`;
         }
-
-
 
         // Fonction dédiée au recalcul et à l'application de la hauteur par défaut
         function updateDefaultMaxHeight() {
@@ -326,12 +322,10 @@ const VoiceSelectorUI = (function() {
             }
         }
 
-
         // --- NOUVEAU : Récupération des valeurs stockées (ou par défaut) ---
         const storedVolume = getTtsSetting('voice_volume', '1.0');
         const storedRate   = getTtsSetting('voice_rate', '1.0');
         const storedPitch  = getTtsSetting('voice_pitch', '1.0');
-
 
         const overlayId = 'voice-selector-overlay';
         let overlay = document.getElementById(overlayId);
@@ -348,7 +342,6 @@ const VoiceSelectorUI = (function() {
             modal: 'background: white; padding: 0; border-radius: 12px; max-width: 90%; width: 450px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); position: relative; margin: 20px 0; max-height: 90vh; display: flex; flex-direction: column;',
             voiceListDefault: `overflow-y: auto; padding-right: 5px; max-height: ${calculateVoiceListMaxHeight()};`, 
         };
-
 
         // --- Création de l'Overlay ---
         overlay = document.createElement('div');
@@ -377,7 +370,7 @@ const VoiceSelectorUI = (function() {
                 padding: 5px; 
                 border-radius: 6px; 
                 font-weight: bold;
-                font-size: 1.5em; 
+                font-size: ${calcFontSize(30)}px; 
                 line-height: 1;
                 width: 30px; 
                 height: 30px; 
@@ -399,7 +392,7 @@ const VoiceSelectorUI = (function() {
             
             .tts-slider-group label {
                 font-weight: normal; 
-                font-size: 0.85em;
+                font-size: ${calcFontSize(19)}px;
                 margin: 0;
                 padding: 0;
                 width: 100px;
@@ -422,7 +415,7 @@ const VoiceSelectorUI = (function() {
             .tts-slider-value {
                 width: 35px;
                 text-align: right;
-                font-size: 0.9em;
+                font-size: ${calcFontSize(18)}px;
                 color: #333;
                 flex-shrink: 0;
             }
@@ -447,7 +440,7 @@ const VoiceSelectorUI = (function() {
         const titleElement = document.createElement('h2');
         titleElement.id = 'voice-selector-modal-title';
         titleElement.textContent = translate('title');
-        titleElement.style.cssText = 'margin: 0; font-size: 1.2em; color: #333;'; 
+        titleElement.style.cssText = `margin: 0; font-size: ${calcFontSize(24)}px; color: #333;`; 
         
         const actionButtons = document.createElement('div');
         actionButtons.style.cssText = 'display: flex; align-items: center; gap: 10px;';
@@ -467,7 +460,7 @@ const VoiceSelectorUI = (function() {
             color: white; 
             border: none;
             border-radius: 50%; 
-            font-size: 1.5em; 
+            font-size: ${calcFontSize(30)}px; 
             cursor: pointer;
             padding: 0; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -526,13 +519,13 @@ const VoiceSelectorUI = (function() {
         contentContainer.style.cssText = 'padding: 0 20px 20px 20px;';
         
         contentContainer.innerHTML = `
-            <p id="voice-status-display" style="font-size: 0.9em; color: #666; margin: 10px 0;">${translate('statusLoading')}</p>
+            <p id="voice-status-display" style="font-size: ${calcFontSize(18)}px; color: #666; margin: 10px 0;">${translate('statusLoading')}</p>
             
             <div id="voice-list-options" style="${styles.voiceListDefault}"> 
             </div>
 
             <div id="voice-list-footer" style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="test-selected-voice" disabled style="padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; flex-grow: 1;">
+                <button id="test-selected-voice" disabled style="padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: ${calcFontSize(20)}px; flex-grow: 1;">
                     ${translate('btnTestDisabled')}
                 </button>
             </div>
@@ -592,13 +585,9 @@ const VoiceSelectorUI = (function() {
         window.addEventListener('resize',debounce(() => {
             updateDefaultMaxHeight();
         }, 150)); // Attend 150ms après le dernier resize
-
-
         return overlay;
     }
 
-    
-    
     /**
      * Récupère les valeurs actuelles des sliders TTS dans la modale.
      * @returns {object|null} Un objet contenant {volume, rate, pitch} ou null si les éléments ne sont pas trouvés.
@@ -649,23 +638,26 @@ const VoiceSelectorUI = (function() {
         return defaultValue;
     }
 
-
-
-
-
-
-
-
-
-
     // Met à jour le contenu de l'UI (liste des voix)
     function renderUI() {
         const listContainer = document.getElementById('voice-list-options');
         const statusDisplay = document.getElementById('voice-status-display');
         const testButton = document.getElementById('test-selected-voice');
-        const voiceStyles = document.getElementById('voice-selector-modal').querySelector('#voice-list-options').style.cssText;
-        
+        // const voiceStyles = document.getElementById('voice-selector-modal').querySelector('#voice-list-options').style.cssText;
+        const titleElement = document.getElementById('voice-selector-modal-title'); // On récupère le titre
+        const toggleBtn = document.getElementById('toggle-tts-controls');
+        const closeBtn = document.getElementById('close-voice-ui');      
+
         if (!listContainer || !statusDisplay) return;
+
+        if (titleElement) titleElement.style.fontSize = `${calcFontSize(24)}px`; 
+        if (testButton) testButton.style.fontSize = `${calcFontSize(20)}px`; 
+        if (statusDisplay) statusDisplay.style.fontSize = `${calcFontSize(18)}px`; 
+        if (toggleBtn) toggleBtn.style.fontSize = `${calcFontSize(30)}px`;
+        if (closeBtn)  closeBtn.style.fontSize  = `${calcFontSize(30)}px`;
+
+        // Mise à jour des textes
+        titleElement.textContent = translate('title');
 
         // Mise à jour des textes multilingues
         document.getElementById('voice-selector-modal-title').textContent = translate('title');
@@ -710,7 +702,7 @@ const VoiceSelectorUI = (function() {
             
             // Contenu du séparateur
             sep.innerHTML = `
-                <span style="font-weight: bold; font-size: 1.1em; margin-right: 10px; color: ${color};">${title}</span>
+                <span style="font-weight: bold; font-size: ${calcFontSize(22)}px; margin-right: 10px; color: ${color};">${title}</span>
                 <small style="font-weight: normal; color: #6c757d;">${subtitle}</small>
             `;
             // --- FIN LOGIQUE DE COULEUR ---
@@ -729,7 +721,7 @@ const VoiceSelectorUI = (function() {
                 const isSelected = selectedVoice && selectedVoice.voiceURI === voice.voiceURI;
                 
                 // Styles de base du bouton
-                button.style.cssText = 'display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; background-color: #f8f9fa; border: 1px solid #dee2e6; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; text-align: left; font-size: 0.95em;';
+                button.style.cssText = `display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; background-color: #f8f9fa; border: 1px solid #dee2e6; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; text-align: left; font-size: ${calcFontSize(19)}px;`;
 
                 // Style de sélection
                 if (isSelected) {
@@ -744,7 +736,7 @@ const VoiceSelectorUI = (function() {
                         <strong>${voice.name}</strong> 
                         <small style="color: #6c757d;">${voiceTypeLabel}</small>
                     </span>
-                    <span style="font-size: 0.8em; color: #495057;">${voice.lang}</span>
+                    <span style="font-size: ${calcFontSize(16)}px; color: #495057;">${voice.lang}</span>
                 `;
 
                 button.addEventListener('click', () => {
@@ -847,22 +839,15 @@ const VoiceSelectorUI = (function() {
         }
     }
 
-
     /**
      * 4. FONCTIONS PUBLIQUES (API)
      */
     function loadVoices() {
-
         console.log('\n\n ---- debug : in loadVoices ---', '\n\n');
-
-
         if(!state) { 
             console.log('\n\n ---- debug : in loadVoices return as state not available ---', '\n\n');
-            
             return false;
         }
-
-
 
         if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
             appState.status = translate('statusNoSupport');
@@ -895,22 +880,8 @@ const VoiceSelectorUI = (function() {
                 sessionStorage.removeItem('restartVoiceSelect');
             }
 
-
             // NOUVELLE LOGIQUE : Sélectionner une voix par défaut si aucune n'est sélectionnée
             if (!selectedVoice) {
-                // const defaultVoice = findDefaultVoice(window.CURRENT_LANGUAGE || 'fr');
-                // if (defaultVoice) {
-                //     handleVoiceSelection(defaultVoice); // Utiliser handleVoiceSelection pour tout initialiser
-                //     console.log(`✅ Voix locale par défaut sélectionnée: ${defaultVoice.name}`);
-                // } else {
-                //     console.warn(`⚠️ Aucune voix locale par défaut trouvée pour la langue ${window.CURRENT_LANGUAGE}.`);
-                //     // Fallback ultime : prendre la première voix disponible
-                //     if (appState.voices.length > 0) {
-                //         handleVoiceSelection(appState.voices[0]);
-                //         console.warn(`⚠️ Aucune voix locale par défaut trouvée. Première voix disponible utilisée: ${appState.voices[0].name}`);
-                //     }
-                // }
-
                 findDefaultVoice(window.CURRENT_LANGUAGE || 'fr').then(defaultVoice => {
                     if (defaultVoice) {
                         handleVoiceSelection(defaultVoice); // Utiliser handleVoiceSelection pour tout initialiser
@@ -924,12 +895,7 @@ const VoiceSelectorUI = (function() {
                         }
                     }
                 });
-
-
             }
-
-
-
 
             if (appState.isUIOpen) {
                 renderUI(); // Re-render si l'UI est déjà ouverte
@@ -937,8 +903,6 @@ const VoiceSelectorUI = (function() {
         }
         return true;
     }
-
-
 
     function waitUntilTestRealConnectivityDone() {
     const start = performance.now();
@@ -954,8 +918,6 @@ const VoiceSelectorUI = (function() {
     });
     }
 
-
-
     /**
      *  Recherche une voix locale correspondant à la langue
      */
@@ -970,7 +932,6 @@ const VoiceSelectorUI = (function() {
 
         selectVoice();
         voice = state.frenchVoice;
-
 
         console.log('\n\n -----------  debug in findDefaultVoice state.isOnLine= ', state.isOnLine, ',langPrefix=', langPrefix, 'state.frenchVoice=',state.frenchVoice);
 
@@ -990,8 +951,6 @@ const VoiceSelectorUI = (function() {
 
         return null;
     }
-
-
 
     function showUI() {
         if (!loadVoices()) {
@@ -1035,43 +994,27 @@ const VoiceSelectorUI = (function() {
         return selectedVoice;
     }
 
-
-
-
     // --- Créer l'UI dès l'initialisation du module (une seule fois) ---
     createUIStructure();
 
-
-
     // Écouter l'événement 'voiceschanged' pour s'assurer que les voix sont chargées
 
-    // document.addEventListener('DOMContentLoaded', () => {
-        if (window.speechSynthesis) {
-            window.speechSynthesis.onvoiceschanged = loadVoices;
-            if (window.speechSynthesis.getVoices().length > 0) {
-                console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
-                setTimeout(() => {
-                    loadVoices();
-                }, 200);
-            }
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        if (window.speechSynthesis.getVoices().length > 0) {
+            console.log('\n\n ---- debug : lancement de loadVoices à la création de VoiceSelectorUI ---', '\n\n')
+            setTimeout(() => {
+                loadVoices();
+            }, 200);
         }
-    // });
-
-
-
-
-
-
+    }
 
     return {
         showUI: showUI,
         getSelectedVoice: getSelectedVoice,
         loadVoices: loadVoices
     };
-
-})();
-
-
+});
 
 
 /*
@@ -1080,7 +1023,7 @@ const VoiceSelectorUI = (function() {
  */
 
 let localConfig = null;
-const SpeechRecognitionUI = (function() {
+export const SpeechRecognitionUI = (function() {
     // --- 1. GESTION DES TRADUCTIONS (i18n) ---
     const i18n = {
         'fr': {
@@ -1125,7 +1068,6 @@ const SpeechRecognitionUI = (function() {
             whoCreatedYou : "qui t'a cree",            
             whatisTheUse : "a quoi sert tu", 
             whatisTheUseBis : "a quoi sert-tu", 
-
 
             go: 'go',
             enter: 'entrer',
@@ -1220,7 +1162,6 @@ const SpeechRecognitionUI = (function() {
             whatIsHistorical: 'what is the historical context of',
             whatIsHistoricalPast: 'what was the historical context of',
             whatAreNotes: 'what are the notes of',
-
 
             whoAreYou : 'who are you',
             whatIsYourName : 'what is your name',
@@ -1529,9 +1470,6 @@ const SpeechRecognitionUI = (function() {
     capturedEntities[translate('lastname')] = '';
     capturedEntities[translate('question')] = translate('whenBorn');
 
-
-
-
     let capturedEntitiesEnglish = [];
     
     // --- Variables d'État du Mode Hybride ---
@@ -1544,11 +1482,8 @@ const SpeechRecognitionUI = (function() {
     const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-
     let entityTimeoutTimer = null;
-    let currentEntity = null;
     const ENTITY_TIMEOUT_MS = 3000; // 2 secondes de timeout
-
 
     let mediaStream = null; // Stocke la référence au flux audio du microphone
     const ANTI_SILENCE_DELAY_MS = 2000; // Délai de prolongation du silence (2 secondes)
@@ -1591,16 +1526,12 @@ const SpeechRecognitionUI = (function() {
     'whoMarried', 'whoMarriedPast', 'howManyChildren', 'howManyChildrenPast', 'whoIsFather', 'whoIsFatherPast', 
     'whoIsMother','whoIsMotherPast','whoAreSibling','whoAreSiblingPast', 'whatIsHistorical','whatIsHistoricalPast', 'whatAreNotes'];
 
-
     const actionKeywordsWithName = ['search', 'research', 'readSheet', 'whenBorn', 'whenDead', 'whenDeadW', 'whenDied', 
     'whatAge', 'whatAgePast', 'whereLive', 'whereLivePast', 'whatProfession', 'whatOccupation', 'whatProfessionPast', 'whatOccupationPast', 
     'whoMarried', 'whoMarriedPast', 'howManyChildren', 'howManyChildrenPast', 'whoIsFather', 'whoIsFatherPast', 
     'whoIsMother','whoIsMotherPast','whoAreSibling','whoAreSiblingPast', 'whatIsHistorical','whatIsHistoricalPast', 'whatAreNotes'];
 
-
-
     const actionKeywordsWithoutFirstName = ['whoAreYou', 'whatIsYourName', 'whatIsYourNameBis','whoCreatedYou', 'whatisTheUse']
-
 
     const validationSignal = [translate('go'), translate('end'), translate('stop'), , translate('endBis'), translate('enter'), translate('validateBis'), translate('validate')];
     const validationSignal2 = [translate('pause'), translate('go'), translate('end'), translate('endBis'), translate('stop'), translate('enter'), translate('validateBis'), translate('validate')];
@@ -1633,27 +1564,18 @@ const SpeechRecognitionUI = (function() {
         // console.log(`[CLAVIER] after ${nameToDisplay} mis à jour manuellement à: "${valueToStore}"`, fieldName, capturedEntities[fieldName], cumulativeTranscript);
 
         // Rafraîchir l'interface (essentiel pour résoudre le problème du "double clic")
-        updateEntityUI(); 
+        updateEntityUI();//localConfig); 
     }
-
-
-
-    
-
-    // // --- Fonctions d'Action Simples (Stubs) ---
-
 
     /**
      * Fonction appelée lorsque l'utilisateur valide la saisie ou ferme la fenêtre.
      */
     function handleValidationAndExit() {
-        
         // 2. Appeler le getter du module
-        const capturedData = SpeechRecognitionUI.getCapturedData();
+        const capturedData = getCapturedData();
         
         // 3. Stocker les données dans la variable globale de l'application
         console.log("--- handleValidationAndExit : DONNÉES FINALES CAPTURÉES ---", capturedData);
-       
          
         // Exemple d'utilisation :
         if (capturedData.firstname) {
@@ -1670,9 +1592,7 @@ const SpeechRecognitionUI = (function() {
         window.speechSynthesis.cancel(); 
 
         // 4. Masquer l'interface
-        SpeechRecognitionUI.hideUI();
-
-
+        hideUI();
     }
 
     // Assurez-vous d'appeler cette fonction lors de la fermeture de la modale.
@@ -1680,15 +1600,13 @@ const SpeechRecognitionUI = (function() {
     const closeButton = document.getElementById('close-stt-button');
     if (closeButton) {
         // Au lieu de la simple hideUI(), on ajoute la récupération des données
-        closeButton.removeEventListener('click', SpeechRecognitionUI.hideUI); // Retirer l'ancien listener si présent
+        closeButton.removeEventListener('click', hideUI); // Retirer l'ancien listener si présent
         closeButton.addEventListener('click', handleValidationAndExit);
     }
-
 
     function arreterEcouteAction() { 
         console.log("[ACTION] Arrêt de l'écoute demandé par l'utilisateur.");
         isRecording = false; 
-
 
         // Nettoyer le minuteur de l'entité
         if (entityTimeoutTimer) {
@@ -1696,7 +1614,7 @@ const SpeechRecognitionUI = (function() {
             entityTimeoutTimer = null;
         }
         
-        currentEntity = null; // S'assurer que l'entité est désactivée
+        // currentEntity = null; // S'assurer que l'entité est désactivée
         window.speechSynthesis.cancel(); 
         window.speechSynthesis.cancel(); 
 
@@ -1708,12 +1626,10 @@ const SpeechRecognitionUI = (function() {
 
         }
     }
-
     
     // =========================================================
     // Fonctions de Contrôle de la Bascule 
     // =========================================================
-
     function startSpellingCycle(targetField, targetFieldEnglish, config = null) {
         targetSpellingField = targetField;
         targetSpellingFieldEnglish = targetFieldEnglish;
@@ -1728,22 +1644,15 @@ const SpeechRecognitionUI = (function() {
             
         } else {
             toggleSpeechRecognition(); 
-
-            // if (state.isMobile) {
-            //     window.speechSynthesis.cancel(); 
-            // } 
         }
-
     }
 
-    
     function stopSpellingCycle() {
         const finalValue = capturedEntities[targetSpellingField];
         // cumulativeTranscript =  cumulativeTranscript + ' ' + targetSpellingField + ' ' + capturedEntities[targetSpellingField] + ' pause ';
         // cumulativeTranscript = cumulativeTranscript.replaceAll(translate('letter'), '');
         cumulativeTranscript = ' ';
 
-        
         isSpellingMode = false;
         targetSpellingField = null;
         targetSpellingFieldEnglish = null;
@@ -1753,18 +1662,9 @@ const SpeechRecognitionUI = (function() {
         
         document.getElementById('stt-result-display').textContent = `✅ ${translate('speelingEnded')} "${finalValue}"`;
         document.getElementById('stt-interim-display').textContent = '';
-        updateEntityUI(); 
+        updateEntityUI();//localConfig); 
         
         console.log(`[LOG STT] Valeur finale de l'épellation enregistrée: ${finalValue}`);
-
-
-
-        // initializeSpeechRecognition();
-        // if (isRecording) {
-            // recognition.start(); 
-
-        // }
-
 
         if (isRecording) {
             recognition.stop(); 
@@ -1772,24 +1672,12 @@ const SpeechRecognitionUI = (function() {
                 window.speechSynthesis.cancel(); 
             }
         }
-
         isSpellingHasCompleted = true;
-
-
-
-
     }
-
-
-
-
-
 
     //###################################################
     async function processFullTranscript(transcript, configIn = null, isOnResult = null) {
-        
         console.log('\n\n\n HHHHHHHHHHHHHHHHHHHHHHHHHH   debug processFullTranscript HHHHHHHHHHHHHHHHHHHHH \n -transcript= ', transcript, '\n -previousNewCumulativeTranscript=', previousNewCumulativeTranscript, '\n\n\n')
-        
         if (previousNewCumulativeTranscript === transcript) {
             // rien de nouveu, on sort
             return;
@@ -1809,24 +1697,18 @@ const SpeechRecognitionUI = (function() {
         let fullTranscript = transcriptCleaned.trim(); // Version propre du transcript
         fullTranscript = fullTranscript.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // enlever les accents !!!
 
-
         isNewCommandToBeExecuted = true;
         
         if (isOnResult == 'onEnd' && previousFullTranscriptOnResult === fullTranscript ) { 
             console.log('\n\n ---- debug 1  : NE PAS EXCECUTER CETTE COMMANDE car c est UN ONEND dupliqué d un ONRESULT déjà excécuté');
             isNewCommandToBeExecuted = false;
         }
-        
 
         console.log('\n #####################   [LOG STT] Détection input : ', transcript , ',',previousFullTranscript, ',', fullTranscript, ',isNewCommandToBeExecuted =',isNewCommandToBeExecuted,',isOnresult=' ,isOnResult);
 
         if (isOnResult == 'onResult') { previousFullTranscriptOnResult = fullTranscript; }
         else { previousFullTranscriptOnEnd = fullTranscript; } 
         previousFullTranscript = fullTranscript;
-        
-
-        
-        
         
         // 1 -  ##########"  Détecter si il y a une question dans le transcript"
         let detectedAction = null; // Variable pour stocker l'expression d'action qui correspond
@@ -1852,20 +1734,12 @@ const SpeechRecognitionUI = (function() {
             }
         }
 
-
-
-
         // 1 -  ##########"  Détecter si il y a une ou des keys  dans le transcript"
         let isKeyDetected = false;
         let isSpellDetected = false;
         let KeyDetectedTab = [];
 
         const entityList = ['firstname','lastname', 'non','place','occupation','date','question'];
-
-
-        
-        
-        
         /////////////////////////
         // pour activer le mode épeler, sinon on peut supprimer ce code
         entityList.forEach( key=> {
@@ -1891,7 +1765,7 @@ const SpeechRecognitionUI = (function() {
                 // }
                 previousNewCumulativeTranscript = cumulativeTranscript;
 
-                updateEntityUI();
+                updateEntityUI();//localConfig);
                 isKeyDetected = true;
                 KeyDetectedTab[localKey] = true;
               
@@ -1907,26 +1781,19 @@ const SpeechRecognitionUI = (function() {
                 wordIndex = 2;
             }
             
-            
             // si un keyWord est détecté et la séquence 'lettre par lettre' est détectée
             if ( !isSpellDetected && index !== -1 &&  letterTriggers.includes(wordsKey[wordIndex]) && wordsKey[wordIndex+1] === translate('by') && letterTriggers.includes(wordsKey[wordIndex+2]) ){                              
 
                 console.log(`[ACTION] Déclenchement du Mode Épellation par 'lettre par lettre' pour le champ:${translate(localKey)}`);
                 capturedEntities[translate(localKey)] = '';
-                updateEntityUI();
+                updateEntityUI(); //localConfig);
 
                 startSpellingCycle(translate(localKey), localKey, config); 
                 isSpellDetected = true;
                 return; 
             }
         })
-
         //////////////////
-
-
-
-
-
 
         let isOneKeyIsDetected = false;
         let KeyDetectedArray = [];
@@ -1974,19 +1841,8 @@ const SpeechRecognitionUI = (function() {
         })
 
         if (isOneKeyIsDetected) {
-            updateEntityUI();
+            updateEntityUI();//localConfig);
         }
-
-
-
-
-
-
-
-
-
-
-
 
         // console.log('\n\n\n\n\n @@@@@@@@@@@@@@@@@@   debug  launch load  @@@@@@@ key',KeyDetectedTab['firstname'], KeyDetectedTab['lastname'], 'firstname=',capturedEntities[translate('firstname')], 'lastname=',capturedEntities[translate('lastname')] , words,   transcript, 'cumulativeTranscript=', cumulativeTranscript,'\n\n\n')
 
@@ -2047,9 +1903,7 @@ const SpeechRecognitionUI = (function() {
                 capturedEntities[translate('lastname')] = 'dumenil';
             }
 
-
             res = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], capturedEntities[translate('lastname')], false);
-
 
             console.log('\n\n\n ------------   debug0 : personne trouvée ??? ---------', res, res.results[0]);
             let lastAlternativeNameFound = null;
@@ -2116,11 +1970,8 @@ const SpeechRecognitionUI = (function() {
                         }
                     }, PC_MAX_DURATION_MS);
                 }
-
                 const overlay = document.getElementById('stt-only-overlay');
-
                 makeModalInteractive(overlay); 
-
             } 
             
             // si la personne n'a pas été trouvée on lance juste un message          
@@ -2196,14 +2047,12 @@ const SpeechRecognitionUI = (function() {
             }
         }
         
-        let newCumulativeTranscript = ''
         // =========================================================
         // DEBUT DU MODE : question + .... + validationSignal
         // =========================================================
         // VÉRIFICATION GLOBALE : Est-ce qu'une action a été détectée ? Et y a-t-il un signal de validation ?
         
         // si on a une clé 'Question'  et une clé de validation sur le dernier mot : exemple 'qui es tu go' ou 'quel age a xx yy go'
-        
         
         if ( config === 'full' && detectedAction && validationSignal.includes(words[words.length - 1])) {
 
@@ -2239,7 +2088,6 @@ const SpeechRecognitionUI = (function() {
 
             // console.log('\n ------------  debug  final entityPart =',  entityWords, ',beforeKeywordFinal=',beforeKeywordFinal, ', newCumulativeTranscript=' ,newCumulativeTranscript)
 
-
             let isEntityKeyAvailable = [];
             entityKeys.forEach(key => { isEntityKeyAvailable[key] = false; });
 
@@ -2274,7 +2122,7 @@ const SpeechRecognitionUI = (function() {
             // console.log('\n ------------  debug  final entityPart =',  entityWords,', newCumulativeTranscript=' ,newCumulativeTranscript)
 
             document.getElementById('stt-result-display').textContent = `✅ ${translate('structuredModeDetected')} ${detectedAction.toUpperCase()}, ${translate('firstname')}: ${capturedEntities[translate('firstname')]}, ${translate('lastname')}: ${capturedEntities[translate('lastname')]}.`;
-            updateEntityUI();
+            updateEntityUI();//localConfig);
 
             if (!isActionWithoutFirstName && isEntityKeyAvailable['firstname'] && isEntityKeyAvailable['lastname']) { 
                 await launchSearchPeopleAction(detectedAction);
@@ -2325,35 +2173,28 @@ const SpeechRecognitionUI = (function() {
 
             cumulativeTranscript = ' ';
             previousNewCumulativeTranscript = cumulativeTranscript;
-
-
             return;
         } 
         // =========================================================
         // FIN DU MODE QUESTION
         // =========================================================
 
-
         console.log ('\n\n\n\n\n\n ++++++++++++++++++++      texte  libre === ', cumulativeTranscript,'+++++++++++++++++++++++++\n\n\n\n')
         if (cumulativeTranscript.length > 10) {
             cumulativeTranscript = ' ' + cumulativeTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
         }
     }
-
     
     // =========================================================
     // CŒUR 2 : Initialisation et Gestion des Sessions (INCHANGÉES)
     // =========================================================
-
     function initializeSpeechRecognition(config = null) {
-
         // On garde votre sécurité d'origine
         if (typeof recognition !== 'undefined' && recognition !== null) {
             return; 
         }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 
         // --- CORRECTION IOS : On ne bloque que si l'API de base est absente ---
         if (!SpeechRecognition) {
@@ -2367,8 +2208,6 @@ const SpeechRecognitionUI = (function() {
         recognition.lang = targetLang; 
         recognition.continuous = !state.isMobile; 
         recognition.interimResults = true;
-
-
 
         recognition.onstart = () => {
             isRecognitionActive = true;
@@ -2385,11 +2224,8 @@ const SpeechRecognitionUI = (function() {
             }
         };
 
-
         recognition.onresult = (event) => {
-
             let interimTranscript = '';
-            
             if (!state.isMobile) {
                 clearTimeout(recognitionTimeout);
                 recognitionTimeout = setTimeout(() => {
@@ -2409,11 +2245,6 @@ const SpeechRecognitionUI = (function() {
                 
                 if (isSpellingMode) {
                     
-
-                    // if (state.isMobile) {
-                    //     window.speechSynthesis.cancel(); 
-                    // } 
-
                     const recognizedSegment = transcriptSegment.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase(); 
                     
                     // if (recognizedSegment === 'terminer' || recognizedSegment === 'fin' || recognizedSegment === 'fini') {
@@ -2422,7 +2253,6 @@ const SpeechRecognitionUI = (function() {
                         return;
                     }
 
-                    
                     // 1. Nettoyage de base
                     let raw = transcriptSegment.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
                     
@@ -2440,7 +2270,7 @@ const SpeechRecognitionUI = (function() {
                             
                             console.log(`[CORRECTION] "${lastChar.toUpperCase()}" supprimé. Reste: "${capturedEntities[targetSpellingField]}"`);
                             document.getElementById('stt-result-display').textContent = `🗑️ ${translate('removed')}: "${lastChar.toUpperCase()}".`;
-                            updateEntityUI();
+                            updateEntityUI();//localConfig);
                         } else {
                             document.getElementById('stt-result-display').textContent = `⚠️ ${translate('nothingToRemove')}.`;
                         }
@@ -2463,7 +2293,6 @@ const SpeechRecognitionUI = (function() {
                         }
                     }
 
-
                     // 4. VALIDATION ET AJOUT
                     if (processedChar && (alphabet.includes(processedChar) || digits.includes(processedChar))) {
                         let currentValue = capturedEntities[targetSpellingField] || '';
@@ -2473,7 +2302,7 @@ const SpeechRecognitionUI = (function() {
                         
                         console.log(`✅ AJOUTÉ: "${processedChar.toUpperCase()}" | Total: ${capturedEntities[targetSpellingField]}`);
                         document.getElementById('stt-result-display').textContent = `✅ ${translate('added')}: "${processedChar.toUpperCase()}"`;
-                        updateEntityUI();
+                        updateEntityUI();//localConfig);
                     } else {
                         // mode lettre par lettre sans mot de trigger
                         let addedChars = '';
@@ -2502,16 +2331,13 @@ const SpeechRecognitionUI = (function() {
                             document.getElementById('stt-result-display').textContent = `✅ ${translate('added')}: "${addedChars.toUpperCase()}". ${translate('nextLetter')}?`;
                             document.getElementById('stt-interim-display').textContent = `(${translate('recognized')}: "${recognizedSegment}"). ${translate('currentValue')}: ${capturedEntities[targetSpellingField]}`;
                             console.log('\n\n ---- debug spelling mode ------  Reconnu:', recognizedSegment, '. Valeur actuelle:', capturedEntities[targetSpellingField]);
-                            updateEntityUI();
+                            updateEntityUI();//localConfig);
                         } else if (errorDetected) {
                              document.getElementById('stt-result-display').textContent = `❌ ${translate('notRecognized')}.`;
                              document.getElementById('stt-interim-display').textContent = `(${translate('recognized')}: "${recognizedSegment}")`;
                         }
-
                     }
-                    
                     return; 
-                    
                 } 
                 else {
                     if (transcriptSegment != '') // && transcriptSegment != ' ')
@@ -2533,23 +2359,16 @@ const SpeechRecognitionUI = (function() {
                 if (interimTranscript.length > 10) {
                     interimTranscript = ' ' + interimTranscript.trim().split(/\s+/).slice(-10).join(' ') + ' ';
                     cumulativeTranscript = '';
-
                 }
                 document.getElementById('stt-result-display').textContent = cumulativeTranscript + interimTranscript;
-
             }
             console.log ('\n\n\n\n\n\n ++++++++++++++++++++     texte in progress ===',`'${cumulativeTranscript + interimTranscript}'` ,'config=' , config,'localConfig=' ,localConfig,'+++++++++++++++++++++++++\n\n\n\n')
-
 
             if (cumulativeTranscript + interimTranscript === '' || cumulativeTranscript + interimTranscript === ' ') {
                 if (localConfig === 'start') { document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgressStart')}`; }
                 else { document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgress')}`; }
             }
-
-
         };
-
-
 
         recognition.onend = (event ) => {
             isRecognitionActive = false;
@@ -2580,7 +2399,6 @@ const SpeechRecognitionUI = (function() {
                         updateButtonUI(false);
                     }
                 }, ANTI_NOISE_DELAY_MS);
-                
             } 
             
             else if (isRecording && isSpellingMode) { 
@@ -2601,7 +2419,6 @@ const SpeechRecognitionUI = (function() {
                         document.getElementById('stt-result-display').textContent = `⚠️ ${translate('spellingStopped')}.`;
                     }
                 }, ANTI_NOISE_DELAY_MS); 
-                
             } 
             
             else if (isRecording && !isSpellingMode) { 
@@ -2635,7 +2452,6 @@ const SpeechRecognitionUI = (function() {
                         console.log("\n[LOG STT] tentative de relance ???.");
                         toggleSpeechRecognition(); 
                     }
-
                 }
 
             } else {
@@ -2643,16 +2459,6 @@ const SpeechRecognitionUI = (function() {
                 console.log("[LOG STT] Reconnaissance Vocale arrêtée volontairement/finale.");
             }
         };
-
-
-
-
-
-
-
-
-
-
 
         recognition.onerror = (event) => {
             document.getElementById('stt-result-display').textContent = `${translate('recognitionError')}: ${event.error}`;
@@ -2671,12 +2477,9 @@ const SpeechRecognitionUI = (function() {
                 console.error("[LOG STT] Erreur STT bis bis:", event.error);                
             }
             console.error("[LOG STT] Erreur STT:", event.error);
-            
             // cumulativeTranscript = '';
         };
     }
-
-
     
     // =========================================================
     // Fonctions UI et Démarrage 
@@ -2754,7 +2557,7 @@ const SpeechRecognitionUI = (function() {
                     background: #c82333;
                     border: 2px solid white;
                     color: white;
-                    font-size: 20px;
+                    font-size: ${calcFontSize(20)}px;
                     width: 35px;
                     height: 35px;
                     display: flex;
@@ -2772,7 +2575,7 @@ const SpeechRecognitionUI = (function() {
                 /* Style de base pour les boutons de contrôle */
                 .control-btn {
                     padding: 10px; 
-                    font-size: 1em; 
+                    font-size: ${calcFontSize(24)}px; 
                     cursor: pointer; 
                     border: none; 
                     border-radius: 8px; 
@@ -2792,7 +2595,7 @@ const SpeechRecognitionUI = (function() {
                     display: flex;
                     justify-content: space-between;
                     font-weight: normal; 
-                    font-size: 0.9em; 
+                    font-size: ${calcFontSize(16)}px; 
                     margin-bottom: 2px;
                     align-items: center;
                 }
@@ -2809,7 +2612,7 @@ const SpeechRecognitionUI = (function() {
                     padding: 5px; 
                     border-radius: 6px; 
                     font-weight: bold;
-                    font-size: 1.8em; 
+                    font-size: ${calcFontSize(36)}px; 
                     line-height: 1;
                     width: 35px; 
                     height: 35px; 
@@ -2828,14 +2631,14 @@ const SpeechRecognitionUI = (function() {
 
             <div id="speechRecognitionHeader" style="
                 position: sticky; top: -20px; 
-                font-size: ~1.17em; font-weight: bold; border-radius: 12px 12px 0 0; 
+                font-size: ${calcFontSize(20)}px; font-weight: bold; border-radius: 12px 12px 0 0; 
                 margin-top: -20px; margin-left: -20px; margin-right: -20px; 
                 padding-top: 7px; padding-bottom: 7px; padding-left: 20px; padding-right: 20px; 
                 display: flex; justify-content: space-between; align-items: center; 
                 background-color: #cc9eddff; 
                 z-index: 10; 
             ">
-                <span>${translate('speechRecognitionTitle')}(Langue : ${targetLang})</span>
+                <span style="font-size: ${calcFontSize(16)}px">${translate('speechRecognitionTitle')}(Langue : ${targetLang})</span>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div id="toggle-tts-controls-wrapper">
                         <button id="toggle-tts-controls" style="cursor: pointer;">
@@ -2873,8 +2676,8 @@ const SpeechRecognitionUI = (function() {
 
                 </div>
                 
-                <div id="stt-container" style="margin-top: 5px; padding: 10px; padding-top: 0px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
-                    <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px; font-size: 0.9em; font-weight: bold;">${translate('speechRecognitionResult')}</div>
+                <div id="stt-container" style="font-size: ${calcFontSize(16)}px; margin-top: 5px; padding: 10px; padding-top: 0px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9;">
+                    <div style="display: block; margin-bottom: 1em; padding-top: 0px; margin-top: 5px; font-size: ${calcFontSize(16)}px; font-weight: bold;">${translate('speechRecognitionResult')}</div>
                     <div id="stt-result-display" style="margin-top: -5px; padding-top: 0px; min-height: 1.2em; color: #333; font-style: italic; white-space: pre-line;">
                         ${translate('statusReady')}
                     </div>
@@ -2883,7 +2686,7 @@ const SpeechRecognitionUI = (function() {
 
 
                 <div id="stt-entity-panel" style="margin-top: 10px; padding: 10px; border: 1px solid #007bff; border-radius: 6px; background-color: #e6f7ff;">
-                    <p style="margin-top: 0; font-weight: bold; color: #007bff;">
+                    <p style=" font-size: ${calcFontSize(16)}px; margin-top: 0; font-weight: bold; color: #007bff;">
                         ✨ ${translate('accessByVoice')} 
                     </p>
                     <ul id="entity-list" style="list-style: none; padding: 0; margin: 0;">
@@ -2893,18 +2696,18 @@ const SpeechRecognitionUI = (function() {
                 <div id="control-buttons-wrapper" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; margin-bottom: 10px;">
                     
                     <button id="record-voice-button" class="control-btn" style="background-color: #007bff; color: white; flex-grow: 1;">
-                        <span style="font-size: 1.2em;">🎙️</span> 
-                        <span>${translate('btnRecord')}</span>
+                        <span style="font-size: ${calcFontSize(24)}px;">🎙️</span> 
+                        <span style="font-size: ${calcFontSize(16)}px;">${translate('btnRecord')}</span>
                     </button>
                     
                     <button id="erase-and-record-voice-button" class="control-btn" style="background-color: #3bad77ff; color: white; flex-grow: 1;">
-                        <span style="font-size: 1.2em; padding:0; margin-left=-10px">🗑️🎙️</span> 
-                        <span style="padding:0; margin-left=-10px;">${translate('btnEraseRecord')}</span>
+                        <span style="font-size: ${calcFontSize(22)}px; padding:0; margin-left=-10px">🗑️🎙️</span> 
+                        <span style="font-size: ${calcFontSize(16)}px; padding:0; margin-left=-10px;">${translate('btnEraseRecord')}</span>
                     </button>
 
                     <button id="stop-voice-button" class="control-btn" style="display: none; background-color: #dc3545; color: white; flex-grow: 1;">
-                        <span style="font-size: 1.5em;">🔴</span> 
-                        <span>${translate('btnStopListening')}</span>
+                        <span style="font-size: ${calcFontSize(30)}px;">🔴</span> 
+                        <span style="font-size: ${calcFontSize(16)}px;">${translate('btnStopListening')}</span>
                     </button>
                 </div>
             </div> `;
@@ -2938,29 +2741,13 @@ const SpeechRecognitionUI = (function() {
             }
         });
 
-
-
-
-        // 2. Gestion des Sliders (mise à jour des valeurs affichées)
-        function updateTtsValueDisplay(e) {
-            const valueId = `${e.target.id}-value`;
-            const valueSpan = modal.querySelector(`#${valueId}`);
-            if (valueSpan) {
-                valueSpan.textContent = e.target.value;
-            }
-        }
-
-
-
         // Fonction gestionnaire des changements de paramètres TTS
         // Cette fonction arrête/redémarre la STT pour libérer la ressource audio, comme demandé.
         function handleTtsParameterChange(e) {
 
             // // 1. Annuler la TTS en cours (pour être sûr)
-
             window.speechSynthesis.cancel();
             window.speechSynthesis.cancel();
-
 
             // Mise à jour de l'affichage de la valeur (même si elle est déjà faite dans le code précédent)
             const valueId = `${e.target.id}-value`;
@@ -2972,29 +2759,12 @@ const SpeechRecognitionUI = (function() {
             if (state.isMobile && !isSpellingMode) {
                 speakTextfromSliderParams(SUPER_LONG_TEXT);
             }
-
-
-            
-            // // 2. Arrêter l'écoute STT
-            // arreterEcouteAction(); // Assurez-vous que cette fonction arrête l'écoute
-            
-            // // 3. Redémarrer l'écoute immédiatement après l'arrêt (pour reprendre la dictée)
-            // // Redémarrer en mode 'continue' après un très court délai (pour s'assurer que l'arrêt est effectif)
-            // setTimeout(() => {
-            //     // Tente de relancer la reconnaissance vocale
-            //     toggleSpeechRecognition('continue'); 
-            // }, 50); // 50ms pour relâcher les ressources
-
-
-
-            
         }
 
         // 2. Gestion des Sliders (Appel de la nouvelle fonction)
         modal.querySelector('#backgroundVoice-volume').addEventListener('input', handleTtsParameterChange);
         modal.querySelector('#backgroundVoice-rate').addEventListener('input', handleTtsParameterChange);
         modal.querySelector('#backgroundVoice-pitch').addEventListener('input', handleTtsParameterChange);
-
 
         // Événements STT
         modal.querySelector('#record-voice-button').addEventListener('click', () => toggleSpeechRecognition('continue') );
@@ -3010,11 +2780,10 @@ const SpeechRecognitionUI = (function() {
         });
 
         // Initialisation
-        updateEntityUI();
+        updateEntityUI();//localConfig);
 
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
-
 
         // Gestion du déplacement et du redimensionnement
         const content = document.getElementById('speechRecognitionModal');
@@ -3025,7 +2794,6 @@ const SpeechRecognitionUI = (function() {
 
         return overlay;
     }
-
 
     /**
      * Récupère les valeurs actuelles des sliders TTS dans la modale.
@@ -3056,7 +2824,6 @@ const SpeechRecognitionUI = (function() {
 
 
     function updateButtonUI(isListening) {
-        
         // Récupérer les trois éléments de contrôle
         const recordBtn = document.getElementById('record-voice-button');
         const eraseBtn = document.getElementById('erase-and-record-voice-button');
@@ -3093,8 +2860,6 @@ const SpeechRecognitionUI = (function() {
         }
     }
 
-
-
     /**
      * Gère le clic sur un élément de la liste de suggestions personnalisée.
      * @param {Event} e - L'événement mousedown.
@@ -3114,9 +2879,6 @@ const SpeechRecognitionUI = (function() {
         // 1. Déclenchement de l'action
         console.log(`[ACTION] Déclenchement de l'action sélectionnée : "${selectedValue}"`);
 
-        // if (typeof action === 'function') { 
-            // action(selectedValue);
-
         // Mettre à jour l'entité et le transcript
         capturedEntities[translate('question')] = selectedValue;
         cumulativeTranscript += ' ' + selectedValue + ' go ';
@@ -3133,9 +2895,6 @@ const SpeechRecognitionUI = (function() {
             updateCapturedEntity(fieldName, selectedValue);
         }
     }
-
-
-
 
     function updateEntityUI(config = null) {
         
@@ -3168,7 +2927,7 @@ const SpeechRecognitionUI = (function() {
         }
         
         for (const field in capturedEntities) {
-            
+
             const entityData = capturedEntities[field];
             const entityValue = (typeof entityData === 'object' && entityData !== null && 'value' in entityData) 
                 ? entityData.value 
@@ -3179,45 +2938,39 @@ const SpeechRecognitionUI = (function() {
             }
 
             const listItem = document.createElement('li');
-            // 🚨 MODIFICATION MAJEURE : Ajout de position: relative pour aligner la liste/flèche
-            listItem.style.cssText = 'padding: 5px 0; font-size: 0.9em; display: flex; align-items: center; justify-content: space-between; position: relative;'; 
+            // FIX: width 100% et box-sizing pour éviter le dépassement
+            listItem.style.cssText = `padding: 5px 0; font-size: ${calcFontSize(16)}px; display: flex; align-items: center; justify-content: space-between; position: relative; width: 100%; box-sizing: border-box;`; 
             
             const label = document.createElement('strong');
             label.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)}:`; 
-            label.style.width = '100px'; 
+            // FIX: display inline-block + width + flex-shrink garantissent l'alignement vertical parfait
+            label.style.cssText = `display: inline-block; width: 110px; flex-shrink: 0;`; 
             
             let inputField; 
             const displayValue = entityValue.trim(); 
             
             if (field === translate('question')) {
-                
-                // 1. CRÉATION DE L'INPUT (PAS DE CONTENEUR DIV)
                 inputField = document.createElement('input');
                 inputField.type = 'text';
                 inputField.id = `input-${field}`; 
                 inputField.value = displayValue;
                 
-                // 2. CRÉATION DE LA FLÈCHE (Look: Indicateur Visuel)
                 const arrow = document.createElement('span');
-                // 🚨 STYLES INJECTÉS : Positionnement absolu par rapport au LI
                 arrow.style.cssText = `
                     position: absolute;
-                    right: 5px;
+                    right: 10px;
                     top: 50%;
                     transform: translateY(-50%);
                     pointer-events: none;
                     color: #555;
-                    font-size: 0.8em;
+                    font-size: ${calcFontSize(16)}px;
                     height: 10px;
                     line-height: 10px;
-                    /* Positionnement par rapport à la bordure de l'input */
-                    right: 5px; 
+                    z-index: 2;
                 `;
                 arrow.textContent = '▼';
 
-                // 3. CRÉATION DE LA LISTE DE SUGGESTIONS (Look: Esthétique)
                 const suggestionsList = document.createElement('ul');
-                // 🚨 STYLES INJECTÉS : Positionnement absolu par rapport au LI
                 suggestionsList.style.cssText = `
                     list-style-type: none;
                     padding: 0;
@@ -3225,11 +2978,8 @@ const SpeechRecognitionUI = (function() {
                     position: absolute;
                     top: auto;        
                     bottom: 100%;     
-                    
-                    /* 🚨 ALIGNEMENT AVEC L'INPUT ET LE LABEL */
-                    left: 110px; /* Largeur du label (100px) + margin-left de l'input (10px) */
+                    left: 120px; /* FIX: Aligné sur width label (110) + margin input (10) */
                     right: 0;
-                    
                     z-index: 1000;
                     max-height: 200px; 
                     overflow-y: auto;
@@ -3239,17 +2989,13 @@ const SpeechRecognitionUI = (function() {
                     background-color: white;
                     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2); 
                     display: none; 
-                    /* 🚨 LARGEUR DÉPEND MAINTENANT DE LEFT/RIGHT, elle sera alignée sur l'input */
                     box-sizing: border-box; 
                 `;
-
-                // --- LOGIQUE DE GESTION DES ÉVÉNEMENTS (inchangée) ---
 
                 const fillSuggestions = function(searchValue = '') {
                     suggestionsList.innerHTML = '';
                     const searchLower = searchValue.toLowerCase();
                     let resultsCount = 0;
-
                     actionKeywords.forEach(keyword => {
                         if (searchValue === '' || keyword.toLowerCase().includes(searchLower)) {
                             const li = document.createElement('li');
@@ -3257,7 +3003,7 @@ const SpeechRecognitionUI = (function() {
                             li.style.cssText = `
                                 padding: 3px 12px; 
                                 cursor: pointer;
-                                font-size: 0.9em;
+                                font-size: ${calcFontSize(16)}px;
                                 color: #333;
                                 transition: background-color 0.1s ease;
                                 min-height: 28px; 
@@ -3266,7 +3012,6 @@ const SpeechRecognitionUI = (function() {
                             li.addEventListener('mouseenter', () => li.style.backgroundColor = '#f0f0f0');
                             li.addEventListener('mouseleave', () => li.style.backgroundColor = 'white');
                             li.addEventListener('mousedown', (e) => handleSuggestionClick(e, li, inputField, suggestionsList, field));
-                            
                             suggestionsList.appendChild(li);
                             resultsCount++;
                         }
@@ -3285,38 +3030,27 @@ const SpeechRecognitionUI = (function() {
                     e.stopPropagation();
                     if (suggestionsList.style.display === 'none') {
                         const count = fillSuggestions.call(this, ''); 
-                        if (count > 0) {
-                            suggestionsList.style.display = 'block';
-                        }
+                        if (count > 0) suggestionsList.style.display = 'block';
                     } else {
                         suggestionsList.style.display = 'none';
                     }
                 });
 
                 inputField.addEventListener('blur', function(e) {
-                    setTimeout(() => {
-                        suggestionsList.style.display = 'none';
-                    }, 150); 
+                    setTimeout(() => { suggestionsList.style.display = 'none'; }, 150); 
                 });
 
-                // 🚨 ATTENTION : La flèche et la liste sont ajoutées au listItem, pas au inputField
                 listItem.appendChild(arrow);
                 listItem.appendChild(suggestionsList);
                 
             } else {
-                // BLOC DES AUTRES CHAMPS
                 inputField = document.createElement('input');
                 inputField.type = 'text';
                 inputField.id = `input-${field}`; 
                 inputField.value = displayValue;
             }
 
-            // -------------------------------------------------------------
-            // GESTIONNAIRES ET STYLES COMMUNS
-            // -------------------------------------------------------------
-
-            const targetInput = inputField; // targetInput est maintenant toujours inputField
-
+            const targetInput = inputField; 
             targetInput.dataset.fieldName = field;
 
             if (field !== translate('question')) {
@@ -3331,24 +3065,23 @@ const SpeechRecognitionUI = (function() {
             
             const color = displayValue.length > 0 ? '#28a745' : '#999';
             
-            // 🚨 STYLES INJECTÉS pour le véritable input (Identiques pour tous les champs)
+            // FIX: min-width: 0 et width: 0 permettent à l'input de ne pas dépasser
             targetInput.style.cssText = `
                 flex-grow: 1; 
-                padding: 5px 25px 5px 5px; /* Espace pour la flèche */
+                min-width: 0;
+                width: 0;
+                padding: 5px 25px 5px 5px; 
                 border: 1px solid ${color}; 
                 border-radius: 4px;
                 font-weight: bold;
-                color: ${color}; 
-                /* 🚨 AJUSTEMENT CLÉ : Margin-left aligne le champ avec les autres */
+                color: ${color};
+                font-size: ${calcFontSize(16)}px; 
                 margin-left: 10px; 
-                width: auto; /* La flexbox gère la largeur */
                 box-sizing: border-box; 
             `;
             
-            // Ajout au DOM
             listItem.appendChild(label);
             listItem.appendChild(inputField); 
-            // Les autres éléments (flèche et liste) sont déjà attachés au listItem
             listElement.appendChild(listItem);
         }
 
@@ -3359,7 +3092,7 @@ const SpeechRecognitionUI = (function() {
             footerLabel.style.cssText = `
                 margin-top: 0px;
                 margin-left : 40px;
-                font-size: 0.85em;
+                font-size: ${calcFontSize(14)}px;
                 font-style: italic;
                 color: #666;
                 text-align: center;
@@ -3367,11 +3100,7 @@ const SpeechRecognitionUI = (function() {
             `;
             listElement.appendChild(footerLabel);
         }
-
-
     }
-
-
 
     function toggleSpeechRecognition(mode = 'continue', restart = '') {
 
@@ -3380,7 +3109,6 @@ const SpeechRecognitionUI = (function() {
         window.speechSynthesis.cancel(); 
 
         initializeSpeechRecognition(config);
-
 
         if (isRecording) {
             isRecording = false; 
@@ -3404,7 +3132,7 @@ const SpeechRecognitionUI = (function() {
                     capturedEntities[translate('lastname')] = document.getElementById('input-form-lastName').value;
                     // console.log('\n\n\n ----- debug start showUI --------',  document.getElementById('input-form-lastName').value )
                 }
-                updateEntityUI();
+                updateEntityUI(localConfig);
                 document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgressStart')}`;
             } else {
                 document.getElementById('stt-result-display').textContent = `🎤 ${translate('listeningInProgress')}`;
@@ -3413,10 +3141,6 @@ const SpeechRecognitionUI = (function() {
 
             if (mode === 'erase') {
                 // Efface toutes les entités capturées (utile pour le bouton "Tout effacer & Écouter")
-                // entityKeys.forEach(key => {
-                //      capturedEntities = [];
-                //      cumulativeTranscript = '';
-                // });
                 entityKeys.forEach(key => {
                     // Utilise la même logique que celle définie dans updateEntityUI pour vider
                     if (typeof capturedEntities[translate(key)] === 'object' && capturedEntities[translate(key)] !== null) {
@@ -3434,7 +3158,7 @@ const SpeechRecognitionUI = (function() {
                     capturedEntities[translate('question')] = translate('whenBorn');
                 }
 
-                updateEntityUI(); // Met à jour l'UI pour montrer que les champs sont vides
+                updateEntityUI();//localConfig); // Met à jour l'UI pour montrer que les champs sont vides
             }
 
             recognition.lang = targetLang;
@@ -3450,7 +3174,6 @@ const SpeechRecognitionUI = (function() {
             // const BARELY_AUDIBLE_SOUND = '.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.'; // 30 répétitions d'une virgule/point
 
             // Utilisation d'une boucle for pour garantir la compatibilité
-
 
             try {
 
@@ -3468,14 +3191,9 @@ const SpeechRecognitionUI = (function() {
 
                 }
                 if (state.isMobile && !stopSpeechRecognition && !isSpellingMode) {
-                // if (true) {
                     speakTextfromSliderParams(SUPER_LONG_TEXT);
-                    // chanter();
-                    // chanterFluide();
                 }
 
-
-                
                 if (!state.isMobile) {
                     clearTimeout(recognitionTimeout);
                     recognitionTimeout = setTimeout(() => {
@@ -3529,16 +3247,11 @@ const SpeechRecognitionUI = (function() {
         return finalData;
     }
 
-
-
     function showUI(config = null) {
-
-
        
         ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
         // state.isMobile = true;
         ////////////////   A SUPPRIMER APRÈS TESTS  ///////////////////
-
 
         const overlay = createUIStructure();
         // if (!recognition) 
@@ -3553,14 +3266,12 @@ const SpeechRecognitionUI = (function() {
 
         updateEntityUI(config);
         
-
         toggleSpeechRecognition(); 
 
     }
 
     function hideUI() {
         const overlay = document.getElementById('stt-only-overlay');
-
         arreterEcouteAction(); 
 
         if (overlay) {
@@ -3569,9 +3280,7 @@ const SpeechRecognitionUI = (function() {
         if (isRecording && recognition) {
             isRecording = false;
             recognition.stop(); 
-
             window.speechSynthesis.cancel(); 
-
         }
         
         capturedEntities = entityKeys.reduce((acc, field) => {
@@ -3582,15 +3291,8 @@ const SpeechRecognitionUI = (function() {
         capturedEntities[translate('firstname')] = '';
         capturedEntities[translate('lastname')] = '';
         capturedEntities[translate('question')] = translate('whenBorn');
-
-
-
-
         window.speechSynthesis.cancel(); 
-
-
     }
-
 
     return {
         showUI: showUI,
@@ -3599,11 +3301,7 @@ const SpeechRecognitionUI = (function() {
         getCapturedData: getCapturedData,
         getTtsParameters: getTtsParameters,
     };
-
-})();
-
-
-
+});
 
 
 /**
@@ -3621,7 +3319,9 @@ export function speakText(text, volume = 1.0, rate = 1.0, pitch = 1.0 ) {
     
     // Assurez-vous que VoiceSelectorUI est disponible et contient la bonne méthode
     // J'utilise ici un placeholder pour la fonction getSelectedVoice
-    const voiceToUse = VoiceSelectorUI.getSelectedVoice(); 
+    if(!voiceUI) { voiceUI = VoiceSelectorUI(); }
+
+    const voiceToUse = voiceUI.getSelectedVoice(); 
     
     if (!voiceToUse) {
         console.warn("Pas de voix sélectionnée pour speakText. Utilisation de la voix par défaut du système.");
@@ -3668,7 +3368,9 @@ export function speakTextfromSliderParams(text) {
     
     // Assurez-vous que VoiceSelectorUI est disponible et contient la bonne méthode
     // J'utilise ici un placeholder pour la fonction getSelectedVoice
-    const voiceToUse = VoiceSelectorUI.getSelectedVoice(); 
+    if(!voiceUI) { voiceUI = VoiceSelectorUI(); }
+
+    const voiceToUse = voiceUI.getSelectedVoice(); 
     
     if (!voiceToUse) {
         console.warn("Pas de voix sélectionnée pour speakText. Utilisation de la voix par défaut du système.");
@@ -3677,7 +3379,8 @@ export function speakTextfromSliderParams(text) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    const params = SpeechRecognitionUI.getTtsParameters();
+    if(!speechUI) { speechUI = SpeechRecognitionUI(); }
+    const params = speechUI.getTtsParameters();
 
     if (voiceToUse) {
         utterance.voice = voiceToUse;
@@ -3711,7 +3414,6 @@ export function generatePhoneticAlternatives(word) {
     const generatedAlternatives = new Set(); 
     const wordLower = word.toLowerCase();
 
-
     // =========================================================================
     // 0. NOUVELLE RÈGLE : Regrouper les mots (enlever les espaces et les traits d'union)
     // =========================================================================
@@ -3723,7 +3425,6 @@ export function generatePhoneticAlternatives(word) {
         generatedAlternatives.add(noSpacesAlternative);
         console.log(`[Alternative Générée] Regroupement : "${word}" -> "${noSpacesAlternative}"`);
     }
-
 
     // =========================================================================
     // 1. Cas ciblé existant : [C]e[s][C] -> [C]e[C] (le cas de 'dumesnil' -> 'dumenil')
@@ -3777,8 +3478,8 @@ export function generatePhoneticAlternatives(word) {
  */
 export function speakTextWithWaitToEnd(text, volume = null) {
     return new Promise((resolve, reject) => { // La fonction retourne une Promesse
-        
-        const voiceToUse = VoiceSelectorUI.getSelectedVoice();
+        if(!voiceUI) { voiceUI = VoiceSelectorUI(); }
+        const voiceToUse = voiceUI.getSelectedVoice();
         const utterance = new SpeechSynthesisUtterance(text);
         
         // --- GESTION DES ÉVÉNEMENTS POUR LA PROMESSE ---
@@ -3800,21 +3501,12 @@ export function speakTextWithWaitToEnd(text, volume = null) {
             //  ATTENTION ICI trouver un moyen de DEPLANTER la SYNTHESE VOCALE !!!!!!!!!
 
             /////////
-
-
-
-
         };
         
-        // ------------------------------------------------
-        
-
-        const params = SpeechRecognitionUI.getTtsParameters();
-
-
+        if(!speechUI) { speechUI = SpeechRecognitionUI(); }
+        const params = speechUI.getTtsParameters();
 
         console.log('\n\n -- voix speakTextWithWaitToEnd , params=', params, state.voice_volume, state.voice_rate, state.voice_pitch)
-
 
         if (voiceToUse) {
             utterance.voice = voiceToUse;
@@ -3823,9 +3515,6 @@ export function speakTextWithWaitToEnd(text, volume = null) {
             else { utterance.volume = state.voice_volume;}
             utterance.rate = state.voice_rate;
             utterance.pitch = state.voice_pitch;
-
-
-
             window.speechSynthesis.speak(utterance);
         } else {
             const warning = "Pas de voix sélectionnée pour speakText. Résolution immédiate.";
@@ -3836,309 +3525,23 @@ export function speakTextWithWaitToEnd(text, volume = null) {
     });
 }
 
-
-
-
-
-function chanter() {
-    // On annule toute parole en cours
-    window.speechSynthesis.cancel();
-
-    // Découpage de la phrase pour créer du rythme et de la mélodie
-    // text: le morceau à dire
-    // pitch: la hauteur (0 = très grave, 1 = normal, 2 = très aigu)
-    // rate: la vitesse (0.5 = lent, 1 = normal, 2 = rapide)
-
-    // ASTUCE : On écrit les syllabes comme des vrais mots (homophones)
-    // pour empêcher le navigateur d'épeler les lettres.
-    // pitch : 0 (grave) à 2 (aigu)
-    // rate : 0.5 (lent/note longue) à 2 (rapide/note courte)
-    
-    const partition = [
-        // "Parler" -> Par - lé
-        { text: "Par",     pitch: 0.8, rate: 0.9 }, 
-        { text: "lé",      pitch: 1.1, rate: 0.9 }, // "lé" pour éviter L-E-R
-        
-        // "dans le micro"
-        { text: "dans le", pitch: 1.0, rate: 1.3 }, // Rapide
-        { text: "mi",      pitch: 1.3, rate: 1.0 }, 
-        { text: "croc",    pitch: 0.7, rate: 0.6 }, // "croc" (mot valide) + note basse/longue
-        
-        // "par dessus cette voix"
-        { text: "par",     pitch: 1.0, rate: 1.2 },
-        { text: "de",      pitch: 1.2, rate: 1.2 },
-        { text: "su",      pitch: 1.4, rate: 1.2 }, // "su" passe mieux que "ssus"
-        { text: "cette",   pitch: 1.2, rate: 1.2 },
-        { text: "voix",    pitch: 0.5, rate: 0.6 }, // Note très grave de fin de mesure
-
-        // "votre voix est analysée"
-        { text: "votre",   pitch: 1.0, rate: 1.1 },
-        { text: "voix",    pitch: 1.0, rate: 1.1 },
-        { text: "est",     pitch: 1.2, rate: 1.1 },
-        { text: "a",       pitch: 1.3, rate: 1.3 },
-        { text: "na",      pitch: 1.4, rate: 1.3 },
-        { text: "li",      pitch: 1.6, rate: 1.3 }, // "li" au lieu de "ly"
-        { text: "zé",      pitch: 1.8, rate: 0.7 }, // "zé" note haute et tenue
-        
-        // "et des mots clé sont détectés"
-        { text: "et des",  pitch: 1.0, rate: 1.4 },
-        { text: "mots",    pitch: 1.2, rate: 1.4 },
-        { text: "clé",     pitch: 1.5, rate: 0.5 }, // Note tenue (Mise en valeur)
-        { text: "sont",    pitch: 1.0, rate: 1.1 },
-        { text: "dé",      pitch: 0.9, rate: 1.1 },
-        { text: "tèque",   pitch: 0.7, rate: 1.1 }, // "tèque" pour bien prononcer le son K
-        { text: "thé",     pitch: 0.4, rate: 0.5 }  // "thé" pour le son TÉ final + note grave
-    ];
-
-
-    let index = 0;
-
-    function jouerNote() {
-
-
-        const note = partition[index];
-        const utterance = new SpeechSynthesisUtterance(note.text);
-        
-        // Réglages voix
-        utterance.lang = 'fr-FR';
-        utterance.pitch = note.pitch;
-        utterance.rate = note.rate;
-        utterance.volume = 1;
-
-        // Sélection de la meilleure voix française disponible
-        // On privilégie "Google français" qui est plus flexible sur le pitch
-        const voices = window.speechSynthesis.getVoices();
-        const bestVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('fr')) 
-                        || voices.find(v => v.lang === 'fr-FR');
-        if (bestVoice) utterance.voice = bestVoice;
-
-        // Affichage Karaoké
-
-        // Enchaînement
-        utterance.onend = function() {
-            index++;
-            jouerNote();
-        };
-        
-        // Gestion d'erreur (si le navigateur bloque)
-        utterance.onerror = function() {
-            console.log("Erreur sur : " + note.text);
-            index++;
-            jouerNote();
-        };
-
-        window.speechSynthesis.speak(utterance);
-    }
-
-
-    jouerNote();
-
-}
-
-
-
-function chanterFluide() {
-    window.speechSynthesis.cancel();
-    
-    const partition = [
-        { text: "Par", pitch: 0.8, rate: 0.9, duree: 250 },
-        { text: "lé", pitch: 1.1, rate: 0.9, duree: 250 },
-        { text: "dansle", pitch: 1.0, rate: 1.3, duree: 300 }, // "dans le" collé
-        { text: "mi", pitch: 1.3, rate: 1.0, duree: 150 },
-        { text: "croc", pitch: 0.7, rate: 0.6, duree: 400 },
-        { text: "par", pitch: 1.0, rate: 1.2, duree: 150 },
-        { text: "dessu", pitch: 1.2, rate: 1.2, duree: 250 }, // "de"+"su" collés
-        { text: "cette", pitch: 1.2, rate: 1.2, duree: 250 },
-        { text: "voix", pitch: 0.5, rate: 0.6, duree: 400 },
-        { text: "votre", pitch: 1.0, rate: 1.1, duree: 250 },
-        { text: "voix", pitch: 1.0, rate: 1.1, duree: 250 },
-        { text: "est", pitch: 1.2, rate: 1.1, duree: 150 },
-        { text: "analy", pitch: 1.4, rate: 1.3, duree: 350 }, // "a"+"na"+"li" collés
-        { text: "zée", pitch: 1.8, rate: 0.7, duree: 500 }, // "zé" allongé
-        { text: "etdes", pitch: 1.0, rate: 1.4, duree: 200 }, // "et des" collés
-        { text: "mots", pitch: 1.2, rate: 1.4, duree: 200 },
-        { text: "clé", pitch: 1.5, rate: 0.5, duree: 600 },
-        { text: "sont", pitch: 1.0, rate: 1.1, duree: 200 },
-        { text: "détécté", pitch: 0.8, rate: 0.9, duree: 600 } // "dé"+"tèque"+"thé" collés
-    ];
-    
-    const voix = window.speechSynthesis.getVoices().find(v => v.lang.includes('fr'));
-    let index = 0;
-    
-    function jouerNote() {
-        if (index >= partition.length) return;
-        
-        const note = partition[index];
-        const utterance = new SpeechSynthesisUtterance(note.text);
-        
-        utterance.lang = 'fr-FR';
-        utterance.pitch = note.pitch;
-        utterance.rate = note.rate;
-        utterance.volume = 0.2;
-        if (voix) utterance.voice = voix;
-        
-        window.speechSynthesis.speak(utterance);
-        index++;
-        
-        // TIMING ULTRA-RAPPROCHÉ : 30ms seulement entre les syllabes
-        setTimeout(jouerNote, 30);
-    }
-    
-    // Démarrer avec un petit délai pour initialisation
-    setTimeout(jouerNote, 50);
-}
-
-
-
-
-let ttsLoopInterval = null; // Variable pour stocker l'ID de l'intervalle
-
-// /**
-//  * Fonction centrale pour générer la parole TTS
-//  * @param {string} text Le texte à lire (un simple espace pour la discrétion)
-//  * @param {number} volume Le volume (entre 0.0 et 1.0)
-//  * @param {number} rate La vitesse (entre 0.1 et 10.0)
-//  */
-// function speakText(text, volume, rate) {
-//     if ('speechSynthesis' in window) {
-//         window.speechSynthesis.cancel(); // Annule tout ce qui est en cours
-        
-//         const utterance = new SpeechSynthesisUtterance(text);
-//         utterance.volume = volume;
-//         utterance.rate = rate;
-        
-//         // La langue est importante pour que le moteur sache comment interpréter l'espace
-//         utterance.lang = 'fr-FR'; // Assurez-vous que la langue est correcte
-
-//         window.speechSynthesis.speak(utterance);
-//     }
-// }
-
-/**
- * Démarre la boucle de synthèse vocale pour maintenir le focus audio.
- * Utilise des paramètres audibles pour le test PC.
- */
-function startTTSLoop(isMobileTest = false) {
-    // Nettoie l'ancien intervalle
-    if (ttsLoopInterval !== null) {
-        clearInterval(ttsLoopInterval);
-    }
-    
-    // 🚨 PARAMÈTRES POUR LE TEST D'AUDIBILITÉ SUR PC
-    let volumeToUse = 0.5; // 50% du volume pour le test PC
-    let intervalDuration = 2000; // Relance toutes les 2 secondes
-
-    if (isMobileTest) {
-        // Paramètres réels pour l'inaudibilité en mobile
-        volumeToUse = 0.01; 
-        intervalDuration = 2000; 
-    }
-    
-    // Fonction qui relance une parole TTS très courte
-    const playSilentSound = () => {
-        // Un simple espace est utilisé
-        speakText('oooooooooooooooooooooooooooooooooooooooo', volumeToUse, 1.0); 
-    };
-
-    // 1. Lance la première fois immédiatement
-    playSilentSound();
-    
-    // 2. Relance la parole de manière continue
-    ttsLoopInterval = setInterval(playSilentSound, intervalDuration); 
-    console.log(`[TTS LOOP] Boucle de parole de fond démarrée. Volume: ${volumeToUse}`);
-}
-
-
-
-let isLoopActive = false; // Drapeau global pour contrôler l'arrêt
-
-/**
- * Lit la chaîne de manière continue en utilisant l'événement onend.
- * @param {string} text La chaîne à lire continuellement (ex: 'oooooooooo')
- * @param {number} volume Le volume (0.0 à 1.0)
- * @param {number} rate La vitesse (0.1 à 10.0)
- */
-function speakContinuousLoop(text, volume, rate) {
-    if (!('speechSynthesis' in window)) {
-        console.error("La synthèse vocale n'est pas supportée dans ce navigateur.");
-        return;
-    }
-    
-    // Annule toute parole en cours pour s'assurer que nous commençons à neuf
-    // window.speechSynthesis.cancel();
-    
-    isLoopActive = true;
-    
-    // Crée l'objet utterance qui servira de modèle pour la boucle
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.volume = volume;
-    utterance.rate = rate;
-    utterance.lang = 'fr-FR'; // Assurez-vous que la langue est correcte
-
-    // 🔑 CLÉ : Définition de l'événement de fin de parole
-    utterance.onend = () => {
-        if (isLoopActive) {
-            // Relance immédiatement la lecture de la même utterance
-            window.speechSynthesis.speak(utterance); 
-        }
-    };
-
-    utterance.onerror = (event) => {
-        console.error("Erreur de parole :", event);
-        isLoopActive = false;
-    };
-
-    // Lance la lecture initiale pour démarrer la boucle
-    window.speechSynthesis.speak(utterance);
-    console.log("Boucle de parole continue démarrée.");
-}
-
-
-
-/**
- * Arrête la boucle de parole de fond et annule la synthèse en cours.
- */
-function stopTTSLoop() {
-    if (ttsLoopInterval !== null) {
-        clearInterval(ttsLoopInterval);
-        ttsLoopInterval = null;
-    }
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); 
-    }
-    console.log("[TTS LOOP] Boucle de parole de fond arrêtée.");
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export function voiceModal() {
-    VoiceSelectorUI.showUI();
+    if(!voiceUI) { voiceUI = VoiceSelectorUI(); }
+    voiceUI.showUI();
 }
 
 export function loadVoices() {
-    VoiceSelectorUI.loadVoices()
+    if(!voiceUI) { voiceUI = VoiceSelectorUI(); }
+    voiceUI.loadVoices()
 }
-
 
 export function voiceCommand(config = null) {
     localConfig = config;
-    SpeechRecognitionUI.showUI(config);
+    if(!speechUI) { speechUI = SpeechRecognitionUI(); }
+    speechUI.showUI();
 }
 
 export function closeVoiceCommand(config = null) {
     localConfig = config;
-    SpeechRecognitionUI.hideUI();
+    if (speechUI) { speechUI.hideUI(); }
 }

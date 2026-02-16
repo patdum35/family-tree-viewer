@@ -1,5 +1,5 @@
 
-import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText } from './main.js';
+import { state, showToast, trackPageView, hideAndCleanupTreeButtons, updateRadarButtonText, redimensionnerSelectorSizeInDOMnameCloud, redimensionnerItemsInCloudName } from './main.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { centerCloudNameContainer } from './nameCloudRenderer.js';
 import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';
@@ -116,7 +116,9 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
     trackPageView('wordCloud');
 
     state.isWordCloudEnabled = true; // Activer le nuage de mots
-    
+    // state.isTreeEnabled = false;
+    // state.isRadarEnabled = false;
+
     // Pour désactiver le fond d'écran
     enableBackground(false);
 
@@ -230,6 +232,10 @@ export function processNamesCloudWithDateInternal(config, containerElement = nul
         createNameCloudUI.renderInContainer(nameData, config, containerElement);
     } else {
         createNameCloudUI.showModal(nameData, config);
+        if (state.browserScaleFactor!=1) { 
+            redimensionnerSelectorSizeInDOMnameCloud(); 
+            redimensionnerItemsInCloudName(); 
+        }
     }
 
     centerCloudNameContainer();

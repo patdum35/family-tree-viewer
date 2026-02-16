@@ -435,7 +435,7 @@ export function addStatsButton(container, nameData, type, newConfig) {
         button.style.position = 'absolute';
         
         // Fixer la largeur du bouton à la même que l'étiquette
-        button.style.width = `${globalStatsPosition.width}px`;
+        button.style.width = `${globalStatsPosition.width*state.scaleChrome}px`;
         button.style.whiteSpace = 'nowrap';
         button.style.overflow = 'hidden';
         button.style.textOverflow = 'ellipsis';
@@ -444,17 +444,17 @@ export function addStatsButton(container, nameData, type, newConfig) {
         positionButtonRelativeToLabel(button, type);
         
         // Styles du bouton
-        button.style.padding = '6px 8px';
-        button.style.height = '30px';
+        button.style.padding = 6*state.scaleChrome+'px '+ 8*state.scaleChrome+'px';
+        button.style.height = 30*state.scaleChrome+'px';
         button.style.backgroundColor = '#4299e1';
         button.style.color = 'white';
         button.style.border = 'none';
-        button.style.borderRadius = '4px';
+        button.style.borderRadius = 4*state.scaleChrome+'px';
         button.style.cursor = 'pointer';
         button.style.fontFamily = 'Arial, sans-serif';
-        button.style.fontSize = '14px';
+        button.style.fontSize = 14*state.scaleTextFontSize+'px';
         button.style.zIndex = '1000';
-        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        button.style.boxShadow = '0 '+2*state.scaleChrome+ 'px' + 4*state.scaleChrome+'px rgba(0,0,0,0.2)';
         
         // Centrer le texte
         button.style.textAlign = 'center';
@@ -462,23 +462,22 @@ export function addStatsButton(container, nameData, type, newConfig) {
         button.style.alignItems = 'center';
         button.style.justifyContent = 'center';
 
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            button.style.fontSize = '12px';
-            button.style.height = '22px';
+        if (state.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = 12*state.scaleTextFontSize+'px';
+            button.style.height = 22*state.scaleChrome+'px';
         }
-
         
         // Effets de survol
         button.onmouseover = () => {
             button.style.backgroundColor = '#3182ce';
-            button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+            button.style.boxShadow = '0 '+4*state.scaleChrome+'px '+ 6*state.scaleChrome+'px rgba(0,0,0,0.3)';
         };
         
         button.onmouseout = () => {
             button.style.backgroundColor = '#4299e1';
-            button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-        };
-        
+            button.style.boxShadow = '0 '+2*state.scaleChrome+'px '+ 4*state.scaleChrome+'px rgba(0,0,0,0.2)';
+        };       
+
         container.appendChild(button);
     }
     
@@ -517,7 +516,7 @@ function positionButtonRelativeToLabel(button, type) {
     } else {
         // Fallback à l'ancienne méthode si l'élément n'est pas trouvé
         const buttonX = globalStatsPosition.x;
-        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height*state.scaleChrome;
         
         button.style.left = `${buttonX}px`;
         button.style.top = `${buttonY}px`;
@@ -777,15 +776,18 @@ export function addStatisticsLabel(svg, textGroup, config) {
         initialY = globalStatsPosition.y;
     } else {
         // Position par défaut basée sur la position du SVG
-
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            initialX = window.innerWidth - 140; // 170px depuis le bord droit
+        if (state.innerWidth < 400 || window.innerHeight < 400) {
+            initialX = (state.innerWidth - 140)*state.scaleChrome; //*state.scaleChrome; // 170px depuis le bord droit
         } else {
-            initialX = window.innerWidth - 165; // 170px depuis le bord droit
+            initialX = (state.innerWidth - 165)*state.scaleChrome; //*state.scaleChrome; // 170px depuis le bord droit
         }
 
-        initialY = 85;  // 110px depuis le haut
+        initialY = 85*state.scaleChrome;  // 110px depuis le haut
     }
+
+
+    // console.log('\n\n\n ---- DEBUG addStatisticsLabel W=', state.innerWidth, 'H=',window.innerHeight, initialX)
+
 
 
     // Créer un élément HTML pour les statistiques
@@ -795,15 +797,15 @@ export function addStatisticsLabel(svg, textGroup, config) {
     container.style.position = 'absolute';
     container.style.left = `${initialX}px`;
     container.style.top = `${initialY}px`;
-    container.style.width = '140px';
-    container.style.height = '60px';
+    container.style.width = 140*state.scaleChrome+'px';
+    container.style.height = 60*state.scaleChrome+'px';
 
 
-    container.style.padding = '5px';
+    container.style.padding = 5*state.scaleChrome+'px';
     container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-    container.style.border = '1px solid #ccc';
-    container.style.borderRadius = '5px';
-    container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    container.style.border = 1*state.scaleChrome+ 'px solid #ccc';
+    container.style.borderRadius = 5*state.scaleChrome+'px';
+    container.style.boxShadow = '0 '+2*state.scaleChrome+ 'px' + 4*state.scaleChrome+'px rgba(0,0,0,0.1)';
     container.style.zIndex = '1000';
     container.style.cursor = 'move';
     container.style.fontFamily = 'Arial, sans-serif';
@@ -811,15 +813,15 @@ export function addStatisticsLabel(svg, textGroup, config) {
     // Ajouter le titre
     const title = document.createElement('div');
     title.textContent = cfg.labelText;
-    title.style.fontSize = '12px';
+    title.style.fontSize = 12*state.scaleTextFontSize+'px';
     title.style.textAlign = 'center';
-    title.style.marginBottom = '5px';
+    title.style.marginBottom = 5*state.scaleChrome+'px';
     container.appendChild(title);
     
     // Ajouter la valeur principale
     const value = document.createElement('div');
     value.textContent = valueText;
-    value.style.fontSize = '16px';
+    value.style.fontSize = 16*state.scaleTextFontSize+'px';
     value.style.fontWeight = 'bold';
     value.style.color = '#e53e3e';
     value.style.textAlign = 'center';
@@ -830,9 +832,9 @@ export function addStatisticsLabel(svg, textGroup, config) {
     if (genderText) {
         gender = document.createElement('div');
         gender.textContent = genderText;
-        gender.style.fontSize = '12px';
+        gender.style.fontSize = 12*state.scaleTextFontSize+'px';
         gender.style.textAlign = 'center';
-        gender.style.marginTop = '2px';
+        gender.style.marginTop = 2*state.scaleChrome+'px';
         container.appendChild(gender);
     }
 
@@ -842,29 +844,29 @@ export function addStatisticsLabel(svg, textGroup, config) {
     if (subtitleText) {
         subtitle = document.createElement('div');
         subtitle.textContent = subtitleText;
-        subtitle.style.fontSize = '12px';
+        subtitle.style.fontSize = 12*state.scaleTextFontSize+'px';
         subtitle.style.textAlign = 'center';
-        subtitle.style.marginTop = '2px';
+        subtitle.style.marginTop = 2*state.scaleChrome+'px';
         container.appendChild(subtitle);
     }
 
 
-    if (window.innerWidth < 400 || window.innerHeight < 400) {
-        container.style.width = '125px';
-        container.style.height = '45px';
-        container.style.padding = '1px';
-        title.style.fontSize = '11px';
+    if (state.innerWidth < 400 || window.innerHeight < 400) {
+        container.style.width = 125*state.scaleChrome+'px';
+        container.style.height = 45*state.scaleChrome+'px';
+        container.style.padding = 1*state.scaleChrome+'px';
+        title.style.fontSize = 11*state.scaleTextFontSize+'px';
         // title.style.marginBottom = '1px';
-        title.style.margin = '1px';
+        title.style.margin = 1*state.scaleChrome+'px';
         title.style.padding = '0px'
-        value.style.fontSize = '13px';
+        value.style.fontSize = 13*state.scaleTextFontSize+'px';
         value.style.marginTop= '0px';
-        value.style.marginBottom = '-3px';
+        value.style.marginBottom = -3*state.scaleChrome+'px';
         if (genderText) {
-            gender.style.fontSize = '10px';
+            gender.style.fontSize = 10*state.scaleTextFontSize+'px';
         }
         if (subtitleText) {
-            subtitle.style.fontSize = '10px';
+            subtitle.style.fontSize = 10*state.scaleTextFontSize+'px';
         }
     }
 
@@ -898,8 +900,8 @@ export function addStatisticsLabel(svg, textGroup, config) {
         // Lors du redimensionnement, si la position n'a pas été modifiée manuellement,
         // repositionner selon les nouvelles dimensions
         if (!globalStatsPosition.userModified) {
-            const newX = window.innerWidth - 165;// parseInt(svg.attr('width')) - 140 - 30;
-            const newY = 85;
+            const newX = state.innerWidth - 165*state.scaleChrome;// parseInt(svg.attr('width')) - 140 - 30;
+            const newY = 85*state.scaleChrome;
             
             // Mettre à jour la position de tous les éléments
             statsLabels.forEach(element => {
@@ -977,7 +979,7 @@ function makeElementDraggable(element, type) {
             if (button) {
                 const rect = button.getBoundingClientRect();
                 centuryButton.style.left = `${rect.left}px`;
-                centuryButton.style.top = `${rect.bottom + 5}px`;
+                centuryButton.style.top = `${rect.bottom + 5*state.scaleChrome}px`;
             }
         }
 
@@ -1008,7 +1010,7 @@ function makeElementDraggable(element, type) {
             if (button) {
                 const rect = button.getBoundingClientRect();
                 centuryButton.style.left = `${rect.left}px`;
-                centuryButton.style.top = `${rect.bottom + 5}px`;
+                centuryButton.style.top = `${rect.bottom + 5*state.scaleChrome}px`;
             }
         }
     }, { passive: false });
@@ -1055,17 +1057,17 @@ export function addCenturyStatsButton(container, type, newConfig) {
         
         // Appliquer les styles du bouton de statistiques détaillées
         button.style.position = 'absolute';
-        button.style.padding = '6px 8px';
-        button.style.height = '30px';
+        button.style.padding = 6*state.scaleChrome+'px '+ 8*state.scaleChrome+'px';
+        button.style.height = 30*state.scaleChrome+'px'
         button.style.backgroundColor = '#7B68EE'; // Couleur violette pour distinguer du bouton principal
         button.style.color = 'white';
         button.style.border = 'none';
-        button.style.borderRadius = '4px';
+        button.style.borderRadius = 4*state.scaleChrome+'px';
         button.style.cursor = 'pointer';
         button.style.fontFamily = 'Arial, sans-serif';
-        button.style.fontSize = '14px';
+        button.style.fontSize = 14*state.scaleTextFontSize+'px';
         button.style.zIndex = '1000';
-        button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        button.style.boxShadow = '0 '+2*state.scaleChrome+ 'px' + 4*state.scaleChrome+'px rgba(0,0,0,0.2)';
         button.style.textAlign = 'center';
         button.style.display = 'flex';
         button.style.alignItems = 'center';
@@ -1075,7 +1077,7 @@ export function addCenturyStatsButton(container, type, newConfig) {
         // Positionner le bouton sous le bouton des statistiques détaillées
         const detailedStatsRect = detailedStatsButton.getBoundingClientRect();
         button.style.left = `${detailedStatsRect.left}px`;
-        button.style.top = `${detailedStatsRect.bottom + 5}px`; // 5px de marge
+        button.style.top = `${detailedStatsRect.bottom + 5*state.scaleChrome}px`; // 5px de marge
         
         // Ajouter l'événement de clic pour ouvrir le modal des statistiques par siècle
         nameCloudState.currentConfig = { ...newConfig };
@@ -1083,17 +1085,17 @@ export function addCenturyStatsButton(container, type, newConfig) {
         // Effets de survol
         button.onmouseover = () => {
             button.style.backgroundColor = '#6A5ACD';
-            button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+            button.style.boxShadow = '0 '+4*state.scaleChrome+'px '+ 6*state.scaleChrome+'px rgba(0,0,0,0.3)';
         };
         
         button.onmouseout = () => {
             button.style.backgroundColor = '#7B68EE';
-            button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            button.style.boxShadow = '0 '+2*state.scaleChrome+'px '+ 4*state.scaleChrome+'px rgba(0,0,0,0.2)';
         };
 
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            button.style.fontSize = '12px';
-            button.style.height = '22px';
+        if (state.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = 12*state.scaleTextFontSize+'px';
+            button.style.height = 22*state.scaleChrome+'px';
         }
   
         container.appendChild(button);
@@ -1106,7 +1108,7 @@ export function addCenturyStatsButton(container, type, newConfig) {
                     // Repositionner le bouton de statistiques par siècle
                     const rect = detailedStatsButton.getBoundingClientRect();
                     button.style.left = `${rect.left}px`;
-                    button.style.top = `${rect.bottom + 5}px`;
+                    button.style.top = `${rect.bottom + 5*state.scaleChrome}px`;
                 }
             });
         });
@@ -1126,6 +1128,9 @@ function forceRepositionButton(type) {
     const cfg = statsConfig[type];
     const button = document.getElementById('unique-statsButton');
 
+
+    // console.log('\n\n\n ------- DEBUG forceRepositionButton \n\n\n');
+
     if (!button) return;
     
     // Essayer d'abord de trouver l'élément HTML correspondant
@@ -1137,14 +1142,14 @@ function forceRepositionButton(type) {
         
         // Positionner le bouton directement sous l'étiquette
         button.style.left = `${labelRect.left}px`;
-        button.style.top = `${labelRect.bottom + 2}px`; // +2px pour un petit espace
+        button.style.top = `${labelRect.bottom + 2*state.scaleChrome}px`; // +2px pour un petit espace
         button.style.width = `${labelRect.width}px`;
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            button.style.fontSize = '12px';
-            button.style.height = '22px';
+        if (state.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = 12*state.scaleTextFontSize+'px';
+            button.style.height = 22*state.scaleChrome+'px';
         } else {
-            button.style.fontSize = '14px';
-            button.style.height = '30px';                    
+            button.style.fontSize = 14*state.scaleTextFontSize+'px';
+            button.style.height = 30*state.scaleChrome+'px';                 
         }
         
         // Repositionner également le bouton de statistiques par siècle
@@ -1153,43 +1158,43 @@ function forceRepositionButton(type) {
             // Obtenir la position exacte du bouton principal
             const buttonRect = button.getBoundingClientRect();
             centuryButton.style.left = `${buttonRect.left}px`;
-            centuryButton.style.top = `${buttonRect.bottom + 5}px`;
+            centuryButton.style.top = `${buttonRect.bottom + 5*state.scaleChrome}px`;
             centuryButton.style.width = `${buttonRect.width}px`;
-            if (window.innerWidth < 400 || window.innerHeight < 400) {
-                centuryButton.style.fontSize = '12px';
-                centuryButton.style.height = '22px';
+            if (state.innerWidth < 400 || window.innerHeight < 400) {
+                centuryButton.style.fontSize = 12*state.scaleTextFontSize+'px';
+                centuryButton.style.height = 22*state.scaleChrome+'px';
             } else {
-                centuryButton.style.fontSize = '14px';
-                centuryButton.style.height = '30px';                    
+                centuryButton.style.fontSize = 14*state.scaleTextFontSize+'px';
+                centuryButton.style.height = 30*state.scaleChrome+'px';                   
             }
         }
     } else {
         // Fallback si aucun élément n'est trouvé
         const buttonX = globalStatsPosition.x;
-        const buttonY = globalStatsPosition.y + globalStatsPosition.height;
+        const buttonY = globalStatsPosition.y + globalStatsPosition.height*state.scaleChrome;
         
         button.style.left = `${buttonX}px`;
         button.style.top = `${buttonY}px`;
-        if (window.innerWidth < 400 || window.innerHeight < 400) {
-            button.style.fontSize = '12px';
-            button.style.height = '22px';
+        if (state.innerWidth < 400 || window.innerHeight < 400) {
+            button.style.fontSize = 12*state.scaleTextFontSize+'px';
+            button.style.height = 22*state.scaleChrome+'px';
         } else {
-            button.style.fontSize = '14px';
-            button.style.height = '30px';                    
+            button.style.fontSize = 14*state.scaleTextFontSize+'px';
+            button.style.height = 30*state.scaleChrome+'px';                   
         }
 
         // Repositionner également le bouton de statistiques par siècle
         const centuryButton = document.getElementById('unique-century-stats-button');
         if (centuryButton) {
             centuryButton.style.left = `${buttonX}px`;
-            centuryButton.style.top = `${buttonY + button.offsetHeight + 5}px`;
+            centuryButton.style.top = `${buttonY + button.offsetHeight + 5*state.scaleChrome}px`;
             centuryButton.style.width = `${button.offsetWidth}px`;
-            if (window.innerWidth < 400 || window.innerHeight < 400) {
-                centuryButton.style.fontSize = '12px';
-                centuryButton.style.height = '22px';
+            if (state.innerWidth < 400 || window.innerHeight < 400) {
+                centuryButton.style.fontSize = 12*state.scaleTextFontSize+'px';
+                centuryButton.style.height = 22*state.scaleChrome+'px';
             } else {
-                centuryButton.style.fontSize = '14px';
-                centuryButton.style.height = '30px';                    
+                centuryButton.style.fontSize = 14*state.scaleTextFontSize+'px';
+                centuryButton.style.height = 30*state.scaleChrome+'px';                   
             }
         }
     }
@@ -1198,6 +1203,9 @@ function forceRepositionButton(type) {
 // Fonction auxiliaire pour mettre à jour la fonction updateStatsButtons
 export function updateStatsButtons(container, nameData, type, newConfig) {
    
+
+    // console.log('\n\n\n ------- DEBUG updateStatsButtons \n\n\n');
+
     // D'abord ajouter le bouton des statistiques détaillées
     addStatsButton(container, nameData, type, newConfig);
     

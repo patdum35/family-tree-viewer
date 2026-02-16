@@ -1,4 +1,4 @@
-import { state } from './main.js';
+import { state, calcFontSize } from './main.js';
 import { nameCloudState } from './nameCloud.js';
 import { createTypeSelect, createScopeSelect, createStatsTypeSelect } from './nameCloudUI.js';
 import { createFrequencyStatsModal, createStatsModal } from './nameCloudStatModal.js';
@@ -9,7 +9,7 @@ import { setupSearchFieldModal, findPersonsBy } from './searchModalUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { closeAllModals, debounce, isModalVisible } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
-import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { disableFortuneModeClean } from './treeWheelAnimation.js';
 
 let lang = window.CURRENT_LANGUAGE;
 
@@ -385,14 +385,14 @@ function openStatsModal() {
         
         .statsModal-header h3 {
             margin: 0;
-            font-size: 18px;
+            font-size: ${calcFontSize(18)}px;
         }
         
         .statsModal-close {
             background: none;
             border: none;
             color: white;
-            font-size: 30px;
+            font-size: ${calcFontSize(30)}px;
             cursor: pointer;
             /* padding: 0; */
             padding = '2px 10px';
@@ -425,7 +425,7 @@ function openStatsModal() {
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
             margin-left: 1px;
         }   
 
@@ -434,7 +434,7 @@ function openStatsModal() {
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }      
 
@@ -457,13 +457,13 @@ function openStatsModal() {
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
         }
         .stats-searchRoot-section label {
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
             margin-left: 6px;
         }
 
@@ -471,7 +471,7 @@ function openStatsModal() {
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            font-size: 15px;
+            font-size: ${calcFontSize(15)}px;
             margin-left: 6px;
         }
 
@@ -479,7 +479,7 @@ function openStatsModal() {
             padding: 4px;
             border: 2px solid #ff9800;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
         }
 
@@ -495,6 +495,7 @@ function openStatsModal() {
         }
 
         #statsModal-search-button {
+            font-size: ${calcFontSize(14)}px;
             padding: 4px 4px;
             background: #438aee;
             color: white;
@@ -515,7 +516,7 @@ function openStatsModal() {
             padding: 8px 4px;
             border-radius: 4px;
             margin-bottom: 4px;
-            font-size: 15px; !important
+            font-size: ${calcFontSize(15)}px; !important
             color: #000;
         }
 
@@ -544,11 +545,11 @@ function openStatsModal() {
             font-weight: bold;
             color: #333;
             margin-bottom: 3px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
         }
         
         .result-info {
-            font-size: 11px;
+            font-size: ${calcFontSize(11)}px;
             color: #666;
         }
         
@@ -559,7 +560,7 @@ function openStatsModal() {
             padding: 2px 6px;
             border-radius: 3px;
             margin-right: 8px;
-            font-size: 11px;
+            font-size: ${calcFontSize(11)}px;
         }
 
         .stats-searchRoot-section {
@@ -574,7 +575,7 @@ function openStatsModal() {
             padding: 2px;
             border: 2px solid #db8401ff;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: ${calcFontSize(14)}px;
             box-sizing: border-box;
 
 
@@ -592,7 +593,7 @@ function openStatsModal() {
         @media screen and (max-height: 500px)  {
             
             .statsModal-header h3 {
-                font-size: 16px !important; /* Réduire la taille du titre */
+                font-size: ${calcFontSize(16)}px !important; /* Réduire la taille du titre */
                 margin: 0 !important;
             }
             
@@ -615,7 +616,7 @@ function openStatsModal() {
             .stats-help {
                 padding: 6px 4px !important; /* Réduire de 8px à 5px */
                 margin-bottom: 4px !important; /* Réduire de 15px à 8px */
-                font-size: 14px !important;
+                font-size: ${calcFontSize(14)}px !important;
             }
 
 
@@ -643,7 +644,7 @@ function openStatsModal() {
                 order: 2;
                 width: 50px !important;
                 height: 28px !important;
-                font-size: 13px !important;
+                font-size: ${calcFontSize(13)}px !important;
             }
 
             #statsModal-settings-button {
@@ -661,7 +662,7 @@ function openStatsModal() {
                 font-weight: bold;
                 color: #333;
                 white-space: nowrap;
-                font-size: 15px;
+                font-size: ${calcFontSize(15)}px;
                 margin-left: 1px;
             }
         }
@@ -684,7 +685,7 @@ function openStatsModal() {
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: ${calcFontSize(20)}px;
             padding: 0px 0px;
         }
         #statsModal-settings-button:hover {

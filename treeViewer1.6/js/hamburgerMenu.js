@@ -1,4 +1,4 @@
-import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive, searchRootPersonId } from './main.js';
+import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive, searchRootPersonId, redimensionnerPlayButtonSizeInDOM } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { closeCloudName } from './nameCloudUI.js';
 import { debounce } from './eventHandlers.js';
@@ -22,7 +22,8 @@ export function getMenuTranslation(key) {
       'generations': 'nb géné',
       'firstNames': 'prénoms',
       'searchPlaceholder': '🔍nom',
-      'rootPersonLabel': 'Sélectionner la racine',
+      'rootPersonLabel1': 'Sélectionner la racine',
+      'rootPersonLabel': 'Sélectionner<br>la racine',
       'rootSearch': '🔍 personne racine',
       'soundToggle': 'Activer/désactiver le son',
       'animationPause': 'Pause animation',
@@ -82,7 +83,8 @@ export function getMenuTranslation(key) {
       'generations': 'gen nb',
       'firstNames': 'first names',
       'searchPlaceholder': '🔍name',
-      'rootPersonLabel': 'Select root person',
+      'rootPersonLabel1': 'Select root person',
+      'rootPersonLabel': 'Select<br>root person',
       'rootSearch': '🔍 search root person',
       'soundToggle': 'Toggle sound',
       'animationPause': 'Pause animation',
@@ -141,7 +143,8 @@ export function getMenuTranslation(key) {
       'generations': 'núm gen',
       'firstNames': 'nombres',
       'searchPlaceholder': '🔍nombre',
-      'rootPersonLabel': 'Seleccionar raíz',
+      'rootPersonLabel1': 'Seleccionar raíz',
+      'rootPersonLabel': 'Seleccionar<br>raíz',
       'rootSearch': '🔍 buscar persona raíz',
       'soundToggle': 'Activar/desactivar sonido',
       'animationPause': 'Pausar animación',
@@ -200,7 +203,8 @@ export function getMenuTranslation(key) {
       'generations': 'genSzám',
       'firstNames': 'keresz.',
       'searchPlaceholder': '🔍név',
-      'rootPersonLabel': 'Gyökér kiválasztása', 
+      'rootPersonLabel1': 'Gyökér kiválasztása',
+      'rootPersonLabel': 'Gyökér<br>kiválasztása', 
       'rootSearch': '🔍 gyökérszemély keresése',
       'soundToggle': 'Hang be/ki',
       'animationPause': 'Animáció szüneteltetése',
@@ -293,7 +297,7 @@ export function resizeHamburger() {
 
 // Nouvelle fonction pour mettre à jour les styles sans recréer le menu
 function updateMenuStyles() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   
   // Adapter les sections
   document.querySelectorAll('.menu-section').forEach((section, index) => {
@@ -310,8 +314,8 @@ function updateMenuStyles() {
     //   section.style.padding = '5px';
     // }
 
-    section.style.margin = '2px 0';
-    section.style.padding = '3px';
+    section.style.margin = 2/state.browserScaleCorrection+'px 0';
+    section.style.padding = 3/state.browserScaleCorrection+'px';
 
     
     // Adapter les titres des sections
@@ -321,6 +325,7 @@ function updateMenuStyles() {
       heading.style.marginTop = '';
       heading.style.marginBottom = '';
       heading.style.display = '';
+      heading.setAttribute('role', 'fontSizeChangeHamburger');
       
       // Masquer certains titres sur petits écrans
       // const title = heading.textContent;
@@ -336,17 +341,17 @@ function updateMenuStyles() {
         )) {
         heading.style.display = 'none';
       } else if (height < 400) {
-        heading.style.fontSize = '13x';
+        heading.style.fontSize = 13/state.browserScaleCorrection+'px';
         heading.style.marginTop = '0';
         heading.style.marginBottom = '0px';
       } else if (height < 800) {
-        heading.style.fontSize = '13px';
+        heading.style.fontSize = 13/state.browserScaleCorrection+'px';
         heading.style.marginTop = '0';
-        heading.style.marginBottom = '5px';
+        heading.style.marginBottom = 5/state.browserScaleCorrection+'px';;
       } else  {
-        heading.style.fontSize = '13px';
+        heading.style.fontSize = 13/state.browserScaleCorrection+'px';
         heading.style.marginTop = '0';
-        heading.style.marginBottom = '5px';
+        heading.style.marginBottom = 5/state.browserScaleCorrection+'px';
       }
       heading.style.marginLeft = '0px';
       heading.style.paddingLeft = '0px';
@@ -364,7 +369,7 @@ function updateMenuStyles() {
       //   content.style.gap = '5px';
       // }
 
-      content.style.gap = '3px';
+      content.style.gap = 3/state.browserScaleCorrection+'px';
     }
   });
   
@@ -389,14 +394,14 @@ function updateMenuStyles() {
   // Adapter les labels
   document.querySelectorAll('.menu-section-content label').forEach(label => {
     label.style.fontSize = '12px';
-    label.style.marginBottom = '2px';
+    label.style.marginBottom = 2/state.browserScaleCorrection+'px';
     
     if (height < 400) {
       label.style.fontSize = '11px';
-      label.style.marginBottom = '1px';
+      label.style.marginBottom = 1/state.browserScaleCorrection+'px';
     } else if (height < 800) {
       label.style.fontSize = '12px';
-      label.style.marginBottom = '2px';
+      label.style.marginBottom = 2/state.browserScaleCorrection+'px';
     }
   });
   
@@ -515,7 +520,7 @@ function updateMenuStyles() {
 
 // Fonctions auxiliaires pour mettre à jour les styles spécifiques
 function updateAudioSectionStyles() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   const container = document.getElementById('audio-controls-container');
   
   if (container) {
@@ -529,15 +534,15 @@ function updateAudioSectionStyles() {
     //   container.style.gap = '3px';
     //   container.style.marginTop = '3px';
     // }
-    container.style.gap = '2px';
-    container.style.marginTop = '2px';
+    container.style.gap = 2/state.browserScaleCorrection+'px';
+    container.style.marginTop = 2/state.browserScaleCorrection+'px';
 
 
   }
 }
 
 function updateRootSectionStyles() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   const rootSearchPlaceholder = document.getElementById('menu-root-person-search-placeholder');
   const rootResultsPlaceholder = document.getElementById('menu-root-person-results-placeholder');
   
@@ -545,11 +550,11 @@ function updateRootSectionStyles() {
     rootSearchPlaceholder.style.margin = '';
     
     if (height < 400) {
-      rootSearchPlaceholder.style.margin = '2px 0';
+      rootSearchPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
     } else if (height < 800) {
-      rootSearchPlaceholder.style.margin = '3px 0';
+      rootSearchPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
     } else {
-      rootSearchPlaceholder.style.margin = '5px 0';
+      rootSearchPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
     }
   }
   
@@ -557,17 +562,17 @@ function updateRootSectionStyles() {
     rootResultsPlaceholder.style.margin = '';
     
     if (height < 400) {
-      rootResultsPlaceholder.style.margin = '2px 0';
+      rootResultsPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
     } else if (height < 800) {
-      rootResultsPlaceholder.style.margin = '3px 0';
+      rootResultsPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
     } else {
-      rootResultsPlaceholder.style.margin = '5px 0';
+      rootResultsPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
     }
   }
 }
 
 function updateModeSectionStyles() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   const modePlaceholder = document.getElementById('menu-treeMode-placeholder');
   const genPlaceholder = document.getElementById('menu-generations-placeholder');
   const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
@@ -576,11 +581,11 @@ function updateModeSectionStyles() {
     modePlaceholder.style.margin = '';
     
     if (height < 400) {
-      modePlaceholder.style.margin = '2px 0';
+      modePlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
     } else if (height < 800) {
-      modePlaceholder.style.margin = '3px 0';
+      modePlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
     } else {
-      modePlaceholder.style.margin = '5px 0';
+      modePlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
     }
   }
   
@@ -592,14 +597,14 @@ function updateModeSectionStyles() {
       genDiv.style.marginLeft = '';
       
       if (height < 400) {
-        genPlaceholder.style.margin = '1px 0';
-        genDiv.style.marginLeft = '5px';
+        genPlaceholder.style.margin = 1/state.browserScaleCorrection+'px 0';
+        genDiv.style.marginLeft = 5/state.browserScaleCorrection+'px';
       } else if (height < 800) {
-        genPlaceholder.style.margin = '2px 0';
-        genDiv.style.marginLeft = '8px';
+        genPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
+        genDiv.style.marginLeft = 8/state.browserScaleCorrection+'px';
       } else {
-        genPlaceholder.style.margin = '2px 0';
-        genDiv.style.marginLeft = '10px';
+        genPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
+        genDiv.style.marginLeft = 10/state.browserScaleCorrection+'px';
       }
     }
   }
@@ -612,62 +617,63 @@ function updateModeSectionStyles() {
       prenomsDiv.style.marginLeft = '';
       
       if (height < 400) {
-        prenomsPlaceholder.style.margin = '2px 0';
-        prenomsDiv.style.marginLeft = '5px';
+        prenomsPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
+        prenomsDiv.style.marginLeft = 5/state.browserScaleCorrection+'px';
       } else if (height < 800) {
-        prenomsPlaceholder.style.margin = '3px 0';
-        prenomsDiv.style.marginLeft = '8px';
+        prenomsPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
+        prenomsDiv.style.marginLeft = 8/state.browserScaleCorrection+'px';
       } else {
-        prenomsPlaceholder.style.margin = '5px 0';
-        prenomsDiv.style.marginLeft = '10px';
+        prenomsPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
+        prenomsDiv.style.marginLeft = 10/state.browserScaleCorrection+'px';
       }
     }
   }
 }
 
 function updateSearchSectionStyles() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   const searchInput = document.getElementById('menu-search');
   
   if (searchInput) {
     searchInput.style.fontSize = '';
     searchInput.style.padding = '';
     
+    // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      searchInput.style.fontSize = '11px';
-      searchInput.style.padding = '2px';
+      searchInput.style.fontSize = 11/state.browserScaleFactor+ 'px';
+      searchInput.style.padding = 2/11+'em';
     } else if (height < 800) {
-      searchInput.style.fontSize = '12px';
-      searchInput.style.padding = '3px';
+      searchInput.style.fontSize = 12/state.browserScaleFactor+ 'px';
+      searchInput.style.padding = 3/12+'em';
     } else {
-      searchInput.style.fontSize = '13px';
-      searchInput.style.padding = '3px';
+      searchInput.style.fontSize = 13/state.browserScaleFactor+ 'px';
+      searchInput.style.padding = 3/13+'em';
     }
   }
 }
 
 // Fonction pour vérifier la hauteur de l'écran et appliquer les classes correspondantes
 function updateHeightClass() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   document.documentElement.classList.remove('small-screen', 'medium-screen');
   
   const demoSelector = document.getElementById('menu-demo-selector')
   if (height < 400) { // mode paysage
     document.documentElement.classList.add('small-screen');
     if (demoSelector) {
-      demoSelector.setDropdownMaxHeight('170px');
+      demoSelector.setDropdownMaxHeight(170/state.browserScaleCorrection+'px');
       // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
     }
   } else if (height < 800) { //mode portrait
     document.documentElement.classList.add('medium-screen');
     if (demoSelector) {
-      demoSelector.setDropdownMaxHeight('300px');
+      demoSelector.setDropdownMaxHeight(300/state.browserScaleCorrection+'px');
       // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
     }
   } else {
     document.documentElement.classList.add('medium-screen');
     if (demoSelector) {
-      demoSelector.setDropdownMaxHeight('300px');
+      demoSelector.setDropdownMaxHeight(300/state.browserScaleCorrection+'px');
       // console.log('\n\n\n ----------------  debug  demo selector height ----------', demoSelector )
     }
   }
@@ -695,11 +701,13 @@ function createMenuElements() {
     hamburgerMenu.className = 'hamburger-menu';
     hamburgerMenu.title = getMenuTranslation('menuprincipal'); //'Menu principal';
     hamburgerMenu.style.display = 'none'; // Caché par défaut
+    hamburgerMenu.role = 'fontSizeChangeChromeHamburger';
     
     // Créer les trois barres du hamburger
     for (let i = 0; i < 3; i++) {
       const span = document.createElement('span');
       hamburgerMenu.appendChild(span);
+      span.role = 'fontSizeChangeChromeHamburger';
     }
     
     // Créer l'overlay
@@ -711,16 +719,59 @@ function createMenuElements() {
     sideMenu = document.createElement('div');
     sideMenu.id = 'side-menu';
     sideMenu.className = 'side-menu';
-    // sideMenu.style.display = 'block'; // Modifié pour être visible initialement
+    sideMenu.role = 'fontSizeChangeChromeHamburger';
+    sideMenu.style.fontSize = '10px';
+    if (window.outerWidth < 400  || window.outerHeight< 400) {
+      sideMenu.style.padding = '4em 1em 1em 1em';
+    } else {
+      sideMenu.style.padding = '5em 1em 1em 1em';
+    }
+
+
+       // sideMenu.style.display = 'block'; // Modifié pour être visible initialement
     
+    // Ajouter le titre du menu
+    // const menuTitle = document.createElement('div');
+    // menuTitle.className = 'menu-title';
+    // menuTitle.role = 'buttonHamburger';
+    // menuTitle.style.fontSize = '14px';
+    // menuTitle.style.left = '3.3em';
+    // menuTitle.style.top = '0.8em';
+    
+    // // menuTitle.textContent = 'Menu de l\'arbre';
+    // menuTitle.textContent = window.CURRENT_LANGUAGE === 'hu' ? 'Fa menü' : 
+    //                         window.CURRENT_LANGUAGE === 'en' ? 'Tree Menu' :
+    //                         window.CURRENT_LANGUAGE === 'es' ? 'Menú del árbol' : 
+    //                         'Menu de l\'arbre';
+
+
+
+
     // Ajouter le titre du menu
     const menuTitle = document.createElement('div');
     menuTitle.className = 'menu-title';
+    menuTitle.role = 'fontSizeChangeChromeHamburger';
+    menuTitle.style.fontSize = '14px';
+    menuTitle.style.left = '3.3em';
+    menuTitle.style.top = '0.8em';
+
+    const titleSpan = document.createElement('div');
+    titleSpan.style.fontSize = '14px';
+    titleSpan.role = "fontSizeChangeHamburger";
+
     // menuTitle.textContent = 'Menu de l\'arbre';
-    menuTitle.textContent = window.CURRENT_LANGUAGE === 'hu' ? 'Fa menü' : 
+    titleSpan.textContent = window.CURRENT_LANGUAGE === 'hu' ? 'Fa menü' : 
                             window.CURRENT_LANGUAGE === 'en' ? 'Tree Menu' :
                             window.CURRENT_LANGUAGE === 'es' ? 'Menú del árbol' : 
                             'Menu de l\'arbre';
+
+
+
+    menuTitle.appendChild(titleSpan);
+
+
+
+                            
 
     sideMenu.appendChild(menuTitle);
     
@@ -795,21 +846,23 @@ function createSection(titleIn, index = 0) {
   container.style.borderRadius = '5px'; // Coins légèrement arrondis
   
   // On ne modifie les marges que pour les petits écrans
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   if (height < 400) {
-    container.style.margin = '2px 0';
+    container.style.margin = 2/state.browserScaleCorrection+'px 0';
     container.style.padding = '0px';
   } else if (height < 800) {
-    container.style.margin = '2px 0';
+    container.style.margin = 2/state.browserScaleCorrection+'px 0';
     container.style.padding = '0px';
   } else {
-    container.style.margin = '2px 0';
+    container.style.margin = 2/state.browserScaleCorrection+'px 0';
     container.style.padding = '0px';    
   }
   
   const heading = document.createElement('h3');
   heading.textContent = title;
   heading.infoName = titleIn;
+  heading.id = `menu-section-heading-${titleIn}`;
+  heading.setAttribute('role', 'fontSizeChangeHamburger');
 
   // En mode petit écran, masquer certains titres spécifiques
   if (height < 400 && (
@@ -827,15 +880,15 @@ function createSection(titleIn, index = 0) {
     // Pour les autres titres en petit écran
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
-    heading.style.marginBottom = '3px';
+    heading.style.marginBottom = 3/state.browserScaleCorrection+'px';
   } else if (height < 800) {
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
-    heading.style.marginBottom = '3px';
+    heading.style.marginBottom = 3/state.browserScaleCorrection+'px';
   } else {
     heading.style.fontSize = '14px';
     heading.style.marginTop = '0';
-    heading.style.marginBottom = '3px';
+    heading.style.marginBottom = 3/state.browserScaleCorrection+'px';
   }
 
   
@@ -868,7 +921,7 @@ export function showLoader()  {
 
 // Créer la section Navigation
 function createButtonsOnDisplaySection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Affichage', 3);  // Index 3
   const section = createSection('section_buttonOnDisplay', 3);
 
@@ -889,6 +942,7 @@ function createButtonsOnDisplaySection() {
     button.title = buttonData.title;
     
     const span = document.createElement('span');
+    span.role = "buttonHamburger"; 
     span.textContent = buttonData.text;
 
     span.style.fontSize = '25px';
@@ -897,32 +951,33 @@ function createButtonsOnDisplaySection() {
     if (height < 400) {
       // span.style.fontSize = '14px';
       button.style.padding = '0px';
-      button.style.marginRight = '1px';
+      button.style.marginRight = 1/state.browserScaleCorrection+'px';
     } else if (height < 800) {
       // span.style.fontSize = '14px';
       button.style.padding = '0px';
-      button.style.marginRight = '1px';
+      button.style.marginRight = 1/state.browserScaleCorrection+'px';
     } else {
       // span.style.fontSize = '14px';
       button.style.padding = '0px';
-      button.style.marginRight = '1px';     
+      button.style.marginRight = 1/state.browserScaleCorrection+'px';     
     }
     // Pour les grands écrans, on conserve le style original
     
     button.appendChild(span);
     // Créer un conteneur pour le label + bouton
     const container = document.createElement('span');
+    container.role = "buttonHamburger"; 
     if (buttonData.text === '👆') { container.textContent = getMenuTranslation('yes'); }
     else if (buttonData.text === '🚫'){ container.textContent = getMenuTranslation('no');}
     else { 
-      button.style.marginLeft = '-8px';
+      button.style.marginLeft = -8/state.browserScaleCorrection+'px';
       button.style.marginRight = '0px'; 
       container.textContent = 'doc';
       container.style.backgroundColor = 'lightGreen';
       // container.style.marginTop= '-15px';
-      container.style.paddingLeft= '4px'; 
-      container.style.maxheight = '20px';
-      container.style.borderRadius = '6px';  
+      container.style.paddingLeft= 4/state.browserScaleCorrection+'px';
+      container.style.maxheight = 20/state.browserScaleCorrection+'px';
+      container.style.borderRadius = 6/state.browserScaleCorrection+'px';  
       
    
 
@@ -989,7 +1044,7 @@ function createButtonsOnDisplaySection() {
 
 // Créer la section Audio et Animation
 function createAudioSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Animation et audio', 0);  // Index 4
   const section = createSection('section_audio', 0);
   
@@ -1004,14 +1059,14 @@ function createAudioSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    audioControlsContainer.style.gap = '2px';
-    audioControlsContainer.style.marginTop = '2px';
+    audioControlsContainer.style.gap = 2/state.browserScaleCorrection+'px';
+    audioControlsContainer.style.marginTop = 2/state.browserScaleCorrection+'px';
   } else if (height < 800) {
-    audioControlsContainer.style.gap = '3px';
-    audioControlsContainer.style.marginTop = '3px';
+    audioControlsContainer.style.gap = 3/state.browserScaleCorrection+'px';
+    audioControlsContainer.style.marginTop = 3/state.browserScaleCorrection+'px';
   } else {
-    audioControlsContainer.style.gap = '5px'; // Valeur originale
-    audioControlsContainer.style.marginTop = '5px'; // Valeur originale
+    audioControlsContainer.style.gap = 5/state.browserScaleCorrection+'px';
+    audioControlsContainer.style.marginTop = 5/state.browserScaleCorrection+'px';
   }
   
   // Créer un placeholder pour le sélecteur de démo
@@ -1021,11 +1076,11 @@ function createAudioSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    demoPlaceholder.style.marginRight = '2px';
+    demoPlaceholder.style.marginRight = 2/state.browserScaleCorrection+'px';
   } else if (height < 800) {
-    demoPlaceholder.style.marginRight = '3px';
+    demoPlaceholder.style.marginRight = 3/state.browserScaleCorrection+'px';
   } else {
-    demoPlaceholder.style.marginRight = '5px'; // Valeur originale
+    demoPlaceholder.style.marginRight = 5/state.browserScaleCorrection+'px';
   }
   
   audioControlsContainer.appendChild(demoPlaceholder);
@@ -1061,6 +1116,13 @@ function createAudioSection() {
           toggleTreeRadarFromHamburger();
         }
         toggleAnimationPause(); toggleMenu(false);
+        setTimeout(() => {
+          const menuPauseBtn = document.getElementById('menu-animationPauseBtn');
+          if (menuPauseBtn) {
+            menuPlayBtn.style.setProperty('visibility', 'visible', 'important'); 
+          }
+        }, 1000); 
+
       },  
       title: getMenuTranslation('animationPlay'), //'lecture animation', 
       // text: '▶️', 
@@ -1078,34 +1140,35 @@ function createAudioSection() {
     
     const span = document.createElement('span');
     span.textContent = buttonData.text;
-    
 
+    
     // Adapter uniquement pour les petits écrans
-    if (height < 400) {
-      span.style.fontSize = '25px';
-    } else if (height < 800) {
-      span.style.fontSize = '25px';
-    } else {
-      span.style.fontSize = '25px'; // Valeur originale
-    }
+
+    // span.style.fontSize = '25px'; // Valeur originale
+
 
     if (buttonData.style && buttonData.text === '🗣️') {
       span.style.cssText = buttonData.style; // Appliquer le style au span
+      span.style.fontSize = '25px'; // Valeur originale
+      span.id = 'menu-speechToggleBtnSpan';
+      span.role = "buttonHamburger"; 
     }
 
     if (buttonData.text === '▶' || buttonData.text === '⏸') {
-      if (buttonData.text === '⏸') {
-          span.innerHTML = `
-            <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle">
-              <rect x="6" y="5" width="4" height="14" fill="currentColor"></rect>
-              <rect x="14" y="5" width="4" height="14" fill="currentColor"></rect>
-            </svg>`;
-      }
+      // if (buttonData.text === '⏸') {
+      //   span.innerHTML = `
+      //       <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle">
+      //         <rect x="6" y="5" width="4" height="14" fill="currentColor"></rect>
+      //         <rect x="14" y="5" width="4" height="14" fill="currentColor"></rect>
+      //       </svg>`;
 
+      // } 
+      span.id = 'menu-playPauseToggleBtnSpan';
+      // span.role = "fontSizeChangeChromeHamburger"; 
       // ajoute ta classe CSS (très important)
       button.classList.add('play-btn');
       // maintenant, crée le span pour l’icône
-      span.classList.add('icon');  // indispensable pour appliquer ton .play-btn .icon
+      // span.classList.add('icon');  // indispensable pour appliquer ton .play-btn .icon
     }
 
 
@@ -1119,15 +1182,15 @@ function createAudioSection() {
     
     // Adapter uniquement pour les petits écrans
     if (height < 400) {
-      button.style.padding = '2px';
+      button.style.padding = 2/state.browserScaleCorrection+'px';
     } else if (height < 800) {
-      button.style.padding = '3px';
+      button.style.padding = 3/state.browserScaleCorrection+'px';
     } else {
-      button.style.padding = '4px'; // Valeur originale
+      button.style.padding = 4/state.browserScaleCorrection+'px';
     }
     
     button.style.margin = '0';
-    button.style.borderRadius = '4px';
+    button.style.borderRadius = 4/state.browserScaleCorrection+'px';
     button.style.flex = '0 0 auto';
     
     audioControlsContainer.appendChild(button);
@@ -1148,7 +1211,7 @@ function createAudioSection() {
 
 // Créer la section Root avec des placeholders pour les sélecteurs
 function createRootSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Racine', 1);  // Index 1
   const section = createSection('section_root', 1);
   section.content.style.flexDirection = 'column';
@@ -1156,29 +1219,32 @@ function createRootSection() {
   // Créer un div pour contenir le sélecteur de recherche racine
   const rootSearchDiv = document.createElement('div');
   rootSearchDiv.id = 'menu-root-search-container';
+  rootSearchDiv.role = 'fontSizeChangeChomeHamburger';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    rootSearchDiv.style.marginBottom = '2px';
+    rootSearchDiv.style.marginBottom = 2/state.browserScaleCorrection+'px';
   } else if (height < 800) {
-    rootSearchDiv.style.marginBottom = '3px';
+    rootSearchDiv.style.marginBottom = 3/state.browserScaleCorrection+'px';
   }
   // Pour les grands écrans, on conserve le style original
         
   // Ajouter un espace pour le champ de texte (sera remplacé)
   const rootSearchPlaceholder = document.createElement('div');
   rootSearchPlaceholder.id = 'menu-root-person-search-placeholder';
+  rootSearchPlaceholder.role = 'fontSizeChangeChomeHamburger';
+  rootSearchPlaceholder.style.width = '100%';
   rootSearchPlaceholder.style.width = '100%';
   rootSearchPlaceholder.style.backgroundColor = '#F6CC7F';
-  rootSearchPlaceholder.title = getMenuTranslation('rootPersonLabel'); //'Champ de recherche de la personne racine';
+  rootSearchPlaceholder.title = getMenuTranslation('rootPersonLabel1'); //'Champ de recherche de la personne racine';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    rootSearchPlaceholder.style.margin = '2px 0';
+    rootSearchPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
   } else if (height < 800) {
-    rootSearchPlaceholder.style.margin = '3px 0';
+    rootSearchPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
   } else {
-    rootSearchPlaceholder.style.margin = '5px 0'; // Valeur originale
+    rootSearchPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
   }
   
   rootSearchDiv.appendChild(rootSearchPlaceholder);
@@ -1195,11 +1261,11 @@ function createRootSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    rootResultsPlaceholder.style.margin = '2px 0';
+    rootResultsPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
   } else if (height < 800) {
-    rootResultsPlaceholder.style.margin = '3px 0';
+    rootResultsPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
   } else {
-    rootResultsPlaceholder.style.margin = '5px 0'; // Valeur originale
+    rootResultsPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
   }
   
   rootResultsDiv.appendChild(rootResultsPlaceholder);
@@ -1210,7 +1276,7 @@ function createRootSection() {
 
 // Créer la section Affichage avec des placeholders pour les sélecteurs personnalisés
 function createModeSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Modes', 3);  // Index 3
   const section = createSection('section_modes', 3);
   
@@ -1221,18 +1287,19 @@ function createModeSection() {
   const modeLabel = document.createElement('label');
   // modeLabel.textContent = 'arbre';
   modeLabel.textContent = getMenuTranslation('treeMode');
+  modeLabel.setAttribute('role', 'fontSizeChangeHamburger');
   modeLabel.style.color = '#000';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
     modeLabel.style.fontSize = '11px';
-    modeLabel.style.marginBottom = '1px';
+    modeLabel.style.marginBottom = 1/state.browserScaleCorrection+'px';
   } else if (height < 800) {
     modeLabel.style.fontSize = '12px';
-    modeLabel.style.marginBottom = '2px';
+    modeLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   } else {
     modeLabel.style.fontSize = '12px';
-    modeLabel.style.marginBottom = '2px';
+    modeLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   }
 
   // Pour les grands écrans, on conserve le style original
@@ -1246,11 +1313,11 @@ function createModeSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    modePlaceholder.style.margin = '2px 0';
+    modePlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
   } else if (height < 800) {
-    modePlaceholder.style.margin = '3px 0';
+    modePlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
   } else {
-    modePlaceholder.style.margin = '5px 0'; // Valeur originale
+    modePlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
   }
 
   modeDiv.style.marginLeft = '-2px'; // Conserver la valeur originale pour tous les écrans
@@ -1264,18 +1331,19 @@ function createModeSection() {
   const genLabel = document.createElement('label');
   // genLabel.textContent = 'nb géné';
   genLabel.textContent = getMenuTranslation('generations');
+  genLabel.setAttribute('role', 'fontSizeChangeHamburger');
   genLabel.style.color = '#000';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
     genLabel.style.fontSize = '11px';
-    genLabel.style.marginBottom = '1px';
+    genLabel.style.marginBottom = 1/state.browserScaleCorrection+'px';
   } else if (height < 800) {
     genLabel.style.fontSize = '12px';
-    genLabel.style.marginBottom = '2px';
+    genLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   } else {
     genLabel.style.fontSize = '12px';
-    genLabel.style.marginBottom = '2px';
+    genLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   }
   // Pour les grands écrans, on conserve le style original
   
@@ -1288,14 +1356,14 @@ function createModeSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    genPlaceholder.style.margin = '1px 0';
-    genDiv.style.marginLeft = '5px';
+    genPlaceholder.style.margin = 1/state.browserScaleCorrection+'px 0';
+    genDiv.style.marginLeft = 5/state.browserScaleCorrection+'px';
   } else if (height < 800) {
-    genPlaceholder.style.margin = '2px 0';
-    genDiv.style.marginLeft = '8px';
+    genPlaceholder.style.margin =  2/state.browserScaleCorrection+'px 0';
+    genDiv.style.marginLeft = 8/state.browserScaleCorrection+'px';
   } else {
-    genPlaceholder.style.margin = '2px 0'; // Valeur originale
-    genDiv.style.marginLeft = '10px'; // Valeur originale
+    genPlaceholder.style.margin =  2/state.browserScaleCorrection+'px 0';
+    genDiv.style.marginLeft = 10/state.browserScaleCorrection+'px';
   }
   
   genDiv.appendChild(genPlaceholder);
@@ -1308,18 +1376,19 @@ function createModeSection() {
   const prenomsLabel = document.createElement('label');
   // prenomsLabel.textContent = 'prénoms';
   prenomsLabel.textContent = getMenuTranslation('firstNames');
+  prenomsLabel.setAttribute('role', 'fontSizeChangeHamburger');
   prenomsLabel.style.color = '#000';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
     prenomsLabel.style.fontSize = '11px';
-    prenomsLabel.style.marginBottom = '1px';
+    prenomsLabel.style.marginBottom = 1/state.browserScaleCorrection+'px';
   } else if (height < 800) {
     prenomsLabel.style.fontSize = '12px';
-    prenomsLabel.style.marginBottom = '2px';
+    prenomsLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   } else {
     prenomsLabel.style.fontSize = '12px';
-    prenomsLabel.style.marginBottom = '2px';
+    prenomsLabel.style.marginBottom = 2/state.browserScaleCorrection+'px';
   }
   // Pour les grands écrans, on conserve le style original
   
@@ -1332,14 +1401,14 @@ function createModeSection() {
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
-    prenomsPlaceholder.style.margin = '2px 0';
-    prenomsDiv.style.marginLeft = '5px';
+    prenomsPlaceholder.style.margin = 2/state.browserScaleCorrection+'px 0';
+    prenomsDiv.style.marginLeft = 5/state.browserScaleCorrection+'px';
   } else if (height < 800) {
-    prenomsPlaceholder.style.margin = '3px 0';
-    prenomsDiv.style.marginLeft = '8px';
+    prenomsPlaceholder.style.margin = 3/state.browserScaleCorrection+'px 0';
+    prenomsDiv.style.marginLeft = 8/state.browserScaleCorrection+'px';
   } else {
-    prenomsPlaceholder.style.margin = '5px 0'; // Valeur originale
-    prenomsDiv.style.marginLeft = '10px'; // Valeur originale
+    prenomsPlaceholder.style.margin = 5/state.browserScaleCorrection+'px 0';
+    prenomsDiv.style.marginLeft = 10/state.browserScaleCorrection+'px';
   }
   
   prenomsDiv.appendChild(prenomsPlaceholder);
@@ -1350,7 +1419,7 @@ function createModeSection() {
 
 // Créer la section Name Cloud
 function createNameCloudSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Nuage de mots', 0);
   const section = createSection('section_namecloud', 0);
    
@@ -1444,6 +1513,7 @@ function createNameCloudSection() {
     } else {
       const span = document.createElement('span');
       span.textContent = buttonData.text;
+      span.role = "buttonHamburger"; 
       span.style.fontSize = '23px';
       button.style.padding = '0px';
       button.style.margin = '0px';
@@ -1462,7 +1532,7 @@ function createNameCloudSection() {
 
 // Créer la section Navigation
 function createDisplaySection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Affichage', 3);  // Index 3
   const section = createSection('section_display', 3);
 
@@ -1488,20 +1558,21 @@ function createDisplaySection() {
     
     const span = document.createElement('span');
     span.textContent = buttonData.text;
+    span.role = "buttonHamburger"; 
     
     // // Adapter uniquement pour les petits écrans
     if (height < 400) {
       span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
-      button.style.marginRight = '2px';
+      button.style.marginRight = 2/state.browserScaleCorrection+'px';
     } else if (height < 800) {
       span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
-      button.style.marginRight = '2px';
+      button.style.marginRight = 2/state.browserScaleCorrection+'px';
     } else {
       span.style.fontSize = '23px', //'25px';
       button.style.padding = '0px';
-      button.style.marginRight = '2px';     
+      button.style.marginRight = 2/state.browserScaleCorrection+'px';     
     }
 
     if (buttonData.text === '➕' || buttonData.text === '➖' ) { 
@@ -1519,7 +1590,7 @@ function createDisplaySection() {
 
 // Créer la section Paramètres
 function createSettingsSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Fonds d\'écran', 1);
   const section = createSection('section_settings', 1);
   
@@ -1546,18 +1617,19 @@ function createSettingsSection() {
     
     const span = document.createElement('span');
     span.textContent = buttonData.text;
+    span.role = "buttonHamburger"; 
     
     // Adapter uniquement pour les petits écrans
     if (height < 400) {
       span.style.fontSize = '25px';
-      button.style.padding = '1px';
-      button.style.marginRight = '10px';
+      button.style.padding = 1/state.browserScaleCorrection+'px';  
+      button.style.marginRight = 10/state.browserScaleCorrection+'px';  
     } else if (height < 800) {
       span.style.fontSize = '25px';
-      button.style.padding = '2px';
+      button.style.padding = 2/state.browserScaleCorrection+'px';  
     } else {
       span.style.fontSize = '25px';
-      button.style.padding = '2px';
+      button.style.padding = 2/state.browserScaleCorrection+'px';  
     }
     if (buttonData.text === '⚙️') { span.style.fontSize = '28px'; }
     // Pour les grands écrans, on conserve le style original
@@ -1585,7 +1657,7 @@ function createSettingsSection() {
 
 // Créer la section Recherche a
 function createSearchSection() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Recherche dans l\'arbre', 2);  // Index 2
   const section = createSection('section_search', 2);
   
@@ -1598,22 +1670,26 @@ function createSearchSection() {
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.id = 'menu-search';
+  searchInput.setAttribute('role', 'fontSizeChangeHamburger');
+
   // searchInput.placeholder = '🔍nom';
   searchInput.placeholder = getMenuTranslation('searchPlaceholder');
   searchInput.setAttribute('oninput', 'searchTree(this.value)');
-  searchInput.style.width = '60%';
+  searchInput.style.width = 120/13+'em'; //60%
   searchInput.style.color = '#000';
+  searchInput.style.border = 2/14 +'em solid #3f3d3d';
+  searchInput.style.borderRadius = 4/14 +'em';
   
   // Adapter uniquement pour les petits écrans
   if (height < 400) {
     searchInput.style.fontSize = '11px';
-    searchInput.style.padding = '2px';
+    searchInput.style.padding = 2/11+'em';
   } else if (height < 800) {
     searchInput.style.fontSize = '12px';
-    searchInput.style.padding = '3px';
+    searchInput.style.padding = 3/12+'em';
   } else {
     searchInput.style.fontSize = '13px'; // Valeur originale
-    searchInput.style.padding = '3px';
+    searchInput.style.padding = 3/13+'em';
   }
   
   searchDiv.appendChild(searchInput);
@@ -1627,9 +1703,10 @@ export function toggleTreeRadarFromHamburger() {
   else { toggleTreeRadar(); }
 }
 
+
 // Fonction pour créer un sélecteur de démo
 function createDemoSelector() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
 
   // Trouver le sélecteur existant ou le placeholder
   let existingSelector = document.getElementById('menu-demo-selector');
@@ -1818,16 +1895,16 @@ function createDemoSelector() {
         optionElement.textContent = option.expandedLabel;
         optionElement.style.textAlign = 'center';
         
-        if (window.innerHeight < 400) {
+        if (window.innerHeight*state.browserScaleCorrection < 400) {
           optionElement.style.padding = '10px 8px'; //'6px 8px';
-          optionElement.style.fontSize = '13px'; //'12px';
-        } else if (window.innerHeight < 800) {
+          // optionElement.style.fontSize = '13px'; //'12px';
+        } else if (window.innerHeight*state.browserScaleCorrection < 800) {
           optionElement.style.padding = '10px 8px'; //'7px 8px';
-          optionElement.style.fontSize = '13px';
+          // optionElement.style.fontSize = '13px';
         } else {  
           // Valeurs originales pour les grands écrans
           optionElement.style.padding = '10px 8px';
-          optionElement.style.fontSize = '13px';
+          // optionElement.style.fontSize = '13px';
         }
       },
       onChange: (value) => {
@@ -1894,10 +1971,49 @@ function createDemoSelector() {
                  const genSelect = document.getElementById('generations');
                  if (genSelect) genSelect.value = '2';
                  
-                 const animationPauseBtn = document.getElementById('animationPauseBtn');
-                 if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
-                    animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+                //  const animationPauseBtn = document.getElementById('animationPauseBtn');
+                 const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
+                //  if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+                 if (animationPauseBtnSpan) {
+                    // animationPauseBtn.querySelector('span').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+                    animationPauseBtnSpan.innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
                  }
+
+                redimensionnerPlayButtonSizeInDOM();
+
+
+// function setAnimationButtonStyle(scaleFactor) {
+//     const btn = document.getElementById('animationPauseBtn');
+//     if (!btn) return;
+
+//     // 1. Appliquer l'échelle au bouton (CSS)
+//     btn.style.setProperty('--scale', scaleFactor);
+
+//     // 2. Calculer la taille de l'icône (80% de la hauteur de base proportionnelle)
+//     // Origine : bouton 30px -> icône ~14-16px. 
+//     // On garde le ratio 0.8 pour le look "aéré".
+//     const iconSize = 16 * scaleFactor * 0.8;
+
+//     const span = btn.querySelector('span');
+//     if (span) {
+//         // SVG Pause avec proportions d'origine (viewBox 24)
+//         span.innerHTML = `
+//             <svg viewBox="0 0 24 24" 
+//                  width="${iconSize}px" 
+//                  height="${iconSize}px" 
+//                  fill="currentColor" 
+//                  style="vertical-align:middle">
+//                 <rect x="6" y="5" width="4" height="14"></rect>
+//                 <rect x="14" y="5" width="4" height="14"></rect>
+//             </svg>`;
+//     }
+// }
+
+// // Utilisation :
+// setAnimationButtonStyle(state.browserScaleFactor);
+
+
+
 
                  const treeModeReal = state.treeModeReal;
                 //  state.treeModeBackup = state.treeMode;
@@ -1953,14 +2069,14 @@ function createDemoSelector() {
           });
           
           // Ajustements uniquement pour les petits écrans
-          if (window.innerHeight < 400) {
-            displayElement.style.fontSize = '12px';
+          if (window.innerHeight*state.browserScaleCorrection < 400) {
+            // displayElement.style.fontSize = '12px';
             displayElement.style.padding = '2px 3px';
-          } else if (window.innerHeight < 800) {
-            displayElement.style.fontSize = '12px';
+          } else if (window.innerHeight*state.browserScaleCorrection < 800) {
+            // displayElement.style.fontSize = '12px';
             displayElement.style.padding = '2px 3px';
           } else {
-            displayElement.style.fontSize = '12px';
+            // displayElement.style.fontSize = '12px';
             displayElement.style.padding = '2px 3px';
           }
           // Pour les grands écrans, on garde le style original (pas de surcharge)
@@ -2022,7 +2138,7 @@ function createDemoSelector() {
 
 // Fonction pour créer un sélecteur de nombre de prénoms
 function createPrenomsSelector() {
-  const height = window.innerHeight;
+  const height = window.innerHeight*state.browserScaleCorrection;
   
   // Vérifier si le placeholder existe
   const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
@@ -2114,14 +2230,14 @@ function createPrenomsSelector() {
           });
           
           // Adapter uniquement pour les petits écrans
-          if (window.innerHeight < 400) {
-            displayElement.style.fontSize = '10px';
+          if (window.innerHeight*state.browserScaleCorrection < 400) {
+            // displayElement.style.fontSize = '10px';
             displayElement.style.padding = '1px 2px';
-          } else if (window.innerHeight < 800) {
-            displayElement.style.fontSize = '11px';
+          } else if (window.innerHeight*state.browserScaleCorrection < 800) {
+            // displayElement.style.fontSize = '11px';
             displayElement.style.padding = '2px 3px';
           } else {
-            displayElement.style.fontSize = '11px';
+            // displayElement.style.fontSize = '11px';
             displayElement.style.padding = '2px 3px';
           }
           // Pour les grands écrans, on garde le style original (pas de surcharge)
@@ -2186,7 +2302,7 @@ function syncCustomSelectors() {
     
     // Mettre à jour la classe de hauteur au cas où
     updateHeightClass();
-    const height = window.innerHeight;
+    const height = window.innerHeight*state.browserScaleCorrection;
     
     // Fonction globale pour fermer tous les menus déroulants
     function closeAllDropdowns() {
@@ -2198,7 +2314,6 @@ function syncCustomSelectors() {
         });
     }
    
-    
     // Fonction générique pour gérer l'ouverture d'un sélecteur
     function handleSelectorClick(originalSelector, e, width = null) {
 
@@ -2319,12 +2434,14 @@ function syncCustomSelectors() {
                     rootPersonContainer.style.alignItems = 'center';
                     
                     // Adapter uniquement pour les petits écrans
+                    let scale = 1;
+                    if(!state.isSamsungBrowser) { scale = 1/state.browserScaleFactor; }
                     if (height < 400) {
-                        rootPersonContainer.style.gap = '5px';
+                        rootPersonContainer.style.gap = 5*scale + 'px';
                     } else if (height < 800) {
-                        rootPersonContainer.style.gap = '8px';
+                        rootPersonContainer.style.gap = 8*scale + 'px';
                     } else {
-                        rootPersonContainer.style.gap = '10px'; // Valeur originale
+                        rootPersonContainer.style.gap = 10*scale + 'px';
                     }
                     // rootPersonContainer.style.width = '200px'; // Valeur originale
                     // rootPersonContainer.style.maxWidth = '200px'; // Valeur originale  
@@ -2333,7 +2450,10 @@ function syncCustomSelectors() {
                     // Label à gauche
                     const rootPersonLabel = document.createElement('label');
                     // rootPersonLabel.textContent = 'Sélect. personne racine';
-                    rootPersonLabel.textContent = getMenuTranslation('rootPersonLabel');
+                    // rootPersonLabel.textContent = getMenuTranslation('rootPersonLabel');
+                    rootPersonLabel.innerHTML = getMenuTranslation('rootPersonLabel');
+                    rootPersonLabel.role = 'fontSizeChangeHamburger';
+
                     rootPersonLabel.style.color = '#000';
                     rootPersonLabel.style.lineHeight = '1.2';
                     rootPersonLabel.style.textAlign = 'right';
@@ -2342,25 +2462,30 @@ function syncCustomSelectors() {
                     // Adapter uniquement pour les petits écrans
                     if (height < 400) {
                         rootPersonLabel.style.fontSize = '10px';
-                        rootPersonLabel.style.width = '60px';
+                        // rootPersonLabel.style.width = 60/10 +'em';
                     } else if (height < 800) {
                         rootPersonLabel.style.fontSize = '12px';
-                        rootPersonLabel.style.width = '60px';
+                        // rootPersonLabel.style.width = 60/12+'em';
+                    } else if (height < 1200) {
+                        rootPersonLabel.style.fontSize = '14px';
+                        // rootPersonLabel.style.width = 60/14+'em'; // Valeur originale                        
                     } else {
                         rootPersonLabel.style.fontSize = '14px'; // Valeur originale
-                        rootPersonLabel.style.width = '60px'; // Valeur originale
+                        // rootPersonLabel.style.width = 60/14+'em'; // Valeur originale
                     }
-                    rootPersonLabel.style.marginRight = '10px';
+                    rootPersonLabel.style.marginRight = 10/14+'em';
+                    rootPersonLabel.style.width = 'fit-content';
 
     
                     // Bouton/div style sélecteur personnalisé
                     const rootPersonLink = document.createElement('div');
-                    rootPersonLink.id = 'menu-root-person-results-clone'
+                    rootPersonLink.id = 'menu-root-person-results-clone';
+                    rootPersonLink.role = 'fontSizeChangeHamburger';
                     
                     // Copier le style du sélecteur original
                     rootPersonLink.style.cursor = 'pointer';
                     rootPersonLink.style.border = 'none';
-                    rootPersonLink.style.borderRadius = '4px';
+                    rootPersonLink.style.borderRadius = 4/14+'em';
                     rootPersonLink.style.backgroundColor = 'rgba(255, 152, 0, 0.85)';
                     rootPersonLink.style.color = 'white';
                     rootPersonLink.style.fontWeight = 'bold';
@@ -2373,25 +2498,32 @@ function syncCustomSelectors() {
                     
                     // Adapter uniquement pour les petits écrans
                     if (height < 400) {
-                        rootPersonLink.style.fontSize = '11px';
-                        rootPersonLink.style.padding = '1px 3px';
-                        rootPersonLink.style.height = '20px';
-                        rootPersonLink.style.minWidth = '80px';
-                        rootPersonLink.style.maxWidth = '80px';
+                        rootPersonLink.style.fontSize = state.initialHamburgerFontSize + 'px'; //11px
+                        // rootPersonLink.style.padding = 1/11+'em ' + 3/11+'em';
+                        // rootPersonLink.style.height = 22/11+'em';
+                        // rootPersonLink.style.minWidth = 80/11+'em';
+                        // rootPersonLink.style.maxWidth = 80/11+'em';
                       } else if (height < 800) {
-                        rootPersonLink.style.fontSize = '12px';
-                        rootPersonLink.style.padding = '1px 4px';
-                        rootPersonLink.style.height = '22px';
-                        rootPersonLink.style.minWidth = '80px';
-                        rootPersonLink.style.maxWidth = '80px';                      
-                    } else {
-                        rootPersonLink.style.fontSize = '14px'; // Valeur originale
-                        rootPersonLink.style.padding = '1px 4px'; // Valeur originale
-                        rootPersonLink.style.height = '25px'; // Valeur originale
-                        rootPersonLink.style.minWidth = '80px'; // Valeur originale
-                        rootPersonLink.style.maxWidth = '80px';                        
-                    }
-    
+                        rootPersonLink.style.fontSize = state.initialHamburgerFontSize + 'px'; //12px                  
+                        // rootPersonLink.style.padding = 1/12+'em ' + 4/12+'em';
+                        // rootPersonLink.style.height = 24/12+'em';
+                        // rootPersonLink.style.minWidth = 80/12+'em';
+                        // rootPersonLink.style.maxWidth = 80/12+'em';
+                      } else {
+                        rootPersonLink.style.fontSize = state.initialHamburgerFontSize + 'px'; //14px                     
+                        // rootPersonLink.style.padding = 1/14+'em ' + 4/14+'em';
+                        // rootPersonLink.style.height = 25/14+'em';
+                        // rootPersonLink.style.minWidth = 80/14+'em';
+                        // rootPersonLink.style.maxWidth = 80/14+'em';
+                      }
+                    // rootPersonLink.style.paddingRight = 8/14 + 'em';
+                    rootPersonLink.style.width = 'fit-content';
+                    rootPersonLink.style.whiteSpace = 'nowrap';
+                    rootPersonLink.style.display = 'block';
+                    rootPersonLink.style.paddingLeft = 3/state.initialHamburgerFontSize +'em';
+                    rootPersonLink.style.paddingRight = 3/state.initialHamburgerFontSize +'em';
+                    rootPersonLink.style.paddingTop = 3/state.initialHamburgerFontSize +'em';
+                    rootPersonLink.style.paddingBottom = 2/state.initialHamburgerFontSize +'em';                        
                     // Texte du bouton (nom de la personne racine)
                     const displayElement = originalRootResults.querySelector('div[style*="border"] span');
                     const currentText = displayElement ? displayElement.textContent.trim() : 'Sélectionner';
@@ -2456,7 +2588,10 @@ function syncCustomSelectors() {
                                         const rect = displayElement.getBoundingClientRect();
                                         
                                         optionsContainerAfterClick.style.display = 'block';
-                                        optionsContainerAfterClick.style.top = `${rect.bottom + 5}px`;
+                                        let offset = 5;
+                                        if (!state.isSamsungBrowser) { offset = offset/state.browserScaleFactor;}
+
+                                        optionsContainerAfterClick.style.top = `${rect.bottom + offset}px`;
                                         
                                         if (optionsContainerAfterClick.offsetWidth > rect.width) {
                                             optionsContainerAfterClick.style.left = `${rect.right - optionsContainerAfterClick.offsetWidth}px`;
@@ -2493,32 +2628,43 @@ function syncCustomSelectors() {
     
                 if (rootSearchPlaceholder && originalRootSearch) {
                     const rootSearchLink = document.createElement('div');
+                    rootSearchLink.id = 'menu-root-person-search-clone';
                     // rootSearchLink.textContent = '🔍 personne racine';
                     rootSearchLink.textContent = getMenuTranslation('rootSearch');
+                    rootSearchLink.role = 'fontSizeChangeChromeHamburger';
                     rootSearchLink.style.cursor = 'pointer';
                     // rootSearchLink.style.backgroundColor = 'white';
                     rootSearchLink.style.backgroundColor = '#F6CC7F';
                     rootSearchLink.style.textAlign = 'left';
-                    rootSearchLink.style.border = '1px solid #333';
-                    rootSearchLink.style.borderRadius = '4px';
+
+                    rootSearchLink.style.border = 1/14 + 'em solid #333';
+                    rootSearchLink.style.borderRadius = 4/14 + 'em';
                     rootSearchLink.style.display = 'flex';
                     rootSearchLink.style.alignItems = 'center';
-                    
+
+                   
                     // Adapter uniquement pour les petits écrans
+                    let fontSize;
                     if (height < 400) {
-                        rootSearchLink.style.fontSize = '11px';
-                        rootSearchLink.style.padding = '2px 3px';
-                        rootSearchLink.style.margin = '2px 0';
+                        fontSize = state.initialHamburgerFontSize + 'px'; //11px
+                        rootSearchLink.style.padding = 2/11 + 'em ' + 3/11 + 'em';
+                        rootSearchLink.style.margin = 2/11 + 'em 0';
                     } else if (height < 800) {
-                        rootSearchLink.style.fontSize = '12px';
-                        rootSearchLink.style.padding = '2px 3px';
-                        rootSearchLink.style.margin = '2px 0';
+                        fontSize = state.initialHamburgerFontSize + 'px'; //12px
+                        rootSearchLink.style.padding =  2/12 + 'em ' + 3/12 + 'em';
+                        rootSearchLink.style.margin = 2/12 + 'em 0';
                     } else {
-                        rootSearchLink.style.fontSize = '14px'; // Valeur originale
-                        rootSearchLink.style.padding = '3px 4px'; // Valeur originale
-                        rootSearchLink.style.margin = '3px 0'; // Valeur originale
+                        fontSize = state.initialHamburgerFontSize + 'px'; // Valeur originale
+                        rootSearchLink.style.padding = 3/14 + 'em ' + 4/14 + 'em'; // Valeur originale
+                        rootSearchLink.style.margin =  3/14 + 'em 0'; // Valeur originale
                     }
-                    rootSearchLink.style.maxWidth = '150px'; // Valeur originale
+                    // rootSearchLink.style.maxWidth = 150/12 + 'em'; // Valeur originale
+                    rootSearchLink.style.paddingRight = 8/14 + 'em';
+                    rootSearchLink.style.width = 'fit-content';
+                    rootSearchLink.style.whiteSpace = 'nowrap';
+                    rootSearchLink.style.display = 'block';
+                    rootSearchLink.style.fontSize = fontSize;
+
 
                     rootSearchLink.addEventListener('click', function(e) {
                         originalRootSearch.style.visibility = 'visible';
@@ -2550,9 +2696,9 @@ function syncCustomSelectors() {
                 setTimeout(() => {
                     const prenomsPlaceholder = document.getElementById('menu-prenoms-placeholder');
                     if (prenomsPlaceholder) {
-                    createPrenomsSelector();
+                      createPrenomsSelector();
                     } else {
-                    console.log("Placeholder de prénoms pas encore disponible");
+                      console.log("Placeholder de prénoms pas encore disponible");
                     }
                 }, 200);
     
@@ -2575,26 +2721,28 @@ function injectStyles() {
     styleElement.textContent = `
         /* Styles pour les petits écrans uniquement */
         .small-screen .hamburger-menu {
-        width: 30px;
-        height: 30px;
+        font-size: 10px;
+        width: 3em;
+        height: 3em;
         }
         
         .small-screen .hamburger-menu span {
-        width: 18px;
-        height: 2px;
-        margin: 1px 0;
+        font-size: 10px;
+        width: 1.8em;
+        height: 0.2em;
+        margin: 0.1em 0;
         }
         
         .small-screen .side-menu {
-        width: 220px;
-        padding: 40px 5px 10px;
+        /* width: 220px; */
+        /* padding: 40px 5px 10px; */
         }
         
-        .small-screen .menu-title {
-        top: 10px;
-        left: 40px;
-        font-size: 14px;
-        }
+        /* .small-screen .menu-title {
+         top: 10px; 
+         left: 40px; 
+         font-size: 14px; 
+        } */
         
         .small-screen .menu-section {
         margin-bottom: 6px;
@@ -2621,26 +2769,28 @@ function injectStyles() {
         
         /* Styles pour les écrans moyens uniquement */
         .medium-screen .hamburger-menu {
-        width: 35px;
-        height: 35px;
+        font-size: 10px;
+        width: 3.5em;
+        height: 3.5em;
         }
         
         .medium-screen .hamburger-menu span {
-        width: 20px;
-        height: 2.5px;
-        margin: 1.5px 0;
+        font-size: 10px;
+        width: 2.2em;
+        height: 0.25em;
+        margin: 0.15em 0;
         }
         
         .medium-screen .side-menu {
-        width: 220px;
-        padding: 50px 8px 15px;
+        /* width: 220px; */
+        /* padding: 50px 8px 15px; */
         }
-        
-        .medium-screen .menu-title {
-        top: 12px;
-        left: 50px;
-        font-size: 16px;
-        }
+
+        /* .medium-screen .menu-title {
+         top: 12px; 
+         left: 50px;
+         font-size: 16px;
+        } */
         
         .medium-screen .menu-section {
         margin-bottom: 10px;
@@ -2668,30 +2818,32 @@ function injectStyles() {
         
         /* Style pour le bouton hamburger - Styles de base inchangés */
         .hamburger-menu {
+        font-size: 10px;
         position: fixed;
-        top: 5px;   
-        left: 5px; 
+        top: 0.5em;   
+        left: 0.5em; 
         z-index: 3000;
-        width: 40px;
-        height: 40px;
+        width: 4em;
+        height: 4em;
         background-color: #4CAF50;
-        border-radius: 8px;
+        border-radius: 0.8em;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        box-shadow: 0 0.2em 0.5em rgba(0,0,0,0.3);
         border: none;
         }
     
         .hamburger-menu span {
+        font-size: 10px;
         display: block;
-        width: 24px;
-        height: 3px;
-        margin: 2px 0;
+        width: 2.4em;
+        height: 0.3em;
+        margin: 0.2em 0;
         background-color: white;
-        border-radius: 3px;
+        border-radius: 0.3em;
         transition: all 0.3s ease;
         }
     
@@ -2699,8 +2851,13 @@ function injectStyles() {
         .side-menu {
         position: fixed;
         top: 0;
-        left: -250px;
-        width: 220px;
+        // left: -250px;
+
+        /* On utilise transform au lieu de left */
+        transform: translateX(-100%); 
+        /*transition: transform 0.3s ease;*/ /* Transition plus fluide (GPU-accelerated) */
+
+        /* width: 220px; */
         height: 100vh;
         background-color: white;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
@@ -2708,14 +2865,17 @@ function injectStyles() {
         transition: left 0.3s ease;
         overflow-y: auto;
         overflow-x: hidden;
-        padding: 60px 10px 20px;
+        /* padding: 60px 10px 20px; */ 
         display: flex;              /* IMPORTANT */
         flex-direction: column;     /* header + body */
         box-sizing: border-box;
+        visibility: hidden;
         }
     
         .side-menu.open {
-        left: 0;
+        // left: 0;
+        transform: translateX(0);
+        visibility: visible;
         }
     
         /* Overlay - Style de base inchangé */
@@ -2782,9 +2942,9 @@ function injectStyles() {
         /* Style pour le titre du menu - Style de base inchangé */
         .menu-title {
         position: absolute;
-        top: 15px;
-        left: 60px;
-        font-size: 18px;
+        /* top: 15px; */
+        /* left: 60px; */
+        /* font-size: 18px; */
         font-weight: bold;
         color: #4CAF50;
         }
@@ -2850,7 +3010,7 @@ function setupMobileMenuClosing() {
     document.querySelectorAll('#side-menu button, #side-menu select').forEach(element => {
       element.addEventListener('click', function() {
         // Sur mobile, fermer le menu après la sélection
-        if (window.innerWidth < 768) {
+        if (window.innerWidth*state.browserScaleCorrection < 768) {
           // Petit délai pour permettre à l'action de se terminer
           setTimeout(() => {
             toggleMenu(false);
@@ -2863,48 +3023,45 @@ function setupMobileMenuClosing() {
 function setupButtonSync() {
     setTimeout(() => {
         // Synchronisation existante pour les boutons de son et pause
-        // const originalSpeechBtn = document.getElementById('speechToggleBtn');
-        // const menuSpeechBtn = document.getElementById('menu-speechToggleBtn');
-        
-        // if (originalSpeechBtn && menuSpeechBtn) {
-        //     const speechObserver = new MutationObserver(function(mutations) {
-        //         mutations.forEach(function(mutation) {
-        //             if (mutation.type === 'childList' || mutation.type === 'attributes') {
-        //                 menuSpeechBtn.innerHTML = originalSpeechBtn.innerHTML;
-        //             }
-        //         });
-        //     });
-            
-        //     speechObserver.observe(originalSpeechBtn, { 
-        //         childList: true,
-        //         attributes: true,
-        //         subtree: true
-        //     });
-        // }
-        
         const originalPauseBtn = document.getElementById('animationPauseBtn');
-        // const menuPauseBtn = document.getElementById('menu-animationPauseBtn');
         const menuPlayBtn = document.getElementById('menu-animationPlayBtn');
-        
-        // if (originalPauseBtn && menuPauseBtn) {
+
         if (originalPauseBtn && menuPlayBtn) {
-          const pauseObserver = new MutationObserver(function(mutations) {
+            const syncStylesAndContent = () => {
+                // 1. Synchronise le contenu (l'icône)
+                menuPlayBtn.innerHTML = originalPauseBtn.innerHTML;
+
+                // 2. Récupère tout le style de l'original
+                menuPlayBtn.style.cssText = originalPauseBtn.style.cssText;
+
+                // 3. FORCE la visibilité à visible (écrase ce qui vient d'être copié)
+                menuPlayBtn.style.visibility = 'visible';
+                
+                // Optionnel : si l'original utilise display:none, forcez aussi le display
+                if (menuPlayBtn.style.display === 'none') {
+                    menuPlayBtn.style.display = 'flex'; // ou 'block' selon votre CSS
+                }
+            };
+
+            const pauseObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        // menuPlayBtn.innerHTML = menuPauseBtn.innerHTML;
-                        // menuPauseBtn.innerHTML = originalPauseBtn.innerHTML;
-                        menuPlayBtn.innerHTML = originalPauseBtn.innerHTML;
-
-                      }
+                        syncStylesAndContent();
+                    }
                 });
             });
-            
+
             pauseObserver.observe(originalPauseBtn, { 
                 childList: true,
-                attributes: true,
-                subtree: true
+                attributes: true, 
+                subtree: true,
+                attributeFilter: ['style', 'class']
             });
+            
+            // Synchronisation initiale
+            syncStylesAndContent();
         }
+
 
         // Observation et synchronisation des sélecteurs
         const selectorsToSync = [
@@ -3112,7 +3269,11 @@ export function offsetHamburgerButtonDown() {
   }
   
   // Appliquer UNIQUEMENT le décalage, sans toucher aux autres propriétés
-  hamburgerButton.style.setProperty('margin-top', '50px', 'important');
+  if (state.isSamsungBrowser) {
+    hamburgerButton.style.setProperty('margin-top', '50px', 'important');
+  } else { 
+    hamburgerButton.style.setProperty('margin-top', 50/state.browserScaleFactor + 'px', 'important');
+  }
   
   console.log("Décalage de 20px vers le bas appliqué au bouton hamburger");
 }

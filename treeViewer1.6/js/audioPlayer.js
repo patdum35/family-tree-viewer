@@ -317,19 +317,19 @@ export function repositionAudioPlayerOnResize() {
     const rect = player.getBoundingClientRect();
     
     // Si le player est partiellement ou totalement hors écran, le replacer
-    if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+    if (rect.right > state.innerWidth || rect.bottom > state.innerHeight) {
         // Calculer la nouvelle position
         let newLeft = rect.left;
         let newTop = rect.top;
         
         // Repositionner horizontalement si nécessaire
-        if (rect.right > window.innerWidth) {
-            newLeft = Math.max(0, window.innerWidth - rect.width - 10);
+        if (rect.right > state.innerWidth) {
+            newLeft = Math.max(0, state.innerWidth - rect.width - 10);
         }
         
         // Repositionner verticalement si nécessaire
-        if (rect.bottom > window.innerHeight) {
-            newTop = Math.max(0, window.innerHeight - rect.height - 10);
+        if (rect.bottom > state.innerHeight) {
+            newTop = Math.max(0, state.innerHeight - rect.height - 10);
         }
         
         // Appliquer la nouvelle position
@@ -367,8 +367,8 @@ function initiallyPositionAudioPlayer() {
     if (!player) return;
     
     const bottomRight = {
-        top: window.innerHeight - player.offsetHeight - 10,
-        left: window.innerWidth - player.offsetWidth - 10
+        top: state.innerHeight - player.offsetHeight - 10,
+        left: state.innerWidth - player.offsetWidth - 10
     };
 
     // Positionner en bas à droite par défaut
@@ -381,16 +381,16 @@ function initiallyPositionAudioPlayer() {
     setTimeout(() => {
         // Vérifier si le player est dans l'écran
         const rect = player.getBoundingClientRect();
-        if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+        if (rect.right > state.innerWidth || rect.bottom > state.innerHeight) {
             // Appliquer les corrections
             const marginFromEdge = 10;
             
-            if (rect.right > window.innerWidth) {
+            if (rect.right > state.innerWidth) {
                 player.style.right = `${marginFromEdge}px`;
                 player.style.left = 'auto';
             }
             
-            if (rect.bottom > window.innerHeight) {
+            if (rect.bottom > state.innerHeight) {
                 player.style.bottom = `${marginFromEdge}px`;
                 player.style.top = 'auto';
             }
@@ -410,14 +410,14 @@ function positionAudioPlayerForCurrentScreen() {
     if (!player) return;
     
     // Détecter si on est sur mobile (approximatif)
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = state.innerWidth <= 768;
     
     // Déterminer l'orientation
-    const isLandscape = window.innerWidth > window.innerHeight;
+    const isLandscape = state.innerWidth > state.innerHeight;
     
     // Dimensions de l'écran
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+    const screenWidth = state.innerWidth;
+    const screenHeight = state.innerHeight;
     
     // Réinitialiser certains styles pour éviter des conflits
     player.style.transform = 'none';
@@ -470,8 +470,8 @@ function saveAudioPlayerPosition() {
         localStorage.setItem('audioPlayerPosition', JSON.stringify({
             top: rect.top,
             left: rect.left,
-            right: window.innerWidth - rect.right,
-            bottom: window.innerHeight - rect.bottom,
+            right: state.innerWidth - rect.right,
+            bottom: state.innerHeight - rect.bottom,
             width: rect.width,
             height: rect.height,
             timestamp: Date.now()
@@ -502,8 +502,8 @@ function restoreAudioPlayerPosition() {
         }
         
         // Détecter si l'écran a été fortement redimensionné depuis
-        const widthRatio = window.innerWidth / (pos.left + pos.width + pos.right);
-        const heightRatio = window.innerHeight / (pos.top + pos.height + pos.bottom);
+        const widthRatio = state.innerWidth / (pos.left + pos.width + pos.right);
+        const heightRatio = state.innerHeight / (pos.top + pos.height + pos.bottom);
         
         if (widthRatio < 0.8 || widthRatio > 1.2 || heightRatio < 0.8 || heightRatio > 1.2) {
             console.log("Dimensions d'écran trop différentes, utilisation du positionnement par défaut");
@@ -515,7 +515,7 @@ function restoreAudioPlayerPosition() {
         player.style.height = `${pos.height}px`;
         
         // Préférer right/bottom pour un positionnement relatif au bas/droite de l'écran
-        if (pos.right < window.innerWidth / 2) {
+        if (pos.right < state.innerWidth / 2) {
             player.style.right = `${pos.right}px`;
             player.style.left = 'auto';
         } else {
@@ -523,7 +523,7 @@ function restoreAudioPlayerPosition() {
             player.style.right = 'auto';
         }
         
-        if (pos.bottom < window.innerHeight / 2) {
+        if (pos.bottom < state.innerHeight / 2) {
             player.style.bottom = `${pos.bottom}px`;
             player.style.top = 'auto';
         } else {
@@ -693,13 +693,13 @@ function showAndMoveAudioPlayer() {
     // Afficher le lecteur avec animation
     setTimeout(() => {
         let moveX, moveY, scale; // Déplacer un peu vers le haut
-        if (window.innerHeight < 400) {
+        if (state.innerHeight < 400) {
             moveX = 0; // Déplacer vers le centre
             moveY = 0; // Déplacer un peu vers le haut
             scale = 1.3; //'';
             animationAudioPlayer.style.transform = `translate(-${moveX}px, -${moveY}px) scaleY(${scale})`;
         } else {
-            moveX = window.innerWidth/2 - 75; // Déplacer vers le centre
+            moveX = state.innerWidth/2 - 75; // Déplacer vers le centre
             moveY = 20; // Déplacer un peu vers le haut
             scale = 1.5;
             animationAudioPlayer.style.transform = `translate(-${moveX}px, -${moveY}px) scale(${scale})`;
@@ -756,10 +756,12 @@ export async function createAudioPlayerToggleButton() {
     
     const toggleButton = document.createElement('button');
     toggleButton.id = 'show-audio-player-btn';
-    toggleButton.innerHTML = '🎵';
+    toggleButton.role = 'fontSizeChangeChrome2';
+
+    // toggleButton.innerHTML = '🎵';
     toggleButton.style.position = 'fixed';
-    toggleButton.style.bottom = '5px';
-    toggleButton.style.right = '5px';
+    toggleButton.style.bottom = '0.25em';
+    toggleButton.style.right = '0.25em';
     toggleButton.style.backgroundColor = 'rgba(50, 50, 50, 0.85)';
     toggleButton.style.color = 'white';
     toggleButton.style.border = 'none';
@@ -768,8 +770,26 @@ export async function createAudioPlayerToggleButton() {
     toggleButton.style.width = '2em'; //'40px';
     toggleButton.style.height = '2em'; //'40px';
     toggleButton.style.cursor = 'pointer';
-    toggleButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    toggleButton.style.boxShadow = '0 0.1em 0.25em rgba(0,0,0,0.3)';
     toggleButton.style.zIndex = '1499';
+    toggleButton.style.padding = '0';
+    toggleButton.style.textAlign = 'center';
+    toggleButton.style.verticalAlign = 'middle';
+
+    const buttonSpan = document.createElement('span');
+    buttonSpan.style.fontSize = '20px';
+    buttonSpan.style.padding = '0';
+    buttonSpan.style.margin = '0';
+    buttonSpan.style.textAlign = 'center';
+    buttonSpan.style.verticalAlign = 'middle';
+    buttonSpan.role ='button2';
+    buttonSpan.innerHTML = '🎵';
+    toggleButton.appendChild(buttonSpan);
+
+    
+
+
+
 
 
     if (window.CURRENT_LANGUAGE === 'fr') {

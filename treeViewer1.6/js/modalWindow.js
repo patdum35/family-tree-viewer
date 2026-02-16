@@ -1,4 +1,4 @@
-import { state, displayGenealogicTree, updateRadarButtonText } from './main.js';
+import { state, calcFontSize, displayGenealogicTree, updateRadarButtonText } from './main.js';
 import { historicalFigures } from './historicalData.js';
 import { extractYear } from './utils.js';
 import { nameCloudState } from './nameCloud.js';
@@ -394,7 +394,7 @@ export function displayPersonDetails(personId) {
     // Set the name in the modal header (with reduced size)
     title.textContent = person.name.replace(/\//g, '');
     title.style.margin = '0';
-    title.style.fontSize = nameCloudState.mobilePhone ? '13px' : '16px';
+    title.style.fontSize = nameCloudState.mobilePhone ? calcFontSize(13)+'px' : calcFontSize(16)+'px';
 
     titleContainer.appendChild(title);
 
@@ -402,7 +402,7 @@ export function displayPersonDetails(personId) {
     closeButton.textContent = '×';
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
-    closeButton.style.fontSize = '28px';
+    closeButton.style.fontSize = calcFontSize(28)+'px';
     closeButton.style.cursor = 'pointer';
     closeButton.style.padding = '2px 10px';
     closeButton.style.marginRight = '10px';
@@ -438,7 +438,7 @@ export function displayPersonDetails(personId) {
             margin-bottom: 6px;
             padding: 6px;
             border-radius: 6px;
-            font-size: ${nameCloudState && nameCloudState.mobilePhone ? '11px' : '13px'};
+            font-size: ${nameCloudState && nameCloudState.mobilePhone ? '${calcFontSize(11)}px' : '${calcFontSize(13)}px'};
             background-color: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(3px);
         }
@@ -501,7 +501,7 @@ export function displayPersonDetails(personId) {
             padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: ${calcFontSize(10)}px;
             margin: 2px 2px 0 0;
             flex: 1;
             min-width: 0;

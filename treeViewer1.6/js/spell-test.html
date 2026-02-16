@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Saisie Vocale Lettre par Lettre (Pure)</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        #output { font-size: 2em; margin: 20px 0; min-height: 1.5em; border: 1px solid #ccc; padding: 10px; }
+        button { padding: 10px 20px; font-size: 1.2em; cursor: pointer; }
+        .recording { background-color: red; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>Saisie Vocale: Épellation (Lettre par Lettre)</h1>
+    <p>Dites une lettre, un chiffre, ou "terminer". **Faites une petite pause entre chaque élément.**</p>
+    
+    <div id="output">...</div>
+    <div id="status" style="color: blue;">Prêt à démarrer l'épellation.</div>
+    
+    <button id="toggle-record">Démarrer l'Épellation</button>
+
+    <script>
+        const outputElement = document.getElementById('output');
+        const statusElement = document.getElementById('status');
+        const toggleButton = document.getElementById('toggle-record');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+
+        if (!SpeechRecognition) {
+            statusElement.textContent = "API Speech Recognition non supportée dans ce navigateur.";
+        }
+
+        let recognition = null;
+        let isRecording = false;
+        let cumulativeText = "";
+
+        const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+        const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const exitSpellingCommand = ['terminer', 'fin', 'fini'];
+
+        function initializeRecognition() {
+            if (recognition) return;
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR'; 
+            recognition.interimResults = false; // Important: on veut seulement les résultats finaux
+            recognition.continuous = false; // TRÈS important: force l'arrêt après chaque mot/silence
+            
+            // Création de la grammaire stricte
+            const spellingWords = [...alphabet, ...digits, ...exitSpellingCommand].join(' | ');
+            const spellingGrammarString = `#JSGF V1.0; grammar spelling; public <letter_or_digit> = ${spellingWords} ;`;
+            const spellingGrammar = new SpeechGrammarList();
+            spellingGrammar.addFromString(spellingGrammarString, 1);
+            
+            recognition.grammars = spellingGrammar;
+            
+            // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
+
+            recognition.onstart = () => {
+                toggleButton.classList.add('recording');
+                toggleButton.textContent = "STOP Écoute 🔴";
+                statusElement.textContent = "🎙️ Écoute... Dites une lettre/chiffre ou 'terminer'.";
+            };
+
+            recognition.onresult = (event) => {
+                const transcriptSegment = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                
+                // On s'assure que c'est le résultat final (normal car interimResults est false)
+                if (event.results[event.results.length - 1].isFinal) {
+
+                    if (exitSpellingCommand.includes(transcriptSegment)) {
+                        statusElement.textContent = `✅ Épellation terminée. Résultat final : "${cumulativeText}"`;
+                        isRecording = false; 
+                        recognition.stop(); // Arrêt volontaire
+                        return;
+                    }
+
+                    // Logique pour s'assurer que seuls les caractères uniques sont ajoutés
+                    let addedChars = '';
+                    let recognizedWords = transcriptSegment.split(/\s+/);
+
+                    // On itère sur tous les "mots" reconnus (qui devraient être des lettres)
+                    recognizedWords.forEach(word => {
+                         // On ne prend que le premier caractère du mot reconnu pour éviter la fusion (ex: 'deux' -> 'd')
+                        const char = word.charAt(0); 
+
+                        if (alphabet.includes(char) || digits.includes(char)) {
+                            cumulativeText += char;
+                            addedChars += char;
+                        } else {
+                             // Si le mot est un mot non prévu mais final (ex: "bonjour")
+                            statusElement.textContent = `⚠️ Mot non valide détecté ("${word}"). Ignoré. Réessayez.`;
+                        }
+                    });
+
+                    if (addedChars.length > 0) {
+                        statusElement.textContent = `Ajouté: "${addedChars.toUpperCase()}". Prochaine lettre?`;
+                    }
+                    
+                    outputElement.textContent = cumulativeText.toUpperCase() || '...';
+                }
+            };
+
+            recognition.onend = () => {
+                toggleButton.classList.remove('recording');
+                toggleButton.textContent = "Démarrer l'Épellation";
+                
+                if (isRecording) {
+                    // Si on est encore en mode enregistrement, on redémarre l'écoute immédiatement
+                    // C'est ce qui crée le cycle lettre-par-lettre, forcé par continuous=false.
+                    try {
+                        recognition.start();
+                        statusElement.textContent = "🎙️ Écoute relancée. Dites la prochaine lettre.";
+                    } catch(e) {
+                         statusElement.textContent = `❌ Erreur au redémarrage : ${e.message}`;
+                         isRecording = false;
+                    }
+                } else {
+                     statusElement.textContent = `Prêt à démarrer l'épellation. Résultat: ${cumulativeText}`;
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                statusElement.textContent = `❌ Erreur: ${event.error}. Arrêt de l'épellation.`;
+                isRecording = false;
+                toggleButton.classList.remove('recording');
+                toggleButton.textContent = "Démarrer l'Épellation";
+            }
+        }
+
+        toggleButton.addEventListener('click', () => {
+            initializeRecognition();
+
+            if (isRecording) {
+                isRecording = false;
+                recognition.stop(); // Arrête la boucle onend -> start
+            } else {
+                isRecording = true;
+                cumulativeText = "";
+                outputElement.textContent = '...';
+                try {
+                    recognition.start();
+                } catch(e) {
+                     statusElement.textContent = `❌ Erreur de démarrage: ${e.message}.`;
+                     isRecording = false;
+                }
+            }
+        });
+
+        initializeRecognition(); 
+    </script>
+</body>
+</html>

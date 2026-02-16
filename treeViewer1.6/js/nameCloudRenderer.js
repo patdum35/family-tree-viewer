@@ -609,7 +609,7 @@ export function centerCloudNameContainer() {
 // // Fonction commune pour initialiser le SVG et créer le nuage de mots
 // function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
-//     console.log('\n\n\n\n  ------------- initializeCloudAndLayout is called with WxH=', width, height , '----------------\n\n\n\n');
+//     console.log('\n\n\n\n  ------------- is called with WxH=', width, height , '----------------\n\n\n\n');
 
 //     const loaderSpinnerOverlay = document.getElementById('loaderSpinnerOverlay');
 //     if (loaderSpinnerOverlay) { loaderSpinnerOverlay.style.visibility= 'visible'; }

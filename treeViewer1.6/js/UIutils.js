@@ -72,8 +72,23 @@ export function createCustomSelector(config) {
     // Conteneur principal
     const selectContainer = document.createElement('div');
     selectContainer.style.position = 'relative';
-    selectContainer.style.width = dimensions.width; // + ' !important';
-    selectContainer.style.height = dimensions.height;
+    // selectContainer.style.width = dimensions.width; // + ' !important';
+    // selectContainer.style.height = dimensions.height;
+
+
+    // // On définit les variables CSS sur l'élément lui-même
+    // selectContainer.style.setProperty('--local-width', dimensions.width);
+    // selectContainer.style.setProperty('--local-height', dimensions.height);
+    // selectContainer.style.setProperty('--local-dropdown-width', dimensions.dropdownWidth);
+
+    // // On applique ces variables pour le style (avec la valeur par défaut en secours)
+    // selectContainer.style.width = `var(--local-width, ${dimensions.width})`;
+    // selectContainer.style.height = `var(--local-height, ${dimensions.height})`;
+
+    selectContainer.style.width = `var(--custom-width, ${dimensions.width})`;
+    selectContainer.style.height = `var(--custom-height, ${dimensions.height})`;
+
+
     selectContainer.style.zIndex = '99900'; // Ajout d'un z-index élevé
     selectContainer.className = 'custom-select-container'; // Ajout d'une classe
 
@@ -81,12 +96,16 @@ export function createCustomSelector(config) {
     // Élément qui simule le select
     const selectDisplay = document.createElement('div');
     selectDisplay.style.padding = `${padding.display.y}px ${padding.display.x}px`;
-    selectDisplay.style.border = '1px solid #ddd';
-    selectDisplay.style.borderRadius = '4px';
+    // selectDisplay.style.border = '1px solid #ddd';
+    // selectDisplay.style.borderRadius = '4px';
+    selectDisplay.style.border = `var(--custom-border, 1px solid #ddd)`;
+    selectDisplay.style.borderRadius = `var(--custom-border-radius, 4px)`;
+
     selectDisplay.style.backgroundColor = colors.main;
     selectDisplay.style.color = 'white';
     selectDisplay.style.cursor = 'pointer';
-    selectDisplay.style.fontSize = '14px';
+    // selectDisplay.style.fontSize = '14px';
+    selectDisplay.style.fontSize = `var(--custom-font-size-display, 14px)`;
     selectDisplay.style.fontWeight = 'bold';
     selectDisplay.style.display = 'flex';
     selectDisplay.style.justifyContent = 'space-between';
@@ -96,11 +115,14 @@ export function createCustomSelector(config) {
     selectDisplay.style.position = 'relative'; // Position relative pour la flèche
     selectDisplay.style.zIndex = '99900'; // Même valeur que le conteneur
     selectDisplay.className = 'custom-select-display'; // Ajout d'une classe
+    // selectDisplay.setAttribute('role', 'fontSizeChange2');
+
     
     // Texte affiché
     const displayText = document.createElement('span');
     displayText.textContent = currentOption;
     displayText.style.width = '100%';
+    // displayText.setAttribute('role', 'fontSizeChange2');
     
     // Aligner le texte en fonction de la position de la flèche
     if (arrow.position.includes('left')) {
@@ -150,19 +172,38 @@ export function createCustomSelector(config) {
             translateY = '-50%';
         }
         
+        // arrowCSS = `
+        //     #${selectId}::after {
+        //         content: '';
+        //         position: absolute;
+        //         top: ${arrowTop};
+        //         left: ${arrowLeft};
+        //         right: ${arrowRight};
+        //         transform: translate(${translateX}, ${translateY});
+        //         width: 0;
+        //         height: 0;
+        //         border-left: ${arrow.size}px solid transparent;
+        //         border-right: ${arrow.size}px solid transparent;
+        //         border-top: ${arrow.size}px solid white;
+        //         pointer-events: none;
+        //     }
+        // `;
+
+
         arrowCSS = `
             #${selectId}::after {
                 content: '';
                 position: absolute;
                 top: ${arrowTop};
                 left: ${arrowLeft};
-                right: ${arrowRight};
+                right: ${arrowRight === 'auto' ? 'auto' : `var(--custom-arrow-right, ${arrowRight})`};
                 transform: translate(${translateX}, ${translateY});
                 width: 0;
                 height: 0;
-                border-left: ${arrow.size}px solid transparent;
-                border-right: ${arrow.size}px solid transparent;
-                border-top: ${arrow.size}px solid white;
+                /* Utilisation de variables pour la taille du triangle */
+                border-left: var(--custom-arrow-size, ${arrow.size}px) solid transparent;
+                border-right: var(--custom-arrow-size, ${arrow.size}px) solid transparent;
+                border-top: var(--custom-arrow-size, ${arrow.size}px) solid white;
                 pointer-events: none;
             }
         `;
@@ -179,10 +220,15 @@ export function createCustomSelector(config) {
     optionsContainer.style.position = 'absolute';
     optionsContainer.style.top = '100%';
     optionsContainer.style.left = '0';
-    optionsContainer.style.width = dimensions.dropdownWidth;
+    // optionsContainer.style.width = dimensions.dropdownWidth;
+    optionsContainer.style.width = `var(--custom-dropdown-width, ${dimensions.dropdownWidth})`;
+ 
     optionsContainer.style.backgroundColor = '#fff';
-    optionsContainer.style.border = '1px solid #ccc';
-    optionsContainer.style.borderRadius = '4px';
+    // optionsContainer.style.border = '1px solid #ccc';
+    // optionsContainer.style.borderRadius = '4px';
+    optionsContainer.style.border = `var(--custom-border, 1px solid #ccc)`;
+    optionsContainer.style.borderRadius = `var(--custom-border-radius, 4px)`;
+
     optionsContainer.style.marginTop = '2px';
     optionsContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
     optionsContainer.style.maxHeight = dimensions.dropdownMaxHeight;
@@ -206,17 +252,24 @@ export function createCustomSelector(config) {
     // Ajouter les options visuelles
     options.forEach((opt, index) => {
         const optionElement = document.createElement('div');
-        optionElement.style.padding = `${padding.options.y}px ${padding.options.x}px`;
+        // optionElement.style.padding = `${padding.options.y}px ${padding.options.x}px`;
+        optionElement.style.padding = `var(--custom-dropdown-padding, ${padding.options.y}px) ${padding.options.x}px`;
+        // optionElement.style.lineHeight = `var(--custom-dropdown-line-height, 1.2)`;
+        optionElement.style.minHeight = '0px';
+
+
         optionElement.style.cursor = 'pointer';
         optionElement.style.backgroundColor = colors.options;
         optionElement.style.color = 'white';
         // Remplacer cette ligne pour une bordure plus foncée
         optionElement.style.borderBottom = '1px solid rgba(0,0,0,0.3)'; // Bordure plus foncée
         // Augmenter la taille de police
-        optionElement.style.fontSize = '15px'; // Taille de police plus grande (était 14px)
+        // optionElement.style.fontSize = '15px'; // Taille de police plus grande (était 14px)
+        optionElement.style.fontSize = `var(--custom-font-size-options, 15px)`;
         // Ajouter une police spécifique pour correspondre à celle de la modale
         optionElement.style.fontFamily = 'Arial, sans-serif'; // Même police que la modale
         optionElement.textContent = opt.label;
+        // optionElement.setAttribute('role', 'fontSizeChange2');
         
         // Personnaliser l'élément d'option si une fonction est fournie
         if (typeof config.customizeOptionElement === 'function') {
@@ -281,45 +334,125 @@ export function createCustomSelector(config) {
     selectDisplay.addEventListener('click', () => {
         const isVisible = optionsContainer.style.display === 'block';
 
+        // if (!isVisible) {
+        //     // AVANT d'afficher le dropdown, le détacher et le rattacher au BODY
+        //     if (optionsContainer.parentNode) {
+        //         optionsContainer.parentNode.removeChild(optionsContainer);
+        //     }
+            
+        //     // Récupérer la position du sélecteur par rapport à la fenêtre
+        //     const rect = selectDisplay.getBoundingClientRect();
+            
+        //     // Appliquer cette position absolue en coordonnées de fenêtre
+        //     optionsContainer.style.position = 'fixed';
+        //     optionsContainer.style.top = (rect.bottom + 1) + 'px';
+
+        //     // // Positionner en fonction de l'alignement choisi
+        //     if (dropdownAlign === 'right') {
+        //         // Calculer la position à gauche pour que le dropdown soit aligné à droite avec le sélecteur
+        //         const dropdownWidth = parseInt(dimensions.dropdownWidth);
+        //         optionsContainer.style.left = (rect.right - dropdownWidth) + 'px';
+        //     } else {
+        //         optionsContainer.style.left = rect.left + 'px';
+        //     }
+
+        //     if (dropdownAlign === 'right') {
+        //         optionsContainer.style.left = (rect.right - parseInt(currentDropWidth)) + 'px';
+        //     } else {
+        //         optionsContainer.style.left = rect.left + 'px';
+        //     }
+
+
+        //     optionsContainer.style.width = dimensions.dropdownWidth;
+        //     optionsContainer.style.zIndex = '999999';
+            
+        //     // L'ajouter directement au body pour qu'il soit au-dessus de tout
+        //     document.body.appendChild(optionsContainer);
+            
+        //     // Maintenant l'afficher
+        //     optionsContainer.style.display = 'block';
+
+        // }
+        
+        
+        // modif pour rendre le dropdown width rescale avec le zoom du brower
         if (!isVisible) {
-            // AVANT d'afficher le dropdown, le détacher et le rattacher au BODY
+            // Détachement pour le porter au body
             if (optionsContainer.parentNode) {
                 optionsContainer.parentNode.removeChild(optionsContainer);
             }
             
-            // Récupérer la position du sélecteur par rapport à la fenêtre
             const rect = selectDisplay.getBoundingClientRect();
-            
-            // Appliquer cette position absolue en coordonnées de fenêtre
             optionsContainer.style.position = 'fixed';
             optionsContainer.style.top = (rect.bottom + 1) + 'px';
 
-            // Positionner en fonction de l'alignement choisi
+            // --- MODIF ICI : SYNCHRO AVANT AFFICHAGE ---
+            // On va chercher la valeur actuelle calculée sur le container (fixée par le resize)
+            const computedStyle = window.getComputedStyle(selectContainer);
+            const currentDW = computedStyle.getPropertyValue('--custom-dropdown-width').trim();
+
+            // Si une valeur de resize existe, on l'applique en dur pour le body
+            if (currentDW) {
+                optionsContainer.style.width = currentDW;
+            } else {
+                optionsContainer.style.width = dimensions.dropdownWidth;
+            }
+
+            const currentOptPadding = computedStyle.getPropertyValue('--custom-dropdown-padding').trim();
+            if (currentOptPadding) {
+                optionsContainer.style.setProperty('--custom-dropdown-padding', currentOptPadding);
+            }
+
+            const currentLineHeight = computedStyle.getPropertyValue('--custom-dropdown-line-height').trim();
+            if (currentLineHeight) {
+                optionsContainer.style.setProperty('--custom-dropdown-line-height', currentLineHeight);
+            }
+
+
+            const currentBorder = computedStyle.getPropertyValue('--custom-border').trim();
+            const currentRadius = computedStyle.getPropertyValue('--custom-border-radius').trim();
+
+            if (currentBorder) optionsContainer.style.border = currentBorder;
+            if (currentRadius) optionsContainer.style.borderRadius = currentRadius;
+
+
+            const currentFontSize = computedStyle.getPropertyValue('--custom-font-size-options').trim();
+            if (currentFontSize) {
+                optionsContainer.style.setProperty('--custom-font-size-options', currentFontSize);
+            }
+
+
+
+            // Calcul de l'alignement basé sur la largeur réelle actuelle
+            const actualWidth = parseInt(optionsContainer.style.width);
             if (dropdownAlign === 'right') {
-                // Calculer la position à gauche pour que le dropdown soit aligné à droite avec le sélecteur
-                const dropdownWidth = parseInt(dimensions.dropdownWidth);
-                optionsContainer.style.left = (rect.right - dropdownWidth) + 'px';
+                optionsContainer.style.left = (rect.right - actualWidth) + 'px';
             } else {
                 optionsContainer.style.left = rect.left + 'px';
             }
 
-
-            optionsContainer.style.width = dimensions.dropdownWidth;
             optionsContainer.style.zIndex = '999999';
-            
-            // L'ajouter directement au body pour qu'il soit au-dessus de tout
             document.body.appendChild(optionsContainer);
-            
-            // Maintenant l'afficher
             optionsContainer.style.display = 'block';
-        } else {
+        }        
+        
+        
+        
+        
+        
+        
+        else {
             // Simplement masquer si déjà visible
             optionsContainer.style.display = 'none';
         }
     });
 
 
-    // Par celle-ci:
+
+
+
+
+
     document.addEventListener('click', (event) => {
         // Vérifier si le clic est à l'extérieur à la fois du container et du options container
         const clickOutsideContainer = !selectContainer.contains(event.target);
@@ -387,7 +520,10 @@ export function createCustomSelector(config) {
         optionsContainer.style.maxHeight = newHeight;
     };
 
-    
+    selectContainer.optionsElement = optionsContainer; // Indispensable pour le resize
+
+
+
     return selectContainer;
 }
 

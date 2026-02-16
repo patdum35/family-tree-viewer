@@ -1,6 +1,6 @@
 import { geocodeLocation } from './geoLocalisation.js';
 import { fetchTileWithCache } from './mapTilesPreloader.js';
-
+import { calcFontSize } from './main.js';
 /**
  * Symboles pour chaque type de lieu
  */
@@ -82,7 +82,7 @@ export function createEnhancedMarkerIcon(type) {
     return L.divIcon({
         className: 'custom-marker',
         html: `<div style="
-            font-size: 28px;
+            font-size: ${calcFontSize(28)}px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -311,7 +311,7 @@ export function initAnimationMap(containerId, options = {}) {
 export function createSimpleMarkerIcon(type) {
     return L.divIcon({
         className: 'custom-marker',
-        html: `<div style="font-size: 20px; display: flex; justify-content: center; align-items: center;">
+        html: `<div style="font-size: ${calcFontSize(20)}px; display: flex; justify-content: center; align-items: center;">
                  ${locationSymbols[type] || '📍'}
                </div>`,
         iconSize: [20, 20],
@@ -450,7 +450,7 @@ export function showTemporaryLabel(marker, text, duration = 1000, options = {}) 
         .setContent(`<div style="
             font-weight: bold; 
             text-align: center;
-            font-size: 12px;
+            font-size: ${calcFontSize(12)}px;
             background-color: rgba(255, 255, 255, 0.6) !important; 
             padding: 3px 6px;
             border-radius: 4px;
@@ -688,7 +688,7 @@ export function createMediumMarkerIcon(type) {
     return L.divIcon({
         className: 'custom-marker',
         html: `<div style="
-            font-size: 22px;
+            font-size: ${calcFontSize(22)}px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -743,9 +743,9 @@ export function addMapTitle(container, title) {
     titleElement.style.borderRadius = '4px';
     titleElement.style.zIndex = '9100';
     if (window.innerHeight < 500 || window.innerWidth < 800) {
-        titleElement.style.fontSize = '12px';
+        titleElement.style.fontSize = calcFontSize(12) +'px';
     } else {
-        titleElement.style.fontSize = '14px';  
+        titleElement.style.fontSize = calcFontSize(14) +'px';  
     }
     titleElement.style.fontWeight = 'bold';
     titleElement.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
@@ -778,7 +778,7 @@ export function addMapButton(container, text, onClick) {
     button.style.padding = '5px 10px';
     button.style.cursor = 'pointer';
     button.style.zIndex = '9100';
-    button.style.fontSize = '14px';
+    button.style.fontSize = calcFontSize(14) +'px';
     button.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
     button.textContent = text;
     
@@ -840,7 +840,7 @@ export function setupCustomPopupStyle() {
             }
             .custom-popup .leaflet-popup-content {
                 margin: 13px 19px;
-                font-size: 14px;
+                font-size: ${calcFontSize(14)}px;
                 line-height: 1.4;
             }
             .custom-popup .leaflet-popup-tip {
