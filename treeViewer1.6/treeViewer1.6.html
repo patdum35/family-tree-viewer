@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html style="color-scheme: light !important;" translate="no">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,14 +135,16 @@
     let browserScaleFactor_ChromeMethod = 1;
     let browserScaleFactor_SamsungMethod = 1;
     let isMobile = false;
+    const MAX_FONT_PIXELS = 100;
 
     const calcChrome = (baseSize) => { 
         if (isSamsungBrowser || isSamsungLikeBrowser) { return baseSize; }
-        else { return Math.round(baseSize/browserScaleFactor);  }        
+        else { return Math.min(MAX_FONT_PIXELS, Math.round(baseSize/browserScaleFactor));  }        
     };
 
     const calcSamsung = (baseSize) => {  
         return Math.round(baseSize/browserScaleFactor); 
+        return Math.min(MAX_FONT_PIXELS, Math.round(baseSize/browserScaleFactor));
     };
 
     function detectBrowserType() { 
@@ -217,10 +220,24 @@
             console.log(' - browser GLOBAL SCALE FACTOR:', window.screen.width / window.innerWidth);
             browserScaleFactor_ChromeMethod = window.screen.width / window.innerWidth; 
         } else {
+            console.log(' - screen size:', window.screen.width+'x'+window.screen.height);
+            console.log(' - screen orientation:', screen.orientation ? screen.orientation.type : 'not available');
+            console.log(' - browser external size:', window.outerWidth+'x'+window.outerHeight);
+            console.log(' - browser internal size:', window.innerWidth+'x'+window.innerHeight);
+            console.log(' - devicePixelRatio:', window.devicePixelRatio);
+            console.log(' - screen available Size:', window.screen.availWidth+'x'+window.screen.availHeight);
+            // console.log(' - F12 DevTools open ?', state.isF12Detected);
+            console.log(' - screen physical real width;', (window.innerWidth * window.devicePixelRatio));
+            console.log(' - browser window position left:', window.screenX, 'top:', window.screenY, 'right:', window.screenX + window.outerWidth, 'bottom:', window.screenY + window.outerHeight);
+            console.log(' - browser text scale factor W :', window.outerWidth / window.innerWidth);
+            console.log(' - browser text scale factor H :', window.outerHeight / window.innerHeight );
+            console.log(' - browser text scale factor H , corrected:', window.outerHeight*0.875 / window.innerHeight );
+
+
             console.log(' - browser GLOBAL SCALE FACTOR:', window.outerWidth / window.innerWidth);
-            browserScaleFactor_ChromeMethod = Math.max(window.outerWidth, window.innerWidth) / window.innerWidth; 
-            let browserScaleFactor2 = window.outerHeight*0.875 / window.innerHeight; 
-            browserScaleFactor_ChromeMethod = Math.min(browserScaleFactor_ChromeMethod, browserScaleFactor2 )
+            browserScaleFactor_ChromeMethod = window.outerWidth/ window.innerWidth; 
+            // let browserScaleFactor2 = window.outerHeight*0.875 / window.innerHeight; 
+            // browserScaleFactor_ChromeMethod = Math.min(browserScaleFactor_ChromeMethod, browserScaleFactor2 )
         }
 
         if (!isSamsungBrowser) { innerWidth = window.innerWidth*browserScaleFactor_ChromeMethod; }
@@ -239,8 +256,8 @@
             browserScaleFactor = browserScaleFactor_SamsungMethod;
             isSamsungLikeBrowser = true;
         }
-        browserScaleFactor = Math.max(Math.min(browserScaleFactor, 5) , 0.3);
-        console.log(' -', browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Lik eBrowser ?', isSamsungLikeBrowser);
+        browserScaleFactor = Math.max(Math.min(browserScaleFactor, 6) , 0.20);
+        console.log(' -', browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
     }
 
 
@@ -268,7 +285,23 @@
             return; // On arrête l'exécution ici, la modale ne s'affichera pas
       }
       const isZoomed = (Math.abs(browserScaleFactor-1) > 0.05);
-      const zoomPercentVal = Math.round(browserScaleFactor * 100);
+    //   const zoomPercentVal = Math.round(browserScaleFactor * 100);
+    //   const zoomPercentVal = Math.round((browserScaleFactor * 100) / 5) * 5;
+      const zoomPercentValTrunc = Math.floor((browserScaleFactor * 100) / 5) * 5;
+      const zoomPercentValRound = Math.round((browserScaleFactor * 100) / 5) * 5;
+      const deltaTrunc = Math.abs(zoomPercentValTrunc - browserScaleFactor);
+      const deltaRound = Math.abs(zoomPercentValTrunc - browserScaleFactor);
+      let zoomPercentVal;
+      if (deltaTrunc < deltaRound) zoomPercentVal = zoomPercentValTrunc;
+      else zoomPercentVal = zoomPercentValRound;
+
+      if (zoomPercentVal >= 200) zoomPercentVal = Math.floor((browserScaleFactor * 100) / 10) * 10;
+      if (zoomPercentVal == 130) zoomPercentVal = 125;
+      if (zoomPercentVal == 155) zoomPercentVal = 150;
+      if (zoomPercentVal == 180) zoomPercentVal = 175;
+      if (zoomPercentVal == 510) zoomPercentVal = 500;
+
+
       const zoomHtml = `<strong>${zoomPercentVal}%</strong>`;
       console.log('\n\n\n\n=== START === is browser Problematic ?', isProblematic, ' is browser zoomed ?', isZoomed, zoomPercentVal,'%\n\n');
 
@@ -728,7 +761,7 @@
                 
                 <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 0.5em; margin: 0.4em; cursor: pointer; ">
                     <input role="fontSizeChangeAdvanced" type="checkbox" id="dont-apply-button-rescale" style="font-size: 10px; width: 1.8em; height: 1.8em; cursor: pointer; box-sizing: border-box; border-radius: 0.2em; border:0.2em solid #afaeae; ">  
-                    <label role="fontSizeChangeAdvanced"  for="dont-apply-button-rescale" style="font-size: 14px; color: #666; cursor: pointer; user-select: none;">
+                    <label role="fontSizeChangeAdvanced" id="dont-apply-button-rescale-label" for="dont-apply-button-rescale" style="font-size: 14px; color: #666; cursor: pointer; user-select: none;">
                         do not apply button rescale
                     </label>
                 </div>
@@ -822,13 +855,12 @@
         
     </div>
 
-    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 9999; cursor: default;" ></div>
+    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 1; cursor: default;" ></div>
     
     <div id="versionFooter" role="fontSizeChange1"
         style="font-size:10px; position:fixed; bottom:0.3em; left:50%; transform:translateX(-50%);  color:white; text-align:center; z-index:1; pointer-events:none;">
         ®isAI4U-PD V2.59
     </div>
-
 
 
     <!-- Conteneur de l'arbre -->
