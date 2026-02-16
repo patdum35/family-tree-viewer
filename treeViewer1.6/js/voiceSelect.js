@@ -3392,6 +3392,9 @@ export function speakTextfromSliderParams(text) {
     } else {
         // Optionnel : Tentative de forcer la langue si aucune voix n'est sélectionnée
         utterance.lang = window.CURRENT_LANGUAGE || 'fr-FR'; 
+        utterance.volume = params.volume;
+        utterance.rate = params.rate;
+        utterance.pitch = params.pitch;
     }
 
     try {
