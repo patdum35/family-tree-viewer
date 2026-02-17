@@ -453,7 +453,7 @@ function detectBrowserScaleChrome() {
         state.browserScaleFactor = browserScaleFactor_SamsungMethod;
         isSamsungLikeBrowser = true;
     }
-    console.log(' -', browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
+    console.log(' -', state.browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
 
     if (navigator.userAgent.includes('SamsungBrowser') || isSamsungLikeBrowser) { 
         // // Samsung: utilise le multiplicateur de font-size
