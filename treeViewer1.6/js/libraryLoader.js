@@ -252,26 +252,59 @@ function loadResource(resource) {
 
 
 // Charger toutes les ressources en séquence pour respecter les dépendances
+// async function loadAllResources() {
+//   try {
+//     // Charger les ressources en séquence pour respecter l'ordre des dépendances
+//     for (const resource of resources) {
+//       await loadResource(resource);
+
+//     }
+    
+
+    
+//     console.log("Toutes les bibliothèques ont été chargées avec succès!");
+    
+//     // Déclencher un événement pour signaler que tout est chargé
+//     document.dispatchEvent(new Event('libraries-loaded'));
+    
+//   } catch (error) {
+//     console.error("Erreur lors du chargement des bibliothèques:", error);
+//   }
+// }
+
+
+
+
 async function loadAllResources() {
   try {
-    // Charger les ressources en séquence pour respecter l'ordre des dépendances
-    for (const resource of resources) {
+    console.time("⏱️ Chargement Libs"); // Pour voir la vitesse dans la console
+
+    // 1. On sépare les chefs (sans dépendance) des suiveurs (avec dépendance)
+    const independentResources = resources.filter(r => !r.dependsOn);
+    const dependentResources = resources.filter(r => r.dependsOn);
+
+    console.log(`🚀 Lancement parallèle de ${independentResources.length} bibliothèques...`);
+
+    // 2. MAGIE ICI : On télécharge tout le bloc principal EN MÊME TEMPS
+    // Le navigateur va ouvrir 6 connexions simultanées au lieu d'une seule
+    await Promise.all(independentResources.map(resource => loadResource(resource)));
+
+    // 3. Une fois le socle prêt, on charge les extensions (ex: leaflet-heat)
+    console.log("✅ Socle principal chargé. Chargement des extensions...");
+    for (const resource of dependentResources) {
       await loadResource(resource);
-
     }
-    
 
+    console.timeEnd("⏱️ Chargement Libs");
+    console.log("🎉 Toutes les bibliothèques sont prêtes !");
     
-    console.log("Toutes les bibliothèques ont été chargées avec succès!");
-    
-    // Déclencher un événement pour signaler que tout est chargé
+    // Déclencher l'événement final
     document.dispatchEvent(new Event('libraries-loaded'));
     
   } catch (error) {
-    console.error("Erreur lors du chargement des bibliothèques:", error);
+    console.error("❌ Erreur critique au chargement :", error);
   }
 }
-
 
 
 
