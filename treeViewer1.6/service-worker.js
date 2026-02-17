@@ -100,11 +100,34 @@ async function performCaching() {
 }
 
 // Installation : NE FAIT RIEN (pas de téléchargement)
+// self.addEventListener('install', (event) => {
+//   swConsole.log('🚀 Service Worker: Installation détectée (Attente validation utilisateur)');
+//   // On passe immédiatement à l'état "installed" sans rien télécharger
+//   event.waitUntil(Promise.resolve());
+// });
+
+
 self.addEventListener('install', (event) => {
-  swConsole.log('🚀 Service Worker: Installation détectée (Attente validation utilisateur)');
-  // On passe immédiatement à l'état "installed" sans rien télécharger
-  event.waitUntil(Promise.resolve());
+  swConsole.log('🚀 Installation : Mise en cache du squelette minimal');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      // On ne met que l'essentiel absolu. 
+      // Si un de ces fichiers est manquant, le SW ne s'installera pas.
+      return cache.addAll([
+        './', 
+        './index.html', 
+        './manifest.webmanifest'
+      ]).catch(err => {
+        swConsole.error('⚠️ Échec de la mise en cache initiale (Ignoré pour éviter blocage): ' + err.message);
+      });
+    })
+  );
+  // Optionnel : forcer le passage à l'activation
+  self.skipWaiting();
 });
+
+
+
 
 // Traitement par lots, comme dans votre code qui fonctionne
 async function processInChunks(items, processor, chunkSize = 3, delay = 50) {
