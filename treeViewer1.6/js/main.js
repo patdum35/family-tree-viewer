@@ -309,8 +309,8 @@ window.toggleAnimationPause = toggleAnimationPause;
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await initResourcePreloading();
-    initTilePreloading();
+    // await initResourcePreloading();
+    // initTilePreloading();
 });
 
 
@@ -322,6 +322,10 @@ function initialiserButtonSize() {
 
     // if (isSamsungBrowser()) {
     if (!state.dontApplyButtonRescale) {
+
+        if (!state.isMobile && !state.dontApplyButtonRescale) { detectF12Once(); }
+
+
     // if (true) {
         // lancer redimensionnement initial
         state.initialHamburgerFontSize =  parseInt(14/state.browserScaleFactor);
@@ -407,7 +411,7 @@ function detectBrowserScaleChrome() {
 
 
 
-    state.browserScaleCorrection = state.browserScaleFactor
+    state.browserScaleCorrection = state.browserScaleFactor;
 
     browserScaleFactor_ChromeMethod = state.browserScaleFactor;
     //Samsung: utilise le multiplicateur de font-size
@@ -482,21 +486,21 @@ function calculerFacteurRedimensionnement() {
 }
 
 function detectF12Once() {
-    const start = performance.now();
-    // Le code va s'arrêter ICI. 
-    // Appuie sur F8 UNE SEULE FOIS.
-    debugger; 
+    // const start = performance.now();
+    // // Le code va s'arrêter ICI. 
+    // // Appuie sur F8 UNE SEULE FOIS.
+    // debugger; 
     
-    const end = performance.now();
-    state.isF12Detected = (end - start > 100);
+    // const end = performance.now();
+    // state.isF12Detected = (end - start > 100);
 
-    if (state.isF12Detected) {
-        console.warn("DÉTECTÉ ! Maintenant le script va te laisser tranquille.");
-        // On ne relance plus le debugger pour ne pas boucler à l'infini
-    }
+    // if (state.isF12Detected) {
+    //     console.warn("DÉTECTÉ ! Maintenant le script va te laisser tranquille.");
+    //     // On ne relance plus le debugger pour ne pas boucler à l'infini
+    // }
 }
 // On lance ce code pour la detection du F12 UNE FOIS au démarrage
-if (!state.isMobile) { detectF12Once(); }
+// if (!state.isMobile && !state.dontApplyButtonRescale) { detectF12Once(); }
 
 // Détecter si c'est Samsung Internet
 function isSamsungBrowser() {
@@ -2327,10 +2331,12 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
         // const originalRootResults = document.getElementById('root-person-results');
         // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
-        
-    console.log('\n\n\n @@@@@@@@@@@  DEBUG : launch redimensionnerButtonSizeInDOM  at loadData after displayGenealogicTree @@@@@@@@@@@\n\n')
-    calculerFacteurRedimensionnement();
-    redimensionnerButtonSizeInDOM();
+     
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n @@@@@@@@@@@  DEBUG : launch redimensionnerButtonSizeInDOM  at loadData after displayGenealogicTree @@@@@@@@@@@\n\n')
+        calculerFacteurRedimensionnement();
+        redimensionnerButtonSizeInDOM();
+    }
 
 
     } catch (error) {
