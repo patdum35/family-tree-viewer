@@ -309,21 +309,24 @@ async function loadAllResources() {
 
 
 
-// Démarrer le chargement quand le DOM est prêt
-function initLibraryLoader() {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAllResources);
-  } else {
-    loadAllResources();
-  }
-}
+// // Démarrer le chargement quand le DOM est prêt
+// function initLibraryLoader() {
+//   if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', loadAllResources);
+//   } else {
+//     loadAllResources();
+//   }
+// }
 
-// Exporter les fonctions qui pourraient être nécessaires ailleurs
-export {
-  initLibraryLoader,
-  loadAllResources,
-  resources
-};
+// // Exporter les fonctions qui pourraient être nécessaires ailleurs
+// export {
+//   initLibraryLoader,
+//   loadAllResources,
+//   resources
+// };
 
-// Initialiser automatiquement le chargeur
-initLibraryLoader();
+// // Initialiser automatiquement le chargeur
+// initLibraryLoader();
+
+
+window.startAppLoading = loadAllResources;
