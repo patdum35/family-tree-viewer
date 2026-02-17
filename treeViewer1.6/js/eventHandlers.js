@@ -567,7 +567,7 @@ export function closeAllModals(isCloseAnimationmap = true, isCloseHeatMapWrapper
     //
     const modals = document.querySelectorAll('[id="search-modal"], [class*="searchModal-content"], [id="stats-modal"], [id*="show-person-list-modal"], [id*="frequency-stat-modal"], [id*="graph-stats-modal"], [id*="century-stats-modal"], [id*="person-fullDetails-modal"], [id*="stt-only-overlay"]');
     closeVoiceCommand();
-    if (state.isMobile && state.isSpeechSynthesisAvailable) {
+    if (state.isMobile && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel(); 
     } 
     // const modals = document.querySelectorAll('div[id*="stats-modal"], div[id*="search-modal"], div[id*="show-person-list-modal"], div[id*="frequency-stat-modal"], div[id*="graph-stats-modal"], div[id*="century-stats-modal"], div[id*="person-details-modal"]'); 
