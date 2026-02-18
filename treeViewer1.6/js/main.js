@@ -315,32 +315,47 @@ window.toggleAnimationPause = toggleAnimationPause;
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Priorité absolue : Afficher l'arbre immédiatement
-    console.log("🌳 Affichage de l'arbre...");
+// document.addEventListener('DOMContentLoaded', () => {
+//     // 1. Priorité absolue : Afficher l'arbre immédiatement
+//     console.log("🌳 Affichage de l'arbre...");
 
-    window.addEventListener('load', () => {
-        // 2. On attend 5 à 10 secondes après le chargement complet
-        // Cela permet à Lighthouse de valider un bon score de performance.
-        setTimeout(async () => {
-            try {
-                console.log("📦 Lancement du préchargement INDISPENSABLE (Resources)...");
+//     window.addEventListener('load', () => {
+//         // 2. On attend 5 à 10 secondes après le chargement complet
+//         // Cela permet à Lighthouse de valider un bon score de performance.
+//         setTimeout(async () => {
+//             try {
+//                 console.log("📦 Lancement du préchargement INDISPENSABLE (Resources)...");
                 
-                // On utilise await ici pour respecter ton ordre :
-                // Le code attend que les ressources soient finies...
-                await initResourcePreloading(); 
-                console.log("✅ Ressources chargées.");
+//                 // On utilise await ici pour respecter ton ordre :
+//                 // Le code attend que les ressources soient finies...
+//                 await initResourcePreloading(); 
+//                 console.log("✅ Ressources chargées.");
 
-                // 3. ...avant de lancer les tuiles qui sont optionnelles
-                console.log("🗺️ Lancement du préchargement OPTIONNEL (Tuiles)...");
-                initTilePreloading(); 
+//                 // 3. ...avant de lancer les tuiles qui sont optionnelles
+//                 console.log("🗺️ Lancement du préchargement OPTIONNEL (Tuiles)...");
+//                 initTilePreloading(); 
 
-            } catch (error) {
-                console.error("Erreur durant le chargement en arrière-plan :", error);
-            }
-        }, 8000); // Délai de 8 secondes pour être "invisible" pour Lighthouse
-    });
-});
+
+//                 if (navigator.serviceWorker.controller) {
+//                     navigator.serviceWorker.controller.postMessage({
+//                         action: 'startFullCaching'
+//                     });
+//                 }
+
+
+
+//             } catch (error) {
+//                 console.error("Erreur durant le chargement en arrière-plan :", error);
+//             }
+//         }, 8000); // Délai de 8 secondes pour être "invisible" pour Lighthouse
+//     });
+// });
+
+
+
+
+
+
 
 
 /////////////////////////////////////////////////////

@@ -49,15 +49,17 @@ import {
     buttonsOnDisplay
 } from './mainUI.js'
 
+import { initResourcePreloading } from './resourcePreloader.js';
+import { initTilePreloading } from './mapTilesPreloader.js';
+
 import { toggleTreeRadarFromHamburger } from './hamburgerMenu.js';
 
 import { resetPuzzle, browserBarPuzzle } from './puzzleSwipe.js';
 import { documentation } from './documentation.js';
 import { voiceModal, voiceCommand, selectVoice } from './voiceSelect.js';
 
-import { toggleAccelerometer } from './accelerometer.js';
-// import { toggleCamera, cycleCameraFilter, openCameraModal, closeCameraModal } from './cameraManager.js';
-import { toggleCamera, cycleCameraFilter, openCameraModal } from './cameraManager.js';
+// import { toggleAccelerometer } from './accelerometer.js';
+// import { toggleCamera, cycleCameraFilter, openCameraModal } from './cameraManager.js';
 
 
 // // ou si tu veux attendre que tout soit chargé
@@ -236,10 +238,13 @@ function initializeAppFunctions() {
     window.voiceModal = voiceModal;
     window.voiceCommand = voiceCommand;
     window.selectVoice = selectVoice;
-    window.toggleAccelerometer = toggleAccelerometer;
-    window.toggleCamera = toggleCamera;
-    window.cycleCameraFilter = cycleCameraFilter;
-    window.openCameraModal = openCameraModal;
+    // window.toggleAccelerometer = toggleAccelerometer;
+    // window.toggleCamera = toggleCamera;
+    // window.cycleCameraFilter = cycleCameraFilter;
+    // window.openCameraModal = openCameraModal;
+
+
+
     // window.closeCameraModal = closeCameraModal;
 }
 
@@ -334,6 +339,47 @@ function initializeAppEventListeners() {
                     
                     try {
                         await loadData(); // ON LANCE L'ARBRE
+
+
+                        console.log("📸 Chargement différé du module Caméra...");
+                        
+                        // 2. ON CHARGE LE FICHIER SEULEMENT MAINTENANT
+                        const cameraModule = await import('./cameraManager.js');
+                        const accelerometerModule = await import('./accelerometer.js');
+
+
+                        // 3. ON REND LES FONCTIONS DISPONIBLES 
+                        window.toggleCamera = cameraModule.toggleCamera;
+                        window.cycleCameraFilter = cameraModule.cycleCameraFilter;
+                        window.openCameraModal = cameraModule.openCameraModal;
+                        window.toggleAccelerometer = accelerometerModule.toggleAccelerometer;
+
+                        console.log("✅ Module Caméra prêt et attaché à 'window'");
+
+
+
+
+
+                        // B. L'arbre est affiché ! 
+                        // MAINTENANT on lance les caches de fond pour le mode hors-ligne
+                        console.log("🚀 Lancement des caches en arrière-plan...");
+
+                        // 1. Ordre au Service Worker (pour tes 34 fichiers JS)
+                        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({
+                                action: 'startFullCaching'
+                            });
+                        }
+
+                        // On utilise await ici pour respecter ton ordre :
+                        // Le code attend que les ressources soient finies...
+                        await initResourcePreloading(); 
+                        console.log("✅ Ressources chargées.");
+
+                        // 3. ...avant de lancer les tuiles qui sont optionnelles
+                        console.log("🗺️ Lancement du préchargement OPTIONNEL (Tuiles)...");
+                        initTilePreloading(); 
+
                     } catch (e) {
                         console.error("Erreur lors du loadData:", e);
                     } finally {

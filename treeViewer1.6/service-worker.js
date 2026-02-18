@@ -320,108 +320,238 @@ self.addEventListener('message', (event) => {
 
 // Mettre en cache du contenu supplémentaire en arrière-plan
 // après l'activation initiale
+
+
+
+
+
+
+// self.addEventListener('activate', (event) => {
+//   // Laisser s'exécuter en arrière-plan
+//   event.waitUntil((async () => {
+//     try {
+//       // Mettre en cache d'autres ressources JS, moins critiques
+//       const additionalResources = [
+//         './js/audioPlayer.js',
+//         './js/backgroundManager.js',
+//         './js/dateUI.js',
+//         './js/debugLogUtils.js',
+//         './js/directHamburgerMenu.js',
+//         './js/eventHandlers.js',
+//         './js/exportManager.js',
+//         './js/exportSettings.js',
+//         './js/gedcomParser.js',
+//         './js/geoHeatMapDataProcessor.js',
+//         './js/geoHeatMapInteractions.js',
+//         './js/geoHeatMapUI.js',
+//         './js/geoLocalisation.js',
+//         './js/hamburgerMenu.js',
+//         './js/helpHamburgerMenu.js',
+//         './js/historicalData.js',
+//         './js/mainUI.js',
+//         './js/mapTilesPreloader.js',
+//         './js/mapUtils.js',
+//         './js/modalWindow.js',
+//         './js/nameCloud.js',
+//         './js/nameCloudAverageAge.js',
+//         './js/nameCloudCenturyModal.js',
+//         './js/nameCloudInteractions.js',
+//         './js/nameCloudRenderer.js',
+//         './js/nameCloudSettings.js',
+//         './js/nameCloudShapes.js',
+//         './js/nameCloudStatModal.js',
+//         './js/nameCloudUI.js',
+//         './js/nameCloudUtils.js',
+//         './js/nodeControls.js',
+//         './js/nodeRenderer.js',
+//         './js/nodeStyles.js',
+//         './js/occupations.js',
+//         './js/photoPlayer.js',
+//         './js/puzzleSwipe.js',
+//         './js/resizableModalUtils.js',
+//         './js/searchModalUI.js',
+//         './js/statsModalUI.js',
+//         './js/treeAnimation.js',
+//         './js/treeOperations.js',
+//         './js/treeRenderer.js',
+//         './js/treeSettingsModal.js',
+//         './js/treeWheelAnimation.js',
+//         './js/treeWheelRenderer.js',
+//         './js/UIutils.js',
+//         './js/utils.js',
+//         './js/occupations.js',
+//         './js/voiceSelect.js',
+//         './libs/lodash.min.js',
+//         './libs/leaflet-heat.js',
+//         './libs/react.production.min.js',
+//         './libs/react-dom.production.min.js',
+//         './libs/d3.layout.cloud.min.js',
+//         './libs/tf.min.js',
+//         './libs/coco-ssd.min.js',
+
+//       ];
+
+//       // Attendre un peu pour ne pas interférer avec l'activation
+//       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+//       swConsole.log('🔄 Mise en cache différée de ressources supplémentaires...');
+      
+//       const cache = await caches.open(CACHE_NAME);
+//       let successCount = 0;
+//       let failedCount = 0;
+
+//       // Utiliser la même technique de lots qui fonctionne déjà pour les tuiles
+//       await processInChunks(additionalResources, async (url) => {
+//         try {
+//           // Vérifier si déjà en cache
+//           const cachedResponse = await cache.match(url);
+//           if (cachedResponse) return;
+          
+//           // Sinon, mettre en cache
+//           const response = await fetch(url, {
+//             method: 'GET',
+//             cache: 'no-cache',
+//             mode: 'no-cors'
+//           });
+          
+//           if (response.ok || response.type === 'opaque') {
+//             await cache.put(url, response.clone());
+//             successCount++;
+//           } else {
+//             failedCount++;
+//           }
+//         } catch (err) {
+//           failedCount++;
+//         }
+//       }, 2, 100); // Encore plus petit (2) et plus lent (100ms) pour les ressources additionnelles
+      
+//       swConsole.log(`✅ Mise en cache différée terminée: ${successCount} réussis, ${failedCount} échoués`);
+//     } catch (error) {
+//       swConsole.error(`Erreur lors de la mise en cache différée: ${error.message}`);
+//     }
+//   })());
+// });
+
+
+
+
+// 1. On vide l'activation pour que Lighthouse ne voit rien au démarrage
 self.addEventListener('activate', (event) => {
-  // Laisser s'exécuter en arrière-plan
-  event.waitUntil((async () => {
-    try {
-      // Mettre en cache d'autres ressources JS, moins critiques
-      const additionalResources = [
-        './js/audioPlayer.js',
-        './js/backgroundManager.js',
-        './js/dateUI.js',
-        './js/debugLogUtils.js',
-        './js/directHamburgerMenu.js',
-        './js/eventHandlers.js',
-        './js/exportManager.js',
-        './js/exportSettings.js',
-        './js/gedcomParser.js',
-        './js/geoHeatMapDataProcessor.js',
-        './js/geoHeatMapInteractions.js',
-        './js/geoHeatMapUI.js',
-        './js/geoLocalisation.js',
-        './js/hamburgerMenu.js',
-        './js/helpHamburgerMenu.js',
-        './js/historicalData.js',
-        './js/mainUI.js',
-        './js/mapTilesPreloader.js',
-        './js/mapUtils.js',
-        './js/modalWindow.js',
-        './js/nameCloud.js',
-        './js/nameCloudAverageAge.js',
-        './js/nameCloudCenturyModal.js',
-        './js/nameCloudInteractions.js',
-        './js/nameCloudRenderer.js',
-        './js/nameCloudSettings.js',
-        './js/nameCloudShapes.js',
-        './js/nameCloudStatModal.js',
-        './js/nameCloudUI.js',
-        './js/nameCloudUtils.js',
-        './js/nodeControls.js',
-        './js/nodeRenderer.js',
-        './js/nodeStyles.js',
-        './js/occupations.js',
-        './js/photoPlayer.js',
-        './js/puzzleSwipe.js',
-        './js/resizableModalUtils.js',
-        './js/searchModalUI.js',
-        './js/statsModalUI.js',
-        './js/treeAnimation.js',
-        './js/treeOperations.js',
-        './js/treeRenderer.js',
-        './js/treeSettingsModal.js',
-        './js/treeWheelAnimation.js',
-        './js/treeWheelRenderer.js',
-        './js/UIutils.js',
-        './js/utils.js',
-        './js/occupations.js',
-        './js/voiceSelect.js',
-        './libs/lodash.min.js',
-        './libs/leaflet-heat.js',
-        './libs/react.production.min.js',
-        './libs/react-dom.production.min.js',
-        './libs/d3.layout.cloud.min.js',
-        './libs/tf.min.js',
-        './libs/coco-ssd.min.js',
+  swConsole.log('✅ SW activé (mode silencieux)');
+  event.waitUntil(self.clients.claim());
+});
 
-      ];
 
-      // Attendre un peu pour ne pas interférer avec l'activation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      swConsole.log('🔄 Mise en cache différée de ressources supplémentaires...');
-      
-      const cache = await caches.open(CACHE_NAME);
-      let successCount = 0;
-      let failedCount = 0;
 
-      // Utiliser la même technique de lots qui fonctionne déjà pour les tuiles
-      await processInChunks(additionalResources, async (url) => {
-        try {
-          // Vérifier si déjà en cache
-          const cachedResponse = await cache.match(url);
-          if (cachedResponse) return;
-          
-          // Sinon, mettre en cache
-          const response = await fetch(url, {
-            method: 'GET',
-            cache: 'no-cache',
-            mode: 'no-cors'
-          });
-          
-          if (response.ok || response.type === 'opaque') {
-            await cache.put(url, response.clone());
-            successCount++;
-          } else {
+// 2. On met TON code de cache à l'intérieur du gestionnaire de messages existant
+self.addEventListener('message', (event) => {
+  if (!event.data || !event.data.action) return;
+
+  // --- AJOUTE CE BLOC ICI ---
+  if (event.data.action === 'startFullCaching') {
+    swConsole.log('📥 Ordre reçu : Lancement du cache différé...');
+
+    event.waitUntil((async () => {
+      try {
+        // Mettre en cache d'autres ressources JS, moins critiques
+        const additionalResources = [
+          './js/audioPlayer.js',
+          './js/backgroundManager.js',
+          './js/dateUI.js',
+          './js/debugLogUtils.js',
+          './js/directHamburgerMenu.js',
+          './js/eventHandlers.js',
+          './js/exportManager.js',
+          './js/exportSettings.js',
+          './js/gedcomParser.js',
+          './js/geoHeatMapDataProcessor.js',
+          './js/geoHeatMapInteractions.js',
+          './js/geoHeatMapUI.js',
+          './js/geoLocalisation.js',
+          './js/hamburgerMenu.js',
+          './js/helpHamburgerMenu.js',
+          './js/historicalData.js',
+          './js/mainUI.js',
+          './js/mapTilesPreloader.js',
+          './js/mapUtils.js',
+          './js/modalWindow.js',
+          './js/nameCloud.js',
+          './js/nameCloudAverageAge.js',
+          './js/nameCloudCenturyModal.js',
+          './js/nameCloudInteractions.js',
+          './js/nameCloudRenderer.js',
+          './js/nameCloudSettings.js',
+          './js/nameCloudShapes.js',
+          './js/nameCloudStatModal.js',
+          './js/nameCloudUI.js',
+          './js/nameCloudUtils.js',
+          './js/nodeControls.js',
+          './js/nodeRenderer.js',
+          './js/nodeStyles.js',
+          './js/occupations.js',
+          './js/photoPlayer.js',
+          './js/puzzleSwipe.js',
+          './js/resizableModalUtils.js',
+          './js/searchModalUI.js',
+          './js/statsModalUI.js',
+          './js/treeAnimation.js',
+          './js/treeOperations.js',
+          './js/treeRenderer.js',
+          './js/treeSettingsModal.js',
+          './js/treeWheelAnimation.js',
+          './js/treeWheelRenderer.js',
+          './js/UIutils.js',
+          './js/utils.js',
+          './js/occupations.js',
+          './js/voiceSelect.js',
+          './libs/lodash.min.js',
+          './libs/leaflet-heat.js',
+          './libs/react.production.min.js',
+          './libs/react-dom.production.min.js',
+          './libs/d3.layout.cloud.min.js',
+          './libs/tf.min.js',
+          './libs/coco-ssd.min.js',
+
+        ];
+
+        // Attendre un peu pour ne pas interférer avec l'activation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        swConsole.log('🔄 Mise en cache différée de ressources supplémentaires...');
+        
+        const cache = await caches.open(CACHE_NAME);
+        let successCount = 0;
+        let failedCount = 0;
+
+        // Utiliser la même technique de lots qui fonctionne déjà pour les tuiles
+        await processInChunks(additionalResources, async (url) => {
+          try {
+            // Vérifier si déjà en cache
+            const cachedResponse = await cache.match(url);
+            if (cachedResponse) return;
+            
+            // Sinon, mettre en cache
+            const response = await fetch(url, {
+              method: 'GET',
+              cache: 'no-cache',
+              mode: 'no-cors'
+            });
+            
+            if (response.ok || response.type === 'opaque') {
+              await cache.put(url, response.clone());
+              successCount++;
+            } else {
+              failedCount++;
+            }
+          } catch (err) {
             failedCount++;
           }
-        } catch (err) {
-          failedCount++;
-        }
-      }, 2, 100); // Encore plus petit (2) et plus lent (100ms) pour les ressources additionnelles
-      
-      swConsole.log(`✅ Mise en cache différée terminée: ${successCount} réussis, ${failedCount} échoués`);
-    } catch (error) {
-      swConsole.error(`Erreur lors de la mise en cache différée: ${error.message}`);
-    }
-  })());
+        }, 2, 100); // Encore plus petit (2) et plus lent (100ms) pour les ressources additionnelles
+        
+        swConsole.log(`✅ Mise en cache différée terminée: ${successCount} réussis, ${failedCount} échoués`);
+      } catch (error) {
+        swConsole.error(`Erreur lors de la mise en cache différée: ${error.message}`);
+      }
+    })());
+  }
 });

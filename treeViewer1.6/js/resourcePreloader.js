@@ -110,7 +110,7 @@ async function checkResourceCacheStatus() {
         console.log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`);
         log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`, 'info');
         
-        return { hasCache: true, hasContent };
+        return { hasCache: true, hasContent, actualCount: cachedRequests.length };
     } catch (error) {
         console.error("❌ Erreur lors de la vérification du cache ressources:", error);
         log(`❌ Erreur lors de la vérification du cache ressources: ${error.message}`, 'error');
@@ -134,10 +134,11 @@ export async function initResourcePreloading() {
         return false;
     }
     
+
     // NOUVEAU : Vérifier si le cache existe déjà et n'est pas vide
     const cacheExists = await checkResourceCacheStatus();
-    
-    if (cacheExists.hasCache && cacheExists.hasContent) {
+
+    if (cacheExists.hasCache && cacheExists.hasContent && cacheExists.actualCount === RESOURCES_TO_CACHE.length) {
         console.log("✅ Cache des ressources déjà présent, préchargement ignoré");
         log("✅ Cache des ressources déjà présent, préchargement ignoré", 'info');
         return true;
