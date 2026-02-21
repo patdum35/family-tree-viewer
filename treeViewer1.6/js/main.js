@@ -1946,7 +1946,7 @@ export function positionFormContainer() {
 
 export async function getCachedImageURL(imagePath) {
     try {
-        const APP_CACHE_NAME = getAPP_CACHE_NAME;
+        const APP_CACHE_NAME = await getAPP_CACHE_NAME();
         const cache = await caches.open(APP_CACHE_NAME);
         const response = await cache.match(imagePath);
         if (response) {
