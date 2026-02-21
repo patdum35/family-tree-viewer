@@ -1,10 +1,13 @@
 import { state } from './main.js';
 import { nameCloudState } from './nameCloud.js';
+// import { nameCloudState } from './main.js';
 import { statsConfig, findPeopleWithName, ensureStatsExist } from './nameCloudAverageAge.js';
 import { showPersonsList, adjustSplitScreenLayout } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-import { findPersonsBy } from './searchModalUI.js';
-import { displayHeatMap } from './geoHeatMapUI.js';
+// import { findPersonsBy } from './searchModalUI.js';
+import { getFindPersonsBy} from './main.js';
+// import { displayHeatMap } from './geoHeatMapUI.js';
+import { getDisplayHeatMap } from './main.js';
 import { debounce, isModalVisible } from './eventHandlers.js';
 
 
@@ -1004,7 +1007,7 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
         } else {
             // Afficher les lieux de cette personne
             // Attendre un peu que la carte soit complètement initialisée
-            setTimeout(() => {
+            setTimeout(async () => {
                 // Créer une carte avec les lieux de cette personne
                 // Trouver les personnes ayant ce nom/prénom/métier/lieu
                 let filter_string = text.replace(/\//g, '');   
@@ -1014,6 +1017,7 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
                 }
 
                 // console.log('-debug findPersonsBy filter_string=',  filter_string, 'searchTerm = ', searchTerm, ', originalName= ', originalName)
+                const findPersonsBy = await getFindPersonsBy();
                 const personList = findPersonsBy(filter_string, newConfig, searchTerm, originalName ); 
                 if (personList.results && personList.results.length > 0) {
 
@@ -1025,7 +1029,7 @@ export function createLocationIcon(isfromSearch = true, index, text, newConfig, 
 
                     // console.log('-debug displayHeatMap true =', personList.results, personList.results.length, filter_string, ', firstItemInList= ', (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null )
 
-
+                    const displayHeatMap = await getDisplayHeatMap();
                     // console.log('\n\n ------debug call to displayHeatMap from createLocationIcon, showPersonListModalIndex', showPersonListModalIndex,'\n\n');
                     displayHeatMap(null, personList.results, false, newConfig, filter_string, (nbPeople === 1), (foundPeople && foundPeople.length > 0) ?  foundPeople[0].name : null, showPersonListModalIndex).then(() => {
                         let content;
@@ -1184,6 +1188,8 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     this.name = newConfig.type + '_' + newConfig.scope + '_' + newConfig.startDate + '_' + newConfig.endDate + '_' + newConfig.rootPersonId + '_' + (searchTerm)?searchTerm:null;
     
     console.log("-call to createFrequencyStatsModal with ", type, newConfig, searchTerm, ', this=', this, this.name);
+    console.log("- debug call to createFrequencyStatsModal with ");
+    
 
     // window.lastSelectedLocationIndex = null;
     this.lastSelectedLocationIndex = null;
@@ -1570,7 +1576,7 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
     
     // Gestionnaire du bouton de geoLocalisation
     geoLocButton.onclick = () => {
-        console.log('Clic bouton geoLocalisation');
+        console.log('Clic bouton geoLocalisation showHeatmapFromStats');
         showHeatmapFromStats();
     };
     // Initialiser l'affichage des boutons
@@ -1780,12 +1786,20 @@ export function createFrequencyStatsModal(nameData, type, newConfig, searchTerm)
 }
 
 export async function showHeatmapFromStats() {
-    if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+    // console.log('-debug before call to displayHeatMap from showHeatmapFromStats: nameCloudState.currentConfig =', nameCloudState.currentConfig );
+    // Effectuer la recherche avec filtrage par dates
+    const findPersonsBy = await getFindPersonsBy();
+    const personList = findPersonsBy('', nameCloudState.currentConfig ); 
+    // if (personList.results && personList.results.length > 0) {
+//    console.log('-debug in to displayHeatMap from showHeatmapFromStats: nameCloudState.currentConfig =', personList.results );
+
+
+    if (personList.results && personList.results.length > 0) {
         // Fermer la modale de recherche
         // closeSearchModal();
         console.log('-debug call to displayHeatMap from showHeatmapFromStats');
-
-        displayHeatMap(null, window.currentSearchResults, false, null, 'Tous').then(() => {
+        const displayHeatMap = await getDisplayHeatMap();
+        displayHeatMap(null, personList.results, false, null, 'Tous').then(() => {
             const allModals = document.querySelectorAll('[id^="frequency-stat-modal-"]');
             let modal;
             if (allModals) { modal = allModals[allModals.length - 1]; }
@@ -1794,7 +1808,6 @@ export async function showHeatmapFromStats() {
                 adjustSplitScreenLayout(modal, true);
             }
         });
-
     } 
 }
 

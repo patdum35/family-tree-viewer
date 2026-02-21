@@ -1,7 +1,9 @@
 import { state, showToast} from './main.js';
 import { nameCloudState, filterPeopleByText } from './nameCloud.js';
+// import { nameCloudState, filterPeopleByText } from './main.js';
 import { showPersonsList } from './nameCloudInteractions.js';
-import { updateTitleText } from './nameCloudUI.js';
+// import { updateTitleText } from './nameCloudUI.js';
+import { getUpdateTitleText } from './main.js';
 import { placeWordsInShape, generateConcentricShapes, debugShapeBoundaries  } from './nameCloudShapes.js';
 import { addStatisticsLabel } from './nameCloudAverageAge.js';
 import { debounce } from './eventHandlers.js';
@@ -1088,7 +1090,7 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
 
 
             // === START: callback .on('end', words => { ... }) replacement ===
-            .on('end', words => {
+            .on('end', async words => {
 
                 if (stopped) return;
 
@@ -1238,7 +1240,10 @@ function initializeCloudAndLayout(svgElement, nameData, config, width, height) {
                 nameCloudState.totalWords = nameData.length;
                 nameCloudState.placedWords = words.length;
                 const titleElement = document.getElementById('name-cloud-title');
-                if (titleElement) updateTitleText(titleElement, config);
+                if (titleElement) {
+                    const updateTitleText = await getUpdateTitleText();
+                    updateTitleText(titleElement, config);
+                }
 
 
                 if ((nameCloudState.cloudShape === 'rectangle') || (nameCloudState.cloudShape === 'ellipse')) {

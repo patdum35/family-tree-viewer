@@ -1,8 +1,15 @@
 import { state , getPersonsFromTCurrenTree } from './main.js';
 import { nameCloudState, getPersonsFromTree, processPersonData, filterPeopleByText } from './nameCloud.js';
-import { geocodeLocation } from './geoLocalisation.js';
-import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
-import { createImprovedHeatmap, displayHeatMap } from './geoHeatMapUI.js';
+import { getNameCloudState, getGetPersonsFromTree, getProcessPersonData, getFilterPeopleByText } from './main.js';
+
+// import { geocodeLocation } from './geoLocalisation.js';
+import { getGeocodeLocation } from './main.js';
+// import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
+import { getSaveHeatmapPosition } from './main.js';
+
+// import { createImprovedHeatmap, displayHeatMap } from './geoHeatMapUI.js';
+import { getCreateImprovedHeatmap, getDisplayHeatMap } from './main.js';
+
 
 
 /**
@@ -195,6 +202,7 @@ export async function refreshHeatmap(isFromTree = false) {
 
     if (isFromTree) {
         console.log('-debug call to displayHeatMap from refreshHeatmap');
+        const displayHeatMap = await getDisplayHeatMap();
         displayHeatMap(null, false);
         return; // Si on vient de la carte 
     }
@@ -204,6 +212,7 @@ export async function refreshHeatmap(isFromTree = false) {
     if (!heatmapWrapper) return;
 
     // Sauvegarder la position et taille actuelles avant de fermer
+    const saveHeatmapPosition = await getSaveHeatmapPosition();
     saveHeatmapPosition();
     
      // Afficher un indicateur de chargement
@@ -311,6 +320,7 @@ export async function refreshHeatmap(isFromTree = false) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     
                     // Créer la nouvelle heatmap avec les données filtrées
+                    const createImprovedHeatmap = await getCreateImprovedHeatmap();
                     createImprovedHeatmap(heatmapData, titleUpdated);
                     
                     // Retirer l'overlay de chargement
@@ -526,6 +536,7 @@ export async function createHeatmapDataForPeople(people) {
             if (!place || place.trim() === '') continue;
             
             try {
+                const geocodeLocation = await getGeocodeLocation();
                 const coords = await geocodeLocation(place);
                 
                 if (coords) {
@@ -688,6 +699,7 @@ export async function createDataForHeatMap(config, isFromCurrentTree = false, cu
             if (!place || place.trim() === '') continue;
             
             try {
+                const geocodeLocation = await getGeocodeLocation();
                 const coords = await geocodeLocation(place);
                 
                 if (coords) {
@@ -862,6 +874,7 @@ export async function updateHeatmapIfVisible(text, people) {
                 if (!place || place.trim() === '') continue;
                 
                 try {
+                    const geocodeLocation = await getGeocodeLocation();
                     const coords = await geocodeLocation(place);
                     
                     if (coords) {
@@ -912,9 +925,9 @@ export async function updateHeatmapIfVisible(text, people) {
             loadingOverlay.remove();
             
             // Sauvegarder la position actuelle
-            if (typeof saveHeatmapPosition === 'function') {
-                saveHeatmapPosition();
-            }
+            const saveHeatmapPosition = await getSaveHeatmapPosition();
+            saveHeatmapPosition();
+
             
             // Fermer la heatmap actuelle
             const closeButton = document.getElementById('heatmap-close');
@@ -938,6 +951,7 @@ export async function updateHeatmapIfVisible(text, people) {
                 }
                 
                 // Créer la nouvelle heatmap
+                const createImprovedHeatmap = await getCreateImprovedHeatmap();
                 createImprovedHeatmap(result, heatmapTitle);
             } else {
                 // Afficher un message si aucun lieu n'est disponible

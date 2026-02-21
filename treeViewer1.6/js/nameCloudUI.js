@@ -1,17 +1,26 @@
+// nameCloudUI.js est importé dynamiquement dans main.js si on clique sur le bouton loadDataButton "Entrez"
+// donc pas de problème de lightHouse score au démarrage
 import { state, showAndRestoreTreeButtons, displayGenealogicTree, updateRadarButtonText, redimensionnerRootSelectorSizeInDOM } from './main.js';
 import { NameCloud } from './nameCloudRenderer.js';
 import { nameCloudState } from './nameCloud.js';
-import { createSettingsModal } from './nameCloudSettings.js';
+// import { nameCloudState } from './main.js';
+// import { createSettingsModal } from './nameCloudSettings.js';
+import { getCreateSettingsModal } from './main.js';
 import { createDateInput } from './dateUI.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { ensureStatsExist, updateStatsButtons, removeAllStatsElements } from './nameCloudAverageAge.js';
-import { createImprovedHeatmap  } from './geoHeatMapUI.js';
-import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
+// import { createImprovedHeatmap  } from './geoHeatMapUI.js';
+import { getCreateImprovedHeatmap  } from './main.js';
+// import { createDataForHeatMap, refreshHeatmap  } from './geoHeatMapDataProcessor.js';
+import { getCreateDataForHeatMap, getRefreshHeatmap  } from './main.js';
 import { showHamburgerButtonForcefully, resetHamburgerButtonPosition } from './hamburgerMenu.js';
+import { buttonsOnDisplay } from './mainUI.js';
 import { enableBackground } from './backgroundManager.js';
-import { enableFortuneMode } from './treeWheelAnimation.js';
+// import { enableFortuneMode } from './treeWheelAnimation.js';
+import { getEnableFortuneMode } from './main.js';
 import { closeAllModals, debounce } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
+import { processNamesCloudWithDate } from './nameCloud.js';
 
 // Fonction pour obtenir les traductions selon la langue actuelle
 export function getTranslation(key) {
@@ -772,7 +781,7 @@ function createSettingsButton() {
     return settingsButton;
 }
 
-export function closeCloudName() {
+export async function closeCloudName() {
     // Supprimer toutes les stats modals avant de fermer la CloudMap
 
     const modal = document.querySelector('[class^="nameCloud-modal-container"]');
@@ -820,6 +829,7 @@ export function closeCloudName() {
     updateRadarButtonText();
 
     if (state.isRadarEnabled) {
+        const enableFortuneMode = await getEnableFortuneMode();
         enableFortuneMode();
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
     } 
@@ -1006,7 +1016,7 @@ export function updateOverlayLayout() {
 
 }
 
-function showNameCloud(nameData, config) {
+async function showNameCloud(nameData, config) {
     config.scope ='ancestors';
 
     const modal = createModalContainer();
@@ -1287,6 +1297,7 @@ function showNameCloud(nameData, config) {
 
     // Ajout du bouton de paramètres
     const settingsButton = createSettingsButton();
+    const createSettingsModal = await getCreateSettingsModal();
     settingsButton.addEventListener('click', () => {
         const settingsModal = createSettingsModal((settings) => {
             // Callback lorsque les paramètres sont sauvegardés
@@ -1330,6 +1341,7 @@ function showNameCloud(nameData, config) {
             scope: scopeSelect.value,
             rootPersonId: scopeSelect.value !== 'all' ? state.rootPersonId : null
         };
+        const refreshHeatmap = await getRefreshHeatmap();
     
         // Vérifier si une heatmap est déjà affichée
         if (document.getElementById('namecloud-heatmap-wrapper')) {
@@ -1357,6 +1369,7 @@ function showNameCloud(nameData, config) {
         try {
 
             // Générer les données pour la heatmap
+            const createDataForHeatMap = await getCreateDataForHeatMap();
             const heatmapData = await createDataForHeatMap(currentConfig);
             
             // Supprimer l'indicateur de chargement
@@ -1377,6 +1390,7 @@ function showNameCloud(nameData, config) {
                 }
                 
                 // Utiliser la fonction pour créer la heatmap
+                const createImprovedHeatmap = await getCreateImprovedHeatmap();
                 createImprovedHeatmap(heatmapData, heatmapTitle);
                 
                 // Ajouter les écouteurs d'événements aux contrôles

@@ -5,18 +5,16 @@ import { isNodeHidden } from './utils.js';
 import { drawNodes } from './nodeRenderer.js';
 import { state } from './main.js';
 import { resetView } from './eventHandlers.js';
-import { setupElegantBackground } from './backgroundManager.js';
-import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
-import { displayHeatMap } from './geoHeatMapUI.js';
+// import { setupElegantBackground } from './backgroundManager.js';
+import { getSetupElegantBackground } from './main.js';
+// import { drawWheelTree, resetWheelView } from './treeWheelRenderer.js';
+import { getDrawWheelTree, getResetWheelView } from './main.js';
+// import { displayHeatMap } from './geoHeatMapUI.js';
+import { getDisplayHeatMap } from './main.js';
 import { animationState } from './treeAnimation.js';
 
 // let zoom;
 // let lastTransform = null;
-
-
-
-
-
 
 
 /**
@@ -49,7 +47,7 @@ export function calculateLayout() {
 /**
  * Initialise et dessine l'arbre selon le mode sélectionné
  */
-export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalculatedLayout = false) {
+export async function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalculatedLayout = false) {
     if (!state.currentTree) return;
 
     if (state.iSAnimationWithStraightLines && !isAnimation) {
@@ -66,6 +64,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
     
     // Modes éventail
     if (isWheelMode(state.treeModeReal)) {
+        const drawWheelTree = await getDrawWheelTree();
         drawWheelTree(isZoomRefresh, isAnimation);
         return;
     }
@@ -400,6 +399,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
     // Vérifier si une heatmap est déjà affichée
     if (document.getElementById('namecloud-heatmap-wrapper')) {
         console.log('-debug call to displayHeatMap from drawTree');//, document.getElementById('namecloud-heatmap-wrapper'));
+        const displayHeatMap = await getDisplayHeatMap();
         displayHeatMap(null, false);
     }
 
@@ -412,6 +412,7 @@ export function drawTree(isZoomRefresh = false, isAnimation = false, isPrecalcul
     // }
 
     // Gestion du fond
+    const setupElegantBackground = await getSetupElegantBackground();
     if (state.initialTreeDisplay) {
         state.initialTreeDisplay = false;
         setTimeout(() => {
@@ -433,8 +434,9 @@ function isWheelMode(mode) {
 /**
  * Réinitialise la vue selon le mode
  */
-export function resetTreeView() {
+export async function resetTreeView() {
     if (isWheelMode(state.treeModeReal)) {
+        const resetWheelView = await getResetWheelView();
         resetWheelView();
     } else {
         resetView();
@@ -462,7 +464,7 @@ function animateTreeModeTransition(fromMode, toMode) {
         });
 }
 
-function drawBothModeTree(isZoomRefresh = false) {
+async function drawBothModeTree(isZoomRefresh = false) {
     const rootPerson = state.currentTree;
     const descendants = rootPerson.descendants || [];
     const ancestors = rootPerson.ancestors || [];
@@ -615,6 +617,7 @@ function drawBothModeTree(isZoomRefresh = false) {
         resetZoomBoth(mainGroup, svg, -leftmostPositionX + 150, window.innerHeight/2 );
     }
 
+    const setupElegantBackground = await getSetupElegantBackground();
     if (state.initialTreeDisplay) {
         state.initialTreeDisplay = false;
         setTimeout(() => {

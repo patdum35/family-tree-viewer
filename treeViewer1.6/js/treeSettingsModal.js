@@ -1,7 +1,11 @@
+// treeSettingsModal.js est importé dynamiquement dans main.js si on clique sur le bouton setting ⚙️  
+// donc pas de problème de lightHouse score au démarrage
+
 // Nouvelle implémentation de la modal des paramètres
-import { setupElegantBackground, setupCustomImageBackground } from './backgroundManager.js';
+import { setupElegantBackground } from './backgroundManager.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { nameCloudState } from './nameCloud.js';
+// import { getNameCloudState } from './main.js';
 import { setTargetAncestorId } from './treeAnimation.js';
 import { state, updatePrenoms, toggleTreeRadar } from './main.js';
 import { createImageSelectorDialog } from './mainUI.js';
@@ -9,6 +13,7 @@ import { initializeAllExportControls } from './exportSettings.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { createSettingsModal } from './nameCloudSettings.js'
 import { debounce, isModalVisible } from './eventHandlers.js';
+import { initBackgroundContainer } from './backgroundManager.js';
 
 // Traductions pour les éléments de l'interface
 const settingsTranslations = {
@@ -1381,14 +1386,6 @@ function createTreeShapeStyleSelect(config) {
         }
     });
 }
-
-
-
-
-
-
-
-
 
 function createRadarControls() {
     const container = document.createElement('div');

@@ -1,3 +1,5 @@
+// mapTilesPreloader.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton loadDataButton "Entrez"
+// donc pas de problème de lightHouse score au démarrage
 /**
  * Système de préchargement des tuiles de carte en tâche de fond
  */
@@ -5,198 +7,158 @@
 // Nom du cache pour les tuiles
 const TILE_CACHE_NAME = 'map-tiles-cache-v2';
 
-
-
-// Verifier le status du cache storage avant de lancer initTilePreloading
-async function checkCacheStatus() {
-    try {
-        const cacheNames = await caches.keys();
-        const hasCache = cacheNames.includes(TILE_CACHE_NAME);
-        
-        if (!hasCache) {
-            return { hasCache: false, hasContent: false };
-        }
-        
-        const cache = await caches.open(TILE_CACHE_NAME);
-        const cachedRequests = await cache.keys();
-        const hasContent = cachedRequests.length > 0;
-        
-        console.log(`📊 Statut du cache: ${cachedRequests.length} tuiles en cache`);
-        return { hasCache: true, hasContent };
-    } catch (error) {
-        console.error("❌ Erreur lors de la vérification du cache:", error);
-        return { hasCache: false, hasContent: false };
-    }
-}
-
 /**
- * Initialise le préchargement des tuiles
- * À appeler au chargement de la page
- */
-export async function initTilePreloading() {
-
-
-    console.log("🗺️ Initialisation du préchargement des tuiles...");
-    
-    // Vérifier si le navigateur supporte le Cache API
-    if (!('caches' in window)) {
-        console.warn("⚠️ Cache API non supportée par ce navigateur");
-        return false;
-    }
-    
-    try {
-
-        // Vérifier si le cache existe déjà et n'est pas vide
-        const cacheExists = await checkCacheStatus();
-        
-        if (cacheExists.hasCache && cacheExists.hasContent) {
-            console.log("✅ Cache des tuiles déjà présent, préchargement ignoré");
-            return true;
-        }
-
-        // Vérifier si le manifeste de tuiles existe
-        const manifestResponse = await fetch('./maps/manifest.json');
-        
-        if (!manifestResponse.ok) {
-            console.warn("⚠️ Manifeste de tuiles non trouvé");
-            return false;
-        }
-        
-        const manifest = await manifestResponse.json();
-        console.log(`📋 Manifeste de tuiles chargé: ${manifest.tileUrls.length} tuiles disponibles`);
-        
-        // Lancer le préchargement en tâche de fond
-        preloadTilesInBackground(manifest.tileUrls);
-        
-        return true;
-    } catch (error) {
-        console.error("❌ Erreur lors de l'initialisation du préchargement:", error);
-        return false;
-    }
-}
-
-/**
- * Précharge les tuiles en tâche de fond
- * @param {Array} tileUrls - Liste des URLs des tuiles à précharger
+ * Précharge les tuiles en tâche de fond avec mesures de temps
  */
 async function preloadTilesInBackground(tileUrls) {
-    // Limiter le nombre de tuiles à précharger pour éviter de surcharger le navigateur
-    const tilesToPreload = tileUrls.slice(0, 2000); // Limiter à 500 tuiles
+    // Limite de sécurité
+    const LIMIT = 2000;
+    const tilesToPreload = tileUrls.slice(0, LIMIT);
     
-    console.log(`🔄 Préchargement de ${tilesToPreload.length} tuiles en tâche de fond...`);
+    console.log(`🔄 Démarrage du préchargement de ${tilesToPreload.length} tuiles...`);
     
-    // Créer un élément de notification pour l'utilisateur (optionnel)
-    // const notification = createPreloadNotification();
-    // document.body.appendChild(notification);
+    const tStartTotal = performance.now();
     
-    // Ouvrir ou créer le cache
+    // Compteurs pour le bilan
+    const stats = {
+        cached: 0,
+        downloaded: 0,
+        errors: 0,
+        totalTimeCached: 0,
+        totalTimeDownload: 0
+    };
+
     try {
         const cache = await caches.open(TILE_CACHE_NAME);
-        let loadedCount = 0;
         
-        // Utiliser un worker ou setTimeout pour ne pas bloquer l'interface
-        await processInChunks(tilesToPreload, async (tileUrl) => {
-            try {
-                // Vérifier si la tuile est déjà en cache
-                const cachedResponse = await cache.match('./maps/' + tileUrl);
-                
-                if (!cachedResponse) {
-                    // Charger et mettre en cache la tuile
-                    // const response = await fetch('./maps/' + tileUrl, { 
-                    //     method: 'GET',
-                    //     cache: 'no-cache' // Forcer le rechargement
-                    // });
+        // On récupère d'abord TOUTES les clés du cache en une fois pour éviter de faire .match() en boucle (très lent)
+        // C'est une optimisation majeure pour 2000 éléments.
+        const keys = await cache.keys();
+        const urlSet = new Set(keys.map(k => k.url));
+        const baseUrl = new URL('./maps/', window.location.origin).href;
 
+        await processInChunks(tilesToPreload, async (tileUrl) => {
+            const tTileStart = performance.now();
+            try {
+                // Construction URL absolue pour vérification fiable dans le Set
+                // tileUrl est relatif (ex: "z/x/y.png"), on doit matcher l'URL complète du cache
+                const fullUrl = new URL(tileUrl, baseUrl).href;
+
+                // CAS 1 : DÉJÀ PRÉSENT (Vérification via Set = instantané)
+                if (urlSet.has(fullUrl)) {
+                    stats.cached++;
+                    // On simule un temps minime pour la stat, car le Set est quasi immédiat
+                    stats.totalTimeCached += (performance.now() - tTileStart);
+                } 
+                // CAS 2 : ABSENT (Téléchargement)
+                else {
                     const response = await fetch('./maps/' + tileUrl, { 
-                        method: 'GET',
-                        cache: 'no-cache',
-                        mode: 'no-cors',
-                        headers: {
-                          'X-Requested-With': 'no-sw-intercept'  // Marqueur spécial
-                        }
-                      });
+                        method: 'GET', cache: 'no-cache', mode: 'no-cors',
+                        headers: { 'X-Requested-With': 'no-sw-intercept' }
+                    });
                     
                     if (response.ok) {
                         await cache.put('./maps/' + tileUrl, response.clone());
-                        loadedCount++;
-                        
-                        // Mettre à jour la notification tous les 10 éléments
-                        // if (loadedCount % 10 === 0) {
-                        //     updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
-                        // }
+                        stats.downloaded++;
+                        stats.totalTimeDownload += (performance.now() - tTileStart);
+                    } else {
+                        stats.errors++;
                     }
-                } else {
-                    // La tuile est déjà en cache
-                    loadedCount++;
                 }
             } catch (e) {
-                console.warn(`⚠️ Impossible de précharger: ${tileUrl}`, e);
+                console.warn(`⚠️ Erreur sur: ${tileUrl}`, e);
+                stats.errors++;
             }
-        }, 10, 20); // Traiter 10 tuiles à la fois, avec 20ms de pause entre les lots
+        }, 10, 20); // 10 tuiles, 20ms pause
         
-        // Mise à jour finale de la notification
-        // updatePreloadNotification(notification, loadedCount, tilesToPreload.length);
+        // --- RAPPORT FINAL DÉTAILLÉ ---
+        const totalDuration = (performance.now() - tStartTotal).toFixed(2);
+        const avgDownload = stats.downloaded > 0 ? (stats.totalTimeDownload / stats.downloaded).toFixed(2) : 0;
         
-        // Faire disparaître la notification après 3 secondes
-        // setTimeout(() => {
-        //     notification.style.opacity = '0';
-        //     setTimeout(() => notification.remove(), 500);
-        // }, 3000);
+        console.group(`🗺️ BILAN TUILES (${totalDuration}ms)`);
+        console.log(`📦 Déjà en cache : ${stats.cached} tuiles (Scan rapide)`);
         
-        console.log(`✅ Préchargement terminé: ${loadedCount}/${tilesToPreload.length} tuiles chargées`);
-
-        // // message unique à la fin (localisation simple)
-        // const msg = window.CURRENT_LANGUAGE === 'fr' ? 'Toutes les ressources sont chargées.' : 'All resources are loaded.';
-        // showCompletionNotification(msg);
-
+        if (stats.downloaded > 0) {
+            console.log(`🌐 Téléchargées  : ${stats.downloaded} tuiles`);
+            console.log(`⏱️ Temps moyen DL : ${avgDownload}ms / tuile`);
+            console.log(`💾 Volume total estimé : ~${(stats.downloaded * 15).toFixed(0)} Ko (si ~15Ko/tuile)`);
+        }
+        
+        if (stats.errors > 0) console.log(`❌ Erreurs      : ${stats.errors}`);
+        
+        console.log(`✅ Opération terminée sur ${tilesToPreload.length} fichiers.`);
+        console.groupEnd();
 
     } catch (error) {
-        console.error("❌ Erreur lors du préchargement des tuiles:", error);
-        notification.remove();
+        console.error("❌ Erreur critique background:", error);
     }
 }
 
+export async function initTilePreloading() {
+    const tStart = performance.now();
+    console.log("🗺️ Initialisation du préchargement des tuiles...");
+    
+    if (!('caches' in window)) return false;
+    
+    try {
+        // 1. Récupérer le manifeste d'abord pour savoir combien on DOIT avoir
+        const manifestResponse = await fetch('./maps/manifest.json');
+        if (!manifestResponse.ok) return false;
+        
+        const manifest = await manifestResponse.json();
+        // On définit la cible : soit tout le manifeste, soit la limite de 2000
+        const targetCount = Math.min(manifest.tileUrls.length, 2000); 
 
+        // 2. Vérifier l'état réel du cache
+        const cacheStatus = await checkCacheStatus();
+        
+        // --- LE BYPASS ---
+        // Si le nombre en cache est supérieur ou égal à notre cible, on gagne du temps !
+        if (cacheStatus.hasCache && cacheStatus.count >= targetCount) {
+            const duration = (performance.now() - tStart).toFixed(2);
+            console.log(`🚀 [BYPASS] Cache tuiles complet : ${cacheStatus.count} tuiles détectées (Cible: ${targetCount}).`);
+            console.log(`✅ Initialisation tuiles terminée en ${duration}ms (Aucun téléchargement requis).`);
+            return true;
+        }
 
-
-function showCompletionNotification(message) {
-  const n = document.createElement('div');
-  n.style.position = 'fixed';
-  n.style.bottom = '20px';
-  n.style.right = '20px';
-  n.style.padding = '12px 16px';
-  n.style.background = 'rgba(0,0,0,0.85)';
-  n.style.color = 'white';
-  n.style.borderRadius = '6px';
-  n.style.zIndex = 99999;
-  n.style.fontSize = '14px';
-  n.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-  n.style.transition = 'opacity 0.4s';
-  n.textContent = message;
-  document.body.appendChild(n);
-  // disparaît après 2s
-  setTimeout(() => { n.style.opacity = '0'; setTimeout(()=>n.remove(), 400); }, 2000);
+        // 3. Si le compte n'est pas bon, on lance le chargement
+        console.log(`Missing tiles: ${targetCount - cacheStatus.count} tuiles à récupérer.`);
+        preloadTilesInBackground(manifest.tileUrls, targetCount);
+        
+        return true;
+    } catch (error) {
+        console.error("❌ Erreur bypass tuiles:", error);
+        return false;
+    }
 }
 
-
-
+/**
+ * Audit flash du cache (Mesure de performance)
+ */
+async function checkCacheStatus() {
+    const t0 = performance.now();
+    try {
+        const cache = await caches.open(TILE_CACHE_NAME);
+        const keys = await cache.keys();
+        const duration = (performance.now() - t0).toFixed(2);
+        
+        return { 
+            hasCache: true, 
+            count: keys.length, 
+            duration 
+        };
+    } catch (e) {
+        return { hasCache: false, count: 0 };
+    }
+}
 
 /**
- * Traite des éléments par lot pour éviter de bloquer l'interface
- * @param {Array} items - Éléments à traiter
- * @param {Function} processor - Fonction de traitement
- * @param {number} chunkSize - Taille des lots
- * @param {number} delay - Délai entre les lots en ms
+ * Traite des éléments par lot (Strictement identique à l'original)
  */
 async function processInChunks(items, processor, chunkSize = 10, delay = 20) {
     for (let i = 0; i < items.length; i += chunkSize) {
         const chunk = items.slice(i, i + chunkSize);
-        
-        // Traiter le lot actuel
-        const promises = chunk.map(item => processor(item));
-        await Promise.all(promises);
-        
-        // Pause pour permettre à l'interface de répondre
+        await Promise.all(chunk.map(item => processor(item)));
         if (i + chunkSize < items.length && delay > 0) {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
@@ -204,101 +166,27 @@ async function processInChunks(items, processor, chunkSize = 10, delay = 20) {
 }
 
 /**
- * Crée un élément de notification visuelle pour le préchargement
- * @returns {HTMLElement} - Élément de notification
+ * Intercepteur runtime (Optimisé pour le silence et la vitesse)
  */
-function createPreloadNotification() {
-    const notification = document.createElement('div');
-    notification.style.position = 'fixed';
-    notification.style.bottom = '20px';
-    notification.style.right = '20px';
-    notification.style.padding = '10px 15px';
-    notification.style.background = 'rgba(0, 0, 0, 0.7)';
-    notification.style.color = 'white';
-    notification.style.borderRadius = '5px';
-    notification.style.fontSize = '14px';
-    notification.style.zIndex = '9999';
-    notification.style.transition = 'opacity 0.5s';
-    notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
-    if (window.CURRENT_LANGUAGE == "fr") {
-        notification.innerHTML = '<div>Préchargement des tuiles de carte...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
-    } else if (window.CURRENT_LANGUAGE == "en") {
-        notification.innerHTML = '<div>Preloading map tiles...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
-    } else if (window.CURRENT_LANGUAGE == "es") {
-        notification.innerHTML = '<div>Precargando mosaicos del mapa...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
-    } else if (window.CURRENT_LANGUAGE == "hu") {
-        notification.innerHTML = '<div>Térkép csempe előtöltése...</div><div><progress id="tile-progress" value="0" max="100" style="width: 100%;"></progress></div>';
-    }
-    
-    return notification;
-}
-
-/**
- * Met à jour la notification de préchargement
- * @param {HTMLElement} notification - Élément de notification
- * @param {number} current - Nombre de tuiles chargées
- * @param {number} total - Nombre total de tuiles
- */
-function updatePreloadNotification(notification, current, total) {
-    const progress = notification.querySelector('#tile-progress');
-    const percentage = Math.round((current / total) * 100);
-    
-    progress.value = percentage;
-    if (window.CURRENT_LANGUAGE == "fr") {
-        notification.firstChild.textContent = `Préchargement des tuiles: ${current}/${total} (${percentage}%)`;
-    } else if (window.CURRENT_LANGUAGE == "en") {
-        notification.firstChild.textContent = `Preloading tiles: ${current}/${total} (${percentage}%)`;
-    } else if (window.CURRENT_LANGUAGE == "es") {
-        notification.firstChild.textContent = `Precargando mosaicos: ${current}/${total} (${percentage}%)`;
-    } else if (window.CURRENT_LANGUAGE == "hu") {
-        notification.firstChild.textContent = `Térkép csempe előtöltése: ${current}/${total} (${percentage}%)`;
-    }
-}
-
-/**
- * Intercepteur pour utiliser les tuiles en cache lorsque disponibles
- * @param {string} url - URL de la tuile
- * @returns {Promise<Response>} - Réponse HTTP
- */
-
 export async function fetchTileWithCache(url) {
-    // Vérifier si le navigateur supporte le Cache API
-    if (!('caches' in window)) {
-        return fetch(url, {
-            headers: {
-                'X-Requested-With': 'no-sw-intercept'
-            }
-        });
-    }
+    if (!('caches' in window)) return fetch(url);
     
     try {
-        // Vérifier si la tuile est dans le cache
         const cache = await caches.open(TILE_CACHE_NAME);
         const cachedResponse = await cache.match(url);
         
         if (cachedResponse) {
-            // Utiliser la version en cache
             return cachedResponse;
         }
         
-        // Si pas en cache, faire une requête réseau AVEC le header spécial
         const networkResponse = await fetch(url, {
-            headers: {
-                'X-Requested-With': 'no-sw-intercept'
-            }
+            headers: { 'X-Requested-With': 'no-sw-intercept' }
         });
         
-        // Mettre en cache pour la prochaine fois
         cache.put(url, networkResponse.clone());
-        
         return networkResponse;
     } catch (error) {
-        console.warn(`⚠️ Erreur lors de la récupération de ${url}:`, error);
-        return fetch(url, {
-            headers: {
-                'X-Requested-With': 'no-sw-intercept'
-            }
-        });
+        // En runtime map, on évite les logs sauf erreur critique
+        return fetch(url);
     }
 }
-

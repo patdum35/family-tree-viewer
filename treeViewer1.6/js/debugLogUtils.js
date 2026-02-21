@@ -1,3 +1,5 @@
+// debugLogUtils.js est importé dynamiquement dans main.js si on active les log de debug
+// donc pas de problème de lightHouse score au démarrage/
 /**
  * debugLogUtils.js - Module de débogage unifié pour souris et tactile
  * Fournit un panneau de débogage entièrement fonctionnel et propre
@@ -31,7 +33,7 @@ import { verifyResourceCache } from './resourcePreloader.js';
 
 
 // Exposer la fonction pour qu'elle soit accessible globalement
-window.activateDebugLogs = activateDebugLogs;
+// window.activateDebugLogs = activateDebugLogs;
 
 
 

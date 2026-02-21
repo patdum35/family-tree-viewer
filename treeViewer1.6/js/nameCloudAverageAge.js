@@ -1,6 +1,9 @@
 import { state, showToast } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
-import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud, extractYear  } from './nameCloudUtils.js';
+// import { nameCloudState, getPersonsFromTree } from './main.js';
+// import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud, extractYear  } from './nameCloudUtils.js';
+import { hasDateInRange, cleanProfession, cleanLocation, cleanProfessionForNameCloud, extractYear  } from './nameCloud.js';
+
 import { createStatsModal, createFrequencyStatsModal }  from './nameCloudStatModal.js';
 import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
 import { debounce, isModalVisible } from './eventHandlers.js';

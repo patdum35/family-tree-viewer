@@ -1,7 +1,8 @@
 
-import { getCachedResourceUrl } from './photoPlayer.js';
-import { state, calcFontSize } from './main.js'
-
+// import { getCachedResourceUrl } from './photoPlayer.js';
+import { state, calcFontSize, getGetCachedResourceUrl } from './main.js'
+// documentation.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton 💡
+// donc pas de problème de lightHouse score au démarrage
 /**
  * @file documentation.js
  * Ce fichier contient la fonction documentation() exportée avec le multilingue intégré.
@@ -1589,6 +1590,8 @@ export function documentation() {
      * @param {object} resourceMeta - Métadonnées de la ressource (maintenant avec targetClass).
      */
     async function injectResource(resourceMeta) {
+
+       const  getCachedResourceUrl = await getGetCachedResourceUrl();
         // 💥 CHANGEMENT CLÉ : Utiliser querySelectorAll pour obtenir une liste de tous les éléments
         const targetElements = document.querySelectorAll(`.${resourceMeta.targetClass}`);
         

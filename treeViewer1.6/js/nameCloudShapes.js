@@ -1,4 +1,5 @@
 import { nameCloudState } from './nameCloud.js'
+// import { nameCloudState } from './main.js';
 
 export function createShapePath(shape, width, height, scale = 1.0) {
     // Appeler la fonction appropriée selon la forme

@@ -1,18 +1,25 @@
 import { state, calcFontSize } from './main.js';
 import { nameCloudState } from './nameCloud.js';
-import { saveHeatmapPosition, makeElementDraggable } from './geoHeatMapInteractions.js';
-import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
+// import { nameCloudState } from './main.js';
+// import { saveHeatmapPosition } from './geoHeatMapInteractions.js';
+import { getSaveHeatmapPosition } from './main.js';
+import { makeElementDraggable } from './resizableModalUtils.js';
+// import { refreshHeatmap, createDataForHeatMap } from './geoHeatMapDataProcessor.js';
+import { getRefreshHeatmap, getCreateDataForHeatMap } from './main.js';
 import { collectPersonLocations, createCachedTileLayer, createEnhancedMarkerIcon, fitMapToMarkers, 
     clearMap, addMapTitle, addMapButton, addLoadingOverlay, removeLoadingOverlay, 
     setupCustomPopupStyle, cleanLocationName, showTemporaryLabel } from './mapUtils.js';
-import { geocodeLocation } from './geoLocalisation.js';
-import { getTranslation } from './nameCloudUI.js';
-import { createDataForHeatMap } from './geoHeatMapDataProcessor.js';
+// import { geocodeLocation } from './geoLocalisation.js';
+import { getGeocodeLocation } from './main.js';
+// import { getTranslation } from './nameCloudUI.js';
+import { getGetTranslation } from './main.js';
 import { getPersonsListTitle } from './nameCloudInteractions.js';
 import { addTooltipTransparencyFix, toggleAnimationPause, animationState} from './treeAnimation.js';
-import { showHeatmapFromSearch } from './searchModalUI.js';
+// import { showHeatmapFromSearch } from './searchModalUI.js';
+import { getShowHeatmapFromSearch } from './main.js';
 import { showHeatmapFromShowPersonList } from './nameCloudInteractions.js';
-import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+// import { disableFortuneModeClean } from './treeWheelAnimation.js';
+import { getDisableFortuneModeClean } from './main.js';
 import { debounce } from './eventHandlers.js';
 
 /**
@@ -180,7 +187,7 @@ function getUITranslation(key) {
 
 
 export async function displayHeatMap(personId = null, currentSearchResults = null, isResultsFormated = false, newConfig = null, title = null, isOnlyOnePerson = false, personName = null, showPersonListModalCounter = null) {
-
+    console.log(' ****** debug in displayHeatMap :currentSearchResults ');
 
     // // si le mode animation était lancé, le mettre en pause
     if (!animationState.isPaused && !state.isRadarEnabled && !state.isWordCloudEnabled ) {
@@ -193,8 +200,9 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
     if (wrapper) {
         wrapper.style.display = "none";
     }
-
+    const  disableFortuneModeClean = await getDisableFortuneModeClean();
     disableFortuneModeClean();
+    const getTranslation = await getGetTranslation();
 
     // console.log('- debug displayHeatMap' , personId, currentSearchResults,isResultsFormated,  newConfig, ', title=', title, isOnlyOnePerson, ', personName=', personName)
     // Création d'un indicateur de chargement
@@ -245,6 +253,7 @@ export async function displayHeatMap(personId = null, currentSearchResults = nul
 
         // Générer les données pour la heatmap
         let heatmapData;
+        const createDataForHeatMap = await getCreateDataForHeatMap();
         if (isSearchResults) {
             if (isResultsFormated) { 
                 heatmapData = currentSearchResults;
@@ -412,6 +421,7 @@ export async function createIndividualLocationMap(personId, heatmapData = null, 
             for (const location of locations) {
                 try {
                     console.log("Géocodage de:", location.place);
+                    const geocodeLocation = await getGeocodeLocation();
                     const coords = await geocodeLocation(location.place);
                     
                     if (coords && !isNaN(coords.lat) && !isNaN(coords.lon)) {
@@ -491,6 +501,7 @@ export async function createIndividualLocationMap(personId, heatmapData = null, 
                 const modal = document.getElementById('search-modal')
                 const isVisible = modal && getComputedStyle(modal).display !== 'none' && getComputedStyle(modal).visibility !== 'hidden';
                 if (isVisible) { 
+                    const showHeatmapFromSearch = getShowHeatmapFromSearch();
                     showHeatmapFromSearch();
                 } else {                           
                     const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
@@ -559,7 +570,7 @@ export async function createIndividualLocationMap(personId, heatmapData = null, 
  * @param {Object} initialPosition - Position et taille initiales optionnelles { top, left, width, height }
  * @returns {HTMLElement} - L'élément wrapper de la heatmap créée ou mise à jour
  */
-export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = false, updateOnly = false, initialPosition = null) {
+export async function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = false, updateOnly = false, initialPosition = null) {
     
 
     // console.log("\n\n\n ****** debug in createImprovedHeatmap", locationData, heatmapTitle, isFromTree , updateOnly , initialPosition);
@@ -698,10 +709,10 @@ export function createImprovedHeatmap(locationData, heatmapTitle, isFromTree = f
     }
 
     // Définir et stocker le nouvel écouteur
-    window._resizeHeatmapListener = function() {
+    window._resizeHeatmapListener = async function() {
 
 
-console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
+        console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
 
 
         const wrapper = document.getElementById('namecloud-heatmap-wrapper');
@@ -752,9 +763,9 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
             }
             
             // Sauvegarder la nouvelle position
-            if (typeof saveHeatmapPosition === 'function') {
-                saveHeatmapPosition();
-            }
+            const saveHeatmapPosition = await getSaveHeatmapPosition();
+            saveHeatmapPosition();
+
         }
     };
 
@@ -906,6 +917,7 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
     makeElementDraggable(heatmapWrapper, [titleBar, dragHandle]);
 
     // Ajouter un écouteur pour sauvegarder la position après déplacement
+    const saveHeatmapPosition = await getSaveHeatmapPosition();
     heatmapWrapper.addEventListener('mouseup', () => {
         saveHeatmapPosition();
     });
@@ -957,7 +969,7 @@ console.log('\n\n\n - ***** debug resize Map ********* \n\n\n ')
  * @param {Array} locationData - Données à afficher sur la carte
  * @param {Function} restoreOriginalZindexes - Fonction pour restaurer les z-index originaux
  */
-function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle, isFromTree = false) {
+async function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restoreOriginalZindexes, heatmapTitle, isFromTree = false) {
     console.log('=== DEBUT initializeLeafletMap ===');
     console.log('window.heatLayer existe ?', !!window.heatLayer);
     console.log('heatmapWrapper.map existe ?', !!heatmapWrapper.map);
@@ -1206,6 +1218,7 @@ function initializeLeafletMap(heatmapWrapper, mapContainer, locationData, restor
         heatmapWrapper.map = map;
 
         // Sauvegarder la position
+        const saveHeatmapPosition = await getSaveHeatmapPosition();
         saveHeatmapPosition();
     } catch (error) {
         console.error('Erreur lors de l\'initialisation de la carte:', error);
@@ -1572,9 +1585,10 @@ function createMapControls(mapContainer, heatmapWrapper, isFromTree) {
 
 
     // Ajouter les écouteurs d'événements
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener('click', async () => {
         if(!isFromTree) 
         {
+            const refreshHeatmap = await getRefreshHeatmap();
             if (typeof refreshHeatmap === 'function') {
                 refreshHeatmap();
             }
@@ -1703,7 +1717,7 @@ function setupResizeHandlers(resizeHandle, heatmapWrapper) {
     }
 
     // Arrêt du redimensionnement
-    function stopResize() {
+    async function stopResize() {
         if (isResizing) {
             isResizing = false;
             heatmapWrapper.style.userSelect = '';
@@ -1715,7 +1729,7 @@ function setupResizeHandlers(resizeHandle, heatmapWrapper) {
             document.removeEventListener('mouseup', stopResize);
             document.removeEventListener('touchend', stopResize);
             document.removeEventListener('touchcancel', stopResize);
-            
+            const saveHeatmapPosition = await getSaveHeatmapPosition();
             // Ajouter un petit délai pour s'assurer que les animations sont terminées
             setTimeout(saveHeatmapPosition, 100);
         }

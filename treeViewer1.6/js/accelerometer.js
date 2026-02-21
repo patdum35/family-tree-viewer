@@ -1,5 +1,7 @@
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { getZoom } from './treeRenderer.js';
+// accelerometer.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton 🧭 Activer l'accéléromètre
+// donc pas de problème de lightHouse score au démarrage
 
 /**
  * Module pour afficher les données de l'accéléromètre en temps réel.

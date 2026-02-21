@@ -2,9 +2,12 @@
  * resourcePreloader.js - Gestion des fichiers importants en cache
  * Complètement séparé de mapTilesPreloader.js
  */
+// resourcePreloader.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton loadDataButton "Entrez"
+// donc pas de problème de lightHouse score au démarrage
 
 // Import de debugLog si disponible
-import { debugLog } from './debugLogUtils.js';
+// import { debugLog } from './debugLogUtils.js';
+import { getDebugLog } from './main.js';
 
 // Nom du cache pour les ressources importantes
 export const APP_CACHE_NAME = 'app-resources-cache-v2';
@@ -53,23 +56,23 @@ const RESOURCES_TO_CACHE = [
   './sounds/lalatte.mpx'
 ];
 
+
 /**
  * Fonction utilitaire pour logger
- * Utilise debugLog s'il est disponible, sinon console.log
  */
-function log(message, type = 'info') {
+ async function log(message, type = 'info') {
+  const debugLog = await getDebugLog();
   if (typeof debugLog === 'function') {
     debugLog(message, type);
   } else {
     if (type === 'error') console.error(message);
     else if (type === 'warning') console.warn(message);
+    else if (type === 'success') console.log(`%c${message}`, 'color: #00ff00');
     else console.log(message);
   }
 }
 
-
-
-// Ajouter cette fonction de debug
+// Diagnostic du contenu
 async function debugCacheContent() {
     try {
         const cacheNames = await caches.keys();
@@ -78,9 +81,11 @@ async function debugCacheContent() {
         if (cacheNames.includes(APP_CACHE_NAME)) {
             const cache = await caches.open(APP_CACHE_NAME);
             const requests = await cache.keys();
-            // console.log(`🔍 Contenu du cache ${APP_CACHE_NAME}:`, requests.length, "entrées");
             requests.forEach(req => {
-                if (req.url.includes('arbre.enc')) {console.log("  -in debugCacheContent : ", req.url)}});
+                if (req.url.includes('arbre.enc')) {
+                    console.log("  -in debugCacheContent : ", req.url);
+                }
+            });
         } else {
             console.log("❌ Cache APP_CACHE_NAME introuvable");
         }
@@ -89,232 +94,159 @@ async function debugCacheContent() {
     }
 }
 
-
-// Ajouter cette fonction avant initResourcePreloading()
+// Vérification du statut avec mesure de temps
 async function checkResourceCacheStatus() {
+    const t0 = performance.now();
     try {
         const cacheNames = await caches.keys();
-        console.log("🔍 TOUS les caches:", cacheNames); // AJOUTER CETTE LIGNE
-        
         const hasCache = cacheNames.includes(APP_CACHE_NAME);
         
         if (!hasCache) {
-            console.log(`❌ Cache ${APP_CACHE_NAME} introuvable dans:`, cacheNames); // AJOUTER
             return { hasCache: false, hasContent: false };
         }
         
         const cache = await caches.open(APP_CACHE_NAME);
         const cachedRequests = await cache.keys();
-        const hasContent = cachedRequests.length > 0;
+        const duration = (performance.now() - t0).toFixed(2);
         
-        console.log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`);
-        log(`📊 Statut du cache ressources: ${cachedRequests.length} ressources en cache`, 'info');
-        
-        return { hasCache: true, hasContent, actualCount: cachedRequests.length };
+        console.log(`📊 Statut : ${cachedRequests.length} ressources détectées en ${duration}ms`);
+        return { 
+            hasCache: true, 
+            hasContent: cachedRequests.length > 0, 
+            actualCount: cachedRequests.length,
+            scanDuration: duration 
+        };
     } catch (error) {
-        console.error("❌ Erreur lors de la vérification du cache ressources:", error);
-        log(`❌ Erreur lors de la vérification du cache ressources: ${error.message}`, 'error');
+        console.error("❌ Erreur vérification cache:", error);
         return { hasCache: false, hasContent: false };
     }
 }
 
-// Modifier initResourcePreloading() pour devenir async et ajouter la vérification :
 export async function initResourcePreloading() {
-    console.log("🚀 Initialisation du préchargement des ressources...");
+    console.log("🚀 Initialisation du préchargement...");
     log("🚀 Initialisation du préchargement des ressources...", 'info');
-    
 
-// DEBUG: Afficher le contenu actuel du cache
     await debugCacheContent();
 
-
     if (!('caches' in window)) {
-        console.warn("⚠️ Cache API non supportée par ce navigateur");
-        log("⚠️ Cache API non supportée par ce navigateur", 'warning');
+        log("⚠️ Cache API non supportée", 'warning');
         return false;
     }
-    
 
-    // NOUVEAU : Vérifier si le cache existe déjà et n'est pas vide
     const cacheExists = await checkResourceCacheStatus();
 
+    // Si tout est déjà là, on ne fait rien (Gain de temps CPU)
     if (cacheExists.hasCache && cacheExists.hasContent && cacheExists.actualCount === RESOURCES_TO_CACHE.length) {
-        console.log("✅ Cache des ressources déjà présent, préchargement ignoré");
+        console.log(`✅ Cache complet (${cacheExists.actualCount} items). Scan disque: ${cacheExists.scanDuration}ms`);
         log("✅ Cache des ressources déjà présent, préchargement ignoré", 'info');
         return true;
     }
     
-    // Précharger les ressources importantes
-    preloadAppResources();
-    
+    // Sinon, on lance le moteur de préchargement
+    await preloadAppResources();
     return true;
 }
 
-
-
-
-
-
-
-// /**
-//  * Initialise le préchargement des ressources
-//  * À appeler au chargement de la page
-//  */
-// export function initResourcePreloading() {
-//     console.log("🚀 Initialisation du préchargement des ressources...");
-//     log("🚀 Initialisation du préchargement des ressources...", 'info');
-    
-//     // Vérifier si le navigateur supporte le Cache API
-//     if (!('caches' in window)) {
-//         console.warn("⚠️ Cache API non supportée par ce navigateur");
-//         log("⚠️ Cache API non supportée par ce navigateur", 'warning');
-//         return false;
-//     }
-    
-//     // Précharger les ressources importantes
-//     preloadAppResources();
-    
-//     return true;
-// }
-
-/**
- * Précharge les ressources importantes de l'application
- */
 async function preloadAppResources() {
-    console.log(`🔄 Préchargement de ${RESOURCES_TO_CACHE.length} ressources de l'application...`);
-    log(`🔄 Préchargement de ${RESOURCES_TO_CACHE.length} ressources importantes...`, 'info');
+    const totalStart = performance.now();
+    log(`🔄 Préchargement de ${RESOURCES_TO_CACHE.length} ressources...`, 'info');
     
-    // Créer un élément de notification pour l'utilisateur
-    let  notification;
-    // if (window.CURRENT_LANGUAGE == "fr") {
-    //     notification = createPreloadNotification("Préchargement des ressources...");
-    // } else if (window.CURRENT_LANGUAGE == "en") {
-    //     notification = createPreloadNotification("Preloading resources...");
-    // } else if (window.CURRENT_LANGUAGE == "es") {
-    //     notification = createPreloadNotification("Precargando recursos...");
-    // } else if (window.CURRENT_LANGUAGE == "hu") {
-    //     notification = createPreloadNotification("Előtolás...");
-    // }
-    
-    // document.body.appendChild(notification);
-    
-    // Ouvrir ou créer le cache
     try {
         const cache = await caches.open(APP_CACHE_NAME);
-        let loadedCount = 0;
-        let skippedCount = 0;
+        const keys = await cache.keys();
+        const urlsInCache = new Set(keys.map(k => k.url));
         
-        // Utiliser processInChunks pour ne pas bloquer l'interface
+        let newlyAddedList = [];
+        let alreadyPresentList = [];
+        let errorList = [];
+        
+        // On traite par lots pour garder l'UI fluide
         await processInChunks(RESOURCES_TO_CACHE, async (resourceUrl) => {
+            const fetchStart = performance.now();
             try {
-                // Vérifier si la ressource est déjà en cache
-                const cachedResponse = await cache.match(resourceUrl);
+                const fullUrl = new URL(resourceUrl, window.location.origin).href;
                 
-                if (!cachedResponse) {
-                    // Déterminer le type MIME approprié (pour aider les navigateurs mobiles)
-                    let mimeType = '*/*';
-                    if (resourceUrl.endsWith('.jpg')) mimeType = 'image/jpeg';
-                    if (resourceUrl.endsWith('.mp3')) mimeType = 'audio/mpeg';
-                    if (resourceUrl.endsWith('.json')) mimeType = 'application/json';
-                    if (resourceUrl.endsWith('.enc')) mimeType = 'application/octet-stream';
+                if (urlsInCache.has(fullUrl)) {
+                    alreadyPresentList.push(resourceUrl);
+                    return;
+                }
+
+                // Détermination du MIME
+                let mimeType = '*/*';
+                if (resourceUrl.endsWith('.jpg')) mimeType = 'image/jpeg';
+                if (resourceUrl.endsWith('.mp3')) mimeType = 'audio/mpeg';
+                if (resourceUrl.endsWith('.json')) mimeType = 'application/json';
+                if (resourceUrl.endsWith('.enc')) mimeType = 'application/octet-stream';
+                
+                const response = await fetch(resourceUrl, { 
+                    method: 'GET',
+                    cache: 'no-cache',
+                    mode: 'no-cors',
+                    headers: { 'Accept': mimeType, 'X-Requested-With': 'no-sw-intercept' }
+                });
+                
+                if (response.ok || response.type === 'opaque') {
+                    await cache.put(resourceUrl, response.clone());
+                    const fetchDuration = (performance.now() - fetchStart).toFixed(2);
+                    newlyAddedList.push(`${resourceUrl} (${fetchDuration}ms)`);
                     
-                    // Charger et mettre en cache la ressource
-                    const response = await fetch(resourceUrl, { 
-                        method: 'GET',
-                        cache: 'no-cache',
-                        mode: 'no-cors',
-                        headers: {
-                          'Accept': mimeType,
-                          'X-Requested-With': 'no-sw-intercept'  // Marqueur spécial
-                        }
-                    });
-                    
-                    if (response.ok || response.type === 'opaque') {
-                        await cache.put(resourceUrl, response.clone());
-                        loadedCount++;
-                        
-                        // Log détaillé pour les fichiers importants
-                        if (resourceUrl.endsWith('.enc')) {
-                            // console.log(`✅ Fichier critique mis en cache: ${resourceUrl}`);
-                            if (resourceUrl.includes('arbre.enc')) {
-                                log(`✅ Fichier critique mis en cache: ${resourceUrl}`, 'success');
-                            }
-                        }
-                        
-                        // Mettre à jour la notification
-                        // updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
+                    if (resourceUrl.includes('arbre.enc')) {
+                        log(`✅ Fichier critique mis en cache: ${resourceUrl} (${fetchDuration}ms)`, 'success');
                     }
                 } else {
-                    // La ressource est déjà en cache
-                    skippedCount++;
+                    errorList.push(resourceUrl);
                 }
             } catch (e) {
-                console.warn(`⚠️ Impossible de précharger: ${resourceUrl}`, e);
-                log(`⚠️ Impossible de précharger: ${resourceUrl} - ${e.message}`, 'warning');
+                errorList.push(resourceUrl);
             }
-        }, 2, 100); // Traiter 2 ressources à la fois, avec 100ms de pause entre les lots
+        }, 2, 100);
+
+        // --- RAPPORT FINAL AVEC MESURE DE TEMPS ---
+        const totalDuration = (performance.now() - totalStart).toFixed(2);
         
-        // Mise à jour finale de la notification
-        // updatePreloadNotification(notification, loadedCount + skippedCount, RESOURCES_TO_CACHE.length);
+        console.group(`📊 BILAN DU PRÉCHARGEMENT (${totalDuration}ms)`);
+        if (alreadyPresentList.length > 0) {
+            console.log(`ℹ️ DÉJÀ EN CACHE (${alreadyPresentList.length})`);
+            console.table(alreadyPresentList); 
+        }
+        if (newlyAddedList.length > 0) {
+            console.log(`✅ NOUVELLEMENT CHARGÉS (${newlyAddedList.length})`);
+            console.table(newlyAddedList);
+        }
+        if (errorList.length > 0) {
+            console.error(`❌ ÉCHECS (${errorList.length})`);
+            console.table(errorList);
+        }
+        console.groupEnd();
+
+        const summary = `✅ Terminé en ${totalDuration}ms: ${newlyAddedList.length} nouveaux, ${alreadyPresentList.length} déjà là.`;
+        console.log(summary);
+        log(summary, 'success');
         
-        // Faire disparaître la notification après 3 secondes
-        // setTimeout(() => {
-        //     notification.style.opacity = '0';
-        //     setTimeout(() => notification.remove(), 500);
-        // }, 3000);
-        
-        console.log(`✅ Préchargement des ressources terminé: ${loadedCount} nouvelles, ${skippedCount} déjà en cache`);
-        log(`✅ Préchargement des ressources terminé: ${loadedCount} nouvelles, ${skippedCount} déjà en cache`, 'success');
-        
-        // Vérifier spécifiquement les fichiers .enc
-        verifyEncFiles(cache);
+        await verifyEncFiles(cache);
+
     } catch (error) {
-        console.error("❌ Erreur lors du préchargement des ressources:", error);
-        log(`❌ Erreur lors du préchargement des ressources: ${error.message}`, 'error');
-        notification.remove();
+        log(`❌ Erreur préchargement: ${error.message}`, 'error');
     }
 }
 
-/**
- * Vérifier spécifiquement que les fichiers .enc sont bien en cache
- */
 async function verifyEncFiles(cache) {
     const encFiles = ['./arbre.enc', './arbreX.enc', './arbreB.enc', './arbreC.enc', './arbreG.enc', './arbreLE.enc'];
-    
-    log("🔍 Vérification des fichiers .enc en cache:", 'info');
-    
+    const t0 = performance.now();
+
     for (const file of encFiles) {
-        try {
-            const response = await cache.match(file);
-            if (response) {
-                // console.log(`✅ Fichier .enc trouvé en cache: ${file}`);
-                if (file.includes('arbre.enc')) {
-                    log(`✅ Fichier .enc trouvé en cache: ${file}`, 'success');
-                }
-            } else {
-                console.warn(`⚠️ Fichier .enc NON trouvé en cache: ${file}`);
-                log(`⚠️ Fichier .enc NON trouvé en cache: ${file}`, 'warning');
-            }
-        } catch (error) {
-            console.error(`❌ Erreur lors de la vérification de ${file}:`, error);
-            log(`❌ Erreur lors de la vérification de ${file}: ${error.message}`, 'error');
+        const response = await cache.match(file);
+        if (response && file.includes('arbre.enc')) {
+            log(`✅ Vérification : ${file} est bien sécurisé en cache`, 'success');
         }
     }
+    console.log(`🔍 Vérification des fichiers .enc terminée en ${(performance.now() - t0).toFixed(2)}ms`);
 }
 
-/**
- * Traite des éléments par lot pour éviter de bloquer l'interface
- * COPIE de la fonction de mapTilesPreloader pour éviter les dépendances
- */
 async function processInChunks(items, processor, chunkSize = 10, delay = 20) {
     for (let i = 0; i < items.length; i += chunkSize) {
         const chunk = items.slice(i, i + chunkSize);
-        
-        // Traiter le lot actuel
-        const promises = chunk.map(item => processor(item));
-        await Promise.all(promises);
-        
-        // Pause pour permettre à l'interface de répondre
+        await Promise.all(chunk.map(item => processor(item)));
         if (i + chunkSize < items.length && delay > 0) {
             await new Promise(resolve => setTimeout(resolve, delay));
         }

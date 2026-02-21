@@ -1,15 +1,21 @@
+// statsModal.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton stats  📊
+// donc pas de problème de lightHouse score au démarrage
+
 import { state, calcFontSize } from './main.js';
-import { nameCloudState } from './nameCloud.js';
+import { nameCloudState , processNamesData} from './nameCloud.js';
+// import { nameCloudState, processNamesData } from './main.js';
 import { createTypeSelect, createScopeSelect, createStatsTypeSelect } from './nameCloudUI.js';
 import { createFrequencyStatsModal, createStatsModal } from './nameCloudStatModal.js';
 import { showCenturyStatsModal }  from './nameCloudCenturyModal.js';
-import { processNamesData } from './nameCloud.js';
 import { ensureStatsExist } from './nameCloudAverageAge.js';
-import { setupSearchFieldModal, findPersonsBy } from './searchModalUI.js';
+// import { setupSearchFieldModal, findPersonsBy } from './searchModalUI.js';
+import { getSetupSearchFieldModal, getFindPersonsBy } from './main.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { closeAllModals, debounce, isModalVisible } from './eventHandlers.js';
 import { fullResetAnimationState } from './treeAnimation.js';
-import { disableFortuneModeClean } from './treeWheelAnimation.js';
+// import { disableFortuneModeClean } from './treeWheelAnimation.js';
+import { getDisableFortuneModeClean } from './main.js';
+
 
 let lang = window.CURRENT_LANGUAGE;
 
@@ -261,9 +267,10 @@ function moveDownStatsModal() {
 /**
  * Crée et affiche la modale de recherche
  */
-function openStatsModal() {
+async function openStatsModal() {
 
     fullResetAnimationState();
+    const disableFortuneModeClean = await getDisableFortuneModeClean();
     disableFortuneModeClean();
 
 
@@ -899,6 +906,7 @@ function setupModalEvents() {
 
     // Recherche en appuyant sur Entrée dans le champ de recherche
     searchRoot.addEventListener('focus', function(event) {
+        const setupSearchFieldModal = getSetupSearchFieldModal();
         setupSearchFieldModal(true);
 
         setTimeout(() => {
@@ -1019,7 +1027,7 @@ function setupModalEvents() {
 /**
  * Effectue la recherche dans la modale
  */
-function performModalSearch() {
+async function performModalSearch() {
     const searchType = document.getElementById('statsModal-search-type').value;
     const searchScope = document.getElementById('statsModal-search-scope').value;
     const statsType = document.getElementById('statsModal-StatsType').value;   
@@ -1048,6 +1056,7 @@ function performModalSearch() {
 
     const nameData = processNamesData(config, searchTerm, true);
 
+    const findPersonsBy = await getFindPersonsBy();
     const personList = findPersonsBy(searchTerm, config, searchTerm);
     // Stocker les résultats pour la heatmap
     window.currentSearchResults = personList.results;

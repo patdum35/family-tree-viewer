@@ -1,9 +1,11 @@
 // ====================================
 // Rendu des nœuds
 // ====================================
+import { importLinks } from './importState.js'; // import de nodeControls via importLinks pour éviter les erreurs de chargement circulaire
 import { extractYear } from './utils.js';
 import { state } from './main.js';
-import { addRootChangeButton, addDescendantsControls, addAncestorsControls } from './nodeControls.js';
+// import { addRootChangeButton, addDescendantsControls, addAncestorsControls } from './nodeControls.js';
+import { getDisplayPersonDetails } from './main.js';
 
 
 
@@ -25,7 +27,6 @@ export function cleanIdForSelector(id) {
  * @param {Object} treeLayout - La mise en page de l'arbre
  */
 export function drawNodes(group, layout, isAnimation = false) {
-
     const nodeGroups = group.selectAll(".node")
         .data(layout.descendants())
         .join("g")
@@ -38,9 +39,10 @@ export function drawNodes(group, layout, isAnimation = false) {
         .attr("class", "node")
         .attr("id", d => `node-${cleanIdForSelector(d.data.id)}`)
         .attr("transform", d => `translate(${d.y},${d.x})`)
-        .on("click", function(event, d) {
+        .on("click", async function(event, d) {
             // Ajout de l'appel à displayPersonDetails lors du clic
             event.stopPropagation();
+            const displayPersonDetails = await getDisplayPersonDetails();
             displayPersonDetails(d.data.id);
         });
 
@@ -64,12 +66,12 @@ export function drawNodes(group, layout, isAnimation = false) {
                 const spacing = state.boxHeight * 1.2;
                 return `translate(${layout.y},${layout.x + initialSpacing + spacing * i})`;
             })
-            .on("click", function(event, d) {
+            .on("click", async function(event, d) {
                 // Ajout de l'appel à displayPersonDetails lors du clic
                 event.stopPropagation();
+                const displayPersonDetails = await getDisplayPersonDetails();
                 displayPersonDetails(d.data.id);
             });
-
             
         // Même traitement pour les spouses
         drawNodeBoxes(spouseNodes);
@@ -257,9 +259,9 @@ function drawDates(text, data) {
  */
 
 export function addControlButtons(nodeGroups) {
-    addRootChangeButton(nodeGroups);
-    addDescendantsControls(nodeGroups);
-    addAncestorsControls(nodeGroups);
+    importLinks.nodeControls.addRootChangeButton(nodeGroups);
+    importLinks.nodeControls.addDescendantsControls(nodeGroups);
+    importLinks.nodeControls.addAncestorsControls(nodeGroups);
 }
 
 

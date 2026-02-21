@@ -1,13 +1,37 @@
+import { importLinks } from './importState.js'; // import de treeAnimation, mainUI via importLinks pour éviter les erreurs de chargement circulaire
 import { state, updateRadarButtonText, toggleTreeRadar, keepSilentAudioAlive, searchRootPersonId, redimensionnerPlayButtonSizeInDOM } from './main.js';
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
-import { closeCloudName } from './nameCloudUI.js';
+// import { closeCloudName } from './nameCloudUI.js';
+import { getCloseCloudName } from './main.js';
 import { debounce } from './eventHandlers.js';
-import { showToastNew } from './debugLogUtils.js';
-import { documentation } from './documentation.js';
-import { toggleAnimationPause, resetAnimationState, startAncestorAnimation, findAncestorPath, findAllAncestorPaths  } from './treeAnimation.js';
+// import { showToastNew } from './debugLogUtils.js';
+// import { documentation } from './documentation.js';
+// import { toggleAnimationPause, resetAnimationState, startAncestorAnimation, findAncestorPath, findAllAncestorPaths  } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-import { openSearchModal } from './searchModalUI.js';
-import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
+// import { openSearchModal } from './searchModalUI.js';
+import { getOpenSearchModal } from './main.js';
+// import { disableFortuneModeClean, disableFortuneModeWithLever } from './treeWheelAnimation.js';
+import { getDisableFortuneModeClean, getDisableFortuneModeWithLever } from './main.js';
+const getDocumentation = async () => {
+  const { documentation } = await import('./documentation.js');
+  documentation(); // On lance l'exécution directement ici
+};
+const getStatsModal = async () => {
+  const { statsModal } = await import('./statsModalUI.js');
+  statsModal();
+};
+const getDisplayHeatMap = async () => {
+  const { displayHeatMap } = await import('./geoHeatMapUI.js');
+  displayHeatMap();
+};
+const getShowToastNew = async () => {
+    const { showToastNew } = await import('./debugLogUtils.js');
+    return showToastNew;
+};
+const getProcessNamesCloudWithDate = async () => {
+    const { processNamesCloudWithDate } = await import('./nameCloud.js');
+    processNamesCloudWithDate({ type: 'prenoms', startDate: 1500, endDate: new Date().getFullYear(), scope: 'ancestors' });
+};
 
 // Variables pour garder une référence aux éléments
 let hamburgerMenu, sideMenu, menuOverlay;
@@ -914,8 +938,9 @@ function createSection(titleIn, index = 0) {
 }
 
 
-export function showLoader()  {
+export async function showLoader()  {
     const message1 = " INIT  " ;
+    const showToastNew = await getShowToastNew();
     showToastNew(message1, 'info', 5000)
 }
 
@@ -930,11 +955,11 @@ function createButtonsOnDisplaySection() {
   document.head.insertAdjacentHTML('beforeend', '<style>.compact-menu{gap:0 14px !important}</style>');
   
   const buttons = [
-    { onclick: () => {buttonsOnDisplay(true); toggleMenu(false);}, title: getMenuTranslation('buttonOnDisplay'), text: '👆' },
-    { onclick: () => {buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('noButtonOnDisplay'), text: '🚫' },
-    { onclick: () => {documentation(); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
+    { onclick: () => {importLinks.mainUI.buttonsOnDisplay(true); toggleMenu(false);}, title: getMenuTranslation('buttonOnDisplay'), text: '👆' },
+    { onclick: () => {importLinks.mainUI.buttonsOnDisplay(false); toggleMenu(false);}, title: getMenuTranslation('noButtonOnDisplay'), text: '🚫' },
+    { onclick: async ()=> { await getDocumentation(); toggleMenu(false);}, title: getMenuTranslation('tutoDocumention'), text: '💡' },
   ];
-  
+ 
   buttons.forEach(buttonData => {
     const button = document.createElement('button');
     // button.setAttribute('onclick', buttonData.onclick);
@@ -1115,7 +1140,7 @@ function createAudioSection() {
           state.isRadarEnabled = true;
           toggleTreeRadarFromHamburger();
         }
-        toggleAnimationPause(); toggleMenu(false);
+        importLinks.treeAnimation.toggleAnimationPause(); toggleMenu(false);
         setTimeout(() => {
           const menuPauseBtn = document.getElementById('menu-animationPauseBtn');
           if (menuPauseBtn) {
@@ -1418,7 +1443,9 @@ function createModeSection() {
 }
 
 // Créer la section Name Cloud
-function createNameCloudSection() {
+async function createNameCloudSection() {
+  const closeCloudName = getCloseCloudName();
+
   const height = window.innerHeight*state.browserScaleCorrection;
   // const section = createSection('Nuage de mots', 0);
   const section = createSection('section_namecloud', 0);
@@ -1435,9 +1462,9 @@ function createNameCloudSection() {
   const buttons = [
     { 
       id: 'menu-nameCloudBtn',
-      onclick: () => {
+      onclick: async () => {
         if (state.isWordCloudEnabled) { closeCloudName(); }
-        processNamesCloudWithDate({ type: "prenoms", startDate: 1500, endDate: new Date().getFullYear(), scope: "ancestors" }); 
+        await getProcessNamesCloudWithDate(); 
         toggleMenu(false);
       },
       title: getMenuTranslation('title_nameCloud'), //'Nuage de noms', 
@@ -1451,14 +1478,14 @@ function createNameCloudSection() {
     },
     { 
       id: 'menu-heatMapBtn',
-      onclick: () => {displayHeatMap(); toggleMenu(false);},
+      onclick: async () => {await getDisplayHeatMap(); toggleMenu(false);},
       title: getMenuTranslation('title_heatmap'), //'heatMap', 
       text: '🌍',
 
     },
     { 
       id: 'menu-statsBtn',
-      onclick:  () => {statsModal(); toggleMenu(false);},
+      onclick:  async () => {await getStatsModal(); toggleMenu(false);},
       title: getMenuTranslation('title_stats'), //'stats', 
       text: '📊' 
     }    
@@ -1698,8 +1725,11 @@ function createSearchSection() {
   sideMenu.appendChild(section.container);
 }
 
-export function toggleTreeRadarFromHamburger() {
-  if (state.isWordCloudEnabled) { closeCloudName(); }
+export async function toggleTreeRadarFromHamburger() {
+  if (state.isWordCloudEnabled) { 
+    const closeCloudName = await getCloseCloudName();
+    closeCloudName(); 
+  }
   else { toggleTreeRadar(); }
 }
 
@@ -1907,7 +1937,7 @@ function createDemoSelector() {
           // optionElement.style.fontSize = '13px';
         }
       },
-      onChange: (value) => {
+      onChange: async (value) => {
         // Créer un événement pour simuler le clic sur l'option de menu correspondante
         if (value === 'createYourDemo') {
           openCustomAnimationModal();
@@ -1927,17 +1957,20 @@ function createDemoSelector() {
 
              if (demo) {
                  // 1. Réinitialiser l'état d'animation (CRUCIAL pour recalculer le chemin)
-                 resetAnimationState();
+                 importLinks.treeAnimation.resetAnimationState();
 
                  // 2. Gérer les modes conflictuels (Radar/Nuage)
                  if (state.isRadarEnabled) {
                     console.log("🔄 Désactivation Radar pour démo");
+                    const disableFortuneModeClean = await getDisableFortuneModeClean();
+                    const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
                     disableFortuneModeClean();
                     disableFortuneModeWithLever();
                     toggleTreeRadar();
                  }
         
-                 if (state.isWordCloudEnabled) { 
+                 if (state.isWordCloudEnabled) {
+                    const closeCloudName = await getCloseCloudName(); 
                     console.log("🔄 Fermeture Nuage pour démo");
                     closeCloudName(); 
                  }
@@ -2030,7 +2063,7 @@ function createDemoSelector() {
 
                 console.log("🚀 Lancement de l'animation dans 500ms...");
                 setTimeout(() => { 
-                  startAncestorAnimation(isCousin);
+                  importLinks.treeAnimation.startAncestorAnimation(isCousin);
                 }, 500);
                 toggleMenu(false);
                 return;
@@ -2343,6 +2376,7 @@ function syncCustomSelectors() {
     
     try {
         const importPromise = import('./mainUI.js');
+        // const importPromise = importLinks.mainUI;
         
         importPromise.then(mainUI => {
             if (mainUI) {
@@ -3533,7 +3567,7 @@ export function openCustomAnimationModal() {
             name = `myDemo ${customDemos.length + 1}`;
         }
         
-        const allPaths = findAllAncestorPaths(state.rootPersonId, selectedAncestor.id);
+        const allPaths = importLinks.treeAnimation.findAllAncestorPaths(state.rootPersonId, selectedAncestor.id);
         let selectedPathIndex;
         if (allPaths.length > 0) {
 
@@ -3541,7 +3575,7 @@ export function openCustomAnimationModal() {
           let cousinDescendantPath = null;
 
           if (cousinToggle.checked && selectedCousin && selectedCousin.id !== '') {
-            [cousinPath, cousinDescendantPath] = findAncestorPath(selectedCousin.id, selectedAncestor.id);
+            [cousinPath, cousinDescendantPath] = importLinks.treeAnimation.findAncestorPath(selectedCousin.id, selectedAncestor.id);
             
             if (cousinPath && cousinPath.length > 0) {  
               console.log("\n\n Chemin cousin trouvé:", cousinPath);
@@ -3615,7 +3649,7 @@ export function openCustomAnimationModal() {
 
         
         setTimeout(() => { 
-          startAncestorAnimation(isCousin);
+          importLinks.treeAnimation.startAncestorAnimation(isCousin);
         }, 500);
 
         closeModal();
@@ -3650,13 +3684,13 @@ export function openCustomAnimationModal() {
             borderRadius: '4px'
         });
 
-        const handleOpenModal = (e) => {
+        const handleOpenModal = async (e) => {
             e.preventDefault();
             input.blur();
 
             console.log(`\n\n--------[DEBUG] handleOpenModal: Ouverture pour le type '${type}'\n\n`);
      
-
+            const openSearchModal = await getOpenSearchModal();
             openSearchModal(null, null, 'select', (person) => {
                 // input.value = person.name.replace(/\//g, '');
                 // onSelect(person);
@@ -3667,9 +3701,7 @@ export function openCustomAnimationModal() {
                 } else {
                     console.error(`\n\n ----[DEBUG] handleOpenModal: L'objet 'person' reçu est invalide.\n\n`);
                 }
-
-
-              });
+            });
         };
 
         input.addEventListener('click', handleOpenModal);

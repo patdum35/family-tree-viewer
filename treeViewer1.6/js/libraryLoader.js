@@ -98,235 +98,169 @@ const resources = [
 ];
 
 
+const loadState = {};
+const libraryReport = { cached: [], downloaded: [], failed: [] };
 
+// --- LOG ET BILAN ---
+function logResourceStatus(type, id, url, isCache) {
+    const icon = isCache ? "📦" : "🌐";
+    const source = isCache ? "CACHE" : "RÉSEAU";
+    console.log(`${icon} [${type.toUpperCase()}] ${id} : succès depuis ${source} (${url})`);
+    
+    // On remplit le rapport pour le console.table final
+    if (isCache) {
+        if (!libraryReport.cached.includes(id)) libraryReport.cached.push(id);
+    } else {
+        if (!libraryReport.downloaded.includes(id)) libraryReport.downloaded.push(id);
+    }
+}
 
+// --- LES OUVRIERS ---
+function loadScript(resource, urlIndex = 0) {
+    if (urlIndex >= resource.urls.length) {
+        libraryReport.failed.push(resource.id);
+        return Promise.reject();
+    }
 
-
-// Ajouter une fonction pour charger les ressources JSON
-function loadJSON(resource, urlIndex = 0) {
-  // Si toutes les URL ont été essayées sans succès
-  if (urlIndex >= resource.urls.length) {
-    console.error(`Échec de chargement du JSON ${resource.id} après avoir essayé toutes les sources`);
-    return Promise.reject(new Error(`Failed to load JSON ${resource.id}`));
-  }
-  
-  return new Promise((resolve, reject) => {
-    fetch(resource.urls[urlIndex])
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log(`JSON chargé avec succès: ${resource.id} depuis ${resource.urls[urlIndex]}`);
+    return new Promise((resolve, reject) => {
+        const url = resource.urls[urlIndex];
         
-        // Pour meSpeak, initialiser avec les données
-        if (resource.id === "mespeak-config") {
-          window.meSpeak.loadConfig(data);
-        } else if (resource.id === "mespeak-voice-fr") {
-          window.meSpeak.loadVoice(data);
-        }
+        // --- LA CLÉ : On lance la vérification cache en PARALLÈLE ---
+        // On n'attend pas (pas de await ici) pour ne pas bloquer le chargement
+        const cacheCheck = caches.match(url).then(match => !!match);
+
+        const script = document.createElement('script');
+        script.id = resource.id;
+        script.src = url;
+        
+        script.onload = async () => {
+            const isCache = await cacheCheck; // On récupère le résultat ici
+            logResourceStatus("js", resource.id, url, isCache);
+            loadState[resource.id] = true;
+            resolve();
+        };
+        
+        script.onerror = () => {
+            script.remove();
+            loadScript(resource, urlIndex + 1).then(resolve).catch(reject);
+        };
+        document.head.appendChild(script);
+    });
+}
+
+function loadCSS(resource, urlIndex = 0) {
+    if (urlIndex >= resource.urls.length) {
+        libraryReport.failed.push(resource.id);
+        return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+        const url = resource.urls[urlIndex];
+        const cacheCheck = caches.match(url).then(match => !!match);
+
+        let link = document.getElementById(resource.id) || document.createElement('link');
+        link.id = resource.id;
+        link.rel = 'stylesheet';
+        link.href = url;
+        
+        link.onload = async () => {
+            const isCache = await cacheCheck;
+            logResourceStatus("css", resource.id, url, isCache);
+            loadState[resource.id] = true;
+            resolve();
+        };
+        
+        link.onerror = () => loadCSS(resource, urlIndex + 1).then(resolve).catch(reject);
+        if (!link.parentNode) document.head.appendChild(link);
+    });
+}
+
+async function loadJSON(resource, urlIndex = 0) {
+    if (urlIndex >= resource.urls.length) {
+        libraryReport.failed.push(resource.id);
+        return Promise.reject();
+    }
+    const url = resource.urls[urlIndex];
+    // Pour JSON/Fetch, on vérifie le cache AVANT le fetch car c'est très rapide
+    const isCache = await caches.match(url).then(m => !!m);
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        
+        logResourceStatus("json", resource.id, url, isCache);
+        
+        if (resource.id === "mespeak-config") window.meSpeak.loadConfig(data);
+        else if (resource.id === "mespeak-voice-fr") window.meSpeak.loadVoice(data);
         
         loadState[resource.id] = true;
-        resolve();
-      })
-      .catch(error => {
-        console.warn(`Échec de chargement du JSON ${resource.id} depuis ${resource.urls[urlIndex]}, essai de la source suivante...`);
-        loadJSON(resource, urlIndex + 1).then(resolve).catch(reject);
-      });
-  });
-}
-
-
-
-
-// État de chargement des ressources
-const loadState = {};
-
-// Fonction pour charger une feuille de style CSS
-function loadCSS(resource, urlIndex = 0) {
-  // Si toutes les URL ont été essayées sans succès
-  if (urlIndex >= resource.urls.length) {
-    console.error(`Échec de chargement du CSS ${resource.id} après avoir essayé toutes les sources`);
-    return Promise.reject(new Error(`Failed to load CSS ${resource.id}`));
-  }
-  
-  return new Promise((resolve, reject) => {
-    // Remplacer l'élément existant s'il existe
-    let linkElement = document.getElementById(resource.id);
-    if (!linkElement) {
-      linkElement = document.createElement('link');
-      linkElement.id = resource.id;
-      linkElement.rel = 'stylesheet';
-      document.head.appendChild(linkElement);
+    } catch (e) {
+        return loadJSON(resource, urlIndex + 1);
     }
-    
-    linkElement.href = resource.urls[urlIndex];
-    
-    // Gérer le succès
-    linkElement.onload = () => {
-      console.log(`CSS chargé avec succès: ${resource.id} depuis ${resource.urls[urlIndex]}`);
-      loadState[resource.id] = true;
-      resolve();
-    };
-    
-    // Gérer l'échec et essayer la prochaine URL
-    linkElement.onerror = () => {
-      console.warn(`Échec de chargement du CSS ${resource.id} depuis ${resource.urls[urlIndex]}, essai de la source suivante...`);
-      loadCSS(resource, urlIndex + 1).then(resolve).catch(reject);
-    };
-  });
 }
 
-// Fonction pour charger un script JS
-function loadScript(resource, urlIndex = 0) {
-  // Si toutes les URL ont été essayées sans succès
-  if (urlIndex >= resource.urls.length) {
-    console.error(`Échec de chargement du script ${resource.id} après avoir essayé toutes les sources`);
-    return Promise.reject(new Error(`Failed to load script ${resource.id}`));
-  }
-  
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.id = resource.id;
-    script.src = resource.urls[urlIndex];
-    
-    // Gérer le succès
-    script.onload = () => {
-      console.log(`Script chargé avec succès: ${resource.id} depuis ${resource.urls[urlIndex]}`);
-      loadState[resource.id] = true;
-      resolve();
-    };
-    
-    // Gérer l'échec et essayer la prochaine URL
-    script.onerror = () => {
-      console.warn(`Échec de chargement du script ${resource.id} depuis ${resource.urls[urlIndex]}, essai de la source suivante...`);
-      // Supprimer l'élément script qui a échoué
-      script.remove();
-      loadScript(resource, urlIndex + 1).then(resolve).catch(reject);
-    };
-    
-    document.head.appendChild(script);
-  });
-}
-
-
-
-
-
-// Mise à jour de la fonction loadResource pour gérer le type JSON
+// --- L'AIGUILLEUR ---
 function loadResource(resource) {
-  // Vérifier si la ressource est déjà chargée
-  if (loadState[resource.id]) {
-    return Promise.resolve();
-  }
-  
-  // Charger les dépendances d'abord
-  const loadDependencies = () => {
-    if (resource.dependencies && resource.dependencies.length > 0) {
-      const dependencyPromises = resource.dependencies.map(depId => {
-        const depResource = resources.find(r => r.id === depId);
-        if (depResource) {
-          return loadResource(depResource);
+    if (loadState[resource.id]) return Promise.resolve();
+    const loadDeps = () => {
+        if (resource.dependencies?.length > 0) {
+            return Promise.all(resource.dependencies.map(depId => {
+                const dep = resources.find(r => r.id === depId);
+                return dep ? loadResource(dep) : Promise.resolve();
+            }));
         }
-        return Promise.resolve(); // Ignorer les dépendances non trouvées
-      });
-      return Promise.all(dependencyPromises);
-    }
-    return Promise.resolve();
-  };
-  
-  // Une fois les dépendances chargées, charger cette ressource
-  return loadDependencies().then(() => {
-    if (resource.type === 'css') {
-      return loadCSS(resource);
-    } else if (resource.type === 'script') {
-      return loadScript(resource);
-    } else if (resource.type === 'json') {
-      return loadJSON(resource);
-    }
-    return Promise.reject(new Error(`Type de ressource inconnu: ${resource.type}`));
-  });
+        return Promise.resolve();
+    };
+    return loadDeps().then(() => {
+        if (resource.type === 'css') return loadCSS(resource);
+        if (resource.type === 'script') return loadScript(resource);
+        if (resource.type === 'json') return loadJSON(resource);
+    });
 }
 
+// --- LE CHEF D'ORCHESTRE ---
+export async function loadAllResources() {
+    try {
+        console.time("⏱️ Temps de chargement");
+        console.log(`🚀 Lancement de ${resources.length} ressources...`);
+        
+        // Reset des rapports
+        libraryReport.cached = []; libraryReport.downloaded = []; libraryReport.failed = [];
 
-// Charger toutes les ressources en séquence pour respecter les dépendances
-// async function loadAllResources() {
-//   try {
-//     // Charger les ressources en séquence pour respecter l'ordre des dépendances
-//     for (const resource of resources) {
-//       await loadResource(resource);
+        const independent = resources.filter(r => !r.dependencies?.length);
+        const dependent = resources.filter(r => r.dependencies?.length > 0);
 
-//     }
-    
+        // Chargement parallèle (Tout part en même temps : fetch + cache check)
+        await Promise.all(independent.map(r => loadResource(r)));
 
-    
-//     console.log("Toutes les bibliothèques ont été chargées avec succès!");
-    
-//     // Déclencher un événement pour signaler que tout est chargé
-//     document.dispatchEvent(new Event('libraries-loaded'));
-    
-//   } catch (error) {
-//     console.error("Erreur lors du chargement des bibliothèques:", error);
-//   }
-// }
+        // Chargement des extensions (Leaflet-heat, etc.)
+        for (const r of dependent) {
+            await loadResource(r);
+        }
 
+        // --- BILAN FINAL ---
+        console.group("📊 BILAN DES LIBRAIRIES");
+        if (libraryReport.cached.length) {
+            console.log(`📦 CACHE (${libraryReport.cached.length}) :`);
+            console.table(libraryReport.cached);
+        }
+        if (libraryReport.downloaded.length) {
+            console.log(`🌐 RÉSEAU (${libraryReport.downloaded.length}) :`);
+            console.table(libraryReport.downloaded);
+        }
+        if (libraryReport.failed.length) {
+            console.error(`❌ ÉCHECS (${libraryReport.failed.length}) :`);
+            console.table(libraryReport.failed);
+        }
+        console.groupEnd();
 
+        console.timeEnd("⏱️ Temps de chargement");
+        document.dispatchEvent(new Event('libraries-loaded'));
 
-
-async function loadAllResources() {
-  try {
-    console.time("⏱️ Chargement Libs"); // Pour voir la vitesse dans la console
-
-    // 1. On sépare les chefs (sans dépendance) des suiveurs (avec dépendance)
-    const independentResources = resources.filter(r => !r.dependsOn);
-    const dependentResources = resources.filter(r => r.dependsOn);
-
-    console.log(`🚀 Lancement parallèle de ${independentResources.length} bibliothèques...`);
-
-    // 2. MAGIE ICI : On télécharge tout le bloc principal EN MÊME TEMPS
-    // Le navigateur va ouvrir 6 connexions simultanées au lieu d'une seule
-    await Promise.all(independentResources.map(resource => loadResource(resource)));
-
-    // 3. Une fois le socle prêt, on charge les extensions (ex: leaflet-heat)
-    console.log("✅ Socle principal chargé. Chargement des extensions...");
-    for (const resource of dependentResources) {
-      await loadResource(resource);
+    } catch (error) {
+        console.error("❌ Erreur critique :", error);
     }
-
-    console.timeEnd("⏱️ Chargement Libs");
-    console.log("🎉 Toutes les bibliothèques sont prêtes !");
-    
-    // Déclencher l'événement final
-    document.dispatchEvent(new Event('libraries-loaded'));
-    
-  } catch (error) {
-    console.error("❌ Erreur critique au chargement :", error);
-  }
 }
-
-
-
-
-// // Démarrer le chargement quand le DOM est prêt
-// function initLibraryLoader() {
-//   if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', loadAllResources);
-//   } else {
-//     loadAllResources();
-//   }
-// }
-
-// // Exporter les fonctions qui pourraient être nécessaires ailleurs
-// export {
-//   initLibraryLoader,
-//   loadAllResources,
-//   resources
-// };
-
-// // Initialiser automatiquement le chargeur
-// initLibraryLoader();
-
 
 window.startAppLoading = loadAllResources;

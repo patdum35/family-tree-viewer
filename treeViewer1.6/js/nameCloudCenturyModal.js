@@ -1,5 +1,6 @@
 import { state } from './main.js';
 import { nameCloudState, collectCenturyData } from './nameCloud.js';
+// import { nameCloudState, collectCenturyData } from './main.js';
 import { statsConfig, findPeopleWithName } from './nameCloudAverageAge.js';
 import { showPersonsList } from './nameCloudInteractions.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';

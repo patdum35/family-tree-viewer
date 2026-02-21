@@ -2,11 +2,12 @@
 // Fonction pour remplacer les sélecteurs standard par des sélecteurs personnalisés
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { state, displayGenealogicTree, showToast, positionRadarButton, positionHeatMapButton, redimensionnerButtonSizeInDOM, redimensionnerSelectorSizeInDOM } from './main.js';
-import { nameCloudState } from './nameCloud.js';
-import { generateNameCloudExport } from './nameCloudUI.js';
+// import { nameCloudState } from './nameCloud.js';
+import { getNameCloudState, getGenerateNameCloudExport } from './main.js';
+// import { generateNameCloudExport } from './nameCloudUI.js';
 import { selectFoundPerson } from './eventHandlers.js';
-import { extractYear, findDateForPerson } from './nameCloudUtils.js';
-import { refreshHeatmap  } from './geoHeatMapDataProcessor.js';
+// import { refreshHeatmap  } from './geoHeatMapDataProcessor.js';
+import { getRefreshHeatmap  } from './main.js';
 
 // Variable pour suivre si les sélecteurs ont été initialisés
 let selectorsInitialized = false;
@@ -370,7 +371,9 @@ export function initializeCustomSelectors() {
 }
 
 // Fonction pour remplacer le sélecteur de générations
-function replaceGenerationSelector() {
+async function replaceGenerationSelector() {
+    const nameCloudState = getNameCloudState();
+
     const originalSelect = document.getElementById('generations');
     if (!originalSelect) return;
     
@@ -520,6 +523,8 @@ export function updateGenerationSelector(newValue) {
 
 // Fonction pour remplacer le sélecteur TreeMode
 function replaceTreeModeSelector() {
+
+    const nameCloudState = getNameCloudState();
     const originalSelect = document.getElementById('treeMode');
     if (!originalSelect) return;
     
@@ -767,6 +772,7 @@ let selectorMode = 'history'; // Valeurs possibles: 'history', 'search'
 
 // Version améliorée de replaceRootPersonSelector
 export function replaceRootPersonSelector(customOptions = null) {
+    const nameCloudState =  getNameCloudState();
     const originalSelect = document.getElementById('root-person-results');
     if (!originalSelect) return;
 
@@ -862,7 +868,7 @@ export function replaceRootPersonSelector(customOptions = null) {
                 optionElement.style.color = 'white';
             }
         },
-        onChange: (value) => {
+        onChange: async (value) => {
             // Gérer différemment les options spéciales
             if (['clear-history', 'demo1', 'demo2'].includes(value)) {
                 // Créer un objet qui imite l'événement attendu par handleRootPersonChange
@@ -903,10 +909,12 @@ export function replaceRootPersonSelector(customOptions = null) {
                     } else if (state.isWordCloudEnabled) {
                         state.rootPersonId = value;
                         state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
+                        const generateNameCloudExport = await getGenerateNameCloudExport();
                         generateNameCloudExport();
                         // Vérifier si une heatmap est déjà affichée
                         if (document.getElementById('namecloud-heatmap-wrapper')) {
                             // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+                            const refreshHeatmap = await getRefreshHeatmap();
                             refreshHeatmap();
                         }
                     } else {

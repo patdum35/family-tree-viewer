@@ -1,8 +1,9 @@
 // ====================================
 // Opérations sur l'arbre
 // ====================================
+import { importLinks } from './importState.js'; // import de  nodeControls via importLinks pour éviter les erreurs de chargement circulaire
 import { state } from './main.js';
-import { findClosestDescendant  } from './nodeControls.js';
+// import { findClosestDescendant  } from './nodeControls.js';
 /**
  * Trouve tous les descendants d'une personne
  * @param {string} personId - ID de la personne
@@ -448,7 +449,7 @@ function findInterBranchMarriages(rootId) {
 export function buildCombinedTree(personId) {
     // Find closest descendant first
     const descendants = findDescendants(personId);
-    const closestDescendant = findClosestDescendant(descendants, personId);
+    const closestDescendant = importLinks.nodeControls.findClosestDescendant(descendants, personId);
     const targetId = closestDescendant ? closestDescendant.id : personId;
 
     // Si pas de descendant proche, retourner un arbre d'ascendants

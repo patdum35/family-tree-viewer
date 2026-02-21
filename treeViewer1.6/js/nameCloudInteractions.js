@@ -1,15 +1,20 @@
-import { state, displayPersonDetails } from './main.js';
+import { state } from './main.js';
 import { startAncestorAnimation } from './treeAnimation.js';
 import { nameCloudState, extractSearchTextFromTitle, filterPeopleByText } from './nameCloud.js'
-import { extractYear } from './nameCloudUtils.js';
+// import { nameCloudState, extractSearchTextFromTitle, filterPeopleByText } from './main.js';
+// import { extractYear } from './nameCloudUtils.js';
+import { extractYear } from './nameCloud.js';
+
 import { removeAllStatsElements } from './nameCloudAverageAge.js';
-import { createDataForHeatMap, createHeatmapDataForPeople } from './geoHeatMapDataProcessor.js';
-import { createImprovedHeatmap } from './geoHeatMapUI.js';
+// import { createDataForHeatMap, createHeatmapDataForPeople } from './geoHeatMapDataProcessor.js';
+import { getCreateDataForHeatMap, getCreateHeatmapDataForPeople } from './main.js';
+// import { createImprovedHeatmap, displayHeatMap } from './geoHeatMapUI.js';
+import { getCreateImprovedHeatmap, getDisplayHeatMap } from './main.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
-import { displayHeatMap } from './geoHeatMapUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
 import { resizeModal } from './nameCloudStatModal.js';
 import { debounce, isModalVisible } from './eventHandlers.js';
+import { getDisplayPersonDetails } from './main.js';
 
 window.lastSelectedLocationId = null;
 window.isIndividualMapMode = false;
@@ -573,11 +578,12 @@ export async function showHeatmapFromShowPersonList(showPersonListModalCounter) 
 
     let heatmapData;
     async function runCreateHeatmapDataForPeople() {
+        const createHeatmapDataForPeople = await getCreateHeatmapDataForPeople();
         heatmapData = await createHeatmapDataForPeople(state.peopleList[showPersonListModalCounter]);
         // console.log(heatmapData);
     }
     // if (window.currentSearchResults && window.currentSearchResults.length > 0) {
-    runCreateHeatmapDataForPeople().then(() => {
+    runCreateHeatmapDataForPeople().then(async () => {
         if (heatmapData ) {
             // Fermer la modale de recherche
             // closeSearchModal();
@@ -587,6 +593,7 @@ export async function showHeatmapFromShowPersonList(showPersonListModalCounter) 
             confLocal.type = 'placeOf';
             const title =  getPersonsListTitle(state.peopleListTitle[showPersonListModalCounter], 0 , confLocal) + ' ' + state.peopleListTitle[showPersonListModalCounter];
             console.log('-debug call to displayHeatMap from showHeatmapFromShowPersonList');
+            const displayHeatMap = await getDisplayHeatMap();
             displayHeatMap(null, heatmapData, true, null, title, null, null, showPersonListModalCounter).then(() => {
                 const allModals = document.querySelectorAll('[id^="show-person-list-modal-"]');
                 let modal;
@@ -631,6 +638,7 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
 
         
         let heatmapData;
+        const createDataForHeatMap = await getCreateDataForHeatMap();
         
         if (searchText) {
             // Utiliser les personnes déjà filtrées que nous avons dans la liste
@@ -641,6 +649,7 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
                 
                 // Utiliser la fonction qui crée des données de heatmap à partir de personnes spécifiques
                 // Cette fonction existe déjà dans geoHeatMapDataProcessor.js sous le nom de updateHeatmapIfVisible
+                const createHeatmapDataForPeople = await getCreateHeatmapDataForPeople();
                 heatmapData = await createHeatmapDataForPeople(filteredPeople);
             } else {
                 console.warn("Aucune personne filtrée trouvée pour", searchText);
@@ -684,6 +693,7 @@ async function showHeatmapAndAdjustLayout(modal, config, hiddenFormerFrenchTitle
         }
         
         // Utiliser la fonction existante pour créer la heatmap
+        const createImprovedHeatmap = await getCreateImprovedHeatmap();
         createImprovedHeatmap(heatmapData, heatmapTitle);
         
         // Récupérer la référence à la heatmap nouvellement créée
@@ -993,13 +1003,15 @@ export function showPersonActions(person, event) {
     });
 }
 
-export function showPersonDetails(personId) {
+export async function showPersonDetails(personId) {
     console.log('Showing details for:', personId);
 
     if (typeof removeAllStatsElements === 'function') {
         removeAllStatsElements();
     }
 
+    
+    const displayPersonDetails = await getDisplayPersonDetails();
     displayPersonDetails(personId);
 
     const modal = document.querySelector('.modal-container');

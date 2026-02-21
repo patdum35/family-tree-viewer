@@ -1,26 +1,46 @@
 // ====================================
 // Animation de l'arbre
 // ====================================
-import { state, searchRootPersonId, trackPageView, toggleTreeRadar, redimensionnerPlayButtonSizeInDOM } from './main.js';
-import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
-import { cleanIdForSelector } from './nodeRenderer.js';
-import { getZoom, getLastTransform, setLastTransform, drawTree, hardResetZoom } from './treeRenderer.js';
-import { buildDescendantTree, buildDescendantTreeWithDuplicates, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
-// import { geocodeLocation } from './modalWindow.js';
-import { geocodeLocation } from './geoLocalisation.js';
-import { initBackgroundContainer, updateBackgroundImage } from './backgroundManager.js';
+import { importLinks } from './importState.js'; // import de nodeRenderer, nodeControls, treeOperations, treeRenderer via importLinks pour éviter les erreurs de chargement circulaire
+
+import { state, searchRootPersonId, trackPageView, toggleTreeRadar, redimensionnerPlayButtonSizeInDOM, showNetworkStatus } from './main.js';
+// import { handleAncestorsClick, handleDescendantsClick, handleDescendants } from './nodeControls.js';
+// import { cleanIdForSelector } from './nodeRenderer.js';
+// import { getZoom, getLastTransform, drawTree, hardResetZoom } from './treeRenderer.js';
+// import { buildDescendantTree, buildDescendantTreeWithDuplicates, buildAncestorTree, buildCombinedTree  } from './treeOperations.js';
+// import { geocodeLocation } from './geoLocalisation.js';
+import { getGeocodeLocation } from './main.js';
+// import { initBackgroundContainer } from './backgroundManager.js';
+import { getInitBackgroundContainer } from './main.js';
 import { extractYear } from './utils.js';
-import { initAnimationMap as initMap, updateAnimationMapMarkers, createCachedTileLayer, updateAnimationMapMarkersWithLabels, collectPersonLocations, locationSymbols} from './mapUtils.js';
-import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { fetchTileWithCache } from './mapTilesPreloader.js';
-import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
-import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
-import { debugLog } from './debugLogUtils.js'
+import { makeElementDraggable } from './resizableModalUtils.js';
+// import { fetchTileWithCache } from './mapTilesPreloader.js';
+import { getFetchTileWithCache } from './main.js';
+// import { playEndOfAnimationSound, stopAnimationAudio } from './audioPlayer.js';
+import { getPlayEndOfAnimationSound, getStopAnimationAudio } from './main.js';
+// import { showEndAnimationPhoto, closeAnimationPhoto } from './photoPlayer.js';
+import { getShowEndAnimationPhoto, getCloseAnimationPhoto } from './main.js';
+// import { debugLog } from './debugLogUtils.js'
 import { findYoungestPerson } from './utils.js';
 import { closeAllModals, resetZoom } from './eventHandlers.js';
 
-import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+// import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js';
+import { getDisableFortuneModeWithLever, getDisableFortuneModeClean } from './main.js';
 import { selectVoice, speakText, speakTextWithWaitToEnd } from './voiceSelect.js';
+
+// import { initAnimationMap as initMap, createCachedTileLayer, updateAnimationMapMarkersWithLabels, collectPersonLocations} from './mapUtils.js';
+
+let mapUtilsModule;
+const loadMapUtils = async () => {
+  if (!mapUtilsModule) { mapUtilsModule = await import('./mapUtils.js');} // OK
+  return mapUtilsModule; };
+// const getInitAnimationMap = async () => (await loadMapUtils()).initAnimationMap;
+const getCreateCachedTileLayer = async () => (await loadMapUtils()).createCachedTileLayer;
+const getUpdateAnimationMapMarkersWithLabels = async () => (await loadMapUtils()).updateAnimationMapMarkersWithLabels;
+const getCollectPersonLocations = async () => (await loadMapUtils()).collectPersonLocations;
+
+
+
 
 let animationTimeouts = [];
 let optimalSpeechRate = 1.0; //1.1;
@@ -31,8 +51,8 @@ let animationMarker = null;
 let localVoice = null;
 
 // Au début du fichier, après les imports
-let isOnline = false; // Variable pour suivre l'état de la connexion Internet
-let previousOnlineState = false;
+// let isOnline = false; // Variable pour suivre l'état de la connexion Internet
+// let previousOnlineState = false;
 
 // État pour la position de la carte d'animation
 let animationMapPosition = {
@@ -319,148 +339,148 @@ function addHighlightStyle() {
     }
 }
 
-export async function testRealConnectivity(isEndFlagRequested = false) {
-    if (isEndFlagRequested) { state.isEndTestRealConnectivity = false; }
+// export async function testRealConnectivity(isEndFlagRequested = false) {
+//     if (isEndFlagRequested) { state.isEndTestRealConnectivity = false; }
 
-    try {
+//     try {
 
-        // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
-        const response = await fetch('https://www.google.com/favicon.ico', {
-            mode: 'no-cors',  // Crucial pour éviter les erreurs CORS
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            },
-            // Timestamp pour éviter la mise en cache par le navigateur
-            signal: AbortSignal.timeout(2000)
-        });
+//         // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
+//         const response = await fetch('https://www.google.com/favicon.ico', {
+//             mode: 'no-cors',  // Crucial pour éviter les erreurs CORS
+//             cache: 'no-store',
+//             headers: {
+//                 'Cache-Control': 'no-cache',
+//                 'Pragma': 'no-cache'
+//             },
+//             // Timestamp pour éviter la mise en cache par le navigateur
+//             signal: AbortSignal.timeout(2000)
+//         });
         
-        // Le mode no-cors retourne toujours une réponse "opaque"
-        // On ne peut pas vérifier le status, mais si on arrive ici sans erreur,
-        // c'est qu'une connexion a pu être établie
+//         // Le mode no-cors retourne toujours une réponse "opaque"
+//         // On ne peut pas vérifier le status, mais si on arrive ici sans erreur,
+//         // c'est qu'une connexion a pu être établie
         
-        // Sauvegarder l'état précédent
-        previousOnlineState = isOnline;
-        isOnline = true;
+//         // Sauvegarder l'état précédent
+//         previousOnlineState = isOnline;
+//         isOnline = true;
         
-        // Détecter le changement d'état
-        if (previousOnlineState !== isOnline) {
-            console.log("✅ Connexion Internet rétablie");
-            showNetworkStatus("Connexion réseau rétablie");
-            // selectVoice();
-        }
-        state.isOnLine = true;
-        // console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
-        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+//         // Détecter le changement d'état
+//         if (previousOnlineState !== isOnline) {
+//             console.log("✅ Connexion Internet rétablie");
+//             showNetworkStatus("Connexion réseau rétablie");
+//             // selectVoice();
+//         }
+//         state.isOnLine = true;
+//         // console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
+//         if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
         
-        return true;
-    } catch (error) {
-        // Si on arrive ici, c'est qu'il n'y a pas de connexion
-        // Sauvegarder l'état précédent
-        previousOnlineState = isOnline;
-        isOnline = false;
+//         return true;
+//     } catch (error) {
+//         // Si on arrive ici, c'est qu'il n'y a pas de connexion
+//         // Sauvegarder l'état précédent
+//         previousOnlineState = isOnline;
+//         isOnline = false;
         
-        // Détecter le changement d'état
-        if (previousOnlineState !== isOnline) {
-            console.log("⚠️ Connexion Internet perdue");
-            showNetworkStatus("Mode hors-ligne");
-            // selectVoice();
-        }
-        state.isOnLine = false;
-        // console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
-        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
-        return false;
-    }
-}
+//         // Détecter le changement d'état
+//         if (previousOnlineState !== isOnline) {
+//             console.log("⚠️ Connexion Internet perdue");
+//             showNetworkStatus("Mode hors-ligne");
+//             // selectVoice();
+//         }
+//         state.isOnLine = false;
+//         // console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
+//         if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+//         return false;
+//     }
+// }
 
-window.testRealConnectivity = testRealConnectivity;
+// window.testRealConnectivity = testRealConnectivity;
 
-export function initNetworkListeners() {
-    console.log("🌐 Initialisation des écouteurs réseau dans initNetworkListeners ...");
+// export function initNetworkListeners() {
+//     console.log("🌐 Initialisation des écouteurs réseau dans initNetworkListeners ...");
     
-    // Test initial
-    testRealConnectivity(true).then(online => {
-        if (window.CURRENT_LANGUAGE == "fr") {
-            showNetworkStatus(online ? "Connexion réseau active" : "Mode hors-ligne");
-        } else if (window.CURRENT_LANGUAGE == "en") {
-            showNetworkStatus(online ? "Network connection active" : "Offline mode");
-        } else if (window.CURRENT_LANGUAGE == "es") {
-            showNetworkStatus(online ? "Conexión de red activa" : "Modo fuera de línea");
-        } else if (window.CURRENT_LANGUAGE == "hu") {
-            showNetworkStatus(online ? "Hálózati kapcsolat aktív" : "Offline mód");
-        }
-    });
+//     // Test initial
+//     testRealConnectivity(true).then(online => {
+//         if (window.CURRENT_LANGUAGE == "fr") {
+//             showNetworkStatus(online ? "Connexion réseau active" : "Mode hors-ligne");
+//         } else if (window.CURRENT_LANGUAGE == "en") {
+//             showNetworkStatus(online ? "Network connection active" : "Offline mode");
+//         } else if (window.CURRENT_LANGUAGE == "es") {
+//             showNetworkStatus(online ? "Conexión de red activa" : "Modo fuera de línea");
+//         } else if (window.CURRENT_LANGUAGE == "hu") {
+//             showNetworkStatus(online ? "Hálózati kapcsolat aktív" : "Offline mód");
+//         }
+//     });
 
-    // Écouteurs d'événements standard
-    window.addEventListener('online', () => testRealConnectivity());
-    window.addEventListener('offline', () => {
-        previousOnlineState = isOnline;
-        isOnline = false;
-        if (previousOnlineState !== isOnline) {
-            console.log("⚠️ Mode hors-ligne détecté");
-            showNetworkStatus("Mode hors-ligne");
-            if (state.isSpeechSynthesisAvailable) { 
-                selectVoice();
-            }
-        }
-    });
+//     // Écouteurs d'événements standard
+//     window.addEventListener('online', () => testRealConnectivity());
+//     window.addEventListener('offline', () => {
+//         previousOnlineState = isOnline;
+//         isOnline = false;
+//         if (previousOnlineState !== isOnline) {
+//             console.log("⚠️ Mode hors-ligne détecté");
+//             showNetworkStatus("Mode hors-ligne");
+//             if (state.isSpeechSynthesisAvailable) { 
+//                 selectVoice();
+//             }
+//         }
+//     });
 
 
-    // testRealConnectivity();
+//     // testRealConnectivity();
 
-}
+// }
 
-// Fonction pour afficher visuellement le statut réseau (optionnel)
-function showNetworkStatus(message) {
-    // Créer ou mettre à jour un élément de notification
-    let notification = document.getElementById('network-status');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'network-status';
+// // Fonction pour afficher visuellement le statut réseau (optionnel)
+// function showNetworkStatus(message) {
+//     // Créer ou mettre à jour un élément de notification
+//     let notification = document.getElementById('network-status');
+//     if (!notification) {
+//         notification = document.createElement('div');
+//         notification.id = 'network-status';
 
-        notification.style.fontSize = 15 / state.browserScaleFactor +'px';
+//         notification.style.fontSize = 15 / state.browserScaleFactor +'px';
 
-        notification.style.position = 'fixed';
-        if (state.innerHeight < 400) {
-            notification.style.top = '0.67em';
-            notification.style.left = '';
-            notification.style.right = '3.33em';
-        } else {
-            if (window.outerWidth > 1000) { notification.style.top = '3.33em';}
-            else { notification.style.top = '3.33em';}
+//         notification.style.position = 'fixed';
+//         if (state.innerHeight < 400) {
+//             notification.style.top = '0.67em';
+//             notification.style.left = '';
+//             notification.style.right = '3.33em';
+//         } else {
+//             if (window.outerWidth > 1000) { notification.style.top = '3.33em';}
+//             else { notification.style.top = '3.33em';}
 
-            notification.style.left = (state.innerWidth/2 - 100)*state.scaleChrome  +'px';
-            notification.style.right = '';
-            // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
-            // notification.style.transform = 'translateX(-50%)';
-        }
+//             notification.style.left = (state.innerWidth/2 - 100)*state.scaleChrome  +'px';
+//             notification.style.right = '';
+//             // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
+//             // notification.style.transform = 'translateX(-50%)';
+//         }
 
-        notification.style.padding = '0.33em';
-        notification.style.borderRadius = '0.33em';
-        notification.style.zIndex = '9999';
-        document.body.appendChild(notification);
-    }
+//         notification.style.padding = '0.33em';
+//         notification.style.borderRadius = '0.33em';
+//         notification.style.zIndex = '9999';
+//         document.body.appendChild(notification);
+//     }
     
-    console.log("\n\n\n 🌐 DEBUG : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, state.innerHeight, notification.style.left) ;
+//     console.log("\n\n\n 🌐 DEBUG : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, state.innerHeight, notification.style.left) ;
 
-    notification.style.setProperty('font-size', (15 / state.browserScaleFactor) + 'px', 'important');
-    notification.textContent = message;
-    notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
-    notification.style.color = 'white';
+//     notification.style.setProperty('font-size', (15 / state.browserScaleFactor) + 'px', 'important');
+//     notification.textContent = message;
+//     notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
+//     notification.style.color = 'white';
 
-    if (state.innerHeight >= 400) {
-        setTimeout(() => {    
-            notification.style.left = (state.innerWidth/2)*state.scaleChrome - (notification.offsetWidth)/2  +'px';
-            console.log("\n\n\n 🌐 DEBUG 2 : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, notification.style.left, notification.offsetWidth) ;
-        }, 50);
-    }
+//     if (state.innerHeight >= 400) {
+//         setTimeout(() => {    
+//             notification.style.left = (state.innerWidth/2)*state.scaleChrome - (notification.offsetWidth)/2  +'px';
+//             console.log("\n\n\n 🌐 DEBUG 2 : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, notification.style.left, notification.offsetWidth) ;
+//         }, 50);
+//     }
 
-    // Faire disparaître la notification après 3 secondes
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
-}
+//     // Faire disparaître la notification après 3 secondes
+//     setTimeout(() => {
+//         notification.style.display = 'none';
+//     }, 3000);
+// }
 
 export function initializeAnimationMapPosition() 
 {
@@ -548,7 +568,8 @@ export function getAnimationMapPosition(mapWrapperName) {
 }
 
 
-function initAnimationMap() {
+async function initAnimationMap() {
+    const createCachedTileLayer = await getCreateCachedTileLayer();
     // Supprimer proprement toute carte existante
     const existingContainer = document.getElementById('animation-map-container');
 
@@ -985,6 +1006,7 @@ async function updateAnimationMapLocations(locations, locationSymbols) {
     }
 
     // Utiliser la fonction avec labels temporaires
+    const updateAnimationMapMarkersWithLabels = await getUpdateAnimationMapMarkersWithLabels();
     window.animationMapMarkers = await updateAnimationMapMarkersWithLabels(animationMap, validLocations, {
         enhanced: true,  // Utiliser les marqueurs améliorés avec cercle
         fitToMarkers: true,
@@ -1017,7 +1039,7 @@ export function findAllAncestorPaths(startId, targetAncestorId) {
     
     // Construire l'arbre des descendants depuis l'ancêtre cible en autorisant les doublons
     // Cela permet de construire toutes les branches possibles menant à la personne de départ
-    const descendantTree = buildDescendantTreeWithDuplicates(targetAncestorId, true);
+    const descendantTree = importLinks.treeOperations.buildDescendantTreeWithDuplicates(targetAncestorId, true);
     
     // Restaurer nombre_generation
     state.nombre_generation = savedGen;
@@ -1078,7 +1100,7 @@ export function findAncestorPath(startId, targetAncestorId) {
     state.nombre_generation = 100;  // Valeur temporaire élevée
     
     // Construire l'arbre des descendants depuis l'ancêtre cible
-    const descendantTree = buildDescendantTree(targetAncestorId);
+    const descendantTree = importLinks.treeOperations.buildDescendantTree(targetAncestorId);
     // const descendantTree = buildDescendantTreeWithDuplicates(targetAncestorId, true);
 
     
@@ -1152,7 +1174,7 @@ function findAncestorPathNew(startId, targetAncestorId) {
     state.nombre_generation = 100; // Valeur temporaire élevée
 
     // Construire l'arbre des descendants depuis l'ancêtre cible
-    const descendantTree = buildDescendantTree(targetAncestorId);
+    const descendantTree = importLinks.treeOperations.buildDescendantTree(targetAncestorId);
     
     // Restaurer nombre_generation
     state.nombre_generation = savedGen;
@@ -1354,40 +1376,40 @@ function simplifyName(fullName) {
 
 
 
-/*  NOUVEAU CODE BON pour nouveau Chrome */
-// Variable globale pour suivre si la synthèse vocale a été initialisée
-// let state.speechSynthesisInitialized = false;
-let errorInSpeechInit = false;
+// /*  NOUVEAU CODE BON pour nouveau Chrome */
+// // Variable globale pour suivre si la synthèse vocale a été initialisée
+// // let state.speechSynthesisInitialized = false;
+// let errorInSpeechInit = false;
 
-// Fonction d'initialisation de la synthèse vocale à exécuter au chargement
-export function initSpeechSynthesis(voice) {
-    if ('speechSynthesis' in window && !state.speechSynthesisInitialized) {
-        console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
-        // Créer et jouer une utterance silencieuse pour initialiser le moteur
-        const initUtterance = new SpeechSynthesisUtterance("");
-        initUtterance.volume = 0.00; // Muet
-        initUtterance.rate = 1.0; // 
-        initUtterance.voice = voice; // 
-        initUtterance.onend = () => {
-            console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
-            state.speechSynthesisInitialized = true;
+// // Fonction d'initialisation de la synthèse vocale à exécuter au chargement
+// export function initSpeechSynthesis(voice) {
+//     if ('speechSynthesis' in window && !state.speechSynthesisInitialized) {
+//         console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
+//         // Créer et jouer une utterance silencieuse pour initialiser le moteur
+//         const initUtterance = new SpeechSynthesisUtterance("");
+//         initUtterance.volume = 0.00; // Muet
+//         initUtterance.rate = 1.0; // 
+//         initUtterance.voice = voice; // 
+//         initUtterance.onend = () => {
+//             console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
+//             state.speechSynthesisInitialized = true;
             
-            // Tentative de déblocage audio HTML
-            new Audio().play().catch(() => {});
-        };
-        initUtterance.onerror = (err) => {
-            console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
-            state.speechSynthesisInitialized = true; // Considérer comme initialisé quand même
-            errorInSpeechInit = true;
-        };
+//             // Tentative de déblocage audio HTML
+//             new Audio().play().catch(() => {});
+//         };
+//         initUtterance.onerror = (err) => {
+//             console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
+//             state.speechSynthesisInitialized = true; // Considérer comme initialisé quand même
+//             errorInSpeechInit = true;
+//         };
         
-        // Forcer le chargement des voix
-        // window.speechSynthesis.getVoices();
+//         // Forcer le chargement des voix
+//         // window.speechSynthesis.getVoices();
         
-        // Jouer l'utterance silencieuse
-        window.speechSynthesis.speak(initUtterance);
-    }
-}
+//         // Jouer l'utterance silencieuse
+//         window.speechSynthesis.speak(initUtterance);
+//     }
+// }
 
 
 function noSpeechAvailableMessage() {
@@ -1513,9 +1535,16 @@ function delay(ms) {
 
 //#####################################################
 export async function startAncestorAnimation(isCousin = false) {
+
+    const disableFortuneModeClean = await getDisableFortuneModeClean();
     disableFortuneModeClean();
+    const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
     disableFortuneModeWithLever();
 
+    const collectPersonLocations = await getCollectPersonLocations();
+
+    const playEndOfAnimationSound = await getPlayEndOfAnimationSound();
+    const showEndAnimationPhoto = await getShowEndAnimationPhoto();
     console.log(`🎬 startAncestorAnimation: Path length=${animationState.path.length}, Root=${state.rootPersonId}, Target=${state.targetAncestorId}`);
 
     origineGenNb = state.nombre_generation;
@@ -1578,6 +1607,7 @@ export async function startAncestorAnimation(isCousin = false) {
     }
 
     initAnimationMap();
+    const initBackgroundContainer = await getInitBackgroundContainer();
     initBackgroundContainer(); // Initialiser le conteneur de fond
 
     state.lastHorizontalPosition = 0;
@@ -1645,16 +1675,16 @@ export async function startAncestorAnimation(isCousin = false) {
 
                 if (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants')  {
                     const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
-                    state.currentTree =  buildDescendantTree(tempPerson.id);
+                    state.currentTree =  importLinks.treeOperations.buildDescendantTree(tempPerson.id);
                 }
                 else {
                     state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
-                        ? buildDescendantTree(state.rootPersonId)
+                        ? importLinks.treeOperations.buildDescendantTree(state.rootPersonId)
                         : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
-                        ? buildAncestorTree(state.rootPersonId.id)
-                        : buildCombinedTree(state.rootPersonId.id); // Pour le mode 'both'
+                        ? importLinks.treeOperations.buildAncestorTree(state.rootPersonId.id)
+                        : importLinks.treeOperations.buildCombinedTree(state.rootPersonId.id); // Pour le mode 'both'
                 }
-                drawTree(); 
+                importLinks.treeRenderer.drawTree(); 
                 console.log("\n\n\n DEBUG findAncestorPath with ", state.rootPersonId , state.targetAncestorId, findAncestorPath(state.rootPersonId.id, state.targetAncestorId))
                 animationState.path = [];
                 animationState.descendpath = [];
@@ -1739,7 +1769,7 @@ export async function startAncestorAnimation(isCousin = false) {
     } else { state.isVoiceSelected = false;}
 
     let svg = d3.select("#tree-svg");
-    state.lastTransform = getLastTransform() || d3.zoomIdentity;  
+    state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;  
     state.previousWindowInnerWidthInMap = window.innerWidth;
     state.previousWindowInnerHeightInMap = window.innerHeight;
     state.prevPrevWindowInnerWidthInMap = window.innerWidth;
@@ -1796,9 +1826,9 @@ export async function startAncestorAnimation(isCousin = false) {
                         updateAnimationMapLocations(validLocations);
                     }
 
-                    let zoom = getZoom();
+                    let zoom = importLinks.treeRenderer.getZoom();
 
-                    state.lastTransform = getLastTransform() || d3.zoomIdentity;  
+                    state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;  
 
                     // zoom = getZoom();
 
@@ -1831,7 +1861,7 @@ export async function startAncestorAnimation(isCousin = false) {
 
                     // Pour le 1er affichage de l'animation on décale le graphe vers le haut pour pouvoir positionner la map dessous
                     if (zoom && ( (animationState.currentIndex === 0 ) || shiftAterRescale ) ) {
-                        state.lastTransform = getLastTransform() || d3.zoomIdentity;                      
+                        state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;                      
                     
                         offsetY = 0;
                         if (animationState.currentIndex === 0) {
@@ -1882,10 +1912,10 @@ export async function startAncestorAnimation(isCousin = false) {
 
                     if ((nodeScreenPos.x > (window.innerWidth +500)) || (nodeScreenPos.x < -500) || (nodeScreenPos.y > (window.innerHeight+500)) || (nodeScreenPos.y < -500) ) {
                         console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de la fenêtre position x=", nodeScreenPos.x, ", y=", nodeScreenPos.y, " , mapX=", mapX, " , mapY=", mapY, " , mapW=", mapW, " , mapH=", mapH );
-                        hardResetZoom();
+                        importLinks.treeRenderer.hardResetZoom();
                     }  
 
-                    zoom = getZoom();
+                    zoom = importLinks.treeRenderer.getZoom();
                     // décaler l'arbre vers la gauche (shift left) pour toujours voir le nouveau noeud apparaitre à droite
                     if (zoom) {
                         const svg = d3.select("#tree-svg");
@@ -1900,7 +1930,7 @@ export async function startAncestorAnimation(isCousin = false) {
                             if (nodeScreenPos.x < minX) { horizontalShift = -(minX - nodeScreenPos.x); }
                             if (nodeScreenPos.y < minY) { verticalShift = -(minY - nodeScreenPos.y); } 
 
-                            state.lastTransform = getLastTransform() || d3.zoomIdentity;  
+                            state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;  
 
                             const transition = svg.transition()
                                 .duration(750)
@@ -1927,7 +1957,7 @@ export async function startAncestorAnimation(isCousin = false) {
                         // Attendre la lecture ou le délai
                         await voicePromise;
 
-                        handleAncestorsClick(event, node, true);
+                        importLinks.nodeControls.handleAncestorsClick(event, node, true);
                         // drawTree();
                     }
                     
@@ -2005,7 +2035,7 @@ export async function startAncestorAnimation(isCousin = false) {
                             updateAnimationMapLocations(validLocations);
                         }
 
-                        let zoom = getZoom();
+                        let zoom = importLinks.treeRenderer.getZoom();
                         const marginX = state.boxWidth/2;
                         const marginY = state.boxHeight/2;
                         let  nodeScreenPos = getNodeScreenPosition(node);
@@ -2024,7 +2054,7 @@ export async function startAncestorAnimation(isCousin = false) {
                             console.log("\n\n ⚠️ ⚠️ ⚠️ Le nœud est en dehors de la fenêtre position x=", nodeScreenPos.x, ", y=", nodeScreenPos.y, " , mapX=", mapX, " , mapY=", mapY, " , mapW=", mapW, " , mapH=", mapH );
                         } 
 
-                        zoom = getZoom();
+                        zoom = importLinks.treeRenderer.getZoom();
 
                         // Créer une promesse qui simule la lecture vocale si le son est coupé
                         const voicePromise = (state.isSpeechEnabled &&  state.isSpeechEnabled2)
@@ -2038,10 +2068,10 @@ export async function startAncestorAnimation(isCousin = false) {
                         const event = new Event('click');
                         if (state.treeModeReal === 'descendants' || state.treeModeReal === 'directDescendants' ) {
                             console.log("debug handleDescendants", node);
-                            handleDescendants(node);
+                            importLinks.nodeControls.handleDescendants(node);
                         } else {
                             const nextNodeId = animationState.cousinDescendantPath[Math.min(j+1, animationState.cousinDescendantPath.length-1)];
-                            await handleDescendantsClick(event, node, true, nextNodeId);
+                            await importLinks.nodeControls.handleDescendantsClick(event, node, true, nextNodeId);
                         }
 
                         state.prevPrevWindowInnerWidthInMap = state.previousWindowInnerWidthInMap;
@@ -2209,7 +2239,9 @@ export async function startAncestorAnimation(isCousin = false) {
  * en utilisant getBoundingClientRect() sur l'élément SVG.
  */
 export function getNodeScreenPosition(node) {
-    const cleanedId = cleanIdForSelector(node.data.id);
+    // const cleanedId = state.nodeRendererModule.cleanIdForSelector(node.data.id);
+    const cleanedId = importLinks.nodeRenderer.cleanIdForSelector(node.data.id);
+
     const selector = `#node-${cleanedId}`;
     const nodeElement = d3.select(selector).node();
     
@@ -2230,7 +2262,7 @@ export function getNodeScreenPosition(node) {
         }
 
         // 2. Si les coordonnées D3 existent, appliquer la transformation du zoom
-        const lastTransform = getLastTransform() || d3.zoomIdentity;
+        const lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
         const screenX = lastTransform.applyX(d3X);
         const screenY = lastTransform.applyY(d3Y);
         
@@ -2254,7 +2286,6 @@ export function getNodeScreenPosition(node) {
         y: rect.y + rect.height / 2 
     };
 }
-
 
 
 
@@ -2357,6 +2388,7 @@ export async function prepareAnimationDemo() {
                 
                 try {
                     // Obtenez les coordonnées comme dans updateAnimationMapLocations
+                    const geocodeLocation = await getGeocodeLocation();
                     const coords = await geocodeLocation(location.place);
                     
                     if (!coords || !coords.lat || !coords.lon) {
@@ -2428,6 +2460,7 @@ export async function prepareAnimationDemo() {
                 
                 try {
                     // Vérification rapide de l'existence dans ./maps/
+                    const fetchTileWithCache = await getFetchTileWithCache();
                     const cacheResponse = await fetchTileWithCache(localUrl, true); // true = juste vérifier l'existence
                     
                     if (cacheResponse && cacheResponse.ok) {
@@ -2757,10 +2790,12 @@ export function generateLocalMaps() {
 window.generateLocalMaps = generateLocalMaps;
 
 
-export function toggleAnimationPause(animationStateisPaused = null) {
+export async function toggleAnimationPause(animationStateisPaused = null) {
 
     if (state.isRadarEnabled) {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
         disableFortuneModeClean();
+        const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
         disableFortuneModeWithLever();
         // displayGenealogicTree(null, true, false, true);
         toggleTreeRadar();
@@ -2817,7 +2852,7 @@ export function displayPauseButton() {
 }
 
 
-export function stopAnimation() {
+export async function stopAnimation() {
     // Démarquer le nœud actuellement en surbrillance
     if (animationState.currentHighlightedNodeId) {
         highlightAnimationNode(animationState.currentHighlightedNodeId, false);
@@ -2836,7 +2871,9 @@ export function stopAnimation() {
     // Réinitialiser les timeouts
     animationTimeouts.forEach(timeout => clearTimeout(timeout));
     animationTimeouts = [];
+    const closeAnimationPhoto = await getCloseAnimationPhoto();
     closeAnimationPhoto();
+    const stopAnimationAudio = await getStopAnimationAudio();
     stopAnimationAudio();
 }
 

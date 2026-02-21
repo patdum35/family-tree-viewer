@@ -1,7 +1,11 @@
-import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { debugLog } from './debugLogUtils.js'
+// photoPlayer.js est importé dynamiquement dans main.js si on clique sur le bouton loadDataButton "Entrez"
+// donc pas de problème de lightHouse score au démarrage
+
+import { makeElementDraggable } from './resizableModalUtils.js';
+// import { debugLog } from './debugLogUtils.js'
+import { getDebugLog } from './main.js'
 import { state } from './main.js';
-import { testRealConnectivity } from './treeAnimation.js'
+import { testRealConnectivity } from './main.js'; //'./treeAnimation.js'
 import { fetchResourceWithCache } from './resourcePreloader.js';
 
 
@@ -67,6 +71,7 @@ function deTotoFile(totoData) {
  * @returns {Promise<string>} - URL blob du fichier detotoisé
  */
 async function loadAndDeTotoFile(url, mimeType) {
+    const debugLog = await getDebugLog();
     debugLog(`Chargement du fichier à deToto: ${url}`, 'info');
     
     try {
@@ -129,6 +134,7 @@ export async function getCachedResourceUrl(relativePath) {
     else if (fileExtension === 'wav') mimeType = 'audio/wav';
     
     // Si c'est un fichier toto, le detTotoiser
+    const debugLog = await getDebugLog();
     if (isEncrypted) {
         debugLog(`Traitement de fichier toto (${fileExtension}): ${resourceUrl}`, 'debug');
         
@@ -244,19 +250,6 @@ export async function getCachedResourceUrl(relativePath) {
         debugLog(`Utilisation de l'URL normale (non trouvée dans le cache)`, 'info');
         return resourceUrl;
     }
-}
-
-/**
- * Résout simplement un chemin relatif par rapport au répertoire actuel
- * @param {string} relativePath - Chemin relatif (avec ou sans /)
- * @returns {string} Chemin complet
- */
-function getResourceUrl(relativePath) {
-    // S'assurer que le chemin relatif commence par /
-    const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-    
-    // Combiner avec le répertoire courant
-    return `${getCurrentDirectory()}${normalizedPath}`;
 }
 
 /**
@@ -643,6 +636,7 @@ export async function showEndAnimationPhoto(nodeName) {
             displayEndAnimationPhoto(`${getCurrentDirectory()}/background_images/contemporain.jpg`, options);
         };
     } catch (error) {
+        const debugLog = await getDebugLog();
         debugLog(`Erreur lors du chargement de l'image: ${error.message}`, 'error');
         // Afficher un message d'erreur ou une image par défaut
     }

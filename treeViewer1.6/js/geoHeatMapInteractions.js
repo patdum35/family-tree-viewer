@@ -1,6 +1,7 @@
-import { nameCloudState } from './nameCloud.js';
-import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
-import { filterPeopleByText, extractSearchTextFromTitle } from './nameCloud.js';
+// import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
+import { getRefreshHeatmap } from './main.js';
+import { nameCloudState , filterPeopleByText, extractSearchTextFromTitle } from './nameCloud.js';
+// import { nameCloudState , filterPeopleByText, extractSearchTextFromTitle } from './main.js';
 import { showPersonsList } from './nameCloudInteractions.js';
 
 
@@ -35,304 +36,9 @@ export function saveHeatmapPosition() {
 }
 
 /**
- * Rend un élément déplaçable
- * 
- * @param {HTMLElement} element - Élément à rendre déplaçable
- * @param {Array|HTMLElement} handles - Poignée(s) pour le déplacement
- */
-// export function makeElementDraggable(element, handles) {
-//     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    
-//     // Convertir en tableau si ce n'est pas déjà le cas
-//     if (!Array.isArray(handles)) {
-//         handles = [handles];
-//     }
-    
-//     // Attacher l'événement à chaque poignée
-//     handles.forEach(handle => {
-//         if (handle) {
-//             handle.onmousedown = dragMouseDown;
-            
-//             // Support tactile
-//             handle.ontouchstart = touchDragStart;
-//         }
-//     });
-    
-//     // Si aucune poignée n'est fournie, l'élément entier devient la poignée
-//     if (handles.length === 0 || !handles[0]) {
-//         element.onmousedown = dragMouseDown;
-//         element.ontouchstart = touchDragStart;
-//     }
-
-//     function dragMouseDown(e) {
-//         e = e || window.event;
-//         e.preventDefault();
-//         // Obtenir la position de la souris au démarrage
-//         pos3 = e.clientX;
-//         pos4 = e.clientY;
-//         document.onmouseup = closeDragElement;
-//         // Appeler la fonction quand la souris bouge
-//         document.onmousemove = elementDrag;
-//     }
-    
-//     // Fonction pour gérer les événements tactiles
-//     function touchDragStart(e) {
-//         if (e.touches && e.touches.length === 1) {
-//             e.preventDefault();
-//             const touch = e.touches[0];
-//             pos3 = touch.clientX;
-//             pos4 = touch.clientY;
-//             document.ontouchend = closeDragElement;
-//             document.ontouchcancel = closeDragElement;
-//             document.ontouchmove = elementTouchDrag;
-//         }
-//     }
-
-//     function elementDrag(e) {
-//         e = e || window.event;
-//         e.preventDefault();
-//         // Calculer la nouvelle position
-//         pos1 = pos3 - e.clientX;
-//         pos2 = pos4 - e.clientY;
-//         pos3 = e.clientX;
-//         pos4 = e.clientY;
-        
-//         // Limiter le déplacement pour ne pas sortir de la fenêtre
-//         const newTop = (element.offsetTop - pos2);
-//         const newLeft = (element.offsetLeft - pos1);
-        
-//         // Empêcher de sortir à gauche ou en haut
-//         if (newTop < 0) pos2 = element.offsetTop;
-//         if (newLeft < 0) pos1 = element.offsetLeft;
-        
-//         // Empêcher de sortir à droite ou en bas
-//         const maxRight = window.innerWidth - element.offsetWidth;
-//         const maxBottom = window.innerHeight - element.offsetHeight;
-        
-//         if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-//         if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-        
-//         // Définir la nouvelle position de l'élément
-//         element.style.top = (element.offsetTop - pos2) + "px";
-//         element.style.left = (element.offsetLeft - pos1) + "px";
-
-//         // Ajouter un délai pour la sauvegarde (throttling)
-//         if (!elementDrag.saveTimeout) {
-//             elementDrag.saveTimeout = setTimeout(() => {
-//                 saveHeatmapPosition();
-//                 elementDrag.saveTimeout = null;
-//             }, 200);
-//         }
-//     }
-    
-//     // Fonction pour gérer le déplacement tactile
-//     function elementTouchDrag(e) {
-//         if (e.touches && e.touches.length === 1) {
-//             e.preventDefault();
-//             const touch = e.touches[0];
-            
-//             pos1 = pos3 - touch.clientX;
-//             pos2 = pos4 - touch.clientY;
-//             pos3 = touch.clientX;
-//             pos4 = touch.clientY;
-            
-//             // Appliquer les mêmes limites que pour la souris
-//             const newTop = (element.offsetTop - pos2);
-//             const newLeft = (element.offsetLeft - pos1);
-            
-//             if (newTop < 0) pos2 = element.offsetTop;
-//             if (newLeft < 0) pos1 = element.offsetLeft;
-            
-//             const maxRight = window.innerWidth - element.offsetWidth;
-//             const maxBottom = window.innerHeight - element.offsetHeight;
-            
-//             if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-//             if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-            
-//             element.style.top = (element.offsetTop - pos2) + "px";
-//             element.style.left = (element.offsetLeft - pos1) + "px";
-//         }
-//     }
-
-//     function closeDragElement() {
-//         // Arrêter de déplacer quand on relâche la souris ou le toucher
-//         document.onmouseup = null;
-//         document.onmousemove = null;
-//         document.ontouchend = null;
-//         document.ontouchcancel = null;
-//         document.ontouchmove = null;
-        
-//         // Sauvegarder la position si la fonction existe
-//         if (typeof saveHeatmapPosition === 'function') {
-//             saveHeatmapPosition();
-//         }
-//     }
-// }
-
-
-export function makeElementDraggable(element, handles) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    
-    // Convertir en tableau si ce n'est pas déjà le cas
-    if (!Array.isArray(handles)) {
-        handles = [handles];
-    }
-    
-    // Attacher l'événement à chaque poignée
-    handles.forEach(handle => {
-        if (handle) {
-            handle.onmousedown = dragMouseDown;
-            
-            // Support tactile avec addEventListener (plus robuste)
-            handle.addEventListener('touchstart', touchDragStart, { passive: false });
-        }
-    });
-    
-    // Si aucune poignée n'est fournie, l'élément entier devient la poignée
-    if (handles.length === 0 || !handles[0]) {
-        element.onmousedown = dragMouseDown;
-        element.addEventListener('touchstart', touchDragStart, { passive: false });
-    }
-
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // Obtenir la position de la souris au démarrage
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.addEventListener('mouseup', closeDragElement);
-        document.addEventListener('mousemove', elementDrag);
-    }
-    
-    // Fonction pour gérer les événements tactiles
-    function touchDragStart(e) {
-        if (e.touches && e.touches.length === 1) {
-            e.preventDefault(); // Nécessaire mais peut poser problème sur certains navigateurs
-            const touch = e.touches[0];
-            pos3 = touch.clientX;
-            pos4 = touch.clientY;
-            
-            document.addEventListener('touchend', closeDragElement, { passive: true });
-            document.addEventListener('touchcancel', closeDragElement, { passive: true });
-            document.addEventListener('touchmove', elementTouchDrag, { passive: false });
-        }
-    }
-
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // Calculer la nouvelle position
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        
-        // Limiter le déplacement pour ne pas sortir de la fenêtre
-        const newTop = (element.offsetTop - pos2);
-        const newLeft = (element.offsetLeft - pos1);
-        
-        // Empêcher de sortir à gauche ou en haut
-        if (newTop < 0) pos2 = element.offsetTop;
-        if (newLeft < 0) pos1 = element.offsetLeft;
-        
-        // Empêcher de sortir à droite ou en bas
-        const maxRight = window.innerWidth - element.offsetWidth;
-        const maxBottom = window.innerHeight - element.offsetHeight;
-        
-        if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-        if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-        
-        // Définir la nouvelle position de l'élément
-        element.style.top = (element.offsetTop - pos2) + "px";
-        element.style.left = (element.offsetLeft - pos1) + "px";
-    }
-    
-    // Fonction pour gérer le déplacement tactile
-    // function elementTouchDrag(e) {
-    //     if (e.touches && e.touches.length === 1) {
-    //         e.preventDefault();
-    //         const touch = e.touches[0];
-            
-    //         pos1 = pos3 - touch.clientX;
-    //         pos2 = pos4 - touch.clientY;
-    //         pos3 = touch.clientX;
-    //         pos4 = touch.clientY;
-            
-    //         // Appliquer les mêmes limites que pour la souris
-    //         const newTop = (element.offsetTop - pos2);
-    //         const newLeft = (element.offsetLeft - pos1);
-            
-    //         if (newTop < 0) pos2 = element.offsetTop;
-    //         if (newLeft < 0) pos1 = element.offsetLeft;
-            
-    //         const maxRight = window.innerWidth - element.offsetWidth;
-    //         const maxBottom = window.innerHeight - element.offsetHeight;
-            
-    //         if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-    //         if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-            
-    //         element.style.top = (element.offsetTop - pos2) + "px";
-    //         element.style.left = (element.offsetLeft - pos1) + "px";
-    //     }
-    // }
-    // Fonction modifiée pour gérer le déplacement tactile avec limite de vitesse
-    function elementTouchDrag(e) {
-        if (e.touches && e.touches.length === 1) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            
-            // Calculer le déplacement
-            pos1 = pos3 - touch.clientX;
-            pos2 = pos4 - touch.clientY;
-            
-            // Limiter la vitesse de déplacement (valeur maximale en pixels)
-            const maxSpeed = 15;
-            if (Math.abs(pos1) > maxSpeed) pos1 = (pos1 > 0) ? maxSpeed : -maxSpeed;
-            if (Math.abs(pos2) > maxSpeed) pos2 = (pos2 > 0) ? maxSpeed : -maxSpeed;
-            
-            // Mettre à jour la position de référence
-            pos3 = touch.clientX;
-            pos4 = touch.clientY;
-            
-            // Appliquer les limites de l'écran comme avant
-            const newTop = (element.offsetTop - pos2);
-            const newLeft = (element.offsetLeft - pos1);
-            
-            if (newTop < 0) pos2 = element.offsetTop;
-            if (newLeft < 0) pos1 = element.offsetLeft;
-            
-            const maxRight = window.innerWidth - element.offsetWidth;
-            const maxBottom = window.innerHeight - element.offsetHeight;
-            
-            if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
-            if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
-            
-            // Appliquer la nouvelle position
-            element.style.top = (element.offsetTop - pos2) + "px";
-            element.style.left = (element.offsetLeft - pos1) + "px";
-        }
-    }
-
-    function closeDragElement() {
-        // Arrêter de déplacer quand on relâche la souris ou le toucher
-        document.removeEventListener('mouseup', closeDragElement);
-        document.removeEventListener('mousemove', elementDrag);
-        document.removeEventListener('touchend', closeDragElement);
-        document.removeEventListener('touchcancel', closeDragElement);
-        document.removeEventListener('touchmove', elementTouchDrag);
-        
-        // Sauvegarder la position si la fonction existe
-        if (typeof saveHeatmapPosition === 'function') {
-            saveHeatmapPosition();
-        }
-    }
-}
-
-
-/**
  * Attache des écouteurs d'événements aux filtres pour mettre à jour la heatmap automatiquement
  */
-export function attachFilterListeners() {
+export async function attachFilterListeners() {
 
     // Fonction debounce pour éviter de réagir trop souvent
     const debounce = (func, wait) => {
@@ -352,6 +58,7 @@ export function attachFilterListeners() {
         rootPerson: null
     };
     
+    const refreshHeatmap = await getRefreshHeatmap();
 
     // Fonction pour vérifier si une valeur a réellement changé
     const hasValueChanged = (element, key) => {
@@ -461,38 +168,42 @@ export function attachFilterListeners() {
 
 
 // Ajouter cet écouteur quelque part où il sera initialisé une seule fois
-document.addEventListener('refreshPersonList', (event) => {
-    // console.log('Événement de rafraîchissement de liste reçu', event.detail);
-    
-    // Vérifier si une liste de personnes est actuellement affichée
-    const personListModal = document.querySelector('.person-list-modal');
-    if (!personListModal) return;
-    
-    // Extraire le texte de recherche
-    const titleElement = personListModal.querySelector('h2');
-    const searchText = extractSearchTextFromTitle(titleElement);
-    
-    if (!searchText) {
-        console.log("Impossible d'extraire le texte de recherche");
-        return;
-    }
-    
-    // Utiliser la configuration actuelle
-    const config = event.detail.config;
-    
-    // Filtrer les personnes
-    const filteredPeople = filterPeopleByText(searchText, config);
-    
-    // Fermer l'ancienne liste et en ouvrir une nouvelle
-    personListModal.remove();
-    new showPersonsList(searchText, filteredPeople, config);
-});
+export function initializeRefreshPersonListEventListener() {
+    document.addEventListener('refreshPersonList', (event) => {
+        console.log('\n\n\n ----------   Événement de rafraîchissement de liste reçu, document.addEventListener(refreshPersonList) dans geoHeatMapInteraction', event.detail);
+        
+        // Vérifier si une liste de personnes est actuellement affichée
+        const personListModal = document.querySelector('.person-list-modal');
+        if (!personListModal) return;
+        
+        // Extraire le texte de recherche
+        const titleElement = personListModal.querySelector('h2');
+        const searchText = extractSearchTextFromTitle(titleElement);
+        
+        if (!searchText) {
+            console.log("Impossible d'extraire le texte de recherche");
+            return;
+        }
+        
+        // Utiliser la configuration actuelle
+        const config = event.detail.config;
+        
+        // Filtrer les personnes
+        const filteredPeople = filterPeopleByText(searchText, config);
+        
+        // Fermer l'ancienne liste et en ouvrir une nouvelle
+        personListModal.remove();
+        new showPersonsList(searchText, filteredPeople, config);
+    });
+}
 
 
 /**
  * Fonction pour rafraîchir la liste de personnes
  */
 function refreshPersonList() {
+
+       console.log('\n\n\n ----------   refreshPersonList  dans geoHeatMapInteraction');
 
 
     // Vérifier si une liste de personnes est visible

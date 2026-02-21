@@ -659,3 +659,171 @@ export function makeModalDraggableAndResizable(modal, handle, rememberPositionAn
         });
     };
 }
+
+
+
+
+/**
+ * Rend un élément déplaçable
+ * 
+ * @param {HTMLElement} element - Élément à rendre déplaçable
+ * @param {Array|HTMLElement} handles - Poignée(s) pour le déplacement
+ */
+export function makeElementDraggable(element, handles) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    // Convertir en tableau si ce n'est pas déjà le cas
+    if (!Array.isArray(handles)) {
+        handles = [handles];
+    }
+    
+    // Attacher l'événement à chaque poignée
+    handles.forEach(handle => {
+        if (handle) {
+            handle.onmousedown = dragMouseDown;
+            
+            // Support tactile avec addEventListener (plus robuste)
+            handle.addEventListener('touchstart', touchDragStart, { passive: false });
+        }
+    });
+    
+    // Si aucune poignée n'est fournie, l'élément entier devient la poignée
+    if (handles.length === 0 || !handles[0]) {
+        element.onmousedown = dragMouseDown;
+        element.addEventListener('touchstart', touchDragStart, { passive: false });
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Obtenir la position de la souris au démarrage
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.addEventListener('mouseup', closeDragElement);
+        document.addEventListener('mousemove', elementDrag);
+    }
+    
+    // Fonction pour gérer les événements tactiles
+    function touchDragStart(e) {
+        if (e.touches && e.touches.length === 1) {
+            e.preventDefault(); // Nécessaire mais peut poser problème sur certains navigateurs
+            const touch = e.touches[0];
+            pos3 = touch.clientX;
+            pos4 = touch.clientY;
+            
+            document.addEventListener('touchend', closeDragElement, { passive: true });
+            document.addEventListener('touchcancel', closeDragElement, { passive: true });
+            document.addEventListener('touchmove', elementTouchDrag, { passive: false });
+        }
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Calculer la nouvelle position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Limiter le déplacement pour ne pas sortir de la fenêtre
+        const newTop = (element.offsetTop - pos2);
+        const newLeft = (element.offsetLeft - pos1);
+        
+        // Empêcher de sortir à gauche ou en haut
+        if (newTop < 0) pos2 = element.offsetTop;
+        if (newLeft < 0) pos1 = element.offsetLeft;
+        
+        // Empêcher de sortir à droite ou en bas
+        const maxRight = window.innerWidth - element.offsetWidth;
+        const maxBottom = window.innerHeight - element.offsetHeight;
+        
+        if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+        if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+        
+        // Définir la nouvelle position de l'élément
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+    
+    // Fonction pour gérer le déplacement tactile
+    // function elementTouchDrag(e) {
+    //     if (e.touches && e.touches.length === 1) {
+    //         e.preventDefault();
+    //         const touch = e.touches[0];
+            
+    //         pos1 = pos3 - touch.clientX;
+    //         pos2 = pos4 - touch.clientY;
+    //         pos3 = touch.clientX;
+    //         pos4 = touch.clientY;
+            
+    //         // Appliquer les mêmes limites que pour la souris
+    //         const newTop = (element.offsetTop - pos2);
+    //         const newLeft = (element.offsetLeft - pos1);
+            
+    //         if (newTop < 0) pos2 = element.offsetTop;
+    //         if (newLeft < 0) pos1 = element.offsetLeft;
+            
+    //         const maxRight = window.innerWidth - element.offsetWidth;
+    //         const maxBottom = window.innerHeight - element.offsetHeight;
+            
+    //         if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+    //         if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+            
+    //         element.style.top = (element.offsetTop - pos2) + "px";
+    //         element.style.left = (element.offsetLeft - pos1) + "px";
+    //     }
+    // }
+    // Fonction modifiée pour gérer le déplacement tactile avec limite de vitesse
+    function elementTouchDrag(e) {
+        if (e.touches && e.touches.length === 1) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            
+            // Calculer le déplacement
+            pos1 = pos3 - touch.clientX;
+            pos2 = pos4 - touch.clientY;
+            
+            // Limiter la vitesse de déplacement (valeur maximale en pixels)
+            const maxSpeed = 15;
+            if (Math.abs(pos1) > maxSpeed) pos1 = (pos1 > 0) ? maxSpeed : -maxSpeed;
+            if (Math.abs(pos2) > maxSpeed) pos2 = (pos2 > 0) ? maxSpeed : -maxSpeed;
+            
+            // Mettre à jour la position de référence
+            pos3 = touch.clientX;
+            pos4 = touch.clientY;
+            
+            // Appliquer les limites de l'écran comme avant
+            const newTop = (element.offsetTop - pos2);
+            const newLeft = (element.offsetLeft - pos1);
+            
+            if (newTop < 0) pos2 = element.offsetTop;
+            if (newLeft < 0) pos1 = element.offsetLeft;
+            
+            const maxRight = window.innerWidth - element.offsetWidth;
+            const maxBottom = window.innerHeight - element.offsetHeight;
+            
+            if (newLeft > maxRight) pos1 = element.offsetLeft - maxRight;
+            if (newTop > maxBottom) pos2 = element.offsetTop - maxBottom;
+            
+            // Appliquer la nouvelle position
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+        }
+    }
+
+    function closeDragElement() {
+        // Arrêter de déplacer quand on relâche la souris ou le toucher
+        document.removeEventListener('mouseup', closeDragElement);
+        document.removeEventListener('mousemove', elementDrag);
+        document.removeEventListener('touchend', closeDragElement);
+        document.removeEventListener('touchcancel', closeDragElement);
+        document.removeEventListener('touchmove', elementTouchDrag);
+        
+        // Sauvegarder la position si la fonction existe
+        if (typeof saveHeatmapPosition === 'function') {
+            saveHeatmapPosition();
+        }
+    }
+}
+

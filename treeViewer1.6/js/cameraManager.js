@@ -1,5 +1,6 @@
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-
+// cameraManager.js est importé dynamiquement dans appInitializer.js si on clique sur le bouton 🎥 Caméra & Réalité Augmentée
+// donc pas de problème de lightHouse score au démarrage
 
 /**
  * Module pour gérer l'affichage de la caméra en arrière-plan (Réalité Augmentée).

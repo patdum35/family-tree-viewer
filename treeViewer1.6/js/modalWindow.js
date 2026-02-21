@@ -2,10 +2,13 @@ import { state, calcFontSize, displayGenealogicTree, updateRadarButtonText } fro
 import { historicalFigures } from './historicalData.js';
 import { extractYear } from './utils.js';
 import { nameCloudState } from './nameCloud.js';
+// import { nameCloudState } from './main.js';
 import { collectPersonLocations, createLocationMap } from './mapUtils.js';
 import { translateOccupation } from './occupations.js';
-import { cleanProfession} from './nameCloudUtils.js';
-import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
+// import { cleanProfession} from './nameCloudUtils.js';
+import { cleanProfession} from './nameCloud.js';
+// import { disableFortuneModeWithLever, showQuizMessage, readPersonDetails } from './treeWheelAnimation.js';
+import { getDisableFortuneModeWithLever, getShowQuizMessage, getReadPersonDetails } from './main.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
 import { testSpeechSynthesisHealth, addTooltipTransparencyFix } from './treeAnimation.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
@@ -986,6 +989,7 @@ async function startQuiz(personId)
             state.isVoiceSelected = false;
         }
     }
+    const showQuizMessage = await getShowQuizMessage();
     showQuizMessage(person);
 }
 window.startQuiz = startQuiz; 
@@ -1019,6 +1023,7 @@ export async function readPersonSheet(personId, detectedAction = null) {
             state.isVoiceSelected = false;
         }
     }
+    const readPersonDetails = await getReadPersonDetails();
     await readPersonDetails(person, detectedAction);  
 }
 window.readPersonSheet = readPersonSheet; 
@@ -1087,7 +1092,7 @@ export function closeModal() {
 /**
  * Définit une personne comme racine de l'arbre
  */
-export function setAsRootPerson(personId) {
+export async function setAsRootPerson(personId) {
     console.log("Définition de la personne comme racine :", personId);
     
     // Fermer la modale
@@ -1105,7 +1110,7 @@ export function setAsRootPerson(personId) {
             updateTreeModeSelector(state.treeMode);
             state.nombre_generation = 4; // Réinitialiser à 4 générations
             updateGenerationSelector(state.nombre_generation)
-            
+            const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
             disableFortuneModeWithLever();
             // displayGenealogicTree(winner.id, false, false, false, 'Ancestors');
     }

@@ -2,11 +2,13 @@
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
 import { state, calcFontSize, updateRadarButtonText, trackPageView } from './main.js';
-import { needsReset, resetWheelView, getGenerationColor, calculateOptimalZoom } from './treeWheelRenderer.js';
+// import { needsReset, resetWheelView, getGenerationColor, calculateOptimalZoom } from './treeWheelRenderer.js';
+import { getNeedsReset, getResetWheelView, getGetGenerationColor, getCalculateOptimalZoom } from './main.js';
 // import { historicalFigures } from './historicalData.js';
 import { formatGedcomDate, findContextualHistoricalFigures } from './modalWindow.js';
 import { translateOccupation } from './occupations.js';
-import { cleanProfession, cleanLocation} from './nameCloudUtils.js';
+// import { cleanProfession, cleanLocation} from './nameCloudUtils.js';
+import { cleanProfession, cleanLocation} from './nameCloud.js';
 import { speakPersonName} from './treeAnimation.js';
 import { updateTreeModeSelector, updateGenerationSelector } from './mainUI.js';
 
@@ -140,13 +142,14 @@ function createSpinningWheelWithLever(finalRotation, duration) {
 }
 
 // Fonction de lancement
-function launchFortuneWheelWithLever(baseVelocity) {
+async function launchFortuneWheelWithLever(baseVelocity) {
     if (state.isSpinning) return;
     
     // NEUTRALISATION COMPLÈTE DES ZOOMS
     const svg = d3.select("#tree-svg");
     
     // Calculer le zoom optimal
+    const calculateOptimalZoom = await getCalculateOptimalZoom();
     const optimalZoom = calculateOptimalZoom();
     
     // RÉINITIALISATION AGRESSIVE DU ZOOM
@@ -648,13 +651,14 @@ function resetLastWinnerHighlightAsync() {
         
 
     // Déférer à la prochaine frame pour ne pas bloquer
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
         if (lastWinner.generation === 0) {
             d3.select(".center-person-group circle")
                 .style("fill", " #ff6b6b")
                 .style("stroke", "white")
                 .style("stroke-width", "4");
         } else {
+            const getGenerationColor = await getGetGenerationColor();
             const originalColor = getGenerationColor(lastWinner.generation, lastWinner.sex);
             const targetElement = d3.select(`.person-segment-group.gen-${lastWinner.generation}[data-segment-position="${lastWinner.segment}"]`);
             
@@ -1876,7 +1880,7 @@ function createRealisticSlotHandle() {
     
     // let state.leverEnabled = true;
     
-    function pullLever() {
+    async function pullLever() {
         const pullStart = performance.now();
         console.log("🎯 DÉBUT pullLever()");
 
@@ -1886,10 +1890,11 @@ function createRealisticSlotHandle() {
         }
 
 
-
+        const needsReset = await getNeedsReset();
         console.log('Reset nécessaire:', needsReset());
     
         if (needsReset()) {
+            const resetWheelView = await getResetWheelView();
             resetWheelView();
             state.userHasInteracted = false;
         }
@@ -1902,7 +1907,7 @@ function createRealisticSlotHandle() {
         d3.selectAll("*").interrupt();
 
         // Nettoyer UNIQUEMENT les segments gagnants mémorisés
-        allWinnerSegments.forEach(winner => {
+        allWinnerSegments.forEach(async winner => {
             if (winner.generation === 0) {
                 d3.select(".center-person-group circle")
                     .style("fill", "#ff6b6b")
@@ -1911,7 +1916,7 @@ function createRealisticSlotHandle() {
             }
             else {
                 console.log(`🎯 DEBUG ----- Nettoyage du segment gagnant: génération ${winner.generation}, segment ${winner.segment},  name ${winner.name},  sex ${winner.sex}`);
-
+                const getGenerationColor = await getGetGenerationColor();
                 const originalColor = getGenerationColor(winner.generation, winner.sex);
                 const targetElement = d3.select(`.person-segment-group.gen-${winner.generation}[data-segment-position="${winner.segment}"]`);
                 

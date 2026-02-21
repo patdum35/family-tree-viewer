@@ -1,4 +1,5 @@
-import { geocodeLocation } from './geoLocalisation.js';
+// import { geocodeLocation } from './geoLocalisation.js';
+import { getGeocodeLocation } from './main.js';
 import { fetchTileWithCache } from './mapTilesPreloader.js';
 import { state, calcFontSize } from './main.js';
 /**
@@ -215,7 +216,8 @@ export function createLocationMap(containerId, locations, options = {}) {
     const markers = [];
 
     // Créer les marqueurs
-    const markerPromises = locations.map(location => {
+    const markerPromises = locations.map(async location => {
+        const geocodeLocation = await getGeocodeLocation();
         return geocodeLocation(location.place).then(coords => {
             if (coords) {
                 const markerIcon = createEnhancedMarkerIcon(location.type);
@@ -345,6 +347,7 @@ export async function updateAnimationMapMarkers(map, locations, options = {}) {
     }
     
     // Géocoder et créer les marqueurs
+    const geocodeLocation = await getGeocodeLocation();
     const locationPromises = validLocations.map(location => 
         geocodeLocation(location.place)
             .then(coords => {
@@ -619,6 +622,7 @@ export async function updateAnimationMapMarkersWithLabels(map, locations, option
     }
     
     // Géocoder et créer les marqueurs
+    const geocodeLocation = await getGeocodeLocation();
     const locationPromises = validLocations.map(location => 
         geocodeLocation(location.place)
             .then(coords => {

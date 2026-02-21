@@ -149,52 +149,208 @@ export const calcFontSize = (baseSize) => {
     const factor = state?.browserScaleFactor || 1;
     return Math.round(baseSize / factor); 
 };
+import { importLinks, loadModule } from './importState.js';
 
-import { parseGEDCOM } from './gedcomParser.js';
-import { drawTree } from './treeRenderer.js';
+// import { parseGEDCOM } from './gedcomParser.js';
+// import { drawTree } from './treeRenderer.js';
 import { findYoungestPerson, findPersonByName } from './utils.js';
-import { buildAncestorTree, buildDescendantTree, buildDescendantTreeWithDuplicates, buildCombinedTree } from './treeOperations.js';
-import { initNetworkListeners, startAncestorAnimation, initializeAnimationMapPosition, 
-    toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js';
-import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
-import { nameCloudState } from './nameCloud.js';
-import { closeCloudName } from './nameCloudUI.js';
-import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
-    applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
-import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
-import { createEnhancedSettingsModal } from './treeSettingsModal.js';
+// import { buildAncestorTree, buildDescendantTree, buildDescendantTreeWithDuplicates, buildCombinedTree } from './treeOperations.js';
+// import {  startAncestorAnimation, initializeAnimationMapPosition, 
+//     toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js'; //initNetworkListeners
+// import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
+// import { nameCloudState } from './nameCloud.js';
+// import { closeCloudName } from './nameCloudUI.js';
+// import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
+//     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
+// import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
+// import { createEnhancedSettingsModal } from './treeSettingsModal.js';
 import { debounce, hideLoginBackground } from './eventHandlers.js';
-import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
-import { initTilePreloading } from './mapTilesPreloader.js';
-import { initResourcePreloading, fetchResourceWithCache } from './resourcePreloader.js';
-import { createAudioElement } from './audioPlayer.js';
-import { cleanupExportControls } from './exportSettings.js';
-import { setMaxGenerationsInit } from './treeWheelRenderer.js';
-import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
-import { debugLog } from './debugLogUtils.js'
-import { enableBackground } from './backgroundManager.js';
+// import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
+// import { initTilePreloading } from './mapTilesPreloader.js';
+// import { fetchResourceWithCache } from './resourcePreloader.js'; // initResourcePreloading
+// import { createAudioElement, createAudioPlayerToggleButton } from './audioPlayer.js';
+// import { cleanupExportControls } from './exportSettings.js';
+// import { setMaxGenerationsInit } from './treeWheelRenderer.js';
+// import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
+// import { debugLog } from './debugLogUtils.js'
+// import { enableBackground } from './backgroundManager.js';
 import { loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
-import { 
-    displayPersonDetails, 
-    closePersonDetails,
-    setAsRootPerson,
-    closeModal
-} from './modalWindow.js';
-import {
-    initializeEventHandlers,
-    updatePrenoms,
-    updateLettersInNames,
-    updateGenerations,
-    zoomIn,
-    zoomOut,
-    resetView,
-    resetZoom,
-    searchTree,
-    closeAllModals
-} from './eventHandlers.js';
+// import { displayPersonDetails, closePersonDetails, setAsRootPerson, closeModal } from './modalWindow.js';
+import { initializeEventHandlers, updatePrenoms, updateLettersInNames, updateGenerations,
+    zoomIn, zoomOut, resetView, resetZoom, searchTree, closeAllModals} from './eventHandlers.js';
 import { resetPuzzle } from './puzzleSwipe.js';
-import { APP_CACHE_NAME } from './resourcePreloader.js';
+// import { APP_CACHE_NAME } from './resourcePreloader.js';
 
+const getCreateEnhancedSettingsModal = async () => {
+    const { createEnhancedSettingsModal } = await import('./treeSettingsModal.js'); // OK
+    return createEnhancedSettingsModal;
+};
+const getCleanupExportControls = async () => {
+    const { cleanupExportControls } = await import('./exportSettings.js'); // OK
+    return cleanupExportControls;
+};
+export const getFetchTileWithCache = async () => {
+    const { fetchTileWithCache } = await import('./mapTilesPreloader.js'); // OK
+    return fetchTileWithCache;
+};
+export const getFetchResourceWithCache = async () => {
+    const { fetchResourceWithCache } = await import('./resourcePreloader.js'); // OK
+    return fetchResourceWithCache;
+};
+export const getAPP_CACHE_NAME = async () => {
+    const { APP_CACHE_NAME } = await import('./resourcePreloader.js'); // OK
+    return APP_CACHE_NAME;
+};
+
+
+export const getDebugLog = async () => {
+    // 1. Si le mode debug est activé, on charge le vrai module
+    if (state.isDebugLog) {
+        const { debugLog } = await import('./debugLogUtils.js');
+        return debugLog;
+    }
+    // 2. Sinon, on renvoie une fonction "miroir" qui utilise console.log
+    // On utilise (...args) pour accepter n'importe quel nombre d'arguments
+    return (message, type) => console.log(`[${type || 'LOG'}]`, message);
+};
+
+let searchModalUIModule, nameCloudModule, nameCloudUIModule, audioPlayerModule, geoLocalisationModule, modalWindowModule; 
+let photoPlayerModule, backgroundManagerModule, geoHeatMapDataProcessorModule, geoHeatMapUIModule, geoHeatMapInteractionsModule;
+let treeWheelAnimationModule, treeWheelRendererModule, nameCloudSettingsModule, hamburgerMenuModule; // treeOperationsModule;
+const loadSearchModalUI = async () => {
+  if (!searchModalUIModule) { searchModalUIModule = await import('./searchModalUI.js');} // OK
+  return searchModalUIModule; };
+export const getSetupSearchFieldModal = async () => (await loadSearchModalUI()).setupSearchFieldModal;
+export const getOpenSearchModal = async () => (await loadSearchModalUI()).openSearchModal;
+export const getFindPersonsBy = async () => (await loadSearchModalUI()).findPersonsBy;
+export const getShowHeatmapFromSearch = async () =>(await loadSearchModalUI()).showHeatmapFromSearch;
+const getParseGEDCOM = async () => {
+    const { parseGEDCOM } = await import('./gedcomParser.js');
+    return parseGEDCOM; };
+const loadNameCloud = async () => {
+  if (!nameCloudModule) { nameCloudModule = await import('./nameCloud.js');} // OK
+//   if (!nameCloudModule) { 
+//     console.trace("\n\n\n\n🚀 DEBUG: Qui m'appelle ?\n\n\n\n"); // Regarde dans la console
+//     nameCloudModule = await import('./nameCloud.js');
+//   }
+  return nameCloudModule; };
+  
+export const getNameCloudState = async () => (await loadNameCloud()).nameCloudState;
+export const getProcessNamesCloudWithDate = async () => (await loadNameCloud()).processNamesCloudWithDate;
+export const getFilterPeopleByText = async () => (await loadNameCloud()).filterPeopleByText;
+export const getGetPersonsFromTree = async () => (await loadNameCloud()).getPersonsFromTree;
+export const getProcessPersonData = async () => (await loadNameCloud()).processPersonData;
+export const getExtractSearchTextFromTitle = async () => (await loadNameCloud()).extractSearchTextFromTitle;
+export const getCollectCenturyData = async () => (await loadNameCloud()).collectCenturyData;
+
+const loadAudioPlayer = async () => {
+  if (!audioPlayerModule) { audioPlayerModule = await import('./audioPlayer.js');} // OK
+  return audioPlayerModule; };
+const getCreateAudioPlayerToggleButton = async () => (await loadAudioPlayer()).createAudioPlayerToggleButton;
+export const getCreateAudioElement = async () => (await loadAudioPlayer()).createAudioElement;
+export const getPlayEndOfAnimationSound = async () => (await loadAudioPlayer()).playEndOfAnimationSound;
+export const getStopAnimationAudio = async () => (await loadAudioPlayer()).stopAnimationAudio;
+export const getRepositionAudioPlayerOnResize = async () => (await loadAudioPlayer()).repositionAudioPlayerOnResize;
+
+const loadPhotoPlayer = async () => {
+  if (!photoPlayerModule) { photoPlayerModule = await import('./photoPlayer.js');} // OK
+  return photoPlayerModule; };
+export const getGetCachedResourceUrl = async () => (await loadPhotoPlayer()).getCachedResourceUrl;
+export const getShowEndAnimationPhoto = async () => (await loadPhotoPlayer()).showEndAnimationPhoto;
+export const getCloseAnimationPhoto = async () => (await loadPhotoPlayer()).closeAnimationPhoto;
+
+const loadNameCloudUI = async () => {
+  if (!nameCloudUIModule) { nameCloudUIModule = await import('./nameCloudUI.js');} // OK
+  return nameCloudUIModule; };
+export const getGenerateNameCloudExport = async () => (await loadNameCloudUI()).generateNameCloudExport;
+export const getGetTranslation = async () => (await loadNameCloudUI()).getTranslation;
+export const getCloseCloudName = async () => (await loadNameCloudUI()).closeCloudName;
+export const getCreateNameCloudUI = async () => (await loadNameCloudUI()).createNameCloudUI;
+export const getUpdateOverlayLayout = async () => (await loadNameCloudUI()).updateOverlayLayout;
+export const getUpdateTitleText = async () => (await loadNameCloudUI()).updateTitleText;
+
+const loadBackgroundManager = async () => {
+  if (!backgroundManagerModule) { backgroundManagerModule = await import('./backgroundManager.js');} // OK
+  return backgroundManagerModule; };
+export const getSetupElegantBackground = async () => (await loadBackgroundManager()).setupElegantBackground;
+export const getEnableBackground = async () => (await loadBackgroundManager()).enableBackground;
+export const getInitBackgroundContainer = async () => (await loadBackgroundManager()).initBackgroundContainer;
+
+const loadGeoHeatMapDataProcessor = async () => {
+  if (!geoHeatMapDataProcessorModule) { geoHeatMapDataProcessorModule = await import('./geoHeatMapDataProcessor.js');} // OK
+  return geoHeatMapDataProcessorModule; };
+export const getCreateDataForHeatMap = async () => (await loadGeoHeatMapDataProcessor()).createDataForHeatMap;
+export const getCreateHeatmapDataForPeople = async () => (await loadGeoHeatMapDataProcessor()).createHeatmapDataForPeople;
+export const getRefreshHeatmap = async () => (await loadGeoHeatMapDataProcessor()).refreshHeatmap;
+
+const loadGeoHeatMapUI = async () => {
+  if (!geoHeatMapUIModule) { geoHeatMapUIModule = await import('./geoHeatMapUI.js');} // OK
+  return geoHeatMapUIModule; };
+export const getCreateImprovedHeatmap = async () => (await loadGeoHeatMapUI()).createImprovedHeatmap;
+export const getDisplayHeatMap = async () => (await loadGeoHeatMapUI()).displayHeatMap;
+
+const loadGeoHeatMapInteractions = async () => {
+  if (!geoHeatMapInteractionsModule) { geoHeatMapInteractionsModule = await import('./geoHeatMapInteractions.js');} // OK
+  return geoHeatMapInteractionsModule; };   
+export const getSaveHeatmapPosition = async () => (await loadGeoHeatMapInteractions()).saveHeatmapPosition;
+const getInitializeRefreshPersonListEventListener = async () => (await loadGeoHeatMapInteractions()).initializeRefreshPersonListEventListener;
+
+const loadGeolocalistion = async () => {
+  if (!geoLocalisationModule) { geoLocalisationModule = await import('./geoLocalisation.js');} // OK
+  return geoLocalisationModule; };   
+export const getGeocodeLocation= async () => (await loadGeolocalistion()).geocodeLocation;
+export const getLoadGeolocalisationFile= async () => (await loadGeolocalistion()).loadGeolocalisationFile;
+
+const loadmodalWindow = async () => {
+  if (!modalWindowModule) { modalWindowModule = await import('./modalWindow.js');} // OK
+  return modalWindowModule; };   
+export const getDisplayPersonDetails= async () => (await loadmodalWindow()).displayPersonDetails;
+export const getFormatGedcomDate= async () => (await loadmodalWindow()).formatGedcomDate;
+export const getFindContextualHistoricalFigures= async () => (await loadmodalWindow()).findContextualHistoricalFigures;
+export const getReadPersonSheet= async () => (await loadmodalWindow()).readPersonSheet;
+
+const loadtreeWheelAnimation = async () => {
+  if (!treeWheelAnimationModule) { treeWheelAnimationModule = await import('./treeWheelAnimation.js');} // OK
+  return treeWheelAnimationModule; };   
+export const getDisableFortuneModeWithLever= async () => (await loadtreeWheelAnimation()).disableFortuneModeWithLever;
+export const getDisableFortuneModeClean= async () => (await loadtreeWheelAnimation()).disableFortuneModeClean;
+export const getEnableFortuneMode= async () => (await loadtreeWheelAnimation()).enableFortuneMode;
+export const getShowQuizMessage= async () => (await loadtreeWheelAnimation()).showQuizMessage;
+export const getReadPersonDetails= async () => (await loadtreeWheelAnimation()).readPersonDetails;
+export const getGenerateRadarCache= async () => (await loadtreeWheelAnimation()).generateRadarCache;
+export const getCreateWinnerRedArrowIndicator= async () => (await loadtreeWheelAnimation()).createWinnerRedArrowIndicator;
+
+const loadTreeWheelRenderer = async () => {
+  if (!treeWheelRendererModule) { treeWheelRendererModule = await import('./treeWheelRenderer.js');} // OK
+  return treeWheelRendererModule; };   
+export const getSetMaxGenerationsInit= async () => (await loadTreeWheelRenderer()).setMaxGenerationsInit;
+export const getSetMaxGenerations= async () => (await loadTreeWheelRenderer()).setMaxGenerations;
+export const getRemoveSpinningImage= async () => (await loadTreeWheelRenderer()).removeSpinningImage;
+export const getDrawWheelTree= async () => (await loadTreeWheelRenderer()).drawWheelTree;
+export const getResetWheelView= async () => (await loadTreeWheelRenderer()).resetWheelView;
+export const getNeedsReset= async () => (await loadTreeWheelRenderer()).needsReset;
+export const getGetGenerationColor= async () => (await loadTreeWheelRenderer()).getGenerationColor;
+export const getCalculateOptimalZoom= async () => (await loadTreeWheelRenderer()).calculateOptimalZoom;
+
+const loadNameCloudSettings = async () => {
+  if (!nameCloudSettingsModule) { nameCloudSettingsModule = await import('./nameCloudSettings.js');} // OK
+  return nameCloudSettingsModule; };   
+export const getCreateSettingsModal= async () => (await loadNameCloudSettings()).createSettingsModal;
+export const getLoadSettingsFromLocalStorage= async () => (await loadNameCloudSettings()).loadSettingsFromLocalStorage;
+
+
+const loadHamburgerMenu = async () => {
+  if (!hamburgerMenuModule) { hamburgerMenuModule = await import('./hamburgerMenu.js');} // OK
+  return hamburgerMenuModule; };   
+export const getShowHamburgerMenu= async () => (await loadHamburgerMenu()).showHamburgerMenu;
+export const getInitializeHamburgerOnce= async () => (await loadHamburgerMenu()).initializeHamburgerOnce;
+export const getGetMenuTranslation= async () => (await loadHamburgerMenu()).getMenuTranslation;
+export const getHideHamburgerMenu= async () => (await loadHamburgerMenu()).hideHamburgerMenu;
+export const getResizeHamburger= async () => (await loadHamburgerMenu()).resizeHamburger;
+
+
+let isOnline = false; // Variable pour suivre l'état de la connexion Internet
+let previousOnlineState = false;
 
 window.addEventListener('load', function() {
     if (window.eruda) {
@@ -206,7 +362,7 @@ window.addEventListener('load', function() {
 });
 
 
-window.addEventListener('load', initialize);
+window.addEventListener('load', initializeAtLoad);
 
 // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
@@ -269,7 +425,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-export { geocodeLocation };
+// export { geocodeLocation };
 
 const i18n = {
     'fr': {
@@ -305,7 +461,7 @@ function translate(key) {
 }
 
 
-window.toggleAnimationPause = toggleAnimationPause;
+// window.toggleAnimationPause = toggleAnimationPause;
 
 
 // document.addEventListener('DOMContentLoaded', async () => {
@@ -1306,10 +1462,13 @@ function openGedcomModal() {
     if (modal) { modal.style.display = 'block'; }
     const secretTargetArea = document.getElementById('secret-trigger-area');
     if (secretTargetArea) {secretTargetArea.style.display = 'none';}
-    setTimeout(() => {
-        calculerFacteurRedimensionnement();
-        redimensionnerButtonSizeInDOM();
-    }, 300);
+    
+    if (!state.dontApplyButtonRescale) {
+        setTimeout(() => {
+            calculerFacteurRedimensionnement();
+            redimensionnerButtonSizeInDOM();
+        }, 300);
+    }
 
     
 };
@@ -1324,17 +1483,17 @@ function closeGedcomModal () {
 
 
 
-// ajoutez des options pour différents types de heatmap
-export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
-    import('./geoLocalisation.js').then(module => {
-        module.createAncestorsHeatMap({
-            type: type,
-            rootPersonId: rootPersonId
-        });k
-    });
-}
+// // ajoutez des options pour différents types de heatmap
+// export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
+//     import('./geoLocalisation.js').then(module => {
+//         module.createAncestorsHeatMap({
+//             type: type,
+//             rootPersonId: rootPersonId
+//         });k
+//     });
+// }
 
-export function updateRadarButtonText(isForceTreeRadarButton = null) {
+export async function updateRadarButtonText(isForceTreeRadarButton = null) {
     const treeRadarToggleBtn = document.getElementById('radarBtn');
     const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
 
@@ -1351,6 +1510,7 @@ export function updateRadarButtonText(isForceTreeRadarButton = null) {
 
     toggleValue = (isForceTreeRadarButton) ? (toggleValue) : state.isRadarEnabled;    
 
+    const getMenuTranslation = await getGetMenuTranslation();
     if( window.nameCloudSection && window.nameCloudSection.container ) {
         window.nameCloudSection.container.querySelector('h3').textContent = toggleValue ? getMenuTranslation('section_namecloud2') : getMenuTranslation('section_namecloud');
     }
@@ -1383,15 +1543,12 @@ export function getPersonsFromTCurrenTree() {
     return persons;
 }
 
-export function toggleTreeRadar() {
+export async function toggleTreeRadar() {
     // Basculer l'état du tree/radar
     state.isRadarEnabled = !state.isRadarEnabled;  
     updateRadarButtonText();  
     closeAllModals();
-    fullResetAnimationState();
-
-
-
+    importLinks.treeAnimation.fullResetAnimationState();
 
     if (state.isRadarEnabled) {
         state.treeModeReal_whenReturnToTree = state.treeMode; 
@@ -1400,7 +1557,7 @@ export function toggleTreeRadar() {
         displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
 
     } else {
-
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
         disableFortuneModeClean();
 
         if ((state.treeModeReal_whenReturnToTree.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
@@ -1423,9 +1580,10 @@ export function toggleTreeRadar() {
         displayGenealogicTree(null, true, false);
 
         if (state.backgroundEnabled) {
-            setTimeout(() => {
+            setTimeout(async () => {
                 // Pour ré-activer le fond d'écran
                 console.log("\n\n re-activation du fond d'écran depuis toggleTreeRadar dans main.js \n\n");
+                const enableBackground = await getEnableBackground();
                 enableBackground(true, true);
             }, 200);
         }
@@ -1433,8 +1591,9 @@ export function toggleTreeRadar() {
 }
 
 // Fonction pour basculer le son
-export function toggleSpeech() {
+export async function toggleSpeech() {
     if (state.isRadarEnabled) {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
         disableFortuneModeClean();
     } else {
         const speechToggleBtn = document.getElementById('speechToggleBtn');
@@ -1448,8 +1607,9 @@ export function toggleSpeech() {
 }
 
 // Fonction pour desactiver complètement le son dans l'animation
-export function toggleSpeech2() {
+export async function toggleSpeech2() {
     if (state.isRadarEnabled) {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
         disableFortuneModeClean();
     } else {
         const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
@@ -1786,6 +1946,7 @@ export function positionFormContainer() {
 
 export async function getCachedImageURL(imagePath) {
     try {
+        const APP_CACHE_NAME = getAPP_CACHE_NAME;
         const cache = await caches.open(APP_CACHE_NAME);
         const response = await cache.match(imagePath);
         if (response) {
@@ -1799,7 +1960,7 @@ export async function getCachedImageURL(imagePath) {
 }
 
 
-function initialize() {   
+function initializeAtLoad() {   
 
     // --- 1. Persistance : Vérifier l'état au chargement ---
     if (localStorage.getItem('modeExpertActif') === 'true') {
@@ -1852,7 +2013,7 @@ function initialize() {
     initializeGenerationSelect();
     
     // Initialiser les gestionnaires d'événements
-    initializeEventHandlers();
+    // initializeEventHandlers();
 
     // 🎯 : Initialisation iOS très tôt
     if (window.initializeIOSInstallation) {
@@ -1860,10 +2021,10 @@ function initialize() {
     }
     
     // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
-    initializeCustomSelectors();
+    // initializeCustomSelectors();
 
-    // Appliquer les définitions de texte
-    applyTextDefinitions();
+    // // Appliquer les définitions de texte
+    // importLinks.mainUI.applyTextDefinitions();
 
 
     const loadGedcomButton = document.getElementById('load-gedcom-button');
@@ -2005,7 +2166,7 @@ function initialize() {
     }
 
 
-    setupSearchFieldModal();
+    // setupSearchFieldModal();
 
 
 
@@ -2079,6 +2240,44 @@ function initialize() {
 
 }
 
+function initializeAtLoadData() {   
+
+     // Initialiser le sélecteur de générations standard d'abord
+    // (nécessaire pour sa création avant de le remplacer)
+    // initializeGenerationSelect();
+    
+    // Initialiser les gestionnaires d'événements
+    initializeEventHandlers();
+
+    
+    // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
+    importLinks.mainUI.initializeCustomSelectors();
+
+    // Appliquer les définitions de texte
+    importLinks.mainUI.applyTextDefinitions();
+
+    // state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
+
+
+
+    // state.nodeStyle = localStorage.getItem('treeNodeStyle') || 'classic';
+    // if (!localStorage.getItem('treeDressingStyle')) { state.addLeaves = false;} 
+    // else if (localStorage.getItem('treeDressingStyle') === 'leaves') { state.addLeaves = true;}
+    // state.linkStyle = localStorage.getItem('treeLinkStyle') || 'normal-dark';
+    // state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
+    // state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
+    // state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
+
+    // console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
+
+
+
+    // console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT END OF INITIALIZE...\n\n');
+    // initialiserButtonSize();
+
+}
+
+
 
 
 function createFullScreenButton() {
@@ -2127,10 +2326,27 @@ function initializeGenerationSelect() {
 export let audio;
 export let audioUnlocked = false;
 
+
 /**
  * Charge les données GEDCOM et configure l'affichage de l'arbre
  */
 export async function loadData(isfromNonEncryptedFile = '', speechCapturedData = null) {
+
+    // On peut les lancer en parallèle pour aller plus vite
+    await Promise.all([
+        loadModule('treeOperations', './treeOperations.js'),
+        loadModule('treeRenderer', './treeRenderer.js'),
+        loadModule('treeAnimation', './treeAnimation.js'),  // to do
+        loadModule('nodeControls', './nodeControls.js'),
+        loadModule('nodeRenderer', './nodeRenderer.js'),
+        loadModule('mainUI', './mainUI.js'),
+    ]);
+
+
+
+    initializeAtLoadData();
+    const initializeRefreshPersonListEventListener = await getInitializeRefreshPersonListEventListener();
+    initializeRefreshPersonListEventListener();
 
     const secretTargetArea = document.getElementById('secret-trigger-area');
     secretTargetArea.style.display = 'none';
@@ -2139,6 +2355,12 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
     trackPageView('AccueilTreeViewer');
 
+    const setupSearchFieldModal = await getSetupSearchFieldModal();
+    setupSearchFieldModal();
+
+    const createAudioPlayerToggleButton  =  await getCreateAudioPlayerToggleButton();
+    createAudioPlayerToggleButton();
+    const createAudioElement =  await getCreateAudioElement();
     audio = await createAudioElement();
     audio.preload = 'auto';
     audio.volume = 1;
@@ -2172,9 +2394,9 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
     state.previousWindowInnerHeight = state.lastWindowInnerHeight;
 
     state.nombre_generation = 4;
-    updateGenerationSelectorValue(state.nombre_generation);
+    importLinks.mainUI.updateGenerationSelectorValue(state.nombre_generation);
 
-    updateTreeModeSelector(state.treeMode);
+    importLinks.mainUI.updateTreeModeSelector(state.treeMode);
 
 
     // Utilisation
@@ -2186,7 +2408,7 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
     // Initialiser la position de la carte d'animation
     if (!state.isAnimationMapInitialized) {
-        initializeAnimationMapPosition();
+        importLinks.treeAnimation.initializeAnimationMapPosition();
     }
     
     if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
@@ -2231,12 +2453,14 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
     // }
 
     // for mobile phone
+    const nameCloudState = await getNameCloudState()
     nameCloudState.mobilePhone = false;
     if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
     else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
     
     try {
         let gedcomContent = await loadGedcomContent(fileInput, passwordInput, (isfromNonEncryptedFile==='nonEncrypted'));
+        const parseGEDCOM = await getParseGEDCOM();
         state.gedcomData = parseGEDCOM(gedcomContent);
 
 
@@ -2272,6 +2496,7 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
         // initBackgroundContainer();
 
         // Chargement du fichier de géolocalisation
+        const loadGeolocalisationFile = await getLoadGeolocalisationFile();
         await loadGeolocalisationFile();
 
         // Dispatch un événement personnalisé
@@ -2335,12 +2560,13 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
 
         // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
         setTimeout(() => {
-            replaceRootPersonSelector();
+            importLinks.mainUI.replaceRootPersonSelector();
         }, 500); // Petit délai pour s'assurer que tout est prêt
         
         hideLoginBackground();
-            
+        const initializeHamburgerOnce = await getInitializeHamburgerOnce();    
         initializeHamburgerOnce();
+        const showHamburgerMenu = await getShowHamburgerMenu();
         showHamburgerMenu();
 
         // toggleFullScreen();
@@ -2354,7 +2580,7 @@ export async function loadData(isfromNonEncryptedFile = '', speechCapturedData =
         }, 50);
 
         setTimeout(() => {
-            buttonsOnDisplay(false);
+            importLinks.mainUI.buttonsOnDisplay(false);
         }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!          
 
         // pour bug flash noir en mode mobile landscape
@@ -2535,6 +2761,7 @@ async function loadGedcomContent(fileInput, passwordInput, isfromNonEncryptedFil
  * @private
  */
 async function loadEncryptedContent(password, filename) {
+    const debugLog = await getDebugLog();
     debugLog(`Tentative de chargement: ${filename}`, 'info');
     debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
     
@@ -2554,6 +2781,7 @@ async function loadEncryptedContent(password, filename) {
     try {
         // Utiliser fetchResourceWithCache au lieu de fetch ou cache.match
         debugLog(`Chargement via fetchResourceWithCache...`, 'info');
+        const fetchResourceWithCache = await getFetchResourceWithCache();
         response = await fetchResourceWithCache(filename);
         debugLog(`Réponse: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
     } catch (fetchError) {
@@ -2734,7 +2962,7 @@ function fallbackUpdateRootPersonSelector(person) {
  * Gère le changement de sélection dans le sélecteur de personnes racines
  * @param {Event} event - L'événement de changement
  */
-export function handleRootPersonChange(event) {
+export async function handleRootPersonChange(event) {
     const selectedValue = event.target.value;
     
     if (selectedValue === 'clear-history') {
@@ -2974,16 +3202,21 @@ export function handleRootPersonChange(event) {
         // showMap();
 
         // Réinitialiser l'état de l'animation avant de démarrer
-        resetAnimationState();
+        importLinks.treeAnimation.resetAnimationState();
 
         if (state.isRadarEnabled) {
+            const disableFortuneModeClean = await getDisableFortuneModeClean();
+            const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
             disableFortuneModeClean();
             disableFortuneModeWithLever();
             // displayGenealogicTree(null, true, false, true);
             toggleTreeRadar();
         }
 
-        if (state.isWordCloudEnabled) { closeCloudName(); }
+        if (state.isWordCloudEnabled) { 
+            const closeCloudName = await getCloseCloudName();
+            closeCloudName(); 
+        }
 
 
         state.isAnimationLaunched = true;
@@ -3046,7 +3279,7 @@ export function handleRootPersonChange(event) {
 
         // Démarrer l'animation après un court délai
         setTimeout(() => {
-            startAncestorAnimation(isCousin);
+            importLinks.treeAnimation.startAncestorAnimation(isCousin);
         }, 500);
         
         // Mettre à jour la valeur du sélecteur si possible
@@ -3056,7 +3289,7 @@ export function handleRootPersonChange(event) {
         }
         
 
-        enforceTextTruncation();
+        importLinks.mainUI.enforceTextTruncation();
 
         return;
     }
@@ -3067,11 +3300,11 @@ export function handleRootPersonChange(event) {
  * @param {string} rootPersonId - ID optionnel de la personne racine
  * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
  */
-export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false, mode = 'ancestors') {
-
+export async function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false, mode = 'ancestors') {
     // Réinitialiser l'état de l'animation avant de changer l'arbre
-    resetAnimationState();
-
+    importLinks.treeAnimation.resetAnimationState();
+    const enableFortuneMode = await getEnableFortuneMode();
+    const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
     if (state.isRadarEnabled) {
         disableFortuneModeWithLever();
         enableFortuneMode();
@@ -3090,6 +3323,8 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     // if (state.firstName != '' && state.lastName!= '') {
     if (isInit && state.firstName != '' && state.lastName!= '') {
 
+
+        const openSearchModal = getOpenSearchModal();
         openSearchModal(state.firstName,  state.lastName );
 
         if (window.currentSearchResults.length == 0) {
@@ -3180,12 +3415,13 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
     }
 
     // Nettoyer les contrôles existants
+    const cleanupExportControls = await getCleanupExportControls();
     cleanupExportControls();
 
     if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
         const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
-        state.currentTree =  buildDescendantTree(tempPerson.id);
-        // state.currentTree =  buildDescendantTreeWithDuplicates(tempPerson.id, true);
+        state.currentTree =  importLinks.treeOperations.buildDescendantTree(tempPerson.id);
+        // state.currentTree =  importLinks.treeOperations.buildDescendantTreeWithDuplicates(tempPerson.id, true);
 
     }
     else {
@@ -3196,38 +3432,39 @@ export function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false
             if (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' ) {
                 state.treeMode = 'directAncestors';
                 state.treeModeReal = 'directAncestors';
-                state.currentTree = buildAncestorTree(person.id);
+                state.currentTree = importLinks.treeOperations.buildAncestorTree(person.id);
             } else {
                 state.treeMode = 'directDescendants';
                 state.treeModeReal = 'directDescendants';
-                state.currentTree = buildDescendantTree(person.id);
+                state.currentTree = importLinks.treeOperations.buildDescendantTree(person.id);
 
             }
-            updateTreeModeSelector(state.treeMode);
+            importLinks.mainUI.updateTreeModeSelector(state.treeMode);
             state.treeModeReal_backup = state.treeModeReal;
             state.treeModeReal = mode;
+            const setMaxGenerationsInit = await getSetMaxGenerationsInit();
             setMaxGenerationsInit(state.nombre_generation);
         } else {
-            updateTreeModeSelector(state.treeMode);
+            importLinks.mainUI.updateTreeModeSelector(state.treeMode);
             console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
             // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
             state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
-                ? buildDescendantTree(person.id)
-                // ? buildDescendantTreeWithDuplicates(person.id, true)
+                ? importLinks.treeOperations.buildDescendantTree(person.id)
+                // ? importLinks.treeOperations.buildDescendantTreeWithDuplicates(person.id, true)
                 : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
-                ? buildAncestorTree(person.id)
+                ? importLinks.treeOperations.buildAncestorTree(person.id)
                 : (state.treeMode === 'both')
-                ? buildCombinedTree(person.id) // Pour le mode 'both'
-                : buildAncestorTree(person.id);
+                ? importLinks.treeOperations.buildCombinedTree(person.id) // Pour le mode 'both'
+                : importLinks.treeOperations.buildAncestorTree(person.id);
         }
     }
 
 
-    updateGenerationSelectorValue(state.nombre_generation);
+    importLinks.mainUI.updateGenerationSelectorValue(state.nombre_generation);
 
 
     // drawTree(isZoomRefresh);
-    drawTree(isZoomRefresh, false); // with WheelAncestors
+    importLinks.treeRenderer.drawTree(isZoomRefresh, false); // with WheelAncestors
 
     // drawWheelTree(true, false);
 
@@ -3289,7 +3526,7 @@ function updateBoxWidth() {
  */
 export function updateTreeMode(mode) {
     // Réinitialiser l'état de l'animation avant de changer le mode
-    resetAnimationState();
+    importLinks.treeAnimation.resetAnimationState();
 
     if (state.isRadarEnabled) {
         // state.treeMode = 'directAncestors';
@@ -3338,9 +3575,10 @@ export function updateTreeMode(mode) {
 
 // }
 
-export function openSettingsModal() {
+export async function openSettingsModal() {
     // Option 1: Utiliser directement la nouvelle modal
-    createEnhancedSettingsModal();
+    const createEnhancedSettingsModal = await getCreateEnhancedSettingsModal();
+    createEnhancedSettingsModal();     
 }
 
 export function closeSettingsModal() {
@@ -3922,7 +4160,18 @@ export function isIOSDevice() {
            (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
     state.isIOS = isIOS;
     // state.isIOS = true;
-    debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info")
+    // const debugLog = getDebugLog();
+    if (state.isDebugLog) {
+        import('./debugLogUtils.js').then(module => {
+            // ON NE MET PAS de () ici, on veut juste la fonction
+            const debugLog = module.debugLog; 
+            
+            // Maintenant on peut l'utiliser
+            debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info");
+        });
+    } else {
+        console.log(`ℹ️  isIOS : ${state.isIOS}`);
+    }
     return state.isIOS;
 }
 
@@ -3961,7 +4210,7 @@ function checkDevice() {
 
 
 
-export function detectDeviceType() {
+export async function detectDeviceType() {
   state.deviceInfo = {
     isMobile: false,
     isIOS: false,
@@ -3982,6 +4231,7 @@ export function detectDeviceType() {
                               (navigator.msMaxTouchPoints > 0);
   
   state.isMobile = state.deviceInfo.isMobile;
+  const debugLog = await getDebugLog();
   debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
 
   debugLog(`ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen}`, "info")
@@ -4041,10 +4291,10 @@ window.actionCounters = actionCounters;
 export {
     openGedcomModal,
     closeGedcomModal,
-    displayPersonDetails,
-    closePersonDetails,
-    setAsRootPerson,
-    closeModal,
+    // displayPersonDetails,
+    // closePersonDetails,
+    // setAsRootPerson,
+    // closeModal,
     updatePrenoms,
     updateLettersInNames,
     updateGenerations,
@@ -4517,6 +4767,155 @@ export function keepSilentAudioAlive() {
     
     return oscillator;
 }
+
+
+
+
+export async function testRealConnectivity(isEndFlagRequested = false) {
+    if (isEndFlagRequested) { state.isEndTestRealConnectivity = false; }
+
+    try {
+
+        // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
+        const response = await fetch('https://www.google.com/favicon.ico', {
+            mode: 'no-cors',  // Crucial pour éviter les erreurs CORS
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            // Timestamp pour éviter la mise en cache par le navigateur
+            signal: AbortSignal.timeout(2000)
+        });
+        
+        // Le mode no-cors retourne toujours une réponse "opaque"
+        // On ne peut pas vérifier le status, mais si on arrive ici sans erreur,
+        // c'est qu'une connexion a pu être établie
+        
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = true;
+        
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("✅ Connexion Internet rétablie");
+            showNetworkStatus("Connexion réseau rétablie");
+            // selectVoice();
+        }
+        state.isOnLine = true;
+        // console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
+        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+        
+        return true;
+    } catch (error) {
+        // Si on arrive ici, c'est qu'il n'y a pas de connexion
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = false;
+        
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Connexion Internet perdue");
+            showNetworkStatus("Mode hors-ligne");
+            // selectVoice();
+        }
+        state.isOnLine = false;
+        // console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
+        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+        return false;
+    }
+}
+
+window.testRealConnectivity = testRealConnectivity;
+
+
+export function initNetworkListeners() {
+    console.log("🌐 Initialisation des écouteurs réseau dans initNetworkListeners ...");
+    
+    // Test initial
+    testRealConnectivity(true).then(online => {
+        if (window.CURRENT_LANGUAGE == "fr") {
+            showNetworkStatus(online ? "Connexion réseau active" : "Mode hors-ligne");
+        } else if (window.CURRENT_LANGUAGE == "en") {
+            showNetworkStatus(online ? "Network connection active" : "Offline mode");
+        } else if (window.CURRENT_LANGUAGE == "es") {
+            showNetworkStatus(online ? "Conexión de red activa" : "Modo fuera de línea");
+        } else if (window.CURRENT_LANGUAGE == "hu") {
+            showNetworkStatus(online ? "Hálózati kapcsolat aktív" : "Offline mód");
+        }
+    });
+
+    // Écouteurs d'événements standard
+    window.addEventListener('online', () => testRealConnectivity());
+    window.addEventListener('offline', () => {
+        previousOnlineState = isOnline;
+        isOnline = false;
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Mode hors-ligne détecté");
+            showNetworkStatus("Mode hors-ligne");
+            if (state.isSpeechSynthesisAvailable) { 
+                selectVoice();
+            }
+        }
+    });
+
+
+    // testRealConnectivity();
+
+}
+
+// Fonction pour afficher visuellement le statut réseau (optionnel)
+export function showNetworkStatus(message) {
+    // Créer ou mettre à jour un élément de notification
+    let notification = document.getElementById('network-status');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'network-status';
+
+        notification.style.fontSize = 15 / state.browserScaleFactor +'px';
+
+        notification.style.position = 'fixed';
+        if (state.innerHeight < 400) {
+            notification.style.top = '0.67em';
+            notification.style.left = '';
+            notification.style.right = '3.33em';
+        } else {
+            if (window.outerWidth > 1000) { notification.style.top = '3.33em';}
+            else { notification.style.top = '3.33em';}
+
+            notification.style.left = (state.innerWidth/2 - 100)*state.scaleChrome  +'px';
+            notification.style.right = '';
+            // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
+            // notification.style.transform = 'translateX(-50%)';
+        }
+
+        notification.style.padding = '0.33em';
+        notification.style.borderRadius = '0.33em';
+        notification.style.zIndex = '9999';
+        document.body.appendChild(notification);
+    }
+    
+    console.log("\n\n\n 🌐 DEBUG : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, state.innerHeight, notification.style.left) ;
+
+    notification.style.setProperty('font-size', (15 / state.browserScaleFactor) + 'px', 'important');
+    notification.textContent = message;
+    notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
+    notification.style.color = 'white';
+
+    if (state.innerHeight >= 400) {
+        setTimeout(() => {    
+            notification.style.left = (state.innerWidth/2)*state.scaleChrome - (notification.offsetWidth)/2  +'px';
+            console.log("\n\n\n 🌐 DEBUG 2 : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, notification.style.left, notification.offsetWidth) ;
+        }, 50);
+    }
+
+    // Faire disparaître la notification après 3 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
+
 
 
 

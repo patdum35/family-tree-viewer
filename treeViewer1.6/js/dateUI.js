@@ -1,5 +1,4 @@
 // dateUI.js - Interface pour la sélection de dates historiques
-import { nameCloudState } from './nameCloud.js';
 
 // Fonction pour obtenir les traductions selon la langue actuelle
 function getTranslation(key) {

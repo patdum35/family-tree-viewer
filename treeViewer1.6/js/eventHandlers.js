@@ -1,22 +1,31 @@
 // ====================================
 // Gestionnaires d'événements
 // ====================================
-import { getZoom, getLastTransform } from './treeRenderer.js';
-import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen, getCachedImageURL, redimensionnerPlayButtonSizeInDOM } from './main.js';
-import { setupElegantBackground } from './backgroundManager.js';
-import { findPersonsByName } from './utils.js';
-import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
-import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
-import { repositionAudioPlayerOnResize } from './audioPlayer.js'
-import { getCachedResourceUrl } from './photoPlayer.js';
-import { setMaxGenerations, removeSpinningImage } from './treeWheelRenderer.js'
-import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
-import { enableBackground } from './backgroundManager.js';
-import { calculateFullTreeDimensions } from './exportManager.js';
-import { generateNameCloudExport } from './nameCloudUI.js';
-import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
-import { closeVoiceCommand } from './voiceSelect.js';
+// import { getZoom, getLastTransform } from './treeRenderer.js';
+import { importLinks } from './importState.js'; // import de treeRenderer, treeAnimation, mainUI via importLinks pour éviter les erreurs de chargement circulaire
 
+import { state, displayGenealogicTree, hideMap, positionFormContainer, toggleFullScreen, getCachedImageURL, redimensionnerPlayButtonSizeInDOM } from './main.js';
+// import { setupElegantBackground, enableBackground } from './backgroundManager.js';
+import { getSetupElegantBackground, getEnableBackground } from './main.js';
+import { findPersonsByName } from './utils.js';
+// import { hideHamburgerMenu, resizeHamburger } from './hamburgerMenu.js';
+import { getHideHamburgerMenu, getResizeHamburger } from './main.js';
+// import { animationState, stopAnimation, initializeAnimationMapPosition, updateAnimationMapSize} from './treeAnimation.js';
+// import { repositionAudioPlayerOnResize } from './audioPlayer.js'
+import { getRepositionAudioPlayerOnResize, getGenerateNameCloudExport } from './main.js'
+// import { setMaxGenerations, removeSpinningImage } from './treeWheelRenderer.js'
+import { getSetMaxGenerations, getRemoveSpinningImage } from './main.js'
+// import { disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
+import { getDisableFortuneModeWithLever, getDisableFortuneModeClean } from './main.js'
+// import { calculateFullTreeDimensions } from './exportManager.js';
+// import { generateNameCloudExport } from './nameCloudUI.js';
+// import { refreshHeatmap } from './geoHeatMapDataProcessor.js';
+import { getRefreshHeatmap } from './main.js';
+import { closeVoiceCommand } from './voiceSelect.js';
+const getCalculateFullTreeDimensions = async () => {
+    const { calculateFullTreeDimensions } = await import('./exportManager.js');
+    return calculateFullTreeDimensions;
+};
 
 
 /** function to reduce to call with 'resize' events*  */
@@ -39,8 +48,9 @@ export function isModalVisible(modalId) {
  */
 export function initializeEventHandlers() {
 
-    window.addEventListener('resize', debounce(() => {
+    window.addEventListener('resize', debounce(async () => {
         if (!state.isWordCloudEnabled) {
+            const resizeHamburger = await getResizeHamburger();
             resizeHamburger();
             handleWindowResize();
         }
@@ -52,25 +62,24 @@ export function initializeEventHandlers() {
     document.getElementById('root-person-results')
         .addEventListener('change', selectRootPerson);
 
-    initializeHeatmapHandlers();
+    // initializeHeatmapHandlers();
 }
 
-export function initializeHeatmapHandlers() {
-    const completeButton = document.querySelector('[data-heatmap="complete"]');
-    const ancestorsButton = document.querySelector('[data-heatmap="ancestors"]');
-    const descendantsButton = document.querySelector('[data-heatmap="descendants"]');
+// export function initializeHeatmapHandlers() {
+    
+//     const completeButton = document.querySelector('[data-heatmap="complete"]');
+//     const ancestorsButton = document.querySelector('[data-heatmap="ancestors"]');
+//     const descendantsButton = document.querySelector('[data-heatmap="descendants"]');
 
-    completeButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'all' }));
-    ancestorsButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'ancestors' }));
-    descendantsButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'descendants' }));
-}
+//     completeButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'all' }));
+//     ancestorsButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'ancestors' }));
+//     descendantsButton?.addEventListener('click', () => createAncestorsHeatMap({ type: 'descendants' }));
+// }
 
 /**
  * Gère le redimensionnement de la fenêtre
  */
-export function handleWindowResize() {
-
-
+export async function handleWindowResize() {
     const closeButton = document.getElementById('close-tree-button');
     if (!state.isSamsungBrowser) { state.innerWidth = window.innerWidth*state.browserScaleFactor; }
     else { state.innerWidth = window.innerWidth;}
@@ -89,24 +98,28 @@ export function handleWindowResize() {
         closeButton.style.setProperty('right', '1em', 'important');        
     }
 
+    if (typeof d3 !== 'undefined') {
 
-    d3.select("#tree-svg")
-        .attr("width", window.innerWidth)
-        .attr("height", window.innerHeight);
-        
-    const svg = d3.select("#tree-svg");
-    setupElegantBackground(svg);
-    initializeAnimationMapPosition();
-    updateAnimationMapSize();
-    // resizeHamburger();
-    repositionAudioPlayerOnResize();
+        d3.select("#tree-svg")
+            .attr("width", window.innerWidth)
+            .attr("height", window.innerHeight);
+            
+        const svg = d3.select("#tree-svg");
+        const setupElegantBackground = await getSetupElegantBackground();
+        setupElegantBackground(svg);
+        importLinks.treeAnimation.initializeAnimationMapPosition();
+        importLinks.treeAnimation.updateAnimationMapSize();
+        // resizeHamburger();
+        const repositionAudioPlayerOnResize = await getRepositionAudioPlayerOnResize();
+        repositionAudioPlayerOnResize();
 
-    state.screenResizeHasOccured = true;
-    state.previousWindowInnerWidth = state.lastWindowInnerWidth;
-    state.previousWindowInnerHeight = state.lastWindowInnerHeight;
-    state.lastWindowInnerWidth = window.innerWidth;
-    state.lastWindowInnerHeight = window.innerHeight;
-    console.log("\n\n\n *** debug on resize :  Redimensionnement de la fenêtre ARBRE , sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured, '########\n\n\n');
+        state.screenResizeHasOccured = true;
+        state.previousWindowInnerWidth = state.lastWindowInnerWidth;
+        state.previousWindowInnerHeight = state.lastWindowInnerHeight;
+        state.lastWindowInnerWidth = window.innerWidth;
+        state.lastWindowInnerHeight = window.innerHeight;
+        console.log("\n\n\n *** debug on resize :  Redimensionnement de la fenêtre ARBRE , sizes = ", state.lastWindowInnerWidth, state.lastWindowInnerHeight, "previous : ", state.previousWindowInnerWidth, state.previousWindowInnerHeight, state.screenResizeHasOccured,  '########\n\n\n');
+    }
 }
 
 /**
@@ -156,11 +169,12 @@ function displaySearchResults(matchedPersons, resultsSelect) {
             resultsSelect.updateOptions(options);
         } else {
             // Sinon, essayez de recréer un nouveau sélecteur avec ces options
-            import('./mainUI.js').then(module => {
-                if (typeof module.replaceRootPersonSelector === 'function') {
-                    module.replaceRootPersonSelector(options);
-                }
-            });
+            // import('./mainUI.js').then(module => {
+            //     if (typeof module.replaceRootPersonSelector === 'function') {
+            //         module.replaceRootPersonSelector(options);
+            //     }
+            // });
+            importLinks.mainUI.replaceRootPersonSelector(options);
         }
     }
     
@@ -224,26 +238,37 @@ export function searchRootPerson(event) {
         });
         
         // Si nous avons un sélecteur personnalisé, utiliser replaceRootPersonSelector
-        import('./mainUI.js').then(module => {
-            if (typeof module.replaceRootPersonSelector === 'function') {
-                const newSelector = module.replaceRootPersonSelector(options);
-                if (newSelector) {
-                    // Forcer l'affichage de "Select" comme texte affiché
-                    module.updateSelectorDisplayText(newSelector, "Select");
+        // import('./mainUI.js').then(module => {
+        //     if (typeof module.replaceRootPersonSelector === 'function') {
+        //         const newSelector = module.replaceRootPersonSelector(options);
+        //         if (newSelector) {
+        //             // Forcer l'affichage de "Select" comme texte affiché
+        //             module.updateSelectorDisplayText(newSelector, "Select");
                     
-                    if (typeof newSelector.setBlinking === 'function') {
-                        newSelector.setBlinking(true);
-                    }
-                }
+        //             if (typeof newSelector.setBlinking === 'function') {
+        //                 newSelector.setBlinking(true);
+        //             }
+        //         }
+        //     }
+        // });
+        const newSelector = importLinks.mainUI.replaceRootPersonSelector(options);
+        if (newSelector) {
+            // Forcer l'affichage de "Select" comme texte affiché
+            importLinks.mainUI.updateSelectorDisplayText(newSelector, "Select");
+            
+            if (typeof newSelector.setBlinking === 'function') {
+                newSelector.setBlinking(true);
             }
-        });
+        }
+
+
     } else {
         alert('Aucune personne trouvée');
     }
 }
 
 // Fonction améliorée pour la sélection d'une personne trouvée
-export function selectFoundPerson(personId) {
+export async function selectFoundPerson(personId) {
     if (!personId) return;
     
     const resultsSelect = document.getElementById('root-person-results');
@@ -274,10 +299,12 @@ export function selectFoundPerson(personId) {
     } else if (state.isWordCloudEnabled) {
         state.rootPersonId = personId;
         state.rootPerson = state.gedcomData.individuals[personId];
+        const generateNameCloudExport = await getGenerateNameCloudExport();
         generateNameCloudExport();
         // Vérifier si une heatmap est déjà affichée
         if (document.getElementById('namecloud-heatmap-wrapper')) {
             // Si oui, la rafraîchir plutôt que d'en créer une nouvelle
+            const refreshHeatmap = await getRefreshHeatmap();
             refreshHeatmap();
         }
     } else {
@@ -290,27 +317,48 @@ export function selectFoundPerson(personId) {
     setTimeout(() => {
         // Forcer une recréation complète du sélecteur en mode historique
         // plutôt que d'essayer de mettre à jour celui existant
-        import('./mainUI.js').then(module => {
-            if (typeof module.replaceRootPersonSelector === 'function') {
-                // Recréer le sélecteur avec l'historique mis à jour
-                const newSelector = module.replaceRootPersonSelector();
+        // import('./mainUI.js').then(module => {
+        //     if (typeof module.replaceRootPersonSelector === 'function') {
+        //         // Recréer le sélecteur avec l'historique mis à jour
+        //         const newSelector = module.replaceRootPersonSelector();
                 
-                // S'assurer que la personne sélectionnée est choisie comme valeur courante
-                if (newSelector) {
-                    // Rechercher la personne dans l'historique mis à jour
-                    const rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
-                    const selectedPerson = rootHistory.find(entry => entry.id === personId);
+        //         // S'assurer que la personne sélectionnée est choisie comme valeur courante
+        //         if (newSelector) {
+        //             // Rechercher la personne dans l'historique mis à jour
+        //             const rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+        //             const selectedPerson = rootHistory.find(entry => entry.id === personId);
                     
-                    if (selectedPerson) {
-                        // Définir la valeur sélectionnée
-                        newSelector.value = personId;
+        //             if (selectedPerson) {
+        //                 // Définir la valeur sélectionnée
+        //                 newSelector.value = personId;
                         
-                        // Mettre à jour l'affichage avec le nom tronqué
-                        module.updateSelectorDisplayText(newSelector, selectedPerson.name);
-                    }
-                }
+        //                 // Mettre à jour l'affichage avec le nom tronqué
+        //                 module.updateSelectorDisplayText(newSelector, selectedPerson.name);
+        //             }
+        //         }
+        //     }
+        // });
+
+
+        // Recréer le sélecteur avec l'historique mis à jour
+        const newSelector = importLinks.mainUI.replaceRootPersonSelector();
+        
+        // S'assurer que la personne sélectionnée est choisie comme valeur courante
+        if (newSelector) {
+            // Rechercher la personne dans l'historique mis à jour
+            const rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+            const selectedPerson = rootHistory.find(entry => entry.id === personId);
+            
+            if (selectedPerson) {
+                // Définir la valeur sélectionnée
+                newSelector.value = personId;
+                
+                // Mettre à jour l'affichage avec le nom tronqué
+                importLinks.mainUI.updateSelectorDisplayText(newSelector, selectedPerson.name);
             }
-        });
+        }
+
+
     }, 200); // Augmenter le délai pour s'assurer que tout est bien synchronisé
 }
 
@@ -334,9 +382,10 @@ export function updateLettersInNames(value) {
 /**
  * Gère les mises à jour du nombre de générations
  */
-export function updateGenerations(value) {
+export async function updateGenerations(value) {
     state.nombre_generation = parseInt(value);
     if (state.isRadarEnabled) {
+        const setMaxGenerations = await getSetMaxGenerations();
         setMaxGenerations(state.nombre_generation);
     } else {
         displayGenealogicTree(null, true, false);
@@ -348,7 +397,7 @@ export function updateGenerations(value) {
  */
 export function zoomIn() {
     const svg = d3.select("#tree-svg");
-    const zoom = getZoom();
+    const zoom = importLinks.treeRenderer.getZoom();
     if (zoom) {
         svg.transition()
             .duration(750)
@@ -361,7 +410,7 @@ export function zoomIn() {
  */
 export function zoomOut() {
     const svg = d3.select("#tree-svg");
-    const zoom = getZoom();
+    const zoom = importLinks.treeRenderer.getZoom();
     if (zoom) {
         svg.transition()
             .duration(750)
@@ -378,7 +427,7 @@ export function zoomOut() {
 export function resetView() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
-    const zoom = getZoom();
+    const zoom = importLinks.treeRenderer.getZoom();
 
     state.isAnimationLaunched = false;
     
@@ -401,17 +450,17 @@ export function resetView() {
     }
 }
 
-export function resetViewZoomBeforeExport() {
+export async function resetViewZoomBeforeExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
-    const zoom = getZoom();
+    const zoom = importLinks.treeRenderer.getZoom();
 
     state.isAnimationLaunched = false;
     
     if (zoom) {
 
         // Récupérer la transformation actuelle
-        const currentTransform = getLastTransform() || d3.zoomIdentity;
+        const currentTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
         
         // Extraire le scale et la position Y actuels
         state.currentScale = currentTransform.k;
@@ -433,8 +482,10 @@ export function resetViewZoomBeforeExport() {
         // enableBackground(false);
         if (state.backgroundEnabled) {
             const svgForExport = document.querySelector('#tree-svg');
+            const calculateFullTreeDimensions = await getCalculateFullTreeDimensions();
             const fullDimensions = calculateFullTreeDimensions(svgForExport);
             console.log( "new dimension pour the background with png export", fullDimensions)
+            const setupElegantBackground = await getSetupElegantBackground();
             setupElegantBackground(svg, fullDimensions, true);
         }
 
@@ -444,10 +495,10 @@ export function resetViewZoomBeforeExport() {
     }
 }
 
-export function resetViewZoomAfterExport() {
+export async function resetViewZoomAfterExport() {
     const svg = d3.select("#tree-svg");
     const height = window.innerHeight;
-    const zoom = getZoom();
+    const zoom = importLinks.treeRenderer.getZoom();
 
     state.isAnimationLaunched = false;
     
@@ -458,6 +509,7 @@ export function resetViewZoomAfterExport() {
         transform = transform.translate(state.currentX, state.currentY).scale(state.currentScale);
 
         if (state.backgroundEnabled) {
+            const enableBackground = await getEnableBackground();
             enableBackground(true);
         }
 
@@ -475,7 +527,7 @@ export function resetViewZoomAfterExport() {
  */
 export function resetZoom() {
     // Arrêter l'animation en cours, si présente
-    stopAnimation();
+    importLinks.treeAnimation.stopAnimation();
     
     // Réinitialiser la vue
     resetView();
@@ -554,7 +606,7 @@ function highlightAndZoomToNode(matchedNode) {
 
         svg.transition()
             .duration(750)
-            .call(getZoom().transform, 
+            .call(importLinks.treeRenderer.getZoom().transform, 
                 d3.zoomIdentity
                     .translate(window.innerWidth/2 - x, window.innerHeight/2 - y)
                     .scale(1)
@@ -672,6 +724,7 @@ export async function returnToLogin() {
     document.body.style.overflow = '';
     
     // Masquer le menu hamburger
+    const hideHamburgerMenu = await getHideHamburgerMenu();
     hideHamburgerMenu();
     
     // Afficher le formulaire de mot de passe
@@ -698,9 +751,9 @@ export async function returnToLogin() {
     // Réinitialiser d'autres propriétés si nécessaire
     state.isAnimationLaunched = false;
     state.isFullResetAnimationRequested = true;
-    stopAnimation();
+    importLinks.treeAnimation.stopAnimation();
 
-    animationState.isPaused = true;
+    importLinks.treeAnimation.animationState.isPaused = true;
     const animationPauseBtn = document.getElementById('animationPauseBtn');
     // Mettre à jour le bouton
     // animationPauseBtn.querySelector('span').textContent = '▶️';
@@ -711,12 +764,15 @@ export async function returnToLogin() {
     hideMap();
 
     state.isRadarEnabled = false;
+    const  disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
     disableFortuneModeWithLever();
     state.isRadarEnabled = false;
     state.treeMode = 'ancestors';
     state.treeModeReal = 'ancestors';
+    const removeSpinningImage = await getRemoveSpinningImage();
     removeSpinningImage();
 
+    const  disableFortuneModeClean = await getDisableFortuneModeClean();
     disableFortuneModeClean();
 
     // Supprimer également tout autre conteneur de fond d'écran existant

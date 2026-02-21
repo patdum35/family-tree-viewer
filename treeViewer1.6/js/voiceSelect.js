@@ -1,15 +1,20 @@
 import { state, loadData, calcFontSize } from './main.js';
-import { initSpeechSynthesis, testRealConnectivity } from './treeAnimation.js';
+// import { initSpeechSynthesis } from './treeAnimation.js';
+// import { initSpeechSynthesis } from './main.js';
 import { makeModalDraggableAndResizable, makeModalInteractive } from './resizableModalUtils.js';
-import { findPersonsBy, openSearchModal } from './searchModalUI.js';
-import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
+// import { findPersonsBy} from './searchModalUI.js';
+import { getFindPersonsBy} from './main.js';
+// import { displayPersonDetails, readPersonSheet } from './modalWindow.js'
+import { getDisplayPersonDetails, getReadPersonSheet } from './main.js'
 import { debounce } from './eventHandlers.js';
-import { debugLog } from './debugLogUtils.js';
+// import { debugLog } from './debugLogUtils.js';
+import { getDebugLog } from './main.js';
+
 
 let voiceUI = null;
 let speechUI = null;
 
-export function selectVoice() {
+export async function selectVoice() {
 
     let voice_language = 'fr-FR';
     let voice_language2 = 'fr_FR';
@@ -153,6 +158,7 @@ export function selectVoice() {
 
     if (state.frenchVoice) {
         console.log("Voix  sélectionnée:", state.frenchVoice);
+        const debugLog = await getDebugLog();
         debugLog(`Version 1.6, Voix sélectionnée:, ${state.frenchVoice.name}, localService=, ${state.frenchVoice.localService}`);
     }
 
@@ -1896,6 +1902,7 @@ export const SpeechRecognitionUI = (function() {
                 capturedEntities[translate('lastname')] = 'dumenil';
             }
 
+            const findPersonsBy = await getFindPersonsBy();
             res = findPersonsBy('', config, '', null, capturedEntities[translate('firstname')], capturedEntities[translate('lastname')], false);
 
             console.log('\n\n\n ------------   debug0 : personne trouvée ??? ---------', res, res.results[0]);
@@ -1928,6 +1935,7 @@ export const SpeechRecognitionUI = (function() {
                 let personId = (res.results.length > 0) ? res.results[0].id : res2.results[0].id;
 
                 if (detectedAction  === 'search' || detectedAction  === 'research' ) {
+                    const displayPersonDetails = await getDisplayPersonDetails();
                     displayPersonDetails(personId);
                 }
 
@@ -1937,6 +1945,7 @@ export const SpeechRecognitionUI = (function() {
                 if (!detectedAction.includes('search') && !detectedAction.includes('research')  ) { 
                     const quizzMessage = document.getElementById('quizz-message');
                     if (quizzMessage) { quizzMessage.remove(); }
+                    const readPersonSheet = await getReadPersonSheet();
                     await readPersonSheet(personId, detectedAction); 
                 } 
                 
@@ -3465,6 +3474,46 @@ export function generatePhoneticAlternatives(word) {
     // Retourne la liste des alternatives (ex: ['dumenil']) ou une liste vide si size = 0.
     return Array.from(generatedAlternatives);
 }
+
+
+
+
+/*  NOUVEAU CODE BON pour nouveau Chrome */
+// Variable globale pour suivre si la synthèse vocale a été initialisée
+// let state.speechSynthesisInitialized = false;
+let errorInSpeechInit = false;
+
+// Fonction d'initialisation de la synthèse vocale à exécuter au chargement
+export function initSpeechSynthesis(voice) {
+    if ('speechSynthesis' in window && !state.speechSynthesisInitialized) {
+        console.log("🎤 Initialisation de la synthèse vocale... avec ", voice);
+        // Créer et jouer une utterance silencieuse pour initialiser le moteur
+        const initUtterance = new SpeechSynthesisUtterance("");
+        initUtterance.volume = 0.00; // Muet
+        initUtterance.rate = 1.0; // 
+        initUtterance.voice = voice; // 
+        initUtterance.onend = () => {
+            console.log("🎤 Synthèse vocale initialisée avec succès avec ", voice);
+            state.speechSynthesisInitialized = true;
+            
+            // Tentative de déblocage audio HTML
+            new Audio().play().catch(() => {});
+        };
+        initUtterance.onerror = (err) => {
+            console.log("🎤 Erreur lors de l'initialisation de la synthèse vocale:", err, ", avec ", voice);
+            state.speechSynthesisInitialized = true; // Considérer comme initialisé quand même
+            errorInSpeechInit = true;
+        };
+        
+        // Forcer le chargement des voix
+        // window.speechSynthesis.getVoices();
+        
+        // Jouer l'utterance silencieuse
+        window.speechSynthesis.speak(initUtterance);
+    }
+}
+
+
 
 
 /**

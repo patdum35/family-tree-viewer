@@ -41,16 +41,16 @@ const RESOURCES_TO_CACHE = [
   './js/libraryLoader.js',
   './js/main.js',
   './js/appInitializer.js',
-  './js/debugLogUtils.js',
+  // './js/debugLogUtils.js',
   './js/serviceWorkerInit.js',
   './js/i18n.js',
   './js/pwaInstaller_ProgressiveWebApps.js',
 
   // Bibliothèques externes essentielles
-  './libs/pako.min.js',
-  './libs/d3.v7.min.js',
-  './libs/leaflet.js',
-  './libs/leaflet.css',
+  // './libs/pako.min.js',
+  // './libs/d3.v7.min.js',
+  // './libs/leaflet.js',
+  // './libs/leaflet.css',
   
   
   // icones et manifest
@@ -223,7 +223,7 @@ self.addEventListener('fetch', (event) => {
   // Stratégie basic Cache-first
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request, { ignoreSearch: true })
+      return cache.match(event.request, { ignoreSearch: true, ignoreVary: true  })
         .then(cachedResponse => {
           if (cachedResponse) {
             return cachedResponse;
@@ -443,23 +443,172 @@ self.addEventListener('activate', (event) => {
 
 
 
-// 2. On met TON code de cache à l'intérieur du gestionnaire de messages existant
+
+
+
+
+// 2. On met le code de cache à l'intérieur du gestionnaire de messages existant
+// self.addEventListener('message', (event) => {
+//   if (!event.data || !event.data.action) return;
+
+//   if (event.data.action === 'startFullCaching') {
+//     swConsole.log('📥 Ordre reçu : Lancement du cache de codes js et libs supplémentaires différé...');
+
+//     event.waitUntil((async () => {
+//       try {
+//         const additionalResources = [
+//           './js/audioPlayer.js',
+//           './js/backgroundManager.js',
+//           './js/dateUI.js',
+//           './js/debugLogUtils.js',
+//           './js/documentation.js',
+//           './js/eventHandlers.js',
+//           './js/exportManager.js',
+//           './js/exportSettings.js',
+//           './js/gedcomParser.js',
+//           './js/geoHeatMapDataProcessor.js',
+//           './js/geoHeatMapInteractions.js',
+//           './js/geoHeatMapUI.js',
+//           './js/geoLocalisation.js',
+//           './js/hamburgerMenu.js',
+//           './js/helpHamburgerMenu.js',
+//           './js/historicalData.js',
+//           './js/mainUI.js',
+//           './js/mapTilesPreloader.js',
+//           './js/mapUtils.js',
+//           './js/modalWindow.js',
+//           './js/nameCloud.js',
+//           './js/nameCloudAverageAge.js',
+//           './js/nameCloudCenturyModal.js',
+//           './js/nameCloudInteractions.js',
+//           './js/nameCloudRenderer.js',
+//           './js/nameCloudSettings.js',
+//           './js/nameCloudShapes.js',
+//           './js/nameCloudStatModal.js',
+//           './js/nameCloudUI.js',
+//           './js/nameCloudUtils.js',
+//           './js/nodeControls.js',
+//           './js/nodeRenderer.js',
+//           './js/nodeStyles.js',
+//           './js/occupations.js',
+//           './js/photoPlayer.js',
+//           './js/puzzleSwipe.js',
+//           './js/resizableModalUtils.js',
+//           './js/searchModalUI.js',
+//           './js/statsModalUI.js',
+//           './js/treeAnimation.js',
+//           './js/treeOperations.js',
+//           './js/treeRenderer.js',
+//           './js/treeSettingsModal.js',
+//           './js/treeWheelAnimation.js',
+//           './js/treeWheelRenderer.js',
+//           './js/UIutils.js',
+//           './js/utils.js',
+//           './js/voiceSelect.js',
+//           // './libs/lodash.min.js',
+//           // './libs/leaflet-heat.js',
+//           // './libs/react.production.min.js',
+//           // './libs/react-dom.production.min.js',
+//           // './libs/d3.layout.cloud.min.js',
+//           './libs/tf.min.js',
+//           './libs/coco-ssd.min.js',
+//         ];
+
+//         await new Promise(resolve => setTimeout(resolve, 1000));
+
+//         swConsole.log(`🔄 Mise en cache différée de codes js et libs supplémentaires ...`);
+
+//         let newlyAdded = [];
+//         let alreadyPresent = [];
+//         let errorFiles = [];
+
+//         swConsole.log(`🔄 Vérification du cache de codes js et libs supplémentaires avant traitement...`);
+
+//         const cache = await caches.open(CACHE_NAME);
+//         const keys = await cache.keys();
+
+//         // --- TON TEST D'OPTIMISATION ---
+//         // On vérifie si le nombre de fichiers en cache correspond au moins 
+//         // au nombre de fichiers qu'on veut ajouter.
+//         if (keys.length >= additionalResources.length) {
+//             // Optionnel : vérifier si un fichier clé de ta liste est bien là
+//             const lastFile = additionalResources[additionalResources.length - 1];
+//             const lastFileFull = new URL(lastFile, self.location.origin).href;
+//             const isLastFileThere = keys.some(k => k.url === lastFileFull);
+
+//             if (isLastFileThere) {
+//                 swConsole.log("✅ Cache de codes js et libs supplémentaires COMPLET détecté. Opération annulée pour gagner du temps.");
+//                 log("✅ Codes js et libs supplémentaires déjà présentes.", 'info');
+//                 return; // ON SORT DIRECTEMENT
+//             }
+//         }
+
+
+//         const urlsInCache = new Set(keys.map(k => k.url));
+
+//         await processInChunks(additionalResources, async (urlToFind) => {
+//             try {
+//                 // Transformation en URL absolue (ex: http://127.0.0.1:5502/js/file.js)
+//                 const fullUrl = new URL(urlToFind, self.location.origin).href;
+
+//                 if (urlsInCache.has(fullUrl)) {
+//                     alreadyPresent.push(urlToFind);
+//                     return;
+//                 }
+
+//                 const response = await fetch(fullUrl, { method: 'GET', cache: 'no-cache', mode: 'no-cors' });
+                
+//                 if (response.ok || response.type === 'opaque') {
+//                     await cache.put(fullUrl, response.clone());
+//                     newlyAdded.push(urlToFind);
+//                 } else {
+//                     errorFiles.push(urlToFind);
+//                 }
+//             } catch (err) {
+//                 errorFiles.push(urlToFind);
+//             }
+//         }, 2, 100);
+
+//         // --- RAPPORT CONSOLIDÉ ---
+//         swConsole.log(`📊 BILAN DES codes js et libs supplémentaires (${additionalResources.length} total) :`);
+
+//         if (alreadyPresent.length > 0) {
+//             swConsole.log(`ℹ️ codes js et libs supplémentaires DÉJÀ EN CACHE (${alreadyPresent.length}) :\n   - ${alreadyPresent.join('\n   - ')}`);
+//         }
+
+//         if (newlyAdded.length > 0) {
+//             swConsole.log(`✅ codes js et libs supplémentaires NOUVELLEMENT AJOUTÉS (${newlyAdded.length}) :\n   - ${newlyAdded.join('\n   - ')}`);
+//         }
+
+//         if (errorFiles.length > 0) {
+//             swConsole.log(`❌ ÉCHECS  codes js et libs supplémentaires (${errorFiles.length}) :\n   - ${errorFiles.join('\n   - ')}`);
+//         }
+
+//         swConsole.log(`🏁 Fin de la mise en cache des codes js et libs supplémentaires.`);
+        
+
+//       } catch (error) {
+//         swConsole.error(`Erreur critique: ${error.message}`);
+//       }
+//     })());
+//   }
+// });
+
+
 self.addEventListener('message', (event) => {
   if (!event.data || !event.data.action) return;
 
-  // --- AJOUTE CE BLOC ICI ---
   if (event.data.action === 'startFullCaching') {
     swConsole.log('📥 Ordre reçu : Lancement du cache différé...');
 
     event.waitUntil((async () => {
       try {
-        // Mettre en cache d'autres ressources JS, moins critiques
         const additionalResources = [
           './js/audioPlayer.js',
           './js/backgroundManager.js',
           './js/dateUI.js',
           './js/debugLogUtils.js',
-          './js/directHamburgerMenu.js',
+          './js/documentation.js',
           './js/eventHandlers.js',
           './js/exportManager.js',
           './js/exportSettings.js',
@@ -502,55 +651,99 @@ self.addEventListener('message', (event) => {
           './js/treeWheelRenderer.js',
           './js/UIutils.js',
           './js/utils.js',
-          './js/occupations.js',
           './js/voiceSelect.js',
-          './libs/lodash.min.js',
-          './libs/leaflet-heat.js',
-          './libs/react.production.min.js',
-          './libs/react-dom.production.min.js',
-          './libs/d3.layout.cloud.min.js',
+
           './libs/tf.min.js',
           './libs/coco-ssd.min.js',
-
         ];
 
-        // Attendre un peu pour ne pas interférer avec l'activation
+        // On attend un peu pour laisser le thread principal respirer au démarrage
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        swConsole.log('🔄 Mise en cache différée de ressources supplémentaires...');
-        
-        const cache = await caches.open(CACHE_NAME);
-        let successCount = 0;
-        let failedCount = 0;
 
-        // Utiliser la même technique de lots qui fonctionne déjà pour les tuiles
-        await processInChunks(additionalResources, async (url) => {
-          try {
-            // Vérifier si déjà en cache
-            const cachedResponse = await cache.match(url);
-            if (cachedResponse) return;
-            
-            // Sinon, mettre en cache
-            const response = await fetch(url, {
-              method: 'GET',
-              cache: 'no-cache',
-              mode: 'no-cors'
-            });
-            
-            if (response.ok || response.type === 'opaque') {
-              await cache.put(url, response.clone());
-              successCount++;
-            } else {
-              failedCount++;
+        const tTotalStart = performance.now(); // Début global
+        swConsole.log(`🔄 Mise en cache différée de codes js et libs supplémentaires ...`);
+
+        let newlyAdded = [];
+        let alreadyPresent = [];
+        let errorFiles = [];
+
+        // --- 1. SCAN INITIAL DU CACHE ---
+        const tScanStart = performance.now();
+        const cache = await caches.open(CACHE_NAME);
+        const keys = await cache.keys();
+        const scanDuration = (performance.now() - tScanStart).toFixed(2);
+
+        swConsole.log(`🔍 Scan du cache effectué en ${scanDuration}ms`);
+
+        // --- 2. TEST D'OPTIMISATION (Short-circuit) ---
+        if (keys.length >= additionalResources.length) {
+            const lastFile = additionalResources[additionalResources.length - 1];
+            const lastFileFull = new URL(lastFile, self.location.origin).href;
+            const isLastFileThere = keys.some(k => k.url === lastFileFull);
+
+            if (isLastFileThere) {
+                const totalDuration = (performance.now() - tTotalStart).toFixed(2);
+                swConsole.log(`✅ Cache COMPLET détecté en ${totalDuration}ms. Opération annulée.`);
+                // Si la fonction log() envoie un message au client :
+                if (typeof log === 'function') log("✅ Codes js et libs supplémentaires déjà présentes.", 'info');
+                return;
             }
-          } catch (err) {
-            failedCount++;
-          }
-        }, 2, 100); // Encore plus petit (2) et plus lent (100ms) pour les ressources additionnelles
-        
-        swConsole.log(`✅ Mise en cache différée terminée: ${successCount} réussis, ${failedCount} échoués`);
+        }
+
+        const urlsInCache = new Set(keys.map(k => k.url));
+
+        // --- 3. TRAITEMENT PAR LOTS AVEC MESURE INDIVIDUELLE ---
+        await processInChunks(additionalResources, async (urlToFind) => {
+            const tFileStart = performance.now();
+            try {
+                const fullUrl = new URL(urlToFind, self.location.origin).href;
+
+                if (urlsInCache.has(fullUrl)) {
+                    alreadyPresent.push(urlToFind);
+                    return;
+                }
+
+                const response = await fetch(fullUrl, { 
+                    method: 'GET', 
+                    cache: 'no-cache', 
+                    mode: 'no-cors' 
+                });
+                
+                if (response.ok || response.type === 'opaque') {
+                    await cache.put(fullUrl, response.clone());
+                    const fileDuration = (performance.now() - tFileStart).toFixed(2);
+                    newlyAdded.push(`${urlToFind} (${fileDuration}ms)`);
+                } else {
+                    errorFiles.push(urlToFind);
+                }
+            } catch (err) {
+                errorFiles.push(urlToFind);
+            }
+        }, 2, 100);
+
+        // --- RAPPORT CONSOLIDÉ MIS À JOUR ---
+        const totalDuration = (performance.now() - tTotalStart).toFixed(2);
+        swConsole.log(`📊 BILAN DES codes js et libs supplémentaires (${additionalResources.length} total) en ${totalDuration}ms :`);
+
+        if (alreadyPresent.length > 0) {
+            // On garde ton formatage exact : \n   - 
+            swConsole.log(`ℹ️ codes js et libs supplémentaires DÉJÀ EN CACHE (${alreadyPresent.length}) :\n   - ${alreadyPresent.join('\n   - ')}`);
+        }
+
+        if (newlyAdded.length > 0) {
+            // On ajoute juste le temps entre parenthèses pour les nouveaux
+            swConsole.log(`✅ codes js et libs supplémentaires NOUVELLEMENT AJOUTÉS (${newlyAdded.length}) :\n   - ${newlyAdded.join('\n   - ')}`);
+        }
+
+        if (errorFiles.length > 0) {
+            swConsole.log(`❌ ÉCHECS codes js et libs supplémentaires (${errorFiles.length}) :\n   - ${errorFiles.join('\n   - ')}`);
+        }
+
+        swConsole.log(`🏁 Fin de la mise en cache des codes js et libs supplémentaires en ${totalDuration}ms.`);
+
+
       } catch (error) {
-        swConsole.error(`Erreur lors de la mise en cache différée: ${error.message}`);
+        swConsole.error(`Erreur critique SW: ${error.message}`);
       }
     })());
   }

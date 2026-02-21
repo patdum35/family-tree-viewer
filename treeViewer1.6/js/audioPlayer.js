@@ -1,8 +1,10 @@
-
-import { makeElementDraggable } from './geoHeatMapInteractions.js';
-import { state, isIOSDevice, audio, audioUnlocked } from './main.js';
-import { getCachedResourceUrl } from './photoPlayer.js';
-import { debugLog } from './debugLogUtils.js'
+// audioPlayer.js est importé dynamiquement dans main.js si on clique sur le bouton loadDataButton "Entrez"
+// donc pas de problème de lightHouse score au démarrage
+import { makeElementDraggable } from './resizableModalUtils.js';
+import { state, isIOSDevice, audio, audioUnlocked, getGetCachedResourceUrl } from './main.js';
+// import { getCachedResourceUrl } from './photoPlayer.js';
+// import { debugLog } from './debugLogUtils.js'
+import { getDebugLog } from './main.js'
 
 let animationAudio = null;
 let animationAudioPlayer = null;
@@ -10,7 +12,6 @@ let isAudioPlayerVisible = false;
 
 
 // let audioUnlocked = false;
-
 
 /**
  * Crée et configure l'élément audio avec support du mode hors ligne
@@ -21,6 +22,7 @@ export async function createAudioElement() {
 
     // Chemin vers le fichier audio chiffré (avec extension .mpx)
     const audioPath = '/sounds/lalatte.mpx';
+    const getCachedResourceUrl = await getGetCachedResourceUrl();
 
     
     try {
@@ -61,7 +63,6 @@ export async function createAudioElement() {
         }
     }
 }
-
 
 /**
  * Crée l'interface du mini-lecteur audio (version ultra-minimaliste)
@@ -279,8 +280,6 @@ function updateVolumeIcon(volume, iconElement) {
     }
 }
 
-
-
 // Pour s'assurer que le volume est bien mémorisé entre les sessions
 // Ajouter cette fonction pour sauvegarder le volume
 
@@ -305,16 +304,20 @@ function restoreAudioVolume() {
     return 0.4; // Valeur par défaut
 }
 
-
 /**
  * Fonction à ajouter dans handleWindowResize pour gérer le repositionnement
  */
 export function repositionAudioPlayerOnResize() {
     const player = document.getElementById('animation-audio-player');
+
     if (!player) return;
     
+    console.log(' \n\n*** debug on resize :  repositionAudioPlayerOnResize \n\n ');
+
+
     // Vérifier si le player est en dehors de l'écran après redimensionnement
     const rect = player.getBoundingClientRect();
+
     
     // Si le player est partiellement ou totalement hors écran, le replacer
     if (rect.right > state.innerWidth || rect.bottom > state.innerHeight) {
@@ -398,147 +401,6 @@ function initiallyPositionAudioPlayer() {
     }, 50);
 }
 
-
-
-
-
-/**
- * Repositionne le lecteur audio en fonction de l'orientation et de la taille de l'écran
- */
-function positionAudioPlayerForCurrentScreen() {
-    const player = document.getElementById('animation-audio-player');
-    if (!player) return;
-    
-    // Détecter si on est sur mobile (approximatif)
-    const isMobile = state.innerWidth <= 768;
-    
-    // Déterminer l'orientation
-    const isLandscape = state.innerWidth > state.innerHeight;
-    
-    // Dimensions de l'écran
-    const screenWidth = state.innerWidth;
-    const screenHeight = state.innerHeight;
-    
-    // Réinitialiser certains styles pour éviter des conflits
-    player.style.transform = 'none';
-    
-    // Positions différentes selon le contexte
-    if (isMobile) {
-        if (isLandscape) {
-            // Mode paysage sur mobile
-            player.style.bottom = '10px';
-            player.style.right = '10px';
-            player.style.top = 'auto';
-            player.style.left = 'auto';
-        } else {
-            // Mode portrait sur mobile
-            player.style.bottom = '60px'; // Plus haut pour éviter les barres de navigation
-            player.style.right = '10px';
-            player.style.top = 'auto';
-            player.style.left = 'auto';
-        }
-    } else {
-        // Sur desktop, position par défaut en bas à droite
-        player.style.bottom = '20px';
-        player.style.right = '20px';
-        player.style.top = 'auto';
-        player.style.left = 'auto';
-    }
-    
-    // Limiter la taille en fonction de l'écran
-    const maxWidth = Math.min(250, screenWidth * 0.4);
-    player.style.maxWidth = `${maxWidth}px`;
-    
-    // Sauvegarder la nouvelle position comme position par défaut
-    saveAudioPlayerPosition();
-    
-    console.log(`Lecteur audio positionné pour ${isMobile ? 'mobile' : 'desktop'} en mode ${isLandscape ? 'paysage' : 'portrait'}`);
-}
-
-/**
- * Sauvegarde la position du lecteur audio
- */
-function saveAudioPlayerPosition() {
-    const player = document.getElementById('animation-audio-player');
-    if (!player) return;
-    
-    try {
-        // Obtenir la position et les dimensions
-        const rect = player.getBoundingClientRect();
-        
-        // Sauvegarder dans localStorage
-        localStorage.setItem('audioPlayerPosition', JSON.stringify({
-            top: rect.top,
-            left: rect.left,
-            right: state.innerWidth - rect.right,
-            bottom: state.innerHeight - rect.bottom,
-            width: rect.width,
-            height: rect.height,
-            timestamp: Date.now()
-        }));
-    } catch (error) {
-        console.warn("Impossible de sauvegarder la position du lecteur audio:", error);
-    }
-}
-
-/**
- * Restaure la position sauvegardée ou utilise la position par défaut
- */
-function restoreAudioPlayerPosition() {
-    const player = document.getElementById('animation-audio-player');
-    if (!player) return false;
-    
-    try {
-        const savedPos = localStorage.getItem('audioPlayerPosition');
-        if (!savedPos) return false;
-        
-        const pos = JSON.parse(savedPos);
-        const now = Date.now();
-        
-        // Vérifier si la position n'est pas trop ancienne (1 jour)
-        if (now - pos.timestamp > 24 * 60 * 60 * 1000) {
-            localStorage.removeItem('audioPlayerPosition');
-            return false;
-        }
-        
-        // Détecter si l'écran a été fortement redimensionné depuis
-        const widthRatio = state.innerWidth / (pos.left + pos.width + pos.right);
-        const heightRatio = state.innerHeight / (pos.top + pos.height + pos.bottom);
-        
-        if (widthRatio < 0.8 || widthRatio > 1.2 || heightRatio < 0.8 || heightRatio > 1.2) {
-            console.log("Dimensions d'écran trop différentes, utilisation du positionnement par défaut");
-            return false;
-        }
-        
-        // Restaurer la position
-        player.style.width = `${pos.width}px`;
-        player.style.height = `${pos.height}px`;
-        
-        // Préférer right/bottom pour un positionnement relatif au bas/droite de l'écran
-        if (pos.right < state.innerWidth / 2) {
-            player.style.right = `${pos.right}px`;
-            player.style.left = 'auto';
-        } else {
-            player.style.left = `${pos.left}px`;
-            player.style.right = 'auto';
-        }
-        
-        if (pos.bottom < state.innerHeight / 2) {
-            player.style.bottom = `${pos.bottom}px`;
-            player.style.top = 'auto';
-        } else {
-            player.style.top = `${pos.top}px`;
-            player.style.bottom = 'auto';
-        }
-        
-        return true;
-    } catch (error) {
-        console.warn("Erreur lors de la restauration de la position:", error);
-        return false;
-    }
-}
-
-
 /**
  * Démarre la lecture audio et affiche le lecteur
  */
@@ -601,6 +463,7 @@ export async function playEndOfAnimationSound() {
             });
         } else {
             console.error("❌ L'audio n'a pas été débloqué !");
+            const debugLog = await getDebugLog();
             debugLog("❌ L'audio n'a pas été débloqué !", "info");
         }
 
@@ -682,7 +545,6 @@ function showAudioPlayer() {
     }, 100);
 }
 
-
 /**
  * Affiche , déplace et grossit le lecteur audio
  */
@@ -708,7 +570,6 @@ function showAndMoveAudioPlayer() {
     }, 100);
 }
 
-
 /**
  * Masque le lecteur audio
  */
@@ -730,7 +591,6 @@ export function stopAnimationAudio() {
         updatePlayPauseButton(false);
     }
 }
-
 
 // Créer une fonction pour nettoyer les ressources audio si nécessaire
 export function cleanupAnimationAudio() {
@@ -842,211 +702,25 @@ export async function createAudioPlayerToggleButton() {
     document.body.appendChild(toggleButton);
 }
 
-
-
-
-
-
-// function unlockAudioOnFirstClick() {
-//     if (audioUnlocked) return;
+// // Fonction pour ajuster la position du bouton lorsque le lecteur est visible
+// function updateToggleButtonPosition() {
+//     const toggleButton = document.getElementById('show-audio-player-btn');
+//     if (!toggleButton) return;
     
-//     console.log("\n\n\n\n\n 🔓 Tentative de déblocage audio...\n\n\n\n\n");
-    
-//     const audio = new Audio();
-//     audio.volume = 0;
-    
-//     // CORRECTION : Ajouter un timeout pour forcer la résolution
-//     const playPromise = audio.play();
-    
-//     if (playPromise !== undefined) {
-//         playPromise.then(() => {
-//             audio.pause();
-//             audioUnlocked = true;
-//             console.log("✅ Audio débloqué automatiquement");
-//             debugLog("✅ Audio débloqué automatiquement", "info");
-            
-//         }).catch((e) => {
-//             console.log("❌ Audio toujours bloqué:", e.message);
-//             debugLog("❌ Audio toujours bloqué:", "info");
-//             // Sur PC, on peut quand même considérer que c'est débloqué
-//             audioUnlocked = true;
-//         });
+//     if (isAudioPlayerVisible) {
+//         toggleButton.style.display = 'none';
 //     } else {
-//         // Navigateurs plus anciens - considérer comme débloqué
-//         console.log("📱 Navigateur ancien - audio considéré comme débloqué");
-//         debugLog("📱 Navigateur ancien - audio considéré comme débloqué", "info");
-//         audioUnlocked = true;
+//         toggleButton.style.display = 'block';
 //     }
-    
-//     // AJOUT : Fallback après 100ms au cas où
-//     setTimeout(() => {
-//         if (!audioUnlocked) {
-//             console.log("⏰ Timeout - audio considéré comme débloqué sur PC");
-//             debugLog("⏰ Timeout - audio considéré comme débloqué sur PC", "info");
-//             audioUnlocked = true;
-//         }
-//     }, 100);
 // }
 
+// // Surveiller les changements de visibilité du lecteur
+// setInterval(updateToggleButtonPosition, 300);
 
-/* */ 
-// // Installation GARANTIE des event listeners
-// function setupAudioUnlock() {
-//     console.log("🔧 Installation des event listeners pour déblocage audio");
-    
-//     // Plusieurs événements pour être sûr
-//     const events = ['click', 'touchstart', 'keydown', 'mousedown'];
-    
-//     events.forEach(eventType => {
-//         document.addEventListener(eventType, unlockAudioOnFirstClick, { 
-//             once: true,  // Se retire automatiquement après 1 usage
-//             passive: true 
-//         });
-//     });
-    
-//     console.log("✅ Event listeners installés");
-// }
-/* */
-
-// // Lancer l'installation au bon moment
-// if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', setupAudioUnlock);
-// } else {
-//     setupAudioUnlock(); // DOM déjà chargé
-// }
-/* */
-
-
-
-
-
-// Fonction pour ajuster la position du bouton lorsque le lecteur est visible
-function updateToggleButtonPosition() {
-    const toggleButton = document.getElementById('show-audio-player-btn');
-    if (!toggleButton) return;
-    
-    if (isAudioPlayerVisible) {
-        toggleButton.style.display = 'none';
-    } else {
-        toggleButton.style.display = 'block';
-    }
-}
-
-
-
-
-
-
-
-// Surveiller les changements de visibilité du lecteur
-setInterval(updateToggleButtonPosition, 300);
-
-// Initialiser le bouton de contrôle après le chargement
-window.addEventListener('load', () => {
-    // Vérifier si le son est activé globalement
-    if (state.isSpeechEnabled) {
-        createAudioPlayerToggleButton();
-    }
-});
-
-
-
-
-
-
-
-
-/**
- * Variables globales pour l'analyse audio
- */
-let audioContext = null;
-let audioSource = null;
-let audioAnalyser = null;
-let isAudioContextInitialized = false;
-
-/**
- * Initialise le contexte audio et connecte l'analyseur
- * @returns {boolean} Succès de l'initialisation
- */
-function initAudioAnalysis() {
-    if (isAudioContextInitialized || !animationAudio) return true;
-    
-    try {
-        console.log("Initialisation de l'analyse audio...");
-        
-        // Créer le contexte audio
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Créer la source à partir de l'élément audio
-        audioSource = audioContext.createMediaElementSource(animationAudio);
-        
-        // Créer l'analyseur
-        audioAnalyser = audioContext.createAnalyser();
-        audioAnalyser.fftSize = 32; // Petite taille pour l'efficacité
-        
-        // Connecter les nœuds
-        audioSource.connect(audioAnalyser);
-        audioAnalyser.connect(audioContext.destination);
-        
-        isAudioContextInitialized = true;
-        console.log("Analyse audio initialisée avec succès");
-        return true;
-    } catch (error) {
-        console.error("Erreur lors de l'initialisation de l'analyse audio:", error);
-        return false;
-    }
-}
-
-/**
- * Analyse le volume et l'ajuste si nécessaire
- */
-function checkAndAdjustVolume() {
-    if (!isAudioContextInitialized || !audioAnalyser || animationAudio.paused) return;
-    
-    try {
-        // Créer un tableau pour les données
-        const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
-        
-        // Obtenir les données de fréquence
-        audioAnalyser.getByteFrequencyData(dataArray);
-        
-        // Calculer le niveau moyen
-        const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-        
-        console.log(`Niveau audio moyen: ${average.toFixed(2)}`);
-        
-        // Ajuster le volume si le niveau est trop bas
-        if (average < 20) { // Seuil à ajuster selon vos tests
-            // Augmenter progressivement le volume
-            const newVolume = Math.min(0.8, animationAudio.volume + 0.1);
-            console.log(`Volume trop bas (${average.toFixed(2)}), augmentation à ${newVolume.toFixed(2)}`);
-            animationAudio.volume = newVolume;
-            
-            // Mettre à jour le slider de volume s'il existe
-            const volumeSlider = document.querySelector('#animation-audio-player input[type="range"]');
-            if (volumeSlider) {
-                volumeSlider.value = newVolume.toString();
-                
-                // Mettre à jour l'icône de volume
-                const volumeIcon = volumeSlider.previousElementSibling;
-                if (volumeIcon) {
-                    updateVolumeIcon(newVolume, volumeIcon);
-                }
-            }
-        }
-    } catch (error) {
-        console.error("Erreur lors de l'analyse du volume:", error);
-    }
-}
-
-
-/**
- * Cette fonction doit être appelée si l'utilisateur interagit avec la page
- * avant que l'audio ne démarre automatiquement
- */
-function enableAudioContext() {
-    if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}
-
+// // Initialiser le bouton de contrôle après le chargement
+// window.addEventListener('load', () => {
+//     // Vérifier si le son est activé globalement
+//     if (state.isSpeechEnabled) {
+//         createAudioPlayerToggleButton();
+//     }
+// });

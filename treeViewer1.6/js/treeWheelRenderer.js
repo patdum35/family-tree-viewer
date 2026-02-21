@@ -2,13 +2,16 @@
 // Rendu de l'arbre en éventail - Version 360° complète
 // ====================================
 import { state, displayGenealogicTree, trackPageView } from './main.js';
-import { setupElegantBackground } from './backgroundManager.js';
-import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
+// import { setupElegantBackground } from './backgroundManager.js';
+import { getSetupElegantBackground } from './main.js';
+// import { generateRadarCache, createWinnerRedArrowIndicator } from './treeWheelAnimation.js';
+import { getGenerateRadarCache, getCreateWinnerRedArrowIndicator } from './main.js';
 import { testSpeechSynthesisHealth } from './treeAnimation.js';
 import { buildAncestorTree, buildDescendantTree } from './treeOperations.js';
 import { extractYear } from './utils.js';
 import { debounce, isModalVisible } from './eventHandlers.js';
 import { selectVoice } from './voiceSelect.js';
+import { getDisplayPersonDetails } from './main.js';
 
 let previousRootPersonId = null;
 let previousNombreGeneration = null;
@@ -132,7 +135,8 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
         resetWheelView();
         // state.isCacheValid = false;
     }
-    
+
+    const setupElegantBackground = await getSetupElegantBackground();
     if (state.initialTreeDisplay) {
         state.initialTreeDisplay = false;
         setTimeout(() => {
@@ -146,7 +150,8 @@ export async function drawWheelTree(isZoomRefresh = false, isAnimation = false) 
 
     if (!state.isCacheValid || !state.cachedRadarPNG || (previousRootPersonId != state.rootPersonId) || (previousNombreGeneration != state.nombre_generation)) {
         console.log(`🔄 Génération du cache PNG...`);
-        setTimeout(() => {
+        setTimeout(async () => {
+            const generateRadarCache = await getGenerateRadarCache();
             generateRadarCache();
         }, 500);
     } else {
@@ -209,13 +214,13 @@ function setupWheelResizeHandler() {
             state.cachedRadarPNG = null;
             
             // Utiliser la fonction displayGenealogicTree pour reconstruire proprement
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (typeof displayGenealogicTree === 'function') {
                     console.log('🔄 Reconstruction via displayGenealogicTree');
                     // displayGenealogicTree(state.rootPersonId, false, false, false, 'WheelAncestors');
                     // state.currentTree = buildAncestorTree(state.rootPersonId);
                     drawWheelTree(false, false);
-
+                    const createWinnerRedArrowIndicator = await getCreateWinnerRedArrowIndicator();
                     createWinnerRedArrowIndicator();
 
                     state.leverEnabled = true;
@@ -517,10 +522,9 @@ function changeRootPerson(personId) {
 /**
  * Affiche les détails d'une personne
  */
-function displayPersonDetails(personId) {
-    if (typeof window.displayPersonDetails === 'function') {
-        window.displayPersonDetails(personId);
-    }
+async function displayPersonDetails(personId) {
+    const displayPersonDetails_ext = await getDisplayPersonDetails();
+    displayPersonDetails_ext(personId);
     console.log(`Affichage des détails pour: ${personId}`);
 }
 

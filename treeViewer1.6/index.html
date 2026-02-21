@@ -31,6 +31,9 @@
     <script>eruda.init();</script>
 
 
+
+
+
     <!-- SCRIPT DE DÉTECTION DE NAVIGATEUR - DOIT ÊTRE EN PREMIER -->
     <script>
     // Traductions
@@ -527,9 +530,7 @@
     </script>
 
 
-
-
-
+  
     <!-- A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
     <!-- pour débugger sur IOS où le service worker pose problème -->
     <!-- <script>
@@ -583,7 +584,7 @@
     <link rel="stylesheet" type="text/css" href="css/styles.css">
 
     <!-- Système de chargement des bibliothèques avec fallback -->
-    <script type="module" src="js/libraryLoader.js"></script>
+    <!-- <script type="module" src="js/libraryLoader.js" defer></script> -->
 
     <!-- Initialisation de l'application -->
     <script type="module" src="js/appInitializer.js"></script>
@@ -591,12 +592,12 @@
    
     
     <!-- Script d'initialisation qui attend le chargement des bibliothèques -->
-    <script>
+    <!-- <script>
         document.addEventListener('libraries-loaded', function() {
             console.log("Toutes les bibliothèques sont chargées, initialisation de l'application...");
             // Vous pouvez initialiser ici les composants qui dépendent des bibliothèques externes
         });
-    </script>
+    </script> -->
     <link rel="manifest" href="./manifest.webmanifest">
 
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
@@ -619,7 +620,8 @@
 
     <!-- Bouton pour ouvrir la modal de chargement de fichier -->
     <button id="load-gedcom-button" role="button1" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
-    <button id="help-button" role="button1" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
+    <!-- <button id="help-button" role="button1" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button> -->
+    <button id="help-button" role="button1" class="help-button" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
 
     <!-- <div id="fullScreenLabel" role="fontSizeChange1" class="fullScreenLabel" data-text-key="fullScreenLabel" style="font-size: 11px; position: fixed; z-index: 2; bottom: 3.75em; left: 0.42em;  color: white; margin-top: 0px; margin-bottom: 0.17em; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div> -->
 
@@ -737,19 +739,22 @@
                 </script>
 
                 <div role="fontSizeChangeChromeAdvanced"  class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button role="buttonAdvanced" id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <!-- <button role="buttonAdvanced" id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                   <button role="buttonAdvanced" id="activateDebugLogsBtn" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🐞 Activer les logs de debug
                     </button>
                 </div>   
 
                 <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d55266; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button role="buttonAdvanced" id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <!-- <button role="buttonAdvanced" id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                    <button role="buttonAdvanced" id="activateAccelerometerBtn" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🧭 Activer l'accéléromètre
                     </button>
                 </div> 
 
                 <div role="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f74; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
-                    <button role="buttonAdvanced"id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <!-- <button role="buttonAdvanced" id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                    <button role="buttonAdvanced" id="openCameraModalBtn" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                         🎥 Caméra & Réalité Augmentée
                     </button>
                 </div> 
@@ -879,7 +884,8 @@
                 </button> -->
 
 
-                <button class="play-btn" role="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn" 
+                <!-- <button class="play-btn" role="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn"  -->
+                <button class="play-btn" role="fontSizeChangeChrome2"  id="animationPauseBtn" 
                         style="font-size: 10px; border-radius: 0.4em; width: 3em!important; min-width: 3em!important;  max-width: 3em!important; height: 3em!important; min-height: 3em!important; max-height: 3em!important; 
                             display: inline-flex; align-items: center; justify-content: center;  padding: 0; line-height: 1; 
                             box-shadow: inset 0 0.2em 0.3em rgba(255,255,255,0.5), inset 0 -0.2em 0.3em rgba(0,0,80,0.4), 0 0.1em 0.2em rgba(255,255,255,0.4), 0 0.2em 0.4em rgba(0,0,0,0.35);">
@@ -891,7 +897,8 @@
 
                 <button onclick="openSettingsModal()" id="settingsBtn" class="large-button" data-text-key="openSettingsModal" style="background: transparent; border: none">
                     <span role="button2" style="font-size: 32px!important;">⚙️</span></button>
-                <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" role="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" > 
+                <!-- <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" role="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" >  -->
+                <button id="cloudBtn" role="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" > 
                     <span role="button2" class="wide-span" style="font-size: 32px !important;">💖</span>
                 </button>            
                 <!-- <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" style=" width: 65px !important;  height: 27px !important; margin-left: -4px !important; " > -->
@@ -904,13 +911,15 @@
                 <select id="root-person-results" data-text-key="rootPersonResults"  >
                     <option value="">Select</option>
                 </select>
-                <button role="fontSizeChangeChrome2"  id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" > 
+                <!-- <button role="fontSizeChangeChrome2"  id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" >  -->
+                <button role="fontSizeChangeChrome2"  id="heatMapBtn"  class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" > 
                     <span role="button2" class="wide-span" style="font-size: 32px !important;">🌍</span>
                 </button> 
                 <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
                     <span role="button2" class="wide-span" style="font-size: 32px !important;">🎯</span>
                 </button> 
-                <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" > 
+                <!-- <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" >  -->
+                <button id="statsBtn" data-text-key="stats" > 
                     <span role="button2" class="wide-span" style="font-size: 32px !important;">📊</span>
                 </button> 
             </div>
@@ -984,7 +993,9 @@
                         >
                         <span style="font-size: 0.8em; color: #666;">(0 = tous)</span>
                     </div>
-                    <button onclick="generateGeocodeFile()">Générer fichier geolocalisation.json</button>
+                    <!-- <button id="generateGeocodeFileBtn" onclick="generateGeocodeFile()">Générer fichier geolocalisation.json</button> -->
+                    <button id="generateGeocodeFileBtn" >Générer fichier geolocalisation.json</button>
+
                     <div id="geocoding-progress" style="margin-top: 10px; display: none;">
                         <div id="geocoding-status"></div>
                         <progress id="geocoding-bar" value="0" max="100" style="width: 100%;"></progress>

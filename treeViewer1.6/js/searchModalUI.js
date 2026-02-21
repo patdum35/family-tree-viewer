@@ -1,15 +1,21 @@
+// searchModal.js est importé dynamiquement dans main.js si on clique sur la zone de recherche 🔍racine
+// donc pas de problème de lightHouse score au démarrage
+
 import { createCustomSelector, createOptionsFromLists } from './UIutils.js';
 import { state, calcFontSize } from './main.js';
 import { nameCloudState, getPersonsFromTree } from './nameCloud.js';
+// import { nameCloudState, getPersonsFromTree } from './main.js';
 import { selectFoundPerson, debounce, isModalVisible } from './eventHandlers.js';
-import { extractYear, findDateForPerson } from './nameCloudUtils.js';
+// import { extractYear, findDateForPerson } from './nameCloudUtils.js';
+import { extractYear, findDateForPerson } from './nameCloud.js';
 import { createLocationIcon } from './nameCloudStatModal.js';
 import { displayHeatMap } from './geoHeatMapUI.js';
 import { makeModalDraggableAndResizable, makeModalInteractive, bringToFrontOfHamburgerButton } from './resizableModalUtils.js';
 import { adjustSplitScreenLayout } from './nameCloudInteractions.js';
 import { resizeModal } from './nameCloudStatModal.js';
 import { fullResetAnimationState } from './treeAnimation.js';
-import { disableFortuneModeClean } from './treeWheelAnimation.js';
+// import { disableFortuneModeClean } from './treeWheelAnimation.js';
+import { getDisableFortuneModeClean } from './main.js';
 
 const searchModalTranslations = {
     fr: {
@@ -779,7 +785,7 @@ let currentSearchCallback = null;
 /**
  * Crée et affiche la modale de recherche
  */
-export function openSearchModal(firstName = null, lastName = null, purpose = 'root', onSelectCallback = null) {
+export async function openSearchModal(firstName = null, lastName = null, purpose = 'root', onSelectCallback = null) {
 
     // console.log(`[DEBUG] openSearchModal: But='${purpose}', Callback fourni?`, !!onSelectCallback); // <-- AJOUTER
 
@@ -795,6 +801,7 @@ export function openSearchModal(firstName = null, lastName = null, purpose = 'ro
 
     if (!isCallFromInit) { 
         fullResetAnimationState();
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
         disableFortuneModeClean();
     }
     // Vérifier si la modale existe déjà

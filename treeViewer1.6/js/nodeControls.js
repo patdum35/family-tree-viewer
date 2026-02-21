@@ -1,13 +1,13 @@
 // ====================================
 // Contrôles et interactions
 // ====================================
-import { findDescendants, findSiblings, findGenealogicalParent  } from './treeOperations.js';
+// import { findDescendants, findSiblings, findGenealogicalParent  } from './treeOperations.js';
 import { extractYear } from './utils.js';
-import { drawTree, calculateLayout, getZoom, getLastTransform } from './treeRenderer.js';
+// import { drawTree, calculateLayout, getZoom, getLastTransform } from './treeRenderer.js';
 import { state, displayGenealogicTree } from './main.js';
 import { updateSelectorValue } from './UIutils.js';
 import { getNodeScreenPosition, getAnimationMapPosition } from './treeAnimation.js'; 
-
+import { importLinks } from './importState.js'; // import de treeOperations , treeRenderer via importLinks pour éviter les erreurs de chargement circulaire
 
 
 
@@ -87,7 +87,7 @@ export function handleRootChange(event, d) {
     {
         const svg = d3.select("#tree-svg");
         const height = window.innerHeight;
-        const zoom = getZoom();
+        const zoom = importLinks.treeRenderer.getZoom();
         
         if (zoom) {
             let transform = d3.zoomIdentity;
@@ -300,7 +300,7 @@ async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
     const clickedNodeInInitialLayoutX = d.y;
     const clickedNodeInInitialLayoutY = d.x;
 
-    state.lastTransform = getLastTransform() || d3.zoomIdentity;
+    state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
 
     // Vérifier si le nœud a des descendants généalogiques
     const siblingId = d.data.id;
@@ -355,7 +355,7 @@ async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
 
     // Mesure PRÉDICTIVE de la position du node cliqué et de ses descendants dans le d3 layout (pas encore dans l'écran)
     // const newLayoutRoot = calculateLayout(state.currentTree); 
-    calculateLayout();
+    importLinks.treeRenderer.calculateLayout();
 
     if (!state.layoutResult) return; // Sécurité
 
@@ -512,7 +512,7 @@ async function handleDescendantsOnLeft(d, isAnimation = false, nextNodeId) {
 
     // Redessiner l'arbre
     // drawTree(false, isAnimation);
-    drawTree(false, isAnimation, true); 
+    importLinks.treeRenderer.drawTree(false, isAnimation, true); 
     state.layoutResult = null;
 
     // rattrapage en Y  pour le cas (clickedNodeInInitialLayoutX === 0 && clickedNodeInInitialLayoutY === 0) : innexplicable ????
@@ -1494,7 +1494,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
             return family && family.children;
         });
 
-        const genealogicalParents  = findGenealogicalParent(descendantData_all[0].id, familiesWithChildren);
+        const genealogicalParents  = importLinks.treeOperations.findGenealogicalParent(descendantData_all[0].id, familiesWithChildren);
        
 
         let newTree = [];
@@ -1509,7 +1509,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 return family && family.children;
             });
 
-            const genealogicalParents  = findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
+            const genealogicalParents  = importLinks.treeOperations.findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
             
             
             const descendantNode = {
@@ -1636,7 +1636,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 return family && family.children;
             });
 
-            const genealogicalParents  = findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
+            const genealogicalParents  = importLinks.treeOperations.findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
 
             const descendantData = descendantData_all[i];
             const descendantNode = {
@@ -1868,7 +1868,7 @@ function restructureTreeForDescendant(descendantData_all, parentSiblingId, paren
                 return family && family.children;
             });
     
-            const genealogicalParents  = findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
+            const genealogicalParents  = importLinks.treeOperations.findGenealogicalParent(descendantData_all[i].id, familiesWithChildren);
 
 
             // Créer le nouveau nœud pour le descendant
@@ -2827,7 +2827,7 @@ export function handleDescendants(d)
         }
     }
 
-    drawTree();
+    importLinks.treeRenderer.drawTree();
 
     // fonction pour ajuster la vue si nécessaire
     handleTreeLeftShift();
@@ -2848,8 +2848,8 @@ function handleTreeLeftShift() {
 // Fonction auxiliaire qui contient la logique actuelle
 function applyTreeLeftShift() {
     const svg = d3.select("#tree-svg");
-    state.lastTransform = getLastTransform() || d3.zoomIdentity;
-    const zoom = getZoom();
+    state.lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
+    const zoom = importLinks.treeRenderer.getZoom();
     
     // Trouver les nœuds du niveau le plus à gauche
     const nodes = d3.selectAll(".node").nodes();
@@ -3140,7 +3140,7 @@ function getDescendantsButtonText(d) {
  * @private
  */
 function handleRootDescendants(d) {     
-    const descendants = findDescendants(d.data.id);     
+    const descendants = importLinks.treeOperations.findDescendants(d.data.id);     
     const closestDescendant = findClosestDescendant(descendants, d.data.id);
     
     if (closestDescendant) {
@@ -3162,7 +3162,7 @@ function handleRootDescendants(d) {
         // Recentrer l'arbre comme à l'initialisation
         const svg = d3.select("#tree-svg");
         const height = window.innerHeight;
-        const zoom = getZoom();
+        const zoom = importLinks.treeRenderer.getZoom();
         
         if (zoom) {
             svg.transition()
@@ -3182,7 +3182,7 @@ function handleRootDescendants(d) {
  */
 function handleNonRootDescendants(d) {
     const personId = d.data.id;
-    const descendants = findDescendants(personId, new Set());
+    const descendants = importLinks.treeOperations.findDescendants(personId, new Set());
 
     // Créer la hiérarchie d3
     const root = d3.hierarchy(state.currentTree);
@@ -3213,7 +3213,7 @@ function handleNonRootDescendants(d) {
         d.data._hiddenDescendants = null;
     }
 
-    drawTree(); //state.currentTree); //, state.gedcomData);
+    importLinks.treeRenderer.drawTree(); //state.currentTree); //, state.gedcomData);
 }
 
 
@@ -3529,8 +3529,8 @@ function findTopMostRightMostNode() {
  */
 function handleTreeShift(direction = 'left') {
     const svg = d3.select("#tree-svg");
-    const lastTransform = getLastTransform() || d3.zoomIdentity;
-    const zoom = getZoom();
+    const lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
+    const zoom = importLinks.treeRenderer.getZoom();
     
     // Trouver les nœuds du niveau le plus profond
     const nodes = d3.selectAll(".node").nodes();
@@ -3575,8 +3575,8 @@ function handleTreeShift(direction = 'left') {
  */
 async function handleTreeXYShift(shiftAmountX = 0, shiftAmountY = 0, duration = 750) {
     const svg = d3.select("#tree-svg");
-    const lastTransform = getLastTransform() || d3.zoomIdentity;
-    const zoom = getZoom();
+    const lastTransform = importLinks.treeRenderer.getLastTransform() || d3.zoomIdentity;
+    const zoom = importLinks.treeRenderer.getZoom();
     const screenWidth = window.innerWidth;
     
  
@@ -3668,7 +3668,7 @@ export function handleAncestorsClick(event, d, isFromAnimation = false) {
         // console.log("After handling normal ancestors:", d.data.children);
     }
 
-    drawTree(false, isFromAnimation);
+    importLinks.treeRenderer.drawTree(false, isFromAnimation);
 
     if (newAncestorsAdded) {
         handleTreeShift();
@@ -3716,9 +3716,9 @@ function buildNewAncestors(ddata) {
                     const family = state.gedcomData.families[famId];
                     return family && family.children;
                 });
-                const genealogicalParents = findGenealogicalParent(family.husband, familiesWithChildren);
+                const genealogicalParents = importLinks.treeOperations.findGenealogicalParent(family.husband, familiesWithChildren);
                 if (state.treeModeReal === 'ancestors') {
-                    const fatherSiblings = findSiblings(family.husband);
+                    const fatherSiblings = importLinks.treeOperations.findSiblings(family.husband);
                     addSiblingsToNode(fatherSiblings, ddata, family.husband, genealogicalParents);
                     addOtherSpouses(family.husband, family.wife, ddata);
                 }
@@ -3745,9 +3745,9 @@ function buildNewAncestors(ddata) {
                     const family = state.gedcomData.families[famId];
                     return family && family.children;
                 });
-                const genealogicalParents = findGenealogicalParent(family.wife, familiesWithChildren);
+                const genealogicalParents = importLinks.treeOperations.findGenealogicalParent(family.wife, familiesWithChildren);
                 if (state.treeModeReal === 'ancestors') {
-                    const motherSiblings = findSiblings(family.wife);
+                    const motherSiblings = importLinks.treeOperations.findSiblings(family.wife);
                     // console.log("debug buildNewAncestors motherSiblings for this node :", family.wife, motherSiblings);
                     addSiblingsToNode(motherSiblings, ddata, family.wife, genealogicalParents);
                     addOtherSpouses(family.wife, family.husband, ddata);
