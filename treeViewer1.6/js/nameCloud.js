@@ -10,7 +10,8 @@ const getCenterCloudNameContainer = async () => {
 // import { createNameCloudUI, generateNameCloudExport, updateOverlayLayout } from './nameCloudUI.js';
 import { getCreateNameCloudUI, getUpdateOverlayLayout } from './main.js';
 // import { hasDateInRange, isValidSurName, extractYear, cleanSurName, cleanFamilyName, formatFamilyName, isValidFamilyName , cleanProfessionForNameCloud, cleanLocation, capitalizeName  } from './nameCloudUtils.js';
-import { offsetHamburgerButtonDown, buttonsOnDisplay} from './hamburgerMenu.js';
+import { offsetHamburgerButtonDown} from './hamburgerMenu.js';
+import { buttonsOnDisplay} from './mainUI.js';
 // import { enableBackground } from './backgroundManager.js';
 import { getEnableBackground } from './main.js'
 // import { loadSettingsFromLocalStorage } from './nameCloudSettings.js';
