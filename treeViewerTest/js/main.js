@@ -1,0 +1,4978 @@
+// ====================================
+// Configuration et initialisation
+// ====================================
+export const APP_CACHE_NAME = 'app-resources-cache-v2'; // Nom du cache pour les resources (.ged, .json, .jpx, ...)
+export const TILE_CACHE_NAME = 'map-tiles-cache-v2'; // Nom du cache pour les tuiles ( .png)
+
+export const state = {
+    gedcomData: null,
+    rootPersonId: null,
+    rootPerson: null,
+    currentTree: null,
+    nombre_prenoms: 2,
+    nombre_lettersInPrenoms: 20,
+    nombre_lettersInNames: 15,
+    nombre_generation: 4,
+    boxWidth: 150,
+    boxHeight: 50,
+    treeMode: 'directAncestors', // ou 'descendants' ou 'both'
+    treeModeReal: 'directAncestors', // ou 'descendants' ou 'both'
+    treeModeReal_backup: 'directAncestors', // ou 'descendants' ou 'both'   
+    // treeModeBackup: 'ancestors', // ou 'descendants' ou 'both'   
+    treeModeReal_whenReturnToTree: 'directAncestors', // ou 'descendants' ou 'both'   
+    lastHorizontalPosition: 0,
+    lastVerticalPosition: 0,
+    isSpeechEnabled: true,
+    isSpeechEnabled2: true,
+    isVoiceSelected: false,
+    isAnimationPaused: false,
+    isAnimationLaunched: false,
+    isAnimationMapInitialized: false,
+    targetAncestorId: "@I739@",
+    targetCousinId: null,
+    animationTargetAncestorId: "@I739@",
+    animationRootPersonId: '@I1@',
+    isTouchDevice: false,
+    isMobile: false,
+    isIOS: false,
+    isPWA: false,
+    isPuzzleSwipe: false, //'notInitialized',
+    isPuzzleSwipeFromSecret: false,
+    initialTreeDisplay: true,
+    isHamburgerMenuInitialized: false,
+    menuHamburgerInitialized: false,
+    backgroundEnabled: true,
+    previousWindowInnerWidth: 0,
+    previousWindowInnerHeight: 0,
+    lastWindowInnerWidth: 0,
+    lastWindowInnerHeight: 0,
+    screenResizeHasOccured: false,
+    previousWindowInnerWidthInMap: 0,
+    previousWindowInnerHeightInMap: 0,
+    prevPrevWindowInnerWidthInMap: 0,
+    prevPrevWindowInnerHeightInMap: 0,
+    treeOwner: 1,
+    isOnLine: false,
+    isDebugLog: false,
+
+    isRadarEnabled: false,
+    isWordCloudEnabled: false,
+    isTreeEnabled: false,
+
+    radarStyle: 0,
+
+    WheelMode: {
+        maxGenerations: 5,
+        showSpouses: true,
+        showSiblings: true,
+        animationsEnabled: true
+    },
+    currentRadarAngle: 0,
+    WheelZoom: null,
+    cachedRadarPNG: null,
+    isCacheValid: false,
+    userHasInteracted: false,
+    currentAnimationTimeouts: [],
+    WheelConfig: {
+        innerRadius: 80,
+        generationWidth: 80,
+        centerX: 0,
+        centerY: 0,
+        totalAngle: 2 * Math.PI, // 360° complet
+        startAngle: -Math.PI / 2, // Commencer en haut
+        maxGenerations: 4,
+        limitMaxGenerations: 26 
+    },
+    lastWheelTransform: null,
+    leverEnabled: true,
+    isSpinning: false,
+    speechSynthesisInitialized: false,
+    isSpeechInGoodHealth: false,
+    frenchVoice: null,
+    currentNameCloudModal: null, // Pour stocker le modal du nuage de mots
+    currentScale: 1.0,
+    currentX: 0,
+    currentY: 0,
+    // nodeStyle: 'classic', //'heraldic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+    nodeStyle: 'classic', //'hextech',//'bubble',//'galaxy', //'diamond', //'organic', //'silhouettes', //'heraldic', //'classic', 
+
+    linkStyle: 'normal-dark', //'thick-light' //'veryThick-light', //, //, //'veryThick-colored', //'thin-dark', // 'thick-light' //, //,  //, //'normal-dark',
+    treeShapeStyle: 'normal',  //'straight'
+    treeShapeStyleBackup: 'normal',  //'straight'
+    addLeaves: false,
+    frequencyStatsModalCounter: 0,
+    showPersonListModalCounter: 0,
+    graphStatsModalCounter: 0,
+    centuryStatsModalCounter: 0,
+    topZindex : 1100,
+    minModalWidth: 250,
+    minModalHeight: 40,
+    isFullResetAnimationRequested: false,
+    firstName: '',
+    lastName: '',
+    previousMode: 'tree',
+    isButtonOnDisplay: false,    // animationMap: null
+    peopleList: [],
+    peopleListTitle: [],
+    firstTimePuzzle: true,
+    heightDifferenceAtInit: 0,
+    isbrowserBarHidden: false,
+    isSpeechSynthesisAvailable: true,
+    svgFull: null,
+    svgExit: null,
+    lastTransform: null,
+    zoom: null,
+    layoutResult: null,
+    selectedVoice: null,
+    selectedVoiceName: null,
+    initialSpeechReconitionIsLaunched: false,
+    voice_volume: 1.0,
+    voice_rate: 1.0,
+    voice_pitch: 1.0,
+    isEndTestRealConnectivity: false,
+    iSAnimationWithStraightLines: false,
+    iSAnimationWithDirectAncestors: false,
+    ancestorPathIndex: null,
+    isF12Detected: false,
+    browserScaleFactor: 1,
+    browserScaleFactorInverse: 1,
+    browserScaleFactor2: 1,
+    isSamsungBrowser: false,
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    initialHamburgerFontSize : 14,
+    browserScaleCorrection: 1,
+    dontApplyButtonRescale: false,
+    scaleTextFontSize: 1,
+    scaleChrome: 1,
+};
+
+export const calcFontSize = (baseSize) => { 
+    // On récupère la valeur de l'import seulement ICI, à l'exécution.
+    const factor = state?.browserScaleFactor || 1;
+    return Math.round(baseSize / factor); 
+};
+import { importLinks, loadModule } from './importState.js';
+
+const isProduction = window.location.pathname.includes('/obfusc/');
+const GEDCOM_PATH = isProduction ? '../' : '';
+const BACKGROUND_IMAGES_PATH = isProduction ? '../background_images/' : 'background_images/';
+
+
+// import { parseGEDCOM } from './gedcomParser.js';
+// import { drawTree } from './treeRenderer.js';
+// import { findYoungestPerson, importLinks.utils.findPersonByName } from './utils.js';
+
+// import { importLinks.utils.findPersonByName } from './utils.js';
+// import { buildAncestorTree, buildDescendantTree, buildDescendantTreeWithDuplicates, buildCombinedTree } from './treeOperations.js';
+// import {  startAncestorAnimation, initializeAnimationMapPosition, 
+//     toggleAnimationPause, resetAnimationState, fullResetAnimationState} from './treeAnimation.js'; //initNetworkListeners
+// import { geocodeLocation, loadGeolocalisationFile } from './geoLocalisation.js';
+// import { nameCloudState } from './nameCloud.js';
+// import { closeCloudName } from './nameCloudUI.js';
+// import { initializeCustomSelectors, replaceRootPersonSelector, enforceTextTruncation, 
+//     applyTextDefinitions, updateGenerationSelectorValue, updateTreeModeSelector } from './mainUI.js';
+// import { setupSearchFieldModal, openSearchModal } from './searchModalUI.js';
+// import { createEnhancedSettingsModal } from './treeSettingsModal.js';
+// import { debounce, hideLoginBackground } from './eventHandlers.js';
+// import { showHamburgerMenu, initializeHamburgerOnce, getMenuTranslation } from './hamburgerMenu.js';
+// import { initTilePreloading } from './mapTilesPreloader.js';
+// import { fetchResourceWithCache } from './resourcePreloader.js'; // initResourcePreloading
+// import { createAudioElement, createAudioPlayerToggleButton } from './audioPlayer.js';
+// import { cleanupExportControls } from './exportSettings.js';
+// import { setMaxGenerationsInit } from './treeWheelRenderer.js';
+// import { enableFortuneMode, disableFortuneModeWithLever, disableFortuneModeClean } from './treeWheelAnimation.js'
+// import { debugLog } from './debugLogUtils.js'
+// import { enableBackground } from './backgroundManager.js';
+// import { selectVoice, loadVoices, speakText, generatePhoneticAlternatives } from './voiceSelect.js';
+// import { displayPersonDetails, closePersonDetails, setAsRootPerson, closeModal } from './modalWindow.js';
+// import { hideLoginBackground, initializeEventHandlers, updatePrenoms, updateLettersInNames, updateGenerations,
+//     zoomIn, zoomOut, resetView, resetZoom, searchTree, closeAllModals} from './eventHandlers.js';
+
+
+// import { resetPuzzle } from './puzzleSwipe.js';
+// import { APP_CACHE_NAME } from './resourcePreloader.js';
+
+const getCreateEnhancedSettingsModal = async () => {
+    const { createEnhancedSettingsModal } = await import('./treeSettingsModal.js'); // OK
+    return createEnhancedSettingsModal;
+};
+const getCleanupExportControls = async () => {
+    const { cleanupExportControls } = await import('./exportSettings.js'); // OK
+    return cleanupExportControls;
+};
+export const getFetchTileWithCache = async () => {
+    const { fetchTileWithCache } = await import('./mapTilesPreloader.js'); // OK
+    return fetchTileWithCache;
+};
+export const getFetchResourceWithCache = async () => {
+    const { fetchResourceWithCache } = await import('./resourcePreloader.js'); // OK
+    return fetchResourceWithCache;
+};
+// export const getAPP_CACHE_NAME = async () => {
+//     const { APP_CACHE_NAME } = await import('./resourcePreloader.js'); // OK
+//     return APP_CACHE_NAME;
+// };
+
+
+export const getDebugLog = async () => {
+    // 1. Si le mode debug est activé, on charge le vrai module
+    if (state.isDebugLog) {
+        const { debugLog } = await import('./debugLogUtils.js');
+        return debugLog;
+    }
+    // 2. Sinon, on renvoie une fonction "miroir" qui utilise console.log
+    // On utilise (...args) pour accepter n'importe quel nombre d'arguments
+    return (message, type) => console.log(`[${type || 'LOG'}]`, message);
+};
+
+let searchModalUIModule, nameCloudModule, nameCloudUIModule, audioPlayerModule, geoLocalisationModule, modalWindowModule; 
+let photoPlayerModule, backgroundManagerModule, geoHeatMapDataProcessorModule, geoHeatMapUIModule, geoHeatMapInteractionsModule;
+let treeWheelAnimationModule, treeWheelRendererModule, nameCloudSettingsModule, hamburgerMenuModule; // treeOperationsModule;
+const loadSearchModalUI = async () => {
+  if (!searchModalUIModule) { searchModalUIModule = await import('./searchModalUI.js');} // OK
+  return searchModalUIModule; };
+export const getSetupSearchFieldModal = async () => (await loadSearchModalUI()).setupSearchFieldModal;
+export const getOpenSearchModal = async () => (await loadSearchModalUI()).openSearchModal;
+export const getFindPersonsBy = async () => (await loadSearchModalUI()).findPersonsBy;
+export const getShowHeatmapFromSearch = async () =>(await loadSearchModalUI()).showHeatmapFromSearch;
+const getParseGEDCOM = async () => {
+    const { parseGEDCOM } = await import('./gedcomParser.js');
+    return parseGEDCOM; };
+const loadNameCloud = async () => {
+  if (!nameCloudModule) { nameCloudModule = await import('./nameCloud.js');} // OK
+//   if (!nameCloudModule) { 
+//     console.trace("\n\n\n\n🚀 DEBUG: Qui m'appelle ?\n\n\n\n"); // Regarde dans la console
+//     nameCloudModule = await import('./nameCloud.js');
+//   }
+  return nameCloudModule; };
+  
+export const getNameCloudState = async () => (await loadNameCloud()).nameCloudState;
+export const getProcessNamesCloudWithDate = async () => (await loadNameCloud()).processNamesCloudWithDate;
+export const getFilterPeopleByText = async () => (await loadNameCloud()).filterPeopleByText;
+export const getGetPersonsFromTree = async () => (await loadNameCloud()).getPersonsFromTree;
+export const getProcessPersonData = async () => (await loadNameCloud()).processPersonData;
+export const getExtractSearchTextFromTitle = async () => (await loadNameCloud()).extractSearchTextFromTitle;
+export const getCollectCenturyData = async () => (await loadNameCloud()).collectCenturyData;
+
+const loadAudioPlayer = async () => {
+  if (!audioPlayerModule) { audioPlayerModule = await import('./audioPlayer.js');} // OK
+  return audioPlayerModule; };
+const getCreateAudioPlayerToggleButton = async () => (await loadAudioPlayer()).createAudioPlayerToggleButton;
+export const getCreateAudioElement = async () => (await loadAudioPlayer()).createAudioElement;
+export const getPlayEndOfAnimationSound = async () => (await loadAudioPlayer()).playEndOfAnimationSound;
+export const getStopAnimationAudio = async () => (await loadAudioPlayer()).stopAnimationAudio;
+export const getRepositionAudioPlayerOnResize = async () => (await loadAudioPlayer()).repositionAudioPlayerOnResize;
+
+const loadPhotoPlayer = async () => {
+  if (!photoPlayerModule) { photoPlayerModule = await import('./photoPlayer.js');} // OK
+  return photoPlayerModule; };
+export const getGetCachedResourceUrl = async () => (await loadPhotoPlayer()).getCachedResourceUrl;
+export const getShowEndAnimationPhoto = async () => (await loadPhotoPlayer()).showEndAnimationPhoto;
+export const getCloseAnimationPhoto = async () => (await loadPhotoPlayer()).closeAnimationPhoto;
+
+const loadNameCloudUI = async () => {
+  if (!nameCloudUIModule) { nameCloudUIModule = await import('./nameCloudUI.js');} // OK
+  return nameCloudUIModule; };
+export const getGenerateNameCloudExport = async () => (await loadNameCloudUI()).generateNameCloudExport;
+export const getGetTranslation = async () => (await loadNameCloudUI()).getTranslation;
+export const getCloseCloudName = async () => (await loadNameCloudUI()).closeCloudName;
+export const getCreateNameCloudUI = async () => (await loadNameCloudUI()).createNameCloudUI;
+export const getUpdateOverlayLayout = async () => (await loadNameCloudUI()).updateOverlayLayout;
+export const getUpdateTitleText = async () => (await loadNameCloudUI()).updateTitleText;
+
+const loadBackgroundManager = async () => {
+  if (!backgroundManagerModule) { backgroundManagerModule = await import('./backgroundManager.js');} // OK
+  return backgroundManagerModule; };
+export const getSetupElegantBackground = async () => (await loadBackgroundManager()).setupElegantBackground;
+export const getEnableBackground = async () => (await loadBackgroundManager()).enableBackground;
+export const getInitBackgroundContainer = async () => (await loadBackgroundManager()).initBackgroundContainer;
+
+const loadGeoHeatMapDataProcessor = async () => {
+  if (!geoHeatMapDataProcessorModule) { geoHeatMapDataProcessorModule = await import('./geoHeatMapDataProcessor.js');} // OK
+  return geoHeatMapDataProcessorModule; };
+export const getCreateDataForHeatMap = async () => (await loadGeoHeatMapDataProcessor()).createDataForHeatMap;
+export const getCreateHeatmapDataForPeople = async () => (await loadGeoHeatMapDataProcessor()).createHeatmapDataForPeople;
+export const getRefreshHeatmap = async () => (await loadGeoHeatMapDataProcessor()).refreshHeatmap;
+
+const loadGeoHeatMapUI = async () => {
+  if (!geoHeatMapUIModule) { geoHeatMapUIModule = await import('./geoHeatMapUI.js');} // OK
+  return geoHeatMapUIModule; };
+export const getCreateImprovedHeatmap = async () => (await loadGeoHeatMapUI()).createImprovedHeatmap;
+export const getDisplayHeatMap = async () => (await loadGeoHeatMapUI()).displayHeatMap;
+
+const loadGeoHeatMapInteractions = async () => {
+  if (!geoHeatMapInteractionsModule) { geoHeatMapInteractionsModule = await import('./geoHeatMapInteractions.js');} // OK
+  return geoHeatMapInteractionsModule; };   
+export const getSaveHeatmapPosition = async () => (await loadGeoHeatMapInteractions()).saveHeatmapPosition;
+const getInitializeRefreshPersonListEventListener = async () => (await loadGeoHeatMapInteractions()).initializeRefreshPersonListEventListener;
+
+const loadGeolocalistion = async () => {
+  if (!geoLocalisationModule) { geoLocalisationModule = await import('./geoLocalisation.js');} // OK
+  return geoLocalisationModule; };   
+export const getGeocodeLocation= async () => (await loadGeolocalistion()).geocodeLocation;
+export const getLoadGeolocalisationFile= async () => (await loadGeolocalistion()).loadGeolocalisationFile;
+
+const loadmodalWindow = async () => {
+  if (!modalWindowModule) { modalWindowModule = await import('./modalWindow.js');} // OK
+  return modalWindowModule; };   
+export const getDisplayPersonDetails= async () => (await loadmodalWindow()).displayPersonDetails;
+export const getFormatGedcomDate= async () => (await loadmodalWindow()).formatGedcomDate;
+export const getFindContextualHistoricalFigures= async () => (await loadmodalWindow()).findContextualHistoricalFigures;
+export const getReadPersonSheet= async () => (await loadmodalWindow()).readPersonSheet;
+
+const loadtreeWheelAnimation = async () => {
+  if (!treeWheelAnimationModule) { treeWheelAnimationModule = await import('./treeWheelAnimation.js');} // OK
+  return treeWheelAnimationModule; };   
+export const getDisableFortuneModeWithLever= async () => (await loadtreeWheelAnimation()).disableFortuneModeWithLever;
+export const getDisableFortuneModeClean= async () => (await loadtreeWheelAnimation()).disableFortuneModeClean;
+export const getEnableFortuneMode= async () => (await loadtreeWheelAnimation()).enableFortuneMode;
+export const getShowQuizMessage= async () => (await loadtreeWheelAnimation()).showQuizMessage;
+export const getReadPersonDetails= async () => (await loadtreeWheelAnimation()).readPersonDetails;
+export const getGenerateRadarCache= async () => (await loadtreeWheelAnimation()).generateRadarCache;
+export const getCreateWinnerRedArrowIndicator= async () => (await loadtreeWheelAnimation()).createWinnerRedArrowIndicator;
+
+const loadTreeWheelRenderer = async () => {
+  if (!treeWheelRendererModule) { treeWheelRendererModule = await import('./treeWheelRenderer.js');} // OK
+  return treeWheelRendererModule; };   
+export const getSetMaxGenerationsInit= async () => (await loadTreeWheelRenderer()).setMaxGenerationsInit;
+export const getSetMaxGenerations= async () => (await loadTreeWheelRenderer()).setMaxGenerations;
+export const getRemoveSpinningImage= async () => (await loadTreeWheelRenderer()).removeSpinningImage;
+export const getDrawWheelTree= async () => (await loadTreeWheelRenderer()).drawWheelTree;
+export const getResetWheelView= async () => (await loadTreeWheelRenderer()).resetWheelView;
+export const getNeedsReset= async () => (await loadTreeWheelRenderer()).needsReset;
+export const getGetGenerationColor= async () => (await loadTreeWheelRenderer()).getGenerationColor;
+export const getCalculateOptimalZoom= async () => (await loadTreeWheelRenderer()).calculateOptimalZoom;
+
+const loadNameCloudSettings = async () => {
+  if (!nameCloudSettingsModule) { nameCloudSettingsModule = await import('./nameCloudSettings.js');} // OK
+  return nameCloudSettingsModule; };   
+export const getCreateSettingsModal= async () => (await loadNameCloudSettings()).createSettingsModal;
+export const getLoadSettingsFromLocalStorage= async () => (await loadNameCloudSettings()).loadSettingsFromLocalStorage;
+
+
+const loadHamburgerMenu = async () => {
+  if (!hamburgerMenuModule) { hamburgerMenuModule = await import('./hamburgerMenu.js');} // OK
+  return hamburgerMenuModule; };   
+export const getShowHamburgerMenu= async () => (await loadHamburgerMenu()).showHamburgerMenu;
+export const getInitializeHamburgerOnce= async () => (await loadHamburgerMenu()).initializeHamburgerOnce;
+export const getGetMenuTranslation= async () => (await loadHamburgerMenu()).getMenuTranslation;
+export const getHideHamburgerMenu= async () => (await loadHamburgerMenu()).hideHamburgerMenu;
+export const getResizeHamburger= async () => (await loadHamburgerMenu()).resizeHamburger;
+
+
+let isOnline = false; // Variable pour suivre l'état de la connexion Internet
+let previousOnlineState = false;
+
+window.addEventListener('load', function() {
+    if (window.eruda) {
+        eruda.hide();
+        console.log("\n\n\nLe bouton Eruda est maintenant masqué, mais la console tourne, continuez !");
+    } else {
+        console.log("\n\n\neruda n'est pas défini.");
+    }
+});
+
+window.addEventListener('load', initializeAtLoad);
+
+
+
+// 1. Détecter si on est sur la page "Clair" (Debug)
+const isDebug = window.location.pathname.includes('private_index_4691.html');
+// 2. Construire l'URL du Service Worker avec un paramètre
+// On ajoute ?mode=debug si c'est le cas
+const swUrl = isDebug ? './service-worker.js?mode=debug' : './service-worker.js';
+console.log('\n\n in main.js : Mode détecté:', isDebug ? 'DEBUG' : 'PROD', 'swUrl =', swUrl);
+
+// // Enregistrement du Service Worker pour permettre le mode hors ligne
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register(swUrl)
+      .then(registration => {
+        console.log('✅ Service Worker enregistré avec succès:', registration.scope);
+        
+        // Vérifier si une mise à jour est disponible
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                console.log('Nouveau Service Worker installé, sera activé au prochain chargement');
+              } else {
+                console.log('Service Worker installé pour la première fois');
+              }
+            }
+          };
+        };
+      })
+      .catch(error => {
+        console.error('Échec de l\'enregistrement du Service Worker:', error);
+      });
+}
+
+// for tracking with google Analytics
+export function trackPageView(pagePath) {
+    if (window.gtag) {
+        console.log(`📊 Suivi de la vue de page pour google Analytics: ${pagePath}`);
+        gtag('event', 'page_view', {
+            page_location: window.location.href,
+            page_title: pagePath
+        });
+    }
+}
+
+// Sélection des champs
+const passwordInput = document.getElementById('password');
+const firstNameInput = document.getElementById('input-form-firstName');
+const lastNameInput = document.getElementById('input-form-lastName');
+
+// Charger les valeurs stockées au chargement de la page
+window.addEventListener('DOMContentLoaded', () => {
+    const savedPassword  = localStorage.getItem('password');
+    const savedFirstName = localStorage.getItem('firstName');
+    const savedLastName = localStorage.getItem('lastName');
+    if (savedPassword) passwordInput.value = savedPassword;
+    if (savedFirstName) firstNameInput.value = savedFirstName;
+    if (savedLastName) lastNameInput.value = savedLastName;
+});
+
+// Sauvegarder les valeurs dès qu’elles changent
+[passwordInput, firstNameInput, lastNameInput].forEach(input => {
+    input.addEventListener('input', () => {
+        localStorage.setItem('password', passwordInput.value);
+        localStorage.setItem('firstName', firstNameInput.value);
+        localStorage.setItem('lastName', lastNameInput.value);
+    });
+});
+
+
+// export { geocodeLocation };
+
+const i18n = {
+    'fr': {
+        hasBeenFound: ' a été trouvé',
+        hasNotBeenFound: ' n\'a pas été trouvé',
+        haveBeenFound: ' ont été trouvés',
+        severalPersonWithName: ' plusieurs personnes du nom de ',
+    },
+    'en': {
+        hasBeenFound: ' has been found',
+        hasNotBeenFound: ' has not been found',
+        haveBeenFound: ' have been found',
+        severalPersonWithName: ' several people with the name ',
+    },
+    'es': {
+        hasBeenFound: ' ha sido encontrado',
+        hasNotBeenFound: ' no ha sido encontrado',
+        haveBeenFound: ' han sido encontrados',
+        severalPersonWithName: ' varias personas con el nombre ',
+    },
+    'hu': {
+        hasBeenFound: ' meg lett találva',
+        hasNotBeenFound: ' nem lett megtalálva',
+        haveBeenFound: ' meg lettek találva',
+        severalPersonWithName: ' több személy ezzel a névvel ',
+    }
+};
+
+// Rendre la fonction de traduction accessible au module STT
+function translate(key) {
+    const lang = window.CURRENT_LANGUAGE || 'fr';
+    return i18n[lang][key] || i18n['fr'][key]; // Fallback au français
+}
+
+
+// window.toggleAnimationPause = toggleAnimationPause;
+
+
+// document.addEventListener('DOMContentLoaded', async () => {
+//     await initResourcePreloading();
+//     initTilePreloading();
+// });
+
+
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     // 1. Priorité absolue : Afficher l'arbre immédiatement
+//     console.log("🌳 Affichage de l'arbre...");
+
+//     window.addEventListener('load', () => {
+//         // 2. On attend 5 à 10 secondes après le chargement complet
+//         // Cela permet à Lighthouse de valider un bon score de performance.
+//         setTimeout(async () => {
+//             try {
+//                 console.log("📦 Lancement du préchargement INDISPENSABLE (Resources)...");
+                
+//                 // On utilise await ici pour respecter ton ordre :
+//                 // Le code attend que les ressources soient finies...
+//                 await initResourcePreloading(); 
+//                 console.log("✅ Ressources chargées.");
+
+//                 // 3. ...avant de lancer les tuiles qui sont optionnelles
+//                 console.log("🗺️ Lancement du préchargement OPTIONNEL (Tuiles)...");
+//                 initTilePreloading(); 
+
+
+//                 if (navigator.serviceWorker.controller) {
+//                     navigator.serviceWorker.controller.postMessage({
+//                         action: 'startFullCaching'
+//                     });
+//                 }
+
+
+
+//             } catch (error) {
+//                 console.error("Erreur durant le chargement en arrière-plan :", error);
+//             }
+//         }, 8000); // Délai de 8 secondes pour être "invisible" pour Lighthouse
+//     });
+// });
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////
+// Observer les changements pour Samsung (polling)
+// Initialisation au chargement
+function initialiserButtonSize() {
+    console.log('\n\n-Initialisation du redimensionnement dynamique de la DOM... with browserScaleFactor=' , state.browserScaleFactor,'\n\n');
+
+    // if (isSamsungBrowser()) {
+    if (!state.dontApplyButtonRescale) {
+
+        if (!state.isMobile && !state.dontApplyButtonRescale) { detectF12Once(); }
+
+
+    // if (true) {
+        // lancer redimensionnement initial
+        state.initialHamburgerFontSize =  parseInt(14/state.browserScaleFactor);
+        calculerFacteurRedimensionnement();
+        redimensionnerButtonSizeInDOM();
+        //Surveillance resize (pour Chrome)
+        window.addEventListener('resize', debounce(() => {
+            console.log('\n\n\n\n @@@@@@@@@@@@@@@@@@@@    Resize détecté, redimensionnement button size...@@@@@@@@@@@@@@@@@@@@@  \n\n\n\n');
+            surveillerChangementsFontSize();
+        }, 250)); // Attend 150ms après le dernier resize
+    }
+}
+
+let dernierFacteur = null;
+function surveillerChangementsFontSize() {
+    console.log('\n\n 🔍 Surveillance des changements de font-size...@@@@@@@@@@@@@\n\n');
+    if (!state.dontApplyButtonRescale) {
+        if (!state.isMobile) { detectF12Once(); }
+        //On lance ce code UNE FOIS au démarrage
+        // detectBrowserScaleChrome();
+        const facteurActuel = calculerFacteurRedimensionnement();
+        if (dernierFacteur !== null && dernierFacteur !== facteurActuel) {
+            console.log('\n\n\n***********  Debug: Changement de scale détecté:', dernierFacteur, '→', facteurActuel);
+            redimensionnerButtonSizeInDOM();
+            redimensionnerSelectorSizeInDOM();
+            const selector = document.getElementById('nameCloudTypeSelect');
+            if (selector) { 
+                redimensionnerSelectorSizeInDOMnameCloud();
+                redimensionnerItemsInCloudName();               
+            }
+        }
+        dernierFacteur = facteurActuel;
+    }
+}
+
+function detectBrowserScaleSamsung() {
+  const probe = document.createElement("span");
+  probe.textContent = "M";
+  probe.style.cssText = `
+    position: fixed;
+    visibility: hidden;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+  `;
+  document.body.appendChild(probe);
+  const computedPx = parseFloat(getComputedStyle(probe).fontSize);
+  document.body.removeChild(probe);
+  const scale = computedPx / 16;
+  console.log(
+    "[detectBrowserScaleSamsung]",
+    "computed font-size =", computedPx + "px",
+    "=> scale =", scale
+  );
+  return scale;
+}
+
+function detectBrowserScaleChrome() {
+    let browserScaleFactor_ChromeMethod = 1;
+    let browserScaleFactor_SamsungMethod = 1;
+    let isSamsungLikeBrowser = false;
+
+    console.log('\n=== ANALYSE SCREEN SIZE / BROWSER WINDOW SIZE / BROWSER ZOOM / isF12 active ===');
+    console.log(' - screen size:', window.screen.width+'x'+window.screen.height);
+    console.log(' - screen orientation:', screen.orientation ? screen.orientation.type : 'not available');
+    console.log(' - browser external size:', window.outerWidth+'x'+window.outerHeight);
+    console.log(' - browser internal size:', window.innerWidth+'x'+window.innerHeight);
+    console.log(' - devicePixelRatio:', window.devicePixelRatio);
+    console.log(' - screen available Size:', window.screen.availWidth+'x'+window.screen.availHeight);
+    console.log(' - F12 DevTools open ?', state.isF12Detected);
+    console.log(' - screen physical real width;', (window.innerWidth * window.devicePixelRatio));
+    console.log(' - browser window position left:', window.screenX, 'top:', window.screenY, 'right:', window.screenX + window.outerWidth, 'bottom:', window.screenY + window.outerHeight);
+    console.log(' - browser text scale factor W :', window.outerWidth / window.innerWidth);
+    console.log(' - browser text scale factor H :', window.outerHeight / window.innerHeight );
+    console.log(' - browser text scale factor H , corrected:', window.outerHeight*0.875 / window.innerHeight );
+    console.log(' - browser GLOBAL SCALE FACTOR:', window.outerWidth / window.innerWidth);
+    // if (!state.isF12Detected) { state.browserScaleFactor = Math.max(window.outerWidth, window.innerWidth) / window.innerWidth; }
+    // else { state.browserScaleFactor = Math.max(window.outerHeight, window.innerHeight) * 0.875 / window.innerHeight; }
+
+    if (!state.isF12Detected) { state.browserScaleFactor = window.outerWidth / window.innerWidth; }
+    else { state.browserScaleFactor = window.outerHeight * 0.875 / window.innerHeight; }
+
+
+
+    state.browserScaleCorrection = state.browserScaleFactor;
+
+    browserScaleFactor_ChromeMethod = state.browserScaleFactor;
+    //Samsung: utilise le multiplicateur de font-size
+    browserScaleFactor_SamsungMethod = detectBrowserScaleSamsung();
+    console.log(' - ', browserScaleFactor_SamsungMethod,'= browser browserScaleFactor samsung method');
+
+    if (Math.abs(browserScaleFactor_SamsungMethod - 1) < 0.05) {
+        state.browserScaleFactor = browserScaleFactor_ChromeMethod;
+    } else {
+        state.browserScaleFactor = browserScaleFactor_SamsungMethod;
+        isSamsungLikeBrowser = true;
+    }
+    console.log(' -', state.browserScaleFactor,' = final browser browserScaleFactor. Is Samsung Like Browser ?', isSamsungLikeBrowser);
+
+    if (navigator.userAgent.includes('SamsungBrowser') || isSamsungLikeBrowser) { 
+        // // Samsung: utilise le multiplicateur de font-size
+        state.isSamsungBrowser = true; 
+        state.browserScaleCorrection = 1;
+        console.log(' - Samsung browser detected : state.browserScaleFactor:', state.browserScaleFactor);
+        console.log(' - Samsung browser detected : state.browserScaleCorrection:', state.browserScaleCorrection);
+        state.scaleChrome = 1;
+    } else { 
+        state.isSamsungBrowser = false; 
+        state.scaleChrome = 1 / state.browserScaleFactor;
+    }
+
+
+    if (!state.isSamsungBrowser) { 
+        state.innerWidth = window.innerWidth*state.browserScaleFactor; 
+        state.innerHeight = window.innerHeight*state.browserScaleFactor;         
+    }
+    else { 
+        state.innerWidth = window.innerWidth;
+        state.innerHeight = window.innerHeight;
+    }
+    state.scaleTextFontSize = 1 / state.browserScaleFactor;
+
+    console.log(' - final browser state.browserScaleFactor:', state.browserScaleFactor);
+    console.log(' - final browser internal width:', state.innerWidth);
+    console.log(' - browser state.browserScaleCorrection:', state.browserScaleCorrection);
+
+    return state.browserScaleFactor;
+}
+
+// Calculer le facteur de redimensionnement
+function calculerFacteurRedimensionnement() {
+    let facteur = 1.0;
+    let facteur2 = 1.0;
+    detectBrowserScaleChrome();
+
+    facteur = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+
+    if (state.isSamsungBrowser) {
+        // // Samsung: utilise le multiplicateur de font-size
+        if (facteur < 0.56) { facteur = facteur * 0.7; } // Limite minimale
+        else if (facteur < 0.7) { facteur = facteur * 0.8; } 
+        else if (facteur < 0.85) { facteur = facteur * 0.9; }
+        facteur2 = facteur;       
+    } else {
+        // Chrome: 
+        facteur2 = facteur;
+        if (!state.isMobile) {
+            if(state.innerWidth > 1000) {
+                facteur = facteur * 1.5;
+            }
+        } 
+    }
+    state.browserScaleFactorInverse = facteur;
+    state.browserScaleFactor2 = facteur2;
+
+    return { facteur, facteur2};
+}
+
+function detectF12Once() {
+    // const start = performance.now();
+    // // Le code va s'arrêter ICI. 
+    // // Appuie sur F8 UNE SEULE FOIS.
+    // debugger; 
+    
+    // const end = performance.now();
+    // state.isF12Detected = (end - start > 100);
+
+    // if (state.isF12Detected) {
+    //     console.warn("DÉTECTÉ ! Maintenant le script va te laisser tranquille.");
+    //     // On ne relance plus le debugger pour ne pas boucler à l'infini
+    // }
+}
+// On lance ce code pour la detection du F12 UNE FOIS au démarrage
+// if (!state.isMobile && !state.dontApplyButtonRescale) { detectF12Once(); }
+
+// Détecter si c'est Samsung Internet
+function isSamsungBrowser() {
+    return navigator.userAgent.includes('SamsungBrowser');
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerButtonSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n @@@@@@@@@@@ start redimensionnerButtonSizeInDOM -Facteur de redimensionnement ?');
+        const facteur = state.browserScaleFactorInverse;
+        const facteur2 = state.browserScaleFactor2;
+                
+        // Si le facteur est proche de 1, pas besoin de redimensionner
+        // if (Math.abs(facteur2 - 1) < 0.01) {
+        //     return;
+        // }
+        
+        // Sélectionner TOUS les éléments
+        let elements; 
+
+        // for start page for samsung browser with button0, fontSizeChange0, fontSizeChangeChrome0, with facteur2"
+        // if (Math.abs(facteur2 - 1) > 0.01) {
+        //     let facteurStartPageSamsung = facteur2;
+        //     if (isSamsungBrowser()) {
+        //         elements = document.querySelectorAll(' [data-role ="button0"], [data-role ="fontSizeChange0"]');
+        //         const initialSamsungFactor = 1/state.browserScaleFactor
+        //         if (facteurStartPageSamsung < 0.56) { facteurStartPageSamsung = facteurStartPageSamsung * 0.8; } // Limite minimale
+        //         else if (facteurStartPageSamsung < 0.7) { facteurStartPageSamsung = facteurStartPageSamsung * 0.9; } // Limite minimale
+        //         else if (facteurStartPageSamsung < 0.85) { facteurStartPageSamsung = facteurStartPageSamsung * 1; } // Limite minimale
+
+        //     } else {
+        //         elements = document.querySelectorAll(' [data-role ="button0"], [data-role ="fontSizeChange0"], [data-role ="fontSizeChangeChrome0"]');
+        //     }
+        //     console.log(`-éléments for for start page for samsung browser  with [data-role ="button0"], [data-role ="fontSizeChange0"], [data-role ="fontSizeChangeChrome0"]: facteur: ${facteurStartPageSamsung}`);
+
+        //     elements.forEach(element => {
+        //         // console.log(`-élément Advanced: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role}`);
+        //         let fontSizeOriginal;
+
+        //         // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+        //         if (!element.dataset.originalFontSize) {
+        //             // C'est la première fois qu'on touche à ce bouton
+        //             const styles = window.getComputedStyle(element);
+        //             fontSizeOriginal = parseFloat(styles.fontSize);
+
+        //             // On sauvegarde la valeur numérique pure dans le dataset
+        //             if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+        //                 element.dataset.originalFontSize = fontSizeOriginal;
+        //             }
+        //         } else {
+        //             // On récupère la valeur sauvegardée précédemment
+        //             fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+        //         }
+
+        //         // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+        //         if (fontSizeOriginal) {
+        //             const nouvelleTaille = fontSizeOriginal * facteurStartPageSamsung;
+        //             // element.style.fontSize = nouvelleTaille + 'px';
+        //             element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+        //             // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+        //         }
+        //     });
+        // }
+
+        // for advanced setting Menu with buttonAdvanced, fontSizeChangeAdvanced, fontSizeChangeChromeAdvanced"
+        if (Math.abs(facteur - 1) > 0.01) {
+            let facteurAdvanced = facteur * 0.9;
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll('[data-role ="buttonAdvanced"], [data-role ="fontSizeChangeAdvanced"]');
+            } else {
+                elements = document.querySelectorAll('[data-role ="buttonAdvanced"], [data-role ="fontSizeChangeAdvanced"], [data-role ="fontSizeChangeChromeAdvanced"]');
+            }
+            console.log(`-éléments for advanced setting Menu with [data-role ="buttonAdvanced"], [data-role ="fontSizeChangeAdvanced"], [data-role ="fontSizeChangeChromeAdvanced"]: facteur: ${facteurAdvanced}`);
+
+            elements.forEach(element => {
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // C'est la première fois qu'on touche à ce bouton
+                    const styles = window.getComputedStyle(element);
+                    fontSizeOriginal = parseFloat(styles.fontSize);
+
+                    // On sauvegarde la valeur numérique pure dans le dataset
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteurAdvanced;
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+            });
+        }
+        
+        // for 1rst page with form container and password  with button1, fontSizeChange1, fontSizeChangeChrome1, with facteur"
+        if (Math.abs(facteur - 1) > 0.01) {
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll('[data-role ="button1"], [data-role ="fontSizeChange1"]');
+            } else {
+                elements = document.querySelectorAll('[data-role ="button1"], [data-role ="fontSizeChange1"], [data-role ="fontSizeChangeChrome1"]');
+            }
+            console.log(`-éléments for 1rst page with form container and password with [data-role ="button1"], [data-role ="fontSizeChange1"], [data-role ="fontSizeChangeChrome1"]: facteur: ${facteur}`);
+
+            elements.forEach(element => {
+                // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role}`);
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // C'est la première fois qu'on touche à ce bouton
+                    const styles = window.getComputedStyle(element);
+                    fontSizeOriginal = parseFloat(styles.fontSize);
+
+                    // On sauvegarde la valeur numérique pure dans le dataset
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteur;
+                    // element.style.fontSize = nouvelleTaille + 'px';
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+            });
+        }
+
+        // For display tree page with button2, fontSizeChange2, fontSizeChangeChrome2"
+        if (Math.abs(facteur2 - 1) > 0.01) {
+            let newfacteur = facteur2
+            if (isSamsungBrowser()) {
+                elements = document.querySelectorAll(' [data-role ="button2"], [data-role ="fontSizeChange2"]');
+
+                newfacteur = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                if (newfacteur < 0.56) { newfacteur = newfacteur * 0.9; } // Limite minimale
+                else if (newfacteur < 0.7) { newfacteur = newfacteur * 0.9; } 
+                else if (newfacteur < 0.85) { newfacteur = newfacteur * 0.9; }
+
+            } else {
+                elements = document.querySelectorAll(' [data-role ="button2"], [data-role ="fontSizeChange2"], [data-role ="fontSizeChangeChrome2"]');
+            }
+            // console.log(`-éléments for display tree page with [data-role ="button2"], [data-role ="fontSizeChange2"], [data-role ="fontSizeChangeChrome2"]: facteur: ${facteur2}`);
+
+            elements.forEach(element => {
+
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                if(element.id ==='menu-root-person-search-clone'  || element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    fontSizeOriginal = 14;
+                    // console.log('\n\n\n ----- DEBUG menu-root-person-search-clone -----',element.id, element.style.fontSize, fontSizeOriginal, facteur2, fontSizeOriginal * facteur2,  ' \n\n')
+                }
+
+
+                if (state.isSamsungBrowser && element.id ==='animationPauseBtnSpan' && state.browserScaleFactor >=1.5) {
+                    if (element.textContent === '▶') {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 35;}
+                        else {fontSizeOriginal = 30;}
+                    } else {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 40;}
+                        else {fontSizeOriginal = 35;}
+                    }
+                    // console.log('\n\n\n ----- DEBUG animationPauseBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, newfacteur, fontSizeOriginal * newfacteur, element.textContent, ' \n\n')
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * newfacteur;
+                    // element.style.fontSize = nouvelleTaille + 'px'
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+
+
+                if( !state.isSamsungBrowser) {
+                    //  Détection du tag "gap"
+                    // if (element.dataset.originalGap && (facteur < 0.83)) {
+                    if (element.dataset.originalGap ) {
+                        // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                        // On injecte la valeur dans la variable CSS
+                        if (facteur2 > 0.5) {
+                            element.style.setProperty('--current-gap', 1.8*newfacteur*1.2);
+                            element.style.setProperty('--current-paddindLeft', 1.5*newfacteur*1.2);
+                        } else {
+                            element.style.setProperty('--current-gap', 1.8*newfacteur*1.2*0.5);
+                            element.style.setProperty('--current-paddindLeft', 1.5*newfacteur*1.2*0.5);
+                        }
+                    }
+                }
+            });
+        }
+
+        setTimeout(() => {
+            redimensionnerItemsInHamburgerMenu();
+        }, 600);
+
+        // if (state.browserScaleFactor != 1 )  {  redimensionnerSelectorSizeInDOM();}
+        positionHeatMapButton();
+        positionRadarButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerPlayButtonSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        if (state.isSamsungBrowser) {
+            let scalingFactor = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+            if (scalingFactor < 0.56) { scalingFactor = scalingFactor * 0.7; } // Limite minimale
+            else if (scalingFactor < 0.7) { scalingFactor = scalingFactor * 0.8; } 
+            else if (scalingFactor < 0.85) { scalingFactor = scalingFactor * 0.9; }
+            
+            console.log('\n\n -Facteur de redimensionnement Play Button:', scalingFactor);
+                        
+            // For display tree page with button2, fontSizeChange2, fontSizeChangeChrome2"
+            if (Math.abs(scalingFactor - 1) > 0.01 ) {
+                const element = document.getElementById('animationPauseBtnSpan');
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
+
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+                if (state.isSamsungBrowser && element.id ==='animationPauseBtnSpan' && state.browserScaleFactor >=1.5) {
+                    if (element.textContent === '▶') {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 35;}
+                        else {fontSizeOriginal = 30;}
+                    } else {
+                        if  (state.browserScaleFactor >=1.9) {fontSizeOriginal = 55;}
+                        else {fontSizeOriginal = 35;}
+                    }
+                    console.log('\n\n\n ----- DEBUG animationPauseBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, scalingFactor, fontSizeOriginal * scalingFactor, element.textContent, ' \n\n')
+                }
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * scalingFactor;
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+            }
+        }
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerItemsInHamburgerMenu() {
+    const facteur2 = state.browserScaleFactor2;
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n -Facteur de redimensionnement Hamburger  menu:', facteur2);
+        // Si le facteur est proche de 1, pas besoin de redimensionner
+        // if (Math.abs(facteur2 - 1) < 0.01) {
+        //     return;
+        // }
+        let elements; 
+        
+        // For display tree page with buttonHamburger, fontSizeChangeHamburger, fontSizeChangeChromeHamburger"
+        if (Math.abs(facteur2 - 1) > 0.01) {
+            let facteurHamburger = facteur2;
+            if (isSamsungBrowser()) {
+                facteurHamburger = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                if (facteurHamburger < 0.56) { facteurHamburger = facteurHamburger * 0.9; } // Limite minimale
+                else if (facteurHamburger < 0.7) { facteurHamburger = facteurHamburger * 0.9; } 
+                else if (facteurHamburger < 0.85) { facteurHamburger = facteurHamburger * 0.9; }
+
+                elements = document.querySelectorAll(' [data-role ="buttonHamburger"], [data-role ="fontSizeChangeHamburger"]');
+                if (facteurHamburger < 0.56) { facteurHamburger = facteurHamburger * 1.3; }
+            } else {
+                elements = document.querySelectorAll(' [data-role ="buttonHamburger"], [data-role ="fontSizeChangeHamburger"], [data-role ="fontSizeChangeChromeHamburger"]');
+            }
+            console.log(`-éléments for display tree page with [data-role ="buttonHamburger"], [data-role ="fontSizeChangeHamburger"], [data-role ="fontSizeChangeChromeHamburger"]: facteur: ${facteur2}`);
+
+            elements.forEach(element => {
+                // console.log('\n\n\n ----- DEBUG menu hamburger elements -----', element.id, element.style.fontSize, ' \n\n')
+
+
+                let fontSizeOriginal;
+
+                // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                if (!element.dataset.originalFontSize) {
+                    // // C'est la première fois qu'on touche à ce bouton
+                    // 1. On regarde d'abord le style direct (le plus fiable)
+                    const styleDirect = element.style.fontSize;
+                    
+                    if (styleDirect && styleDirect.includes('px')) {
+                        fontSizeOriginal = parseFloat(styleDirect);
+                    } else {
+                        // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                        fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                    }
+
+                    if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                        element.dataset.originalFontSize = fontSizeOriginal;
+                    }
+
+                } else {
+                    // On récupère la valeur sauvegardée précédemment
+                    fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                }
+
+
+                if(element.id ==='menu-root-person-search-clone'|| element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    fontSizeOriginal = 14;
+                    // if (element.id === 'menu-root-search-span') {fontSizeOriginal = 12;}
+                    console.log('\n\n\n ----- DEBUG menu hamburger elements -----',element.id, element.style.fontSize, fontSizeOriginal, facteurHamburger, fontSizeOriginal * facteurHamburger,  ' \n\n')
+                }
+
+                if( element.id === 'menu-speechToggleBtnSpan' && state.isSamsungBrowser) {
+                    fontSizeOriginal = 30;
+                    console.log('\n\n\n ----- DEBUG menu hamburger menu-speechToggleBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, facteurHamburger, fontSizeOriginal * facteurHamburger,  ' \n\n')
+                }
+
+
+
+                // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                if (fontSizeOriginal) {
+                    const nouvelleTaille = fontSizeOriginal * facteurHamburger;
+                    // element.style.fontSize = nouvelleTaille + 'px'
+                    element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                    // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                }
+
+
+                if( !state.isSamsungBrowser) {
+                    //  Détection du tag "gap"
+                    // if (element.dataset.originalGap && (facteur < 0.83)) {
+                    if (element.dataset.originalGap ) {
+                        // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                        // On injecte la valeur dans la variable CSS
+                        if (facteur2 > 0.5) {
+                            element.style.setProperty('--current-gap', 1.8*facteurHamburger*1.2);
+                            element.style.setProperty('--current-paddindLeft', 1.5*facteurHamburger*1.2);
+                        } else {
+                            element.style.setProperty('--current-gap', 1.8*facteurHamburger*1.2*0.5);
+                            element.style.setProperty('--current-paddindLeft', 1.5*facteurHamburger*1.2*0.5);
+                        }
+                    }
+                }
+        
+
+                // --- LE CORRECTIF GLOBAL (H3 et Labels) ---
+                let fixStyle = document.getElementById('global-fix-style');
+                if (!fixStyle) {
+                    fixStyle = document.createElement('style');
+                    fixStyle.id = 'global-fix-style';
+                    document.head.appendChild(fixStyle);
+                }
+                
+                // On calcule les tailles pour les deux types d'éléments
+                const h3Taille = 14 * facteurHamburger;
+                const labelTaille = 12 * facteurHamburger; // Base 12px pour tes labels
+                
+                fixStyle.textContent = `
+                    /* Pour les titres du menu */
+                    .menu-section h3[data-role ="fontSizeChangeHamburger"] {
+                        font-size: ${h3Taille}px !important;
+                    }
+                    /* Pour les labels du menu */
+                    label[data-role ="fontSizeChangeHamburger"] {
+                        font-size: ${labelTaille}px !important;
+                        display: inline-block; /* Sécurité pour le rendu */
+                    }
+                `;
+                
+                // console.log(`Sécurité appliquée: H3=${h3Taille}px, Label=${labelTaille}px`);
+            });
+        }
+    }
+}
+
+// Redimensionner tous les éléments de la DOM
+export function redimensionnerItemsInCloudName() {
+    const facteur2 = state.browserScaleFactor2;
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n -Facteur de redimensionnement CloudName  menu:', facteur2, ', if width >1000 and chrome:');
+        let elements; 
+        
+        setTimeout(() => {
+            // For display tree page with buttonCloudName, fontSizeChangeCloudName, fontSizeChangeChromeCloudName"
+            if (Math.abs(facteur2 - 1) > 0.01) {
+                let facteurCloudName = facteur2;
+                if (isSamsungBrowser()) {
+                    facteurCloudName = Math.min(5, Math.max(0.3,1/state.browserScaleFactor));
+                    if (facteurCloudName < 0.56) { facteurCloudName = facteurCloudName * 0.9; } // Limite minimale
+                    else if (facteurCloudName < 0.7) { facteurCloudName = facteurCloudName * 0.9; } 
+                    else if (facteurCloudName < 0.85) { facteurCloudName = facteurCloudName * 0.9; }
+
+                    elements = document.querySelectorAll(' [data-role ="buttonCloudName"], [data-role ="fontSizeChangeCloudName"]');
+                    if (facteurCloudName < 0.56) { facteurCloudName = facteurCloudName * 1.3; }
+                } else {
+                    elements = document.querySelectorAll(' [data-role ="buttonCloudName"], [data-role ="fontSizeChangeCloudName"], [data-role ="fontSizeChangeChromeCloudName"]');
+                }
+                console.log(`-éléments for display tree page with [data-role ="buttonCloudName"], [data-role ="fontSizeChangeCloudName"], [data-role ="fontSizeChangeChromeCloudName"]: facteur: ${facteur2}`);
+
+                elements.forEach(element => {
+                    // console.log('\n\n\n ----- DEBUG menu CloudName elements -----', element.id, element.style.fontSize, ' \n\n')
+
+                    let fontSizeOriginal;
+
+                    // ÉTAPE 1 : Récupérer ou mémoriser la taille d'origine
+                    if (!element.dataset.originalFontSize) {
+                        // // C'est la première fois qu'on touche à ce bouton
+                        // 1. On regarde d'abord le style direct (le plus fiable)
+                        const styleDirect = element.style.fontSize;
+                        
+                        if (styleDirect && styleDirect.includes('px')) {
+                            fontSizeOriginal = parseFloat(styleDirect);
+                        } else {
+                            // 2. Sinon seulement on demande au navigateur (moins fiable au zoom)
+                            fontSizeOriginal = parseFloat(window.getComputedStyle(element).fontSize);
+                        }
+
+                        if (!isNaN(fontSizeOriginal) && fontSizeOriginal > 0) {
+                            element.dataset.originalFontSize = fontSizeOriginal;
+                        }
+
+                    } else {
+                        // On récupère la valeur sauvegardée précédemment
+                        fontSizeOriginal = parseFloat(element.dataset.originalFontSize);
+                    }
+
+
+                    // if(element.id ==='menu-root-person-search-clone'|| element.id ==='menu-root-person-search-placeholder' || element.id ==='menu-root-person-results-clone' || element.id ==='menu-root-person-results-placeholder') {
+                    //     fontSizeOriginal = 14;
+                    //     // if (element.id === 'menu-root-search-span') {fontSizeOriginal = 12;}
+                    //     console.log('\n\n\n ----- DEBUG menu CloudName elements -----',element.id, element.style.fontSize, fontSizeOriginal, facteurCloudName, fontSizeOriginal * facteurCloudName,  ' \n\n')
+                    // }
+
+                    // if( element.id === 'menu-speechToggleBtnSpan' && state.isSamsungBrowser) {
+                    //     fontSizeOriginal = 30;
+                    //     console.log('\n\n\n ----- DEBUG menu CloudName menu-speechToggleBtnSpan -----',element.id, element.style.fontSize, fontSizeOriginal, facteurCloudName, fontSizeOriginal * facteurCloudName,  ' \n\n')
+                    // }
+
+
+
+                    // ÉTAPE 2 : Appliquer le redimensionnement basé sur la source unique de vérité
+                    if (fontSizeOriginal) {
+                        const nouvelleTaille = fontSizeOriginal * facteurCloudName;
+                        // element.style.fontSize = nouvelleTaille + 'px'
+                        element.style.setProperty('font-size', nouvelleTaille + 'px', 'important');
+                        // console.log(`-élément: ID: ${element.id} | Tag: ${element.tagName} | role: ${element.role} | Initial: ${fontSizeOriginal}px | Nouveau: ${nouvelleTaille}px`);
+                    }
+
+
+                    if( !state.isSamsungBrowser) {
+                        //  Détection du tag "gap"
+                        // if (element.dataset.originalGap && (facteur < 0.83)) {
+                        if (element.dataset.originalGap ) {
+                            // On applique le facteur2 au gap pour qu'il suive la réduction de la police
+                            // On injecte la valeur dans la variable CSS
+                            if (facteur2 > 0.5) {
+                                element.style.setProperty('--current-gap', 1.8*facteurCloudName*1.2);
+                                element.style.setProperty('--current-paddindLeft', 1.5*facteurCloudName*1.2);
+                            } else {
+                                element.style.setProperty('--current-gap', 1.8*facteurCloudName*1.2*0.5);
+                                element.style.setProperty('--current-paddindLeft', 1.5*facteurCloudName*1.2*0.5);
+                            }
+                        }
+                    }
+            
+
+                    // --- LE CORRECTIF GLOBAL (H3 et Labels) ---
+                    let fixStyle = document.getElementById('global-fix-style');
+                    if (!fixStyle) {
+                        fixStyle = document.createElement('style');
+                        fixStyle.id = 'global-fix-style';
+                        document.head.appendChild(fixStyle);
+                    }
+                    
+                    // On calcule les tailles pour les deux types d'éléments
+                    const h3Taille = 14 * facteurCloudName;
+                    const labelTaille = 12 * facteurCloudName; // Base 12px pour tes labels
+                    
+                    fixStyle.textContent = `
+                        /* Pour les titres du menu */
+                        .menu-section h3[data-role ="fontSizeChangeCloudName"] {
+                            font-size: ${h3Taille}px !important;
+                        }
+                        /* Pour les labels du menu */
+                        label[data-role ="fontSizeChangeCloudName"] {
+                            font-size: ${labelTaille}px !important;
+                            display: inline-block; /* Sécurité pour le rendu */
+                        }
+                    `;
+                    
+                    // console.log(`Sécurité appliquée: H3=${h3Taille}px, Label=${labelTaille}px`);
+                });
+            }
+            setTimeout(() => {
+                redimensionnerItemsInHamburgerMenu();
+
+                setTimeout(() => {
+                    redimensionnerRootSelectorSizeInDOM();
+                }, 500);
+            }, 100);
+        }, 100);
+    }
+}
+
+let facteur, borderWidth, borderRadius, borderStyle, arrowSize, arrowRight, fontSizeDisplay, fontSizeOptions;
+
+function rescaleCustomSelector(id, marginLeft, width, height, dropdownWidth, dropdownPadding) {
+    if (!state.dontApplyButtonRescale) {
+        const selector = document.getElementById(id);
+        let offsetMargin = 0;
+        let offsetWidth = 0;
+        if ((id === 'root-person-results') && (facteur < 0.67) ) { offsetMargin = 10; }
+        if ((id === 'root-person-results') && (facteur < 0.49) ) {  offsetWidth = 10;}
+        if ((id === 'treeMode') && (facteur < 0.51) && (facteur > 0.48) ) {  offsetWidth = -10;}
+
+        if (!state.isSamsungBrowser) {
+            selector.style.setProperty('--custom-marginleft', `${marginLeft + offsetMargin*facteur}px`);
+            selector.style.setProperty('--custom-width', `${width + offsetWidth*facteur}px`);
+            selector.style.setProperty('--custom-height', `${height}px`);
+            selector.style.setProperty('--custom-dropdown-width', `${dropdownWidth}px`);
+            selector.style.setProperty('--custom-dropdown-padding', `${dropdownPadding}px`);
+            selector.style.setProperty('--custom-border', borderStyle);
+            selector.style.setProperty('--custom-border-radius', borderRadius);
+            selector.style.setProperty('--custom-arrow-size', arrowSize);
+            selector.style.setProperty('--custom-arrow-right', arrowRight);
+        }
+        selector.style.setProperty('--custom-font-size-display', fontSizeDisplay);
+        selector.style.setProperty('--custom-font-size-options', fontSizeOptions);
+
+        // Si le menu est ouvert, il est dans le body, on le cherche par sa classe
+        if (selector.optionsElement && document.body.contains(selector.optionsElement)) {
+            selector.optionsElement.style.width =dropdownWidth + 'px';
+            const options = selector.optionsElement.querySelectorAll('div');
+            selector.optionsElement.style.setProperty('--custom-font-size-options', fontSizeOptions);
+            options.forEach(opt => {
+                if (!state.isSamsungBrowser) {
+                    opt.style.padding = `${dropdownPadding} ${Math.round(facteur*10)}px`;
+                }
+                opt.style.fontSize = fontSizeOptions;
+            });
+            if (!state.isSamsungBrowser) {
+                selector.optionsElement.style.border = borderStyle;
+                selector.optionsElement.style.borderRadius = borderRadius;
+            }
+        }
+    }
+}
+
+export function redimensionnerSelectorSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n --- DEBUG redimensionner Selectors SizeInDOM ----: generations, treeMode, root-person-results, menu-demo-selector, prenoms, @@@@@@@@@@@@@\n\n\n')
+        facteur = 1/state.browserScaleFactor;
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+
+        let selector = null;
+        setTimeout(() => {
+            selector = document.getElementById('generations');
+            if (selector) {
+                rescaleCustomSelector('generations', -parseInt(facteur*14), Math.round(facteur*35), Math.round(facteur*25), Math.round(facteur*55), Math.round(facteur*2));
+                console.log("Élément generations trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'generations' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('treeMode');
+            if (selector) {
+                rescaleCustomSelector('treeMode', parseInt(facteur*0), Math.round(facteur*45), Math.round(facteur*25), Math.round(facteur*220), Math.round(facteur*1.5));
+                console.log("Élément treeMode trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }
+            if (!state.isSamsungBrowser) {
+                setTimeout(() => {
+                    const selector = document.getElementById('generations');
+                    selector.style.setProperty('margin-right', 1/state.browserScaleFactor +'px', 'important');
+                }, 150);
+            }
+            selector = document.getElementById('searchModal-search-type'); 
+            if (selector) {
+                rescaleCustomSelector('searchModal-search-type', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément searchModal-search-type' trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'searchModal-search-type'' est INTROUVABLE dans le DOM.");
+            }
+
+
+            selector = document.getElementById('statsModal-search-type'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-search-type', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-search-type trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-search-type' est INTROUVABLE dans le DOM.");
+            }            
+            selector = document.getElementById('statsModal-search-scope'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-search-scope', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-search-scope trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-search-scope' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('statsModal-StatsType'); 
+            if (selector) {
+                rescaleCustomSelector('statsModal-StatsType', parseInt(facteur*0), Math.round(facteur*170), Math.round(facteur*28), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément statsModal-StatsType trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'statsModal-StatsType' est INTROUVABLE dans le DOM.");
+            }
+
+        }, 300);
+
+        setTimeout(() => {
+            selector = document.getElementById('menu-demo-selector');
+            if (selector) {
+                rescaleCustomSelector('menu-demo-selector', parseInt(facteur*0), Math.round(facteur*70), Math.round(facteur*30), Math.round(facteur*190), Math.round(facteur*1.5));
+                console.log("Élément menu-demo-selector trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'menu-demo-selector' est INTROUVABLE dans le DOM.");
+            }
+        // }, 300);
+
+        // setTimeout(() => {
+            fontSizeDisplay = Math.round(facteur*12) + 'px';
+            fontSizeOptions = Math.round(facteur*13) + 'px';
+            selector = document.getElementById('menu-prenoms-selector');
+            if (selector) {
+                rescaleCustomSelector('menu-prenoms-selector', parseInt(facteur*0), Math.round(facteur*30), Math.round(facteur*25), Math.round(facteur*45), Math.round(facteur*1.5));
+                console.log("Élément menu-prenoms-selector trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'menu-prenoms-selector' est INTROUVABLE dans le DOM.");
+            }
+        // }, 300);
+
+        // setTimeout(() => {
+            selector = document.getElementById('root-person-results');
+            if (selector) {
+                rescaleCustomSelector('root-person-results', -parseInt(facteur*14), Math.round(facteur*70), Math.round(facteur*27), Math.round(facteur*250), Math.round(facteur*10) );
+                console.log("*********** Élément root-person-results trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'root-person-results' est INTROUVABLE dans le DOM.");
+            }
+        }, 1200);
+    }
+}
+
+export function redimensionnerRootSelectorSizeInDOM() {
+    if (!state.dontApplyButtonRescale) {
+        facteur = 1/state.browserScaleFactor;
+        console.log('\n\n\n --- DEBUG redimensionner Root SelectorSizeInDOM avec facteur= ',facteur,'---- @@@@@@@@@@@@@\n\n', )
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+        let selector = null;
+        selector = document.getElementById('root-person-results');
+        if (selector) {
+            rescaleCustomSelector('root-person-results', -parseInt(facteur*14), Math.round(facteur*70), Math.round(facteur*27), Math.round(facteur*250), Math.round(facteur*10) );
+            console.log("*********** Élément root-person-results trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+        } else {
+            console.error("L'ID 'root-person-results' est INTROUVABLE dans le DOM.");
+        }
+    }
+}
+
+export function redimensionnerSelectorSizeInDOMnameCloud() {
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n\n --- DEBUG redimensionnerSelectorSizeInDOM nameCloud ----\n\n\n\n')
+        facteur = 1/state.browserScaleFactor;
+        borderWidth = Math.max(1, Math.round(facteur)); 
+        borderRadius = Math.round(facteur*4) + 'px';
+        borderStyle = `${borderWidth}px solid #ccc`;
+        arrowSize = Math.round(facteur*5) + 'px'; 
+        arrowRight = Math.round(facteur*3) + 'px'; 
+        fontSizeDisplay = Math.round(facteur*14) + 'px';
+        fontSizeOptions = Math.round(facteur*15) + 'px';
+        setTimeout(() => {
+            let selector = document.getElementById('nameCloudTypeSelect');
+            if (selector) {
+                rescaleCustomSelector('nameCloudTypeSelect', parseInt(facteur*0), Math.round(facteur*60), Math.round(facteur*25), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }
+            selector = document.getElementById('nameCloudScopeSelect');
+            if (selector) {
+                rescaleCustomSelector('nameCloudScopeSelect', parseInt(facteur*0), Math.round(facteur*60), Math.round(facteur*25), Math.round(facteur*170), Math.round(facteur*1.5));
+                console.log("Élément trouvé ! Classe :", selector.className, ',resize avec :', facteur);
+            } else {
+                console.error("L'ID 'treeMode' est INTROUVABLE dans le DOM.");
+            }            
+        }, 600);
+        if (!state.isSamsungBrowser) {
+            setTimeout(() => {
+                const selector = document.getElementById('generations');
+                selector.style.setProperty('margin-right', 1/state.browserScaleFactor +'px', 'important');
+            }, 150);
+        }
+    }
+}
+/////////////////////////////////////////////////////////////////
+
+
+
+// Définir la fonction openGedcomModal globalement avant de charger i18n.js
+function openGedcomModal() {
+    const modal = document.getElementById('advanced-settings-modal');
+    if (modal) { modal.style.display = 'block'; }
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    if (secretTargetArea) {secretTargetArea.style.display = 'none';}
+    
+    if (!state.dontApplyButtonRescale) {
+        setTimeout(() => {
+            calculerFacteurRedimensionnement();
+            redimensionnerButtonSizeInDOM();
+        }, 300);
+    }
+
+    
+};
+    
+// Définir également la fonction de fermeture
+function closeGedcomModal () {
+    const modal = document.getElementById('advanced-settings-modal');
+    if (modal) { modal.style.display = 'none';}
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    if (secretTargetArea) {secretTargetArea.style.display = '';}
+};
+
+
+
+// // ajoutez des options pour différents types de heatmap
+// export function createAncestorsHeatMap(type = 'all', rootPersonId = null) {
+//     import('./geoLocalisation.js').then(module => {
+//         module.createAncestorsHeatMap({
+//             type: type,
+//             rootPersonId: rootPersonId
+//         });k
+//     });
+// }
+
+export async function updateRadarButtonText(isForceTreeRadarButton = null) {
+    const treeRadarToggleBtn = document.getElementById('radarBtn');
+    const menu_nameTreeRadarBtn = document.getElementById('menu-nameTreeRadarBtn');
+
+
+    if (treeRadarToggleBtn && !isForceTreeRadarButton) {
+        const span = treeRadarToggleBtn.querySelector('span');
+        if (span) {
+            span.textContent = state.isRadarEnabled ? '🌳' : '🎯';
+        }
+    }
+
+    let toggleValue = false;
+    if (state.previousMode === 'tree') { toggleValue = true; } 
+
+    toggleValue = (isForceTreeRadarButton) ? (toggleValue) : state.isRadarEnabled;    
+
+    const getMenuTranslation = await getGetMenuTranslation();
+    if( window.nameCloudSection && window.nameCloudSection.container ) {
+        window.nameCloudSection.container.querySelector('h3').textContent = toggleValue ? getMenuTranslation('section_namecloud2') : getMenuTranslation('section_namecloud');
+    }
+
+    if (menu_nameTreeRadarBtn) {
+        // Mettre à jour le bouton du menu hamburger
+        menu_nameTreeRadarBtn.querySelector('span').textContent = toggleValue ? '🌳' : '🎯';
+    }
+}
+
+/**
+ * Extrait toutes les personnes contenues dans un rootHierarchy (d3.hierarchy)
+
+ * @returns {Array} Tableau de toutes les personnes (node.data)
+ */
+export function getPersonsFromTCurrenTree() {
+    const persons = [];
+    const rootHierarchy = d3.hierarchy(state.currentTree, node => node.children); 
+    console.log('getPersonsFromTCurrenTree rootHierarchy', rootHierarchy);    
+    function traverse(node) {
+        if (!node) return;
+        if (node.data) {
+            persons.push(state.gedcomData.individuals[node.data.id]);
+        }
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => traverse(child));
+        }
+    }
+    traverse(rootHierarchy);
+    return persons;
+}
+
+export async function toggleTreeRadar() {
+    // Basculer l'état du tree/radar
+    state.isRadarEnabled = !state.isRadarEnabled;  
+    updateRadarButtonText();  
+    importLinks.eventHandlers.closeAllModals();
+    importLinks.treeAnimation.fullResetAnimationState();
+
+    if (state.isRadarEnabled) {
+        state.treeModeReal_whenReturnToTree = state.treeMode; 
+        state.treeModeReal_backup = state.treeMode; 
+        state.nombre_generation = 4;       
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+
+    } else {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
+        disableFortuneModeClean();
+
+        if ((state.treeModeReal_whenReturnToTree.includes('ncestors')) && !(state.treeMode.includes('ncestors'))) {
+            state.treeMode = 'ancestors';
+            state.treeModeReal = 'ancestors';
+            state.treeModeReal_backup = 'ancestors';
+            state.treeModeReal_whenReturnToTree = 'ancestors';
+
+        } else if ((state.treeModeReal_whenReturnToTree.includes('escendants')) && !(state.treeMode.includes('escendants'))) {
+            state.treeMode = 'descendants';
+            state.treeModeReal = 'descendants';
+            state.treeModeReal_backup = 'descendants';
+            state.treeModeReal_whenReturnToTree = 'descendants';
+        } else {
+            state.treeMode = state.treeModeReal_whenReturnToTree;
+            state.treeModeReal = state.treeModeReal_whenReturnToTree;  
+            state.treeModeReal_backup = state.treeModeReal_whenReturnToTree;  
+        } 
+
+        displayGenealogicTree(null, true, false);
+
+        if (state.backgroundEnabled) {
+            setTimeout(async () => {
+                // Pour ré-activer le fond d'écran
+                console.log("\n\n re-activation du fond d'écran depuis toggleTreeRadar dans main.js \n\n");
+                const enableBackground = await getEnableBackground();
+                enableBackground(true, true);
+            }, 200);
+        }
+    }
+}
+
+// Fonction pour basculer le son
+export async function toggleSpeech() {
+    if (state.isRadarEnabled) {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
+        disableFortuneModeClean();
+    } else {
+        const speechToggleBtn = document.getElementById('speechToggleBtn');
+        
+        // Basculer l'état du son
+        state.isSpeechEnabled = !state.isSpeechEnabled;
+
+        // Mettre à jour le bouton
+        speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled ? '🔊' : '🔇';
+    }
+}
+
+// Fonction pour desactiver complètement le son dans l'animation
+export async function toggleSpeech2() {
+    if (state.isRadarEnabled) {
+        const disableFortuneModeClean = await getDisableFortuneModeClean();
+        disableFortuneModeClean();
+    } else {
+        const menu_speechToggleBtn = document.getElementById('menu-speechToggleBtn');
+        // Basculer l'état du son
+        state.isSpeechEnabled2 = !state.isSpeechEnabled2;
+  
+        // Mettre à jour le bouton
+        menu_speechToggleBtn.querySelector('span').textContent = state.isSpeechEnabled2 ? '🗣️' : '🔇';
+        // Appliquer le style uniquement pour l'emoji 🗣️
+        if (menu_speechToggleBtn.querySelector('span').textContent === '🗣️') {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'brightness(2) contrast(0.7) saturate(2)';
+        } else {
+            menu_speechToggleBtn.querySelector('span').style.filter = 'none'; // Réinitialiser le filtre pour 🔇
+        }
+    }
+}
+
+// Pour arrêter le monitoring
+function stopBackgroundMonitoring() {
+    if (window._monitoringStopFunction) {
+      console.log("Arrêt du monitoring du fond d'écran");
+      const stats = window._monitoringStopFunction();
+      console.log("Statistiques finales:", stats);
+      window._monitoringStopFunction = null;
+      return stats;
+    } else {
+      console.log("Pas de monitoring actif à arrêter");
+      return null;
+    }
+  }
+  
+// Pour redémarrer le monitoring si nécessaire
+function restartBackgroundMonitoring() {
+// D'abord arrêter s'il est en cours
+if (window._monitoringStopFunction) {
+    stopBackgroundMonitoring();
+}
+
+// Puis redémarrer avec la fonction originale
+// if (window._originalSetupElegantBackground) {
+//     console.log("Redémarrage du monitoring du fond d'écran");
+//     import('./performanceMonitor.js').then(module => {
+//     window._monitoringStopFunction = module.monitorFunction(
+//         window, 
+//         '_originalSetupElegantBackground', 
+//         1000
+//     );
+//     });
+// } else {
+//     console.log("Impossible de redémarrer, fonction originale non trouvée");
+// }
+}
+
+export function toggleFullScreen(requestedstate = null) {
+
+    // requestedstate can be 'fullScreenRequired' ou 'exitfullScreenRequired'
+    let isFullSreenRequested = (!document.fullscreenElement)
+    // isFullSreenRequested is true : si on est pas en fullScreen
+    if (requestedstate && requestedstate === 'fullScreenRequired') {
+        isFullSreenRequested = true;
+    } else if (requestedstate && requestedstate === 'exitfullScreenRequired') {
+        isFullSreenRequested = false;
+    }
+
+   console.log('\n\n debug Toggle FullScreen with requestedstate=', requestedstate, ',isFullSreenRequested=', isFullSreenRequested)
+
+
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    const fullScreenLabel = document.getElementById('fullScreenLabel');
+    
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = (!condition) ? '🖥️' : '↩️';
+            if (!isFullSreenRequested) {
+                // Icône plein écran (flèches vers l’extérieur)
+                // span.textContent = '🖥️';
+                state.svgFull.style.display = '';
+                state.svgExit.style.display = 'none';
+            } else {
+                // Icône sortie plein écran (flèches vers l’intérieur)
+                state.svgFull.style.display = 'none';
+                state.svgExit.style.display = '';                
+            }
+        }
+        // si isFullSreenRequested on va passer en mode fullScreen, il faut donc mettre le bouton et le texte pour le retour en mode normal 
+        // fullScreenLabel.textContent = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        // fullScreenLabel.dataset.textKey = (isFullSreenRequested) ? 'normalScreenLabel' : 'fullScreenLabel';
+        // window.i18n.updateUI();
+    }
+
+    const browserBarButton = document.getElementById('browserBar-button');
+    const browserBarLabel = document.getElementById('browserBarLabel'); 
+
+    if (isFullSreenRequested) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+            document.documentElement.msRequestFullscreen();
+        }
+        if (state.isPuzzleSwipeFromSecret) {
+            browserBarButton.style.visibility = 'hidden'; 
+            browserBarLabel.style.visibility = 'hidden';
+            state.isPuzzleSwipe = false; 
+            const slot = document.getElementById('puzzleSlot'); 
+            const piece = document.getElementById('puzzlePiece'); 
+            const message = document.getElementById('puzzleMessage');
+            if (message) {
+                slot.style.visibility = 'hidden';
+                piece.style.visibility = 'hidden';
+                message.style.visibility = 'hidden';
+            }
+        }
+    } else {
+        // if (document.exitFullscreen) {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+
+        if (state.isPuzzleSwipeFromSecret && state.isMobile && state.isTouchDevice && !state.isPWA) {
+            browserBarButton.style.visibility = 'visible'; 
+            browserBarLabel.style.visibility = 'visible';
+        }
+    }
+}
+
+
+
+function createExitFullscreenSVG(
+    width, height,
+    cornerRatio = 0.1, arrowLineRatio = 0.25,
+    strokeWidth = 6, arrowWidth = 6, arrowLength = 6,
+    borderWidth = 2, bgColor = "#3498db", arrowColor = "green",
+    direction = "inward" // "inward" ou "outward"
+) {
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    // génère un suffixe unique court pour éviter tout conflit d'ID
+    const uid = 'id' + Math.random().toString(36).slice(2,9);
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    // rectangle fond + bord noir
+    const rect = document.createElementNS(svgNS, "rect");
+    rect.setAttribute("width", width);
+    rect.setAttribute("height", height);
+    rect.setAttribute("rx", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("ry", Math.min(width, height) * cornerRatio);
+    rect.setAttribute("fill", bgColor);
+    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke-width", borderWidth);
+    svg.appendChild(rect);
+
+    // longueur diagonale pour calcul flèches
+    const diag = Math.sqrt(width*width + height*height);
+    const lineLength = diag * arrowLineRatio;
+
+    // coordonnées des flèches (inward base)
+    let coords = [
+        { x1: 0.1*width, y1: 0.1*height, dx: lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 },   // haut-gauche
+        { x1: 0.9*width, y1: 0.1*height, dx: -lineLength*(width/diag)*0.5, dy: lineLength*(height/diag)*0.5 }, // haut-droit
+        { x1: 0.1*width, y1: 0.9*height, dx: lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 }, // bas-gauche
+        { x1: 0.9*width, y1: 0.9*height, dx: -lineLength*(width/diag)*0.5, dy: -lineLength*(height/diag)*0.5 } // bas-droit
+    ];
+
+    if (direction === "outward") {
+        // Transformer (inward base) en outward start/end, puis translater ENTIER SEGMENT de 2px vers le centre.
+        const cx = width / 2;
+        const cy = height / 2;
+        const shift = 4; // pixels toward center
+
+        coords = coords.map(c => {
+            // inward segment was: start_in = (c.x1, c.y1) -> end_in = (c.x1 + c.dx, c.y1 + c.dy)
+            // outward desired segment is start_out = end_in, end_out = start_in (i.e. direction reversed)
+            const startX = c.x1 + c.dx;
+            const startY = c.y1 + c.dy;
+            const endX = c.x1;
+            const endY = c.y1;
+
+            // vector from corner(end) to center (coin -> centre)
+            const vx = cx - endX;
+            const vy = cy - endY;
+            const vlen = Math.hypot(vx, vy) || 1;
+            const ux = vx / vlen;
+            const uy = vy / vlen;
+
+            // translate both endpoints toward center by `shift` px
+            const newStartX = startX + ux * shift;
+            const newStartY = startY + uy * shift;
+            const newEndX = endX + ux * shift;
+            const newEndY = endY + uy * shift;
+
+            return {
+                x1: newStartX,
+                y1: newStartY,
+                dx: newEndX - newStartX,
+                dy: newEndY - newStartY
+            };
+        });
+    }
+
+    // defs pour les flèches — IDs uniques
+    const defs = document.createElementNS(svgNS,"defs");
+    coords.forEach((c,i)=>{
+        const marker = document.createElementNS(svgNS,"marker");
+        const markerId = `arrow-${uid}-${i}`;               // <--- ID unique ici
+        marker.setAttribute("id", markerId);
+        marker.setAttribute("markerWidth", arrowWidth);
+        marker.setAttribute("markerHeight", arrowLength);
+        marker.setAttribute("refX", 0);
+        marker.setAttribute("refY", arrowLength/2);
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
+
+        const path = document.createElementNS(svgNS,"path");
+        path.setAttribute("d", `M0,0 L${arrowWidth},${arrowLength/2} L0,${arrowLength} z`);
+        path.setAttribute("fill", arrowColor);
+        marker.appendChild(path);
+        defs.appendChild(marker);
+    });
+    svg.appendChild(defs);
+
+    // lignes avec marqueurs — utilisent les IDs uniques
+    coords.forEach((c,i)=>{
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("x1", c.x1);
+        line.setAttribute("y1", c.y1);
+        line.setAttribute("x2", c.x1 + c.dx);
+        line.setAttribute("y2", c.y1 + c.dy);
+        line.setAttribute("stroke", arrowColor);
+        line.setAttribute("stroke-width", strokeWidth);
+        line.setAttribute("stroke-linecap","round");
+        line.setAttribute("stroke-linejoin","round");
+        line.setAttribute("fill","none");
+        line.setAttribute("marker-end", `url(#arrow-${uid}-${i})`); // <--- réf unique
+        svg.appendChild(line);
+    });
+
+    return svg;
+}
+
+
+export async function positionFormContainer() {
+    const formContainer = document.querySelector('.form-container');
+    const languageSelectorContainer = document.getElementById('language-selector-container');
+    const startTitle = document.getElementById('startTitle');
+
+    let puzzleSlot, puzzlePiece, puzzleMessage;
+    if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+        puzzleSlot = document.getElementById('puzzleSlot');
+        puzzlePiece = document.getElementById('puzzlePiece');
+        puzzleMessage = document.getElementById('puzzleMessage');
+        //1️⃣ Scroll pour revenir en haut après le mouvement vers le haut avce le puzzle pour faire disparaitre le bandeau du brower
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        if (puzzleSlot) { 
+            const puzzleSwipeModule = await import('./puzzleSwipe.js');
+            resetPuzzle = puzzleSwipeModule.resetPuzzle;
+            resetPuzzle();
+        }
+    }
+
+    if (formContainer && startTitle) {
+        formContainer.style.display = '';
+        startTitle.style.display = '';
+        languageSelectorContainer.style.display = '';
+
+        // console.log('\n\n @@@@@@@@@@@@  debug formContainer.offsetHeight', formContainer.offsetHeight, ', state.isPuzzleSwipe=' , state.isPuzzleSwipe)
+
+        let formContainerPositionTop = window.innerHeight/2 - formContainer.offsetHeight/2 - 80;
+        let startTitlePositionTop = window.innerHeight/2 + 110/2 - 80  + 10;  // normallement formContainer.offsetHeight = 110
+        if (window.innerHeight < 400 && !document.fullscreenElement) { 
+            formContainerPositionTop =  60;
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
+        } else if (window.innerHeight < 400 && document.fullscreenElement) { 
+            formContainerPositionTop =  50;
+            startTitlePositionTop =  40 + formContainer.offsetHeight + 20; //10;            
+        }
+        if (state.isPuzzleSwipeFromSecret && state.isPuzzleSwipe) {
+            formContainer.style.top = formContainerPositionTop  + 0 + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 0 + 'px'; 
+            if (puzzleSlot) {puzzleSlot.style.top = '50px';}
+
+            if (puzzleSlot) {puzzlePiece.style.top = '120px';}
+
+            if (window.innerHeight < 400) { 
+                formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 - 50 + 'px';
+                formContainer.style.transform = '';
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 - 50 + 'px';
+                startTitle.style.transform = '';
+                languageSelectorContainer.style.left = window.innerWidth/2 - languageSelectorContainer.offsetWidth/2 - 50 + 'px';
+                languageSelectorContainer.style.transform = '';
+                puzzleSlot.style.left = window.innerWidth - 60 + 'px';
+                puzzlePiece.style.left = window.innerWidth - 60 + 'px';
+                // puzzleMessage.style.left = window.innerWidth - 220 + 'px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            } else {
+                formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+                formContainer.style.transform = 'translateX(-50%)'; // ''; //
+                startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+                startTitle.style.transform = ''; //'translateX(-50%)';
+                // formContainer.style.left = window.innerWidth/2 - formContainer.offsetWidth/2 + 'px';
+                // startTitle.style.left = window.innerWidth/2 - startTitle.offsetWidth/2 + 'px';
+                languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+                languageSelectorContainer.style.transform = 'translateX(-50%)';
+
+                puzzleSlot.style.left = '50%';
+                puzzlePiece.style.left = '50%';
+                // puzzleMessage.style.left = '10px';
+                puzzleMessage.style.top = '70px';
+                puzzleMessage.style.width = '130px';
+                puzzleMessage.style.left = puzzlePiece.offsetLeft - 140 - 35 + 'px';
+            }
+        } else {
+            formContainer.style.top = formContainerPositionTop + 'px'; 
+            startTitle.style.top = startTitlePositionTop + 'px'; 
+            formContainer.style.left = '50%'; // window.innerWidth/2 - formContainer.offsetWidth/2  + 'px'; //
+            formContainer.style.transform = 'translateX(-50%)'; // ''; //
+            startTitle.style.padding = '0px';
+            startTitle.style.margin = '0px';            
+            startTitle.style.left = '50%'; //window.innerWidth/2 - startTitle.offsetWidth/2 + 'px'; //'50%';
+            startTitle.style.transform = 'translateX(-50%)';
+            languageSelectorContainer.style.left = '50%'; //window.innerWidth/2 - languageSelectorContainer.offsetWidth/2  + 'px';
+            languageSelectorContainer.style.transform = 'translateX(-50%)';
+        }
+    }
+}
+
+
+
+export async function getCachedImageURL(imagePath) {
+    try {
+        // const APP_CACHE_NAME = await getAPP_CACHE_NAME();
+        const cache = await caches.open(APP_CACHE_NAME);
+        const response = await cache.match(imagePath);
+        if (response) {
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        }
+    } catch (e) {
+        console.error("Erreur accès cache:", e);
+    }
+    return imagePath; // Retourne le chemin original si échec
+}
+
+
+function initializeAtLoad() {   
+
+    // --- 1. Persistance : Vérifier l'état au chargement ---
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        activerModeExpert('modeExpertActif');
+    }
+
+    if ((window.innerWidth < 400 || window.innerHeight < 400) && !localStorage.getItem('nombre_prenoms')) {
+        state.nombre_prenoms = 1;
+        localStorage.setItem('nombre_prenoms', 1);
+    }
+
+
+
+
+    // // on met à jour l'image de fond en bonne qualité si l'écran est grand
+    // if (window.innerWidth > 512 || window.innerHeight > 512) {
+    //     setTimeout(() => {
+    //         const loginBackground = document.getElementById('login-background-image');
+    //         if (loginBackground) {
+    //             if (window.innerWidth > 800 ||  window.innerHeight > 800)  {
+    //                 loginBackground.src = 'background_images/tree-log.jpg';  
+    //             } else {
+    //                 loginBackground.src = 'background_images/tree-log-mediumQuality.jpg';                      
+    //             }
+    //         }
+    //     }, 100); // Petit délai pour s'assurer que tout est prêt   
+    // }
+
+    // On met à jour l'image de fond en bonne qualité si l'écran est grand
+    if (window.innerWidth > 512 || window.innerHeight > 512) {
+        setTimeout(async () => {
+            const loginBackground = document.getElementById('login-background-image');
+            if (loginBackground) {
+                let imagePath = '';
+                if (window.innerWidth > 800 || window.innerHeight > 800) {
+                    // imagePath = 'background_images/tree-log.jpg';
+                    imagePath = `${BACKGROUND_IMAGES_PATH}tree-log.webp`;                   
+                } else {
+                    imagePath = `${BACKGROUND_IMAGES_PATH}tree-log-mediumQuality.jpg`;
+                }
+                // Récupération forcée depuis le cache pour le mode offline
+                loginBackground.src = await getCachedImageURL(imagePath);
+            }
+        }, 100); 
+    }
+
+
+
+     // Initialiser le sélecteur de générations standard d'abord
+    // (nécessaire pour sa création avant de le remplacer)
+    initializeGenerationSelect();
+    
+    // Initialiser les gestionnaires d'événements
+    // initializeEventHandlers();
+
+    // 🎯 : Initialisation iOS très tôt
+    if (window.initializeIOSInstallation) {
+        initializeIOSInstallation();
+    }
+    
+    // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
+    // initializeCustomSelectors();
+
+    // // Appliquer les définitions de texte
+    // importLinks.mainUI.applyTextDefinitions();
+
+
+    const loadGedcomButton = document.getElementById('load-gedcom-button');
+    loadGedcomButton.style.background = 'transparent';  
+    loadGedcomButton.style.padding = '0px';
+    loadGedcomButton.style.border = 'none';
+    loadGedcomButton.style.borderRadius = 6*state.scaleChrome+'px';
+    loadGedcomButton.style.position = 'fixed';
+    loadGedcomButton.style.top = 5*state.scaleChrome+'px';
+    loadGedcomButton.style.left = 10*state.scaleChrome+'px';
+    loadGedcomButton.style.zIndex = '1000';
+     
+
+
+    const loadGedcomButtonSpan = loadGedcomButton.querySelector('span');
+    loadGedcomButtonSpan.style.display = 'inline-block';
+
+    loadGedcomButtonSpan.style.animation = 'gear-spin 6s linear infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    loadGedcomButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
+
+
+
+    // Animation subtile au survol
+    loadGedcomButton.addEventListener('mouseover', () => {
+        // loadGedcomButton.style.transform = 'scale(1.1)';
+        loadGedcomButton.style.animation = 'gear-spin-fast 2s linear infinite';
+    });
+    
+    loadGedcomButton.addEventListener('mouseout', () => {
+        loadGedcomButton.style.animation = 'none';
+    });
+
+
+
+
+
+
+    const helpButton = document.getElementById('help-button');
+    helpButton.style.background = 'transparent';  
+    helpButton.style.padding = '0px';
+    helpButton.style.border = 'none';
+    helpButton.style.borderRadius = 6*state.scaleChrome+'px';
+    helpButton.style.position = 'fixed';
+    helpButton.style.top = 5*state.scaleChrome+'px';
+    helpButton.style.right = 10*state.scaleChrome+'px';
+    helpButton.style.zIndex = '1000';
+     
+
+
+    const helpButtonSpan = helpButton.querySelector('span');
+    helpButtonSpan.style.display = 'inline-block';
+
+    helpButtonSpan.style.animation = 'lightbulb-glow 3s ease-in-out infinite'; // 6 secondes pour un tour complet
+
+    // Ombre portée pour faire ressortir l'icône
+    helpButtonSpan.style.textShadow = `
+        1px 1px 0 #716f6fff,   /* décalage sombre à droite/bas */
+        -1px -1px 0 #716f6fff, /* décalage sombre à gauche/haut */
+        1px -1px 0 #716f6fff,
+        -1px 1px 0 #716f6fff
+    `;
+
+
+
+    // Animation subtile au survol
+    helpButton.addEventListener('mouseover', () => {
+        // helpButton.style.transform = 'scale(1.1)';
+        helpButton.style.animation = 'lightbulb-glow 1s ease-in-out infinite';
+    });
+    
+    helpButton.addEventListener('mouseout', () => {
+        helpButton.style.animation = 'none';
+    });
+
+
+
+
+
+
+    // Ajouter l'animation de rotation CSS
+    let style = document.createElement('style');
+    style.textContent = `
+        @keyframes gear-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes gear-spin-fast {
+            0% { transform: scale(1.1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    
+    // Création de la balise <style> pour l'animation CSS
+    style = document.createElement('style');
+    style.textContent += `
+    @keyframes lightbulb-glow {
+        0%, 100% {
+        text-shadow: 0 0 ${2*state.scaleChrome}px rgba(255, 255, 150, 0.2);
+        filter: brightness(1);
+        }
+        50% {
+        text-shadow: 0 0 ${15*state.scaleChrome}px rgba(255, 255, 120, 0.8);
+        filter: brightness(1.6);
+        }
+    }
+    `;
+    document.head.appendChild(style);
+
+
+
+    // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
+    createFullScreenButton();
+
+ 
+    // Ajouter l'événement pour soumettre le formulaire avec Enter
+    const passwordInput = document.getElementById('password');
+
+
+    if (passwordInput) {
+        console.log(" - Password input trouvé, ajout de l'écouteur d'événement pour Enter");
+        passwordInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                console.log("Touche Enter détectée");
+                event.preventDefault();
+                loadData(false);
+            }
+        });
+    } else {
+        console.warn("Élément 'password' non trouvé lors de l'initialisation");
+    }
+
+
+    // setupSearchFieldModal();
+
+
+
+    function isPWA() { // test si l'appli est lancé en mode brower web ou en mode appli Progressive Web App
+        return (
+            window.matchMedia('(display-mode: standalone)').matches || // Chrome, Android
+            window.navigator.standalone === true // Safari iOS
+        );
+    }
+
+
+    
+    const device = detectDeviceType();
+
+
+
+
+
+
+
+    console.log("\n\n\n   --- DEBUG device", device);
+
+
+    if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+    state.isPWA = isPWA();
+    
+
+    secretMode();
+
+
+    if (state.isPuzzleSwipeFromSecret) {
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+        // if (true){
+        } else {
+            const browserBarButton = document.getElementById('browserBar-button');
+            const browserBarLabel = document.getElementById('browserBarLabel'); 
+            browserBarButton.style.display = 'none';  
+            browserBarLabel.style.display = 'none';   
+        }
+    }
+
+    state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
+
+
+
+    state.nodeStyle = localStorage.getItem('treeNodeStyle') || 'classic';
+    if (!localStorage.getItem('treeDressingStyle')) { state.addLeaves = false;} 
+    else if (localStorage.getItem('treeDressingStyle') === 'leaves') { state.addLeaves = true;}
+    state.linkStyle = localStorage.getItem('treeLinkStyle') || 'normal-dark';
+    state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
+    state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
+    state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
+
+    // console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
+
+
+    // if (state.selectedVoiceName != null) { loadVoices();}
+    // state.voice_volume = localStorage.getItem('voice_volume') || 1.0;
+    // state.voice_rate = localStorage.getItem('voice_rate') || 1.0;
+    // state.voice_pitch = localStorage.getItem('voice_pitch') || 1.0;
+
+
+
+    setTimeout(() => {
+        positionFormContainer();
+    }, 200); // Petit délai pour s'assurer que tout est prêt    
+
+
+    console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT END OF INITIALIZE...\n\n');
+    initialiserButtonSize();
+
+}
+
+function initializeAtLoadData() {   
+
+     // Initialiser le sélecteur de générations standard d'abord
+    // (nécessaire pour sa création avant de le remplacer)
+    // initializeGenerationSelect();
+    
+    // Initialiser les gestionnaires d'événements
+    importLinks.eventHandlers.initializeEventHandlers();
+
+    
+    // Initialiser les sélecteurs personnalisés (remplace les sélecteurs standards)
+    importLinks.mainUI.initializeCustomSelectors();
+
+    // Appliquer les définitions de texte
+    importLinks.mainUI.applyTextDefinitions();
+
+    // state.heightDifferenceAtInit = window.screen.height - window.innerHeight;
+
+
+
+    // state.nodeStyle = localStorage.getItem('treeNodeStyle') || 'classic';
+    // if (!localStorage.getItem('treeDressingStyle')) { state.addLeaves = false;} 
+    // else if (localStorage.getItem('treeDressingStyle') === 'leaves') { state.addLeaves = true;}
+    // state.linkStyle = localStorage.getItem('treeLinkStyle') || 'normal-dark';
+    // state.treeShapeStyle = localStorage.getItem('treeShapeStyle') || 'normal';
+    // state.nombre_prenoms = localStorage.getItem('nombre_prenoms') || '2';
+    // state.selectedVoiceName = localStorage.getItem('selectedVoice') || null;
+
+    // console.log('\n\n\n -------DEBUG INIT voice localStorage=', localStorage.getItem('selectedVoice') , 'state.selectedVoiceName=', state.selectedVoiceName)
+
+
+
+    // console.log('\n\nInitialisation du redimensionnement dynamique de la DOM AT END OF INITIALIZE...\n\n');
+    // initialiserButtonSize();
+
+    if (state.selectedVoiceName != null) { loadVoices();}
+    state.voice_volume = localStorage.getItem('voice_volume') || 1.0;
+    state.voice_rate = localStorage.getItem('voice_rate') || 1.0;
+    state.voice_pitch = localStorage.getItem('voice_pitch') || 1.0;
+
+}
+
+
+
+
+function createFullScreenButton() {
+
+    // regénère le bouton fullScreen avec la fonction createExitFullscreenSVG
+    const fullScreenButton = document.getElementById('fullScreen-button');
+    if (fullScreenButton) {
+        const span = fullScreenButton.querySelector('span');
+        if (span) {
+            // span.textContent = '🖥️';
+            span.innerHTML = "";
+            // span.appendChild(createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward")); 
+
+            // Créer les SVG une seule fois
+            if (state.isSamsungBrowser) {
+                state.svgFull = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "outward");
+                state.svgExit = createExitFullscreenSVG(35, 28, 0.1, 0.35, 2, 3, 5, 2, "#3498db", "yellow", "inward");
+            } else {
+                const f=1/state.browserScaleFactor;
+                state.svgFull = createExitFullscreenSVG(35.0*f, 28.0*f, 0.1*f, 0.35*f, 2.0*f, 3.0*f, 5.0*f, 2.0*f, "#3498db", "yellow", "outward");
+                state.svgExit = createExitFullscreenSVG(35.0*f, 28.0*f, 0.1*f, 0.35*f, 2.0*f, 3.0*f, 5.0*f, 2.0*f, "#3498db", "yellow", "inward");
+            }
+            state.svgExit.style.display = 'none'; // caché par défaut
+
+            span.appendChild(state.svgFull);
+            span.appendChild(state.svgExit);
+        }
+    }
+}
+
+
+/**
+ * Initialise le sélecteur de générations
+ */
+function initializeGenerationSelect() {
+    const select = document.getElementById('generations');
+    for (let i = 2; i <= 101; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.text = i;
+        if (i === 6) option.selected = true;
+        select.appendChild(option);
+    }
+}
+
+export let audio;
+export let audioUnlocked = false;
+
+let loadVoices, speakText, generatePhoneticAlternatives;
+// let importLinks.utils.findPersonByName;
+/**
+ * Charge les données GEDCOM et configure l'affichage de l'arbre
+ */
+export async function loadData(isfromNonEncryptedFile = '', speechCapturedData = null) {
+    // const utilsModule = await import('./utils.js');
+    // importLinks.utils.findPersonByName = utilsModule.findPersonsByName;
+
+    // On peut les lancer en parallèle pour aller plus vite
+    await Promise.all([
+        loadModule('treeOperations', './treeOperations.js'),
+        loadModule('treeRenderer', './treeRenderer.js'),
+        loadModule('treeAnimation', './treeAnimation.js'),  // to do
+        loadModule('nodeControls', './nodeControls.js'),
+        loadModule('nodeRenderer', './nodeRenderer.js'),
+        loadModule('mainUI', './mainUI.js'),
+        loadModule('utils', './utils.js'),
+        loadModule('eventHandlers', './eventHandlers.js'),
+    ]);
+
+    const voiceSelectModule = await import('./voiceSelect.js');
+    loadVoices = voiceSelectModule.loadVoices;
+    speakText = voiceSelectModule.speakText;
+    generatePhoneticAlternatives = voiceSelectModule.generatePhoneticAlternatives;
+
+
+    initializeAtLoadData();
+    const initializeRefreshPersonListEventListener = await getInitializeRefreshPersonListEventListener();
+    initializeRefreshPersonListEventListener();
+
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+    secretTargetArea.style.display = 'none';
+
+    state.isTreeEnabled = true;
+
+    trackPageView('AccueilTreeViewer');
+
+    const setupSearchFieldModal = await getSetupSearchFieldModal();
+    setupSearchFieldModal();
+
+    const createAudioPlayerToggleButton  =  await getCreateAudioPlayerToggleButton();
+    createAudioPlayerToggleButton();
+    const createAudioElement =  await getCreateAudioElement();
+    audio = await createAudioElement();
+    audio.preload = 'auto';
+    audio.volume = 1;
+
+    state.treeMode = 'directAncestors';
+    state.treeModeReal = 'directAncestors';
+
+
+    // 💡 Débloque l'audio à ce moment-là pour IOS
+    // Pour le cas IOS qui bloque la musique si la musique n'est pas déclenchée par un clic
+    // or en mode démo la musique est lancée à la fin de l'animation , loin après le clic
+    // dans ce cas il faut faire un pré-init de la musique. L eproblème c'est qu'il faut déjà connaitre quel mp3 il faut jouer. 
+    // Il faudra sans doute déplacer cet init juste après le clic du mode démo qui définit quelle musique doit être jouée
+    if (isIOSDevice() && !audioUnlocked) {
+        audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioUnlocked = true;
+            console.log("🔓 Audio débloqué !");
+        }).catch(e => {
+            console.warn("🛑 iOS a bloqué l’audio :", e);
+        });
+    } else {
+        audioUnlocked = true;
+    }
+    
+
+    state.lastWindowInnerWidth = window.innerWidth;
+    state.lastWindowInnerHeight = window.innerHeight;
+    state.previousWindowInnerWidth = state.lastWindowInnerWidth;
+    state.previousWindowInnerHeight = state.lastWindowInnerHeight;
+
+    state.nombre_generation = 4;
+    importLinks.mainUI.updateGenerationSelectorValue(state.nombre_generation);
+
+    importLinks.mainUI.updateTreeModeSelector(state.treeMode);
+
+
+    // Utilisation
+    const device = detectDeviceType();
+    // showToast("isMobile= " + device.isMobile + " , hasTouchScreen=" + device.hasTouchScreen + ", inputType=" + device.inputType + ", Width="+ device.viewportWidth + ", Height="+ device.viewportHeight, 2000);
+    
+    // console.log("🌐 État initial du réseau:", navigator.onLine);
+    // initNetworkListeners();
+
+    // Initialiser la position de la carte d'animation
+    if (!state.isAnimationMapInitialized) {
+        importLinks.treeAnimation.initializeAnimationMapPosition();
+    }
+    
+    if (device.hasTouchScreen || device.inputType === 'tactile') state.isTouchDevice = true;
+  
+    const fileInput = document.getElementById('gedFile');
+
+    const passwordInput = document.getElementById('password');
+    
+    state.firstName = document.getElementById('input-form-firstName').value;
+    state.lastName = document.getElementById('input-form-lastName').value;
+
+        
+    // console.log('\n\n --------------- debug speechCapturedData', speechCapturedData); 
+    if (speechCapturedData && state.initialSpeechReconitionIsLaunched) {
+        if (speechCapturedData.firstname) { 
+            state.firstName = speechCapturedData.firstname ;
+            localStorage.setItem('firstName', speechCapturedData.firstname );
+            document.getElementById('input-form-firstName').value = speechCapturedData.firstname;
+        }
+        if (speechCapturedData.lastname) { 
+            state.lastName = speechCapturedData.lastname ;
+            localStorage.setItem('lastName', speechCapturedData.lastname );
+            document.getElementById('input-form-lastName').value = speechCapturedData.lastname;
+        }
+    }
+
+
+
+
+    // console.log("\n\n ******* in loadData", isfromNonEncryptedFile, (isfromNonEncryptedFile==='nonEncrypted'),fileInput.value, passwordInput.value, state.firstName, state.lastName, '\n\n');
+
+    // if (state.isMobile && state.isTouchDevice ) {
+    //     if (!state.isPWA && state.isbrowserBarHidden) {
+    //         // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+    //     }
+    //     else { 
+    //         if (localStorage.getItem('noFullScreenActif') === 'true') {
+    //         } else if (window.innerWidth < 500 && window.innerHeight > 600) { // mode portrait
+    //             toggleFullScreen('fullScreenRequired');
+    //         }
+    //     }
+    // }
+
+    // for mobile phone
+    const nameCloudState = await getNameCloudState()
+    nameCloudState.mobilePhone = false;
+    if (Math.min(window.innerWidth, window.innerHeight) < 400 ) nameCloudState.mobilePhone = 1;
+    else if (Math.min(window.innerWidth, window.innerHeight) < 600 ) nameCloudState.mobilePhone = 2;    
+    
+    try {
+        let gedcomContent = await loadGedcomContent(fileInput, passwordInput, (isfromNonEncryptedFile==='nonEncrypted'));
+        const parseGEDCOM = await getParseGEDCOM();
+        state.gedcomData = parseGEDCOM(gedcomContent);
+
+
+        // IMPORTANT: Supprimer l'image de fond de la page d'accueil
+        const loginBackground = document.querySelector('.login-background');
+        if (loginBackground) {
+            loginBackground.remove(); // Supprime complètement l'élément du DOM
+        }
+        // Nettoyer aussi tout autre conteneur de fond d'écran existant
+        const existingBackgroundContainer = document.querySelector('.background-container');
+        if (existingBackgroundContainer) {
+            existingBackgroundContainer.remove();
+        }
+
+        document.getElementById('password-form').style.display = 'none';
+
+        // Cacher le bouton paramètres de la page d'accueil
+        const settingsButton = document.getElementById('load-gedcom-button');
+        if (settingsButton) {
+            settingsButton.style.display = 'none';
+        }
+
+        const helpButton = document.getElementById('help-button');
+        if (helpButton) {
+            helpButton.style.display = 'none';
+        }
+
+
+        document.getElementById('tree-container').style.display = 'block';
+
+        // Si vous souhaitez remplacer l'image par un autre fond, vous pouvez initialiser
+        // un nouveau conteneur ici, sinon, commentez ou supprimez cette ligne
+        // initBackgroundContainer();
+
+        // Chargement du fichier de géolocalisation
+        const loadGeolocalisationFile = await getLoadGeolocalisationFile();
+        await loadGeolocalisationFile();
+
+        // Dispatch un événement personnalisé
+        const event = new Event('gedcomLoaded');
+        document.dispatchEvent(event);
+
+        hideMap();
+
+
+
+        let ancestor = null;
+        let cousin = null;
+       if ((state.treeOwner === 5 ) || (state.treeOwner === 6)) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('charlem');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 4 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('guillaume sez');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 3 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('hugues cap');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 2 ) {
+            // state.targetAncestorId = "@I1152@";
+            ancestor = searchRootPersonId('guillaume ducl');
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 1 ){              
+            // state.targetAncestorId = "@I739@" 
+            ancestor = searchRootPersonId('alain ii goyon de matignon');  
+            cousin = null; 
+            state.targetAncestorId = ancestor.id;
+        } else {
+            ancestor = searchRootPersonId('alain ii goyon de matignon', false);  
+            if (ancestor != null) {
+                state.treeOwner = 1;
+                state.targetAncestorId = ancestor.id;
+            } 
+            ancestor = searchRootPersonId('guillaume ducl', false);  
+            if (ancestor != null) {
+                state.treeOwner = 2;
+                state.targetAncestorId = ancestor.id;
+            }     
+
+        }
+
+
+        state.isRadarEnabled = false;
+
+        updateRadarButtonText();
+
+        state.initialTreeDisplay = true;
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in loadData ################# ')
+
+        displayGenealogicTree(null, true, true);  // Appel avec isInit = true
+
+        // Maintenant que l'arbre est affiché, remplacer le sélecteur de personnes racines
+        setTimeout(() => {
+            importLinks.mainUI.replaceRootPersonSelector();
+        }, 500); // Petit délai pour s'assurer que tout est prêt
+        
+        importLinks.eventHandlers.hideLoginBackground();
+        const initializeHamburgerOnce = await getInitializeHamburgerOnce();    
+        initializeHamburgerOnce();
+        const showHamburgerMenu = await getShowHamburgerMenu();
+        showHamburgerMenu();
+
+        // toggleFullScreen();
+
+        setTimeout(() => {
+            positionRadarButton();
+            positionHeatMapButton();
+            createAndPositionRadarOverlay();
+            createAndPositionHeatMapOverlay();
+            // console.log('\n\n\n -**** DEBUG : positionRadarButton() for button positionning**********\n\n\n')
+        }, 50);
+
+        setTimeout(() => {
+            importLinks.mainUI.buttonsOnDisplay(false);
+        }, 300); // Petit délai pour s'assurer que le menu Hamburger est prêt pour qu'il récupère les botons encore visibles!          
+
+        // pour bug flash noir en mode mobile landscape
+        if (state.isMobile && state.isTouchDevice ) {
+            if (!state.isPWA && state.isbrowserBarHidden) {
+                // si on est sur mobile et pas en pwa ( donc dans le browser et pas dans l'appli installée) on n'active pas le fullScrren si on a réussi à cacher la barre avec le puzzle
+            }
+            else { 
+                if (localStorage.getItem('noFullScreenActif') === 'true') {
+                } else { //if (window.innerWidth > 600 && window.innerHeight < 500) { // mode lanscape
+                    setTimeout(() => {
+                        toggleFullScreen('fullScreenRequired');
+                    }, 300); 
+                }
+            }
+        }
+
+
+        // const originalRootResults = document.getElementById('root-person-results');
+        // if (originalRootResults && !state.isButtonOnDisplay) {originalRootResults.style.visibility = 'hidden';}
+     
+    if (!state.dontApplyButtonRescale) {
+        console.log('\n\n\n @@@@@@@@@@@  DEBUG : launch redimensionnerButtonSizeInDOM  at loadData after displayGenealogicTree @@@@@@@@@@@\n\n')
+        calculerFacteurRedimensionnement();
+        redimensionnerButtonSizeInDOM();
+    }
+
+
+    } catch (error) {
+        console.error('Erreur complète:', error);
+        alert(error.message);
+    }
+}
+
+// Pour être certain que le fond est bien supprimé, on peut aussi ajouter une règle CSS
+// Vous pouvez ajouter ceci à votre fichier CSS ou l'injecter dynamiquement
+function injectCustomStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .tree-container-active .login-background,
+        .tree-container-active .background-container {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* Pour s'assurer que le fond est blanc ou transparent */
+        body.tree-view {
+            background: white !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Ajouter la classe à body quand l'arbre est affiché
+    document.addEventListener('gedcomLoaded', function() {
+        document.body.classList.add('tree-view');
+        document.getElementById('tree-container').classList.add('tree-container-active');
+    });
+}
+
+// Appelez cette fonction au chargement de la page
+window.addEventListener('load', injectCustomStyle);
+
+
+/**
+ * Charge le contenu du fichier GEDCOM
+ * @private
+ */
+async function loadGedcomContent(fileInput, passwordInput, isfromNonEncryptedFile = false ) {
+    if( ((!passwordInput.value) && (!fileInput.files[0]))  ||  ((isfromNonEncryptedFile) && (!fileInput.files[0])) ){
+        if (window.CURRENT_LANGUAGE === 'fr') {
+            throw new Error('Veuillez sélectionner un fichier ou entrer un mot de passe');
+        } else if (window.CURRENT_LANGUAGE === 'en') {
+            throw new Error('Please select a file or enter a password');
+        } else if (window.CURRENT_LANGUAGE === 'es') {
+            throw new Error('Por favor, seleccione un archivo o ingrese una contraseña');
+        } else if (window.CURRENT_LANGUAGE === 'hu') {
+            throw new Error('Kérjük, válasszon ki egy fájlt vagy adjon meg egy jelszót');
+        }
+    }
+
+
+    if (passwordInput.value && !isfromNonEncryptedFile) {
+        try {
+            // Essayer d'abord avec arbre.enc
+            const content = await loadEncryptedContent(passwordInput.value, `${GEDCOM_PATH}arbre.enc`);
+            // Si succès avec arbre.enc, définir treeOwner = 1
+            state.treeOwner = 1;
+            console.log("Fichier arbre.enc ouvert avec succès. Owner: 1");
+            return content;
+        } catch (error) {
+            // Si le mot de passe est incorrect pour arbre.enc, essayer avec arbreX.enc
+            if (error.message === 'Mot de passe incorrect') {
+                console.log("Tentative d'ouverture du fichier arbreX.enc...");
+                try {
+                    const content = await loadEncryptedContent(passwordInput.value, `${GEDCOM_PATH}arbreX.enc`);
+                    // Si succès avec arbreX.enc, définir treeOwner = 2
+                    state.treeOwner = 2;
+                    console.log("Fichier arbreX.enc ouvert avec succès. Owner: 2");
+                    return content;
+                } catch (secondError) {
+                    // Si le mot de passe est incorrect pour arbre.enc, essayer avec arbreB.enc
+                    if (secondError.message === 'Mot de passe incorrect') {
+                        console.log("Tentative d'ouverture du fichier arbreB.enc...");
+                        try {
+                            const content = await loadEncryptedContent(passwordInput.value, `${GEDCOM_PATH}arbreB.enc`);
+                            // Si succès avec arbreB.enc, définir treeOwner = 3
+                            state.treeOwner = 3;
+                            console.log("Fichier arbreB.enc ouvert avec succès. Owner: 3");
+                            return content;
+                        } catch (thirdError) {
+
+                            if (thirdError.message === 'Mot de passe incorrect') {
+                                console.log("Tentative d'ouverture du fichier arbreC.enc...");
+                                try {
+                                    const content = await loadEncryptedContent(passwordInput.value, `${GEDCOM_PATH}arbreC.enc`);
+                                    // Si succès avec arbreC.enc, définir treeOwner = 4
+                                    state.treeOwner = 4;
+                                    console.log("Fichier arbreC.enc ouvert avec succès. Owner: 4");
+                                    return content;
+                                } catch (fourthError) {
+
+                                    if (fourthError.message === 'Mot de passe incorrect') {
+                                        console.log("Tentative d'ouverture du fichier arbreG.enc...");
+                                        try {
+                                            const content = await loadEncryptedContent(passwordInput.value, `${GEDCOM_PATH}arbreG.enc`);
+                                            // Si succès avec arbreG.enc, définir treeOwner = 5
+                                            state.treeOwner = 5;
+                                            console.log("Fichier arbreG.enc ouvert avec succès. Owner: 5");
+                                            return content;
+                                        } catch (fifthError) {
+
+
+                                            if (fourthError.message === 'Mot de passe incorrect') {
+                                                console.log("Tentative d'ouverture du fichier arbreLE.enc...");
+                                                try {
+                                                    const content = await loadEncryptedContent(passwordInput.value,`${GEDCOM_PATH}arbreLE.enc`);
+                                                    // Si succès avec arbreLE.enc, définir treeOwner = 6
+                                                    state.treeOwner = 6;
+                                                    console.log("Fichier arbreG.enc ouvert avec succès. Owner: 6");
+                                                    return content;
+                                                } catch (fifthError) {
+                                                    // Si le mot de passe est également incorrect pour arbreX.enc
+                                                    if (window.CURRENT_LANGUAGE === 'fr') {
+                                                        throw new Error('Mot de passe incorrect pour les deux fichiers');
+                                                    } else if (window.CURRENT_LANGUAGE === 'en') {
+                                                        throw new Error('Incorrect password for both files');
+                                                    } else if (window.CURRENT_LANGUAGE === 'es') {
+                                                        throw new Error('Contraseña incorrecta para ambos archivos');
+                                                    } else if (window.CURRENT_LANGUAGE === 'hu') {
+                                                        throw new Error('Helytelen jelszó mindkét fájlhoz');
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                            
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Si c'est une autre erreur (comme un problème de réseau), la propager
+                throw error;
+            }
+        }
+    } else if (isfromNonEncryptedFile) {
+        // Pour un fichier téléchargé, définir treeOwner = 0 (ou autre valeur par défaut)
+        state.treeOwner = 0;
+        console.log("Fichier GEDCOM personnalisé chargé. Owner: 0");
+        return await loadFileContent(fileInput.files[0]);
+    }
+}
+
+/**
+ * Charge le contenu crypté avec logs améliorés
+ * @private
+ */
+async function loadEncryptedContent(password, filename) {
+    const debugLog = await getDebugLog();
+    debugLog(`Tentative de chargement: ${filename}`, 'info');
+    debugLog(`Mode: ${state.isOnLine ? 'Connecté' : 'Non connecté'}`, state.isOnLine ? 'success' : 'warning');
+    
+    // Vérifier les bibliothèques essentielles avant de continuer
+    try {
+        if (typeof pako === 'undefined' || typeof pako.inflate !== 'function') {
+            debugLog("❌ Bibliothèque 'pako' non chargée!", 'error');
+        } else {
+            debugLog("✓ Bibliothèque 'pako' disponible", 'success');
+        }
+    } catch (e) {
+        debugLog("❌ Erreur lors de la vérification de pako: " + e.message, 'error');
+    }
+    
+    let response;
+    
+    try {
+        // Utiliser fetchResourceWithCache au lieu de fetch ou cache.match
+        debugLog(`Chargement via fetchResourceWithCache...`, 'info');
+        const fetchResourceWithCache = await getFetchResourceWithCache();
+
+        console.log('\n\n\n\n ****************     DEBUG loadEncryptedContent with fetchResourceWithCache(filename) ********   ', filename, '\n\n\n\n')
+        response = await fetchResourceWithCache(filename);
+        debugLog(`Réponse: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+    } catch (fetchError) {
+        debugLog(`Erreur réseau: ${fetchError.message}`, 'error');
+        throw fetchError;
+    }
+    
+    if (!response || !response.ok) {
+        debugLog(`Erreur HTTP: ${response ? response.status : 'Aucune réponse'}`, 'error');
+        throw new Error(`Erreur lors du chargement du fichier ${filename}: ${response ? response.statusText : 'Aucune réponse'}`);
+    }
+    
+    try {
+        const encryptedData = await response.text();
+        debugLog(`Données reçues: ${encryptedData.length} caractères`, 'info');
+        
+        try {
+            debugLog("Décodage base64...", 'info');
+            const decoded = atob(encryptedData);
+            debugLog(`Décodé: ${decoded.length} bytes`, 'info');
+            
+            debugLog("Déchiffrement...", 'info');
+            const key = password.repeat(decoded.length);
+            const decrypted = new Uint8Array(decoded.length);
+            
+            for(let i = 0; i < decoded.length; i++) {
+                decrypted[i] = decoded.charCodeAt(i) ^ key.charCodeAt(i);
+            }
+            debugLog("Déchiffrement terminé", 'info');
+            
+            debugLog("Validation mot de passe...", 'info');
+            await validatePassword(password, decrypted);
+            debugLog("Mot de passe valide", 'info');
+            
+            debugLog("Décompression...", 'info');
+            const result = pako.inflate(decrypted.slice(8), {to: 'string'});
+            
+            debugLog(`Chargement réussi: ${result.length} caractères`, 'success');
+            return result;
+        } catch (processError) {
+            debugLog(`Erreur traitement: ${processError.message}`, 'error');
+            
+            if (processError.message && processError.message.includes('mot de passe')) {
+                throw new Error('Mot de passe incorrect');
+            } else {
+                throw processError;
+            }
+        }
+    } catch (error) {
+        debugLog(`Erreur finale: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+
+/**
+ * Valide le mot de passe
+ * @private
+ */
+async function validatePassword(password, decrypted) {
+    const expectedHash = decrypted.slice(0, 8);
+    const encoder = new TextEncoder();
+    const passwordData = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
+    const actualHash = new Uint8Array(hashBuffer).slice(0, 8);
+    
+    if (!actualHash.every((val, i) => val === expectedHash[i])) {
+        throw new Error('Mot de passe incorrect');
+    }
+}
+
+/**
+ * Charge le contenu du fichier
+ * @private
+ */
+async function loadFileContent(file) {
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.onload = () => resolve(fileReader.result);
+        fileReader.onerror = reject;
+        fileReader.readAsText(file);
+    });
+}
+
+/**
+ * Ajoute une personne à l'historique des racines et met à jour le sélecteur
+ * @param {Object} person - La personne à ajouter
+ */
+function addToRootHistory(person) {
+
+
+    if (person.name === state.gedcomData.individuals[person.id].name) {
+        console.log('-  addToRootHistory OK', person.id, person.name, state.gedcomData.individuals[person.id].name);
+
+        // Utiliser la fonction de mise à jour du sélecteur personnalisé
+        // au lieu de manipuler directement le sélecteur standard
+        import('./mainUI.js').then(module => {
+            if (typeof module.updateRootPersonSelector === 'function') {
+                module.updateRootPersonSelector(person);
+            } else {
+                console.warn("La fonction updateRootPersonSelector n'est pas disponible");
+                // Comportement de secours en cas d'échec
+                fallbackUpdateRootPersonSelector(person);
+            }
+        }).catch(error => {
+            console.error("Erreur lors de l'import de mainUI.js:", error);
+            // Comportement de secours en cas d'échec
+            fallbackUpdateRootPersonSelector(person);
+        });
+    }
+}
+
+// Fonction de secours qui utilise le code original
+function fallbackUpdateRootPersonSelector(person) {
+    const rootPersonResults = document.getElementById('root-person-results');
+    if (!rootPersonResults) return;
+    
+    // Récupérer l'historique des racines depuis le localStorage
+    let rootHistory = JSON.parse(localStorage.getItem('rootPersonHistory') || '[]');
+    
+    // Vérifier si cette personne est déjà dans l'historique
+    const existingIndex = rootHistory.findIndex(entry => entry.id === person.id);
+    
+    // Si la personne n'est pas dans l'historique, l'ajouter
+    if (existingIndex === -1) {
+        rootHistory.push({
+            id: person.id,
+            name: person.name.replace(/\//g, '').trim()
+        });
+        
+        // Sauvegarder l'historique mis à jour
+        localStorage.setItem('rootPersonHistory', JSON.stringify(rootHistory));
+    }
+
+    // Réinitialiser le sélecteur
+    rootPersonResults.innerHTML = '';
+    
+    // Remplir le sélecteur avec l'historique
+    rootHistory.forEach(entry => {
+        const option = document.createElement('option');
+        option.value = entry.id;
+        option.textContent = entry.name;
+        rootPersonResults.appendChild(option);
+    });
+
+    // Ajouter l'option "clear history"
+    const clearOption = document.createElement('option');
+    clearOption.value = 'clear-history';
+    clearOption.textContent = '--- Clear History ---';
+    rootPersonResults.appendChild(clearOption);
+
+    // // Ajouter l'option "demo1"
+    // const demoOption = document.createElement('option');
+    // demoOption.value = 'demo1';
+
+    
+    // // Ajouter l'option "demo2"
+    // const demoOption2 = document.createElement('option');
+    // demoOption2.value = 'demo2';
+    // if (state.treeOwner ===2 ) { 
+    //     demoOption.textContent = '--- démo Clou du spectacle ---';
+    //     demoOption2.textContent = '--- démo Spain ---';
+    // } else { 
+    //     demoOption.textContent = '--démo Costaud la Planche--';
+    //     demoOption2.textContent = '--démo on descend tous de lui--'; 
+    // }
+
+
+    // rootPersonResults.appendChild(demoOption);
+    // rootPersonResults.appendChild(demoOption2);
+
+    // Sélectionner la personne courante
+    rootPersonResults.value = person.id;
+    if (rootPersonResults && !state.isButtonOnDisplay) {rootPersonResults.style.visibility = 'hidden';}
+}
+
+/**
+ * Gère le changement de sélection dans le sélecteur de personnes racines
+ * @param {Event} event - L'événement de changement
+ */
+export async function handleRootPersonChange(event) {
+    const selectedValue = event.target.value;
+    
+    if (selectedValue === 'clear-history') {
+        // Vider l'historique
+        localStorage.removeItem('rootPersonHistory');
+        
+        // Garder uniquement la racine actuelle dans l'historique
+        const currentPerson = state.gedcomData.individuals[state.rootPersonId];
+        let newHistory = [{
+            id: currentPerson.id,
+            name: currentPerson.name.replace(/\//g, '').trim()
+        }];
+        
+        // Sauvegarder le nouvel historique
+        localStorage.setItem('rootPersonHistory', JSON.stringify(newHistory));
+        
+        // Mettre à jour le sélecteur avec seulement la racine actuelle
+        addToRootHistory(currentPerson);
+        
+        return;
+    }
+
+    
+    console.log('- handleRootPersonChange =', selectedValue)
+    
+    // if ((selectedValue === 'demo1') || (selectedValue === 'demo2')) {
+    if (selectedValue.includes('demo')) {
+        let ancestor;
+        let cousin;
+        if (state.treeOwner === 2 ) {
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('guillaume du');
+            } //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('alonso de ');
+            }
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 3 ) {
+            if (selectedValue === 'demo1'){ 
+                // state.targetAncestorId = "@I1152@";
+                ancestor = searchRootPersonId('hugues c');
+            } //"@I74@" } // "@I739@" } //"@I6@" } //
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('hugues c ');
+            }
+            state.targetAncestorId = ancestor.id;
+        } else if (state.treeOwner === 4 ) {
+            if (selectedValue === 'demo1'){  //'chanteur breton'
+                ancestor = searchRootPersonId('jean gourmelen', true, '1710');
+                cousin = searchRootPersonId('daniel le bras');                      
+            } else if (selectedValue === 'demo2'){  //'bagnard'
+                ancestor = searchRootPersonId('louis trellu');
+                cousin = searchRootPersonId('joseph marie dit');  
+            } else if (selectedValue === 'demo3'){  //'Espace'
+                ancestor = searchRootPersonId('charles vézier');
+                cousin = searchRootPersonId('thomas pesquet');          
+            } else if (selectedValue === 'demo4'){ // 'Victor'
+                ancestor = searchRootPersonId('pierre augustin duchemin');
+                cousin = searchRootPersonId('victor robert');             
+            } else if (selectedValue === 'demo5'){ // 'le grand blond'
+                ancestor = searchRootPersonId('suzanne martin', true, '1655');
+                cousin = searchRootPersonId('pierre richard maurice');                        
+            } else if (selectedValue === 'demo6'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('richard por');
+                cousin = null; 
+            } else if (selectedValue === 'demo7'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('catherine tymen (le)');
+                cousin = null; 
+            } else {
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
+            }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            } 
+
+        } else if (state.treeOwner === 5 ) {
+            if (selectedValue === 'demo1'){ 
+                ancestor = searchRootPersonId('charlemagne');  
+                cousin = null;                                                   
+            } else if (selectedValue === 'demo2'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues de france'); 
+                cousin = null;           
+            } else {
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
+            }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            } 
+
+        } else if (state.treeOwner === 6 ) {
+            if (selectedValue === 'demo1'){ 
+                ancestor = searchRootPersonId('charlemagne');
+            } else if (selectedValue === 'demo2'){ // 'Francs'
+                ancestor = searchRootPersonId('pharabert des francs'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo3'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues capet'); 
+                cousin = null;           
+            } else if (selectedValue === 'demo4'){ // 'chanteur breton'
+                ancestor = searchRootPersonId('guillaume le g');
+                cousin = searchRootPersonId('christophe m');
+            } else if (selectedValue === 'demo5'){ // 'footballeur'
+                ancestor = searchRootPersonId('marie cro');
+                cousin = searchRootPersonId('yoann mi');
+            } else if (selectedValue === 'demo6'){ // 'ecrivain'
+                ancestor = searchRootPersonId('jean louis fré');
+                cousin = searchRootPersonId('rené gustave henri');
+            } else if (selectedValue === 'demo7'){ // 'journaliste'
+                ancestor = searchRootPersonId('sébastien le r');
+                cousin = searchRootPersonId('xavier (marie) g');
+            } else if (selectedValue === 'demo8'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('goulven le roux', true, '1610');
+                cousin = searchRootPersonId('michel leclerc');
+            } else if (selectedValue === 'demo9'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('yves le roux', true, '1615');
+                cousin = searchRootPersonId('louis le duff');
+            } else if (selectedValue === 'demo10'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('françois roux', true, '1605');
+                cousin = searchRootPersonId('didier sq');
+            } else if (selectedValue === 'demo11'){ // 'comme un ouragan'
+                ancestor = searchRootPersonId('françois le bot', true, '1744');
+                cousin = searchRootPersonId('benoit ha');
+            }
+            else { 
+                // state.targetAncestorId = "@I2179@";
+                ancestor = searchRootPersonId('charlemagne');
+            }
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            }   
+
+
+        } else {
+            if (selectedValue === 'demo1'){// 'Costaud la Planche'                   
+                // state.targetAncestorId = "@I739@" 
+                ancestor = searchRootPersonId('alain ii goyon de matignon');  
+                // ancestor = searchRootPersonId('denis a');  
+                // ancestor = searchRootPersonId('noël r');  
+
+                cousin = null;       
+            } else if (selectedValue === 'demo2'){  //'On descend tous de lui'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;  
+            } else if (selectedValue === 'demo3'){ // 'comme un ouragan'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('bertrand gouyon');
+                cousin = searchRootPersonId('stéphanie marie elisabeth grimaldi');
+            } else if (selectedValue === 'demo4'){  //'Espace'
+                // state.targetAncestorId = "@I1322@"
+                ancestor = searchRootPersonId('charles lebon');
+                cousin = searchRootPersonId('thomas pesquet');
+            } else if (selectedValue === 'demo5'){ // 'Arabe du futur'
+                ancestor = searchRootPersonId('anthoine sicot');  
+                cousin = searchRootPersonId('riad sattouf');          
+            } else if (selectedValue === 'demo6'){ // 'Loup du Canada'
+                ancestor = searchRootPersonId('andré du matz'); 
+                cousin = searchRootPersonId('pierre garand');            
+            } else if (selectedValue === 'demo7'){ // "c'est normal"
+                ancestor = searchRootPersonId('jan demaure');
+                cousin = searchRootPersonId('brigitte fontaine');             
+            } else if (selectedValue === 'demo8'){ // "les bronzés"
+                ancestor = searchRootPersonId('jean mathurin monvoisin');
+                cousin = searchRootPersonId('dominique lavanant');             
+            } else if (selectedValue === 'demo9'){ // 'avant JC'
+                ancestor = searchRootPersonId('kamber de cambrie'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo10'){ // 'Francs'
+                ancestor = searchRootPersonId('pharabert des francs'); 
+                cousin = null;            
+            } else if (selectedValue === 'demo11'){ // 'Capet'
+                ancestor = searchRootPersonId('hugues capet'); 
+                cousin = null;           
+            } else if (selectedValue === 'demo12'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('jacques delabarre');
+                cousin = searchRootPersonId('laurent ruq');             
+            // } else if (selectedValue === 'demo13'){ // 'un pti gars du wav'
+            //         ancestor = searchRootPersonId('marie guilemard');
+            //         cousin = searchRootPersonId('robert charpentier');             
+            } else if (selectedValue === 'demo13'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('julien vilboux');
+                cousin = searchRootPersonId('louis pierre marie bobet', true, '1925');     
+            } else if (selectedValue === 'demo14'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('Léger lecerf');
+                cousin = searchRootPersonId('Valérie le');             
+            } else if (selectedValue === 'demo15'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('jean baptiste hebert');
+                cousin = searchRootPersonId('victor lan');             
+            } else if (selectedValue === 'demo16'){ // 'un pti gars du wav'
+                ancestor = searchRootPersonId('guillaume olivier');
+                cousin = searchRootPersonId('pierre richard maurice');                        
+            } else {
+                ancestor = searchRootPersonId('charlemagne');
+                cousin = null;
+            }
+
+            console.log('\n\n TARGET ANCESTOR = ', ancestor, ", COUSIN =" , cousin)
+            state.targetAncestorId = ancestor.id;
+            if (cousin != null) {
+                state.targetCousinId = cousin.id;
+            } else {  
+                 state.targetCousinId = null;
+            }   
+
+        }
+
+
+        // typeOptions = ['démo1', 'démo2', 'démo3', 'démo4', 'démo5', 'démo6', 'démo7', 'démo8', 'démo9', 'démo10'];
+        // typeValues = ['demo1', 'demo2', 'demo3', 'demo4', 'demo5', 'demo6', 'demo7', 'demo8', 'demo9', 'demo10'];
+        // typeOptionsExpanded = ['Costaud la Planche', 'On descend tous de lui', 'comme un ouragan', 'Espace', 'Arabe du futur', 'Loup du Canada', "c'est normal", 'avant JC', 'Francs', 'Capet'];
+  
+
+
+
+        
+        // showMap();
+
+        // Réinitialiser l'état de l'animation avant de démarrer
+        importLinks.treeAnimation.resetAnimationState();
+
+        if (state.isRadarEnabled) {
+            const disableFortuneModeClean = await getDisableFortuneModeClean();
+            const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
+            disableFortuneModeClean();
+            disableFortuneModeWithLever();
+            // displayGenealogicTree(null, true, false, true);
+            toggleTreeRadar();
+        }
+
+        if (state.isWordCloudEnabled) { 
+            const closeCloudName = await getCloseCloudName();
+            closeCloudName(); 
+        }
+
+
+        state.isAnimationLaunched = true;
+        
+        // Forcer 2 générations
+        state.nombre_generation = 2;
+        
+        // Mettre à jour le sélecteur si disponible
+        const genSelect = document.getElementById('generations');
+        if (genSelect) {
+            genSelect.value = '2';
+        }
+        
+        // Mettre à jour l'état de pause
+        // const animationPauseBtn = document.getElementById('animationPauseBtn');
+        // if (animationPauseBtn && animationPauseBtn.querySelector('span')) {
+        //     // animationPauseBtn.querySelector('span').textContent = '⏸️';
+        //     // animationPauseBtn.querySelector('span').textContent = '⏸';
+        //     animationPauseBtn.querySelector('span').innerHTML =
+        //     '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+
+        // }
+
+        const animationPauseBtnSpan = document.getElementById('animationPauseBtnSpan');
+        if (animationPauseBtnSpan ) {
+            // animationPauseBtn.querySelector('span').textContent = '⏸';
+            if(state.isSamsungBrowser && state.browserScaleFactor > 1.4) {
+                animationPauseBtnSpan.style.fontSize = baseSizeSVG; // On applique la taille SVG
+            }
+            animationPauseBtnSpan.innerHTML =
+            '<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" style="vertical-align:middle"><rect x="6" y="5" width="4" height="14" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" fill="currentColor"></rect></svg>';
+        }
+        redimensionnerPlayButtonSizeInDOM();
+              
+        
+        // Redessiner l'arbre d'abord
+        console.log('\n\n\n\n ###################   CALL displayGenealogicTree in handleRootPersonChange ################# ')
+
+        const treeModeReal = state.treeModeReal;
+        // state.treeModeBackup = state.treeMode;
+        let isCousin = false;
+        if (state.targetCousinId && state.targetCousinId !== '') {
+            state.treeMode = 'directAncestors';
+            isCousin = true;
+        }
+
+        displayGenealogicTree(null, true, false, true);
+
+        state.treeModeReal = treeModeReal; 
+
+        // Nettoyer tous les conteneurs de fond d'écran existants
+        const loginBackground = document.querySelector('.login-background');
+        if (loginBackground) {
+            loginBackground.remove();
+        }
+        const existingBackgroundContainer = document.querySelector('.background-container');
+        if (existingBackgroundContainer) {
+            existingBackgroundContainer.remove();
+        }
+
+        // Démarrer l'animation après un court délai
+        setTimeout(() => {
+            importLinks.treeAnimation.startAncestorAnimation(isCousin);
+        }, 500);
+        
+        // Mettre à jour la valeur du sélecteur si possible
+        const customSelector = document.querySelector('[data-text-key="rootPersonResults"]');
+        if (customSelector && typeof customSelector.value !== 'undefined') {
+            customSelector.value = state.rootPersonId;
+        }
+        
+
+        importLinks.mainUI.enforceTextTruncation();
+
+        return;
+    }
+}
+
+/**
+ * Affiche l'arbre généalogique
+ * @param {string} rootPersonId - ID optionnel de la personne racine
+ * @param {boolean} isInit - Indique s'il s'agit de l'initialisation
+ */
+export async function displayGenealogicTree(rootPersonId = null, isZoomRefresh = false, isInit = false, isInitDemo = false, mode = 'ancestors') {
+    // Réinitialiser l'état de l'animation avant de changer l'arbre
+    importLinks.treeAnimation.resetAnimationState();
+    const enableFortuneMode = await getEnableFortuneMode();
+    const disableFortuneModeWithLever = await getDisableFortuneModeWithLever();
+    if (state.isRadarEnabled) {
+        disableFortuneModeWithLever();
+        enableFortuneMode();
+        state.currentRadarAngle = 0;
+    } else {
+        disableFortuneModeWithLever();
+    }
+
+    // Si pas de rootPersonId, on utilise soit l'existant soit le plus jeune
+    // let person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId  ? state.gedcomData.individuals[state.rootPersonId] : findYoungestPerson();
+
+
+
+    let personInit = null; 
+    // console.log('\n\n - debug AVANT : personne trouvée : ', state.firstName,  state.lastName , '\n\n') 
+    // if (state.firstName != '' && state.lastName!= '') {
+    if (isInit && state.firstName != '' && state.lastName!= '') {
+
+
+        const openSearchModal = getOpenSearchModal();
+        openSearchModal(state.firstName,  state.lastName );
+
+        if (window.currentSearchResults.length == 0) {
+            // essayer avec un changement d'ortographe du nom, par exemple dumenil à la place de dumesnil
+            let othernames = generatePhoneticAlternatives(state.lastName);
+            let lastAlternativeNameFound = null;
+            // console.log('\n\n\n ------------   debug 1: autres noms possibles ??? ---------', othernames);
+            if (othernames.length > 0) {
+                othernames.forEach(name => { 
+                    lastAlternativeNameFound = name;
+                    openSearchModal(state.firstName,  name );
+                    // console.log('\n\n\n ------------   debug : personne trouvée ??? ---------', window.currentSearchResults.length, window.currentSearchResults);
+                    if (window.currentSearchResults.length > 0 ) {
+                        state.lastName = name;
+                        localStorage.setItem('lastName', name );
+                        document.getElementById('input-form-lastName').value = name;
+                        return;
+                    }
+                });
+            }
+        }
+
+
+
+        if (window.currentSearchResults.length === 1) {
+            personInit = window.currentSearchResults[0];
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName + translate('hasBeenFound'));
+            }
+        } else if (window.currentSearchResults.length === 0)  {
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(state.firstName + ' ' + state.lastName  + translate('hasNotBeenFound')) ;        
+            }
+        } else if (window.currentSearchResults.length > 1)  {
+            if (state.initialSpeechReconitionIsLaunched) {
+                speakText(translate('severalPersonWithName') + state.firstName + ' ' + state.lastName  + translate('haveBeenFound')) ; 
+           }
+        }
+        state.initialSpeechReconitionIsLaunched = false;
+    }
+
+    let person = null; 
+    if (state.treeOwner === 6) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || importLinks.utils.findYoungestPerson()) : importLinks.utils.findYoungestPerson());
+    } else if (state.treeOwner === 5) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || importLinks.utils.findPersonByName("giovanna san") || importLinks.utils.findYoungestPerson()) : importLinks.utils.findYoungestPerson());
+    } else if (state.treeOwner === 4) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || importLinks.utils.findPersonByName("Nadine C") || importLinks.utils.findYoungestPerson()) : importLinks.utils.findYoungestPerson());
+    } else if (state.treeOwner === 3) {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || importLinks.utils.findPersonByName("Léon Mo") || importLinks.utils.findYoungestPerson()) : importLinks.utils.findYoungestPerson());
+    } else {
+        person = rootPersonId ? state.gedcomData.individuals[rootPersonId] : state.rootPersonId ? state.gedcomData.individuals[state.rootPersonId] : (isInit ? (personInit || importLinks.utils.findPersonByName("Emma A") || importLinks.utils.findYoungestPerson()) : importLinks.utils.findYoungestPerson());
+    }
+
+    // Important : toujours sauvegarder l'ID de la personne courante
+    if (!state.isAnimationLaunched || (state.treeModeReal !== 'descendants' && state.treeModeReal !== 'directDescendants')) {
+        if (rootPersonId || person) {
+            state.rootPersonId = rootPersonId || person.id;
+        } else if (state.rootPersonId.id) {
+            person = state.rootPersonId; 
+        }
+        state.rootPerson = state.gedcomData.individuals[state.rootPersonId];
+    } 
+
+
+    // Si c'est l'initialisation, configurer le sélecteur avec la première racine
+    if (isInit) {
+        const rootPersonResults = document.getElementById('root-person-results');
+        rootPersonResults.innerHTML = '';
+        addToRootHistory(person);
+        rootPersonResults.style.display = 'block';
+        // rootPersonResults.style.backgroundColor = 'orange';
+    } else {
+        // Sinon, ajouter la nouvelle racine à l'historique
+        if (!state.isAnimationLaunched || (!state.treeModeReal==='descendants'&& !state.treeModeReal==='directDescendants'))  {
+         addToRootHistory(person);
+        }
+    }
+
+
+    updateBoxWidth();
+
+    // Construire l'arbre selon le mode
+    state.treeModeReal = state.treeMode;
+
+    if (isInitDemo && state.targetCousinId != null  && state.treeModeReal === 'ancestors' ) {
+        state.treeModeReal = 'directAncestors';
+    }
+
+    // Nettoyer les contrôles existants
+    const cleanupExportControls = await getCleanupExportControls();
+    cleanupExportControls();
+
+    if (state.isAnimationLaunched && (state.treeModeReal==='descendants'|| state.treeModeReal==='directDescendants'))  {
+        const tempPerson = state.gedcomData.individuals[state.targetAncestorId];
+        state.currentTree =  importLinks.treeOperations.buildDescendantTree(tempPerson.id);
+        // state.currentTree =  importLinks.treeOperations.buildDescendantTreeWithDuplicates(tempPerson.id, true);
+
+    }
+    else {
+        if (['WheelAncestors', 'WheelDescendants'].includes(mode)) {
+            console.log('🌟 Mode éventail détecté:', mode);
+            // state.treeModeReal = mode;
+
+            if (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' ) {
+                state.treeMode = 'directAncestors';
+                state.treeModeReal = 'directAncestors';
+                state.currentTree = importLinks.treeOperations.buildAncestorTree(person.id);
+            } else {
+                state.treeMode = 'directDescendants';
+                state.treeModeReal = 'directDescendants';
+                state.currentTree = importLinks.treeOperations.buildDescendantTree(person.id);
+
+            }
+            importLinks.mainUI.updateTreeModeSelector(state.treeMode);
+            state.treeModeReal_backup = state.treeModeReal;
+            state.treeModeReal = mode;
+            const setMaxGenerationsInit = await getSetMaxGenerationsInit();
+            setMaxGenerationsInit(state.nombre_generation);
+        } else {
+            importLinks.mainUI.updateTreeModeSelector(state.treeMode);
+            console.log('🌟 Mode arbre classique détecté:', state.treeModeReal);
+            // Pour les modes 'ancestors', 'directAncestors', 'both', 'directDescendants', 'descendants'
+            state.currentTree = (state.treeMode === 'directDescendants' || state.treeMode === 'descendants' )
+                ? importLinks.treeOperations.buildDescendantTree(person.id)
+                // ? importLinks.treeOperations.buildDescendantTreeWithDuplicates(person.id, true)
+                : (state.treeMode === 'directAncestors' || state.treeMode === 'ancestors' )
+                ? importLinks.treeOperations.buildAncestorTree(person.id)
+                : (state.treeMode === 'both')
+                ? importLinks.treeOperations.buildCombinedTree(person.id) // Pour le mode 'both'
+                : importLinks.treeOperations.buildAncestorTree(person.id);
+        }
+    }
+
+
+    importLinks.mainUI.updateGenerationSelectorValue(state.nombre_generation);
+
+
+    // drawTree(isZoomRefresh);
+    importLinks.treeRenderer.drawTree(isZoomRefresh, false); // with WheelAncestors
+
+    // drawWheelTree(true, false);
+
+    // Ne pas faire resetView() en mode both
+    if (state.treeModeReal !== 'both') {
+        importLinks.eventHandlers.resetView();    
+    }
+    if (state.browserScaleFactor != 1) { 
+        console.log('\n\n - DEBUG : call to redimensionnerSelectorSizeInDOM in displayGenealogicTree tree=', state.isTreeEnabled,'cloud=', state.isWordCloudEnabled, 'radar=',state.isRadarEnabled, 'previousMode=',state.previousMode)
+        redimensionnerSelectorSizeInDOM(); 
+
+        // redimensionnerRootSelectorSizeInDOM() ;
+    }
+
+}
+
+window.displayGenealogicTree = displayGenealogicTree; // Exposer la fonction pour l'utiliser dans d'autres modules
+
+/**
+ * Met à jour la largeur des boîtes en fonction du nombre de prénoms
+ * @private
+ */
+function updateBoxWidth() {
+    if (typeof state.nombre_prenoms === 'string') {
+        state.nombre_prenoms = parseInt(state.nombre_prenoms, 10);
+    }
+    if (typeof state.nombre_lettersInNames === 'string') {
+        state.nombre_lettersInNames = parseInt(state.nombre_lettersInNames, 10);
+    }
+    // state.boxWidth = state.nombre_prenoms === 1 ? 90 : state.nombre_prenoms === 2 ? 120 : state.nombre_prenoms === 3 ? 150 : 180;
+
+    if (state.nombre_prenoms === 1) {
+        state.boxWidth = 90;
+        state.nombre_lettersInNames = 11;
+        state.nombre_lettersInPrenoms = 13;
+    }
+    else if (state.nombre_prenoms === 2) {
+        state.boxWidth = 120;
+        state.nombre_lettersInNames = 15;
+        state.nombre_lettersInPrenoms = 18;
+    }
+    else if (state.nombre_prenoms === 3) {
+        state.boxWidth = 150;
+        state.nombre_lettersInNames = 19;
+        state.nombre_lettersInPrenoms = 23;
+    }
+    else if (state.nombre_prenoms === 4) {
+        state.boxWidth = 180;
+        state.nombre_lettersInNames = 24;
+        state.nombre_lettersInPrenoms = 30;
+    }
+    // state.boxWidth = state.nombre_lettersInNames < 11 ? 90 : state.nombre_lettersInNames <= 15 ? 120 : state.nombre_lettersInNames <= 19 ? 140 : state.nombre_lettersInNames <= 13 ? 160 : 180;
+}
+
+/**
+ * Met à jour le mode d'affichage de l'arbre (ascendants/descendants)
+ * et redessine l'arbre avec le nouveau mode
+ * @param {string} mode - Le mode d'affichage ('ancestors' ou 'descendants')
+ */
+export function updateTreeMode(mode) {
+    // Réinitialiser l'état de l'animation avant de changer le mode
+    importLinks.treeAnimation.resetAnimationState();
+
+    if (state.isRadarEnabled) {
+        // state.treeMode = 'directAncestors';
+        // mode = 'directAncestors';
+        state.treeMode = mode;
+        displayGenealogicTree(null, false, false,  false, 'WheelAncestors');
+    } else {
+        state.treeMode = mode;
+        displayGenealogicTree(null, true, false);
+    }
+
+    // state.treeMode = mode;
+    console.log('\n\n\n\n ###################   CALL displayGenealogicTree in updateTreeMode ################# ')
+
+    // displayGenealogicTree(null, true, false);
+
+    // pour mettre à jour la description
+    const description = document.getElementById('treeModeDescription');
+    if (description) {
+        if (mode === 'directAncestors') {
+            description.textContent = 'Ascendants directs';
+        } else if (mode === 'ancestors') {
+            description.textContent = 'Ascendants + fratrie';
+        } else if (mode === 'directDescendants'){
+            description.textContent = 'Descendants direct';
+        } else if (mode === 'descendants') {
+            description.textContent = 'Descendants + conjoints';
+        } else {
+            description.textContent = 'Ascendants + Descendants';
+        }
+    }
+
+
+}
+
+// Fonctions de gestion de la modal de paramètres
+// export function openSettingsModal() {
+//     const settingsModal = document.getElementById('settings-modal');
+//     settingsModal.style.display = 'block';
+
+//     // Charger la valeur actuelle
+//     const currentTargetId = localStorage.getItem('targetAncestorId') || '@I741@';
+//     document.getElementById('targetAncestorId').value = currentTargetId;
+
+//     initBackgroundSelector();
+
+// }
+
+export async function openSettingsModal() {
+    // Option 1: Utiliser directement la nouvelle modal
+    const createEnhancedSettingsModal = await getCreateEnhancedSettingsModal();
+    createEnhancedSettingsModal();     
+}
+
+export function closeSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    settingsModal.style.display = 'none';
+}
+
+export function saveTargetAncestorId() {
+    const targetId = document.getElementById('targetAncestorId').value.trim();
+    
+    if (targetId) {
+        localStorage.setItem('targetAncestorId', targetId);
+        
+        // Utiliser la fonction de mise à jour
+        import('./treeAnimation.js').then(module => {
+            module.setTargetAncestorId(targetId);
+        });
+
+        alert('ID de l\'ancêtre enregistré avec succès !');
+        closeSettingsModal();
+    } else {
+        alert('Veuillez entrer un ID valide');
+    }
+}
+
+// Fonction pour masquer la map
+export function hideMap() {
+    const mapContainer = document.getElementById('animation-map-container');
+    if (mapContainer) {
+        mapContainer.style.display = 'none';
+    }
+}
+
+// Fonction pour afficher la map
+// export function showMap() {
+//     const mapContainer = document.getElementById('animation-map-container');
+//     mapContainer.style.display = 'block';
+// }
+
+
+
+
+
+
+
+// Fonction pour afficher un message toast temporaire
+export function showToast(message, duration = 2500) {
+    const toast = document.getElementById('mobile-toast');
+    if (toast) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+
+        // Masquer après le délai spécifié
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, duration);
+    }
+}
+
+// Objet pour stocker les compteurs d'actions
+const actionCounters = {};
+const max_count = 3;
+
+// Ajouter les messages toast aux boutons et sélecteurs
+document.addEventListener('DOMContentLoaded', function() {
+
+    const dontApplyButtonRescaleCheckbox = document.getElementById('dont-apply-button-rescale');
+
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+    if (!isMobile) { 
+        dontApplyButtonRescaleCheckbox.checked = true;
+    }
+
+
+    // 1. RÉCUPÉRATION au démarrage
+    // On récupère la valeur stockée (qui est une chaîne de caractères "true" ou "false")
+    const savedRescalePreference = localStorage.getItem('dontApplyButtonRescale');
+    // Si une valeur existe en mémoire, on l'applique au state et à la checkbox
+    if (savedRescalePreference !== null) {
+        state.dontApplyButtonRescale = (savedRescalePreference === 'true');
+        dontApplyButtonRescaleCheckbox.checked = state.dontApplyButtonRescale;
+    } else {
+        // Valeur par défaut si rien n'est stocké
+        state.dontApplyButtonRescale = dontApplyButtonRescaleCheckbox.checked;
+    }
+
+    // 2. SAUVEGARDE lors du changement
+    dontApplyButtonRescaleCheckbox.addEventListener('change', (e) => {
+        state.dontApplyButtonRescale = e.target.checked;
+        // On enregistre la nouvelle valeur dans le localStorage
+        localStorage.setItem('dontApplyButtonRescale', e.target.checked);
+        if(state.dontApplyButtonRescale) {
+            state.browserScaleFactor = 1;
+            state.browserScaleCorrection = 1;
+        } 
+        window.location.reload();
+    });
+
+
+    //On lance ce code UNE FOIS au démarrage
+    if (!state.dontApplyButtonRescale) { detectBrowserScaleChrome();}
+
+
+    const buttonSpan = document.getElementById('animationPauseBtnSpan');
+    if (buttonSpan && navigator.userAgent.includes('SamsungBrowser')) {
+    // if (buttonSpan ) {
+        buttonSpan.style.fontSize = '25px';
+        console.log("/n/n -------  DEBUG ---------Font-size initial de animationPauseBtnSpan fixé à 25px " );
+    }
+
+
+    document.querySelectorAll('.controls-row-1 button, .controls-row-2 button, select, .controls-row-1 input, .controls-row-2 input').forEach(element => {
+        element.addEventListener('change', function() {
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
+            // console.log('\n\n Debug : Change event detected on', this, element);
+        });
+
+        // Pour les sélecteurs, utiliser l'événement change
+        if (element.tagName === 'SELECT') {
+            element.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const message = selectedOption.getAttribute('data-action') || this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+                // console.log('\n\n Debug : SELECT Change event detected on', this, element);        
+            });    
+        }
+
+        // Pour les champs de saisie, utiliser l'événement input
+        if (element.tagName === 'INPUT') {
+            element.addEventListener('input', function() {
+                const message = this.getAttribute('data-action');
+                if (message) {
+                    const key = this.getAttribute('data-text-key');
+                    if (!actionCounters[key]) {
+                        actionCounters[key] = 0;
+                    }
+                    actionCounters[key]++;
+                    if (actionCounters[key] <= max_count) {
+                        showToast(message);
+                    }
+                }
+            });
+            // console.log('\n\n Debug : INPUT Change event detected on', this, element);        
+        }
+
+        // Garder le clic pour tous
+        element.addEventListener('click', function() {
+            const message = this.getAttribute('data-action');
+            if (message) {
+                const key = this.getAttribute('data-text-key');
+                if (!actionCounters[key]) {
+                    actionCounters[key] = 0;
+                }
+                actionCounters[key]++;
+                if (actionCounters[key] <= max_count) {
+                    showToast(message);
+                }
+            }
+            // console.log('\n\n Debug : click Change event detected on', this, element);      
+        });
+    });
+
+    initNetworkListeners();
+    console.log("🌐 État initial du réseau:", state.isOnLine, ",?:", navigator.onLine);
+});
+
+
+/**
+ * Bascule l'affichage du mot de passe entre 'text' (visible) et 'password' (masqué).
+ */
+function changePasswordVisibility(hidden = false) {
+    const passwordInput = document.getElementById('password');
+    
+    if (passwordInput) {
+        // Si l'input est 'text', on le passe en 'password' (masqué)
+        if (hidden) {
+            passwordInput.type = 'password';
+            console.log("Mode mot de passe : Masqué");
+        } 
+        // Si l'input est 'password', on le passe en 'text' (visible)
+        else {
+            passwordInput.type = 'text';
+            console.log("Mode mot de passe : Visible");
+        }
+    }
+}
+
+
+const CLASSE_CACHE = 'expert-hidden';
+
+// --- Fonction d'Activation (où la modification a lieu) ---
+const activerModeExpert = (mode) => {
+    // Mémoriser l'état
+    localStorage.setItem(mode, 'true');
+    
+    // Afficher le pop-up sympa !
+    if (mode === 'modeExpertActif') {
+
+        montrerConsole();
+
+        // si mode expert Afficher les boutons ayant la classe 'expert-hidden' en leur supprimant cette classe
+        document.querySelectorAll(`.${CLASSE_CACHE}`).forEach(el => {
+            el.classList.remove(CLASSE_CACHE);
+        });
+        afficherPopup('Mode Expert Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'hidePasswordActif') {
+        changePasswordVisibility(true);
+        afficherPopup('Mode Password Caché Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'noFullScreenActif') {
+        afficherPopup('Mode noFullScreen Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+    } else if (mode === 'puzzleActif') {
+        afficherPopup('Mode puzzleSwipe Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        if (state.isMobile && state.isTouchDevice && !state.isPWA) {
+            state.isPuzzleSwipeFromSecret = true;
+            const browserBarLabel = document.getElementById('browserBarLabel');
+            browserBarLabel.style.display = '';
+            const browserBarButton = document.getElementById('browserBar-button');
+            browserBarButton.style.display = '';
+            const bodyElement = document.body;
+            // Augmenter min-height à 105vh
+            bodyElement.style.minHeight = '110vh'; //'15vh';
+            // Supprimer la propriété overflow: hidden; (la définir sur 'auto', 'visible' ou simplement l'enlever)
+            // En général, la définir sur 'visible' ou 'auto' désactive l'effet 'hidden'.
+            // 'visible' est souvent la valeur par défaut du navigateur.
+            bodyElement.style.overflow = 'visible';
+        }
+    } else if (mode === 'leavesActif') {
+        afficherPopup('Mode leaves Activé ! 🚀 \n cliquer sur "Paramètres par défaut" dans ⚙️ pour le désactiver');
+        state.addLeaves = true;
+    } else {
+        changePasswordVisibility(false);
+    }
+};
+
+
+
+
+
+function montrerConsole() {
+    const el = document.getElementById('eruda');
+    if (el) {
+        // On force l'affichage en modifiant le style directement
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.style.setProperty('opacity', '1', 'important');
+        el.style.setProperty('pointer-events', 'auto', 'important');
+        eruda.show(); // Commande interne d'Eruda
+    }
+}
+
+function cacherConsole() {
+    const el = document.getElementById('eruda');
+    if (el) {
+        el.style.setProperty('display', 'none', 'important');
+        eruda.hide(); // Commande interne d'Eruda
+    }
+}
+
+
+
+// --- Nouvelle fonction pour créer et afficher le pop-up ---
+const afficherPopup = (message, time = null, top = null) => {
+    // 1. Créer l'élément (Toaster)
+    const popup = document.createElement('div');
+    popup.textContent = message;
+    popup.id = 'expert-activation-popup';
+    popup.style.cssText = `
+        font-size: ${16*state.scaleTextFontSize}px;
+        position: fixed;
+        bottom: 1.25em;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4CAF50; /* Vert */
+        color: white;
+        padding: 0.31em 0.31em;
+        border-radius: 0.5em;
+        font-family: sans-serif;
+        z-index: 10000; /* Assurez-vous qu'il soit au-dessus de tout */
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        box-shadow: 0 0.25em 0.375em rgba(0, 0, 0, 0.1);
+        white-space: pre-line;
+        text-align: center;
+    `;
+
+    if (top) {
+        popup.style.bottom =  '';
+        popup.style.top = top +'px';
+    }
+
+    popup.style.setProperty('font-size', (16 / state.browserScaleFactor) + 'px', 'important');
+
+    document.body.appendChild(popup);
+
+    // 2. Afficher l'élément (utiliser setTimeout pour la transition d'apparition)
+    setTimeout(() => {
+        popup.style.opacity = '1';
+    }, 10);
+
+    // 3. Le faire disparaître après 3 secondes
+    let duration = 3000;
+    if (time) {
+        console.log('\n\n   debug 2 afficherPopup ', time)
+        duration = time; 
+    }
+
+    setTimeout(() => {
+        popup.style.opacity = '0';
+        // Supprimer l'élément du DOM après la transition de disparition
+        setTimeout(() => {
+            popup.remove();
+        }, 500); // 500ms correspond à la durée de la transition CSS
+    }, duration); // Reste affiché pendant 3 secondes
+};
+
+
+function secretMode() {
+    // --- Configuration ---
+    // const CLASSE_CACHE = 'expert-hidden';
+
+    // Configuration séquence de touches
+    const SEQUENCE_SECRETE = ['S', 'E', 'C', 'R', 'E', 'T']; 
+    const SEQUENCE_NOFULLSCREEN = ['N', 'O', 'F', 'U', 'L', 'L']; 
+    const SEQUENCE_PUZZLE = ['P', 'U', 'Z', 'Z', 'L', 'E']; 
+    const SEQUENCE_LEAVES = ['L', 'E', 'A', 'V', 'E', 'S']; 
+
+    let sequenceEnCours = [];
+    let sequenceNoFullScreenEnCours = [];
+    let sequencePuzzleEnCours = [];
+    let sequenceLeavesEnCours = [];
+    // Configuration Mobile et PC (click et taps)
+    const TAP_COUNT_NECESSAIRE = 5;
+    let tapCount = 0;
+    let tapTimer = null;
+
+
+
+    function checkSequence(keyPressed) {
+        sequenceEnCours.push(keyPressed);
+        sequenceNoFullScreenEnCours.push(keyPressed);
+        sequencePuzzleEnCours.push(keyPressed);
+        sequenceLeavesEnCours.push(keyPressed);
+
+
+
+        // console.log('----- debug checkSequence, ', keyPressed, sequenceEnCours, sequenceNoFullScreenEnCours, sequencePuzzleEnCours, sequenceLeavesEnCours)
+        // Garde la taille de la séquence
+        if (sequenceEnCours.length > SEQUENCE_SECRETE.length) {
+            sequenceEnCours.shift();
+        }
+        if (sequenceNoFullScreenEnCours.length > SEQUENCE_NOFULLSCREEN.length) {
+            sequenceNoFullScreenEnCours.shift();
+        }
+        if (sequencePuzzleEnCours.length > SEQUENCE_PUZZLE.length) {
+            sequencePuzzleEnCours.shift();
+        }
+        if (sequenceLeavesEnCours.length > SEQUENCE_LEAVES.length) {
+            sequenceLeavesEnCours.shift();
+        }
+
+
+        // Vérification de la correspondance
+        if (sequenceEnCours.join(',') === SEQUENCE_SECRETE.join(',')) {
+            activerModeExpert('hidePasswordActif');
+            console.log('\n\n ---- mode hidePasswordActif activé ----')
+            sequenceEnCours = []; // Réinitialise
+        }
+        if (sequenceNoFullScreenEnCours.join(',') === SEQUENCE_NOFULLSCREEN.join(',')) {
+            activerModeExpert('noFullScreenActif');
+            console.log('\n\n ---- mode noFullScreenActif activé ----')            
+            sequenceNoFullScreenEnCours = []; // Réinitialise
+        }
+        if (sequencePuzzleEnCours.join(',') === SEQUENCE_PUZZLE.join(',')) {
+            activerModeExpert('puzzleActif');
+            console.log('\n\n ---- mode puzzleActif activé ----')
+            sequencePuzzleEnCours = []; // Réinitialise
+        }
+        if (sequenceLeavesEnCours.join(',') === SEQUENCE_LEAVES.join(',')) {
+            activerModeExpert('leavesActif');
+            console.log('\n\n ---- mode leavesActif activé ----')
+            sequenceLeavesEnCours = []; // Réinitialise
+        }
+    }
+
+
+    // --- 1. Persistance : Vérifier l'état au chargement ---
+    if (localStorage.getItem('modeExpertActif') === 'true') {
+        activerModeExpert('modeExpertActif');
+    }
+    if (localStorage.getItem('hidePasswordActif') === 'true') {
+        activerModeExpert('hidePasswordActif');
+    }
+    if (localStorage.getItem('noFullScreenActif') === 'true') {
+        activerModeExpert('noFullScreenActif');
+    }
+    if (localStorage.getItem('puzzleActif') === 'true') {
+        activerModeExpert('puzzleActif');
+    }
+    if (localStorage.getItem('leavesActif') === 'true') {
+        activerModeExpert('leavesActif');
+    }
+
+    console.log( '\n\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+
+    // if (state.isMobile && state.isTouchDevice) {
+    //     const inputField = document.getElementById('input-form-firstName');
+    //     if (inputField) {
+    //         // Écouter l'événement directement sur le champ de saisie
+    //         inputField.addEventListener('input', (e) => {
+    //             const currentValue = inputField.value;
+    //             if (currentValue.length === 0) return; // Rien tapé
+
+    //             // Obtient le DERNIER caractère tapé
+    //             const lastKey = currentValue.slice(-1).toUpperCase(); 
+    //             // --- Logique de séquence ---
+    //             // 1. Ajouter la dernière touche à la séquence en cours
+    //             // sequenceEnCours.push(lastKey);
+    //             // sequenceNoFullScreenEnCours.push(lastKey);
+    //             // sequencePuzzleEnCours.push(lastKey);
+
+    //             checkSequence(lastKey);
+    //         });
+    //     }
+    // }
+
+
+    // console.log( '\n\n ----- debug mode clavier pour tactile --- isMobile=', state.isMobile, ', isTouchDevice=' ,state.isTouchDevice, ', isPWA=',state.isPWA)
+
+    // if (state.isMobile && state.isTouchDevice) {
+    if (true) {
+        // --- NOUVEAU LOG 1 : Vérification de l'entrée dans le bloc mobile
+        // console.log('Mode Mobile/Tactile détecté. Tentative de configuration de l\'écouteur "input".');
+        
+        const inputField = document.getElementById('input-form-firstName');
+        
+        if (inputField) {
+            // --- NOUVEAU LOG 2 : Vérification que l'input est trouvé
+            // console.log('Champ de saisie trouvé. Écouteur "input" configuré.');
+            
+            // Écouter l'événement directement sur le champ de saisie
+            inputField.addEventListener('input', (e) => {
+                const currentValue = inputField.value;
+                if (currentValue.length === 0) return; 
+
+                // Obtient le DERNIER caractère tapé
+                const lastKey = currentValue.slice(-1).toUpperCase(); 
+                
+                // --- NOUVEAU LOG 3 : Vérification de la touche capturée
+                // console.log(`Caractère tapé (Mobile/Input) : ${lastKey}`);
+                
+                checkSequence(lastKey);
+            });
+        } else {
+            // --- NOUVEAU LOG 4 : Vérification que l'input n'est pas trouvé
+            console.warn("L'élément 'input-form-firstName' n'a pas été trouvé. Le mode secret clavier ne fonctionnera pas sur mobile.");
+        }
+    }
+
+
+
+    // if (!state.isMobile) {
+
+    //     // ---2.  Activation PC : Écoute de la séquence de touches ---
+    //     document.addEventListener('keydown', (e) => {
+    //         // Affiche le caractère tapé (ex: 'a', 'q', 'm', etc.)
+    //         // La conversion en majuscule gère les majuscules/minuscules et QWERTY/AZERTY
+            
+    //         const keyPressed = e.key.toUpperCase();
+            
+    //         // sequenceEnCours.push(keyPressed);
+    //         // sequenceNoFullScreenEnCours.push(keyPressed);
+    //         // sequencePuzzleEnCours.push(keyPressed);
+
+    //         checkSequence(keyPressed);
+    //     });
+
+    // }
+
+
+    if(false) {
+    // if (!state.isMobile) {
+        // ---2.  Activation PC : Écoute de la séquence de touches ---
+        document.addEventListener('keydown', (e) => {
+            
+            // NOUVEAU BLOCAGE CONDITIONNEL INFALLIBLE
+            // Vérifiez si l'événement provient d'un élément de saisie (input, select, textarea)
+            // ET si la touche 'key' n'est pas définie (ce qui est le cas du conflit de datalist)
+            const targetTagName = e.target.tagName.toLowerCase();
+            
+            if (targetTagName === 'input' || targetTagName === 'select' || targetTagName === 'textarea') {
+                // Bloquer si la propriété 'key' est manquante ou l'événement est incomplet
+                if (typeof e.key === 'undefined' || e.key === null) {
+                    e.stopPropagation(); // Bloque la remontée (une dernière tentative)
+                    e.preventDefault();  // Empêche toute action par défaut
+                    console.warn("[BLOCAGE CRITIQUE] Keydown global bloqué car e.key est manquant (conflit datalist).");
+                    return; // Arrête l'exécution de ce gestionnaire
+                }
+            }
+            // ---------------------------------------------
+
+            // LIGNE 2390 (main.js) :
+            // Si l'exécution arrive ici, 'e.key' est garanti d'être défini
+            const keyPressed = e.key.toUpperCase();
+            
+            checkSequence(keyPressed);
+        });
+
+    }
+
+    // --- 3. Activation Mobile ou PC  : Écoute du click ou tapotement rapide ---
+    const secretTargetArea = document.getElementById('secret-trigger-area');
+
+    if (secretTargetArea) {
+        secretTargetArea.addEventListener('click', () => {
+
+            // console.log('\n\n debug secret mode : cible mobile touchée **************', tapCount);
+            // Empêche l'activation si déjà actif
+            if (localStorage.getItem('modeExpertActif') === 'true') return;
+            tapCount++;
+            
+            // Réinitialise le compteur après un court délai (800ms)
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 800);
+
+            if (tapCount >= TAP_COUNT_NECESSAIRE) {
+                activerModeExpert('modeExpertActif');
+                tapCount = 0; // Réinitialise
+            }
+        });
+    } else {
+        console.warn(`[Mode Expert] Élément cible mobile non trouvé (ID: ${'secret-trigger-area'}).`);
+    }
+}
+
+
+function detectInputType() {
+  // Vérifie si l'appareil utilise principalement une souris
+  const prefersMouse = window.matchMedia('(pointer: fine)').matches;
+  
+  // Vérifie si l'appareil utilise principalement un toucher
+  const prefersTouch = window.matchMedia('(pointer: coarse)').matches;
+  
+  // Vérifie si l'appareil n'a pas de dispositif de pointage principal
+  const noPointer = window.matchMedia('(pointer: none)').matches;
+  
+  if (prefersMouse) return "souris";
+  if (prefersTouch) return "tactile";
+  if (noPointer) return "sans_pointeur";
+  
+  // Fallback pour les navigateurs qui ne supportent pas ces media queries
+  return "inconnu";
+}
+
+// ==========  fonction de détection iOS ==========
+export function isIOSDevice() {
+    let isIOS = /iPad|iPhone|iPod|Macintosh|Mac OS/.test(navigator.userAgent) || 
+           (navigator.userAgent.includes('Mac') && 'ontouchend' in document) ||
+           (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
+    state.isIOS = isIOS;
+    // state.isIOS = true;
+    // const debugLog = getDebugLog();
+    if (state.isDebugLog) {
+        import('./debugLogUtils.js').then(module => {
+            // ON NE MET PAS de () ici, on veut juste la fonction
+            const debugLog = module.debugLog; 
+            
+            // Maintenant on peut l'utiliser
+            debugLog(`ℹ️  isIOS : ${state.isIOS}`, "info");
+        });
+    } else {
+        console.log(`ℹ️  isIOS : ${state.isIOS}`);
+    }
+    return state.isIOS;
+}
+
+
+// async function checkDevice() {
+//   if (navigator.userAgentData) {
+//     const uaData = await navigator.userAgentData.getHighEntropyValues(['platform', 'model']);
+//     console.log(uaData.platform); // "Android" apparaîtra ici même si le UA dit "Linux"
+    
+//     if (uaData.platform === "Android") {
+//       return "Mobile/Tablette";
+//     }
+//   }
+//   return "PC (ou navigateur non compatible)";
+// }
+
+
+function checkDevice() {
+  // On ne peut PAS utiliser getHighEntropyValues ici car il impose 'await'
+  
+  // On se rabat sur l'API synchrone (moins précise mais immédiate)
+  if (navigator.userAgentData) {
+    if (navigator.userAgentData.mobile) {
+      return "Mobile/Tablette";
+    }
+  }
+  
+  // Détection classique par User Agent (Synchrone)
+  if (/Android/i.test(navigator.userAgent)) {
+    return "Mobile/Tablette";
+  }
+
+  return "PC (ou navigateur non compatible)";
+}
+
+
+
+
+export async function detectDeviceType() {
+  state.deviceInfo = {
+    isMobile: false,
+    isIOS: false,
+    hasTouchScreen: false,
+    inputType: "inconnu",
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight
+  };
+  
+  // Détection par user-agent
+//   deviceInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  state.deviceInfo.isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Macintosh|Mac OS/i.test(navigator.userAgent);
+  
+  // Détection de l'écran tactile
+  state.deviceInfo.hasTouchScreen = ('ontouchstart' in window) || 
+                              (navigator.maxTouchPoints > 0) || 
+                              (navigator.msMaxTouchPoints > 0);
+  
+  state.isMobile = state.deviceInfo.isMobile;
+  const debugLog = await getDebugLog();
+  debugLog(`ℹ️  isMobile : ${state.isMobile}`, "info")
+
+  debugLog(`ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen}`, "info")
+
+//   const deviceType = await checkDevice();
+  const deviceType = checkDevice();
+
+  debugLog(`ℹ️  isMobile2 : ${deviceType}`, "info")
+
+  const isAndroidTablet = navigator.userAgent.includes("Linux") && state.deviceInfo.hasTouchScreen;
+  
+  debugLog(`ℹ️  isAndroidTablet : ${isAndroidTablet}`, "info")
+
+  state.isMobile = state.deviceInfo.isMobile || isAndroidTablet;
+
+  debugLog(`ℹ️  isMobile final : ${state.isMobile}`, "info")
+
+  state.deviceInfo.isIOS = isIOSDevice();
+  state.isIOS = state.deviceInfo.isIOS;
+
+  // Détection du type d'entrée principal
+  if (window.matchMedia) {
+    if (window.matchMedia('(pointer: fine)').matches) {
+      state.deviceInfo.inputType = "souris";
+    } else if (window.matchMedia('(pointer: coarse)').matches) {
+      state.deviceInfo.inputType = "tactile";
+    }
+  }
+  
+ console.log(`ℹ️  isMobile : ${state.deviceInfo.isMobile}, ℹ️  isIOS : ${state.deviceInfo.isIOS} ,  ℹ️  hasTouchScreen : ${state.deviceInfo.hasTouchScreen},  ℹ️  isIOS: ${state.deviceInfo.isIOS}, ℹ️  inputType: ${state.deviceInfo.inputType},  ℹ️ screen orientation: ${screen.orientation ? screen.orientation.type : 'not available'}`);
+ console.log(`ℹ️ W_scr : ${window.screen.width} x H_scr : ${window.screen.height}`)
+ console.log(`ℹ️ W_in : ${window.innerWidth} x H_in : ${window.innerHeight}`)
+ console.log(`ℹ️ W_out : ${window.outerWidth} x H_out : ${window.outerHeight}`)
+ console.log(`ℹ️ browser scale: ${ state.browserScaleFactor}`)
+
+
+  // // Utilisation
+  // if (hasTouchScreen()) {
+  //   console.log("Écran tactile détecté");
+  // } else {
+  //   console.log("Pas d'écran tactile détecté");
+  // }
+
+  
+  
+  // // Utilisation
+  // console.log(`Type d'entrée principal: ${detectInputType()}`);
+
+
+  
+  return state.deviceInfo;
+}
+
+
+// Exposer la fonction et le compteur globalement
+window.showToast = showToast;
+window.actionCounters = actionCounters;
+// window.displayGenealogicTree = displayGenealogicTree;
+
+
+// Export des variables et fonctions nécessaires
+export {
+    openGedcomModal,
+    closeGedcomModal,
+    // displayPersonDetails,
+    // closePersonDetails,
+    // setAsRootPerson,
+    // closeModal,
+    // updatePrenoms,
+    // updateLettersInNames,
+    // updateGenerations,
+    // zoomIn,
+    // zoomOut,
+    // resetZoom,
+    // searchTree
+};
+
+
+// window.addEventListener('load', initialize);
+
+
+//  fonction searchRootPerson pour utiliser findPersonsByName :
+export function searchRootPersonId(searchStr, isAlert = true, date = null) {
+
+    // searchStr = searchStr.value.toLowerCase();
+
+    if (!searchStr) return;
+
+    // Utiliser la nouvelle fonction findPersonsByName
+
+    const matchedPerson = importLinks.utils.findPersonByName(searchStr, date);
+
+
+
+    if (matchedPerson) {
+        // Convertir les personnes trouvées au format d'options pour le sélecteur personnalisé
+        // const options = matchedPersons.map(person => ({
+        //     value: person.id,
+        //     label: person.name.replace(/\//g, '').trim()
+        // }));
+
+        console.log('- search persone for demo ***********',matchedPerson)
+        return matchedPerson;
+        
+
+    } else if (isAlert) {
+        alert('Aucune personne trouvée');
+        return null;
+    }
+}
+
+// Gestionnaire des paramètres avec support multi-langues
+// Fonction pour réinitialiser les paramètres
+export function resetToDefaultSettings() {
+    // Obtenir les textes traduits
+    const getMultilingueText = (key) => window.i18n ? window.i18n.getMultilingueText(key) : key;
+    
+    // Message de confirmation multilingue
+    const confirmMessage = `${getMultilingueText('confirmResetSettings')}\n\n${getMultilingueText('resetWillDo')}:\n• ${getMultilingueText('deletePrefs')}\n• ${getMultilingueText('resetLang')}\n• ${getMultilingueText('clearCustomSettings')}\n\n(${getMultilingueText('cacheWillBeKept')})`;
+    
+    if (confirm(confirmMessage)) {
+        try {
+            // Sauvegarder la langue actuelle si on veut la conserver
+            // const currentLang = localStorage.getItem('preferredLanguage');
+            
+            // Vider tout le localStorage
+            localStorage.clear();
+            
+            // Optionnel : remettre la langue (décommentez si vous voulez garder la langue)
+            // if (currentLang) {
+            //     localStorage.setItem('preferredLanguage', currentLang);
+            // }
+            
+            console.log('Paramètres remis à zéro');
+            
+            // Afficher un message de confirmation multilingue
+            alert(`${getMultilingueText('resetSuccess')}\n\n${getMultilingueText('pageWillReload')}`);
+            
+            // Recharger la page pour appliquer les changements
+            window.location.reload();
+            
+        } catch (error) {
+            console.error('Erreur lors de la réinitialisation:', error);
+            alert(getMultilingueText('resetError'));
+        }
+    }
+}
+
+// Exposer la fonction globalement
+// window.resetToDefaultSettings = resetToDefaultSettings;
+
+// Fonction pour initialiser les paramètres au chargement
+function initializeSettings() {
+    console.log('[Settings Manager] Initialisé');
+}
+
+// Initialiser au chargement du DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSettings);
+} else {
+    initializeSettings();
+}
+
+// Export pour les modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { resetToDefaultSettings };
+}
+
+/**
+ * Gestion des erreurs
+ */
+function showErrorMessage(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    
+    // Ajouter des styles d'erreur
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: ${20*state.scaleChrome}px;
+        right: ${20*state.scaleChrome}px;
+        background: #dc3545;
+        color: white;
+        padding: ${15*state.scaleChrome}px ${20*state.scaleChrome}px;
+        border-radius: ${5*state.scaleChrome}px;
+        z-index: 10000;
+        box-shadow: 0 ${4*state.scaleChrome}px ${6*state.scaleChrome}px rgba(0,0,0,0.1);
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    // Supprimer après 5 secondes
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 5000);
+}
+
+/**
+ * Configuration par défaut à adapter selon vos besoins
+ */
+// export const WheelConfig = {
+//     defaultMode: 'WheelAncestors',
+//     maxGenerations: 5,
+//     enableAnimations: true,
+//     exportFormat: 'png',
+//     exportQuality: 1.0
+// };
+
+// Exemple d'utilisation :
+// displayPersonTree('PERSON_ID', 'WheelAncestors');
+// switchTreeMode('WheelDescendants');
+// exportToPDF();
+
+export function positionRadarButton() {
+    const cloudButton = document.getElementById('cloudBtn');
+    const radarButton = document.getElementById('radarBtn');
+    const statsButton = document.getElementById('statsBtn');
+    
+
+    let offsetY = 0;
+    let offsetY2 = 5;
+    // if (window.innerWidth < 768) {offsetY = 5; offsetY2 = 0;}
+    offsetY = 5; offsetY2 = 0;
+    let factor = 1; 
+    let radarX = 0, statsX = 47;
+    let radarY = 0, statsY = 0, cloudY = 0;
+
+    if (!state.isSamsungBrowser) { 
+        factor= 1/state.browserScaleFactor; 
+        radarX = factor*3;
+        statsX = factor*47.0;    
+        radarX = 2;
+        // if (factor < 0.5) {radarX = 1;}
+    }
+
+    if (state.isMobile) { 
+        radarY = factor*3; statsY = factor*3; cloudY = 0;
+        if (state.isSamsungBrowser && state.browserScaleFactor >= 1.1){
+            radarY = 8; statsY = 8; cloudY = 0;
+        }
+    }
+    else { radarY = -5*factor; statsY = -5*factor; cloudY = -15*factor;}
+  
+
+    setTimeout(() => {
+        if (cloudButton && radarButton && statsButton) {
+            const cloudRect = cloudButton.getBoundingClientRect();
+            radarButton.style.position = 'fixed';
+            // radarButton.style.left = cloudRect.left + 'px';
+            // radarButton.style.top = (cloudRect.bottom + 3 + offsetY) + 'px';
+
+
+            radarButton.style.left = parseInt(cloudRect.left + (radarX)) + 'px';
+            radarButton.style.top = parseInt(cloudRect.bottom + (radarY)) + 'px';
+            radarButton.style.zIndex = '1001';
+
+            statsButton.style.position = 'fixed';
+            // statsButton.style.top = (cloudRect.bottom + 8 - offsetY2) + 'px';
+            // statsButton.style.left = cloudRect.left + (fontSize*47/32)+ 'px';
+            statsButton.style.left = parseInt(cloudRect.left + statsX) + 'px';
+            statsButton.style.top = parseInt(cloudRect.bottom + (statsY)) + 'px';
+
+            // cloudButton.style.marginTop = parseInt(-15) + 'px';
+
+            statsButton.style.zIndex = '1001';
+        }
+
+    }, 100);
+
+
+}
+
+// Nouvelle fonction pour l'overlay
+function createAndPositionRadarOverlay() {
+    setTimeout(() => {
+        // Trouver les boutons
+        const cloudButton = document.getElementById('cloudBtn');
+        const radarButton = document.getElementById('radarBtn');
+        const statsButton = document.getElementById('statsBtn');
+
+        // Vérifier que les boutons existent
+        if (!cloudButton || !radarButton || !statsButton) return;
+        
+        // Récupérer les dimensions du bouton cloud
+        const cloudRect = cloudButton.getBoundingClientRect();
+        
+        // Créer l'overlay s'il n'existe pas déjà
+        let overlay = document.getElementById('radarBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'radarBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+            overlay.style.cursor = 'pointer';
+            
+            // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+            overlay.addEventListener('click', () => {
+                radarButton.click();
+            });
+            
+            // Ajouter l'overlay au body
+            document.body.appendChild(overlay);
+        }
+
+        let factor = 1;
+        if (!state.isSamsungBrowser) { factor= 1/state.browserScaleFactor; }
+        
+        // Positionner l'overlay
+        overlay.style.top = `${cloudRect.bottom + 5*factor}px`;
+        overlay.style.left = `${cloudRect.left}px`;
+        overlay.style.width = `${radarButton.offsetWidth}px`;
+        overlay.style.height = `${radarButton.offsetHeight}px`;
+
+        // Créer l'overlay s'il n'existe pas déjà
+        overlay = document.getElementById('statsBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'statsBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002'; // Un peu plus haut que le bouton
+            overlay.style.cursor = 'pointer';
+            
+            // Quand on clique sur l'overlay, on déclenche le clic du bouton radar
+            overlay.addEventListener('click', () => {
+                statsButton.click();
+            });
+            
+            // Ajouter l'overlay au body
+            document.body.appendChild(overlay);
+        }
+        
+        // Positionner l'overlay
+        overlay.style.top = `${cloudRect.bottom + 15*factor}px`;
+        overlay.style.left = `${cloudRect.left + 45*factor}px`;
+
+        overlay.style.width = `${statsButton.offsetWidth}px`;
+        overlay.style.height = `${statsButton.offsetHeight}px`;
+    }, 100);
+}
+
+function createAndPositionHeatMapOverlay() {
+    setTimeout(() => {
+
+        const heatMapBtn = document.getElementById('heatMapBtn');
+        if (!heatMapBtn) return;
+
+        let overlay = document.getElementById('heatMapBtn-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'heatMapBtn-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.backgroundColor = 'transparent';
+            overlay.style.zIndex = '1002';
+            overlay.style.cursor = 'pointer';
+            overlay.addEventListener('click', () => {
+                heatMapBtn.click();
+            });
+            document.body.appendChild(overlay);
+        }
+        let factor = 1;
+        if (!state.isSamsungBrowser) { factor= 1/state.browserScaleFactor; }
+
+        const rect = heatMapBtn.getBoundingClientRect();
+        overlay.style.top = `${rect.top - 10*factor }px`;
+        overlay.style.left = `${rect.left - 10*factor}px`;
+        overlay.style.width = `${rect.width + 20*factor}px`;
+        overlay.style.height = `${rect.height + 20*factor}px`;
+    }, 100);
+}
+
+export function positionHeatMapButton() {
+    const settingsBtn = document.getElementById('settingsBtn');
+    const heatMapBtn = document.getElementById('heatMapBtn');
+    setTimeout(() => {
+
+        // let factor = 1;
+        // let heatmapX = 0; //1;
+        // let heatmapY = 0; //1;
+
+        // if (!state.isSamsungBrowser) { 
+        //     factor = 1/state.browserScaleFactor; 
+        //     heatmapX = 0.0;
+        //     if (factor < 0.5) {heatmapX = -1.5;}
+        // }
+
+        // if (state.isMobile) { heatmapY = 2;}
+        // else { heatmapY = -5;}
+
+        // // if (state.browserScaleFactor >=1.74) { radarY = 2*factor;  }
+
+
+
+
+
+        let factor = 1; 
+        let heatmapX = 0, heatmapY = 0;
+
+        if (!state.isSamsungBrowser) { 
+            factor= 1/state.browserScaleFactor;
+            heatmapX = -1*factor;
+            if (factor < 0.5) {heatmapX = -2*factor;}            
+
+            // if (factor < 0.5) {radarX = 1;}
+        }
+
+        if (state.isMobile) { 
+            heatmapY = 2*factor;
+            if (state.isSamsungBrowser && state.browserScaleFactor >= 1.1){
+                heatmapY =7;
+            }
+        }
+        else { heatmapY = -5*factor;}
+
+
+
+
+
+        if (settingsBtn && heatMapBtn) {
+            const settingRect = settingsBtn.getBoundingClientRect();
+
+            heatMapBtn.style.position = 'fixed';
+            if (factor < 0.5) {heatmapX = 1;}
+            heatMapBtn.style.left = parseInt(settingRect.left + heatmapX)+ 'px';
+            // heatMapBtn.style.top = parseInt(settingRect.bottom - factor*5) + 'px';
+            heatMapBtn.style.top = parseInt(settingRect.bottom + heatmapY) + 'px';
+
+            heatMapBtn.style.zIndex = '1001';
+        }
+
+    }, 100);
+
+
+}
+
+export function hideAndCleanupTreeButtons() {
+    const buttonListToHide = ['heatMapBtn', 'radarBtn'];
+    const overlayListToHide = ['heatMapBtn-overlay', 'radarBtn-overlay'];
+
+    let btn;
+    let overlay;
+    let index = 0;
+    buttonListToHide.forEach(btnName=>{
+        // Cacher le bouton 
+        btn = document.getElementById(btnName);
+        if (btn) {
+            btn.style.display = 'none';
+        }
+        // Supprimer complètement l'overlay
+        overlay = document.getElementById(overlayListToHide[index]);
+        if (overlay) {
+            overlay.remove();
+        }
+        index++;
+    });
+}
+
+export function showAndRestoreTreeButtons() {
+    const buttonListToRestore = ['heatMapBtn', 'radarBtn'];
+    let btn;
+    let overlay;
+    let index = 0;
+    buttonListToRestore.forEach(btnName=>{
+        // restorer le bouton 
+        btn = document.getElementById(btnName);
+        if (btn) {
+            btn.style.display = '';
+            if (btnName === 'radarBtn') { createAndPositionRadarOverlay(); }
+            else if (btnName === 'heatMapBtn') { createAndPositionHeatMapOverlay(); }
+        }
+    });
+}
+
+window.addEventListener('resize', debounce(() => {
+    if (!state.isWordCloudEnabled && state.isTreeEnabled) {
+        positionRadarButton();
+        positionHeatMapButton();
+        createAndPositionRadarOverlay();
+        createAndPositionHeatMapOverlay();
+        console.log('\n\n*** debug resize in main.js  for position buttons and  and map\n\n')          
+    }
+    if (!state.isTreeEnabled) {
+        positionFormContainer();
+        console.log('\n\n*** debug resize in main.js  for positionFormContainerr\n\n')  
+    }
+    // console.log('\n\n\n -**** DEBUG : addEventListener(resize) for button positionning**********\n\n\n')
+}, 150)); // Attend 150ms après le dernier resize
+
+
+// window.addEventListener('load', () => {
+//     if (!sessionStorage.getItem('reloadedOnce')) {
+//         sessionStorage.setItem('reloadedOnce', 'true');
+//         // setTimeout(() => {
+//         //     console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//         //     location.reload();
+//         // }, 1000);
+
+//         setTimeout(() => {
+//             console.log('\n\n\n -**** DEBUG : reload after 1 s for button positionning**********\n\n\n')
+//             setTimeout(() => location.reload(), 100); // petit délai pour laisser la console écrire
+//         }, 1000);
+//         alert('DEBUG: reload after 1s');
+
+
+
+// function to generate a constant silent audio for HDMI to avoid TV to switch between audio or non audio and to display a black banner on the top 
+export function keepSilentAudioAlive() {
+
+    console.log('\n\n\n  ------ activate silent audio for HDMI ----------\n,\n');
+    // 1. Initialiser le contexte audio
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    // 2. Créer l'oscillateur (le son)
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine';
+    // Fréquence haute (ex: 15000 Hz) : plus difficile à entendre pour l'oreille humaine que 440 Hz.
+    oscillator.frequency.setValueAtTime(15000, audioCtx.currentTime); 
+
+    // 3. Créer un nœud de Gain (Volume)
+    const gainNode = audioCtx.createGain();
+
+    // Régler le volume à un niveau EXTRÊMEMENT BAS. 
+    // 0.0001 est généralement le bon compromis entre "inaudible" et "signal actif".
+    gainNode.gain.setValueAtTime(0.0001, audioCtx.currentTime); 
+
+    // 4. Connexion et lancement
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    // Le son est lancé en continu
+    oscillator.start(0);
+
+    // Mettre à jour le statut
+    // document.getElementById('status-message').textContent = "Statut : Flux audio actif (Gain minime). Le bandeau Sony ne devrait plus apparaître.";
+    
+    return oscillator;
+}
+
+
+
+
+export async function testRealConnectivity(isEndFlagRequested = false) {
+    if (isEndFlagRequested) { state.isEndTestRealConnectivity = false; }
+
+    try {
+
+        // Utiliser le mode 'no-cors' pour éviter les erreurs CORS
+        const response = await fetch('https://www.google.com/favicon.ico', {
+            mode: 'no-cors',  // Crucial pour éviter les erreurs CORS
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            // Timestamp pour éviter la mise en cache par le navigateur
+            signal: AbortSignal.timeout(2000)
+        });
+        
+        // Le mode no-cors retourne toujours une réponse "opaque"
+        // On ne peut pas vérifier le status, mais si on arrive ici sans erreur,
+        // c'est qu'une connexion a pu être établie
+        
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = true;
+        
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("✅ Connexion Internet rétablie");
+            showNetworkStatus("Connexion réseau rétablie");
+            // selectVoice();
+        }
+        state.isOnLine = true;
+        // console.log('\n\n -----------  debug in testRealConnectivity,  state.isOnLine= ', state.isOnLine);
+        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+        
+        return true;
+    } catch (error) {
+        // Si on arrive ici, c'est qu'il n'y a pas de connexion
+        // Sauvegarder l'état précédent
+        previousOnlineState = isOnline;
+        isOnline = false;
+        
+        // Détecter le changement d'état
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Connexion Internet perdue");
+            showNetworkStatus("Mode hors-ligne");
+            // selectVoice();
+        }
+        state.isOnLine = false;
+        // console.log('\n\n -----------  debug in testRealConnectivity, state.isOnLine= ', state.isOnLine);
+        if (isEndFlagRequested) { state.isEndTestRealConnectivity = true; }
+        return false;
+    }
+}
+
+window.testRealConnectivity = testRealConnectivity;
+
+
+export function initNetworkListeners() {
+    console.log("🌐 Initialisation des écouteurs réseau dans initNetworkListeners ...");
+    
+    // Test initial
+    testRealConnectivity(true).then(online => {
+        if (window.CURRENT_LANGUAGE == "fr") {
+            showNetworkStatus(online ? "Connexion réseau active" : "Mode hors-ligne");
+        } else if (window.CURRENT_LANGUAGE == "en") {
+            showNetworkStatus(online ? "Network connection active" : "Offline mode");
+        } else if (window.CURRENT_LANGUAGE == "es") {
+            showNetworkStatus(online ? "Conexión de red activa" : "Modo fuera de línea");
+        } else if (window.CURRENT_LANGUAGE == "hu") {
+            showNetworkStatus(online ? "Hálózati kapcsolat aktív" : "Offline mód");
+        }
+    });
+
+    // Écouteurs d'événements standard
+    window.addEventListener('online', () => testRealConnectivity());
+    window.addEventListener('offline', async () => {
+        previousOnlineState = isOnline;
+        isOnline = false;
+        if (previousOnlineState !== isOnline) {
+            console.log("⚠️ Mode hors-ligne détecté");
+            showNetworkStatus("Mode hors-ligne");
+            if (state.isSpeechSynthesisAvailable) { 
+                const voiceSelectModule = await import('./voiceSelect.js');
+                const selectVoice = voiceSelectModule.selectVoice;
+                selectVoice();
+            }
+        }
+    });
+
+
+    // testRealConnectivity();
+
+}
+
+// Fonction pour afficher visuellement le statut réseau (optionnel)
+export function showNetworkStatus(message) {
+    // Créer ou mettre à jour un élément de notification
+    let notification = document.getElementById('network-status');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'network-status';
+
+        notification.style.fontSize = 15 / state.browserScaleFactor +'px';
+
+        notification.style.position = 'fixed';
+        if (state.innerHeight < 400) {
+            notification.style.top = '0.67em';
+            notification.style.left = '';
+            notification.style.right = '3.33em';
+        } else {
+            if (window.outerWidth > 1000) { notification.style.top = '3.33em';}
+            else { notification.style.top = '3.33em';}
+
+            notification.style.left = (state.innerWidth/2 - 100)*state.scaleChrome  +'px';
+            notification.style.right = '';
+            // notification.style.right = window.innerWidth - (window.innerWidth - notification.offsetWidth)/2  +'px'; //'10px';
+            // notification.style.transform = 'translateX(-50%)';
+        }
+
+        notification.style.padding = '0.33em';
+        notification.style.borderRadius = '0.33em';
+        notification.style.zIndex = '9999';
+        document.body.appendChild(notification);
+    }
+    
+    console.log("\n\n\n 🌐 DEBUG : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, state.innerHeight, notification.style.left) ;
+
+    notification.style.setProperty('font-size', (15 / state.browserScaleFactor) + 'px', 'important');
+    notification.textContent = message;
+    notification.style.backgroundColor = isOnline ? '#4CAF50' : '#f44336';
+    notification.style.color = 'white';
+
+    if (state.innerHeight >= 400) {
+        setTimeout(() => {    
+            notification.style.left = (state.innerWidth/2)*state.scaleChrome - (notification.offsetWidth)/2  +'px';
+            console.log("\n\n\n 🌐 DEBUG 2 : Statut réseau font-size et scale factor:",  state.browserScaleFactor, state.scaleChrome, notification.style.left, notification.offsetWidth) ;
+        }, 50);
+    }
+
+    // Faire disparaître la notification après 3 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
+
+/** function to reduce to call with 'resize' events*  */
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout); // Annule le timer précédent
+        timeout = setTimeout(() => func(...args), wait); // Nouveau timer
+    };
+}
+
+
+
+
+

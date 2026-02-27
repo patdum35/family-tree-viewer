@@ -1,0 +1,1058 @@
+/* Contenu du fichier styles.css */
+
+
+/* :root { color-scheme: light; } */
+
+/* Empêche les navigateurs de forcer le mode sombre */
+html {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+}
+
+*[translate="no"] {
+  unicode-bidi: isolate;
+}
+
+body { 
+    margin: 0; 
+    font-family: Arial;
+    /* overflow: hidden; */
+    overflow: hidden;
+    /* min-height: 105vh; */ /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
+    min-height: 100vh; /*pour autoriser un scroll à l'ouverture de la page web et permettre de cacher la barre d'adresse du browser en swippant vers le haut */
+} 
+
+
+/* @media (prefers-color-scheme: dark) {
+  body { */
+    /*background:  #000 !important;*/ /* #fff!important;*/
+    /* color: #000 !important;
+  }
+} */
+
+#tree-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 2;  
+}
+/*z-index: 2;   Au-dessus du fond mais en-dessous des contrôles */
+
+
+
+.expert-hidden {
+    display: none !important; 
+}
+
+
+
+/* Style pour le fond d'écran de la page de connexion */
+.login-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.login-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.9;
+    /* Réduire la luminosité et légèrement le contraste */
+    filter: brightness(0.7) contrast(0.9); 
+    transition: opacity 2s ease-in-out;
+}
+
+/* Modification du style existant du formulaire pour mieux s'intégrer */
+/* #password-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+#password-form button {
+    font-size: 16px; 
+    padding: 12px; 
+    width: 100%; 
+} */
+
+
+/* .form-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+} */
+
+
+#advancedSettingsClose-btn {
+    /* BASE : PLUS GROS */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; 
+    font-size: 36px; /*!important; /* Rendre le 'X' plus visible */
+    width: 1.1em; /*40px;  /*Augmenté à 40px */
+    height: 1.1em ;/*40px; /* Augmenté à 40px */    
+    /* COULEURS AU REPOS (Gris/Transparent pour la discrétion) */
+    background-color: transparent; 
+    color: #333 !important; 
+    border: 1px solid #B0BEC5; /* AJOUT : Bordure ronde grise claire */
+
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s; /* Ajout du border-color à la transition */
+    margin-left: 10px;
+}
+
+/* Style de survol (Hover effect) : Rond rouge, X blanc */
+#advancedSettingsClose-btn:hover {
+    background-color: #F44336; /* Rouge vif au survol */
+    color: white !important; /* X blanc au survol */
+}
+
+
+
+
+.settings-Button {
+  cursor: pointer;
+  transition: transform 0.2s ease; /* animation fluide */
+}
+
+.settings-Button:hover {
+  transform: scale(1.4); /* léger grossissement */
+}
+
+
+
+#loadDataButton {
+  transition: transform 0.2s ease; /* animation fluide */   
+}
+
+#loadDataButton:hover {
+  transform: scale(1.05); /* léger grossissement */ 
+}
+
+.fullScreen-Button {
+  cursor: pointer;
+  transition: transform 0.2s ease; /* animation fluide */
+}
+
+.browserBar-Button {
+  cursor: pointer;
+  left: 50%;
+  transform: translateX(-50%); /* centré par défaut */
+  transition: transform 0.2s ease; /* animation fluide */
+}
+
+.fullScreen-Button:hover {
+  transform: scale(1.1); /* léger grossissement */
+}
+
+.browserBar-Button:hover {
+  transform: translateX(-50%) scale(1.1); /* léger grossissement */
+}
+
+
+.password-row, .or-row, .file-row, .submit-row {
+    margin-bottom: 10px;
+}
+
+.file-row button, .submit-row button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.or-row {
+    color: #666;
+    font-style: italic;
+}
+
+#gedfile {
+    display: none;
+}
+
+
+.file-row span {
+    color: #666;
+}
+
+
+.file-row {
+    display: flex;
+    align-items: center;
+}
+
+.file-row button {
+    margin-right: 10px;
+}
+
+#file-name {
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+
+.controls {
+    /* position: relative; */
+    position: fixed; 
+    z-index: 1000;  /* Pour être au-dessus de l'arbre */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alignement à gauche */
+ }
+ 
+ .controls-row-1, .controls-row-2  {
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    background-color: transparent;
+    display: flex;
+    justify-content: flex-start; /* Justification à gauche */
+    align-items: center;
+    /* width: 100%;
+    padding-left: 10px; 
+    gap: 10px; */
+ }
+ 
+
+     /* Espace entre les deux rangées */
+ /* .controls-row-1 {
+    margin-bottom: 10px; 
+ } */
+
+
+.controls-row-1 button:focus {
+    outline: none;  /* Supprime le contour de focus */
+}
+
+/* Base styles for control buttons */
+.controls-row-1 button {
+    /* min-width: 28px;
+    height: 30px; */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.7); /* Fond semi-transparent */
+    cursor: pointer;
+    border-radius: 0px;
+    transition: background-color 0.2s;
+    padding: 0;
+    /* Espacement normal entre les boutons */
+    /* margin: 3px;  */
+}
+
+.controls-row-1 button:hover {
+    background-color: rgba(255, 255, 255, 0.85); /* Fond un peu plus opaque au survol */
+}
+
+.controls-row-1 button span {
+    /* font-size: 26px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Styles for larger buttons */
+/* .controls-row-1 button.large-button {
+    min-width: 35px;
+    height: 30px;
+} */
+
+
+/* Augmenter l'espacement des éléments dans controls-row-1 */
+/* .controls-row-1 {
+    gap: 11px !important; 
+} */
+
+/* Légère augmentation de taille pour les 3 boutons */
+/* .controls-row-1 button {
+    min-width: 29px !important; 
+    height: 31px !important; 
+    margin: 1px;
+} */
+
+
+/* Augmenter la taille des icônes dans les boutons */
+/* .controls-row-1 button span {
+    font-size: 27px !important; 
+} */
+
+/* Augmenter aussi les icônes des boutons larges */
+/* .controls-row-1 button span.wide-span {
+    font-size: 33px !important; 
+} */
+
+
+
+
+ #settings-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.settings-section {
+    background-color: #f9f9f9;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+}
+
+.settings-section input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Pour s'assurer que le texte et les contrôles restent bien visibles */
+.controls select, 
+.controls input[type="number"],
+.controls input[type="text"],
+.controls button,
+.controls label {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+
+.controls button {
+    /* background-color: transparent; */
+    background-color: rgba(255, 255, 255, 0.5);
+    font-size: 12px; /* Taille de police plus grande */
+    padding: 0px; /* Padding plus important */
+    width: 100%; /* Largeur complète */
+    max-width: 20px;        
+}
+
+.controls select, 
+.controls input[type="number"] {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+.controls select {
+    font-size: 12px;
+    padding: 0px 0px 0px 0px; /* Augmenter le padding à droite */
+    height: 22px
+}
+
+.controls label {
+    font-size: 12px;
+    text-align: center; /* Centrer le texte */ 
+    background-color: transparent;
+    line-height: 0.9;
+    padding: opx
+}
+.node {
+    cursor: pointer;
+}
+.node rect {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+.node text {
+    font: 12px sans-serif;
+}
+
+
+
+/* .background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+} */
+
+/* .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;  
+    transition: opacity 2s ease-in-out;
+} */
+
+
+/* .background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    transition: opacity 2s ease-in-out;
+} */
+
+
+
+
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Assurez-vous qu'il soit derrière tous les autres éléments */
+    pointer-events: none; /* Pour ne pas interférer avec les interactions */
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Couvre tout l'écran sans déformation */
+    opacity: 0.15; /* Faible opacité comme dans votre code original */
+    transition: opacity 2s ease-in-out;
+}
+
+/* body {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+} */
+
+
+
+
+
+
+
+
+
+
+
+/* L'image qui sort */
+/* .background-image.fade-out {
+    opacity: 0;
+} */
+
+/* L'image qui entre */
+/* .background-image.fade-in {
+    opacity: 0.15;
+} */
+
+
+
+.tooltip {
+    position: absolute;
+    background: white;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.person-box {
+    fill: white;
+    stroke: steelblue;
+    cursor: pointer;
+    transition: stroke 0.3s;
+}
+.person-box.sibling {
+    stroke: #4CAF50;  /* Vert pour les fratries */
+}
+
+.person-box.spouse {
+    stroke: orange;
+    stroke-width: 1.5px;
+}
+
+.person-box.duplicate {
+    fill: #ffaaaa;  /* Rouge clair */
+    stroke: #ff0000;  /* Bordure rouge plus foncée */
+    stroke-width: 2px;
+}
+
+.person-box:hover {
+    stroke: #333;
+    stroke-width: 2px;
+}
+.selected {
+    stroke: #ff4444;
+    stroke-width: 2px;
+}
+.search-highlight {
+    fill: #ffeb3b;
+}
+/* .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+} */
+.link {
+    fill: none;
+    stroke: #AAA; /* Gris foncé au lieu de #ccc */
+    stroke-width: 1.5px;
+}
+.link.spouse {
+    stroke-dasharray: 5,5;
+}
+.link.sibling-link {
+    stroke: #4CAF50;  /* Vert pour les liens de fratrie */
+    stroke-dasharray: 3,3;  /* Trait pointillé optionnel */
+}
+.link.hidden {
+    display: none;
+}
+/* Styles for person details in modal window*/
+#person-details-modal {
+    display: none;
+    /* position: fixed; */
+    z-index: 1000;
+    /* left: 0;
+    top: 0; */
+    /* width: 100%; */
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    position: absolute !important;
+    top: 50px;
+    left: 10px;
+    width: calc(100% - 20px) !important;
+}
+.modal-content {
+    background-color: #f0f4f8; /* Bleu très clair pour le fond */
+    margin: 1% auto;
+    padding: 20px;
+    border: 1px solid #d1e7ff; /* Bordure bleu très pâle */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-width: 600px;
+}
+.details-section {
+    background-color: white;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.details-section:nth-child(odd) {
+    background-color: #f9fcff; /* Nuance de bleu très claire pour les sections impaires */
+}
+.details-section:nth-child(even) {
+    background-color: #f0f7ff; /* Autre nuance de bleu claire */
+}
+.details-section h3 {
+    color: #2c3e50; /* Bleu gris foncé pour les titres */
+    border-bottom: 2px solid #3498db; /* Ligne de titre bleu */
+    padding-bottom: 5px;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.modal-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.modal-close:hover,
+.modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.person-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+select {
+    appearance: none; /* Supprime le style natif */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') no-repeat right 10px center;
+    background-size: 24px; /* Réduire la taille de la flèche */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 60px 8px 10px; /* Augmenter le padding à droite */
+    font-size: 16px;
+    text-align: center; /* Centrer le texte */
+    min-width: 40px; /* Largeur minimale */
+    background-position: right 20px center; /* Position ajustée pour mobile */
+}
+.search-highlight {
+    fill: #ffeb3b !important; /* Jaune vif */
+    stroke: #ff4444 !important; /* Bordure rouge */
+    stroke-width: 3px !important;
+    transition: all 0.3s ease;
+}
+#search {
+    width: 100%; /* Réduire la largeur */
+    max-width: 50px; /* Limiter la largeur maximale */
+    min-width: 50px; /* Limiter la largeur minimale */    
+}
+
+#root-person-search {
+    background-color: rgb(246, 204, 127);
+    padding: 0px;
+    /* border: 1px solid #ccc;
+    border-radius: 4px; */
+    /* width: 65px;  */
+    /* font-size: 15px;  */
+    /* height: 30px; */
+    color: #000 !important;             /* texte */
+    -webkit-text-fill-color: #000 !important; /* cas Chrome/autofill */
+}
+
+
+
+.toggle-text {
+    cursor: pointer;
+}
+.toggle-text:hover {
+    opacity: 0.7;
+}
+
+
+
+
+
+/* styles pour l'affichage Cloud map */
+
+
+
+/* Pour les navigateurs webkit (Chrome, Safari, navigateurs récents) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    width: 35px;  /* Essayons 10px */
+    height: 100%; /* Garder la hauteur complète */
+    margin: 0;    /* Suppression des marges par défaut */
+    padding: 0;   /* Suppression du padding */
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+/* Pour l'input lui-même */
+input[type=number] {
+    /* padding-left: -10px;
+    margin-left: -7px;  */
+    padding-left: -5px;
+    margin-left: -7px; 
+
+    padding-right: 0px; /* Laisser de la place pour les flèches */
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+
+/* Pour Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+
+/* Réduire la taille de police du titre */
+.modal-container h2 {
+    font-size: 16px;  /* Taille de police plus petite */
+    margin: 10px 0;    /* Réduire les marges */
+}
+
+/* Réduire l'espace entre les éléments de configuration */
+.modal-container .options-container {
+    margin-bottom: 10px;  /* Réduire l'espace en-dessous */
+    display: flex;
+    align-items: center;
+    gap: 5px;  /* Espace minimal entre les éléments */
+}
+
+
+/* Réduire la taille des sélecteurs et boutons */
+.modal-container select,
+.modal-container button {
+    padding: 3px 5px;  /* Padding plus petit */
+    font-size: 15px;   /* Police plus petite */
+    height: 25px;      /* Hauteur fixe et réduite */
+}
+
+/* Réduire la hauteur du conteneur principal */
+.modal-container > div:first-child {
+    padding: 10px;  /* Padding réduit */
+}
+
+/* Augmenter l'espace pour le nuage de mots */
+.modal-container > div:last-child {
+    flex-grow: 1;
+    overflow: auto;
+    /* height: calc(100% - 100px);   */
+    /* Ajuster selon vos besoins */
+    
+}
+
+
+
+
+
+@keyframes findResults {
+    0% { background-color: yellow; }
+    50% { background-color: lightyellow; }
+    100% { background-color: yellow; }
+}
+
+
+
+
+
+/* Styles par défaut pour les boutons */
+.control-button {
+    font-size: 16px;
+    padding: 10px;
+    margin: 5px;
+}
+
+
+ /* #statsBtn {
+
+    background-color: #438aee; 
+    color: #fff;
+    border: 2px solid #438aee;
+    border-radius: 8px;
+    padding: 10px 24px;
+    cursor: pointer; 
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+} */
+/*
+#statsBtn .wide-span {
+    font-size: 12px !important;
+}
+
+#statsBtn:hover {
+    background-color: #2762a6; 
+    color: #ffd700;
+    border-color: #ffd700;
+} */
+
+#statsBtn:hover {
+  transform: scale(1.1);       /* petit zoom élégant */
+}
+
+
+
+
+
+
+
+/* Media query pour les petits écrans */
+/* @media screen and (max-width: 768px) {
+    .control-button {
+        font-size: 8px; 
+        padding: 0px; 
+        margin: 0px; 
+    }
+} */
+
+
+
+
+/* Styles responsive pour le formulaire de mot de passe */
+@media screen and (max-width: 768px) {
+
+    /* #password-form button {
+        font-size: 16px; 
+        padding: 12px; 
+        width: 100%; 
+    }
+    .controls input[type="text"],
+    .controls input[type="number"] {
+        font-size: 12px; 
+        padding: 0px; 
+        width: 100%; 
+        max-width: 50px;
+    }
+    .controls button {
+        font-size: 12px; 
+        padding: 0px; 
+        width: 100%; 
+        max-width: 20px;        
+    }   */
+
+
+    
+    .modal-content {
+        width: 95%; /* Plus étroit sur mobile */
+        margin: 1% auto; /* Moins de marge */
+        max-height: 80vh; /* Hauteur maximale */
+        overflow-y: auto; /* Scroll si nécessaire */
+        padding: 10px; /* Moins de padding */
+    }
+    .details-section {
+        padding: 10px; /* Moins de padding */
+        margin-bottom: 8px; /* Moins d'espace entre les sections */
+    }
+    .details-section h3 {
+        font-size: 16px; /* Taille de police plus petite */
+    }
+    .person-details {
+        grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+    }
+    /* #search {
+        width: 100%; 
+        max-width: 50px;
+    } */
+    /* #root-person-results {
+        max-width: 200px;
+    } */
+    /* #root-person-search {
+        width: 100%; 
+        max-width: 65px;
+        height: 30px;
+    }         */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Légère augmentation pour la zone de recherche */
+/* #root-person-search {
+    width: 65px !important; 
+    height: 27px !important; 
+    margin-left: -4px !important; 
+} */
+
+
+ /* #root-person-results {
+    margin-left: -25px;
+}  */
+
+/* Légère augmentation pour le sélecteur */
+ /* #root-person-results {
+    background-color: orange;
+    margin-top: 0px;
+    width: 100%;
+    padding: 0px 0px 0px 0px;
+    height: 27px !important; 
+    min-width: 35px !important;
+    max-width: 70px !important; 
+    margin-left: -15px !important;
+}  */
+
+
+/* #root-person-results {
+    background-color: orange;
+    margin-top: 0px;
+    width: 100%;
+    max-width: 200px;
+    min-width: 60px;
+    height: 23px;
+    padding: 0px 0px 0px 0px;
+} */
+
+/* #close-tree-button {
+    top: 6px; 
+    right: 6px; 
+} */
+
+
+
+.mobile-tooltip {
+    position: fixed;
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    z-index: 2000;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+
+
+
+
+/* Style pour la personne racine */
+.person-box.root {
+    fill: #ffb347; /*#ffa500; /* #fff3e0; /* orange */ /*#b6d1f6; /* Bleu clair */
+    stroke: #4a90e2; /* Bordure bleue plus foncée */
+    stroke-width: 2px; /* Bordure légèrement plus épaisse pour la racine */
+}
+
+/* Style existant que vous avez probablement déjà */
+.person-box.normal {
+    /* fill: white; */
+    fill: #f0fbfb; /* #ddf9f9; /* Bleu clair */
+    /* stroke: #666;
+    stroke-width: 1px; */
+}
+
+
+.person-box.spouse {
+    fill: #fff7fa; /* #fff0f5; /* Rose extrêmement pâle (Lavender Blush) */
+    /* stroke: #ffccda;  */
+    /* Bordure rose très légère */
+}
+
+.person-box.sibling {
+    fill: #f7fff7; /* #f0fff0; /* Vert extrêmement pâle (Honeydew) */
+    /* stroke: #d6ecd6;  */
+    /* Bordure verte très légère */
+}
+
+
+
+/* CSS pour le sélecteur de langue */
+/* .language-selector {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  } */
+  
+  .lang-flag {
+    font-size: 40px;
+    cursor: pointer; /* Supprime l'espace blanc autour des drapeaux */
+    width: 1em; /*40px;*/
+    height: 0.75em; /*30px;*/
+    cursor: pointer;
+    border: 0.05em solid transparent;
+    border-radius: 0.1em;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+  }
+  
+  .lang-flag:hover {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  
+  .lang-flag.active {
+    outline: 0.05em solid #2196F3;
+    outline-offset: 0.05em;    
+    border-color: #4CAF50;
+    opacity: 1;
+    box-shadow: 0 0 0.125em rgba(76, 175, 80, 0.5);
+  }
+  
+  /* Styles pour le drapeaux (versions simplifiées) */
+  .flag-fr {
+    background: linear-gradient(to right, #0055A4 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #EF4135 66.66%);
+  }
+  
+  .flag-en {
+    background: #012169 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cclippath id='a'%3E%3Cpath d='M0 0v30h60V0z'/%3E%3C/clippath%3E%3Cpath fill='%23012169' d='M0 0v30h60V0z'/%3E%3Cpath stroke='%23fff' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath stroke='%23C8102E' stroke-width='6' d='M0 0l60 30m0-30L0 30' clip-path='url(%23a)'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='10' d='M30 0v30M0 15h60'/%3E%3Cpath fill='none' stroke='%23C8102E' stroke-width='6' d='M30 0v30M0 15h60'/%3E%3C/svg%3E") center/cover no-repeat;
+  }
+  
+  .flag-es {
+    background: linear-gradient(to bottom, #C60B1E 25%, #FFC400 25%, #FFC400 75%, #C60B1E 75%);
+  }
+
+  /* Drapeau hongrois */
+  .flag-hu {
+    background: linear-gradient(to bottom, #CE2939 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #477050 66.66%);
+  }
+
+
+
+
+
+
+
+.play-btn { /* buttons ▶ and ⏸  */
+  color: white;                /* triangle blanc */
+  background: linear-gradient(to bottom, #7cc8ff, #1a6dff) !important;
+  border: none !important;
+  /* border-radius: 4px !important;
+  min-width: 28px !important;
+  min-height: 30px !important; */
+  /* box-shadow: */
+  /*  inset 0 2px 3px rgba(255,255,255,0.5),  /* lumière interne plus marquée */
+  /*  inset 0 -2px 3px rgba(0,0,80,0.4),      /* ombre interne basse plus sombre */
+  /*  0 1px 2px rgba(255,255,255,0.4),         /* bord clair externe */
+  /*  0 2px 4px rgba(0,0,0,0.35);             /* ombre portée externe */
+
+  /* transition: transform 0.2s ease, filter 0.2s ease; */
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+/* scale uniquement le triangle ▶ */
+/* .play-btn .icon {
+  font-size: 20px !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+} */
+
+.play-btn:hover {
+  background: #1a6dff;         /* bleu plus vif */
+  transform: scale(1.1);       /* petit zoom élégant */
+}
+
+
+/* Cache l'élément racine d'Eruda */
+#eruda {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

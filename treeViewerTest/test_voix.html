@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Synthèse Vocale Mi</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.5; }
+        button { padding: 15px; font-size: 18px; cursor: pointer; background: #4361ee; color: white; border: none; border-radius: 8px; width: 100%; }
+        #status { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; min-height: 50px; white-space: pre-wrap; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Diagnostic SpeechSynthesis</h2>
+    
+    <button onclick="testerParole()">1. Cliquer pour parler</button>
+
+    <div id="status">En attente de test...</div>
+
+    <h3>Voix détectées :</h3>
+    <ul id="voiceList"></ul>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const voiceList = document.getElementById('voiceList');
+        const synth = window.speechSynthesis;
+
+        function log(msg, isError = false) {
+            statusDiv.innerText += (isError ? "❌ " : "ℹ️ ") + msg + "\n";
+            console.log(msg);
+        }
+
+        // 1. Vérification du support
+        if (!('speechSynthesis' in window)) {
+            log("ERREUR : speechSynthesis n'est pas supporté par ce navigateur.", true);
+        } else {
+            log("API détectée. Chargement des voix...");
+        }
+
+        // 2. Affichage des voix (pour voir si Mi en trouve)
+        function chargerVoix() {
+            const voices = synth.getVoices();
+            voiceList.innerHTML = "";
+            if (voices.length === 0) {
+                log("Aucune voix trouvée pour l'instant (normal au premier chargement).");
+            } else {
+                log(voices.length + " voix détectées !");
+                voices.forEach(voice => {
+                    const li = document.createElement('li');
+                    li.textContent = `${voice.name} (${voice.lang})`;
+                    voiceList.appendChild(li);
+                });
+            }
+        }
+
+        // Événement crucial pour les navigateurs mobiles
+        synth.onvoiceschanged = () => {
+            log("Événement 'onvoiceschanged' détecté.");
+            chargerVoix();
+        };
+
+        // 3. La fonction de test
+        function testerParole() {
+            statusDiv.innerText = ""; // Reset
+            log("Tentative de parole lancée...");
+
+            const phrase = "Bonjour. Si vous entendez ceci, le navigateur Mi accepte la synthèse vocale.";
+            const utter = new SpeechSynthesisUtterance(phrase);
+            
+            // On force la première voix disponible pour le test
+            const voices = synth.getVoices();
+            if (voices.length > 0) {
+                utter.voice = voices.find(v => v.lang.includes('fr')) || voices[0];
+                log("Voix utilisée : " + utter.voice.name);
+            }
+
+            utter.onstart = () => log("LECTURE EN COURS...", false);
+            utter.onend = () => log("FIN DE LECTURE.", false);
+            utter.onerror = (e) => log("ERREUR SYNTHÈSE : " + e.error, true);
+
+            // On lance
+            synth.cancel(); // On nettoie avant
+            synth.speak(utter);
+        }
+
+        // Premier essai de chargement
+        chargerVoix();
+    </script>
+</body>
+</html>

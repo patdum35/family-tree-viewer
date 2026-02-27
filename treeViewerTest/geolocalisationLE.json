@@ -1,0 +1,2178 @@
+{
+  "La Prealle, Herstal, Belgique": {
+    "lat": 50.6668629,
+    "lon": 5.611534
+  },
+  "Aix la Chapelle, Allemagne": {
+    "lat": 50.776351,
+    "lon": 6.083862
+  },
+  "Worms, Rhénanie-Palatinat, Allemagne": {
+    "lat": 49.6302618,
+    "lon": 8.3620898
+  },
+  "Saint-Denis, 93066, Seine St Denis, Ile-de-France, France": {
+    "lat": 48.935773,
+    "lon": 2.3580232
+  },
+  "Héristal, Belgique": {
+    "lat": 50.6650412,
+    "lon": 5.629981
+  },
+  "Quierzy, 02631, Aisne, Picardie, France": {
+    "lat": 49.5713889,
+    "lon": 3.1441667
+  },
+  "Jupille-sur-Meuse, Liège, Belgique": {
+    "lat": 50.6431909,
+    "lon": 5.6301266
+  },
+  "Remiremont, 88383, Vosges, Lorraine, France": {
+    "lat": 48.0158951,
+    "lon": 6.5912615
+  },
+  "Cambrai, 59122, Hauts-de-France, France": {
+    "lat": 50.1757546,
+    "lon": 3.2346145
+  },
+  "Orléans, 45234, Loiret, Centre-Val de Loire, France": {
+    "lat": 47.9027336,
+    "lon": 1.9086066
+  },
+  "chateau de melun, Melun, 77, Seine-et-Marne, Ile-de-France, France": {
+    "lat": 48.5809085,
+    "lon": 2.5670983
+  },
+  "Melun, 77, Seine-et-Marne, Ile-de-France, France": {
+    "lat": 48.539927,
+    "lon": 2.6608169
+  },
+  "Prasville, 28304, Eure-et-Loir, Centre-Val de Loire, France": {
+    "lat": 48.2767097,
+    "lon": 1.7092261
+  },
+  "Eglise Saint-Denis, Paris, 75056, Paris, Ile-de-France, France": {
+    "lat": 48.8599705,
+    "lon": 2.3652531
+  },
+  "Brissarthe, 49051, Maine-et-Loire, Pays de la Loire, France": {
+    "lat": 47.7004572,
+    "lon": -0.4495089
+  },
+  "Vermandois, Normandie, France": {
+    "lat": 49.6281356,
+    "lon": -1.6253248
+  },
+  "Milan, Lombardie, Italie": {
+    "lat": 45.4641943,
+    "lon": 9.1896346
+  },
+  "Francfort (Allemagne)": {
+    "lat": 50.1106444,
+    "lon": 8.6820917
+  },
+  "Avrieux, 73500, Savoie,": {
+    "lat": 45.2153331,
+    "lon": 6.7201839
+  },
+  "Brest": {
+    "lat": 48.3905283,
+    "lon": -4.4860088
+  },
+  "Loperhet, 29140, Finistère, Bretagne, France": {
+    "lat": 48.3754847,
+    "lon": -4.3065629
+  },
+  "Landerneau, 29103, Finistère, Bretagne, France": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "Landerneau, Finistère, Bretagne, France": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "Kermerrien, Plouvien, Finistère, Bretagne, France": {
+    "lat": 48.5326894,
+    "lon": -4.5117546
+  },
+  "Plougastel-Daoulas, Finistère, Bretagne, France": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Pencran 29156, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4372905,
+    "lon": -4.2350745
+  },
+  "Landerneau 29103, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "Plouédern 29181, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4841517,
+    "lon": -4.2459354
+  },
+  "Bourg-Blanc, Finistère, Bretagne, France": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Ar Lech, Landerneau, Finistère, Bretagne, France": {
+    "lat": 48.4590913,
+    "lon": -4.262673
+  },
+  "Plouvien, Finistère, Bretagne, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Lambézellec, Brest, Finistère, Bretagne, France": {
+    "lat": 48.4157509,
+    "lon": -4.4924318
+  },
+  "Plabennec, Finistère, Bretagne, France": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Kervaziou, Bourg-Blanc, Finistère, Bretagne, France": {
+    "lat": 48.5014764,
+    "lon": -4.5053998
+  },
+  "Bourg-Blanc, 29015, Finistère, Bretagne, France": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Plabennec 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Milizac 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Saint-Pol-de-Léon, 29250, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6849601,
+    "lon": -3.9868641
+  },
+  "Plouvien, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Lannilis, Finistère, Bretagne, France": {
+    "lat": 48.569633,
+    "lon": -4.5215472
+  },
+  "Bourg-Blanc,  Finistère, Bretagne, France": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Plouvien, , Finistère, Bretagne, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Kermerrien Plouvien,  Finistère, Bretagne, France": {
+    "lat": 48.5326894,
+    "lon": -4.5117546
+  },
+  "Plouvien, 29209, Finistère, Bretagne, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouguerneau, Finistère, Bretagne, France": {
+    "lat": 48.6063358,
+    "lon": -4.506818
+  },
+  "Tréglonou, Finistère, Bretagne, France": {
+    "lat": 48.5516859,
+    "lon": -4.5384194
+  },
+  "plouvien": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Tréglonou, 29870, Finistère, Bretagne": {
+    "lat": 48.5516859,
+    "lon": -4.5384194
+  },
+  "Plouvien, 29860, Finistère, Bretagne": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien, , , ,": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien (29), , , ,": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Guissény, Finistère, Bretagne, France": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Kernilis, 29093, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5712881,
+    "lon": -4.4190749
+  },
+  "Plouguerneau, 29880, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6063358,
+    "lon": -4.506818
+  },
+  "Landéda, 29870, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5870031,
+    "lon": -4.5720236
+  },
+  "Guissény, 29880, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Guissény, 29077, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Lesneven, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5718493,
+    "lon": -4.3235917
+  },
+  "Plouguerneau, 29195, Finistère, Bretagne, France": {
+    "lat": 48.6063358,
+    "lon": -4.506818
+  },
+  "Plouvien, 29, Finistère, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Ploudalmézeau, 29178, Finistère, Bretagne, France": {
+    "lat": 48.5410278,
+    "lon": -4.6576826
+  },
+  "Lannilis, 29117, Finistère, Bretagne, France": {
+    "lat": 48.569633,
+    "lon": -4.5215472
+  },
+  "Landéda, 29101, Finistère, Bretagne, France": {
+    "lat": 48.5870031,
+    "lon": -4.5720236
+  },
+  "Plouguin, 29196, Finistère, Bretagne, France": {
+    "lat": 48.5252677,
+    "lon": -4.5976893
+  },
+  "Bourg-Blanc, 29860, Finistère, Bretagne": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Plouvien, 29, , , ,": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien, 29209,": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "PLOUVIEN, Finistère, Bretagne": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien, 29209, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Kerlouan, 29890, Finistère, Bretagne, FRANCE": {
+    "lat": 48.644456,
+    "lon": -4.3637438
+  },
+  "Guissény, 29077, Finistère, Bretagne, France": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Kerlouan, 29091, Finistère, Bretagne, France": {
+    "lat": 48.644456,
+    "lon": -4.3637438
+  },
+  "Plouvien (29)": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Lannilis, 29870, Finistère, Bretagne, France": {
+    "lat": 48.569633,
+    "lon": -4.5215472
+  },
+  "Plouguerneau, 29880, Finistère, Bretagne, France": {
+    "lat": 48.6063358,
+    "lon": -4.506818
+  },
+  "Milizac, 29149, Finistère, Bretagne, France": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "MIlizac, 29290, Finistère, Bretagne, France": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Saint-Renan, 29260, Finistère, Bretagne, France": {
+    "lat": 48.4328451,
+    "lon": -4.622982
+  },
+  "Milizac, 29290, Finistère, Bretagne, France": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Calanhel": {
+    "lat": 48.4366601,
+    "lon": -3.4812165
+  },
+  "Plougonven, 29191, Finistère, Bretagne, France": {
+    "lat": 48.5208348,
+    "lon": -3.7122511
+  },
+  "Le Faou": {
+    "lat": 48.295772,
+    "lon": -4.1809082
+  },
+  "Saint Pol de Léon, 29250, Finistère, Bretagne, France": {
+    "lat": 48.6849601,
+    "lon": -3.9868641
+  },
+  "Blois, 41018, Loir et Cher, France": {
+    "lat": 47.5876861,
+    "lon": 1.3337639
+  },
+  "La Roche Maurice, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4719455,
+    "lon": -4.2035505
+  },
+  "Douvres, Royaume-Uni": {
+    "lat": 51.1251275,
+    "lon": 1.3134228
+  },
+  "Londres, Royaume-Uni": {
+    "lat": 51.5074456,
+    "lon": -0.1277653
+  },
+  "Chartres, 280000, Eure et Loire, France": {
+    "lat": 48.4438601,
+    "lon": 1.4881434
+  },
+  "Marcigny, 71110, Saône-et-Loire, France": {
+    "lat": 46.2747868,
+    "lon": 4.0398531
+  },
+  "Falaise, 14258, Calvados, Normandie, France": {
+    "lat": 48.8964741,
+    "lon": -0.1999129
+  },
+  "Rouen, 76540, Seine Maritime, Normandie, France": {
+    "lat": 49.4404591,
+    "lon": 1.0939658
+  },
+  "Fécamp, 76259, Seine-Maritime, Normandie, France": {
+    "lat": 49.7577729,
+    "lon": 0.374891
+  },
+  "Picquigny, 80622, Somme, France": {
+    "lat": 49.9443256,
+    "lon": 2.1418065
+  },
+  "Eure - Evreux, 27229, Eure, Normandie, France": {
+    "lat": 48.9064867,
+    "lon": 1.2735196
+  },
+  "Saint Cadou, Sizun, Finistère, France": {
+    "lat": 48.373239,
+    "lon": -4.0195185
+  },
+  "Plougastel Daoulas(29)": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Brest, 29019, Finistère, Bretagne, France": {
+    "lat": 48.3905283,
+    "lon": -4.4860088
+  },
+  "Commana, 29038, Finistère, Bretagne, France": {
+    "lat": 48.4139586,
+    "lon": -3.9554613
+  },
+  "Sizun, 29277, Finistère, Bretagne, France": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Saint Cadou - Sizun, 29277, Finistère, Bretagne, France": {
+    "lat": 48.373239,
+    "lon": -4.0195185
+  },
+  "Mezout Bian, Loperhet, 29140, Finistère, Bretagne, France": {
+    "lat": 48.3747206,
+    "lon": -4.3257184
+  },
+  "Plougastel-Daoulas, 29189, Finistère, Bretagne, France": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Lesquivit, PLOUGASTEL-DAOULAS, Finistère, France": {
+    "lat": 48.3783147,
+    "lon": -4.3564802
+  },
+  "Irvillac, 29086, Finistère, Bretagne, France": {
+    "lat": 48.3713824,
+    "lon": -4.2110737
+  },
+  "Plougastel-Daoulas, 29470, Finistère, Bretagne, France": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Mezout Bian - Loperhet, 29140, Bretagne, France ???": {
+    "lat": 48.3747206,
+    "lon": -4.3257184
+  },
+  "Plougastel-Daoulas, 29, Finistère": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Kerhalvez, Plougastel-Daoulas, 29189, Finistère, Bretagne, France": {
+    "lat": 48.3629621,
+    "lon": -4.3720468
+  },
+  "Plougastel-Daoulas, 29, Finistère, Bretagne, France": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Saint-Sauveur, 29262, Finistère, Bretagne, France": {
+    "lat": 48.4471795,
+    "lon": -4.005725
+  },
+  "Commana, 29038": {
+    "lat": 48.4139586,
+    "lon": -3.9554613
+  },
+  "Guimiliau, 29074, Finistère, Bretagne, France": {
+    "lat": 48.4882362,
+    "lon": -3.9978134
+  },
+  "Sizun, Finistère, Bretagne,": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Saint Cadou - Sizun, , Finistère, Bretagne,": {
+    "lat": 48.373239,
+    "lon": -4.0195185
+  },
+  "Le Drennec, Finistère, Bretagne,": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Saint-Nazaire, 44184, Loire-Atlantique, Pays de la Loire, France": {
+    "lat": 47.2733517,
+    "lon": -2.2138905
+  },
+  "Paris, 75, Paris, Ile-de-France, France": {
+    "lat": 48.8605462,
+    "lon": 2.3791013
+  },
+  "Ballainvilliers, 91044, Essonne, Ile-de-France, France": {
+    "lat": 48.6752123,
+    "lon": 2.2944783
+  },
+  "Lambezellec, 29200, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4157509,
+    "lon": -4.4924318
+  },
+  "Paris 18ème": {
+    "lat": 48.8920934,
+    "lon": 2.3444494
+  },
+  "Bohars": {
+    "lat": 48.428823,
+    "lon": -4.5155977
+  },
+  "Nyons, 26110, Drôme, , FRANCE": {
+    "lat": 44.3611931,
+    "lon": 5.1408743
+  },
+  "Poilly-lez-Gien, 45254, Loiret, Centre-Val de Loire, France": {
+    "lat": 47.6769496,
+    "lon": 2.5932801
+  },
+  "Guipavas, 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Montmédy, 55600, Meuse, Grand Est, FRANCE": {
+    "lat": 49.5194191,
+    "lon": 5.3672502
+  },
+  "Roscoff, 29239, Finistère, Bretagne, France": {
+    "lat": 48.7255816,
+    "lon": -3.9828983
+  },
+  "Plougoulm, 29250, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6640619,
+    "lon": -4.04557
+  },
+  "Plouénan, 29184, Finistère, Bretagne, France": {
+    "lat": 48.6277816,
+    "lon": -3.988968
+  },
+  "Santec, 29273, Finistère, Bretagne, France": {
+    "lat": 48.7031864,
+    "lon": -4.0260322
+  },
+  "Plouénan": {
+    "lat": 48.6277816,
+    "lon": -3.988968
+  },
+  "Taulé": {
+    "lat": 48.603826,
+    "lon": -3.8995821
+  },
+  "Plouvorn, 29210, Finistère, Bretagne, France": {
+    "lat": 48.5790723,
+    "lon": -4.0378054
+  },
+  "Saint-Pol-de-Léon": {
+    "lat": 48.6849601,
+    "lon": -3.9868641
+  },
+  "Sibiril, 29250, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6648843,
+    "lon": -4.0633184
+  },
+  "Tréflaouénan, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6281024,
+    "lon": -4.0960192
+  },
+  "Sibiril": {
+    "lat": 48.6648843,
+    "lon": -4.0633184
+  },
+  "Cléder": {
+    "lat": 48.6612675,
+    "lon": -4.1039679
+  },
+  "Bourg-Blanc,29860,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Lampaul-Ploudalmézeau, 29099, Finistère, Bretagne, France": {
+    "lat": 48.5617935,
+    "lon": -4.6551129
+  },
+  "Plouarzel, 29177, Finistère, Bretagne, France": {
+    "lat": 48.433792,
+    "lon": -4.7309245
+  },
+  "Rennes, 35238, Ille et Vilaine, Bretagne, France": {
+    "lat": 48.1113387,
+    "lon": -1.6800198
+  },
+  "Taulé, 29279, Finistère, Bretagne, France": {
+    "lat": 48.603826,
+    "lon": -3.8995821
+  },
+  "Le Drennec, 29047, Finistère, Bretagne, France": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Plouider, 29198, Finistère, Bretagne, France": {
+    "lat": 48.6079965,
+    "lon": -4.2987232
+  },
+  "Dirinon 29045, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "Dirinon, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "Irvillac 29086, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3713824,
+    "lon": -4.2110737
+  },
+  "Hanvec 29078, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Lopérec 29139, 29590, Finistère, Bretagne, FRANCE": {
+    "lat": 48.2774273,
+    "lon": -4.0484214
+  },
+  "Loperhet 29140, 29470, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3754847,
+    "lon": -4.3065629
+  },
+  "Plougastel-Daoulas 29189, 29470, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Saint-Urbain 29270, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3994891,
+    "lon": -4.226856
+  },
+  "Hôpital-Camfrout 29080, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3214264,
+    "lon": -4.2366629
+  },
+  "Logonna-Daoulas 29137, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3206584,
+    "lon": -4.299589
+  },
+  "Le Tréhou, 29450, Finistère, Bretagne, FRANCE": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Pencran, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4372905,
+    "lon": -4.2350745
+  },
+  "Pencran, 29156, Finistère, Bretagne, France": {
+    "lat": 48.0230346,
+    "lon": -4.1492584
+  },
+  "Dirinon, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "St Thomas - Landerneau, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4489415,
+    "lon": -4.2489571
+  },
+  "Dirinon, 29045, Finistère, Bretagne, France": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "Dirinon, 29045, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "La Martyre, 29144, Finistère, Bretagne, France": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Dirinon, 29460, Finistère": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "La Martyre,29144, Finistère, Bretagne, France": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Bourg - La Martyre,29144, Finistère, Bretagne, France": {
+    "lat": 48.4482316,
+    "lon": -4.1601802
+  },
+  "Irvillac - Daoulas": {
+    "lat": 48.3944624,
+    "lon": -4.1975232
+  },
+  "Ploudiry, 29180, Finistère, Bretagne, France": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Saint-Thomas - Landerneau, 29103, Finistère, Bretagne, France": {
+    "lat": 48.4489228,
+    "lon": -4.2495087
+  },
+  "Saint-Thomas - Landerneau, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4489415,
+    "lon": -4.2489571
+  },
+  "St Thomas, Landerneau, 29103, Finistère, Bretagne, France": {
+    "lat": 48.4489228,
+    "lon": -4.2495087
+  },
+  "Pernaman - Loc-Eguiner, 29128, Finistère, Bretagne, France": {
+    "lat": 48.4859611,
+    "lon": -4.0847239
+  },
+  "Loc-Eguiner, 29128, Finistère, Bretagne, France": {
+    "lat": 48.4730112,
+    "lon": -4.0942227
+  },
+  "Verveur - La Martyre, 29144, Finistère, Bretagne, France": {
+    "lat": 48.446537,
+    "lon": -4.1889794
+  },
+  "Plouédern, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4841517,
+    "lon": -4.2459354
+  },
+  "Plounéventer, 29230, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5161379,
+    "lon": -4.21393
+  },
+  "Plabennec, 29160, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Plabennec, 29095, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Guipavas, 29075, Finistère, Bretagne, France": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Plounéventer, 29400, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5161379,
+    "lon": -4.21393
+  },
+  "Plounéventer, 29204, Finistère, Bretagne, France": {
+    "lat": 48.5161379,
+    "lon": -4.21393
+  },
+  "Trémaouézan, 29295, Finistère, Bretagne, France": {
+    "lat": 48.5037986,
+    "lon": -4.2541801
+  },
+  "La Forest-Landerneau,,Finistère,,": {
+    "lat": 48.4278084,
+    "lon": -4.3182625
+  },
+  "Trémaouézan, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5037986,
+    "lon": -4.2541801
+  },
+  "Plouguerneau,,Finistère,,": {
+    "lat": 48.6063358,
+    "lon": -4.506818
+  },
+  "Plabennec,,Finistère,,": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Milizac,,Finistère,,": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Guipavas": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "La Forest-Landerneau, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4278084,
+    "lon": -4.3182625
+  },
+  "Irvillac, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3713824,
+    "lon": -4.2110737
+  },
+  "La Forest-Landerneau, 29056, Finistère, Bretagne, France": {
+    "lat": 48.4278084,
+    "lon": -4.3182625
+  },
+  "Plabennec, 29160, Finistère, Bretagne, France": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Gouesnou, 29061, Finistère, Bretagne, FRANCE": {
+    "lat": 48.451729,
+    "lon": -4.465365
+  },
+  "Quimerch, 29560, Finistère, Bretagne, France,": {
+    "lat": 48.2556905,
+    "lon": -4.0859125
+  },
+  "Hanvec, 29078, Finistère, Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Le Faou, 29053, Finistère, Bretagne, France": {
+    "lat": 48.295772,
+    "lon": -4.1809082
+  },
+  "Rosnoën, 29240, Finistère, Bretagne, France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Hanvec, Finistère, Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Hanvec,29460,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "La Roche-Maurice,29800,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4719455,
+    "lon": -4.2035505
+  },
+  "Trémaouézan,,Finistère,,": {
+    "lat": 48.5037986,
+    "lon": -4.2541801
+  },
+  "Kerarsaos - St Thonan,,Finistère,,": {
+    "lat": 48.4917868,
+    "lon": -4.3358634
+  },
+  "Clos Neuf - La Roche-Maurice,29800,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4734297,
+    "lon": -4.2109631
+  },
+  "Guipavas,,Finistère,,": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Tréglonou, 29290, Finistère, Bretagne, France": {
+    "lat": 48.5516859,
+    "lon": -4.5384194
+  },
+  "Ploudaniel,,Finistère,,": {
+    "lat": 48.5369612,
+    "lon": -4.3100487
+  },
+  "Keramezec ? - Ploudaniel,,Finistère,,": {
+    "lat": 48.5029669,
+    "lon": -4.3117028
+  },
+  "Cléder,,Finistère,,": {
+    "lat": 48.6612675,
+    "lon": -4.1039679
+  },
+  "St Thonan,,Finistère,,": {
+    "lat": 48.4792138,
+    "lon": -4.3362597
+  },
+  "Saint-Houardon,,Finistère,,": {
+    "lat": 48.4519332,
+    "lon": -4.2506545
+  },
+  "Kersaos - St Thonan,,Finistère,,": {
+    "lat": 48.4851807,
+    "lon": -4.3383806
+  },
+  "Botiguery - St Thonan,,Finistère,,": {
+    "lat": 48.4663765,
+    "lon": -4.3089963
+  },
+  "Plabennec, 29095, Finistère, Bretagne, France": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Le Drennec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Plabennec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Plougar, 29187, Finistère, Bretagne, France": {
+    "lat": 48.562264,
+    "lon": -4.141439
+  },
+  "Plabennec, 29860, Finistère, Bretagne, France": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Saint-Divy, 29245, Finistère, Bretagne, France": {
+    "lat": 48.4538382,
+    "lon": -4.3349176
+  },
+  "Kernilis, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5712881,
+    "lon": -4.4190749
+  },
+  "Guipavas, 29490, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Saint-Frégant, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.602633,
+    "lon": -4.367119
+  },
+  "Bourg - Kernilis, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5713182,
+    "lon": -4.4193039
+  },
+  "Bourg-Blanc   29, , , , ,": {
+    "lat": 48.5116293,
+    "lon": -4.508497
+  },
+  "Bourg-Blanc 29, , , , ,": {
+    "lat": 48.5116293,
+    "lon": -4.508497
+  },
+  "Plabennec   29, , , , ,": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Plouvien, 29860, Finistère, Bretagne, France": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Bourg-Blanc, 29860, Finistère, Bretagne, France": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Bréventec - Bréventec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5153868,
+    "lon": -4.3762684
+  },
+  "Pellan - Kernilis, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.574355,
+    "lon": -4.4348884
+  },
+  "Breventec - Le Drennec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5153868,
+    "lon": -4.3762684
+  },
+  "Saint-Divy, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4538382,
+    "lon": -4.3349176
+  },
+  "Landerneau, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "Plougonven, 29640, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5208348,
+    "lon": -3.7122511
+  },
+  "Lannilis, 29870, Finistère, Bretagne, FRANCE": {
+    "lat": 48.569633,
+    "lon": -4.5215472
+  },
+  "Ergué-Gabéric, 29500, Finistère, Bretagne, FRANCE": {
+    "lat": 47.9965297,
+    "lon": -4.026792
+  },
+  "Kernilis,  29093, Finistère, Bretagne, France": {
+    "lat": 48.5712881,
+    "lon": -4.4190749
+  },
+  "Lanarvily, 29100, Finistère, Bretagne, France": {
+    "lat": 48.5519569,
+    "lon": -4.3888658
+  },
+  "Lagaduzic - Bourg Blanc, 29015, Finistère, Bretagne, France": {
+    "lat": 48.5079933,
+    "lon": -4.4876637
+  },
+  "Plouvien,29860,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Bourg Blanc, 29015, Finistère, Bretagne, France": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Plabennec,29860,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Le Drennec,29860,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Guipavas,29490,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Plouguin,29830,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5252677,
+    "lon": -4.5976893
+  },
+  "Locmaria-Plouzané,29280,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3747011,
+    "lon": -4.6444051
+  },
+  "Languidic, 56101, Morbihan, Bretagne, FRANCE": {
+    "lat": 47.8340055,
+    "lon": -3.1583936
+  },
+  "Milizac, 29149, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Ploudaniel, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5369612,
+    "lon": -4.3100487
+  },
+  "Milizac, Finistère, Bretagne, France": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Milizac, 29290, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4569489,
+    "lon": -4.5576639
+  },
+  "Ploudalmézeau, 29830, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5410278,
+    "lon": -4.6576826
+  },
+  "Lanneuffret, 29400, Finistère, Bretagne, FRANCE": {
+    "lat": 48.497697,
+    "lon": -4.202954
+  },
+  "Lanneuffret, 29400, Finistère, Bretagne, France": {
+    "lat": 48.497697,
+    "lon": -4.202954
+  },
+  "Plounéventer, 29400, Finistère, Bretagne, France": {
+    "lat": 48.5161379,
+    "lon": -4.21393
+  },
+  "Robiac-Rochessadoule, 30216, Gard, France": {
+    "lat": 44.2672288,
+    "lon": 4.1098645
+  },
+  "Montelimar, 26200, Drome, , FRANCE": {
+    "lat": 44.5579391,
+    "lon": 4.750318
+  },
+  "Nîmes, 30189, Gard, France": {
+    "lat": 43.8374249,
+    "lon": 4.3600687
+  },
+  "Nyons,26,Drome,,FRANCE": {
+    "lat": 44.3611931,
+    "lon": 5.1408743
+  },
+  "Villeperdrix, 26510, Drôme, , FRANCE": {
+    "lat": 44.4417579,
+    "lon": 5.2870419
+  },
+  "Venterol,26110,Drôme,,FRANCE": {
+    "lat": 44.3889859,
+    "lon": 5.0993308
+  },
+  "Bourdeaux, 26460, Drôme, , FRANCE": {
+    "lat": 44.5867879,
+    "lon": 5.1342966
+  },
+  "Vinsobres, 26110, Drôme, , FRANCE": {
+    "lat": 44.3339938,
+    "lon": 5.0609674
+  },
+  "Bourdeaux, 26460, Drôme, FRANCE": {
+    "lat": 44.5867879,
+    "lon": 5.1342966
+  },
+  "Espenel,26340,Drôme,,FRANCE": {
+    "lat": 44.6838,
+    "lon": 5.2348738
+  },
+  "Treschenu-Creyers,26410,Drôme,,FRANCE": {
+    "lat": 44.7367841,
+    "lon": 5.5472368
+  },
+  "Boulc,26410,Drôme,,FRANCE": {
+    "lat": 44.6482,
+    "lon": 5.56614
+  },
+  "Châtillon-en-Diois,26410,Drôme,,FRANCE": {
+    "lat": 44.6951492,
+    "lon": 5.4851785
+  },
+  "Rigny-le-Ferron, 10319, Aube, Champagne-Ardenne, France": {
+    "lat": 48.2084989,
+    "lon": 3.6310348
+  },
+  "Lailly, 89214, Yonne, Bourgogne, France": {
+    "lat": 48.24336,
+    "lon": 3.52939
+  },
+  "Courgenay, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2863869,
+    "lon": 3.5489709
+  },
+  "Foissy-sur-Vanne, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.22367,
+    "lon": 3.50495
+  },
+  "Véron": {
+    "lat": 48.1281866,
+    "lon": 3.3070869
+  },
+  "Paron, 89287, Yonne, Bourgogne, France": {
+    "lat": 48.1785718,
+    "lon": 3.2470551
+  },
+  "Courgenay, 89122, Yonne, Bourgogne, France": {
+    "lat": 48.2863869,
+    "lon": 3.5489709
+  },
+  "Saint-Etienne-Vallée-Française, 48148, Lozère, France": {
+    "lat": 44.1671974,
+    "lon": 3.8409135
+  },
+  "Saint-Etienne-Vallée-Française, Lozère, France": {
+    "lat": 44.1671974,
+    "lon": 3.8409135
+  },
+  "Boucoiran,gard": {
+    "lat": 43.992667,
+    "lon": 4.18752
+  },
+  "Nimes,30000,Gard": {
+    "lat": 43.8374249,
+    "lon": 4.3600687
+  },
+  "Le Pouzin,07250,Ardeche": {
+    "lat": 44.7555185,
+    "lon": 4.7485628
+  },
+  "Nimes  30000,30000": {
+    "lat": 43.8374249,
+    "lon": 4.3600687
+  },
+  "Boucoiran 30,Gard": {
+    "lat": 43.992667,
+    "lon": 4.18752
+  },
+  "LE POUZIN": {
+    "lat": 44.7555185,
+    "lon": 4.7485628
+  },
+  "ST LAGER BRESSAC": {
+    "lat": 44.6923,
+    "lon": 4.71026
+  },
+  "Le Pouzin, 07250, Ardèche, , FRANCE": {
+    "lat": 44.7555185,
+    "lon": 4.7485628
+  },
+  "La Voulte, 07800, Ardèche, , FRANCE": {
+    "lat": 44.8000756,
+    "lon": 4.7813846
+  },
+  "Rochessauve, 07194, Ardèche, , France": {
+    "lat": 44.6796032,
+    "lon": 4.6260059
+  },
+  "Saint-Lager-Bressac, 07260 Ardeche  FRANCE": {
+    "lat": 44.6923,
+    "lon": 4.71026
+  },
+  "Saint lager Bressac, 07260 Ardèche  FRANCE": {
+    "lat": 44.6923,
+    "lon": 4.71026
+  },
+  "Pourchères 07 Ardèche  France": {
+    "lat": 44.7467,
+    "lon": 4.50612
+  },
+  "Pourchères, 07179, , France": {
+    "lat": 44.7467,
+    "lon": 4.50612
+  },
+  "Rochessauve, 07194, , Franc": {
+    "lat": 44.6796032,
+    "lon": 4.6260059
+  },
+  "Saint-Lager-Bressac, 07260, Ardèche, , FRANCE": {
+    "lat": 44.6923,
+    "lon": 4.71026
+  },
+  "Alissas, Ardeche, France": {
+    "lat": 44.7141578,
+    "lon": 4.6327064
+  },
+  "Rochessauve, 07194, Ardèche, , FRANCE": {
+    "lat": 44.6796032,
+    "lon": 4.6260059
+  },
+  "Freyssenet, 07092, Ardèche, , France": {
+    "lat": 44.6823581,
+    "lon": 4.5411994
+  },
+  "Privas, 07186, Ardèche, , France": {
+    "lat": 44.7352708,
+    "lon": 4.5986733
+  },
+  "Chales - Berzème, 07032, Ardèche, , France": {
+    "lat": 44.659332,
+    "lon": 4.5844276
+  },
+  "Berzème, 07032, Ardèche, , France": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Berzème, 07032, Ardèche, , FRANCE": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Chalès - Berzème, 07032, Ardèche, , FRANCE": {
+    "lat": 44.659332,
+    "lon": 4.5844276
+  },
+  "Berzème, 07, Ardèche, -  -, FRANCE": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Berzème, 07, Ardèche, , FRANCE": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Berzème, 07032, Ardèche,, France": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Saint-Jean-le-Centenier, 07580, Ardèche, , FRANCE": {
+    "lat": 44.591,
+    "lon": 4.53414
+  },
+  "Berzème, 07580, Ardèche, , FRANCE": {
+    "lat": 44.6523,
+    "lon": 4.56472
+  },
+  "Saint-Jean-le-Centenier, 07247, Ardèche, , FRANCE": {
+    "lat": 44.591,
+    "lon": 4.53414
+  },
+  "Chomerac, Ardeche, France": {
+    "lat": 44.708414,
+    "lon": 4.6615361
+  },
+  "Pourchères, 07179, Ardèche, France": {
+    "lat": 44.7467,
+    "lon": 4.50612
+  },
+  "Rochessauve, 07194, Ardèche, France": {
+    "lat": 44.6796032,
+    "lon": 4.6260059
+  },
+  "Saint-Sauveur-de-Montagut, 07190, Ardèche, , FRANCE": {
+    "lat": 44.8215401,
+    "lon": 4.5801909
+  },
+  "Issamoulenc, 07190, Ardèche, , FRANCE": {
+    "lat": 44.7821,
+    "lon": 4.45835
+  },
+  "Saint-Pierreville, 07190, Ardèche, , FRANCE": {
+    "lat": 44.8152273,
+    "lon": 4.4884463
+  },
+  "Saint-Sauveur-de-Montagut, Ardèche, FRANCE": {
+    "lat": 44.8215401,
+    "lon": 4.5801909
+  },
+  "Annonay, 07100, Ardèche, , FRANCE": {
+    "lat": 45.2399639,
+    "lon": 4.6675475
+  },
+  "Saint-Pierreville, 07286, , France": {
+    "lat": 44.8152273,
+    "lon": 4.4884463
+  },
+  "Annonay, 07010, , France": {
+    "lat": 45.2399639,
+    "lon": 4.6675475
+  },
+  "Saint-Sauveur-de-Montagut, 07295, , France": {
+    "lat": 44.8215401,
+    "lon": 4.5801909
+  },
+  "Privas, 07000, Ardèche, , FRANCE": {
+    "lat": 44.7352708,
+    "lon": 4.5986733
+  },
+  "Le Cheylard ?, 07160, France": {
+    "lat": 44.9093,
+    "lon": 4.42245
+  },
+  "Le Cheylard (07) Ardeche, France": {
+    "lat": 44.9093,
+    "lon": 4.42245
+  },
+  "La Voulte-sur-Rhône, 07800, Ardèche, , FRANCE": {
+    "lat": 44.8000756,
+    "lon": 4.7813846
+  },
+  "la Voulte-sur-Rhône, 07349, , France": {
+    "lat": 44.8000756,
+    "lon": 4.7813846
+  },
+  "Saint-Pierre de Rompon, Ardèche, France": {
+    "lat": 44.7680762,
+    "lon": 4.749945
+  },
+  "Banne, 07024, Ardèche, , France": {
+    "lat": 44.3681,
+    "lon": 4.15405
+  },
+  "Raucoules, 43": {
+    "lat": 45.1882791,
+    "lon": 4.2952521
+  },
+  "Monistrol-sur-Loire, 43": {
+    "lat": 45.2926341,
+    "lon": 4.1727546
+  },
+  "La Rivoire, Monistrol-sur-Loire": {
+    "lat": 45.3106129,
+    "lon": 4.2006934
+  },
+  "Raucoules, France": {
+    "lat": 45.1882791,
+    "lon": 4.2952521
+  },
+  "Saint-Front, Haute-Loire, France": {
+    "lat": 44.9756854,
+    "lon": 4.1428766
+  },
+  "Saint-Étienne-de-Serre, 07190, Ardèche, , FRANCE": {
+    "lat": 44.80157,
+    "lon": 4.5398122
+  },
+  "Saint Etienne de Serres, 07, Ardèche,  FRANCE": {
+    "lat": 44.8162547,
+    "lon": 4.5685102
+  },
+  "St Etienne de Serre, 07, Ardeche, , FRANCE": {
+    "lat": 44.80157,
+    "lon": 4.5398122
+  },
+  "St-Pierreville 07": {
+    "lat": 44.8152273,
+    "lon": 4.4884463
+  },
+  "Coubon, 43700, Haute Loire, France": {
+    "lat": 44.9965854,
+    "lon": 3.9177723
+  },
+  "Coubon, 43078, Haute Loire, France": {
+    "lat": 44.9965854,
+    "lon": 3.9177723
+  },
+  "Coubon, Haute-Loire, France": {
+    "lat": 44.9965854,
+    "lon": 3.9177723
+  },
+  "Gluiras, Ardèche, FRANCE": {
+    "lat": 44.847,
+    "lon": 4.52357
+  },
+  "Abbatiale Saint-Chaffre, le Monastier, France": {
+    "lat": 44.9394884,
+    "lon": 3.9949997
+  },
+  "Saint-Agrève, 07320, Ardèche, , France": {
+    "lat": 45.0100141,
+    "lon": 4.3950488
+  },
+  "Naples": {
+    "lat": 40.8358846,
+    "lon": 14.2487679
+  },
+  "Mayenne": {
+    "lat": 48.1507819,
+    "lon": -0.6491274
+  },
+  "Sablé-sur-Sarthe, 72300, Sarthe, Pays de la Loire, FRANCE": {
+    "lat": 47.8400712,
+    "lon": -0.3352048
+  },
+  "Montmorency, 95160, Val-d'Oise, Île-de-France, FRANCE": {
+    "lat": 48.9891693,
+    "lon": 2.3197111
+  },
+  "Le Mans, 72000, Sarthe, Pays de la Loire, FRANCE": {
+    "lat": 48.0073849,
+    "lon": 0.1967849
+  },
+  "Bellême, 61130, Orne, Normandie, FRANCE": {
+    "lat": 48.3753612,
+    "lon": 0.5629418
+  },
+  "Le Mans, 72000, Sarthe, Pays de la Loire, France": {
+    "lat": 48.0073849,
+    "lon": 0.1967849
+  },
+  "Metz, 57000, Moselle, Lorraine, FRANCE": {
+    "lat": 49.1196964,
+    "lon": 6.1763552
+  },
+  "Chasseneuil-du-Poitou, 86360, Vienne, Poitou-Charentes": {
+    "lat": 46.6505634,
+    "lon": 0.3748389
+  },
+  "Ingelheim am Rhein, ALLEMAGNE": {
+    "lat": 49.9752749,
+    "lon": 8.0547274
+  },
+  "Aix-la-Chapelle, ALLEMAGNE": {
+    "lat": 50.776351,
+    "lon": 6.083862
+  },
+  "Altdorf, ALLEMAGNE": {
+    "lat": 49.2863021,
+    "lon": 8.2164153
+  },
+  "Tours, 37000, Indre-et-Loire, Centre, FRANCE": {
+    "lat": 47.3900474,
+    "lon": 0.6889268
+  },
+  "Alès, 30100, Gard, France": {
+    "lat": 44.1253665,
+    "lon": 4.0852818
+  },
+  "Chambon-sur-Voueize, 23045, Creuse, Limousin, France": {
+    "lat": 46.1886294,
+    "lon": 2.425828
+  },
+  "Auxerre, 89024, Yonne, Bourgogne, France": {
+    "lat": 47.7961287,
+    "lon": 3.570579
+  },
+  "Eglise de St-Etienne d'Auxerre": {
+    "lat": 48.0034289,
+    "lon": 3.6833083
+  },
+  "Saint-Gilles, 30258, Gard, France": {
+    "lat": 43.677007,
+    "lon": 4.4318488
+  },
+  "Messines, 8957, Flandre Occidentale, Flandre, Belgique": {
+    "lat": 50.7598269,
+    "lon": 2.8998324
+  },
+  "Weißkirchen in Steiermark, Autriche": {
+    "lat": 47.1533213,
+    "lon": 14.7366379
+  },
+  "France": {
+    "lat": 46.603354,
+    "lon": 1.8883335
+  },
+  "Francfort-sur-le-Main, Allemagne": {
+    "lat": 50.1106444,
+    "lon": 8.6820917
+  },
+  "Bohars, 29820, Finistère, Bretagne, FRANCE": {
+    "lat": 48.428823,
+    "lon": -4.5155977
+  },
+  "Guipronvel, 29076, Finistère, Bretagne, France": {
+    "lat": 48.4933296,
+    "lon": -4.569884
+  },
+  "???, France": {
+    "lat": 46.603354,
+    "lon": 1.8883335
+  },
+  "Kerider - Guipronvel, 29076, Finistère, Bretagne, France": {
+    "lat": 48.5005783,
+    "lon": -4.5624363
+  },
+  "Ploudaniel,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5369612,
+    "lon": -4.3100487
+  },
+  "Plouider,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6079965,
+    "lon": -4.2987232
+  },
+  "Saint Servais, 29400, Finistère, Bretagne, France": {
+    "lat": 48.5110375,
+    "lon": -4.1547375
+  },
+  "Pont Christ, 29237, Finistère, Bretagne, France": {
+    "lat": 48.6490985,
+    "lon": -4.1959517
+  },
+  "Pencran, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4372905,
+    "lon": -4.2350745
+  },
+  "Plouédern, 29181, Finistère, Bretagne, France": {
+    "lat": 48.4841517,
+    "lon": -4.2459354
+  },
+  "Lanneuffret, 29116, Finistère, Bretagne, France": {
+    "lat": 48.497697,
+    "lon": -4.202954
+  },
+  "Flacy, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2261896,
+    "lon": 3.608977
+  },
+  "Villeneuve-l'Archevêque, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2363724,
+    "lon": 3.5579884
+  },
+  "Vulaines, Aube, Grand Est, France": {
+    "lat": 48.23302,
+    "lon": 3.61952
+  },
+  "Rigny-le-Ferron, Aube, Grand Est, France": {
+    "lat": 48.2084989,
+    "lon": 3.6310348
+  },
+  "Voisines, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.251697,
+    "lon": 3.3933603
+  },
+  "Les Clérimois, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2273906,
+    "lon": 3.4403366
+  },
+  "Bagneaux, Yonne, Bourgogne -Franche-Comté, France": {
+    "lat": 48.2320591,
+    "lon": 3.5944098
+  },
+  "Bagneaux, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2320591,
+    "lon": 3.5944098
+  },
+  "Fontaine-la-Gaillarde, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.2202152,
+    "lon": 3.3800231
+  },
+  "Les Sièges, Yonne, Bourgogne-Franche-Comté, France": {
+    "lat": 48.17952,
+    "lon": 3.51799
+  },
+  "Villeneuve-l'Archevêque, 89461, Yonne, Bourgogne, France": {
+    "lat": 48.2363724,
+    "lon": 3.5579884
+  },
+  "Saint-Benoist-sur-Vanne, 10335, Aube, Champagne-Ardenne, France": {
+    "lat": 48.23545,
+    "lon": 3.66938
+  },
+  "Molinons, 89261, Yonne, Bourgogne, France": {
+    "lat": 48.23073,
+    "lon": 3.536
+  },
+  "Vulaines, 10444, Aube, Champagne-Ardenne, France": {
+    "lat": 48.23302,
+    "lon": 3.61952
+  },
+  "Bagneaux, 89027, Yonne, Bourgogne, France": {
+    "lat": 48.2320591,
+    "lon": 3.5944098
+  },
+  "Bercenay-le-Hayer, 10038, Aube, Champagne-Ardenne, France": {
+    "lat": 48.34294,
+    "lon": 3.59112
+  },
+  "Saint-Urbain, 29270, Finistère, Bretagne, France": {
+    "lat": 48.3994891,
+    "lon": -4.226856
+  },
+  "Plougastel-Daoulas, 29470, 29, Finistère - Mezargaz": {
+    "lat": 48.3797654,
+    "lon": -4.3308656
+  },
+  "Kergoat - Loperhet, 29140, Finistère, Bretagne, France": {
+    "lat": 48.3563275,
+    "lon": -4.3127612
+  },
+  "Mezout Bian - Loperhet, 29140, Finistère, Bretagne, France": {
+    "lat": 48.3747206,
+    "lon": -4.3257184
+  },
+  "Loperhet, 29140, Bretagne, France ???": {
+    "lat": 48.3754847,
+    "lon": -4.3065629
+  },
+  "Loperhet, 29140, Bretagne, France - Mezout Bian": {
+    "lat": 48.3747206,
+    "lon": -4.3257184
+  },
+  "Tréflévénez, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4158504,
+    "lon": -4.1707425
+  },
+  "Kergoffou - La Martyre, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4260595,
+    "lon": -4.1563208
+  },
+  "La Martyre, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Loc-Eguiner, 29400, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4730112,
+    "lon": -4.0942227
+  },
+  "Ploudiry, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Saint-Urbain, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3994891,
+    "lon": -4.226856
+  },
+  "Saint-Houardon - Landerneau, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4519332,
+    "lon": -4.2506545
+  },
+  "Landerneau, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "La Forest Landerneau, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4278084,
+    "lon": -4.3182625
+  },
+  "Tréflévénez, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4158504,
+    "lon": -4.1707425
+  },
+  "Saint Thomas - Landerneau, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4489415,
+    "lon": -4.2489571
+  },
+  "Dirinon, 29460, Finistère, Bretagne, France": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "ploudaniel": {
+    "lat": 48.5369612,
+    "lon": -4.3100487
+  },
+  "Quimerc'h - Pont-de-Buis-lès-Quimerch, 29590, Finistère, Bretagne, FRANCE": {
+    "lat": 48.2832869,
+    "lon": -4.1067375
+  },
+  "Pont-de-Buis-lès-Quimerch, 29590, Finistère, Bretagne, FRANCE": {
+    "lat": 48.2556905,
+    "lon": -4.0859125
+  },
+  "Lopérec, 29590, Finistère, Bretagne, FRANCE": {
+    "lat": 48.2774273,
+    "lon": -4.0484214
+  },
+  "Crevel - Lopérec, 29590, Finistère, Bretagne, FRANCE": {
+    "lat": 48.2956235,
+    "lon": -4.0509738
+  },
+  "Brasparts, 29190, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3019638,
+    "lon": -3.9558632
+  },
+  "Saint-Urbain, 29270, Finistère, Bretagne,": {
+    "lat": 48.3994891,
+    "lon": -4.226856
+  },
+  "Daoulas, 29043, Finistère, Bretagne, France": {
+    "lat": 48.3615618,
+    "lon": -4.259431
+  },
+  "Scao - Plouguin, 29830, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5350114,
+    "lon": -4.5637518
+  },
+  "Saint-Servais, 22160, Côtes-d'Armor, Bretagne, FRANCE": {
+    "lat": 48.3873336,
+    "lon": -3.3881776
+  },
+  "Plouguin, 29830, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5252677,
+    "lon": -4.5976893
+  },
+  "Plourin, 29830, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5093656,
+    "lon": -4.6870131
+  },
+  "Plouguin, 29830, Finistère, Bretagne, France": {
+    "lat": 48.5252677,
+    "lon": -4.5976893
+  },
+  "Plouvien, 29, Finistère, Bretagne": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plouvien, 29, Finistère, Bretagne,": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Plourin, finistère, France": {
+    "lat": 48.5093656,
+    "lon": -4.6870131
+  },
+  "Plouguin, 29196, Finistère, Bretagne": {
+    "lat": 48.5252677,
+    "lon": -4.5976893
+  },
+  "Plouvien,  Finistère, Bretagne": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Coat-Méal, 29870, Finistère, Bretagne, France": {
+    "lat": 48.5086643,
+    "lon": -4.5414778
+  },
+  "Plouvien 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5305465,
+    "lon": -4.451225
+  },
+  "Bourg-Blanc 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5116293,
+    "lon": -4.508497
+  },
+  "Kernilis 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5712881,
+    "lon": -4.4190749
+  },
+  "Lanarvily 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5519569,
+    "lon": -4.3888658
+  },
+  "Le Drennec, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Kernilis, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5712881,
+    "lon": -4.4190749
+  },
+  "Le Drennec 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5347375,
+    "lon": -4.3700732
+  },
+  "Tréglonou 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5516859,
+    "lon": -4.5384194
+  },
+  "Guissény 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Guissény 29 ( Kerbrézan ), Finistère, Bretagne, FRANCE": {
+    "lat": 48.6374702,
+    "lon": -4.4083085
+  },
+  "Plouvorn, 29420, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5790723,
+    "lon": -4.0378054
+  },
+  "La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4719455,
+    "lon": -4.2035505
+  },
+  "Kervern - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4487246,
+    "lon": -4.188533
+  },
+  "L'Isle - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4718024,
+    "lon": -4.1762094
+  },
+  "Saint-Servais, 29400, Finistère, Bretagne, FRANCE": {
+    "lat": 48.5110375,
+    "lon": -4.1547375
+  },
+  "La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Sizun, 29450, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Plouider, 29260, Finistère, Bretagne, FRANCE": {
+    "lat": 48.6079965,
+    "lon": -4.2987232
+  },
+  "Ploudiry, 29180, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Ploudiry, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Bodilis, 29010, Finistère, Bretagne, FRANCE": {
+    "lat": 48.53056,
+    "lon": -4.1167121
+  },
+  "Lannilis, 29117, Bretagne, FRANCE": {
+    "lat": 48.569633,
+    "lon": -4.5215472
+  },
+  "Lothunou - Lannilis, 29117, Bretagne, FRANCE": {
+    "lat": 48.563729,
+    "lon": -4.5410791
+  },
+  "?, 29, Finistère, Bretagne, FRANCE": {
+    "lat": 48.0002283,
+    "lon": -4.0410959
+  },
+  "Kermadec - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4654307,
+    "lon": -4.2021993
+  },
+  "Roudouhir - Hanvec, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3406822,
+    "lon": -4.1375224
+  },
+  "Hanvec, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Le Val - Hanvec, 29460, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3317197,
+    "lon": -4.184688
+  },
+  "Moguerou - Sizun, 29450, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3751696,
+    "lon": -4.0085008
+  },
+  "Saint-Maudez - Sizun, 29450, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4045131,
+    "lon": -4.0544932
+  },
+  "Irvillac, 29086, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3713824,
+    "lon": -4.2110737
+  },
+  "La Garenne - Brasparts, 29190, Finistère, Bretagne, FRANCE": {
+    "lat": 48.3202177,
+    "lon": -3.9621655
+  },
+  "Penanrun - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.463315,
+    "lon": -4.191633
+  },
+  "Plouzévédé, 29213, Finistère, Bretagne, FRANCE": {
+    "lat": 48.595965,
+    "lon": -4.112168
+  },
+  "Cadol, 29140, Finistère, Bretagne, FRANCE": {
+    "lat": 47.9402965,
+    "lon": -3.854843
+  },
+  "Isle - La Roche Maurice, 29237, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4718024,
+    "lon": -4.1762094
+  },
+  "La Haie - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4581074,
+    "lon": -4.1782186
+  },
+  "Roudouguenvez - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4248904,
+    "lon": -4.1358224
+  },
+  "Le Cann - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4257186,
+    "lon": -4.160266
+  },
+  "Poulbroch - La Martyre, 29144, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4362925,
+    "lon": -4.1736313
+  },
+  "Le Tréhou Stang (a)": {
+    "lat": 48.3863541,
+    "lon": -4.1154434
+  },
+  "Le Tréhou Kerbrun (a)": {
+    "lat": 48.3997945,
+    "lon": -4.1063576
+  },
+  "Le Tréhou, Finistère, France": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Le Tréhou, 29, , , , Bretagne": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Tréhou, 29294, Finistère, Bretagne, France": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "le Tréhou, 29294, Finistère, Bretagne, France": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Lopérec, 29139, Finistère, Bretagne, France": {
+    "lat": 48.2774273,
+    "lon": -4.0484214
+  },
+  "La Roche-Maurice, 29237, Finistère, Bretagne, France": {
+    "lat": 48.4719455,
+    "lon": -4.2035505
+  },
+  "Le Tréhou, Finistère, Bretagne, France": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "le Tréhou, Finistère, Bretagne, France": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Tréflévénez, 29286, Finistère, Bretagne, France": {
+    "lat": 48.4158504,
+    "lon": -4.1707425
+  },
+  "Saint Sauveur, , Finistère, Bretagne,": {
+    "lat": 48.4471795,
+    "lon": -4.005725
+  },
+  "Kergreven - Lampaul Guimiliau, , Finistère, Bretagne,": {
+    "lat": 48.4756936,
+    "lon": -4.0328607
+  },
+  "Stamadec, Commana, 29038, Finistère, Bretagne, France": {
+    "lat": 48.3913969,
+    "lon": -3.9993783
+  },
+  "Roscoat, Commana, 29038, Finistère, Bretagne, France": {
+    "lat": 48.3989264,
+    "lon": -3.9785996
+  },
+  "Stamadec,Commana, 29038, Finistère, Bretagne, France": {
+    "lat": 48.3913969,
+    "lon": -3.9993783
+  },
+  "Hengoat - Sizun, , Finistère, Bretagne,": {
+    "lat": 48.378951,
+    "lon": -4.0008976
+  },
+  "Sizun - Finistère - Bretagne.": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Sizun, Finistère, Bretagne.": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Kergudon - Sizun, , Finistère, Bretagne,": {
+    "lat": 48.3743911,
+    "lon": -4.0177183
+  },
+  "Guimiliau,, Finistère, Bretagne,": {
+    "lat": 48.4882362,
+    "lon": -3.9978134
+  },
+  "Sizun, , Finistère, Bretagne,": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Commana, , Finistère, Bretagne,": {
+    "lat": 48.4139586,
+    "lon": -3.9554613
+  },
+  "Kermorvan - Commana, , Finistère, Bretagne,": {
+    "lat": 48.4377227,
+    "lon": -3.9647148
+  },
+  "Bodivy - Sizun, , Finistère, Bretagne,": {
+    "lat": 48.404638,
+    "lon": -4.0817264
+  },
+  "Locmelar, , Finistère, Bretagne,": {
+    "lat": 48.4528938,
+    "lon": -4.0654009
+  },
+  "Plabennec": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Kersaint Plabennec": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Keraiber Ploudaniel": {
+    "lat": 48.50183,
+    "lon": -4.3240109
+  },
+  "Kersaint-Plabennec, 29095, Finistère, Bretagne, France": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Kervily Kersaint-Plabennec, 29095, Finistère, Bretagne, France": {
+    "lat": 48.4970483,
+    "lon": -4.3628076
+  },
+  "Kersaint-Plabennec, 29860, Finistère, Bretagne, France": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Saint Thonan, 29800, Finistère, Bretagne, France": {
+    "lat": 48.4792138,
+    "lon": -4.3362597
+  },
+  "29800 Saint Thonan, Finistère, Bretagne, France": {
+    "lat": 48.4876994,
+    "lon": -4.2719144
+  },
+  "Ploudaniel, 29260, Finistère, Bretagne, France": {
+    "lat": 48.5369719,
+    "lon": -4.3106173
+  },
+  "Benghazi, Libye": {
+    "lat": 32.1200168,
+    "lon": 20.0812174
+  },
+  "Salles-sous-Bois, Drôme, , France": {
+    "lat": 44.4511,
+    "lon": 4.93441
+  },
+  "Paris, île de France, France": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "roudouhir - Hanvec,29460,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3406822,
+    "lon": -4.1375224
+  },
+  "Rosnoën,29580,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën,29580,Finistère,Bretagne,France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën, 29590, Finistère, Bretagne, France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Rosnoën, 29580, Finistère, Bretagne, France": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Hanvec, 29460, Finistère, Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "L'Hopital Camfrout, 29460, Finistère  Bretagne, France": {
+    "lat": 48.3214264,
+    "lon": -4.2366629
+  },
+  "Douarnenez, 29100, Finistère, Bretagne, France": {
+    "lat": 48.0944459,
+    "lon": -4.3311243
+  },
+  "Hanvec, 29460, Finistère Bretagne, France": {
+    "lat": 48.3271604,
+    "lon": -4.1597391
+  },
+  "Ploemeur, 56270, Morbihan, Bretagne, France": {
+    "lat": 47.7354591,
+    "lon": -3.4270534
+  },
+  "Lestraouen Plougastel Daoulas": {
+    "lat": 48.3408724,
+    "lon": -4.3704104
+  },
+  "Plougastel Daoulas Finistère Bretagne": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Kersaint-Plabennec, 29860, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4713377,
+    "lon": -4.3740404
+  },
+  "Beuzit-Conogan, 29103, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4417599,
+    "lon": -4.2793636
+  },
+  "Saint-Thonan, 29800, Finistère, Bretagne, FRANCE": {
+    "lat": 48.4792138,
+    "lon": -4.3362597
+  },
+  "Plouzévédé, 29440, Finistère, Bretagne, France": {
+    "lat": 48.595965,
+    "lon": -4.112168
+  },
+  "Plougar, 29440, Finistère, Bretagne, France": {
+    "lat": 48.562264,
+    "lon": -4.141439
+  },
+  "Kervingant - Plouzévédé, 29440, Finistère, Bretagne, France": {
+    "lat": 48.593557,
+    "lon": -4.10231
+  },
+  "Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.6612675,
+    "lon": -4.1039679
+  },
+  "Kersaudy - Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.63104,
+    "lon": -4.1404059
+  },
+  "Kerleunoc - Cléder, 29233, Finistère, Bretagne, France": {
+    "lat": 48.670037,
+    "lon": -4.1543287
+  },
+  "Boulevard de la Boutière - Saint-Grégoire, 35760, Ille-et-Vilaine, Bretagne, FRANCE": {
+    "lat": 48.1433544,
+    "lon": -1.6881925
+  },
+  "Ploudaniel,29179,Finistère,Bretagne,France": {
+    "lat": 48.5369719,
+    "lon": -4.3106173
+  },
+  "Lanneuffret,29 ,Finistère,Bretagne,France": {
+    "lat": 48.4978925,
+    "lon": -4.2035575
+  },
+  "Landerneau,29103,Finistère,Bretagne,France": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "La Forest-Landerneau,29106,Finistère,Bretagne,France": {
+    "lat": 48.4279152,
+    "lon": -4.3177287
+  },
+  "Guipavas,29075,Finistère,Bretagne,France": {
+    "lat": 48.4346366,
+    "lon": -4.400979
+  },
+  "Dirinon,29045,Finistère,Bretagne,France": {
+    "lat": 48.3975444,
+    "lon": -4.2689684
+  },
+  "Ploudalmézeau,29178,Bretagne,France": {
+    "lat": 48.5410278,
+    "lon": -4.6576826
+  },
+  "Loperhet,29140,Finistère,Bretagne,France": {
+    "lat": 48.3754847,
+    "lon": -4.3065629
+  },
+  "Ploudiry, Finistère": {
+    "lat": 48.4532343,
+    "lon": -4.1418753
+  },
+  "Le Tréhou, Finistère": {
+    "lat": 48.393974,
+    "lon": -4.131626
+  },
+  "Tréflévénez, Finistère": {
+    "lat": 48.4158504,
+    "lon": -4.1707425
+  },
+  "Tréflévénez, Finistère (Tromelin)": {
+    "lat": 48.4046489,
+    "lon": -4.1591346
+  },
+  "La Martyre, Finistère": {
+    "lat": 48.4483714,
+    "lon": -4.1580155
+  },
+  "Ploudiry, Finistère (Salou Coativy)": {
+    "lat": 48.4413157,
+    "lon": -4.1052168
+  },
+  "Landivisiau, Finistère, Bretagne, France": {
+    "lat": 48.5127551,
+    "lon": -4.0699356
+  },
+  "Landivisiau, Finistère": {
+    "lat": 48.5127551,
+    "lon": -4.0699356
+  },
+  "Landivisiau, Finistère (Saint-Guénal)": {
+    "lat": 48.507173,
+    "lon": -4.0708849
+  },
+  "Landivisiau, Finistère (Rue Saint-Guénal)": {
+    "lat": 48.507173,
+    "lon": -4.0708849
+  },
+  "Landivisiau, Finistère (19 Rue du Manoir)": {
+    "lat": 48.5110349,
+    "lon": -4.0737499
+  }
+}

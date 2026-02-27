@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Fullscreen Measurements</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px 0;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    #log {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .measurement-section {
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .highlight {
+      background: yellow;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 Test des mesures Fullscreen</h1>
+  
+  <p>
+    Ce test va passer en fullscreen pendant 2 secondes, 
+    prendre toutes les mesures possibles, puis revenir en mode normal.
+  </p>
+  
+  <button id="testBtn">🚀 Lancer le test Fullscreen</button>
+  <button id="clearBtn">🗑️ Effacer le log</button>
+  
+  <div id="log"></div>
+
+  <script>
+    const logElement = document.getElementById('log');
+    const testBtn = document.getElementById('testBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    
+    let measurementData = {
+      beforeFullscreen: {},
+      duringFullscreen: {},
+      afterFullscreen: {}
+    };
+
+    function log(message, highlight = false) {
+      const timestamp = new Date().toLocaleTimeString();
+      const line = `[${timestamp}] ${message}\n`;
+      
+      if (highlight) {
+        logElement.innerHTML += `<span class="highlight">${line}</span>`;
+      } else {
+        logElement.textContent += line;
+      }
+      
+      logElement.scrollTop = logElement.scrollHeight;
+      console.log(message);
+    }
+
+    function getAllMeasurements(label) {
+      const measurements = {
+        // Screen measurements
+        screen_width: window.screen.width,
+        screen_height: window.screen.height,
+        screen_availWidth: window.screen.availWidth,
+        screen_availHeight: window.screen.availHeight,
+        screen_colorDepth: window.screen.colorDepth,
+        screen_pixelDepth: window.screen.pixelDepth,
+        
+        // Window measurements
+        window_innerWidth: window.innerWidth,
+        window_innerHeight: window.innerHeight,
+        window_outerWidth: window.outerWidth,
+        window_outerHeight: window.outerHeight,
+        
+        // Device Pixel Ratio
+        devicePixelRatio: window.devicePixelRatio,
+        
+        // Calculated physical resolution
+        calculated_physical_width: window.screen.width * window.devicePixelRatio,
+        calculated_physical_height: window.screen.height * window.devicePixelRatio,
+        
+        // Document measurements
+        document_clientWidth: document.documentElement.clientWidth,
+        document_clientHeight: document.documentElement.clientHeight,
+        
+        // Viewport
+        visualViewport_width: window.visualViewport?.width,
+        visualViewport_height: window.visualViewport?.height,
+        visualViewport_scale: window.visualViewport?.scale,
+        
+        // Fullscreen state
+        isFullscreen: document.fullscreenElement !== null,
+        fullscreenElement: document.fullscreenElement?.tagName || 'none'
+      };
+      
+      return measurements;
+    }
+
+    function logMeasurements(measurements, title) {
+      log(`\n${'='.repeat(60)}`, false);
+      log(`${title}`, true);
+      log(`${'='.repeat(60)}`, false);
+      
+      log('\n📺 SCREEN (Écran physique):', false);
+      log(`  screen.width x height: ${measurements.screen_width} x ${measurements.screen_height}`, false);
+      log(`  screen.availWidth x availHeight: ${measurements.screen_availWidth} x ${measurements.screen_availHeight}`, false);
+      log(`  screen.colorDepth: ${measurements.screen_colorDepth}`, false);
+      log(`  screen.pixelDepth: ${measurements.screen_pixelDepth}`, false);
+      
+      log('\n🪟 WINDOW (Fenêtre du navigateur):', false);
+      log(`  window.innerWidth x innerHeight: ${measurements.window_innerWidth} x ${measurements.window_innerHeight}`, false);
+      log(`  window.outerWidth x outerHeight: ${measurements.window_outerWidth} x ${measurements.window_outerHeight}`, false);
+      
+      log('\n📱 DEVICE PIXEL RATIO:', true);
+      log(`  devicePixelRatio: ${measurements.devicePixelRatio}`, true);
+      
+      log('\n🖥️ RÉSOLUTION PHYSIQUE CALCULÉE:', true);
+      log(`  screen.width × DPR: ${measurements.calculated_physical_width}`, true);
+      log(`  screen.height × DPR: ${measurements.calculated_physical_height}`, true);
+      
+      log('\n📄 DOCUMENT:', false);
+      log(`  document.documentElement.clientWidth x clientHeight: ${measurements.document_clientWidth} x ${measurements.document_clientHeight}`, false);
+      
+      log('\n👁️ VISUAL VIEWPORT:', false);
+      log(`  visualViewport.width x height: ${measurements.visualViewport_width} x ${measurements.visualViewport_height}`, false);
+      log(`  visualViewport.scale: ${measurements.visualViewport_scale}`, false);
+      
+      log('\n🎬 FULLSCREEN STATE:', false);
+      log(`  isFullscreen: ${measurements.isFullscreen}`, false);
+      log(`  fullscreenElement: ${measurements.fullscreenElement}`, false);
+    }
+
+    function compareMeasurements(before, during, after) {
+      log(`\n${'='.repeat(60)}`, false);
+      log(`📊 COMPARAISON DES MESURES`, true);
+      log(`${'='.repeat(60)}`, false);
+      
+      const keys = Object.keys(before);
+      
+      keys.forEach(key => {
+        const beforeVal = before[key];
+        const duringVal = during[key];
+        const afterVal = after[key];
+        
+        // Vérifier si les valeurs ont changé
+        const changedDuringFS = beforeVal !== duringVal;
+        const changedAfterFS = duringVal !== afterVal;
+        const backToNormal = beforeVal === afterVal;
+        
+        if (changedDuringFS || changedAfterFS) {
+          log(`\n${key}:`, true);
+          log(`  Avant FS:   ${beforeVal}`, false);
+          log(`  Pendant FS: ${duringVal} ${changedDuringFS ? '← CHANGÉ' : ''}`, changedDuringFS);
+          log(`  Après FS:   ${afterVal} ${!backToNormal ? '← NE REVIENT PAS À LA NORMALE!' : ''}`, !backToNormal);
+        }
+      });
+      
+      // Analyse spéciale du DPR
+      log(`\n${'='.repeat(60)}`, false);
+      log(`🔍 ANALYSE DU DEVICE PIXEL RATIO`, true);
+      log(`${'='.repeat(60)}`, false);
+      
+      if (before.devicePixelRatio === during.devicePixelRatio) {
+        log(`✅ Le DPR reste IDENTIQUE en fullscreen (${before.devicePixelRatio})`, true);
+        log(`   → Le zoom navigateur affecte TOUJOURS le DPR en fullscreen`, true);
+        log(`   → ❌ Cette méthode NE PEUT PAS détecter le DPR réel`, true);
+      } else {
+        log(`✅ Le DPR CHANGE en fullscreen!`, true);
+        log(`   Avant: ${before.devicePixelRatio} → Pendant: ${during.devicePixelRatio}`, true);
+        log(`   → ✅ Cette méthode PEUT détecter le DPR réel!`, true);
+      }
+    }
+
+    async function runFullscreenTest() {
+      try {
+        log('\n\n🚀 DÉBUT DU TEST', true);
+        log('Zoom navigateur actuel: Vérifiez dans votre navigateur (Ctrl+molette ou Ctrl+0)', false);
+        
+        // Mesures AVANT fullscreen
+        await new Promise(resolve => setTimeout(resolve, 500));
+        measurementData.beforeFullscreen = getAllMeasurements();
+        logMeasurements(measurementData.beforeFullscreen, '📸 MESURES AVANT FULLSCREEN');
+        
+        log('\n⏳ Passage en fullscreen dans 1 seconde...', false);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Passer en fullscreen
+        await document.documentElement.requestFullscreen();
+        log('\n✅ Fullscreen activé!', true);
+        
+        // Attendre que le navigateur stabilise les mesures
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Mesures PENDANT fullscreen
+        measurementData.duringFullscreen = getAllMeasurements();
+        logMeasurements(measurementData.duringFullscreen, '📸 MESURES PENDANT FULLSCREEN');
+        
+        log('\n⏳ Sortie du fullscreen dans 2 secondes...', false);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Sortir du fullscreen
+        await document.exitFullscreen();
+        log('\n✅ Fullscreen désactivé!', true);
+        
+        // Attendre un peu
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Mesures APRÈS fullscreen
+        measurementData.afterFullscreen = getAllMeasurements();
+        logMeasurements(measurementData.afterFullscreen, '📸 MESURES APRÈS FULLSCREEN');
+        
+        // Comparaison
+        compareMeasurements(
+          measurementData.beforeFullscreen,
+          measurementData.duringFullscreen,
+          measurementData.afterFullscreen
+        );
+        
+        log('\n\n✅ TEST TERMINÉ!', true);
+        log('💡 Essayez maintenant de changer le zoom du navigateur (Ctrl+ ou Ctrl-) et relancez le test.', false);
+        
+      } catch (error) {
+        log(`\n❌ ERREUR: ${error.message}`, true);
+        log('Note: Le fullscreen nécessite une interaction utilisateur (clic sur le bouton)', false);
+      }
+    }
+
+    // Event listeners
+    testBtn.addEventListener('click', runFullscreenTest);
+    clearBtn.addEventListener('click', () => {
+      logElement.textContent = '';
+      log('Log effacé. Prêt pour un nouveau test.', false);
+    });
+
+    // Log initial
+    log('Prêt à tester. Cliquez sur le bouton pour lancer le test.', false);
+    log('Conseil: Testez avec différents zooms navigateur (Ctrl+0 pour 100%, Ctrl+ pour zoomer)', false);
+  </script>
+</body>
+</html>

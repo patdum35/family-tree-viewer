@@ -1,0 +1,2002 @@
+{
+  "Landivisiau,29105,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5127551,
+    "lon": -4.0699356
+  },
+  "Plounévez-Lochrist,29206,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6174675,
+    "lon": -4.2110063
+  },
+  "Plounévez-Lochrist,29430,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6174675,
+    "lon": -4.2110063
+  },
+  "Plouvorn,29210,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5790723,
+    "lon": -4.0378054
+  },
+  "Saint-Vougay,29271,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5940258,
+    "lon": -4.1379131
+  },
+  "Lampaul-Guimiliau,29097,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4935856,
+    "lon": -4.0433645
+  },
+  "Plouzévédé,29213,Finistère,Bretagne,FRANCE": {
+    "lat": 48.595965,
+    "lon": -4.112168
+  },
+  "Trézilidé,29301,Finistère,Bretagne,FRANCE": {
+    "lat": 48.609356,
+    "lon": -4.087303
+  },
+  "Sibiril,29276,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6648843,
+    "lon": -4.0633184
+  },
+  "Plougoulm,29192,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6640619,
+    "lon": -4.04557
+  },
+  "Lanhouarneau,29111,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5793208,
+    "lon": -4.2103749
+  },
+  "Le Mans,72181,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0073849,
+    "lon": 0.1967849
+  },
+  "Noyen,72223,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8723118,
+    "lon": -0.0992579
+  },
+  "Vion,72378,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8193592,
+    "lon": -0.2389191
+  },
+  "Parcé-sur-Sarthe,72228,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8434492,
+    "lon": -0.1986762
+  },
+  "Tassé,72347,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8898752,
+    "lon": -0.1364026
+  },
+  "Pirmil,72237,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9124045,
+    "lon": -0.0973998
+  },
+  "Le Havre,76351,Normandie,FRANCE": {
+    "lat": 49.4938975,
+    "lon": 0.1079732
+  },
+  "Paris,75106,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Ploaré,29046,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0858368,
+    "lon": -4.3207223
+  },
+  "Logonna-Daoulas,29137,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3206584,
+    "lon": -4.299589
+  },
+  "Plonévez-Porzay,29176,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1267385,
+    "lon": -4.2201939
+  },
+  "Villainville,76741,Normandie,FRANCE": {
+    "lat": 49.6603362,
+    "lon": 0.2440325
+  },
+  "Vittefleur,76748,Normandie,FRANCE": {
+    "lat": 49.8189759,
+    "lon": 0.6376968
+  },
+  "Cléder,29030,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6612675,
+    "lon": -4.1039679
+  },
+  "Plouescat,29185,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6572057,
+    "lon": -4.1743159
+  },
+  "Vattetot-sur-Mer,76726,Normandie,FRANCE": {
+    "lat": 49.7282797,
+    "lon": 0.2800862
+  },
+  "Fercé-sur-Sarthe,72131,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9014492,
+    "lon": -0.0307267
+  },
+  "Douarnenez,29046,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0944459,
+    "lon": -4.3311243
+  },
+  "Criquebeuf-en-Caux,76194,Normandie,FRANCE": {
+    "lat": 49.74033,
+    "lon": 0.33204
+  },
+  "Criquebeuf-en-Caux,76111,Normandie,FRANCE": {
+    "lat": 49.74033,
+    "lon": 0.33204
+  },
+  "Octeville-sur-Mer,76930,Normandie,FRANCE": {
+    "lat": 49.5553201,
+    "lon": 0.1161519
+  },
+  "Paris,75009,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Fécamp,76259,Normandie,FRANCE": {
+    "lat": 49.7577729,
+    "lon": 0.374891
+  },
+  "Mézières-sur-Ponthouin,72290,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.193248,
+    "lon": 0.2985281
+  },
+  "Écrainville,76110,Normandie,FRANCE": {
+    "lat": 49.6503748,
+    "lon": 0.3252411
+  },
+  "Saint-Pierre-en-Port,76540,Normandie,FRANCE": {
+    "lat": 49.8069179,
+    "lon": 0.4946787
+  },
+  "Bertreville,76084,Normandie,FRANCE": {
+    "lat": 49.7673564,
+    "lon": 0.5801703
+  },
+  "Theuville-aux-Maillots,76686,Normandie,FRANCE": {
+    "lat": 49.7651851,
+    "lon": 0.5435424
+  },
+  "Thérouldeville,76540,Normandie,FRANCE": {
+    "lat": 49.7552689,
+    "lon": 0.5216394
+  },
+  "Angerville-la-Martel,76013,Normandie,FRANCE": {
+    "lat": 49.7614028,
+    "lon": 0.5013556
+  },
+  "Levallois-Perret,92044,Hauts de Seine,Île-de-FRANCE": {
+    "lat": 48.892956,
+    "lon": 2.2881683
+  },
+  "Concarneau,29039,Finistère,Bretagne,FRANCE": {
+    "lat": 47.8757017,
+    "lon": -3.9223889
+  },
+  "Kerlaz,29090,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0912954,
+    "lon": -4.2719988
+  },
+  "Ploare,29046,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0858368,
+    "lon": -4.3207223
+  },
+  "Doudeville,76560,Normandie,FRANCE": {
+    "lat": 49.7229361,
+    "lon": 0.7835886
+  },
+  "Saint-Léonard,76400,Normandie,FRANCE": {
+    "lat": 49.7436857,
+    "lon": 0.3600596
+  },
+  "Le Hanouard,76339,Normandie,FRANCE": {
+    "lat": 49.7301081,
+    "lon": 0.6619725
+  },
+  "Héricourt-en-Caux,76355,Normandie,FRANCE d' Héricourt": {
+    "lat": 49.6969006,
+    "lon": 0.6743835
+  },
+  "Juigné-sur-Sarthe,72151,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8632521,
+    "lon": -0.2867745
+  },
+  "Vaas,72364,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.668841,
+    "lon": 0.3144401
+  },
+  "Saint-Mars-la-Brière,72300,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0301287,
+    "lon": 0.3718076
+  },
+  "Conteville,76390,Normandie,FRANCE": {
+    "lat": 49.6938778,
+    "lon": 1.6348314
+  },
+  "Le Tilleul,76790,Normandie,FRANCE": {
+    "lat": 49.6833648,
+    "lon": 0.20339
+  },
+  "Pouldergat,29224,Finistère,Bretagne,FRANCE": {
+    "lat": 48.043461,
+    "lon": -4.3275721
+  },
+  "Poullan-sur-Mer,29226,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0803295,
+    "lon": -4.4144643
+  },
+  "Neuville-aux-Bois,45224,Loiret,Centre,FRANCE": {
+    "lat": 48.0695211,
+    "lon": 2.0534134
+  },
+  "Paris,75111,Île-de-FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Froberville,76291,Normandie,FRANCE": {
+    "lat": 49.7217636,
+    "lon": 0.331158
+  },
+  "Plogonnec,29169,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0776491,
+    "lon": -4.1915768
+  },
+  "Savigné-L'Évêque,72329,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0773296,
+    "lon": 0.2962126
+  },
+  "Saint-Plaisir,03251,Allier,Auvergne,FRANCE": {
+    "lat": 46.6225895,
+    "lon": 2.9684788
+  },
+  "Alexandrie,Egypte": {
+    "lat": 31.1991806,
+    "lon": 29.8951716
+  },
+  "La Milesse,72198,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0647399,
+    "lon": 0.1361917
+  },
+  "Canouville,76156,Normandie,FRANCE": {
+    "lat": 49.8066238,
+    "lon": 0.6036945
+  },
+  "Vinnemerville,76540,Normandie,FRANCE": {
+    "lat": 49.80613,
+    "lon": 0.555
+  },
+  "Yvré-le-Pôlin,72385,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8184362,
+    "lon": 0.1522973
+  },
+  "Ouainville,76488,Normandie,FRANCE": {
+    "lat": 49.7844397,
+    "lon": 0.5902585
+  },
+  "Vire,14762,Calvados,Normandie,FRANCE": {
+    "lat": 48.8385198,
+    "lon": -0.8893293
+  },
+  "Coulaines,72095,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0306873,
+    "lon": 0.2068691
+  },
+  "Combrit,29037,Finistère,Bretagne,FRANCE": {
+    "lat": 47.8873445,
+    "lon": -4.1563101
+  },
+  "Le Bailleul,72022,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7679046,
+    "lon": -0.1613837
+  },
+  "Poillé-sur-Vègre,72239,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9196294,
+    "lon": -0.265377
+  },
+  "Brûlon,72050,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.2022493,
+    "lon": 0.3221543
+  },
+  "Fontenay-sur-Vègre,72136,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9040008,
+    "lon": -0.2209596
+  },
+  "Brest,29019,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3905283,
+    "lon": -4.4860088
+  },
+  "Locronan,29134,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0984894,
+    "lon": -4.2077026
+  },
+  "Malleville-les-Grès,76403,Normandie,FRANCE": {
+    "lat": 49.8309297,
+    "lon": 0.6067597
+  },
+  "Gerponville,76299,Normandie,FRANCE": {
+    "lat": 49.7524426,
+    "lon": 0.5650873
+  },
+  "Cuverville,76280,Normandie,FRANCE": {
+    "lat": 49.6641832,
+    "lon": 0.2613169
+  },
+  "Bretteville-du-Grand-Caux,76143,Normandie,FRANCE": {
+    "lat": 49.6629465,
+    "lon": 0.3922726
+  },
+  "Aigné,72001,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0652788,
+    "lon": 0.1191661
+  },
+  "Montaudin,53154,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 48.3859546,
+    "lon": -0.9890746
+  },
+  "Quéménéven,29229,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1149391,
+    "lon": -4.1205993
+  },
+  "Cast,29025,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1576903,
+    "lon": -4.1385595
+  },
+  "Ploare,29100,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0858368,
+    "lon": -4.3207223
+  },
+  "Gourlizon,29065,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0194092,
+    "lon": -4.2669528
+  },
+  "Plomodiern,29172,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1815192,
+    "lon": -4.2328062
+  },
+  "Plougourvest,29193,Finistère,Bretagne,FRANCE": {
+    "lat": 48.554211,
+    "lon": -4.085873
+  },
+  "Saint-Pol-de-Léon,29259,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6849601,
+    "lon": -3.9868641
+  },
+  "Ploéven,29166,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1571549,
+    "lon": -4.2333681
+  },
+  "Quimper,29232,Finistère,Bretagne,FRANCE": {
+    "lat": 47.9960325,
+    "lon": -4.1024782
+  },
+  "Guengat,29066,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0425444,
+    "lon": -4.2050526
+  },
+  "Pouldergat": {
+    "lat": 48.043461,
+    "lon": -4.3275721
+  },
+  "Plounéour-Trez,29203,Finistère,Bretagne,FRANCE": {
+    "lat": 48.646876,
+    "lon": -4.3313019
+  },
+  "Lunéville,54329,Meurthe et Moselle,Lorraine,FRANCE": {
+    "lat": 48.5916164,
+    "lon": 6.4919563
+  },
+  "Maulévrier-Sainte-Gertrude,76490,Normandie,FRANCE": {
+    "lat": 49.5551855,
+    "lon": 0.721912
+  },
+  "Sassetot-le-Mauconduit,76663,Normandie,FRANCE": {
+    "lat": 49.8023407,
+    "lon": 0.5297357
+  },
+  "Plonéis,29173,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0158575,
+    "lon": -4.2078869
+  },
+  "Châteaulin,29026,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1968026,
+    "lon": -4.0916875
+  },
+  "Ternat,52486,Haute Marne,Champagne-Ardenne,FRANCE": {
+    "lat": 47.9058525,
+    "lon": 5.1266052
+  },
+  "Saint Nazaire,44184,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.2733517,
+    "lon": -2.2138905
+  },
+  "Aix-les-Bains,73008,Savoie,Rhône-Alpes,FRANCE": {
+    "lat": 45.6886292,
+    "lon": 5.9146362
+  },
+  "Loudéac,22136,Côtes d'Armor,Bretagne,FRANCE": {
+    "lat": 48.1762534,
+    "lon": -2.7535644
+  },
+  "Plougar,29187,Finistère,Bretagne,FRANCE": {
+    "lat": 48.562264,
+    "lon": -4.141439
+  },
+  "Bertheauville,76450,Normandie,FRANCE": {
+    "lat": 49.7542104,
+    "lon": 0.597414
+  },
+  "Montivilliers,76447,Normandie,FRANCE": {
+    "lat": 49.5456435,
+    "lon": 0.192418
+  },
+  "Plouhinec,29197,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0153626,
+    "lon": -4.4877863
+  },
+  "Saint Pierre du Bois": {
+    "lat": 49.4395995,
+    "lon": -2.6408963
+  },
+  "Solesmes,72336,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8514506,
+    "lon": -0.3020139
+  },
+  "Ballée,53017,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 47.9362975,
+    "lon": -0.4152381
+  },
+  "Noyen-sur-Sarthe,72223,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8723118,
+    "lon": -0.0992579
+  },
+  "Plabennec,29160,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5020355,
+    "lon": -4.4268474
+  },
+  "Briec,29020,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1019452,
+    "lon": -3.999718
+  },
+  "Életot,76540,Normandie,FRANCE": {
+    "lat": 49.7878126,
+    "lon": 0.4519036
+  },
+  "Goderville,76110,Normandie,FRANCE": {
+    "lat": 49.6456303,
+    "lon": 0.3661017
+  },
+  "Yport,76754,Normandie,FRANCE": {
+    "lat": 49.7378489,
+    "lon": 0.3133709
+  },
+  "Saint-Martin-aux-Buneaux,76450,Normandie,FRANCE": {
+    "lat": 49.8243383,
+    "lon": 0.552795
+  },
+  "Sanvic,76351,Normandie,FRANCE": {
+    "lat": 49.5057242,
+    "lon": 0.1063322
+  },
+  "Saint-Crespin,76590,Normandie,FRANCE": {
+    "lat": 49.7827295,
+    "lon": 1.1117846
+  },
+  "Cléden-Cap-Sizun,29028,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0484381,
+    "lon": -4.6493092
+  },
+  "Glazick": {
+    "lat": 47.9949469,
+    "lon": -4.1091967
+  },
+  "Loos-en-Gohelle,62750,Pas de Calais,Nord-Pas-de-Calais,FRANCE": {
+    "lat": 50.4576111,
+    "lon": 2.792593
+  },
+  "Clasville,76176,Normandie,FRANCE": {
+    "lat": 49.7907636,
+    "lon": 0.6186733
+  },
+  "Paris,75118,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Vannes,56260,Morbihan,Bretagne,FRANCE": {
+    "lat": 47.6586772,
+    "lon": -2.7599079
+  },
+  "Juvardeil,49170,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.655173,
+    "lon": -0.4988123
+  },
+  "Cany-Barville,76159,Normandie,FRANCE": {
+    "lat": 49.7868965,
+    "lon": 0.6358291
+  },
+  "Malicorne-sur-Sarthe,72179,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8144856,
+    "lon": -0.0881093
+  },
+  "Mézeray,72195,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8251899,
+    "lon": -0.0190118
+  },
+  "Courcelles-la-Forêt,72100,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7840168,
+    "lon": -0.0175076
+  },
+  "Saint-Servais,29264,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5110375,
+    "lon": -4.1547375
+  },
+  "Sablé-sur-Sarthe,72264,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8400712,
+    "lon": -0.3352048
+  },
+  "Landudec,29108,Finistère,Bretagne,FRANCE": {
+    "lat": 48,
+    "lon": -4.3357542
+  },
+  "Rosnoën,29240,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2639592,
+    "lon": -4.1954004
+  },
+  "Hôpital-Camfrout,29080,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3214264,
+    "lon": -4.2366629
+  },
+  "Le Faou,29053,Finistère,Bretagne,FRANCE": {
+    "lat": 48.295772,
+    "lon": -4.1809082
+  },
+  "Grainville-la-Teinturière,76315,Normandie,FRANCE": {
+    "lat": 49.7480281,
+    "lon": 0.6403272
+  },
+  "Cossé-en-Champagne,53076,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 47.9627533,
+    "lon": -0.3344122
+  },
+  "Paluel": {
+    "lat": 49.8324987,
+    "lon": 0.6294445
+  },
+  "Mentheville,76425,Normandie,FRANCE": {
+    "lat": 49.6910772,
+    "lon": 0.4095646
+  },
+  "Ganzeville,76400,Normandie,FRANCE": {
+    "lat": 49.735058,
+    "lon": 0.4127928
+  },
+  "Dureil,72123,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8432362,
+    "lon": -0.1456782
+  },
+  "Gouesnou,29850,Finistère,Bretagne,FRANCE": {
+    "lat": 48.451729,
+    "lon": -4.465365
+  },
+  "Nogent-le-Rotrou,28280,Eure et Loir,Centre,FRANCE": {
+    "lat": 48.321809,
+    "lon": 0.8211488
+  },
+  "Avoise,72021,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8662439,
+    "lon": -0.2075772
+  },
+  "Treboul,29046,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0961342,
+    "lon": -4.3429148
+  },
+  "Landrévarzec,29106,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0912721,
+    "lon": -4.0581968
+  },
+  "Sainte-Hélène-Bondeville,76400,Normandie,FRANCE": {
+    "lat": 49.7733604,
+    "lon": 0.4506462
+  },
+  "Thiergeville,76540,Normandie,FRANCE": {
+    "lat": 49.7189057,
+    "lon": 0.4966203
+  },
+  "Plozévet,29215,Finistère,Bretagne,FRANCE": {
+    "lat": 47.9859232,
+    "lon": -4.4258889
+  },
+  "Plouider,29198,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6079965,
+    "lon": -4.2987232
+  },
+  "Ancretteville-sur-Mer,76540,Normandie,FRANCE": {
+    "lat": 49.7889591,
+    "lon": 0.5116878
+  },
+  "Écretteville-sur-Mer,76540,Normandie,FRANCE": {
+    "lat": 49.79122,
+    "lon": 0.4849
+  },
+  "Plounéventer,29204,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5161379,
+    "lon": -4.21393
+  },
+  "Pont-Croix,29218,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0409459,
+    "lon": -4.4879445
+  },
+  "Sausseuzemare-en-Caux,76669,Normandie,FRANCE": {
+    "lat": 49.6663496,
+    "lon": 0.3437234
+  },
+  "Saint-Nazaire,44184,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.2733517,
+    "lon": -2.2138905
+  },
+  "Nantes,44109,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.2186371,
+    "lon": -1.5541362
+  },
+  "Guiler-sur-Goyen,29070,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0169514,
+    "lon": -4.3581059
+  },
+  "Nointot,76210,Normandie,FRANCE": {
+    "lat": 49.5986007,
+    "lon": 0.4775408
+  },
+  "Thiétreville,76689,Normandie,FRANCE": {
+    "lat": 49.7133604,
+    "lon": 0.5114289
+  },
+  "Crozon,29042,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2463989,
+    "lon": -4.4894463
+  },
+  "Ploëven,29166,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1571549,
+    "lon": -4.2333681
+  },
+  "Morlaix,29151,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5824932,
+    "lon": -3.8331972
+  },
+  "Saint-Nic,29256,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2017457,
+    "lon": -4.2835356
+  },
+  "Plogastel-Saint-Germain,29167,Finistère,Bretagne,FRANCE": {
+    "lat": 47.9823471,
+    "lon": -4.2705595
+  },
+  "Le Juch,29087,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0652654,
+    "lon": -4.2547998
+  },
+  "Audierne,29003,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0232848,
+    "lon": -4.5453157
+  },
+  "Plobannalec-Lesconil,29165,Finistère,Bretagne,FRANCE": {
+    "lat": 47.8208839,
+    "lon": -4.2305785
+  },
+  "Tréboul,29046,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0961342,
+    "lon": -4.3429148
+  },
+  "Aix-en-Provence,13001,Bouches du Rhône,Provence-Alpes-Côte-d'Azur,FRANCE": {
+    "lat": 43.5298424,
+    "lon": 5.4474738
+  },
+  "Plomeur,29171,Finistère,Bretagne,FRANCE": {
+    "lat": 47.8411013,
+    "lon": -4.2835502
+  },
+  "37000 TOURS, Indre-Et-Loire": {
+    "lat": 47.3867351,
+    "lon": 0.6883243
+  },
+  "Azay-le-Rideau, 37014, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2614793,
+    "lon": 0.4667128
+  },
+  "Lothey,29142,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1816811,
+    "lon": -4.0281159
+  },
+  "Mahalon,29143,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0343785,
+    "lon": -4.4360154
+  },
+  "Senneville-sur-Fécamp,76400,Normandie,FRANCE": {
+    "lat": 49.7723206,
+    "lon": 0.4176305
+  },
+  "Gréez-sur-Roc,72144,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1368046,
+    "lon": 0.7958405
+  },
+  "La Chapelle-Saint-Rémy,72067,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1072141,
+    "lon": 0.4561565
+  },
+  "Bordeaux,33063,Gironde,Aquitaine,FRANCE": {
+    "lat": 44.841225,
+    "lon": -0.5800364
+  },
+  "Rouillon,72257,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0073958,
+    "lon": 0.1364063
+  },
+  "Le Mans,72181,Sarthe,Pays de la Loire,FRANCE Le Pré": {
+    "lat": 48.0914916,
+    "lon": 0.1095211
+  },
+  "Villaines-sous-Malicorne,72377,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7622722,
+    "lon": -0.0986413
+  },
+  "Saint-Jean-de-la-Motte,72291,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7430653,
+    "lon": 0.0565437
+  },
+  "Lavardin,72157,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0779955,
+    "lon": 0.0620244
+  },
+  "La Chapelle-Saint-Aubin,72065,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0341335,
+    "lon": 0.1600629
+  },
+  "Corcieux,88115,Vosges,Lorraine,FRANCE": {
+    "lat": 48.1725865,
+    "lon": 6.8785935
+  },
+  "Paris,75001,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Plogoff,29168,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0377367,
+    "lon": -4.6662622
+  },
+  "Plouénan,29184,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6277816,
+    "lon": -3.988968
+  },
+  "La Poterie-Cap-d'Antifer,76508,Normandie,FRANCE": {
+    "lat": 49.6714411,
+    "lon": 0.1897265
+  },
+  "Beuzec-Conq,29900,Finistère,Bretagne,FRANCE": {
+    "lat": 47.888943,
+    "lon": -3.9023106
+  },
+  "Octeville-sur-Mer,76481,Normandie,FRANCE": {
+    "lat": 49.5553201,
+    "lon": 0.1161519
+  },
+  "Coulans-sur-Gée,72096,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0203044,
+    "lon": 0.0086737
+  },
+  "Bodilis,29010,Finistère,Bretagne,FRANCE": {
+    "lat": 48.53056,
+    "lon": -4.1167121
+  },
+  "Tréflaouénan,29285,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6281024,
+    "lon": -4.0960192
+  },
+  "Saint Nazaire sur Loire,44184,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.3675673,
+    "lon": -2.5157809
+  },
+  "Le Genest-Saint-Isle,53103,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 48.0990232,
+    "lon": -0.8869129
+  },
+  "Guissény,29880,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6341971,
+    "lon": -4.4091613
+  },
+  "Saint-Renan,29260,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4328451,
+    "lon": -4.622982
+  },
+  "Paris,75110,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Étretat,76254,Normandie,FRANCE": {
+    "lat": 49.7074621,
+    "lon": 0.2031905
+  },
+  "Saint-Sylvain,76460,Normandie,FRANCE": {
+    "lat": 49.8457822,
+    "lon": 0.6727233
+  },
+  "Brissarthe,49051,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.7004572,
+    "lon": -0.4495089
+  },
+  "Étriché,49132,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.6507202,
+    "lon": -0.444339
+  },
+  "Beuzec-Cap-Sizun,29008,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0756527,
+    "lon": -4.5115232
+  },
+  "La Suze-sur-Sarthe,72346,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8895538,
+    "lon": 0.0275915
+  },
+  "Écommoy,72124,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8286006,
+    "lon": 0.2733338
+  },
+  "Cauville-sur-Mer,76167,Normandie,FRANCE": {
+    "lat": 49.5952267,
+    "lon": 0.1307202
+  },
+  "Auvers-le-Hamon,72016,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9026909,
+    "lon": -0.3508962
+  },
+  "Saint-Léonard,76600,Normandie,FRANCE": {
+    "lat": 49.7436857,
+    "lon": 0.3600596
+  },
+  "Vaas": {
+    "lat": 47.668841,
+    "lon": 0.3144401
+  },
+  "Theuville-aux-Maillots,76540,Normandie,FRANCE": {
+    "lat": 49.7651851,
+    "lon": 0.5435424
+  },
+  "Châtellerault,86066,Vienne,Poitou-Charentes,FRANCE": {
+    "lat": 46.8180047,
+    "lon": 0.545812
+  },
+  "Vattetot-sur-Mer,76111,Normandie,FRANCE": {
+    "lat": 49.7282797,
+    "lon": 0.2800862
+  },
+  "Les Loges,76790,Normandie,FRANCE": {
+    "lat": 49.6991265,
+    "lon": 0.2827091
+  },
+  "Bordeaux-Saint-Clair,76117,Normandie,FRANCE": {
+    "lat": 49.7007871,
+    "lon": 0.2563417
+  },
+  "Saint-Jouin-Bruneval,76280,Normandie,FRANCE": {
+    "lat": 49.6434514,
+    "lon": 0.1618064
+  },
+  "Contremoulins,76400,Normandie,FRANCE": {
+    "lat": 49.726758,
+    "lon": 0.4308362
+  },
+  "Plougourvest,29400,Finistère,Bretagne,FRANCE": {
+    "lat": 48.554211,
+    "lon": -4.085873
+  },
+  "Mannevillette,76409,Normandie,FRANCE": {
+    "lat": 49.5971248,
+    "lon": 0.1752755
+  },
+  "Souligné-sous-Ballon,72,Sarthe,FRANCE": {
+    "lat": 48.1378403,
+    "lon": 0.2358762
+  },
+  "Sargé-lès-le-Mans,72328,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0339235,
+    "lon": 0.2402009
+  },
+  "Chatou,78146,Yvelines,Île-de-FRANCE": {
+    "lat": 48.8897044,
+    "lon": 2.1573695
+  },
+  "Épreville,76240,Normandie,FRANCE": {
+    "lat": 49.4400409,
+    "lon": 1.2850439
+  },
+  "Oherville,76483,Normandie,FRANCE": {
+    "lat": 49.7194938,
+    "lon": 0.6791412
+  },
+  "Saint-Valery-en-Caux,76655,Normandie,FRANCE": {
+    "lat": 49.8597004,
+    "lon": 0.7106831
+  },
+  "Saint-Valéry-en-Caux,76655,Normandie,FRANCE": {
+    "lat": 49.8597004,
+    "lon": 0.7106831
+  },
+  "La Cerlangue,76169,Normandie,FRANCE": {
+    "lat": 49.5071407,
+    "lon": 0.4148421
+  },
+  "Stalhille,Belgique": {
+    "lat": 51.2142072,
+    "lon": 3.071601
+  },
+  "Cherbourg-Octeville,50129,Manche,Normandie,FRANCE": {
+    "lat": 49.634413,
+    "lon": -1.6285858
+  },
+  "Alençon,61001,Orne,Normandie,FRANCE": {
+    "lat": 48.4312059,
+    "lon": 0.0911374
+  },
+  "Aizy,02008,Aisne,Picardie,FRANCE": {
+    "lat": 49.4345,
+    "lon": 3.51502
+  },
+  "Maigné,72177,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9377512,
+    "lon": -0.0542299
+  },
+  "Ingouville,76460,Normandie,FRANCE": {
+    "lat": 49.8398561,
+    "lon": 0.6856371
+  },
+  "Caluire-et-Cuire,69034,Rhône,Rhône-Alpes,FRANCE": {
+    "lat": 45.7969952,
+    "lon": 4.8423304
+  },
+  "Précigné,72244,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7664332,
+    "lon": -0.3246558
+  },
+  "Ourville-en-Caux,76490,Normandie,FRANCE": {
+    "lat": 49.7291568,
+    "lon": 0.6020575
+  },
+  "Saint-Servais,29400,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5110375,
+    "lon": -4.1547375
+  },
+  "Guengat": {
+    "lat": 48.0425444,
+    "lon": -4.2050526
+  },
+  "Confort-Meilars,29145,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0508873,
+    "lon": -4.4291275
+  },
+  "Durtal,49127,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.6705186,
+    "lon": -0.2453787
+  },
+  "Bazouges-sur-le-Loir,72025,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.6819772,
+    "lon": -0.1860547
+  },
+  "Kerfeunteun,29232,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0062317,
+    "lon": -4.0966477
+  },
+  "Vittefleur,76,Normandie,FRANCE": {
+    "lat": 49.8189759,
+    "lon": 0.6376968
+  },
+  "Auberville-la-Manuel,76032,Normandie,FRANCE": {
+    "lat": 49.827421,
+    "lon": 0.5911251
+  },
+  "Saint-Riquier-Ès-Plains,76646,Normandie,FRANCE": {
+    "lat": 49.8231971,
+    "lon": 0.6655447
+  },
+  "Vue,44220,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.1997831,
+    "lon": -1.8781241
+  },
+  "Vallon-sur-Gée,72367,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9628689,
+    "lon": -0.0651259
+  },
+  "Paris,75004,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Hermeville,76280,Normandie,FRANCE": {
+    "lat": 49.598476,
+    "lon": 0.2625657
+  },
+  "Criquetot-L'Esneval,76280,Normandie,FRANCE": {
+    "lat": 49.6449576,
+    "lon": 0.2661419
+  },
+  "Criquetot-sur-Ouville,76760,Normandie,FRANCE": {
+    "lat": 49.67588,
+    "lon": 0.84519
+  },
+  "Lorleau,27480,Eure,Normandie,FRANCE": {
+    "lat": 49.4155458,
+    "lon": 1.504075
+  },
+  "Valmont,76719,Normandie,FRANCE": {
+    "lat": 49.7444276,
+    "lon": 0.5124798
+  },
+  "Rieux,76340,Normandie,FRANCE": {
+    "lat": 49.93468,
+    "lon": 1.58039
+  },
+  "Paris": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Saint-Pavace,72310,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0386173,
+    "lon": 0.1875497
+  },
+  "Louailles,72167,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7929617,
+    "lon": -0.2531184
+  },
+  "Paris,75105,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Luzarches,95270,Val d'Oise,Île-de-FRANCE": {
+    "lat": 49.1124996,
+    "lon": 2.4223849
+  },
+  "Guillonville,28190,Eure et Loir,Centre,FRANCE": {
+    "lat": 48.0900812,
+    "lon": 1.664049
+  },
+  "Saint-Mathurin-sur-Loire,49307,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.4098877,
+    "lon": -0.3209822
+  },
+  "Liancourt-Fosse,80473,Somme,Picardie,FRANCE": {
+    "lat": 49.7544192,
+    "lon": 2.8153354
+  },
+  "Gercourt-et-Drillancourt,55206,Meuse,Lorraine,FRANCE": {
+    "lat": 49.2840697,
+    "lon": 5.2382157
+  },
+  "Bousse,72044,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.769618,
+    "lon": -0.0582693
+  },
+  "Montauban,82000,Tarn et Garonne,FRANCE": {
+    "lat": 44.0175835,
+    "lon": 1.3549991
+  },
+  "Neuville-sur-Sarthe,72217,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0753824,
+    "lon": 0.1897267
+  },
+  "Saint-Mars-d'Outillé,72299,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.8706856,
+    "lon": 0.3322536
+  },
+  "Paris,75114,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Guérigny,58131,Nièvre,Bourgogne,FRANCE": {
+    "lat": 47.0866061,
+    "lon": 3.1937606
+  },
+  "Recife,Brésil": {
+    "lat": -8.0584933,
+    "lon": -34.8848193
+  },
+  "Champien,80185,Somme,Picardie,FRANCE": {
+    "lat": 49.6951621,
+    "lon": 2.8611544
+  },
+  "La Flèche,72154,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.6968408,
+    "lon": -0.0746149
+  },
+  "Breuil-le-Sec,60106,Oise,Picardie,FRANCE": {
+    "lat": 49.3758211,
+    "lon": 2.4513755
+  },
+  "Paris, 75110,Île-de-France,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Djemila,Algérie": {
+    "lat": 36.3208994,
+    "lon": 5.7367902
+  },
+  "Harfleur,76341,Normandie,FRANCE": {
+    "lat": 49.5075158,
+    "lon": 0.200141
+  },
+  "Huismes, 37118, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.2312241,
+    "lon": 0.2519958
+  },
+  "Manthelan, 37143, Indre-et-Loire, Centre-Val de Loire, France": {
+    "lat": 47.136387,
+    "lon": 0.7938916
+  },
+  "Saint-Martin-aux-Buneaux,76613,Normandie,FRANCE": {
+    "lat": 49.8243383,
+    "lon": 0.552795
+  },
+  "Saint-Maclou-la-Brière,76603,Normandie,FRANCE": {
+    "lat": 49.655427,
+    "lon": 0.4654155
+  },
+  "Anglesqueville-L'Esneval,76280,Normandie,FRANCE": {
+    "lat": 49.6323888,
+    "lon": 0.2360067
+  },
+  "Bénarville,76076,Normandie,FRANCE": {
+    "lat": 49.672557,
+    "lon": 0.4906322
+  },
+  "Tiercé,49347,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.6152682,
+    "lon": -0.4673732
+  },
+  "Saint-Jean-de-Verges,0900,Ariège,FRANCE": {
+    "lat": 43.0123688,
+    "lon": 1.6114072
+  },
+  "Épernay,51230,Marne,Champagne-Ardenne,FRANCE": {
+    "lat": 48.8421809,
+    "lon": 3.8299006
+  },
+  "Middelburg,Pays-Bas": {
+    "lat": 51.4996784,
+    "lon": 3.6137371
+  },
+  "Pleyben,29162,Finistère,Bretagne,FRANCE": {
+    "lat": 48.226109,
+    "lon": -3.9688719
+  },
+  "Plogonnec,Kersimon": {
+    "lat": 48.0689659,
+    "lon": -4.2368471
+  },
+  "Saint Georges du Plain,72181,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9889242,
+    "lon": 0.1715829
+  },
+  "Évron,53097,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 48.1460174,
+    "lon": -0.3753617
+  },
+  "Saint-Sauveur-d'Émalleville,76650,Normandie,FRANCE": {
+    "lat": 49.6143266,
+    "lon": 0.3034048
+  },
+  "Auberville-la-Renault,76110,Normandie,FRANCE": {
+    "lat": 49.6810924,
+    "lon": 0.3678179
+  },
+  "Suresnes,92073,Hauts de Seine,Île-de-FRANCE": {
+    "lat": 48.8709053,
+    "lon": 2.2255727
+  },
+  "Fontaine-la-Mallet,76290,Normandie,FRANCE": {
+    "lat": 49.5363508,
+    "lon": 0.1460207
+  },
+  "Rouelles,76600,Normandie,FRANCE": {
+    "lat": 49.5253792,
+    "lon": 0.1686302
+  },
+  "Lexy,54720,Meurthe et Moselle,Lorraine,FRANCE": {
+    "lat": 49.502997,
+    "lon": 5.7302118
+  },
+  "Longwy,54400,Meurthe et Moselle,Lorraine,FRANCE": {
+    "lat": 49.5145564,
+    "lon": 5.7679082
+  },
+  "Château-Porcien,08107,Ardennes,Champagne-Ardenne,FRANCE": {
+    "lat": 49.529127,
+    "lon": 4.24513
+  },
+  "Cast": {
+    "lat": 48.1576903,
+    "lon": -4.1385595
+  },
+  "Lopérec,29139,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2774273,
+    "lon": -4.0484214
+  },
+  "Saint-Denis-d'Anjou,53210,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 47.7909625,
+    "lon": -0.4405136
+  },
+  "Morannes,49220,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.7323429,
+    "lon": -0.400453
+  },
+  "Saint-Mars-sous-Ballon,72301,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1746126,
+    "lon": 0.272584
+  },
+  "Bleville,76600,Normandie,FRANCE": {
+    "lat": 49.5174437,
+    "lon": 0.097968
+  },
+  "Mamers,72180,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.3505932,
+    "lon": 0.3696376
+  },
+  "Sainte Colombe 72": {
+    "lat": 47.6917031,
+    "lon": -0.0666916
+  },
+  "Laigné-en-Belin,72155,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.868632,
+    "lon": 0.2342945
+  },
+  "Landerneau,29103,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4514803,
+    "lon": -4.2557901
+  },
+  "Toulon,83137,Var,Provence-Alpes-Côte-d'Azur,FRANCE": {
+    "lat": 43.1257311,
+    "lon": 5.9304919
+  },
+  "Saint-Martin-du-Manoir,76290,Normandie,FRANCE": {
+    "lat": 49.5313835,
+    "lon": 0.238674
+  },
+  "Crosmières,72110,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.746478,
+    "lon": -0.1506805
+  },
+  "Damgan,56052,Morbihan,Bretagne,FRANCE": {
+    "lat": 47.5198994,
+    "lon": -2.5788036
+  },
+  "Guilers,29069,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4244717,
+    "lon": -4.5583284
+  },
+  "Pouldergat, 29224, Finistère, Bretagne, France": {
+    "lat": 48.043461,
+    "lon": -4.3275721
+  },
+  "Vernon,27681,Eure,Normandie,FRANCE": {
+    "lat": 49.0932008,
+    "lon": 1.4857205
+  },
+  "Sauzon,56241,Morbihan,Bretagne,FRANCE": {
+    "lat": 47.3711688,
+    "lon": -3.221511
+  },
+  "Annouville-Vilmesnil,76110,Normandie,FRANCE": {
+    "lat": 49.6777571,
+    "lon": 0.4326426
+  },
+  "Cancale,35260,Ille et Vilaine,Bretagne,FRANCE": {
+    "lat": 48.6771721,
+    "lon": -1.8506953
+  },
+  "Rouans,44145,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.1858102,
+    "lon": -1.8598756
+  },
+  "Olonne-sur-Mer,85340,Vendée,Pays de la Loire,FRANCE": {
+    "lat": 46.5358685,
+    "lon": -1.7687019
+  },
+  "Craon,53084,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 47.84831,
+    "lon": -0.9518383
+  },
+  "Metz,57463,Moselle,Lorraine,FRANCE": {
+    "lat": 49.1196964,
+    "lon": 6.1763552
+  },
+  "Chevillé,72083,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9484268,
+    "lon": -0.2239009
+  },
+  "Asnières-sur-Vègre,72010,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.888604,
+    "lon": -0.2346437
+  },
+  "Le Cormier,27171,Eure,Normandie,FRANCE": {
+    "lat": 48.9769726,
+    "lon": 1.3069895
+  },
+  "Ergue Armel,29232,Finistère,Bretagne,FRANCE": {
+    "lat": 47.9873151,
+    "lon": -4.0837823
+  },
+  "Sainte Croix,72,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0011333,
+    "lon": 0.2109735
+  },
+  "Issoudun,36088,Indre,Centre,FRANCE": {
+    "lat": 46.947766,
+    "lon": 1.9882811
+  },
+  "Gonneville-la-Mallet,76280,Normandie,FRANCE": {
+    "lat": 49.6400396,
+    "lon": 0.2228718
+  },
+  "Cauville-sur-Mer,76930,Normandie,FRANCE": {
+    "lat": 49.5952267,
+    "lon": 0.1307202
+  },
+  "Criquetot": {
+    "lat": 49.7778018,
+    "lon": 1.0778882
+  },
+  "Sorquainville,76540,Normandie,FRANCE": {
+    "lat": 49.7048657,
+    "lon": 0.5509057
+  },
+  "Lanvéoc,29120,Finistère,Bretagne,FRANCE": {
+    "lat": 48.2866723,
+    "lon": -4.4615166
+  },
+  "Goulven,29064,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6303229,
+    "lon": -4.3023695
+  },
+  "Barville,27042,Eure,Normandie,FRANCE": {
+    "lat": 49.15711,
+    "lon": 0.47731
+  },
+  "Vendoeuvres,36232,Indre,Centre,FRANCE": {
+    "lat": 46.8009578,
+    "lon": 1.3554475
+  },
+  "Trignac,44210,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.3176944,
+    "lon": -2.1894926
+  },
+  "Montoir-de-Bretagne,44103,Loire Atlantique,Pays de la Loire,FRANCE": {
+    "lat": 47.3285909,
+    "lon": -2.1543171
+  },
+  "La Rochelle,17300,Charente Maritime,Poitou-Charentes,FRANCE": {
+    "lat": 46.159732,
+    "lon": -1.1515951
+  },
+  "Brest,29019,Bretagne,FRANCE": {
+    "lat": 48.3905283,
+    "lon": -4.4860088
+  },
+  "Loué,72168,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9965376,
+    "lon": -0.1511977
+  },
+  "Yvetot,76190,Normandie,FRANCE": {
+    "lat": 49.6179384,
+    "lon": 0.7538866
+  },
+  "Sizun,29277,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4055412,
+    "lon": -4.0790475
+  },
+  "Lesneven,29124,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5718493,
+    "lon": -4.3235917
+  },
+  "Liège,Belgique": {
+    "lat": 50.6450944,
+    "lon": 5.5736112
+  },
+  "Lambezellec,29019,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4157509,
+    "lon": -4.4924318
+  },
+  "Bordeaux-Saint-Clair,76790,Normandie,FRANCE": {
+    "lat": 49.7007871,
+    "lon": 0.2563417
+  },
+  "Bénouville,76790,Normandie,FRANCE": {
+    "lat": 49.7176881,
+    "lon": 0.2520246
+  },
+  "Colleville,76400,Normandie,FRANCE": {
+    "lat": 49.7492373,
+    "lon": 0.452349
+  },
+  "Lucenay-L'Évêque,71540,Saône et Loire,Bourgogne,FRANCE": {
+    "lat": 47.0829725,
+    "lon": 4.2439895
+  },
+  "Paris,75117,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Foucart,76279,Normandie,FRANCE": {
+    "lat": 49.6130366,
+    "lon": 0.5962335
+  },
+  "Saint Pavin des Champs 72": {
+    "lat": 48.0098245,
+    "lon": 0.1789365
+  },
+  "Connerré,72090,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0604578,
+    "lon": 0.4933923
+  },
+  "Degré,72113,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0501765,
+    "lon": 0.0693661
+  },
+  "Sanvic,76600,Normandie,FRANCE": {
+    "lat": 49.5057242,
+    "lon": 0.1063322
+  },
+  "Vattetot-sous-Beaumont,76725,Normandie,FRANCE": {
+    "lat": 49.6251018,
+    "lon": 0.445606
+  },
+  "Mirville,76439,Normandie,FRANCE": {
+    "lat": 49.6093714,
+    "lon": 0.4418209
+  },
+  "Nice,06088,Alpes Maritimes,Provence-Alpes-Côte-d'Azur,FRANCE": {
+    "lat": 43.7009358,
+    "lon": 7.2683912
+  },
+  "Anvéville,76023,Normandie,FRANCE": {
+    "lat": 49.6968391,
+    "lon": 0.7377056
+  },
+  "Avranches,50300,Manche,Normandie,FRANCE": {
+    "lat": 48.6862085,
+    "lon": -1.3579476
+  },
+  "Essonnes,91100,Essonne,Île-de-FRANCE": {
+    "lat": 48.6136061,
+    "lon": 2.4717073
+  },
+  "La Chapelle-d'Aligné,72061,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.718433,
+    "lon": -0.2377403
+  },
+  "Le Bailleul,72022,Pays de la Loire,France": {
+    "lat": 47.7679046,
+    "lon": -0.1613837
+  },
+  "Sainte Colombe,Pays de la Loire,France": {
+    "lat": 47.6917031,
+    "lon": -0.0666916
+  },
+  "Clefs,49101,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.6241895,
+    "lon": -0.0708434
+  },
+  "Épinal,88160,Vosges,Lorraine,FRANCE": {
+    "lat": 48.1747684,
+    "lon": 6.4503643
+  },
+  "Envronville,76236,Normandie,FRANCE": {
+    "lat": 49.6621985,
+    "lon": 0.6687624
+  },
+  "Héricourt-en-Caux,76355,Normandie,FRANCE": {
+    "lat": 49.6976164,
+    "lon": 0.6985668
+  },
+  "Bayeux,14400,Calvados,Normandie,FRANCE": {
+    "lat": 49.2764624,
+    "lon": -0.7024738
+  },
+  "Champaissant,72276,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.273559,
+    "lon": 0.4469043
+  },
+  "Ussy,14720,Calvados,Normandie,FRANCE": {
+    "lat": 48.9483816,
+    "lon": -0.2834797
+  },
+  "Veulettes-sur-Mer,76736,Normandie,FRANCE": {
+    "lat": 49.8503223,
+    "lon": 0.5971459
+  },
+  "Courtrai Flandre Occidentale Belgique": {
+    "lat": 50.8276429,
+    "lon": 3.2659884
+  },
+  "Sainneville,76430,Normandie,FRANCE": {
+    "lat": 49.5566905,
+    "lon": 0.286551
+  },
+  "Saint-Pierre-en-Port,76637,Normandie,FRANCE": {
+    "lat": 49.8069179,
+    "lon": 0.4946787
+  },
+  "Colleville-sur-Mer,14710,Calvados,Normandie,FRANCE": {
+    "lat": 49.3487616,
+    "lon": -0.8520938
+  },
+  "Paris,75015,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Grainville-Ymauville,76110,Normandie,FRANCE": {
+    "lat": 49.6531516,
+    "lon": 0.4114211
+  },
+  "Yvré-L'Évêque,72386,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0137909,
+    "lon": 0.270926
+  },
+  "Étoutteville,76253,Normandie,FRANCE": {
+    "lat": 49.6765378,
+    "lon": 0.7854339
+  },
+  "Meilars,29,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0439282,
+    "lon": -4.428672
+  },
+  "Domfront,61145,Orne,Normandie,FRANCE": {
+    "lat": 48.5931801,
+    "lon": -0.6473487
+  },
+  "Criquetot-le-Mauconduit,76540,Normandie,FRANCE": {
+    "lat": 49.79274,
+    "lon": 0.5598
+  },
+  "Plounéour-Trez,29890,Finistère,Bretagne,FRANCE": {
+    "lat": 48.646876,
+    "lon": -4.3313019
+  },
+  "Bénouville,76079,Normandie,FRANCE": {
+    "lat": 49.2466066,
+    "lon": -0.2781925
+  },
+  "Saint-Étienne-du-Rouvray,76800,Normandie,FRANCE": {
+    "lat": 49.3831,
+    "lon": 1.09163
+  },
+  "Hattenville,76640,Normandie,FRANCE": {
+    "lat": 49.6514049,
+    "lon": 0.5368215
+  },
+  "Sainte-Sabine-sur-Longève,72319,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1402222,
+    "lon": 0.0956588
+  },
+  "Paris,75012,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Cast,cast": {
+    "lat": 48.1471005,
+    "lon": -4.1715524
+  },
+  "Tréflez,29287,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6230182,
+    "lon": -4.2612327
+  },
+  "Ploaré": {
+    "lat": 48.0858368,
+    "lon": -4.3207223
+  },
+  "Neuilly-Plaisance,93049,Seine Saint Denis,Île-de-FRANCE": {
+    "lat": 48.8608712,
+    "lon": 2.5060144
+  },
+  "Bec-de-Mortagne,76068,Normandie,FRANCE": {
+    "lat": 49.6834337,
+    "lon": 0.4350075
+  },
+  "Ypreville-Biville,76540,Normandie,FRANCE": {
+    "lat": 49.6943317,
+    "lon": 0.5321463
+  },
+  "Saint Pierre Quilbignon,29019,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3791059,
+    "lon": -4.5347698
+  },
+  "Guiclan,29068,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5506172,
+    "lon": -3.9624251
+  },
+  "Cuzon,29000,Quimper,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0040973,
+    "lon": -4.0745846
+  },
+  "Saint-Thégonnec,29266,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5230359,
+    "lon": -3.9374261
+  },
+  "Edern,29048,Finistère,Bretagne,FRANCE": {
+    "lat": 48.1041952,
+    "lon": -3.9775903
+  },
+  "Bonnétable,72039,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1768212,
+    "lon": 0.4269856
+  },
+  "Plouaret,22207,Côtes d'Armor,Bretagne,FRANCE": {
+    "lat": 48.6118151,
+    "lon": -3.4731376
+  },
+  "Saint Denis le Hericourt,76355,Normandie,FRANCE": {
+    "lat": 49.7002086,
+    "lon": 0.7077231
+  },
+  "Saint-Maclou-la-Brière,76110,Normandie,FRANCE": {
+    "lat": 49.655427,
+    "lon": 0.4654155
+  },
+  "Quéran,29440,Tréflaouénan,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6210612,
+    "lon": -4.1294493
+  },
+  "Neuville-les-Dieppe,76217,Normandie,FRANCE": {
+    "lat": 49.9275389,
+    "lon": 1.1076031
+  },
+  "Les Loges,76390,Normandie,FRANCE": {
+    "lat": 49.6991265,
+    "lon": 0.2827091
+  },
+  "Paris,75113,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Nevers,58194,Nièvre,Bourgogne,FRANCE": {
+    "lat": 46.919483,
+    "lon": 3.3402381
+  },
+  "Reims,51454,Marne,Champagne-Ardenne,FRANCE": {
+    "lat": 49.2577886,
+    "lon": 4.031926
+  },
+  "Lucé-sous-Ballon,72174,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.2078196,
+    "lon": 0.2146481
+  },
+  "Montbizot,72205,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1440706,
+    "lon": 0.1821652
+  },
+  "Cleuville,76180,Normandie,FRANCE": {
+    "lat": 49.70966,
+    "lon": 0.63169
+  },
+  "Conlie,72089,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1218262,
+    "lon": -0.016945
+  },
+  "Saint-Vougay,29440,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5940258,
+    "lon": -4.1379131
+  },
+  "Antony,92002,Hauts de Seine,Île-de-FRANCE": {
+    "lat": 48.753613,
+    "lon": 2.2958034
+  },
+  "Bréventec": {
+    "lat": 48.5884793,
+    "lon": -3.8644878
+  },
+  "Paris,75116,FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Bouloire,72042,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9724995,
+    "lon": 0.5524301
+  },
+  "Pont-Croix,29,Finistere,Bretagne,FRANCE": {
+    "lat": 48.0409459,
+    "lon": -4.4879445
+  },
+  "Courceboeufs,72099,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1369008,
+    "lon": 0.2869421
+  },
+  "Mayet,72191,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7592389,
+    "lon": 0.2752165
+  },
+  "Saint-Méen,29255,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5598024,
+    "lon": -4.2632477
+  },
+  "Plouédern,29181,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4841517,
+    "lon": -4.2459354
+  },
+  "Beuzeville-la-Grenier,76090,Normandie,FRANCE": {
+    "lat": 49.5918079,
+    "lon": 0.4268108
+  },
+  "Bretteville,76110,Normandie,FRANCE": {
+    "lat": 49.6629465,
+    "lon": 0.3922726
+  },
+  "Gouézec,29062,Finistère,Bretagne,FRANCE": {
+    "lat": 48.16952,
+    "lon": -3.973472
+  },
+  "Pouldavid,29260,Plouider,Finistère,Bretagne,FRANCE": {
+    "lat": 48.6087667,
+    "lon": -4.3139838
+  },
+  "Mespaul,29148,Finistère,Bretagne,FRANCE": {
+    "lat": 48.61774,
+    "lon": -4.021821
+  },
+  "Auzouville-Auberbosc,76044,Normandie,FRANCE": {
+    "lat": 49.6271512,
+    "lon": 0.5711206
+  },
+  "Auzebosc,76043,Normandie,FRANCE": {
+    "lat": 49.5945901,
+    "lon": 0.7271104
+  },
+  "Quéménéven,29229,Bretagne,FRANCE": {
+    "lat": 48.1149391,
+    "lon": -4.1205993
+  },
+  "Cracovie,Pologne": {
+    "lat": 50.0469432,
+    "lon": 19.9971534
+  },
+  "Vaulandry,49380,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.5976118,
+    "lon": -0.0444811
+  },
+  "Robertot,76530,Normandie,FRANCE": {
+    "lat": 49.719,
+    "lon": 0.69642
+  },
+  "Sommesnil,76679,Normandie,FRANCE": {
+    "lat": 49.71044,
+    "lon": 0.67185
+  },
+  "Cleder,Péren": {
+    "lat": 48.6289988,
+    "lon": -4.1246827
+  },
+  "Rosny-sous-Bois,93110,Seine Saint Denis,Île-de-FRANCE": {
+    "lat": 48.8716626,
+    "lon": 2.4875193
+  },
+  "Avessé,72019,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.9553489,
+    "lon": -0.2497866
+  },
+  "Pleine-Sève,76460,Normandie,FRANCE": {
+    "lat": 49.8174919,
+    "lon": 0.7583019
+  },
+  "Graville,76600,Normandie,FRANCE": {
+    "lat": 49.5018963,
+    "lon": 0.1623279
+  },
+  "Plougonvelin,29190,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3415116,
+    "lon": -4.7192399
+  },
+  "Paris,75103,FRANCE": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Ploudaniel,29179,Finistère,Bretagne,FRANCE": {
+    "lat": 48.5369612,
+    "lon": -4.3100487
+  },
+  "Gainneville,76296,Normandie,FRANCE": {
+    "lat": 49.5175549,
+    "lon": 0.264251
+  },
+  "Campoussy,66730,Pyrénées Orientales,FRANCE": {
+    "lat": 42.709814,
+    "lon": 2.4591836
+  },
+  "Plougastel-Daoulas,29189,Finistère,Bretagne,FRANCE": {
+    "lat": 48.3742317,
+    "lon": -4.369679
+  },
+  "Goulien,29063,Finistère,Bretagne,FRANCE": {
+    "lat": 48.0559152,
+    "lon": -4.5931059
+  },
+  "Bergamasco Italie": {
+    "lat": 44.827249,
+    "lon": 8.454743
+  },
+  "Amné,72004,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.0394927,
+    "lon": -0.0594335
+  },
+  "Bourg-Blanc,29015,Finistère,Bretagne,FRANCE": {
+    "lat": 48.4991511,
+    "lon": -4.5060451
+  },
+  "Cheffes,49090,Maine et Loire,Pays de la Loire,FRANCE": {
+    "lat": 47.6206507,
+    "lon": -0.5100566
+  },
+  "Landrévarzec, 29510, Finistère, Bretagne, FRANCE": {
+    "lat": 48.0912721,
+    "lon": -4.0581968
+  },
+  "Lannion,22300,Côtes d'Armor,Bretagne,FRANCE": {
+    "lat": 48.7322183,
+    "lon": -3.4587994
+  },
+  "Requeil,72252,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 47.7845119,
+    "lon": 0.1624312
+  },
+  "Thorigné-en-Charnie,53264,Mayenne,Pays de la Loire,FRANCE": {
+    "lat": 48.0008711,
+    "lon": -0.3583521
+  },
+  "Alvimare,76002,Normandie,FRANCE": {
+    "lat": 49.6042107,
+    "lon": 0.630598
+  },
+  "Lagny-sur-Marne,77400,Seine et Marne,Île-de-FRANCE": {
+    "lat": 48.8773018,
+    "lon": 2.7056056
+  },
+  "Maniquerville,76400,Normandie,FRANCE": {
+    "lat": 49.6962075,
+    "lon": 0.3460825
+  },
+  "Sillé-le-Philippe,72335,Sarthe,Pays de la Loire,FRANCE": {
+    "lat": 48.1069075,
+    "lon": 0.3520896
+  },
+  "Le Mans": {
+    "lat": 48.0073849,
+    "lon": 0.1967849
+  },
+  "Montpellier,Hérault,FRANCE": {
+    "lat": 43.6112422,
+    "lon": 3.8767337
+  },
+  "Hautot-Saint-Sulpice,76190,Normandie,FRANCE": {
+    "lat": 49.6805831,
+    "lon": 0.740849
+  },
+  "Rue de l'hospice - Quimper, 29232, Finistère, Bretagne, France": {
+    "lat": 47.8729073,
+    "lon": -3.9129062
+  },
+  "Douarnenez, 29046, Finistère, Bretagne, France": {
+    "lat": 48.0944459,
+    "lon": -4.3311243
+  },
+  "Rue Duguay Trouin - Douarnenez, 29046, Finistère, Bretagne, France": {
+    "lat": 48.0918507,
+    "lon": -4.3313462
+  },
+  "Quimper, 29232, Finistère, Bretagne, France": {
+    "lat": 47.9960325,
+    "lon": -4.1024782
+  },
+  "Plogonnec, 29180, Finistère, Bretagne, FRANCE": {
+    "lat": 48.0776491,
+    "lon": -4.1915768
+  },
+  "Plomodiern, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1815192,
+    "lon": -4.2328062
+  },
+  "Quéménéven, 29180, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1149391,
+    "lon": -4.1205993
+  },
+  "Ploéven, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1571549,
+    "lon": -4.2333681
+  },
+  "Kerniol - Plomodiern, 29550, Finistère, Bretagne, FRANCE": {
+    "lat": 48.1776995,
+    "lon": -4.2752869
+  },
+  "Paris, 75013, Paris, Ile-de-France, France": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Grainville-la-Teinturière, 76450, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.7480281,
+    "lon": 0.6403272
+  },
+  "Autretot, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6557481,
+    "lon": 0.7248077
+  },
+  "Veauville-lès-Baons, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6560034,
+    "lon": 0.7577053
+  },
+  "Yvetot, 76190, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.6179384,
+    "lon": 0.7538866
+  },
+  "Veules-les-Roses, 76980, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 49.8722029,
+    "lon": 0.7990652
+  },
+  "Paris, 75000, Paris, Île-de-France, FRANCE": {
+    "lat": 48.8588897,
+    "lon": 2.320041
+  },
+  "Roye, 80700, Somme, Hauts-de-France, FRANCE": {
+    "lat": 49.6986186,
+    "lon": 2.7930755
+  },
+  "Incheville, 76117, Seine-Maritime, Normandie, FRANCE": {
+    "lat": 50.0156564,
+    "lon": 1.4979002
+  },
+  "Droue-sur-Drouette, 28135, Eure-et-Loir, Centre-Val de Loire, France": {
+    "lat": 48.6007588,
+    "lon": 1.7022661
+  },
+  "Saint-Saulve, 59880, Nord, Nord-Pas-de-Calais, FRANCE": {
+    "lat": 50.3710165,
+    "lon": 3.5547336
+  },
+  "Clasville, 76, Normandie, France": {
+    "lat": 49.7907636,
+    "lon": 0.6186733
+  },
+  "Canouville, 76, Normandie, France": {
+    "lat": 49.8066238,
+    "lon": 0.6036945
+  },
+  "Thiouville, 76, Normandie, France": {
+    "lat": 49.692902,
+    "lon": 0.6189306
+  },
+  "Butot-en-Caux, 76, Normandie, France": {
+    "lat": 49.6257734,
+    "lon": 0.9926733
+  },
+  "Saint-Pierre-Lavis, 76, Normandie, France": {
+    "lat": 49.665587,
+    "lon": 0.6215956
+  },
+  "Bosville, 76, Normandie, France": {
+    "lat": 49.7595553,
+    "lon": 0.6830967
+  },
+  "Ermenouville, 76, Normandie, France": {
+    "lat": 49.7985524,
+    "lon": 0.7880973
+  },
+  "Hermeville, 76, Normandie, France": {
+    "lat": 49.598476,
+    "lon": 0.2625657
+  },
+  "Criquetot-l'Esneval, 76, Normandie, France": {
+    "lat": 49.6449576,
+    "lon": 0.2661419
+  },
+  "Le Havre, 76, Normandie, France": {
+    "lat": 49.5394242,
+    "lon": 0.316573
+  },
+  "Brunoy, 91, Île-de-France, France": {
+    "lat": 48.6979312,
+    "lon": 2.5044613
+  },
+  "Paris, 75, Île-de-France, France": {
+    "lat": 48.8534951,
+    "lon": 2.3483915
+  },
+  "Boulogne Billancourt, 94, Île-de-France, France": {
+    "lat": 48.8356649,
+    "lon": 2.240206
+  }
+}

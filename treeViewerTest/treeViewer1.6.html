@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html style="color-scheme: light !important;" translate="no">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="google" content="notranslate">
+    <meta name="color-scheme" content="light">
+
+    <meta property="og:title" content="Explore tes origines">
+    <meta property="og:description" content="Visualisez votre arbre généalogique de manière interactive.">
+    <meta property="og:url" content="https://family-tree-pd.vercel.app">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://family-tree-pd.vercel.app/icons/icon-192x192.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="192">
+    <meta property="og:image:height" content="192">
+
+
+    <!-- Méta tags pour le mode plein écran mobile -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Explore tes origines</title>
+
+
+    <script>
+        // On vérifie le localStorage immédiatement
+        if (localStorage.getItem('modeExpertActif') === 'true') {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/eruda";
+            script.onload = () => eruda.init(); // On initialise une fois chargé
+            document.head.appendChild(script);
+        }
+    </script>
+
+
+  
+    <!-- A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
+    <!-- pour débugger sur IOS où le service worker pose problème -->
+    <!-- <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+            console.log("Caches d'API supprimés");
+        }
+        // Optionnel : vider aussi le localStorage si besoin
+        // localStorage.clear();
+    </script> -->
+    <!-- FIN A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
+
+
+
+    <!-- Google tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HWT22W45CN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-HWT22W45CN');
+    </script>
+
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="js/treeWheelStyles.css"> -->
+
+
+    <!-- Script d'enregistrement amélioré du Service Worker -->
+    <script src="js/serviceWorkerInit.js"></script>
+
+    <script src="js/i18n.js"></script>
+
+
+    <script src="./cacheConfig.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+
+    <!-- Système de chargement des bibliothèques avec fallback -->
+    <!-- <script type="module" src="js/libraryLoader.js" defer></script> -->
+
+    <!-- Initialisation de l'application -->
+    <script type="module" src="js/appInitializer.js"></script>
+    
+   
+    
+    <!-- Script d'initialisation qui attend le chargement des bibliothèques -->
+    <!-- <script>
+        document.addEventListener('libraries-loaded', function() {
+            console.log("Toutes les bibliothèques sont chargées, initialisation de l'application...");
+            // Vous pouvez initialiser ici les composants qui dépendent des bibliothèques externes
+        });
+    </script> -->
+    <link rel="manifest" href="./manifest.webmanifest">
+
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+
+    <script src="js/pwaInstaller_ProgressiveWebApps.js"></script>
+
+
+</head>
+
+
+
+<body>
+    <div class="login-background">
+        <!-- <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran"> -->
+        <!-- <img src="background_images/bois.jpg" class="login-background-image" alt="Fond d'écran">         -->
+        <img id="login-background-image" src="background_images/tree-log-lowQuality.jpg" class="login-background-image" alt="Fond d'écran">  
+        <!-- <img class="login-background-image" alt="Fond d'écran"> -->
+    </div>
+
+
+    <!-- Bouton pour ouvrir la modal de chargement de fichier -->
+    <button id="load-gedcom-button" data-role ="button1" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
+    <!-- <button id="help-button" data-role ="button1" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button> -->
+    <button id="help-button" data-role ="button1" class="help-button" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
+
+    <!-- <div id="fullScreenLabel" data-role ="fontSizeChange1" class="fullScreenLabel" data-text-key="fullScreenLabel" style="font-size: 11px; position: fixed; z-index: 2; bottom: 3.75em; left: 0.42em;  color: white; margin-top: 0px; margin-bottom: 0.17em; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div> -->
+
+    <div id="fullScreenLabel" data-role ="fontSizeChangeChrome1" class="fullScreenLabel"  style="font-size: 11px; position: fixed; z-index: 2; bottom: 3.1em; left: 0.42em;  color: white; margin-top: 0px; margin-bottom: 0.17em; padding-top:0; padding-bottom:0; text-align: center;">
+        <span data-text-key="fullScreenLabel" data-role ="fontSizeChange1" style="font-size: 10px;">fullScreen</span>
+    </div>
+
+
+    <button id="fullScreen-button" data-role ="fontSizeChangeChrome1" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="font-size: 10px; position: fixed; z-index: 1499; bottom: 0.4em; left: 0.7em; padding: 0; margin:0; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
+<!-- bottom: 0.09em; -->
+    <div id="browserBarLabel" class="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
+    <!-- <button id="browserBar-button" data-role ="button1" class="browserBar-Button"   onclick="browserBarPuzzle()" data-text-key="browserBar" style="display: none; position: fixed; z-index: 2; bottom: 3px;  font-size: 28px; background: transparent; border: none; cursor: pointer;"><span>💻</span></button> -->
+    <button id="browserBar-button" data-role ="button1" class="browserBar-Button"  data-text-key="browserBar" style="display: none; position: fixed; z-index: 2; bottom: 3px;  font-size: 28px; background: transparent; border: none; cursor: pointer;"><span>💻</span></button>
+
+
+    <div id="advanced-settings-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
+    
+
+        <div data-role ="fontSizeChangeChromeAdvanced" style="background-color: white; font-size: 10px; width: 34em; max-width: 90%; border-radius: 1em; box-shadow: 0 0.4em 0.6em rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+            <!-- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; "> -->
+            <div data-role ="fontSizeChangeChromeAdvanced"  style="font-size: 10px; display: flex; justify-content: space-between; align-items: center;  /* STYLES DU BANDEAU */ background-color: #E0F7FA;  padding: 0.3em 2em; margin-bottom: 0;  border-radius: 1em 1em 0 0;  border-bottom: 0.1em solid #B2EBF2;">
+                <h2 data-role ="fontSizeChangeAdvanced" id="advancedSettingsTitle" style="margin: 0; font-size: 16px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
+                <span data-role ="button1" onclick="closeGedcomModal()" id="advancedSettingsClose-btn" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
+            </div>
+            <div id="insertionPointForInstallButton" style="font-size: 10px; padding: 2em; padding-left: 2.5em;" data-role ="fontSizeChangeChrome1">
+                <!-- <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;"> -->
+                <!-- Cacher l'input file original -->
+                <input type="file" id="gedFile" accept=".ged" style="display: none;">
+
+                <div data-role ="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4CAF50; border-radius: 3px;  margin-top: -1.5em; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button data-role ="buttonAdvanced" id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        Mise à jour du logiciel
+                    </button>
+                </div>
+
+
+                <div data-role ="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #9c27b0; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <button data-role ="buttonAdvanced"id="defaultSettingsBtn" onclick="resetToDefaultSettings()" data-text-key="parametresDefaut" style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        🔄 Paramètres par défaut
+                    </button>
+                </div>
+
+                
+                <div data-role ="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #4c93af; border-radius: 3px; margin-bottom: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <!-- <button data-role ="buttonAdvanced" id="voiceBtn" onclick="voiceModal()" data-text-key="voiceModal"style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                    <button data-role ="buttonAdvanced" id="voiceBtn" data-text-key="voiceModal"style="font-size: 16px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        🗣️ sélection de la voix
+                    </button>
+                </div>                
+
+
+                <!-- Label pour le fichier GEDCOM -->
+                <!-- <label id="labelGedFile"  data-role ="fontSizeChangeChrome1" for="gedFile" style="display: block; font-size: 10px; color: #333; margin-top: 2em; margin-bottom: 0.3em; font-weight: 500;" data-text-key="fichierGedcom">
+                    <span id="labelGedFileSpan" data-role ="fontSizeChange1"  class="label-text" style="font-size: 14px;">GEDCOM file</span>
+                </label> -->
+
+                <label id="labelGedFile"  data-role ="fontSizeChangeAdvanced" class="label-text" for="gedFile" style="display: block; font-size: 13px; color: #333; margin-top: 1.4em; margin-bottom: 0.2em; font-weight: 500;" data-text-key="fichierGedcom">
+                    GEDCOM file
+                </label>
+
+
+                <div style="font-size: 10px; width: 100%; max-width: 30em; display: flex; margin-bottom: 0px; align-items: stretch; height: auto;">
+                    <div data-role ="fontSizeChangeChromeAdvanced"  style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4361ee; border-radius: 3px; padding: 0.6em; box-sizing: border-box;">
+                        <button data-role ="buttonAdvanced" id="gedFileBtn" onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
+                                style="font-size: 13px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0;">
+                            Choisir un fichier
+                        </button>
+                    </div>
+
+                    <span data-role ="fontSizeChangeChromeAdvanced" id="fileNameDisplay" style="font-size: 10px; flex-grow: 1; padding: 1em; border: 1px solid #ccc; border-left: none; border-right: none; 
+                                                    box-sizing: border-box; /* IMPORTANT : pour inclure le padding dans les 300px */
+                                                    display: block;        /* IMPORTANT : pour que le box-sizing s'applique correctement */
+                                                    border-radius: 0; background-color: #f9f9f9; text-align: left; 
+                                                    overflow: hidden; /* Permet le saut de ligne */
+                                                    text-overflow: ellipsis; 
+                                                    align-self: stretch;
+                                                    line-height: 1.2; /* Permet le saut de ligne */
+                                                    max-height: 6em; /*40px;  Limite la hauteur à environ 2 lignes de texte */
+                                                    white-space: normal;"> 
+                                                    <span data-role ="fontSizeChangeAdvanced" class="label-text" style="font-size: 14px;  margin: 0; padding: 0;">Aucun fichier choisi</span>
+                    </span>
+
+                    <div data-role ="fontSizeChangeChromeAdvanced" id="showTreeBtnDiv" style="font-size: 10px;  flex-shrink: 0; width: 8em; height: 6em; background-color: #4CAF50; border-radius: 3px; padding: 0.6em; box-sizing: border-box; display: none;">
+                        <button data-role ="buttonAdvanced" id="showTreeBtn" onclick="loadData('nonEncrypted'); closeGedcomModal()" data-text-key="afficherArbre" 
+                                style="font-size: 14px; width: 100%; line-height: 1.2; height: 100%; background: transparent; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 0; padding: 0; display: none;">
+                            Afficher l'arbre
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
+                <script>
+                    document.getElementById('gedFile').addEventListener('change', function() {
+                        var fileNameDisplay = document.getElementById('fileNameDisplay');
+                        var showTreeBtn = document.getElementById('showTreeBtn'); // Récupération du bouton
+                        var showTreeBtnDiv = document.getElementById('showTreeBtnDiv'); // Récupération du div contenant le bouton
+                        
+                        if (this.files.length > 0) {
+                            // Affichage du nom du fichier
+                            fileNameDisplay.textContent = this.files[0].name;
+                            fileNameDisplay.removeAttribute('data-text-key');
+                            
+                            // Affichage du bouton vert
+                            showTreeBtn.style.display = 'block';
+                            showTreeBtnDiv.style.display = 'block';
+
+                        } else {
+                            // Rétablissement du texte par défaut
+                            fileNameDisplay.textContent = window.i18n ? window.i18n.getMultilingueText('aucunFichier') : 'Aucun fichier choisi';
+                            fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
+                            
+                            // Masquage du bouton vert
+                            showTreeBtn.style.display = 'none';
+                            showTreeBtnDiv.style.display = 'none'; 
+                        }
+                    });
+                </script>
+
+                <div data-role ="fontSizeChangeChromeAdvanced"  class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f48; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <!-- <button data-role ="buttonAdvanced" id="activateDebugLogsBtn" onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                   <button data-role ="buttonAdvanced" id="activateDebugLogsBtn" data-text-key="activerLogs" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        🐞 Activer les logs de debug
+                    </button>
+                </div>   
+
+                <div data-role ="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d55266; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <!-- <button data-role ="buttonAdvanced" id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                    <button data-role ="buttonAdvanced" id="activateAccelerometerBtn" data-text-key="activerAccel" class="expert-hidden" style="font-size: 14px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        🧭 Activer l'accéléromètre
+                    </button>
+                </div> 
+
+                <div data-role ="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px;  width: 100%; max-width: 30em; height: 4em; background-color: #d42f74; border-radius: 3px; margin-top: 1em; padding: 0.5em; box-sizing: border-box;">
+                    <!-- <button data-role ="buttonAdvanced" id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"> -->
+                    <button data-role ="buttonAdvanced" id="openCameraModalBtn" data-text-key="openCameraModal" class="expert-hidden" style="font-size: 13px; width: 100%; height: 100%; background: transparent; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        🎥 Caméra & Réalité Augmentée
+                    </button>
+                </div> 
+                
+                <div data-role ="fontSizeChangeChromeAdvanced" class="expert-hidden" style="font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 0.5em; margin: 0.4em; cursor: pointer; ">
+                    <input data-role ="fontSizeChangeAdvanced" type="checkbox" id="dont-apply-button-rescale" style="font-size: 10px; width: 1.8em; height: 1.8em; cursor: pointer; box-sizing: border-box; border-radius: 0.2em; border:0.2em solid #afaeae; ">  
+                    <label data-role ="fontSizeChangeAdvanced" id="dont-apply-button-rescale-label" for="dont-apply-button-rescale" style="font-size: 14px; color: #666; cursor: pointer; user-select: none;">
+                        do not apply button rescale
+                    </label>
+                </div>
+            </div>
+            <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
+        </div>
+
+    </div>
+
+
+    <!-- Formulaire de mot de passe -->
+    <div id="password-form" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">    
+
+        <div id="language-selector-container" data-role ="fontSizeChangeChrome1" style="font-size: 10px; display: none; position: fixed; top: 0; margin-top: -1em; z-index: 1; pointer-events: none;">
+            <div id="language-selector" data-role ="fontSizeChangeChrome1" class="language-selector" style="font-size: 10px; display: flex; justify-content: center; background-color: rgba(255, 255, 255, 0.8); padding: 0.5em; border-radius: 0.8em; box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.2); pointer-events: auto; margin-top: 1.5em; gap: 1em;">
+                <div id="french" data-role ="fontSizeChangeChrome1" class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr'); "></div>
+                <div id="english" data-role ="fontSizeChangeChrome1" class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en'); "></div>
+                <div id="spanish" data-role ="fontSizeChangeChrome1" class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es'); "></div>
+                <div id="hungarian" data-role ="fontSizeChangeChrome1" class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu'); "></div>
+            </div>
+        </div>
+        
+
+        <div  id="formContainer"  data-role ="fontSizeChangeChrome1" class="form-container" 
+            style="display: none; position: fixed; font-size: 10px; width: 28em; max-width: 28em; top: 8em; padding: 2em; padding-top: 1em; padding-bottom: 0.5em; text-align: center; box-sizing: border-box;  overflow-y: auto; border-radius: 0.85em; border:0.1em solid #afaeae; box-shadow: 0 0.4em 0.6em  rgba(0,0,0,0.1); background-color: rgba(255, 255, 255, 0.9);">
+
+            <div id="nameRow" data-role ="fontSizeChangeChrome1" id="nameRow" class="name-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 0.4em; max-width: 24em; width: 100%; margin-left: auto; margin-right: auto;">
+
+                <div data-role ="fontSizeChangeChrome1" style="display: flex; flex-direction: column; justify-content: flex-end; flex: 1 1 0; font-size: 18px; padding: 0px; margin-left: -1.22em; margin-right: -0.83em; height: auto; ">
+                    <!-- <button id="voiceCommandBtn" data-role ="button1"  onclick="voiceCommand('start')" style="font-size: 18px; width: 100%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; background: transparent;"> -->
+                    <button id="voiceCommandBtn" data-role ="button1"  style="font-size: 18px; width: 100%; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; background: transparent;">
+                        🎙️
+                    </button>
+                </div>
+
+                <div id="firstNameContainer" data-role ="fontSizeChangeChrome1"  style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small id="firstNameContainerDetail" data-role ="fontSizeChangeChrome1"  style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span id="prenomLabel" data-role ="fontSizeChange1"  data-text-key="inputFormFirstName" class="label-text" style="font-size: 9px;">prénom</span>
+                    </small>
+
+                    <div id="firstNameInputContainer" data-role ="fontSizeChangeChrome1"  style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input id="input-form-firstName" data-role ="fontSizeChange1" type="text"  placeholder="prénom" data-text-key="inputFormFirstName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
+                    </div>
+                </div>
+
+                <div id="lastNameContainer" data-role ="fontSizeChangeChrome1"  style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em;">
+                    <small id="lastNameContainerDetail" data-role ="fontSizeChangeChrome1"  style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.45em; margin-left: -1em; padding-top:0; padding-bottom:0; text-align: center;">
+                        <span id="nomLabel" data-role ="fontSizeChange1"  data-text-key="inputFormLastNameComment" class="label-text" style="font-size: 9px;">nom (jeune fille)</span>
+                    </small>
+
+                    <div id="lastNameInputContainer"  data-role ="fontSizeChangeChrome1" style="font-size: 10px; width: 11.5em; height: 2.8em; margin-top: 0px; display: inline-block; vertical-align: middle;">
+                        <input id="input-form-lastName" data-role ="fontSizeChange1" type="text"  placeholder="nom" data-text-key="inputFormLastName" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border: 0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
+                    </div>    
+                </div>
+            </div>
+
+            <div data-role ="fontSizeChangeChrome1" class="password-row" style="display: flex; font-size: 10px; gap: 0.8em; margin-top: 0px; margin-bottom: 2em; max-width: 24em;  height: 3em; width: 100%; margin-left: auto; margin-right: auto;">
+                <div data-role ="fontSizeChangeChrome1" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small data-role ="fontSizeChange1"data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
+                        mot de passe
+                    </small>
+
+                    <div data-role ="fontSizeChangeChrome1" style="font-size: 10px; width: 11.5em; height: 4em; box-sizing: border-box; display: inline-block; vertical-align: middle;">
+                        <input id="password" data-role ="fontSizeChange1" type="text"  placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" 
+                            style="font-size: 10px; width: 100%; height: 100%; text-align: center; box-sizing: border-box; border:0.1em solid #767676; margin: 0; padding: 0; border-radius: 0.3em; outline: none;"
+                            onfocus="this.style.border='0.2em solid black';"  onblur="this.style.border='0.1em solid #767676';">
+                        </div>    
+                </div>
+
+                <div data-role ="fontSizeChangeChrome1" style="display: flex; flex-direction: column; flex: 1 1 0; font-size: 10px; width: 11.5em; height: 4em;">
+                    <small data-role ="fontSizeChange1" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 0.22em; padding-top:0; padding-bottom:0; text-align: center;">
+                        .
+                    </small>
+
+                    <div data-role ="fontSizeChangeChrome1"  style="flex: 1 1 0; font-size: 16px; width: 7.19em; min-height: 1.75em; padding-top: 0.0625em; padding-bottom: 0.0625em; box-sizing: border-box;">
+                        <button id="loadDataButton"data-role ="button1"  data-text-key="visualiserArbre" style="font-size: 16px; width: 100%; height: 100%; background-color: #4CAF50; color: white; border: none; border-radius: 0.25em; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0;">
+                            Continuer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="startTitle" style="display: none; position: fixed; top: '80%';  z-index: 1; ">
+            <h2 data-role ="fontSizeChange1" style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
+            data-text-key="startTitle">explore tes origines...</h2>
+        </div>  
+        
+    </div>
+
+    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 1; cursor: default;" ></div>
+    
+    <div id="versionFooter" data-role ="fontSizeChange1"
+        style="font-size:10px; position:fixed; bottom:0.3em; left:50%; transform:translateX(-50%);  color:white; text-align:center; z-index:1; pointer-events:none;">
+        ®isAI4U-PD V2.59
+    </div>
+
+
+    <!-- Conteneur de l'arbre -->
+    <div id="tree-container" style="display: none;">
+        <!-- <button data-role ="button2" id="voiceCommand2Btn" onclick="voiceCommand('full')" style="display: block; position: fixed;  background-color: transparent; font-size: 40px; color: white; border: none; padding: 0px; bottom: 3px; left:50%; transform:translateX(-50%); cursor: pointer; z-index: 10001; ">🎙️</button> -->
+        <button data-role ="button2" id="voiceCommand2Btn" style="display: block; position: fixed;  background-color: transparent; font-size: 40px; color: white; border: none; padding: 0px; bottom: 3px; left:50%; transform:translateX(-50%); cursor: pointer; z-index: 10001; ">🎙️</button>
+
+        <div class="controls">
+            <!-- <button data-role ="button2" id="close-tree-button" onclick="returnToLogin()" style="font-size: 32px!important; position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times; -->
+            <button data-role ="fontSizeChangeChrome2" id="close-tree-button" onclick="returnToLogin()" style="font-size: 10px!important; position: fixed; top: 1em; right: 1em; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 3.2em; height: 3.2em; min-width: 3.2em; min-height: 3.2em; max-width: 3.2em; max-height: 3.2em; padding: 0; font-weight: bold; cursor: pointer; box-shadow: 0 0.2em 0.5em rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">
+                <span data-role ="button2" class="wide-span"style="font-size: 32px!important;">&times;</span>
+            </button>
+
+            <div data-role ="fontSizeChangeChrome2"  class="controls-row-1" data-original-gap="1.8"  style="font-size: 10px; position: fixed; top: 0.3em; left: 4em; margin-bottom: 0; width: fit-content; padding-left: calc(var(--current-paddindLeft, 1.5) * 1em);  gap: calc(var(--current-gap, 1.8) * 1em);" >
+                <!-- gap: 1.8em !important; -->
+                <button id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" >
+                    <span data-role ="button2" class="wide-span" style="font-size: 32px !important;">🔊</span></button>
+                <!-- <button class="play-btn" data-role ="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause" 
+                    style="font-size: 10px; border-radius: 0.4em; width: 3em!important; min-width: 3em!important;  max-width: 3em!important; min-height: 3em; max-height: 3em; 
+                    box-shadow: inset 0 0.2em 0.3em rgba(255,255,255,0.5),  inset 0 -0.2em 0.3em rgba(0,0,80,0.4),  0 0.1em 0.2em rgba(255,255,255,0.4), 0 0.2em 0.4em rgba(0,0,0,0.35);" >
+                    <span data-role ="button2" id="animationPauseBtnSpan" style="font-size: 20px !important; display: inline-block; ">▶</span>
+                </button> -->
+
+
+                <!-- <button class="play-btn" data-role ="fontSizeChangeChrome2" onclick="toggleAnimationPause()" id="animationPauseBtn"  -->
+                <button class="play-btn" data-role ="fontSizeChangeChrome2"  id="animationPauseBtn" 
+                        style="font-size: 10px; border-radius: 0.4em; width: 3em!important; min-width: 3em!important;  max-width: 3em!important; height: 3em!important; min-height: 3em!important; max-height: 3em!important; 
+                            display: inline-flex; align-items: center; justify-content: center;  padding: 0; line-height: 1; 
+                            box-shadow: inset 0 0.2em 0.3em rgba(255,255,255,0.5), inset 0 -0.2em 0.3em rgba(0,0,80,0.4), 0 0.1em 0.2em rgba(255,255,255,0.4), 0 0.2em 0.4em rgba(0,0,0,0.35);">
+                    
+                    <!-- <span id="animationPauseBtnSpan" data-role ="button2" style="font-size: 20px !important; display: inline-block; line-height: 1;">▶</span> -->
+                    <span id="animationPauseBtnSpan" data-role ="button2" style="font-size: 20px;  display: inline-flex; align-items: center; justify-content: center; line-height: 1;">▶</span>
+                </button>
+
+
+                <button onclick="openSettingsModal()" id="settingsBtn" class="large-button" data-text-key="openSettingsModal" style="background: transparent; border: none">
+                    <span data-role ="button2" style="font-size: 32px!important;">⚙️</span></button>
+                <!-- <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" data-role ="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" >  -->
+                <button id="cloudBtn" data-role ="fontSizeChangeChrome2" class="large-button"  data-text-key="processNamesCloudWithDate" style="font-size:10px; margin-top:-0.2em" > 
+                    <span data-role ="button2" class="wide-span" style="font-size: 32px !important;">💖</span>
+                </button>            
+                <!-- <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" style=" width: 65px !important;  height: 27px !important; margin-left: -4px !important; " > -->
+
+
+                <div data-role ="fontSizeChangeChrome2" id="root-person-search-div" style="font-size: 10px; width: 6.5em!important; min-width: 6.5em!important; max-width: 6.5em!important;  height: 2.7em; min-height: 2.7em!important; margin-left: -0.4em; ">
+                    <input data-role ="fontSizeChange2" type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" style="font-size: 15px; width: 100%; height: 100%; box-sizing: border-box; display: block; border: 0.1em solid #ccc; border-radius: 0.4em;">
+                </div> 
+
+                <select id="root-person-results" data-text-key="rootPersonResults"  >
+                    <option value="">Select</option>
+                </select>
+                <!-- <button data-role ="fontSizeChangeChrome2"  id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" >  -->
+                <button data-role ="fontSizeChangeChrome2"  id="heatMapBtn"  class="large-button"  data-text-key="heatMap" style="font-size: 10px !important;" > 
+                    <span data-role ="button2" class="wide-span" style="font-size: 32px !important;">🌍</span>
+                </button> 
+                <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
+                    <span data-role ="button2" class="wide-span" style="font-size: 32px !important;">🎯</span>
+                </button> 
+                <!-- <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" >  -->
+                <button id="statsBtn" data-text-key="stats" > 
+                    <span data-role ="button2" class="wide-span" style="font-size: 32px !important;">📊</span>
+                </button> 
+            </div>
+            
+            <div data-role ="fontSizeChangeChrome2" class="controls-row-2" style="font: size 10px !important; position: fixed; top: 3.1em; left: 0.7em; gap: 0.3em!important; width: fit-content;">                  
+                <label data-role ="fontSizeChange2" id="generationsLabel" for="generations" data-text-key="nbreGene" style="font-size: 12px !important;">nbre<br>géné</label>
+                <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
+                <!-- <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations";"> -->
+                <select id="generations"  data-text-key="updateGenerations";>
+
+                </select>
+                    <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
+                    <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode"  style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
+                        <option value="ancestors" data-text-key="treeModeAncestors" selected>Asc.</option>
+                        <option value="descendants"  data-text-key="treeModeDescendants">Desc.</option>
+                        <option value="both" data-text-key="treeModeBoth">A+D</option>
+                    </select>
+                </select>
+            </div> 
+            
+        </div>
+
+        <svg id="tree-svg"></svg>
+        <div id="animation-map-container" style="position: fixed; bottom: 20px; left: 20px; width: 300px; height: 200px; z-index: 1000; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div id="animation-map" style="width: 100%; height: 100%; border-radius: 10px;"></div>
+        </div>
+ 
+    </div>
+
+    <!-- Fenêtre modale pour les paramètres -->
+    <div id="settings-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Paramètres</h2>
+                <span class="modal-close" onclick="closeSettingsModal()">&times;</span>
+            </div>
+            <div id="settings-content">
+                <div class="settings-section">
+                    <h3>Animation des Ancêtres</h3>
+                    <label for="targetAncestorId">ID de l'Ancêtre Cible :</label>
+                    <input 
+                        type="text" 
+                        id="targetAncestorId" 
+                        value="@I741@" 
+                        placeholder="Entrez l'ID de l'ancêtre"
+                    >
+                    <button onclick="saveTargetAncestorId()">Enregistrer</button>
+                </div>
+                
+                <!-- Nouveau bloc pour le module "prenoms" -->
+                <div class="settings-section">
+                    <h3>Nombre de Prénoms</h3>
+                    <label for="prenoms">nbre<br>prénom</label>
+                    <!-- <select id="prenoms" onchange="updatePrenoms(this.value)" data-text-key="prenoms"> -->
+                    <select id="prenoms" data-text-key="prenoms">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <!-- Section pour le géocodage -->
+                <div class="settings-section">
+                    <h3>Géocodage Local</h3>
+                    <div style="margin-bottom: 10px;">
+                        <label for="maxLocations">Nombre max. de lieux à traiter :</label>
+                        <input 
+                            type="number" 
+                            id="maxLocations" 
+                            value="10" 
+                            min="1"
+                            style="width: 80px;"
+                        >
+                        <span style="font-size: 0.8em; color: #666;">(0 = tous)</span>
+                    </div>
+                    <!-- <button id="generateGeocodeFileBtn" onclick="generateGeocodeFile()">Générer fichier geolocalisation.json</button> -->
+                    <button id="generateGeocodeFileBtn" >Générer fichier geolocalisation.json</button>
+
+                    <div id="geocoding-progress" style="margin-top: 10px; display: none;">
+                        <div id="geocoding-status"></div>
+                        <progress id="geocoding-bar" value="0" max="100" style="width: 100%;"></progress>
+                    </div>
+                    <select id="geocoding-results" size="10" style="width: 100%; margin-top: 10px; display: none;">
+                        <option>Résultats apparaîtront ici</option>
+                    </select>
+                </div>
+                <div class="settings-section">
+                    <h3>Générer les tuiles/map en local</h3>
+                    <button onclick="generateLocalMaps()">Générer les tuiles/maps</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    
+<!-- fenêtre toast pour faire un tooltip -->
+<!-- <div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div> -->
+<div id="mobile-toast" style="position: fixed; top: auto; bottom: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
+
+
+</body>
+</html>
