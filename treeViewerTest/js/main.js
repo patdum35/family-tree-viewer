@@ -381,12 +381,12 @@ window.addEventListener('load', initializeAtLoad);
 const isDebug = window.location.pathname.includes('private_index_4691.html');
 // 2. Construire l'URL du Service Worker avec un paramètre
 // On ajoute ?mode=debug si c'est le cas
-const swUrl = isDebug ? './service-worker.js?mode=debug' : './service-worker.js';
+const swUrl = true; //isDebug ? './service-worker.js?mode=debug' : './service-worker.js';
 console.log('\n\n in main.js : Mode détecté:', isDebug ? 'DEBUG' : 'PROD', 'swUrl =', swUrl);
 
 // // Enregistrement du Service Worker pour permettre le mode hors ligne
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register(swUrl)
+    navigator.serviceWorker.register('./service-worker.js')
       .then(registration => {
         console.log('✅ Service Worker enregistré avec succès:', registration.scope);
         

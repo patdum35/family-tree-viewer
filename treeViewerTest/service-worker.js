@@ -868,7 +868,7 @@ console.log('-------------------');
 
 
 const swUrl = new URL(self.location.href);
-const isDebugMode = swUrl.searchParams.get('mode') === 'debug';
+const isDebugMode = true; //swUrl.searchParams.get('mode') === 'debug';
 
 const GEDCOM_PATH = './';
 const LIBS_PATH = './libs/';

@@ -213,7 +213,7 @@ const GEDCOM_PATH = isProduction ? '../' : './';
 
 
 // 1. Détecter si on est sur la page "Clair" (Debug)
-const isDebug = window.location.pathname.includes('private_index_4691.html');
+const isDebug = true; ///window.location.pathname.includes('private_index_4691.html');
 
 // 2. Construire l'URL du Service Worker avec un paramètre
 // On ajoute ?mode=debug si c'est le cas
