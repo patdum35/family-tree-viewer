@@ -1,0 +1,738 @@
+<!-- <!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Redirection...</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .icon {
+      font-size: 60px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #333;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .browser-name {
+      color: #667eea;
+      font-weight: bold;
+      background: #f0f0f0;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .steps {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .steps ol {
+      padding-left: 20px;
+      color: #444;
+    }
+    
+    .steps li {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    
+    .button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: all 0.3s;
+    }
+    
+    .button:hover {
+      background: #45a049;
+    }
+    
+    .button.secondary {
+      background: #2196F3;
+    }
+    
+    .button.secondary:hover {
+      background: #0b7dda;
+    }
+    
+    .continue-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .continue-link a {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .success {
+      color: #4CAF50;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="content"></div>
+
+  <script>
+    // ⚠️ CONFIGUREZ ICI L'URL DE VOTRE APPLICATION
+    const APP_URL = 'https://patdum35.github.io/family-tree-viewer/treeViewer1.6/treeViewer1.6.html';
+
+    // Ajouter un cache-buster automatique - GLOBAL pour être accessible partout
+    window.FULL_URL = APP_URL + '?v=' + Date.now();
+
+    
+    // Détection immédiate
+    (function() {
+      const ua = navigator.userAgent.toLowerCase();
+      let isProblematic = false;
+      let browserName = '';
+      
+      // Liste des navigateurs problématiques
+      if (ua.includes('samsungbrowser')) {
+        isProblematic = true;
+        browserName = 'Samsung Internet';
+      } else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) {
+        isProblematic = true;
+        browserName = 'MIUI Browser';
+      } else if (ua.includes('oppo')) {
+        isProblematic = true;
+        browserName = 'Oppo Browser';
+      } else if (ua.includes('vivo')) {
+        isProblematic = true;
+        browserName = 'Vivo Browser';
+      } else if (ua.includes('huawei')) {
+        isProblematic = true;
+        browserName = 'Huawei Browser';
+      } else if (ua.includes('ucbrowser')) {
+        isProblematic = true;
+        browserName = 'UC Browser';
+      } else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) {
+        isProblematic = true;
+        browserName = 'Navigateur système';
+      } else if (ua.includes('edg')) {
+        isProblematic = false;
+        browserName = 'Edge';
+      }  else if (ua.includes('chrome')) {
+        isProblematic = false;
+        browserName = 'Chrome';
+      }
+      
+      const content = document.getElementById('content');
+      
+      // if (isProblematic) {
+      if (true) {
+        // Afficher l'avertissement
+        content.innerHTML = `
+          <h1 style="white-space: nowrap; margin-top: -20px; margin-bottom: 5px; padding: 0;  font-size: 20px;">⚠️ Navigateur compatible ?</h1>
+          <p>Vous utilisez <span class="browser-name" style="padding-top: 0px; padding-bottom: 1px;">${browserName}</span></p>
+          <p style= "margin-top: -10px;">Ce navigateur risque d'inverser les couleurs de l'app.</p>
+          
+          <div class="steps" style="padding-top: 3px; padding-bottom: 2px; padding-left: 5px; padding-right: 2px;">
+            <strong style="padding: 5px;">Solutions :</strong>
+            <ol>
+              <li>Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong></li>
+              <li>Plan B : Continuer quand même, et activer le mode site lumineux </li>
+              <li>Plan C : Copiez l'URL et coller dans un autre browser</li>
+            </ol>
+          </div>
+
+          <button class="button secondary" onclick="tryChrome()">
+            🚀 Ouvrir dans Chrome
+          </button>          
+          <button class="button" style="background: #ff9800;" onclick="window.location.href=FULL_URL">
+            ⚠️ Continuer quand même
+          </button>
+          <button class="button" onclick="copyUrl()">
+            📋 Copier l'URL
+          </button>
+        `;
+      } 
+      else {
+        // Redirection immédiate
+        window.location.href = APP_URL;
+      }
+    })();
+
+   
+    function tryChrome() {
+      const url = APP_URL.replace('https://', '');
+      window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+      
+      setTimeout(() => {
+        alert('Si Chrome ne s\'ouvre pas, utilisez le bouton "Copier l\'URL"');
+      }, 2000);
+    }
+
+    function copyUrl() {
+      const url = APP_URL;
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        const msg = document.createElement('div');
+        msg.className = 'success';
+        msg.textContent = '✅ URL copiée !';
+        document.querySelector('.steps').after(msg);
+        setTimeout(() => msg.remove(), 2000);
+      } catch (err) {
+        alert('Copiez manuellement : ' + url);
+      }
+      
+      document.body.removeChild(textArea);
+    }
+    
+
+  </script>
+</body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Redirection...</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .icon {
+      font-size: 60px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #333;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .browser-name {
+      color: #667eea;
+      font-weight: bold;
+      background: #f0f0f0;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .steps {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .steps ol {
+      padding-left: 20px;
+      color: #444;
+    }
+    
+    .steps li {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    
+    .button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: all 0.3s;
+    }
+    
+    .button:hover {
+      background: #45a049;
+    }
+    
+    .button.secondary {
+      background: #2196F3;
+    }
+    
+    .button.secondary:hover {
+      background: #0b7dda;
+    }
+    
+    .continue-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .continue-link a {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .success {
+      color: #4CAF50;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ===== Ajout du sélecteur de langue avec drapeaux - NE PAS TOUCHER LE RESTE ===== */
+    #language-selector-container {
+      position: fixed;
+      top: 8px;
+      right: 12px;
+      margin-top: 0;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .language-selector {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 6px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+    .lang-flag {
+      width: 28px;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      background-size: cover;
+    }
+    /* .lang-flag.active {
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
+    } */
+    .lang-flag:hover {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    
+    .lang-flag.active {
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
+      border-color: #4CAF50;
+      opacity: 1;
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+    }
+
+
+
+    /* Styles pour le drapeaux (versions simplifiées) */
+    .flag-fr {
+      background: linear-gradient(to right, #0055A4 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #EF4135 66.66%);
+    }
+    
+    .flag-en {
+      background: #012169 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cclippath id='a'%3E%3Cpath d='M0 0v30h60V0z'/%3E%3C/clippath%3E%3Cpath fill='%23012169' d='M0 0v30h60V0z'/%3E%3Cpath stroke='%23fff' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath stroke='%23C8102E' stroke-width='6' d='M0 0l60 30m0-30L0 30' clip-path='url(%23a)'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='10' d='M30 0v30M0 15h60'/%3E%3Cpath fill='none' stroke='%23C8102E' stroke-width='6' d='M30 0v30M0 15h60'/%3E%3C/svg%3E") center/cover no-repeat;
+    }
+    
+    .flag-es {
+      background: linear-gradient(to bottom, #C60B1E 25%, #FFC400 25%, #FFC400 75%, #C60B1E 75%);
+    }
+
+    /* Drapeau hongrois */
+    .flag-hu {
+      background: linear-gradient(to bottom, #CE2939 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #477050 66.66%);
+    }
+
+
+
+
+    /* ===== fin sélecteur drapeaux ===== */
+  </style>
+</head>
+<body>
+  <!-- Sélecteur de langue ajouté (discret en haut à droite) -->
+  <div id="language-selector-container" style="display: block; pointer-events: auto;">
+    <div class="language-selector" role="group" aria-label="Langues">
+      <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="changeLanguage('fr')"></div>
+      <div class="lang-flag flag-en" data-lang="en" title="English" onclick="changeLanguage('en')"></div>
+      <div class="lang-flag flag-es" data-lang="es" title="Español" onclick="changeLanguage('es')"></div>
+      <div class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="changeLanguage('hu')"></div>
+    </div>
+  </div>
+
+  <div class="container" id="content"></div>
+
+  <script>
+    // ⚠️ CONFIGUREZ ICI L'URL DE VOTRE APPLICATION
+    const APP_URL = 'https://patdum35.github.io/family-tree-viewer/treeViewer1.6/treeViewer1.6.html';
+
+    // Ajouter un cache-buster automatique - GLOBAL pour être accessible partout
+    window.FULL_URL = APP_URL + '?v=' + Date.now();
+
+    // --- Traductions (uniquement les textes affichés) ---
+    const T = {
+      fr: {
+        title: "⚠️ Navigateur compatible ?",
+        using: "Vous utilisez",
+        risk: "Ce navigateur risque d'inverser les couleurs de l'app.",
+        colorRisk: "Ce navigateur inverse les couleurs de l'app.",
+        solutionsStrong: "Solutions :",
+        s1: "Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong>",
+        s2: "Plan B : Continuer quand même, et activer le mode site lumineux",
+        s3: "Plan C : Copiez l'URL et coller dans un autre browser",
+        chromeBtn: "🚀 Ouvrir dans Chrome",
+        continueBtn: "⚠️ Continuer quand même",
+        copyBtn: "📋 Copier l'URL",
+        copiedMsg: "✅ URL copiée !",
+        chromeAlert: "Si Chrome ne s\\'ouvre pas, utilisez le bouton \"Copier l\\'URL\"",
+        chromeIntentFailedMsg: "Impossible d'ouvrir Chrome automatiquement.\nOK = Installer Chrome\nAnnuler = Copier l'URL",
+      },
+      en: {
+        title: "⚠️ Compatible browser?",
+        using: "You are using",
+        risk: "This browser may invert the app's colors.",
+        colorRisk: "This browser will invert the app colors.",
+        solutionsStrong: "Solutions:",
+        s1: "Open with <strong>Chrome</strong> or <strong>Firefox</strong>",
+        s2: "Plan B: Continue anyway and enable light mode",
+        s3: "Plan C: Copy the URL and open it in another browser",
+        chromeBtn: "🚀 Open in Chrome",
+        continueBtn: "⚠️ Continue anyway",
+        copyBtn: "📋 Copy URL",
+        copiedMsg: "✅ URL copied!",
+        chromeAlert: "If Chrome doesn't open, use the 'Copy URL' button",
+        chromeIntentFailedMsg: "Couldn't open Chrome automatically.\nOK = Install Chrome\nCancel = Copy URL",
+      },
+      es: {
+        title: "⚠️ ¿Navegador compatible?",
+        using: "Estás usando",
+        risk: "Este navegador puede invertir los colores de la aplicación.",
+        colorRisk: "Este navegador invertirá los colores de la aplicación.",
+        solutionsStrong: "Soluciones :",
+        s1: "Abre en <strong>Chrome</strong> o <strong>Firefox</strong>",
+        s2: "Plan B : Continuar de todos modos y activar el modo claro",
+        s3: "Plan C : Copia la URL y ábrela en otro navegador",
+        chromeBtn: "🚀 Abrir en Chrome",
+        continueBtn: "⚠️ Continuar de todos modos",
+        copyBtn: "📋 Copiar URL",
+        copiedMsg: "✅ URL copiada!",
+        chromeAlert: "Si Chrome no se abre, usa el botón 'Copiar URL'",
+        chromeIntentFailedMsg: "No se pudo abrir Chrome automáticamente.\nOK = Instalar Chrome\nCancelar = Copiar URL",
+      },
+      hu: {
+        title: "⚠️ Kompatibilis böngésző?",
+        using: "Ön ezt használja:",
+        risk: "Ez a böngésző megfordíthatja az alkalmazás színeit.",
+        colorRisk: "Ez a böngésző meg fogja fordítani az app színeit.",
+        solutionsStrong: "Megoldások :",
+        s1: "Nyissa meg <strong>Chrome</strong> vagy <strong>Firefox</strong> böngészőben",
+        s2: "B terv : Folytassa így is, és kapcsolja be a világos módot",
+        s3: "C terv : Másolja a címet, és nyissa meg másik böngészőben",
+        chromeBtn: "🚀 Megnyitás Chrome-ban",
+        continueBtn: "⚠️ Folytatás mégis",
+        copyBtn: "📋 URL másolása",
+        copiedMsg: "✅ URL másolva!",
+        chromeAlert: "Ha a Chrome nem nyílik meg, használja az 'URL másolása' gombot",
+        chromeIntentFailedMsg: "Nem sikerült automatikusan megnyitni a Chrome-ot.\nOK = Chrome telepítése\nMégse = URL másolása",
+      }
+    };
+
+    // --- Détection immédiate (TA LOGIQUE, INCHANGÉE) ---
+    (function() {
+      const ua = navigator.userAgent.toLowerCase();
+      let isProblematic = false;
+      let browserName = '';
+
+      const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      // Liste des navigateurs problématiques
+      if (/iphone|ipad|ipod/.test(ua)) {
+        isProblematic = false;
+        if (ua.includes('crios')) browserName = 'Chrome (iOS)';
+        else if (ua.includes('fxios')) browserName = 'Firefox (iOS)';
+        else browserName = 'Safari';
+      } else if (ua.includes('samsungbrowser')) {
+        isProblematic = true;
+        browserName = 'Samsung Internet';
+      } else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) {
+        isProblematic = true;
+        browserName = 'MIUI Browser';
+      } else if (ua.includes('oppo')) {
+        isProblematic = true;
+        browserName = 'Oppo Browser';
+      } else if (ua.includes('vivo')) {
+        isProblematic = true;
+        browserName = 'Vivo Browser';
+      } else if (ua.includes('huawei')) {
+        isProblematic = true;
+        browserName = 'Huawei Browser';
+      } else if (ua.includes('ucbrowser')) {
+        isProblematic = true;
+        browserName = 'UC Browser';
+      } else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) {
+        isProblematic = true;
+        browserName = 'Navigateur système';
+      } else if (ua.includes('edg')) {
+        isProblematic = false;
+        browserName = 'Edge';
+      }  else if (ua.includes('chrome')) {
+        isProblematic = false;
+        browserName = 'Chrome';
+      }
+      
+      const content = document.getElementById('content');
+      
+      if (isProblematic) {
+      // if (true) {
+        // Afficher l'avertissement (MAINTIEN de la mise en page EXACTE — on remplace seulement les textes par la traduction active)
+        // Rend le contenu via la fonction render() plus bas
+      } 
+      else {
+        // Redirection immédiate
+        window.location.href = APP_URL;
+      }
+    })();
+
+    // --- gestion de la langue (ajout minimal, sans changer le reste) ---
+    const DEFAULT_LANG = 'fr';
+    const saved = localStorage.getItem('redir_lang');
+    let LANG = saved || (navigator.language ? navigator.language.slice(0,2) : DEFAULT_LANG);
+    if (!T[LANG]) LANG = DEFAULT_LANG;
+
+    function changeLanguage(lang) {
+      if (!T[lang]) return;
+      LANG = lang;
+      localStorage.setItem('redir_lang', lang);
+      // met à jour visuel drapeaux
+      document.querySelectorAll('.lang-flag').forEach(f => f.classList.remove('active'));
+      const el = document.querySelector('.lang-flag[data-lang="'+lang+'"]');
+      if (el) el.classList.add('active');
+      renderContent(); // ré-affiche avec la nouvelle langue
+    }
+
+    // --- fonction render qui conserve STRICTEMENT la structure HTML initiale (mêmes inline-styles, mêmes classes, mêmes couleurs) ---
+    function renderContent() {
+      const ua = navigator.userAgent.toLowerCase();
+      let browserName = '';
+      if (ua.includes('samsungbrowser')) browserName = 'Samsung Internet';
+      else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) browserName = 'MIUI Browser';
+      else if (ua.includes('oppo')) browserName = 'Oppo Browser';
+      else if (ua.includes('vivo')) browserName = 'Vivo Browser';
+      else if (ua.includes('huawei')) browserName = 'Huawei Browser';
+      else if (ua.includes('ucbrowser')) browserName = 'UC Browser';
+      else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) browserName = 'Navigateur système';
+      else if (ua.includes('edg')) browserName = 'Edge';
+      else if (ua.includes('chrome')) browserName = 'Chrome';
+      else browserName = 'navigateur inconnu';
+
+      const t = T[LANG] || T['fr'];
+      const content = document.getElementById('content');
+
+      const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      let warningMsg = t.risk;  // message par défaut
+      if (dark) {
+        warningMsg = t.colorRisk; // message pour navigateur à risque en mode sombre
+      }
+      
+      content.innerHTML = `
+        <h1 style="white-space: nowrap; margin-top: -20px; margin-bottom: 5px; padding: 0;  font-size: 20px;">${t.title}</h1>
+        <p>${t.using} <span class="browser-name" style="padding-top: 0px; padding-bottom: 1px;">${browserName}</span></p>
+        <p style= "margin-top: -10px;">${warningMsg}</p>
+        
+        <div class="steps" style="padding-top: 3px; padding-bottom: 2px; padding-left: 5px; padding-right: 2px;">
+          <strong style="padding: 5px;">${t.solutionsStrong}</strong>
+          <ol>
+            <li>${t.s1}</li>
+            <li>${t.s2}</li>
+            <li>${t.s3}</li>
+          </ol>
+        </div>
+
+        <button class="button secondary" onclick="tryChrome()">
+          ${t.chromeBtn}
+        </button>          
+        <button class="button" style="background: #ff9800;" onclick="window.location.href=FULL_URL">
+          ${t.continueBtn}
+        </button>
+        <button class="button" onclick="copyUrl()">
+          ${t.copyBtn}
+        </button>
+      `;
+    }
+
+    // appel initial (conserve la condition if (true) que tu avais)
+    (function initRender() {
+      // garde ton comportement exact : on affiche l'avertissement (tu avais if(true))
+      renderContent();
+      // active le drapeau correspondant visuellement
+      document.querySelectorAll('.lang-flag').forEach(f => {
+        if (f.dataset.lang === LANG) f.classList.add('active'); else f.classList.remove('active');
+      });
+    })();
+
+    // --- fonctions existantes (conservées) ---
+    // function tryChrome() {
+    //   const url = APP_URL.replace('https://', '');
+    //   window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+      
+    //   setTimeout(() => {
+    //     // message localisé mais fonction inchangée
+    //     alert(T[LANG] ? T[LANG].chromeAlert : T['fr'].chromeAlert);
+    //   }, 2000);
+    // }
+
+    function tryChrome() {
+      const url = APP_URL.replace('https://', '');
+      const intentUrl = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+      const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.android.chrome';
+      const start = Date.now();
+
+      // tente l'intent (peut échouer silencieusement)
+      window.location.href = intentUrl;
+
+      // fallback si rien ne se passe au bout de ~1800ms
+      setTimeout(() => {
+        // si la page est toujours visible, l'intent n'a probablement pas fonctionné
+        if (document.visibilityState === 'visible' && Date.now() - start < 3000) {
+          // message localisé (ajoute la clé chromeIntentFailedMsg dans T si besoin)
+          const msg = (T && T[LANG] && T[LANG].chromeIntentFailedMsg) ?
+                        T[LANG].chromeIntentFailedMsg :
+                        "Impossible d'ouvrir Chrome automatiquement.\nOK = Installer Chrome\nAnnuler = Copier l'URL";
+
+          // confirm() : OK => ouvrir Play Store, Annuler => copier URL
+          if (confirm(msg)) {
+            // ouvre le Play Store dans un nouvel onglet
+            try { window.open(playStoreUrl, '_blank'); }
+            catch (e) { window.location.href = playStoreUrl; }
+          } else {
+            // réutilise ta fonction copyUrl() existante
+            try { copyUrl(); }
+            catch (e) { navigator.clipboard && navigator.clipboard.writeText(APP_URL); alert("URL copiée !"); }
+          }
+        }
+      }, 1800);
+    }
+
+    function copyUrl() {
+      const url = APP_URL;
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        const existing = document.querySelector('.success');
+        if (existing) existing.remove();
+        const msg = document.createElement('div');
+        msg.className = 'success';
+        msg.textContent = T[LANG] ? T[LANG].copiedMsg : T['fr'].copiedMsg;
+        document.querySelector('.steps').after(msg);
+        setTimeout(() => msg.remove(), 2000);
+      } catch (err) {
+        alert('Copiez manuellement : ' + url);
+      }
+      
+      document.body.removeChild(textArea);
+    }
+
+  </script>
+</body>
+</html>

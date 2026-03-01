@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS PWA Installation Component</title>
+    <style>
+        /* Styles pour le guide d'installation iOS */
+        .ios-install-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            color: white;
+            padding: 12px 16px;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .ios-install-banner.show {
+            transform: translateY(0);
+        }
+
+        .ios-banner-content {
+            display: flex;
+            align-items: center;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .ios-banner-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .ios-banner-text {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .ios-banner-text strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .ios-banner-text span {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .share-icon {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .ios-banner-close {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            padding: 4px;
+        }
+
+        .ios-banner-close:hover {
+            opacity: 1;
+        }
+
+        .ios-banner-details {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .ios-banner-details:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Modal pour instructions détaillées */
+        .ios-instructions-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .ios-instructions-content {
+            background: white;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .ios-instructions-content h2 {
+            margin: 0 0 20px 0;
+            color: #007AFF;
+        }
+
+        .instructions-section {
+            margin-bottom: 20px;
+        }
+
+        .instructions-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .instructions-section ol {
+            line-height: 1.8;
+            color: #666;
+            padding-left: 20px;
+        }
+
+        .instructions-section li {
+            margin-bottom: 8px;
+        }
+
+        .modal-buttons {
+            text-align: center;
+        }
+
+        .btn-close {
+            background: #007AFF;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-close:hover {
+            background: #0056CC;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .ios-banner-text strong {
+                font-size: 14px;
+            }
+            .ios-banner-text span {
+                font-size: 12px;
+            }
+            .ios-instructions-content {
+                margin: 10px auto;
+                padding: 15px;
+            }
+            .ios-banner-details {
+                right: 35px;
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner d'installation iOS -->
+    <div id="ios-install-banner" class="ios-install-banner">
+        <div class="ios-banner-content">
+            <div class="ios-banner-icon">📱</div>
+            <div class="ios-banner-text">
+                <strong id="banner-title" data-text-key="iosInstallTitle">Installer l'application</strong>
+                <span id="banner-instruction" data-text-key="iosInstallInstruction">Appuyez sur <span class="share-icon">📤</span> puis "Ajouter à l'écran d'accueil"</span>
+            </div>
+            <button class="ios-banner-details" onclick="window.showIOSInstructions()" id="details-btn" data-text-key="iosDetailsBtn">Détails</button>
+            <button class="ios-banner-close" onclick="window.hideIOSBanner()">&times;</button>
+        </div>
+    </div>
+
+    <!-- Modal pour instructions détaillées -->
+    <div id="ios-instructions-modal" class="ios-instructions-modal">
+        <div class="ios-instructions-content">
+            <h2 id="modal-title" data-text-key="iosModalTitle">📱 Installation sur iOS</h2>
+            
+            <div class="instructions-section">
+                <h3 id="steps-title" data-text-key="iosStepsTitle">📋 Étapes détaillées :</h3>
+                <ol id="instructions-list">
+                    <li data-text-key="iosStep1"><strong>Ouvrez Safari</strong> (l'installation ne fonctionne que dans Safari)</li>
+                    <li data-text-key="iosStep2"><strong>Appuyez sur l'icône Partager</strong> 📤 en bas de l'écran</li>
+                    <li data-text-key="iosStep3"><strong>Faites défiler</strong> et trouvez "Ajouter à l'écran d'accueil" ➕</li>
+                    <li data-text-key="iosStep4"><strong>Personnalisez le nom</strong> si souhaité</li>
+                    <li data-text-key="iosStep5"><strong>Appuyez sur "Ajouter"</strong> ✅</li>
+                </ol>
+            </div>
+            
+            <div class="modal-buttons">
+                <button onclick="window.hideIOSInstructions()" class="btn-close" id="close-btn" data-text-key="iosCloseBtn">
+                    Compris !
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Module iOS Installation - Compatible avec le système i18n existant
+        (function() {
+            'use strict';
+            
+            // Fonction pour appliquer les traductions du système i18n principal
+            function applyTranslations() {
+                // Vérifier que le système i18n principal est disponible (fenêtre parent ou actuelle)
+                const i18n = window.i18n || (window.parent && window.parent.i18n);
+                
+                if (i18n && typeof i18n.getMultilingueText === 'function') {
+                    console.log('Applying iOS translations...');
+                    
+                    // Appliquer les traductions à tous les éléments avec data-text-key
+                    document.querySelectorAll('[data-text-key]').forEach(element => {
+                        const key = element.getAttribute('data-text-key');
+                        const translation = i18n.getMultilingueText(key);
+                        
+                        // Log pour débugger
+                        console.log(`Translating ${key}: ${translation}`);
+                        
+                        if (element.tagName === 'INPUT') {
+                            element.placeholder = translation;
+                        } else {
+                            // Pour les éléments avec du HTML (comme les steps avec <strong> et les instructions avec span)
+                            if (key === 'iosInstallInstruction' || key.startsWith('iosStep')) {
+                                element.innerHTML = translation;
+                            } else {
+                                element.textContent = translation;
+                            }
+                        }
+                    });
+                } else {
+                    console.warn('Système i18n non trouvé, traductions par défaut conservées');
+                }
+            }
+            
+            // Fonctions exposées globalement pour compatibilité
+            window.hideIOSBanner = function() {
+                const banner = document.getElementById('ios-install-banner');
+                if (banner) {
+                    banner.classList.remove('show');
+                    localStorage.setItem('ios-install-dismissed', Date.now().toString());
+                    console.log('Banner iOS fermé par l\'utilisateur');
+                }
+            };
+
+            window.hideIOSInstructions = function() {
+                const modal = document.getElementById('ios-instructions-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            window.showIOSInstructions = function() {
+                const modal = document.getElementById('ios-instructions-modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    
+                    // Appliquer les traductions quand la modal s'ouvre
+                    setTimeout(applyTranslations, 50);
+                }
+            };
+
+            // Appliquer les traductions au chargement initial et périodiquement
+            function initTranslations() {
+                applyTranslations();
+                
+                // Réessayer plusieurs fois au cas où le système i18n se charge après
+                setTimeout(applyTranslations, 100);
+                setTimeout(applyTranslations, 500);
+                setTimeout(applyTranslations, 1000);
+            }
+            
+            // Auto-initialisation si chargé directement
+            if (window.location.pathname.includes('ios-install.html')) {
+                console.log('Module iOS Installation chargé');
+                document.addEventListener('DOMContentLoaded', initTranslations);
+            } else {
+                // Si chargé dynamiquement, initialiser immédiatement
+                initTranslations();
+            }
+        })();
+    </script>
+</body>
+</html>
