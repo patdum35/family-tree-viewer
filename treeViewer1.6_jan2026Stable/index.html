@@ -336,9 +336,16 @@
             
             <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px; width: fit-content;">                  
                 <!-- <label id="generationsLabel" for="generations" data-text-key="nbreGene">nbre<br>géné</label> -->
-                <label id="generationsLabel"  data-text-key="nbreGene">nbre<br>géné</label>
+                <!-- <label id="generationsLabel"  data-text-key="nbreGene">nbre<br>géné</label> -->
                 <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
-                <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
+                <!-- <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations"> -->
+                <label id="generationsLabel" data-text-key="nbreGene">
+                    nbre<br>géné
+                    <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
+                        </select>
+                </label>
+
+
                 </select>
                     <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
                     <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode"  style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
