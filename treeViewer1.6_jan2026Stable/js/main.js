@@ -312,7 +312,7 @@ window.toggleAnimationPause = toggleAnimationPause;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initResourcePreloading();
-    initTilePreloading();
+    //initTilePreloading();
 });
 
 

@@ -1,10 +1,10 @@
 {
   "name": "explore your origins",
   "short_name": "origin",
-  "id": "/explore-origins-v1",
+  "id": "family-tree-v1-6",
   "description": "explore your origins",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "./", 
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4361ee",
@@ -16,16 +16,19 @@
       "purpose": "any"
     },
     {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/icon-512x512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Capture Mobile"
     }
   ]
 }
