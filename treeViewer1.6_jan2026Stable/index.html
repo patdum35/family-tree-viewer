@@ -1,738 +1,432 @@
-<!-- <!DOCTYPE html>
-
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <title>Redirection...</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .icon {
-      font-size: 60px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    h1 {
-      color: #333;
-      font-size: 24px;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    
-    .browser-name {
-      color: #667eea;
-      font-weight: bold;
-      background: #f0f0f0;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: inline-block;
-    }
-    
-    p {
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    .steps {
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    
-    .steps ol {
-      padding-left: 20px;
-      color: #444;
-    }
-    
-    .steps li {
-      margin: 10px 0;
-      line-height: 1.5;
-    }
-    
-    .button {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 10px 0;
-      transition: all 0.3s;
-    }
-    
-    .button:hover {
-      background: #45a049;
-    }
-    
-    .button.secondary {
-      background: #2196F3;
-    }
-    
-    .button.secondary:hover {
-      background: #0b7dda;
-    }
-    
-    .continue-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-    
-    .continue-link a {
-      color: #999;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    
-    .success {
-      color: #4CAF50;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container" id="content"></div>
-
-  <script>
-    // ⚠️ CONFIGUREZ ICI L'URL DE VOTRE APPLICATION
-    const APP_URL = 'https://patdum35.github.io/family-tree-viewer/treeViewer1.6/treeViewer1.6.html';
-
-    // Ajouter un cache-buster automatique - GLOBAL pour être accessible partout
-    window.FULL_URL = APP_URL + '?v=' + Date.now();
-
-    
-    // Détection immédiate
-    (function() {
-      const ua = navigator.userAgent.toLowerCase();
-      let isProblematic = false;
-      let browserName = '';
-      
-      // Liste des navigateurs problématiques
-      if (ua.includes('samsungbrowser')) {
-        isProblematic = true;
-        browserName = 'Samsung Internet';
-      } else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) {
-        isProblematic = true;
-        browserName = 'MIUI Browser';
-      } else if (ua.includes('oppo')) {
-        isProblematic = true;
-        browserName = 'Oppo Browser';
-      } else if (ua.includes('vivo')) {
-        isProblematic = true;
-        browserName = 'Vivo Browser';
-      } else if (ua.includes('huawei')) {
-        isProblematic = true;
-        browserName = 'Huawei Browser';
-      } else if (ua.includes('ucbrowser')) {
-        isProblematic = true;
-        browserName = 'UC Browser';
-      } else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) {
-        isProblematic = true;
-        browserName = 'Navigateur système';
-      } else if (ua.includes('edg')) {
-        isProblematic = false;
-        browserName = 'Edge';
-      }  else if (ua.includes('chrome')) {
-        isProblematic = false;
-        browserName = 'Chrome';
-      }
-      
-      const content = document.getElementById('content');
-      
-      // if (isProblematic) {
-      if (true) {
-        // Afficher l'avertissement
-        content.innerHTML = `
-          <h1 style="white-space: nowrap; margin-top: -20px; margin-bottom: 5px; padding: 0;  font-size: 20px;">⚠️ Navigateur compatible ?</h1>
-          <p>Vous utilisez <span class="browser-name" style="padding-top: 0px; padding-bottom: 1px;">${browserName}</span></p>
-          <p style= "margin-top: -10px;">Ce navigateur risque d'inverser les couleurs de l'app.</p>
-          
-          <div class="steps" style="padding-top: 3px; padding-bottom: 2px; padding-left: 5px; padding-right: 2px;">
-            <strong style="padding: 5px;">Solutions :</strong>
-            <ol>
-              <li>Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong></li>
-              <li>Plan B : Continuer quand même, et activer le mode site lumineux </li>
-              <li>Plan C : Copiez l'URL et coller dans un autre browser</li>
-            </ol>
-          </div>
-
-          <button class="button secondary" onclick="tryChrome()">
-            🚀 Ouvrir dans Chrome
-          </button>          
-          <button class="button" style="background: #ff9800;" onclick="window.location.href=FULL_URL">
-            ⚠️ Continuer quand même
-          </button>
-          <button class="button" onclick="copyUrl()">
-            📋 Copier l'URL
-          </button>
-        `;
-      } 
-      else {
-        // Redirection immédiate
-        window.location.href = APP_URL;
-      }
-    })();
-
-   
-    function tryChrome() {
-      const url = APP_URL.replace('https://', '');
-      window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
-      
-      setTimeout(() => {
-        alert('Si Chrome ne s\'ouvre pas, utilisez le bouton "Copier l\'URL"');
-      }, 2000);
-    }
-
-    function copyUrl() {
-      const url = APP_URL;
-      const textArea = document.createElement('textarea');
-      textArea.value = url;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-9999px';
-      document.body.appendChild(textArea);
-      textArea.select();
-      
-      try {
-        document.execCommand('copy');
-        const msg = document.createElement('div');
-        msg.className = 'success';
-        msg.textContent = '✅ URL copiée !';
-        document.querySelector('.steps').after(msg);
-        setTimeout(() => msg.remove(), 2000);
-      } catch (err) {
-        alert('Copiez manuellement : ' + url);
-      }
-      
-      document.body.removeChild(textArea);
-    }
-    
-
-  </script>
-</body>
-</html> -->
-
-
-
-
 <!DOCTYPE html>
+<html style="color-scheme: light !important;" translate="no">
 
-<html lang="fr">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <title>Redirection...</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .icon {
-      font-size: 60px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    h1 {
-      color: #333;
-      font-size: 24px;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    
-    .browser-name {
-      color: #667eea;
-      font-weight: bold;
-      background: #f0f0f0;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: inline-block;
-    }
-    
-    p {
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    .steps {
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    
-    .steps ol {
-      padding-left: 20px;
-      color: #444;
-    }
-    
-    .steps li {
-      margin: 10px 0;
-      line-height: 1.5;
-    }
-    
-    .button {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin: 10px 0;
-      transition: all 0.3s;
-    }
-    
-    .button:hover {
-      background: #45a049;
-    }
-    
-    .button.secondary {
-      background: #2196F3;
-    }
-    
-    .button.secondary:hover {
-      background: #0b7dda;
-    }
-    
-    .continue-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-    
-    .continue-link a {
-      color: #999;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    
-    .success {
-      color: #4CAF50;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    /* ===== Ajout du sélecteur de langue avec drapeaux - NE PAS TOUCHER LE RESTE ===== */
-    #language-selector-container {
-      position: fixed;
-      top: 8px;
-      right: 12px;
-      margin-top: 0;
-      z-index: 9999;
-      pointer-events: none;
-    }
-    .language-selector {
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 6px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      display: flex;
-      gap: 6px;
-      pointer-events: auto;
-    }
-    .lang-flag {
-      width: 28px;
-      height: 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      background-size: cover;
-    }
-    /* .lang-flag.active {
-      outline: 2px solid #2196F3;
-      outline-offset: 2px;
-    } */
-    .lang-flag:hover {
-      transform: scale(1.1);
-      opacity: 1;
-    }
-    
-    .lang-flag.active {
-      outline: 2px solid #2196F3;
-      outline-offset: 2px;
-      border-color: #4CAF50;
-      opacity: 1;
-      box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-    }
+    <!-- Méta tags pour le mode plein écran mobile -->
+    <meta name="google" content="notranslate">
+    <meta name="color-scheme" content="light">
+    <!--  <meta name="theme-color" content="#4361ee"> -->
 
 
 
-    /* Styles pour le drapeaux (versions simplifiées) */
-    .flag-fr {
-      background: linear-gradient(to right, #0055A4 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #EF4135 66.66%);
-    }
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     
-    .flag-en {
-      background: #012169 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cclippath id='a'%3E%3Cpath d='M0 0v30h60V0z'/%3E%3C/clippath%3E%3Cpath fill='%23012169' d='M0 0v30h60V0z'/%3E%3Cpath stroke='%23fff' d='M0 0l60 30m0-30L0 30'/%3E%3Cpath stroke='%23C8102E' stroke-width='6' d='M0 0l60 30m0-30L0 30' clip-path='url(%23a)'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='10' d='M30 0v30M0 15h60'/%3E%3Cpath fill='none' stroke='%23C8102E' stroke-width='6' d='M30 0v30M0 15h60'/%3E%3C/svg%3E") center/cover no-repeat;
-    }
+    <title>Arbre généalogique</title>
+
     
-    .flag-es {
-      background: linear-gradient(to bottom, #C60B1E 25%, #FFC400 25%, #FFC400 75%, #C60B1E 75%);
-    }
-
-    /* Drapeau hongrois */
-    .flag-hu {
-      background: linear-gradient(to bottom, #CE2939 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #477050 66.66%);
-    }
+    <!-- Pour afficher un bouton de debug pour afficher la console de debug eruda -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 
 
 
+    <!-- A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
+    <!-- pour débugger sur IOS où le service worker pose problème -->
+    <!-- <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
 
-    /* ===== fin sélecteur drapeaux ===== */
-  </style>
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+            console.log("Caches d'API supprimés");
+        }
+        // Optionnel : vider aussi le localStorage si besoin
+        // localStorage.clear();
+    </script> -->
+    <!-- FIN A ENLEVER !!!!!!!!!!!!!!!!!!   code pour désactiver le service worker et vider les caches -->
+
+
+
+    <!-- Google tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HWT22W45CN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-HWT22W45CN');
+    </script>
+
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="js/treeWheelStyles.css"> -->
+
+
+    <!-- Script d'enregistrement amélioré du Service Worker -->
+    <script src="js/serviceWorkerInit.js"></script>
+
+    <script src="js/i18n.js"></script>
+
+
+    <script src="./cacheConfig.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+
+    <!-- Système de chargement des bibliothèques avec fallback -->
+    <script type="module" src="js/libraryLoader.js"></script>
+
+    <!-- Initialisation de l'application -->
+    <script type="module" src="js/appInitializer.js"></script>
+    
+   
+    
+    <!-- Script d'initialisation qui attend le chargement des bibliothèques -->
+    <script>
+        document.addEventListener('libraries-loaded', function() {
+            console.log("Toutes les bibliothèques sont chargées, initialisation de l'application...");
+            // Vous pouvez initialiser ici les composants qui dépendent des bibliothèques externes
+        });
+    </script>
+    <link rel="manifest" href="./manifest.webmanifest">
+
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+
+    <script src="js/pwaInstaller_ProgressiveWebApps.js"></script>
+
+
 </head>
+
+
+
 <body>
-  <!-- Sélecteur de langue ajouté (discret en haut à droite) -->
-  <div id="language-selector-container" style="display: block; pointer-events: auto;">
-    <div class="language-selector" role="group" aria-label="Langues">
-      <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="changeLanguage('fr')"></div>
-      <div class="lang-flag flag-en" data-lang="en" title="English" onclick="changeLanguage('en')"></div>
-      <div class="lang-flag flag-es" data-lang="es" title="Español" onclick="changeLanguage('es')"></div>
-      <div class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="changeLanguage('hu')"></div>
+    <div class="login-background">
+        <!-- <img src="background_images/fort_lalatte.jpg" class="login-background-image" alt="Fond d'écran"> -->
+        <!-- <img src="background_images/bois.jpg" class="login-background-image" alt="Fond d'écran">         -->
+        <img id="login-background-image" src="background_images/tree-log-lowQuality.jpg" class="login-background-image" alt="Fond d'écran">  
+        <!-- <img class="login-background-image" alt="Fond d'écran"> -->
     </div>
-  </div>
 
-  <div class="container" id="content"></div>
 
-  <script>
-    // ⚠️ CONFIGUREZ ICI L'URL DE VOTRE APPLICATION
-    const APP_URL = 'https://patdum35.github.io/family-tree-viewer/treeViewer1.6/treeViewer1.6.html';
+    <!-- Bouton pour ouvrir la modal de chargement de fichier -->
+    <button id="load-gedcom-button" class="settings-button" onclick="openGedcomModal()" style=" top: 10px;  font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>⚙️</span></button>
+    <button id="help-button" class="help-button" onclick="documentation()" style=" position: fixed; top: 10px;  right: 10px; font-size: 34px; background: transparent; border: none; cursor: pointer;" ><span>💡</span></button>
 
-    // Ajouter un cache-buster automatique - GLOBAL pour être accessible partout
-    window.FULL_URL = APP_URL + '?v=' + Date.now();
+    <div class="fullScreenLabel" id="fullScreenLabel" data-text-key="fullScreenLabel" style="position: fixed; z-index: 2; bottom: 45px; left: 5px; font-size: 12px; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">fullScreen</div>
+    <button id="fullScreen-button" class="fullScreen-Button"   onclick="toggleFullScreen()" data-text-key="fullScreen" style="position: fixed; z-index: 1499; bottom: 3px; left: 5px; font-size: 34px; background: transparent; border: none; cursor: pointer;"><span>🖥️</span></button>
 
-    // --- Traductions (uniquement les textes affichés) ---
-    const T = {
-      fr: {
-        title: "⚠️ Navigateur compatible ?",
-        using: "Vous utilisez",
-        risk: "Ce navigateur risque d'inverser les couleurs de l'app.",
-        colorRisk: "Ce navigateur inverse les couleurs de l'app.",
-        solutionsStrong: "Solutions :",
-        s1: "Ouvrez dans <strong>Chrome</strong> ou <strong>Firefox</strong>",
-        s2: "Plan B : Continuer quand même, et activer le mode site lumineux",
-        s3: "Plan C : Copiez l'URL et coller dans un autre browser",
-        chromeBtn: "🚀 Ouvrir dans Chrome",
-        continueBtn: "⚠️ Continuer quand même",
-        copyBtn: "📋 Copier l'URL",
-        copiedMsg: "✅ URL copiée !",
-        chromeAlert: "Si Chrome ne s\\'ouvre pas, utilisez le bouton \"Copier l\\'URL\"",
-        chromeIntentFailedMsg: "Impossible d'ouvrir Chrome automatiquement.\nOK = Installer Chrome\nAnnuler = Copier l'URL",
-      },
-      en: {
-        title: "⚠️ Compatible browser?",
-        using: "You are using",
-        risk: "This browser may invert the app's colors.",
-        colorRisk: "This browser will invert the app colors.",
-        solutionsStrong: "Solutions:",
-        s1: "Open with <strong>Chrome</strong> or <strong>Firefox</strong>",
-        s2: "Plan B: Continue anyway and enable light mode",
-        s3: "Plan C: Copy the URL and open it in another browser",
-        chromeBtn: "🚀 Open in Chrome",
-        continueBtn: "⚠️ Continue anyway",
-        copyBtn: "📋 Copy URL",
-        copiedMsg: "✅ URL copied!",
-        chromeAlert: "If Chrome doesn't open, use the 'Copy URL' button",
-        chromeIntentFailedMsg: "Couldn't open Chrome automatically.\nOK = Install Chrome\nCancel = Copy URL",
-      },
-      es: {
-        title: "⚠️ ¿Navegador compatible?",
-        using: "Estás usando",
-        risk: "Este navegador puede invertir los colores de la aplicación.",
-        colorRisk: "Este navegador invertirá los colores de la aplicación.",
-        solutionsStrong: "Soluciones :",
-        s1: "Abre en <strong>Chrome</strong> o <strong>Firefox</strong>",
-        s2: "Plan B : Continuar de todos modos y activar el modo claro",
-        s3: "Plan C : Copia la URL y ábrela en otro navegador",
-        chromeBtn: "🚀 Abrir en Chrome",
-        continueBtn: "⚠️ Continuar de todos modos",
-        copyBtn: "📋 Copiar URL",
-        copiedMsg: "✅ URL copiada!",
-        chromeAlert: "Si Chrome no se abre, usa el botón 'Copiar URL'",
-        chromeIntentFailedMsg: "No se pudo abrir Chrome automáticamente.\nOK = Instalar Chrome\nCancelar = Copiar URL",
-      },
-      hu: {
-        title: "⚠️ Kompatibilis böngésző?",
-        using: "Ön ezt használja:",
-        risk: "Ez a böngésző megfordíthatja az alkalmazás színeit.",
-        colorRisk: "Ez a böngésző meg fogja fordítani az app színeit.",
-        solutionsStrong: "Megoldások :",
-        s1: "Nyissa meg <strong>Chrome</strong> vagy <strong>Firefox</strong> böngészőben",
-        s2: "B terv : Folytassa így is, és kapcsolja be a világos módot",
-        s3: "C terv : Másolja a címet, és nyissa meg másik böngészőben",
-        chromeBtn: "🚀 Megnyitás Chrome-ban",
-        continueBtn: "⚠️ Folytatás mégis",
-        copyBtn: "📋 URL másolása",
-        copiedMsg: "✅ URL másolva!",
-        chromeAlert: "Ha a Chrome nem nyílik meg, használja az 'URL másolása' gombot",
-        chromeIntentFailedMsg: "Nem sikerült automatikusan megnyitni a Chrome-ot.\nOK = Chrome telepítése\nMégse = URL másolása",
-      }
-    };
+    <div class="browserBarLabel" id="browserBarLabel" data-text-key="hideBrowserBarLabel" style="display: none; position: fixed; z-index: 2; bottom: 35px; left: 50%; transform: translateX(-50%); font-size: 12px; white-space: pre-line; color: white; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">browser<br>Bar</div>
+    <button id="browserBar-button" class="browserBar-Button"   onclick="browserBarPuzzle()" data-text-key="browserBar" style="display: none; position: fixed; z-index: 2; bottom: 3px;  font-size: 28px; background: transparent; border: none; cursor: pointer;"><span>💻</span></button>
 
-    // --- Détection immédiate (TA LOGIQUE, INCHANGÉE) ---
-    (function() {
-      const ua = navigator.userAgent.toLowerCase();
-      let isProblematic = false;
-      let browserName = '';
 
-      const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      // Liste des navigateurs problématiques
-      if (/iphone|ipad|ipod/.test(ua)) {
-        isProblematic = false;
-        if (ua.includes('crios')) browserName = 'Chrome (iOS)';
-        else if (ua.includes('fxios')) browserName = 'Firefox (iOS)';
-        else browserName = 'Safari';
-      } else if (ua.includes('samsungbrowser')) {
-        isProblematic = true;
-        browserName = 'Samsung Internet';
-      } else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) {
-        isProblematic = true;
-        browserName = 'MIUI Browser';
-      } else if (ua.includes('oppo')) {
-        isProblematic = true;
-        browserName = 'Oppo Browser';
-      } else if (ua.includes('vivo')) {
-        isProblematic = true;
-        browserName = 'Vivo Browser';
-      } else if (ua.includes('huawei')) {
-        isProblematic = true;
-        browserName = 'Huawei Browser';
-      } else if (ua.includes('ucbrowser')) {
-        isProblematic = true;
-        browserName = 'UC Browser';
-      } else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) {
-        isProblematic = true;
-        browserName = 'Navigateur système';
-      } else if (ua.includes('edg')) {
-        isProblematic = false;
-        browserName = 'Edge';
-      }  else if (ua.includes('chrome')) {
-        isProblematic = false;
-        browserName = 'Chrome';
-      }
-      
-      const content = document.getElementById('content');
-      
-      if (isProblematic) {
-      // if (true) {
-        // Afficher l'avertissement (MAINTIEN de la mise en page EXACTE — on remplace seulement les textes par la traduction active)
-        // Rend le contenu via la fonction render() plus bas
-      } 
-      else {
-        // Redirection immédiate
-        window.location.href = APP_URL;
-      }
-    })();
+    <div id="advanced-settings-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
+    
 
-    // --- gestion de la langue (ajout minimal, sans changer le reste) ---
-    const DEFAULT_LANG = 'fr';
-    const saved = localStorage.getItem('redir_lang');
-    let LANG = saved || (navigator.language ? navigator.language.slice(0,2) : DEFAULT_LANG);
-    if (!T[LANG]) LANG = DEFAULT_LANG;
+        <div style="background-color: white; width: 300px; max-width: 90%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90vh; overflow-y: auto;">
+            <!-- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; "> -->
+            <div style="display: flex; justify-content: space-between; align-items: center;  /* STYLES DU BANDEAU */ background-color: #E0F7FA;  padding: 3px 20px; margin-bottom: 0;  border-radius: 10px 10px 0 0;  border-bottom: 1px solid #B2EBF2;">
+                <h2 style="margin: 0; font-size: 18px; color: #333;" data-text-key="AdvancedUserMenu">Advanced user menu</h2>
+                <span onclick="closeGedcomModal()" id="advancedSettingsClose-btn" style="cursor: pointer; font-size: 24px; color: #999;">&times;</span>
+            </div>
+            <div style="padding: 20px;">
+                <!-- <input type="file" id="gedFile" accept=".ged" style="width: 100%; margin-bottom: 15px; padding: 8px; box-sizing: border-box;"> -->
+                
+                <!-- Cacher l'input file original -->
+                <input type="file" id="gedFile" accept=".ged" style="display: none;">
 
-    function changeLanguage(lang) {
-      if (!T[lang]) return;
-      LANG = lang;
-      localStorage.setItem('redir_lang', lang);
-      // met à jour visuel drapeaux
-      document.querySelectorAll('.lang-flag').forEach(f => f.classList.remove('active'));
-      const el = document.querySelector('.lang-flag[data-lang="'+lang+'"]');
-      if (el) el.classList.add('active');
-      renderContent(); // ré-affiche avec la nouvelle langue
-    }
+                <button id="SWUpdateBtn" onclick="SWUpdate()" data-text-key="SWUpdate" style="background-color: #4CAF50; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: -15px; margin-bottom: 10px;">Mise à jour du logiciel</button>
+                
+                <button id="defaultSettingsBtn" onclick="resetToDefaultSettings()" data-text-key="parametresDefaut" style="background-color: #9c27b0; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔄 Paramètres par défaut</button>
+                    
+                <button id="voiceBtn" onclick="voiceModal()" data-text-key="voiceModal" style="background-color: #4c93af; color: white; border: none; padding: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🗣️ sélection de la voix</button>
 
-    // --- fonction render qui conserve STRICTEMENT la structure HTML initiale (mêmes inline-styles, mêmes classes, mêmes couleurs) ---
-    function renderContent() {
-      const ua = navigator.userAgent.toLowerCase();
-      let browserName = '';
-      if (ua.includes('samsungbrowser')) browserName = 'Samsung Internet';
-      else if (ua.includes('miuibrowser') || ua.includes('xbrowser')) browserName = 'MIUI Browser';
-      else if (ua.includes('oppo')) browserName = 'Oppo Browser';
-      else if (ua.includes('vivo')) browserName = 'Vivo Browser';
-      else if (ua.includes('huawei')) browserName = 'Huawei Browser';
-      else if (ua.includes('ucbrowser')) browserName = 'UC Browser';
-      else if (ua.includes('android') && !ua.includes('chrome') && !ua.includes('firefox')) browserName = 'Navigateur système';
-      else if (ua.includes('edg')) browserName = 'Edge';
-      else if (ua.includes('chrome')) browserName = 'Chrome';
-      else browserName = 'navigateur inconnu';
+                <!-- Label pour le fichier GEDCOM -->
+                <label id="labelGedFile" for="gedFile" style="display: block; font-size: 14px; color: #333; margin-top: 20px; margin-bottom: 3px; font-weight: 500;" data-text-key="fichierGedcom">GEDCOM file</label>
 
-      const t = T[LANG] || T['fr'];
-      const content = document.getElementById('content');
+                <div style="display: flex; margin-bottom: 0px; width: 100%; align-items: stretch; height: auto;">
 
-      const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    <button onclick="document.getElementById('gedFile').click();" data-text-key="choisirFichier" 
+                            style="background-color: #4361ee; color: white; border: none; padding: 5px; /* Padding réduit */
+                                border-radius: 4px 0 0 4px; cursor: pointer; 
+                                flex-shrink: 0; /* Empêche le bouton de rétrécir */
+                                width: 80px;  /* LARGEUR FIXE (Égale au bouton vert) */
+                                line-height: 1.2; /* Permet un saut de ligne propre */
+                                height: auto;">
+                        Choisir un fichier </button>
+                    
+                    <span id="fileNameDisplay" style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-left: none; border-right: none; 
+                                                    border-radius: 0; background-color: #f9f9f9; text-align: left; 
+                                                    overflow: hidden; /* Permet le saut de ligne */
+                                                    text-overflow: ellipsis; 
+                                                    align-self: stretch;
+                                                    line-height: 1.2; /* Permet le saut de ligne */
+                                                    max-height: 40px; /* Limite la hauteur à environ 2 lignes de texte */
+                                                    white-space: normal;"> Aucun fichier choisi
+                    </span>
 
-      let warningMsg = t.risk;  // message par défaut
-      if (dark) {
-        warningMsg = t.colorRisk; // message pour navigateur à risque en mode sombre
-      }
-      
-      content.innerHTML = `
-        <h1 style="white-space: nowrap; margin-top: -20px; margin-bottom: 5px; padding: 0;  font-size: 20px;">${t.title}</h1>
-        <p>${t.using} <span class="browser-name" style="padding-top: 0px; padding-bottom: 1px;">${browserName}</span></p>
-        <p style= "margin-top: -10px;">${warningMsg}</p>
-        
-        <div class="steps" style="padding-top: 3px; padding-bottom: 2px; padding-left: 5px; padding-right: 2px;">
-          <strong style="padding: 5px;">${t.solutionsStrong}</strong>
-          <ol>
-            <li>${t.s1}</li>
-            <li>${t.s2}</li>
-            <li>${t.s3}</li>
-          </ol>
+                    <button id="showTreeBtn" 
+                            onclick="loadData('nonEncrypted'); closeGedcomModal()" 
+                            data-text-key="afficherArbre" 
+                            style="background-color: #4CAF50; 
+                                color: white; 
+                                border: 1px solid #4CAF50; 
+                                border-left: none;
+                                padding: 5px; /* Padding réduit pour coller au bouton bleu */
+                                border-radius: 0 4px 4px 0; 
+                                cursor: pointer; 
+                                font-weight: bold; 
+                                flex-shrink: 0; /* Empêche le bouton de rétrécir */
+                                width: 80px;  /* LARGEUR FIXE (Égale au bouton bleu) */
+                                line-height: 1.2;
+                                height: auto;
+                                display: none;"> 
+                        Afficher l'arbre
+                    </button>
+                </div>
+    
+
+                <!-- Ajouter un script pour mettre à jour le nom du fichier sélectionné -->
+                <script>
+                    document.getElementById('gedFile').addEventListener('change', function() {
+                        var fileNameDisplay = document.getElementById('fileNameDisplay');
+                        var showTreeBtn = document.getElementById('showTreeBtn'); // Récupération du bouton
+                        
+                        if (this.files.length > 0) {
+                            // Affichage du nom du fichier
+                            fileNameDisplay.textContent = this.files[0].name;
+                            fileNameDisplay.removeAttribute('data-text-key');
+                            
+                            // Affichage du bouton vert
+                            showTreeBtn.style.display = 'block'; 
+
+                        } else {
+                            // Rétablissement du texte par défaut
+                            fileNameDisplay.textContent = window.i18n ? window.i18n.getMultilingueText('aucunFichier') : 'Aucun fichier choisi';
+                            fileNameDisplay.setAttribute('data-text-key', 'aucunFichier');
+                            
+                            // Masquage du bouton vert
+                            showTreeBtn.style.display = 'none'; 
+                        }
+                    });
+                </script>
+
+                <button id="activateDebugLogsBtn"  onclick="activateDebugLogs()" data-text-key="activerLogs" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer les logs de debug</button>
+
+                <button id="activateAccelerometerBtn"  onclick="toggleAccelerometer()" data-text-key="activerAccel" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activer l'accéléromètre</button>
+                <button id="openCameraModalBtn"  onclick="openCameraModal()" data-text-key="openCameraModal" class="expert-hidden" style="background-color: #d42f48; color: white; border: none; padding: 10px; margin-top: 10px; width: 100%; max-width: 300px; border-radius: 4px; cursor: pointer; font-weight: bold;">🎥 Caméra & Réalité Augmentée</button>
+
+            </div>
+            <div id="cache-status" style="margin-top: 10px; font-size: 14px; display: none;"></div>
         </div>
 
-        <button class="button secondary" onclick="tryChrome()">
-          ${t.chromeBtn}
-        </button>          
-        <button class="button" style="background: #ff9800;" onclick="window.location.href=FULL_URL">
-          ${t.continueBtn}
-        </button>
-        <button class="button" onclick="copyUrl()">
-          ${t.copyBtn}
-        </button>
-      `;
-    }
+    </div>
 
-    // appel initial (conserve la condition if (true) que tu avais)
-    (function initRender() {
-      // garde ton comportement exact : on affiche l'avertissement (tu avais if(true))
-      renderContent();
-      // active le drapeau correspondant visuellement
-      document.querySelectorAll('.lang-flag').forEach(f => {
-        if (f.dataset.lang === LANG) f.classList.add('active'); else f.classList.remove('active');
-      });
-    })();
 
-    // --- fonctions existantes (conservées) ---
-    // function tryChrome() {
-    //   const url = APP_URL.replace('https://', '');
-    //   window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
-      
-    //   setTimeout(() => {
-    //     // message localisé mais fonction inchangée
-    //     alert(T[LANG] ? T[LANG].chromeAlert : T['fr'].chromeAlert);
-    //   }, 2000);
-    // }
+    <!-- Formulaire de mot de passe -->
+    <div id="password-form" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">    
 
-    function tryChrome() {
-      const url = APP_URL.replace('https://', '');
-      const intentUrl = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
-      const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.android.chrome';
-      const start = Date.now();
+        <div id="language-selector-container" style="display: none; position: fixed; top: 0px; margin-top: -10px;   z-index: 1; pointer-events: none;">
+            <div class="language-selector" style=" background-color: rgba(255, 255, 255, 0.8); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); pointer-events: auto;">
+                <div class="lang-flag flag-fr active" data-lang="fr" title="Français" onclick="window.i18n.changeLanguage('fr'); "></div>
+                <div class="lang-flag flag-en" data-lang="en" title="English" onclick="window.i18n.changeLanguage('en'); "></div>
+                <div class="lang-flag flag-es" data-lang="es" title="Español" onclick="window.i18n.changeLanguage('es'); "></div>
+                <div class="lang-flag flag-hu" data-lang="hu" title="Magyar" onclick="window.i18n.changeLanguage('hu'); "></div>
+            </div>
+        </div>
 
-      // tente l'intent (peut échouer silencieusement)
-      window.location.href = intentUrl;
 
-      // fallback si rien ne se passe au bout de ~1800ms
-      setTimeout(() => {
-        // si la page est toujours visible, l'intent n'a probablement pas fonctionné
-        if (document.visibilityState === 'visible' && Date.now() - start < 3000) {
-          // message localisé (ajoute la clé chromeIntentFailedMsg dans T si besoin)
-          const msg = (T && T[LANG] && T[LANG].chromeIntentFailedMsg) ?
-                        T[LANG].chromeIntentFailedMsg :
-                        "Impossible d'ouvrir Chrome automatiquement.\nOK = Installer Chrome\nAnnuler = Copier l'URL";
 
-          // confirm() : OK => ouvrir Play Store, Annuler => copier URL
-          if (confirm(msg)) {
-            // ouvre le Play Store dans un nouvel onglet
-            try { window.open(playStoreUrl, '_blank'); }
-            catch (e) { window.location.href = playStoreUrl; }
-          } else {
-            // réutilise ta fonction copyUrl() existante
-            try { copyUrl(); }
-            catch (e) { navigator.clipboard && navigator.clipboard.writeText(APP_URL); alert("URL copiée !"); }
-          }
-        }
-      }, 1800);
-    }
 
-    function copyUrl() {
-      const url = APP_URL;
-      const textArea = document.createElement('textarea');
-      textArea.value = url;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-9999px';
-      document.body.appendChild(textArea);
-      textArea.select();
-      
-      try {
-        document.execCommand('copy');
-        const existing = document.querySelector('.success');
-        if (existing) existing.remove();
-        const msg = document.createElement('div');
-        msg.className = 'success';
-        msg.textContent = T[LANG] ? T[LANG].copiedMsg : T['fr'].copiedMsg;
-        document.querySelector('.steps').after(msg);
-        setTimeout(() => msg.remove(), 2000);
-      } catch (err) {
-        alert('Copiez manuellement : ' + url);
-      }
-      
-      document.body.removeChild(textArea);
-    }
+        
 
-  </script>
+        <div class="form-container" style="display: none; position: fixed; width: 280px; max-width: 280px; padding: 20px; padding-top: 10px; padding-bottom: 5px; text-align: center; box-sizing: border-box;  overflow-y: auto;">
+            <div class="name-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 4px; max-width: 240px;  height: 40px; width: 100%; margin-left: auto; margin-right: auto;">
+                <button id="voiceCommandBtn" onclick="voiceCommand('start')" style="background-color: transparent; font-size: 18px; color: white; border: none; padding: 0px; margin-left: -22px;  margin-right: -15px; margin-top: 11px;  cursor: pointer;">🎙️</button>
+
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
+                    <small data-text-key="inputFormFirstName" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        prénom
+                    </small>
+                    <input type="text" id="input-form-firstName" placeholder="prénom" data-text-key="inputFormFirstName"
+                        style="box-sizing: border-box; width: 115px; text-align: center; height: 40px;" autocomplete="off">
+                </div>
+
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
+                    <small data-text-key="inputFormLastNameComment" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        nom (fem.: de jeune fille)
+                    </small>
+                    <input type="text" id="input-form-lastName" placeholder="nom" data-text-key="inputFormLastName"
+                        style="box-sizing: border-box; width: 115px; text-align: center;height: 40px;" autocomplete="off">
+                </div>
+            </div>
+
+
+            <div class="password-row" style="display: flex; gap: 8px; margin-top: 0px; margin-bottom: 20px; max-width: 240px;  height: 30px; width: 100%; margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
+                    <small data-text-key="motDePasse" style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        mot de passe
+                    </small>
+                    <input type="text" id="password" placeholder="Mot de passe" data-text-key="motDePasse" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"
+                        style="box-sizing: border-box; width: 115px; text-align: center; height: 40px; ">
+                </div>
+
+                <div style="display: flex; flex-direction: column; flex: 1 1 0; width: 115px; height: 40px;">
+                    <small style="font-size: 9px; color: #888; margin-top: 0px; margin-bottom: 2px; padding-top:0; padding-bottom:0; text-align: center;">
+                        .
+                    </small>
+                    <button id="loadDataButton" data-text-key="visualiserArbre"
+                        style="flex: 1 1 0; width: 115px; box-sizing: border-box; min-height: 28px;  padding-top: 1px; padding-bottom: 1px;  background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Continuer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="startTitle" style="display: none; position: fixed; top: '80%';  z-index: 1; ">
+            <h2 style="text-align:center; white-space: nowrap; margin-bottom: 10px; margin-left: 0px; margin-right: 0px; padding: 0; font-size: 20px; color: white" 
+            data-text-key="startTitle">explore tes origines...</h2>
+        </div>  
+        
+    </div>
+
+    <div id="secret-trigger-area" style="opacity:0; position: fixed; left: 10%; top: 70%; width: 80%; height: 20%; z-index: 9999; cursor: default;" ></div>
+    
+    <div id="versionFooter" 
+        style="position:fixed; bottom:3px; left:50%; transform:translateX(-50%); font-size:10px; color:white; text-align:center; z-index:1; pointer-events:none;">
+        ®isAI4U-PD V2.53
+    </div>
+
+
+
+    <!-- Conteneur de l'arbre -->
+    <div id="tree-container" style="display: none;">
+        <button id="voiceCommand2Btn" onclick="voiceCommand('full')" style="display: block; position: fixed;  background-color: transparent; font-size: 40px; color: white; border: none; padding: 0px; bottom: 3px; left:50%; transform:translateX(-50%); cursor: pointer; z-index: 10001; ">🎙️</button>
+
+        <div class="controls">
+            <button id="close-tree-button" onclick="returnToLogin()" style="position: fixed; top: 10px; right: 10px; z-index: 2000; background-color: #f44336; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; padding: 0; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; text-align: center; line-height: 0;">&times;
+            </button>
+            <div class="controls-row-1" style="position: fixed; top: 5px; left: 40px; width: fit-content;" >
+                <button id="speechToggleBtn" onclick="toggleSpeech()" class="large-button" data-text-key="toggleSpeech" ><span class="wide-span">🔊</span></button>
+                <!-- <button onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span>▶️</span></button> -->
+                <button class="play-btn" onclick="toggleAnimationPause()" id="animationPauseBtn" data-text-key="toggleAnimationPause"><span class="icon">▶</span></button>
+
+                <button onclick="openSettingsModal()" id="settingsBtn" class="large-button" data-text-key="openSettingsModal" style="font-size: 34px; background: transparent; border: none"><span>⚙️</span></button>
+                <button id="cloudBtn" onclick="processNamesCloudWithDate({ type: 'prenoms',  startDate: 1500,   endDate: new Date().getFullYear(), scope: 'ancestors' })" class="large-button"  data-text-key="processNamesCloudWithDate" > 
+                    <span class="wide-span">💖</span>
+                </button>            
+                <input type="text" id="root-person-search" placeholder="🔍racine" inputmode="text" enterkeyhint="next" data-text-key="rootPersonSearch" >
+                <select id="root-person-results" style="display:block;" data-text-key="rootPersonResults"  >
+                    <option value="">Select</option>
+                </select>
+                <button id="heatMapBtn" onclick="displayHeatMap()" class="large-button"  data-text-key="heatMap" > 
+                    <span class="wide-span">🌍</span>
+                </button> 
+                <button id="radarBtn" onclick="toggleTreeRadar()" class="large-button"  data-text-key="radar" > 
+                    <span class="wide-span">🎯</span>
+                </button> 
+
+                <button id="statsBtn" onclick="statsModal()"  data-text-key="stats" > 
+                    <span class="wide-span">📊</span>
+                </button> 
+            </div>
+            
+            <div class="controls-row-2" style="position: fixed; top: 50px; left: 1px; gap: 5px; width: fit-content;">                  
+                <label id="generationsLabel" for="generations" data-text-key="nbreGene">nbre<br>géné</label>
+                <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
+                <select id="generations" onchange="updateGenerations(this.value)" data-text-key="updateGenerations">
+                </select>
+                    <!-- Le sélecteur sera remplacé dynamiquement par JavaScript -->
+                    <select id="treeMode" onchange="updateTreeMode(this.value)" data-text-key="treeMode"  style="border: 1px solid black; background-color: rgba(255, 255, 255, 0.8); margin: 0; padding: 0 2px;">
+                        <option value="ancestors" data-text-key="treeModeAncestors" selected>Asc.</option>
+                        <option value="descendants"  data-text-key="treeModeDescendants">Desc.</option>
+                        <option value="both" data-text-key="treeModeBoth">A+D</option>
+                    </select>
+                </select>
+            </div> 
+            
+        </div>
+
+        <svg id="tree-svg"></svg>
+        <div id="animation-map-container" style="position: fixed; bottom: 20px; left: 20px; width: 300px; height: 200px; z-index: 1000; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div id="animation-map" style="width: 100%; height: 100%; border-radius: 10px;"></div>
+        </div>
+ 
+    </div>
+
+    <!-- Fenêtre modale pour les paramètres -->
+    <div id="settings-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Paramètres</h2>
+                <span class="modal-close" onclick="closeSettingsModal()">&times;</span>
+            </div>
+            <div id="settings-content">
+                <div class="settings-section">
+                    <h3>Animation des Ancêtres</h3>
+                    <label for="targetAncestorId">ID de l'Ancêtre Cible :</label>
+                    <input 
+                        type="text" 
+                        id="targetAncestorId" 
+                        value="@I741@" 
+                        placeholder="Entrez l'ID de l'ancêtre"
+                    >
+                    <button onclick="saveTargetAncestorId()">Enregistrer</button>
+                </div>
+                
+                <!-- Nouveau bloc pour le module "prenoms" -->
+                <div class="settings-section">
+                    <h3>Nombre de Prénoms</h3>
+                    <label for="prenoms">nbre<br>prénom</label>
+                    <select id="prenoms" onchange="updatePrenoms(this.value)" data-text-key="prenoms">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <!-- Section pour le géocodage -->
+                <div class="settings-section">
+                    <h3>Géocodage Local</h3>
+                    <div style="margin-bottom: 10px;">
+                        <label for="maxLocations">Nombre max. de lieux à traiter :</label>
+                        <input 
+                            type="number" 
+                            id="maxLocations" 
+                            value="10" 
+                            min="1"
+                            style="width: 80px;"
+                        >
+                        <span style="font-size: 0.8em; color: #666;">(0 = tous)</span>
+                    </div>
+                    <button onclick="generateGeocodeFile()">Générer fichier geolocalisation.json</button>
+                    <div id="geocoding-progress" style="margin-top: 10px; display: none;">
+                        <div id="geocoding-status"></div>
+                        <progress id="geocoding-bar" value="0" max="100" style="width: 100%;"></progress>
+                    </div>
+                    <select id="geocoding-results" size="10" style="width: 100%; margin-top: 10px; display: none;">
+                        <option>Résultats apparaîtront ici</option>
+                    </select>
+                </div>
+                <div class="settings-section">
+                    <h3>Générer les tuiles/map en local</h3>
+                    <button onclick="generateLocalMaps()">Générer les tuiles/maps</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    
+<!-- fenêtre toast pour faire un tooltip -->
+<!-- <div id="mobile-toast" style="position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div> -->
+<div id="mobile-toast" style="position: fixed; top: auto; bottom: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; z-index: 1500; display: none;">Message</div>
+
+
 </body>
 </html>

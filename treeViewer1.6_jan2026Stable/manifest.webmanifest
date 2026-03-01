@@ -2,7 +2,7 @@
   "name": "Genealogic Tree Viewer",
   "short_name": "treeViewer",
   "description": "Genealogic Tree Viewer",
-  "start_url": "./treeViewer1.6.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4361ee",
